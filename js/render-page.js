@@ -115,9 +115,12 @@ TPP.spineEl = function (settings, x, y, height) {
   element.style.width = width + "in";
   element.style.height = height + "in";
   TPP.applyVars(element, settings);
+  const hasAuthor = settings.spineAuthorOn && String(settings.spineAuthor || settings.author || "").trim();
+  const authorReserve = hasAuthor ? Math.max(0.12, ((Number(settings.spineAuthorSize) || 4) / 72) * 1.6) : 0;
+  element.style.setProperty("--spine-title-length", Math.max(0.1, height - authorReserve) + "in");
   element.innerHTML =
     (settings.spineImageData ? '<img class="spine-img" src="' + settings.spineImageData + '" style="width:' + settings.spineImgZoom + '%;margin-left:' + settings.spineImgX + '%">' : "") +
     '<div class="spine-title ' + (settings.spineTitleRotate ? "rot" : "") + '">' + TPP.esc(settings.title) + "</div>" +
-    (settings.spineAuthorOn ? '<div class="spine-author ' + (settings.spineAuthorRotate ? "rot" : "") + '">' + TPP.esc(settings.spineAuthor || settings.author) + "</div>" : "");
+    (hasAuthor ? '<div class="spine-author ' + (settings.spineAuthorRotate ? "rot" : "") + '">' + TPP.esc(settings.spineAuthor || settings.author) + "</div>" : "");
   return element;
 };
