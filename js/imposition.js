@@ -359,7 +359,7 @@ TPP.renderCover = function () {
     artwork.appendChild(TPP.pageEl(back, settings, wrap, wrap, false, false, { w: settings.page.w, h: settings.page.h }));
     if (spineW > 0) artwork.appendChild(TPP.spineEl(settings, wrap + settings.page.w + spineW / 2, wrap, settings.page.h));
     artwork.appendChild(TPP.pageEl(front, settings, wrap + settings.page.w + spineW, wrap, false, false, { w: settings.page.w, h: settings.page.h }));
-    TPP.guides(sheet, settings, x, y, w, h, spineW);
+    TPP.guides(sheet, Object.assign({}, settings, { showFoldGuides: false }), x, y, w, h, spineW);
     TPP.coverPerimeter(sheet, settings, x, y, w, h, spineW);
     TPP.coverCutSegments(sheet, settings, x, y, w, h, spineW);
   }
