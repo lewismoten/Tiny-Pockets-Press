@@ -52,6 +52,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("chapterEditor").oninput = function (e) {
     const card = e.target.closest(".chapter-card");
     if (!card) return;
+    if (e.target.classList.contains("chapter-metadata") && e.target.checked) {
+      const textarea = card.querySelector(".chapter-text");
+      if (textarea && !textarea.value.trim()) textarea.value = '{\n  "type": "blank",\n  "pages": 12\n}';
+    }
     TPP.sync();
     const preview = card.querySelector(".md-preview");
     const textarea = card.querySelector(".chapter-text");
