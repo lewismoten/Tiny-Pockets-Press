@@ -47,6 +47,7 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--page-number-size", Math.max(3, settings.bodySize * 0.75) + "pt");
   element.style.setProperty("--page-number-color", settings.pageText);
   element.style.setProperty("--spine-title-size", settings.spineTitleSize + "pt");
+  element.style.setProperty("--spine-title-x", (Number(settings.spineTitleX) || 0) + "%");
   element.style.setProperty("--spine-title-y", (Number(settings.spineTitleY) || 0) + "%");
   element.style.setProperty("--spine-author-size", settings.spineAuthorSize + "pt");
   element.style.setProperty("--spine-text-color", settings.spineTextColor);
