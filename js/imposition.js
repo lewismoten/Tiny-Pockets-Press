@@ -53,7 +53,7 @@ TPP.coverCutGeometry = function (settings) {
   const wrap = Math.max(0, Number(settings.wrapInside) || 0);
   const board = Math.max(0, Number(settings.boardThickness) || 0);
   const inset = settings.wrapCover ? wrap : 0;
-  const thickness = inset ? Math.min(inset * 0.8, Math.max(0.025, board || inset * 0.3)) : 0;
+  const thickness = inset && board ? Math.min(inset, board) : 0;
   return { inset: inset, thickness: thickness };
 };
 TPP.coverCutOutlinePath = function (settings, w, h) {
@@ -64,24 +64,24 @@ TPP.coverCutOutlinePath = function (settings, w, h) {
   return [
     "M", inset + t, 0,
     "H", w - inset - t,
-    "L", w - inset, t,
+    "L", w - inset, inset - t,
     "V", inset,
-    "H", w - t,
+    "H", w - inset + t,
     "L", w, inset + t,
     "V", h - inset - t,
-    "L", w - t, h - inset,
+    "L", w - inset + t, h - inset,
     "H", w - inset,
-    "V", h - t,
+    "V", h - inset + t,
     "L", w - inset - t, h,
     "H", inset + t,
-    "L", inset, h - t,
+    "L", inset, h - inset + t,
     "V", h - inset,
-    "H", t,
+    "H", inset - t,
     "L", 0, h - inset - t,
     "V", inset + t,
-    "L", t, inset,
+    "L", inset - t, inset,
     "H", inset,
-    "V", t,
+    "V", inset - t,
     "Z"
   ].join(" ");
 };
@@ -94,36 +94,37 @@ TPP.coverCutClipPath = function (settings, w, h) {
   return "polygon(" + [
     pct(inset + t, w) + " 0",
     pct(w - inset - t, w) + " 0",
-    pct(w - inset, w) + " " + pct(t, h),
+    pct(w - inset, w) + " " + pct(inset - t, h),
     pct(w - inset, w) + " " + pct(inset, h),
-    pct(w - t, w) + " " + pct(inset, h),
+    pct(w - inset + t, w) + " " + pct(inset, h),
     "100% " + pct(inset + t, h),
     "100% " + pct(h - inset - t, h),
-    pct(w - t, w) + " " + pct(h - inset, h),
+    pct(w - inset + t, w) + " " + pct(h - inset, h),
     pct(w - inset, w) + " " + pct(h - inset, h),
-    pct(w - inset, w) + " " + pct(h - t, h),
+    pct(w - inset, w) + " " + pct(h - inset + t, h),
     pct(w - inset - t, w) + " 100%",
     pct(inset + t, w) + " 100%",
-    pct(inset, w) + " " + pct(h - t, h),
+    pct(inset, w) + " " + pct(h - inset + t, h),
     pct(inset, w) + " " + pct(h - inset, h),
-    pct(t, w) + " " + pct(h - inset, h),
+    pct(inset - t, w) + " " + pct(h - inset, h),
     "0 " + pct(h - inset - t, h),
     "0 " + pct(inset + t, h),
-    pct(t, w) + " " + pct(inset, h),
+    pct(inset - t, w) + " " + pct(inset, h),
     pct(inset, w) + " " + pct(inset, h),
-    pct(inset, w) + " " + pct(t, h)
+    pct(inset, w) + " " + pct(inset - t, h)
   ].join(", ") + ")";
 };
 TPP.coverCutPaths = function (settings, w, h, spineW) {
   const geo = TPP.coverCutGeometry(settings);
   const inset = geo.inset;
-  if (inset <= 0) return [];
+  const t = geo.thickness;
+  if (inset <= 0 || t <= 0) return [];
   const pageW = settings.page.w;
   const foldA = inset + pageW;
   const foldB = inset + pageW + spineW;
   return [
-    "M" + foldA + " 0V" + inset + " M" + foldA + " " + h + "V" + (h - inset),
-    "M" + foldB + " 0V" + inset + " M" + foldB + " " + h + "V" + (h - inset)
+    "M" + foldA + " 0V" + t + " M" + foldA + " " + h + "V" + (h - t),
+    "M" + foldB + " 0V" + t + " M" + foldB + " " + h + "V" + (h - t)
   ];
 };
 TPP.coverPerimeter = function (sheet, settings, x, y, w, h, spineW) {
