@@ -32,15 +32,61 @@ TPP.guide = function (sheet, cls, x, y, w, h) {
   guide.style.height = h + "in";
   sheet.appendChild(guide);
 };
-TPP.coverPerimeter = function (sheet, settings, x, y, w, h) {
+TPP.coverCornerCut = function (settings, w, h) {
+  if (!settings.wrapCover) return 0;
+  const board = Math.max(0, Number(settings.boardThickness) || 0);
+  const wrap = Math.max(0, Number(settings.wrapInside) || 0);
+  return Math.min(w / 4, h / 4, Math.max(0.06, board + Math.min(0.08, wrap / 2)));
+};
+TPP.coverShapePath = function (w, h, cut) {
+  if (!cut) return "M0 0H" + w + "V" + h + "H0Z";
+  return [
+    "M", cut, 0,
+    "H", w - cut,
+    "L", w, cut,
+    "V", h - cut,
+    "L", w - cut, h,
+    "H", cut,
+    "L", 0, h - cut,
+    "V", cut,
+    "Z"
+  ].join(" ");
+};
+TPP.coverPerimeter = function (sheet, settings, x, y, w, h, spineW) {
   if (!settings.coverPerimeterOn) return;
-  const outline = document.createElement("div");
+  const wrap = settings.wrapCover ? Math.max(0, Number(settings.wrapInside) || 0) : 0;
+  const board = settings.wrapCover ? Math.max(0, Number(settings.boardThickness) || 0) : 0;
+  const inset = wrap + board;
+  const cut = TPP.coverCornerCut(settings, w, h);
+  const outline = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   outline.className = "cover-perimeter";
   outline.style.left = x + "in";
   outline.style.top = y + "in";
   outline.style.width = w + "in";
   outline.style.height = h + "in";
-  outline.style.borderColor = settings.coverBorder;
+  outline.setAttribute("viewBox", "0 0 " + w + " " + h);
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", TPP.coverShapePath(w, h, cut));
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", settings.coverBorder || "#000000");
+  path.setAttribute("stroke-width", "0.018");
+  path.setAttribute("vector-effect", "non-scaling-stroke");
+  outline.appendChild(path);
+  if (settings.wrapCover && spineW > 0 && inset > 0) {
+    [settings.page.w + inset, settings.page.w + spineW + inset].forEach(function (foldX) {
+      [[0, inset], [h - inset, h]].forEach(function (seg) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", foldX);
+        line.setAttribute("x2", foldX);
+        line.setAttribute("y1", seg[0]);
+        line.setAttribute("y2", seg[1]);
+        line.setAttribute("stroke", settings.coverBorder || "#000000");
+        line.setAttribute("stroke-width", "0.018");
+        line.setAttribute("vector-effect", "non-scaling-stroke");
+        outline.appendChild(line);
+      });
+    });
+  }
   sheet.appendChild(outline);
 };
 TPP.coverFootprint = function (sheet, settings, x, y, w, h) {
@@ -51,6 +97,12 @@ TPP.coverFootprint = function (sheet, settings, x, y, w, h) {
   footprint.style.width = w + "in";
   footprint.style.height = h + "in";
   TPP.applyVars(footprint, settings);
+  const cut = TPP.coverCornerCut(settings, w, h);
+  if (cut) {
+    footprint.style.clipPath = "polygon(" +
+      cut + "in 0, calc(100% - " + cut + "in) 0, 100% " + cut + "in, 100% calc(100% - " + cut + "in), " +
+      "calc(100% - " + cut + "in) 100%, " + cut + "in 100%, 0 calc(100% - " + cut + "in), 0 " + cut + "in)";
+  }
   sheet.appendChild(footprint);
 };
 TPP.guides = function (sheet, settings, x, y, w, h, spineW) {
@@ -159,20 +211,7 @@ TPP.renderCover = function () {
     if (spineW > 0) sheet.appendChild(TPP.spineEl(settings, ix + settings.page.w + spineW / 2, iy, settings.page.h));
     sheet.appendChild(TPP.pageEl(front, settings, ix + settings.page.w + spineW, iy, false, false, { w: settings.page.w, h: settings.page.h }));
     TPP.guides(sheet, settings, x, y, w, h, spineW);
-    if (settings.wrapCover) {
-      const cut = 0.16;
-      [[x, y, 45], [x + w - cut, y, -45], [x, y + h - 0.01, -45], [x + w - cut, y + h - 0.01, 45]].forEach(function (corner) {
-        const el = document.createElement("div");
-        el.className = "cut";
-        el.style.left = corner[0] + "in";
-        el.style.top = corner[1] + "in";
-        el.style.width = cut + "in";
-        el.style.height = "0.012in";
-        el.style.transform = "rotate(" + corner[2] + "deg)";
-        sheet.appendChild(el);
-      });
-    }
-    TPP.coverPerimeter(sheet, settings, x, y, w, h);
+    TPP.coverPerimeter(sheet, settings, x, y, w, h, spineW);
   }
   preview.appendChild(sheet);
 };
