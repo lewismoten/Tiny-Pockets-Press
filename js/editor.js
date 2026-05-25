@@ -61,7 +61,7 @@ TPP.renderChapterList = function () {
   }).join("");
 };
 TPP.previewWithBreaks = function (text) {
-  const settings = TPP.settings();
+  const settings = TPP.active || TPP.fallbackBook();
   const blocks = TPP.blocksFromText(text, settings).map(function (block) { return block.html; }).join("");
   const parts = blocks.split(/<\/p>/);
   return parts.map(function (part, index) {
