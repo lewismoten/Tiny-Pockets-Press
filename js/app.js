@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   await TPP.load();
   TPP.loadForm();
   TPP.renderAll();
+  TPP.restoreSettingsUi();
+  TPP.bindSettingsUiPersistence();
 
   document.querySelectorAll(".tab").forEach(function (button) {
     button.onclick = function () { TPP.switchView(button.dataset.view); };
@@ -225,6 +227,61 @@ document.addEventListener("DOMContentLoaded", async function () {
     reader.readAsText(file);
   };
 });
+
+TPP.readSettingsUi = function () {
+  try {
+    return JSON.parse(localStorage.getItem(TPP.UI) || "{}");
+  } catch {
+    return {};
+  }
+};
+TPP.writeSettingsUi = function (state) {
+  localStorage.setItem(TPP.UI, JSON.stringify(state || {}));
+};
+TPP.settingsDetails = function () {
+  return Array.from(document.querySelectorAll(".controls details"));
+};
+TPP.restoreSettingsUi = function () {
+  const state = TPP.readSettingsUi();
+  TPP.settingsDetails().forEach(function (details, index) {
+    details.dataset.settingsIndex = index;
+    if (state.open && Object.prototype.hasOwnProperty.call(state.open, index)) {
+      details.open = Boolean(state.open[index]);
+    }
+  });
+  const controls = document.querySelector(".controls");
+  if (controls && Number.isFinite(Number(state.scrollTop))) {
+    requestAnimationFrame(function () {
+      controls.scrollTop = Number(state.scrollTop) || 0;
+    });
+  }
+};
+TPP.saveSettingsUi = function () {
+  const controls = document.querySelector(".controls");
+  const open = {};
+  TPP.settingsDetails().forEach(function (details, index) {
+    open[index] = details.open;
+  });
+  TPP.writeSettingsUi({
+    open: open,
+    scrollTop: controls ? controls.scrollTop : 0
+  });
+};
+TPP.bindSettingsUiPersistence = function () {
+  const controls = document.querySelector(".controls");
+  let scrollTimer = 0;
+  TPP.settingsDetails().forEach(function (details, index) {
+    details.dataset.settingsIndex = index;
+    details.addEventListener("toggle", TPP.saveSettingsUi);
+  });
+  if (controls) {
+    controls.addEventListener("scroll", function () {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(TPP.saveSettingsUi, 120);
+    });
+  }
+  window.addEventListener("beforeunload", TPP.saveSettingsUi);
+};
 
 TPP.switchView = function (view) {
   TPP.view = view;

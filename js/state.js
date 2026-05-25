@@ -1,6 +1,7 @@
 window.TPP = window.TPP || {};
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
+TPP.UI = "tinyPocketsPressUiV61";
 TPP.library = [];
 TPP.active = null;
 TPP.view = "editor";
