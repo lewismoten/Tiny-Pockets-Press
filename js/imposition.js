@@ -52,7 +52,7 @@ TPP.svgPath = function (svg, d, color, width) {
 TPP.coverCutGeometry = function (settings) {
   const wrap = Math.max(0, Number(settings.wrapInside) || 0);
   const board = Math.max(0, Number(settings.boardThickness) || 0);
-  const inset = settings.wrapCover ? wrap + board : 0;
+  const inset = settings.wrapCover ? wrap : 0;
   const thickness = inset ? Math.min(inset * 0.8, Math.max(0.025, board || inset * 0.3)) : 0;
   return { inset: inset, thickness: thickness };
 };
@@ -172,8 +172,9 @@ TPP.guides = function (sheet, settings, x, y, w, h, spineW) {
   }
   if (settings.showFoldGuides) {
     if (spineW) {
-      TPP.guide(sheet, "fold v", x + settings.page.w, y, 0, h);
-      TPP.guide(sheet, "fold v", x + settings.page.w + spineW, y, 0, h);
+      const wrap = settings.wrapCover ? Math.max(0, Number(settings.wrapInside) || 0) : 0;
+      TPP.guide(sheet, "fold v", x + wrap + settings.page.w, y, 0, h);
+      TPP.guide(sheet, "fold v", x + wrap + settings.page.w + spineW, y, 0, h);
     } else {
       TPP.guide(sheet, "fold v", x + w / 2, y, 0, h);
     }
@@ -239,17 +240,16 @@ TPP.renderCover = function () {
   preview.innerHTML = "";
   const spineW = TPP.spineWidth(settings);
   const wrap = settings.wrapCover ? Number(settings.wrapInside) || 0 : 0;
-  const board = settings.wrapCover ? Number(settings.boardThickness) || 0 : 0;
-  const w = settings.page.w * 2 + spineW + wrap * 2 + board * 2;
-  const h = settings.page.h + wrap * 2 + board * 2;
+  const w = settings.page.w * 2 + spineW + wrap * 2;
+  const h = settings.page.h + wrap * 2;
   const grid = TPP.bestGrid(settings.sheet, { w, h });
   const copies = settings.coverCopiesMax ? grid.count : Math.min(grid.count, Math.max(1, Number(settings.coverCopies) || 1));
   document.getElementById("coverSummary").innerHTML =
     "Cover stock preview. Cover footprint " + w.toFixed(3) + " × " + h.toFixed(3) +
     " in, including spine/wrap/material allowances. " + copies + " cop" + (copies === 1 ? "y" : "ies") + " shown.";
   const sheet = TPP.makeSheet(settings, "Cover print sheet");
-  const sx = (settings.sheet.w - grid.cols * grid.w) / 2;
-  const sy = (settings.sheet.h - grid.rows * grid.h) / 2;
+  const sx = copies === 1 ? (settings.sheet.w - w) / 2 : (settings.sheet.w - grid.cols * grid.w) / 2;
+  const sy = copies === 1 ? (settings.sheet.h - h) / 2 : (settings.sheet.h - grid.rows * grid.h) / 2;
   const front = pages.find(function (p) { return p.role === "front"; });
   const back = pages.find(function (p) { return p.role === "back"; });
   for (let i = 0; i < copies; i++) {
@@ -257,8 +257,8 @@ TPP.renderCover = function () {
     const row = Math.floor(i / grid.cols);
     const x = sx + col * grid.w;
     const y = sy + row * grid.h;
-    const ix = x + wrap + board;
-    const iy = y + wrap + board;
+    const ix = x + wrap;
+    const iy = y + wrap;
     TPP.coverFootprint(sheet, settings, x, y, w, h);
     sheet.appendChild(TPP.pageEl(back, settings, ix, iy, false, false, { w: settings.page.w, h: settings.page.h }));
     if (spineW > 0) sheet.appendChild(TPP.spineEl(settings, ix + settings.page.w + spineW / 2, iy, settings.page.h));
