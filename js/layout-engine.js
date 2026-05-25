@@ -50,6 +50,22 @@ TPP.splitHtmlText = function (text, settings, maxHeight) {
   if (current.length) chunks.push(current.join(" "));
   return chunks.length ? chunks : [""];
 };
+TPP.parseChapterMetadata = function (chapter) {
+  let text = String((chapter && chapter.text) || "").trim();
+  if (!text) return null;
+  text = text.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+  text = text.replace(/([{,]\s*)([A-Za-z_$][\w$]*)(\s*:)/g, '$1"$2"$3');
+  try {
+    const meta = JSON.parse(text);
+    if (!meta || meta.type !== "blank") return meta || null;
+    return {
+      type: "blank",
+      pages: Math.max(0, Math.min(500, Math.floor(Number(meta.pages) || 0)))
+    };
+  } catch {
+    return null;
+  }
+};
 TPP.buildPages = function () {
   const settings = TPP.settings();
   const pages = [];
@@ -74,6 +90,21 @@ TPP.buildPages = function () {
   settings.chapters.forEach(function (chapter, index) {
     const startPage = pages.length + 1;
     let heading = '<div class="chapter-heading">' + TPP.esc(chapter.title || "") + "</div>";
+
+    if (chapter.isMetadata) {
+      const meta = TPP.parseChapterMetadata(chapter);
+      if (meta && meta.type === "blank") {
+        for (let i = 0; i < meta.pages; i++) {
+          makePage("chapter-blank", i === 0 ? heading : "", { chapterTitle: chapter.title || "Chapter " + (index + 1) });
+        }
+      } else {
+        makePage("text", heading + '<div class="story-text"><p>Invalid metadata JSON.</p></div>');
+      }
+      if (chapter.includeInToc !== false) {
+        toc.push({ title: chapter.title || "Chapter " + (index + 1), chapter: index + 1, page: startPage, level: chapter.level || 0 });
+      }
+      return;
+    }
 
     if (chapter.imageData && chapter.imagePlacement !== "none") {
       const imageHtml = '<figure class="figure image-figure"><img src="' + chapter.imageData + '" style="width:' + Math.min(100, Math.max(10, Number(chapter.imageWidth) || 70)) + '%"><figcaption class="caption"></figcaption></figure>';

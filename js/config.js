@@ -153,6 +153,7 @@ TPP.fallbackBook = function () {
       imageWidth: 70,
       level: 0,
       isSubsection: false,
+      isMetadata: false,
       includeInToc: true
     }]
   };

@@ -31,6 +31,7 @@ TPP.norm = function (book) {
       imageWidth: 70,
       level: 0,
       isSubsection: false,
+      isMetadata: false,
       includeInToc: true
     }, chapter);
   });
