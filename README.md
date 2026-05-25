@@ -1,29 +1,24 @@
-# Tiny Pockets Press v4
+# Tiny Pockets Press v5
 
-A static browser app for creating tiny printable books, microfiction chapbooks, zines, and miniature folded/sewn booklets.
+Static browser prototype for miniature printed books.
 
-## Major v4 changes
+## Added in v5
 
-- Modular JavaScript and CSS files.
-- Optional cover fields with title always shown.
-- Cover text split mode: title at top, metadata at bottom.
-- Cover text outline/stroke and semi-transparent panel.
-- Back cover text/image support and option to reuse the front image.
-- Blank inside front/back covers with chosen color/texture.
-- Separate publication/imprint page inside the book.
-- Page numbers: none, centered, or outer-edge, with ornaments before/after.
-- Reader spread navigation starts cover-only, then page 2/page 3.
-- Style JSON import/export for applying styling to other books.
-- Library duplicate asks for a new title, prefilled with “Copy of {title}”.
-- Line spacing, paragraph gap, and justified text options.
-- Markdown preview, toolbar buttons, and Ctrl/Cmd+B/I/U shortcuts.
-- Markdown support for headings, bullet lists, tables, strike, bold, italic, underline via HTML.
-- TOC page/chapter numbering, leader dots/line/none, and leader color.
-- Separate cover printing mode with overhang and “as many as fit” copies.
-- URLs in rendered markdown are converted into QR code blocks.
-- Booklet imposition now creates front/back paper sides with leaflet-style ordering.
-- Spine guides are simple black edge boxes only.
+- Spine width accounts for paper thickness, staple/thread allowance, and board thickness.
+- Spine title/author rotation options and separate spine image pan/zoom.
+- Double-sided booklet imposition uses front/back sheet sides.
+- Back cover text has its own position, color, and size.
+- Cover elements have vertical position sliders.
+- Cover images may bleed past the frame.
+- URLs become QR codes without printing the URL.
+- Image URLs render as images. The following line becomes a centered caption.
+- QR codes can be placed on separate pages.
+- Page number ornament presets and side-aware ornaments.
+- Chapter-end ornaments.
+- Chapter list/edit mode with equal-height scrollable editor and preview.
+- Reader jumps to cover, TOC, chapters, and last page.
+- Cover copies can be fixed or “as many as fit.”
+- Cover wrap/inside flap/board-thickness options with cut-corner marks.
+- Library cards can save rendered cover previews.
 
-## Notes
-
-Pagination is still approximate, but it now estimates capacity, inserts soft hyphens into long words, supports CSS hyphenation, and shows progress during PDF export. A future print-shop version should use measured browser layout line-by-line.
+Pagination uses canvas text measurement for body text, but exact browser layout with rich markup, QR codes, and images is still approximate.
