@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tiny Book Maker</title>
+  <title>Tiny Pockets Press</title>
   <link rel="stylesheet" href="styles.css" />
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,35 +12,62 @@
 <body>
   <header class="app-header">
     <div>
-      <h1>Tiny Book Maker</h1>
-      <p>Paste a short story, design a cover, then export printable double-sided booklet sheets.</p>
+      <h1>Tiny Pockets Press</h1>
+      <p>Microfiction, chapbooks, zines, and tiny printable books.</p>
     </div>
-    <button id="exportPdfBtn" class="primary">Export PDF</button>
+    <div class="header-actions">
+      <button id="printBtn">Print</button>
+      <button id="exportPdfBtn" class="primary">Export PDF</button>
+    </div>
   </header>
 
   <main class="layout">
     <section class="panel controls" aria-label="Book settings">
-      <h2>Story</h2>
-      <label>Title <input id="title" value="The Cursed Brewer’s Soliloquy"></label>
-      <label>Author <input id="author" value="Lewis Moten"></label>
+      <h2>Book</h2>
+      <label>Book Title <input id="title"></label>
+      <label>Author <input id="author"></label>
       <label>Publishing Date <input id="pubDate" type="date"></label>
-      <label>Publisher <input id="publisher" value="100 Word Stories"></label>
+      <label>Publisher / Press Name <input id="publisher"></label>
+      <label>Copyright <input id="copyright"></label>
 
       <div class="two-col">
-        <label>Series Name <input id="seriesName" value="100 Word Stories Weekly Challenge"></label>
-        <label>Series No. <input id="seriesNumber" value="1048"></label>
+        <label>Printing
+          <select id="printing">
+            <option>First Printing</option>
+            <option>Second Printing</option>
+            <option>Third Printing</option>
+            <option>Fourth Printing</option>
+            <option>Revised Edition</option>
+            <option>Proof Copy</option>
+          </select>
+        </label>
+        <label>Volume <input id="volume" placeholder="Volume 1"></label>
       </div>
 
-      <label>Story Text
-        <textarea id="story" rows="12">Paste your story here. The app will paginate it into tiny book pages, arrange pages into printable double-sided sheets, and add optional sewing/signature marks when the book needs a spine.</textarea>
+      <div class="two-col">
+        <label>Number <input id="number" placeholder="No. 1048"></label>
+        <label>Series Name <input id="seriesName"></label>
+      </div>
+
+      <h2>Chapters / Stories</h2>
+      <p class="hint">Separate chapters with <code>---</code>. Put the chapter title on the first line.</p>
+      <label>Stories / Chapters
+        <textarea id="story" rows="16"></textarea>
       </label>
+      <label><input id="includeToc" type="checkbox" checked> Include table of contents</label>
 
       <h2>Page Setup</h2>
       <div class="two-col">
         <label>Finished Page Size
           <select id="pageSize">
+            <option value="one-inch">Tiny Square — 1 × 1 in</option>
+            <option value="pocket-16">Letter 4×4 Grid — 2.125 × 2.75 in</option>
+            <option value="business-card">Business Card-ish — 2 × 3.5 in</option>
+            <option value="sixteenth-letter">Sixteenth Letter — 2.125 × 2.75 in</option>
+            <option value="eighth-letter">Eighth Letter — 2.75 × 4.25 in</option>
             <option value="quarter-letter">Quarter Letter — 4.25 × 5.5 in</option>
             <option value="sixth-letter">Sixth Letter — 2.83 × 5.5 in</option>
+            <option value="a7">A7 — 74 × 105 mm</option>
             <option value="a6">A6 — 105 × 148 mm</option>
             <option value="custom">Custom</option>
           </select>
@@ -55,13 +82,13 @@
       </div>
 
       <div class="two-col custom-size" hidden>
-        <label>Page Width (in) <input id="customPageWidth" type="number" min="1" step="0.01" value="4.25"></label>
-        <label>Page Height (in) <input id="customPageHeight" type="number" min="1" step="0.01" value="5.5"></label>
+        <label>Page Width (in) <input id="customPageWidth" type="number" min="0.5" step="0.01" value="1"></label>
+        <label>Page Height (in) <input id="customPageHeight" type="number" min="0.5" step="0.01" value="1"></label>
       </div>
 
       <div class="two-col">
-        <label>Page Margin (in) <input id="margin" type="number" min="0" step="0.01" value="0.25"></label>
-        <label>Font Size (pt) <input id="fontSize" type="number" min="6" step="1" value="11"></label>
+        <label>Page Margin (in) <input id="margin" type="number" min="0" step="0.01" value="0.08"></label>
+        <label>Font Size (pt) <input id="fontSize" type="number" min="3" step="0.5" value="5.5"></label>
       </div>
 
       <div class="two-col">
@@ -81,6 +108,8 @@
       <div class="checks">
         <label><input id="showPageNumbers" type="checkbox" checked> Show page numbers</label>
         <label><input id="showBorder" type="checkbox" checked> Framed cover border</label>
+        <label><input id="showCutGuides" type="checkbox" checked> Show cut guides</label>
+        <label><input id="showFoldGuides" type="checkbox" checked> Show fold guides</label>
         <label><input id="forceSpine" type="checkbox"> Force spine even for short books</label>
       </div>
 
@@ -95,7 +124,7 @@
         <label>Image X (%) <input id="imageX" type="range" min="-100" max="100" value="0"></label>
         <label>Image Y (%) <input id="imageY" type="range" min="-100" max="100" value="20"></label>
       </div>
-      <label>Image Zoom <input id="imageZoom" type="range" min="10" max="300" value="85"></label>
+      <label>Image Zoom <input id="imageZoom" type="range" min="10" max="350" value="85"></label>
 
       <h2>Binding</h2>
       <div class="two-col">
@@ -105,7 +134,7 @@
 
       <div class="button-row">
         <button id="refreshBtn">Refresh Preview</button>
-        <button id="printBtn">Print Preview</button>
+        <button id="resetSavedBtn" type="button">Reset Saved Settings</button>
       </div>
     </section>
 

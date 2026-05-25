@@ -9,8 +9,12 @@
 
 * { box-sizing: border-box; }
 
-body {
+html, body {
   margin: 0;
+  min-height: 100%;
+}
+
+body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #f3efe8;
   color: var(--ink);
@@ -39,9 +43,14 @@ body {
   color: #e8ddd2;
 }
 
+.header-actions {
+  display: flex;
+  gap: .5rem;
+}
+
 .layout {
   display: grid;
-  grid-template-columns: minmax(320px, 420px) 1fr;
+  grid-template-columns: minmax(320px, 440px) 1fr;
   gap: 1rem;
   padding: 1rem;
 }
@@ -87,6 +96,12 @@ body {
 .controls textarea {
   resize: vertical;
   line-height: 1.45;
+}
+
+.hint {
+  margin: -.3rem 0 .6rem;
+  color: var(--muted);
+  font-size: .85rem;
 }
 
 .two-col {
@@ -155,10 +170,10 @@ button.primary {
   align-items: start;
 }
 
+/* The sheet has no visible border in print. The screen shadow is preview-only. */
 .sheet {
   position: relative;
   background: white;
-  border: 1px solid #bbb;
   box-shadow: 0 14px 36px rgb(0 0 0 / .12);
   margin: 0 auto;
   overflow: hidden;
@@ -177,7 +192,7 @@ button.primary {
 .page {
   position: absolute;
   background: var(--paper);
-  border: .5px solid #d8d0c3;
+  outline: .5px solid #d8d0c3;
   overflow: hidden;
 }
 
@@ -197,8 +212,8 @@ button.primary {
 .cover.framed::after {
   content: "";
   position: absolute;
-  inset: .14in;
-  border: 2px solid currentColor;
+  inset: .06in;
+  border: 1.5px solid currentColor;
   opacity: .72;
   pointer-events: none;
 }
@@ -219,35 +234,50 @@ button.primary {
   z-index: 2;
   display: grid;
   place-content: center;
-  gap: .18in;
+  gap: .08in;
   height: 100%;
-  padding: .35in;
+  padding: .12in;
   text-shadow: 0 2px 12px rgb(0 0 0 / .35);
 }
 
 .cover-title {
-  font-size: 24pt;
-  line-height: 1.05;
+  font-size: 2.6em;
+  line-height: 1.02;
   font-weight: 850;
 }
 
 .cover-author,
 .cover-series {
-  font-size: 10pt;
+  font-size: .9em;
   letter-spacing: .04em;
 }
 
 .story-title {
   text-align: center;
   font-weight: 800;
-  margin-bottom: .15in;
+  margin-bottom: .08in;
 }
 
-.story-meta {
+.story-meta,
+.copyright-page {
   text-align: center;
   color: #6c625a;
   font-size: .82em;
-  margin-bottom: .18in;
+  margin-bottom: .08in;
+}
+
+.toc-list {
+  margin: .05in 0 0;
+  padding: 0;
+  list-style: none;
+  line-height: 1.25;
+}
+
+.toc-list li {
+  display: flex;
+  gap: .06in;
+  justify-content: space-between;
+  border-bottom: .5px dotted #b8ad9f;
 }
 
 .story-text {
@@ -255,12 +285,18 @@ button.primary {
   line-height: 1.35;
 }
 
+.chapter-heading {
+  text-align: center;
+  font-weight: 800;
+  margin-bottom: .08in;
+}
+
 .page-number {
   margin-top: auto;
   text-align: center;
   font-size: .78em;
   color: #6c625a;
-  padding-top: .08in;
+  padding-top: .04in;
 }
 
 .blank {
@@ -284,13 +320,13 @@ button.primary {
 .spine span {
   transform: rotate(90deg);
   white-space: nowrap;
-  font-size: 8pt;
+  font-size: 7pt;
 }
 
 .sewing-mark {
   position: absolute;
-  width: .08in;
-  height: .28in;
+  width: .06in;
+  min-height: .08in;
   background: black;
   z-index: 8;
 }
@@ -299,24 +335,77 @@ button.primary {
   position: absolute;
   background: black;
   color: white;
-  font: bold 7px system-ui, sans-serif;
-  padding: 1px 3px;
+  font: bold 6px system-ui, sans-serif;
+  padding: 1px 2px;
   z-index: 9;
 }
 
-.crop-mark {
+.cut-guide,
+.fold-guide {
   position: absolute;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.cut-guide {
   background: #111;
-  z-index: 7;
+}
+
+.fold-guide {
+  border-color: #555;
+  opacity: .55;
+}
+
+.fold-guide.vertical {
+  border-left: .5px dashed #555;
+}
+
+.fold-guide.horizontal {
+  border-top: .5px dashed #555;
+}
+
+@page {
+  margin: 0;
 }
 
 @media print {
-  body { background: white; }
-  .app-header, .controls, .summary { display: none !important; }
-  .layout { display: block; padding: 0; }
-  .preview-panel { border: 0; box-shadow: none; padding: 0; }
-  .preview { display: block; }
-  .sheet { margin: 0; box-shadow: none; border: 0; page-break-after: always; }
+  html, body {
+    width: auto;
+    height: auto;
+    background: white;
+  }
+
+  .app-header,
+  .controls,
+  .summary,
+  .sheet-title {
+    display: none !important;
+  }
+
+  .layout {
+    display: block;
+    padding: 0;
+  }
+
+  .preview-panel {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .preview {
+    display: block;
+    gap: 0;
+  }
+
+  .sheet {
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    outline: 0 !important;
+    transform: none !important;
+    page-break-after: always;
+  }
 }
 
 @media (max-width: 900px) {
