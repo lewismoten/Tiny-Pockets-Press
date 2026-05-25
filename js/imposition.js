@@ -205,8 +205,8 @@ TPP.coverCutLines = function (settings, w, h, spineW) {
     [rightEdgeX, yT + sideRun, rightOuter, yT],
     [leftEdgeX, yB - sideRun, leftOuter, yB],
     [rightEdgeX, yB - sideRun, rightOuter, yB],
-    [foldA, 0, foldA, t], [foldA, h, foldA, h - t],
-    [foldB, 0, foldB, t], [foldB, h, foldB, h - t]
+    [foldA, 0, foldA, yT], [foldA, h, foldA, yB],
+    [foldB, 0, foldB, yT], [foldB, h, foldB, yB]
   ];
 };
 TPP.coverPerimeter = function (sheet, settings, x, y, w, h, spineW) {
