@@ -137,28 +137,32 @@ TPP.coverCutClipPath = function (settings, w, h) {
   const bottomEdgeY = Math.min(h, bottomOuter + topRun);
   const leftEdgeX = Math.max(0, leftOuter - sideRun);
   const rightEdgeX = Math.min(w, rightOuter + sideRun);
+  const trim = Math.min(0.01, w / 200, h / 200);
+  const ix = function (value) { return Math.max(trim, Math.min(w - trim, value)); };
+  const iy = function (value) { return Math.max(trim, Math.min(h - trim, value)); };
   const pct = function (value, total) { return (value / total * 100).toFixed(4) + "%"; };
+  const pt = function (x, y) { return pct(ix(x), w) + " " + pct(iy(y), h); };
   return "polygon(" + [
-    pct(xL + topRun, w) + " " + pct(topEdgeY, h),
-    pct(xR - topRun, w) + " " + pct(topEdgeY, h),
-    pct(xR, w) + " " + pct(topOuter, h),
-    pct(xR, w) + " " + pct(yT, h),
-    pct(rightOuter, w) + " " + pct(yT, h),
-    pct(rightEdgeX, w) + " " + pct(yT + sideRun, h),
-    pct(rightEdgeX, w) + " " + pct(yB - sideRun, h),
-    pct(rightOuter, w) + " " + pct(yB, h),
-    pct(xR, w) + " " + pct(yB, h),
-    pct(xR, w) + " " + pct(bottomOuter, h),
-    pct(xR - topRun, w) + " " + pct(bottomEdgeY, h),
-    pct(xL + topRun, w) + " " + pct(bottomEdgeY, h),
-    pct(xL, w) + " " + pct(bottomOuter, h),
-    pct(xL, w) + " " + pct(yB, h),
-    pct(leftOuter, w) + " " + pct(yB, h),
-    pct(leftEdgeX, w) + " " + pct(yB - sideRun, h),
-    pct(leftEdgeX, w) + " " + pct(yT + sideRun, h),
-    pct(leftOuter, w) + " " + pct(yT, h),
-    pct(xL, w) + " " + pct(yT, h),
-    pct(xL, w) + " " + pct(topOuter, h)
+    pt(xL + topRun, topEdgeY),
+    pt(xR - topRun, topEdgeY),
+    pt(xR, topOuter),
+    pt(xR, yT),
+    pt(rightOuter, yT),
+    pt(rightEdgeX, yT + sideRun),
+    pt(rightEdgeX, yB - sideRun),
+    pt(rightOuter, yB),
+    pt(xR, yB),
+    pt(xR, bottomOuter),
+    pt(xR - topRun, bottomEdgeY),
+    pt(xL + topRun, bottomEdgeY),
+    pt(xL, bottomOuter),
+    pt(xL, yB),
+    pt(leftOuter, yB),
+    pt(leftEdgeX, yB - sideRun),
+    pt(leftEdgeX, yT + sideRun),
+    pt(leftOuter, yT),
+    pt(xL, yT),
+    pt(xL, topOuter)
   ].join(", ") + ")";
 };
 TPP.coverCutLines = function (settings, w, h, spineW) {
@@ -215,20 +219,12 @@ TPP.coverPerimeter = function (sheet, settings, x, y, w, h, spineW) {
   outline.style.pointerEvents = "none";
   outline.style.display = "block";
   outline.setAttribute("viewBox", "0 0 " + w + " " + h);
-  const backing = color === "#000000" ? "#ffffff" : "#000000";
-  TPP.svgPath(outline, "M0 0H" + w + "V" + h + "H0Z", backing, "0.04");
   TPP.svgPath(outline, "M0 0H" + w + "V" + h + "H0Z", color, "0.016");
-  TPP.coverCutLines(settings, w, h, spineW).forEach(function (line) {
-    TPP.svgLine(outline, line[0], line[1], line[2], line[3], backing, "0.065");
-    TPP.svgLine(outline, line[0], line[1], line[2], line[3], color, "0.035");
-  });
   sheet.appendChild(outline);
 };
 TPP.coverCutSegments = function (sheet, settings, x, y, w, h, spineW) {
   const color = TPP.coverCutColor(settings);
-  const backing = color === "#000000" ? "#ffffff" : "#000000";
   TPP.coverCutLines(settings, w, h, spineW).forEach(function (line) {
-    TPP.coverCutSegment(sheet, "cover-cut backing", x + line[0], y + line[1], x + line[2], y + line[3], backing, 0.028);
     TPP.coverCutSegment(sheet, "cover-cut", x + line[0], y + line[1], x + line[2], y + line[3], color, 0.014);
   });
 };
