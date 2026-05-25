@@ -32,6 +32,19 @@ TPP.guide = function (sheet, cls, x, y, w, h) {
   guide.style.height = h + "in";
   sheet.appendChild(guide);
 };
+TPP.coverCutSegment = function (sheet, cls, x1, y1, x2, y2, color, thickness) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const segment = document.createElement("div");
+  segment.className = cls;
+  segment.style.left = x1 + "in";
+  segment.style.top = y1 + "in";
+  segment.style.width = Math.sqrt(dx * dx + dy * dy) + "in";
+  segment.style.height = thickness + "in";
+  segment.style.background = color;
+  segment.style.transform = "rotate(" + (Math.atan2(dy, dx) * 180 / Math.PI) + "deg)";
+  sheet.appendChild(segment);
+};
 TPP.coverCutColor = function (settings) {
   if (!TPP.contrastRatio) return "#000000";
   const black = Math.min(TPP.contrastRatio(settings.coverBg1, "#000000"), TPP.contrastRatio(settings.coverBg2, "#000000"));
@@ -49,19 +62,38 @@ TPP.svgPath = function (svg, d, color, width) {
   path.setAttribute("vector-effect", "non-scaling-stroke");
   svg.appendChild(path);
 };
+TPP.svgLine = function (svg, x1, y1, x2, y2, color, width) {
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", x1);
+  line.setAttribute("y1", y1);
+  line.setAttribute("x2", x2);
+  line.setAttribute("y2", y2);
+  line.setAttribute("stroke", color);
+  line.setAttribute("stroke-width", width || "0.018");
+  line.setAttribute("stroke-linecap", "square");
+  line.setAttribute("vector-effect", "non-scaling-stroke");
+  svg.appendChild(line);
+};
 TPP.coverCutGeometry = function (settings) {
   const wrap = Math.max(0, Number(settings.wrapInside) || 0);
   const board = Math.max(0, Number(settings.boardThickness) || 0);
-  const inset = settings.wrapCover ? wrap : 0;
+  const inset = wrap;
   const thickness = inset && board ? Math.min(inset, board) : 0;
   return { inset: inset, thickness: thickness };
 };
-TPP.coverCutOutlinePath = function (settings, w, h) {
+TPP.coverCornerGeometry = function (settings, w, h) {
   const geo = TPP.coverCutGeometry(settings);
   const inset = geo.inset;
   const t = geo.thickness;
+  if (!inset || !t) return { inset: inset, thickness: t, tip: 0 };
+  return { inset: inset, thickness: t, tip: Math.min(2 * inset - t, w / 2, h / 2) };
+};
+TPP.coverCutOutlinePath = function (settings, w, h) {
+  const geo = TPP.coverCornerGeometry(settings, w, h);
+  const inset = geo.inset;
+  const t = geo.thickness;
   if (!inset || !t) return "M0 0H" + w + "V" + h + "H0Z";
-  const d = Math.max(inset, 2 * inset - t);
+  const d = geo.tip;
   return [
     "M", d, 0,
     "H", w - d,
@@ -91,42 +123,81 @@ TPP.coverCutClipPath = function (settings, w, h) {
   const inset = geo.inset;
   const t = geo.thickness;
   if (!inset || !t) return "";
-  const d = Math.max(inset, 2 * inset - t);
+  const xL = inset;
+  const xR = w - inset;
+  const yT = inset;
+  const yB = h - inset;
+  const leftOuter = inset - t;
+  const rightOuter = w - inset + t;
+  const topOuter = inset - t;
+  const bottomOuter = h - inset + t;
+  const topRun = Math.min(topOuter, Math.max(0, w / 2 - xL), Math.max(0, xR - w / 2));
+  const sideRun = Math.min(leftOuter, Math.max(0, h / 2 - yT), Math.max(0, yB - h / 2));
+  const topEdgeY = Math.max(0, topOuter - topRun);
+  const bottomEdgeY = Math.min(h, bottomOuter + topRun);
+  const leftEdgeX = Math.max(0, leftOuter - sideRun);
+  const rightEdgeX = Math.min(w, rightOuter + sideRun);
   const pct = function (value, total) { return (value / total * 100).toFixed(4) + "%"; };
   return "polygon(" + [
-    pct(d, w) + " 0",
-    pct(w - d, w) + " 0",
-    pct(w - inset, w) + " " + pct(inset - t, h),
-    pct(w - inset, w) + " " + pct(inset, h),
-    pct(w - inset + t, w) + " " + pct(inset, h),
-    "100% " + pct(d, h),
-    "100% " + pct(h - d, h),
-    pct(w - inset + t, w) + " " + pct(h - inset, h),
-    pct(w - inset, w) + " " + pct(h - inset, h),
-    pct(w - inset, w) + " " + pct(h - inset + t, h),
-    pct(w - d, w) + " 100%",
-    pct(d, w) + " 100%",
-    pct(inset, w) + " " + pct(h - inset + t, h),
-    pct(inset, w) + " " + pct(h - inset, h),
-    pct(inset - t, w) + " " + pct(h - inset, h),
-    "0 " + pct(h - d, h),
-    "0 " + pct(d, h),
-    pct(inset - t, w) + " " + pct(inset, h),
-    pct(inset, w) + " " + pct(inset, h),
-    pct(inset, w) + " " + pct(inset - t, h)
+    pct(xL + topRun, w) + " " + pct(topEdgeY, h),
+    pct(xR - topRun, w) + " " + pct(topEdgeY, h),
+    pct(xR, w) + " " + pct(topOuter, h),
+    pct(xR, w) + " " + pct(yT, h),
+    pct(rightOuter, w) + " " + pct(yT, h),
+    pct(rightEdgeX, w) + " " + pct(yT + sideRun, h),
+    pct(rightEdgeX, w) + " " + pct(yB - sideRun, h),
+    pct(rightOuter, w) + " " + pct(yB, h),
+    pct(xR, w) + " " + pct(yB, h),
+    pct(xR, w) + " " + pct(bottomOuter, h),
+    pct(xR - topRun, w) + " " + pct(bottomEdgeY, h),
+    pct(xL + topRun, w) + " " + pct(bottomEdgeY, h),
+    pct(xL, w) + " " + pct(bottomOuter, h),
+    pct(xL, w) + " " + pct(yB, h),
+    pct(leftOuter, w) + " " + pct(yB, h),
+    pct(leftEdgeX, w) + " " + pct(yB - sideRun, h),
+    pct(leftEdgeX, w) + " " + pct(yT + sideRun, h),
+    pct(leftOuter, w) + " " + pct(yT, h),
+    pct(xL, w) + " " + pct(yT, h),
+    pct(xL, w) + " " + pct(topOuter, h)
   ].join(", ") + ")";
 };
-TPP.coverCutPaths = function (settings, w, h, spineW) {
+TPP.coverCutLines = function (settings, w, h, spineW) {
   const geo = TPP.coverCutGeometry(settings);
   const inset = geo.inset;
   const t = geo.thickness;
   if (inset <= 0 || t <= 0) return [];
+  const xL = inset;
+  const xR = w - inset;
+  const yT = inset;
+  const yB = h - inset;
   const pageW = settings.page.w;
   const foldA = inset + pageW;
   const foldB = inset + pageW + spineW;
+  const leftOuter = inset - t;
+  const rightOuter = w - inset + t;
+  const topOuter = inset - t;
+  const bottomOuter = h - inset + t;
+  const topRun = Math.min(topOuter, Math.max(0, w / 2 - xL), Math.max(0, xR - w / 2));
+  const sideRun = Math.min(leftOuter, Math.max(0, h / 2 - yT), Math.max(0, yB - h / 2));
+  const topEdgeY = Math.max(0, topOuter - topRun);
+  const bottomEdgeY = Math.min(h, bottomOuter + topRun);
+  const leftEdgeX = Math.max(0, leftOuter - sideRun);
+  const rightEdgeX = Math.min(w, rightOuter + sideRun);
   return [
-    "M" + foldA + " 0V" + t + " M" + foldA + " " + h + "V" + (h - t),
-    "M" + foldB + " 0V" + t + " M" + foldB + " " + h + "V" + (h - t)
+    [xL, yT - t, xL, yT], [xL, yT, xL - t, yT],
+    [xR, yT - t, xR, yT], [xR, yT, xR + t, yT],
+    [xL, yB + t, xL, yB], [xL, yB, xL - t, yB],
+    [xR, yB + t, xR, yB], [xR, yB, xR + t, yB],
+    [xL + topRun, topEdgeY, xL, topOuter],
+    [xR - topRun, topEdgeY, xR, topOuter],
+    [xL + topRun, bottomEdgeY, xL, bottomOuter],
+    [xR - topRun, bottomEdgeY, xR, bottomOuter],
+    [leftEdgeX, yT + sideRun, leftOuter, yT],
+    [rightEdgeX, yT + sideRun, rightOuter, yT],
+    [leftEdgeX, yB - sideRun, leftOuter, yB],
+    [rightEdgeX, yB - sideRun, rightOuter, yB],
+    [foldA, 0, foldA, t], [foldA, h, foldA, h - t],
+    [foldB, 0, foldB, t], [foldB, h, foldB, h - t]
   ];
 };
 TPP.coverPerimeter = function (sheet, settings, x, y, w, h, spineW) {
@@ -134,20 +205,43 @@ TPP.coverPerimeter = function (sheet, settings, x, y, w, h, spineW) {
   const outline = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   const color = TPP.coverCutColor(settings);
   outline.className = "cover-perimeter";
+  outline.style.position = "absolute";
   outline.style.left = x + "in";
   outline.style.top = y + "in";
   outline.style.width = w + "in";
   outline.style.height = h + "in";
+  outline.style.zIndex = "40";
+  outline.style.overflow = "visible";
+  outline.style.pointerEvents = "none";
+  outline.style.display = "block";
   outline.setAttribute("viewBox", "0 0 " + w + " " + h);
-  const outlinePath = TPP.coverCutOutlinePath(settings, w, h);
   const backing = color === "#000000" ? "#ffffff" : "#000000";
-  TPP.svgPath(outline, outlinePath, backing, "0.04");
-  TPP.svgPath(outline, outlinePath, color, "0.018");
-  TPP.coverCutPaths(settings, w, h, spineW).forEach(function (d) {
-    TPP.svgPath(outline, d, backing, "0.045");
-    TPP.svgPath(outline, d, color, "0.022");
+  TPP.svgPath(outline, "M0 0H" + w + "V" + h + "H0Z", backing, "0.04");
+  TPP.svgPath(outline, "M0 0H" + w + "V" + h + "H0Z", color, "0.016");
+  TPP.coverCutLines(settings, w, h, spineW).forEach(function (line) {
+    TPP.svgLine(outline, line[0], line[1], line[2], line[3], backing, "0.065");
+    TPP.svgLine(outline, line[0], line[1], line[2], line[3], color, "0.035");
   });
   sheet.appendChild(outline);
+};
+TPP.coverCutSegments = function (sheet, settings, x, y, w, h, spineW) {
+  const color = TPP.coverCutColor(settings);
+  const backing = color === "#000000" ? "#ffffff" : "#000000";
+  TPP.coverCutLines(settings, w, h, spineW).forEach(function (line) {
+    TPP.coverCutSegment(sheet, "cover-cut backing", x + line[0], y + line[1], x + line[2], y + line[3], backing, 0.028);
+    TPP.coverCutSegment(sheet, "cover-cut", x + line[0], y + line[1], x + line[2], y + line[3], color, 0.014);
+  });
+};
+TPP.coverArtworkGroup = function (settings, x, y, w, h) {
+  const group = document.createElement("div");
+  group.className = "cover-artwork";
+  group.style.left = x + "in";
+  group.style.top = y + "in";
+  group.style.width = w + "in";
+  group.style.height = h + "in";
+  const clipPath = TPP.coverCutClipPath(settings, w, h);
+  if (clipPath) group.style.clipPath = clipPath;
+  return group;
 };
 TPP.coverFootprint = function (sheet, settings, x, y, w, h) {
   const footprint = document.createElement("div");
@@ -157,8 +251,6 @@ TPP.coverFootprint = function (sheet, settings, x, y, w, h) {
   footprint.style.width = w + "in";
   footprint.style.height = h + "in";
   TPP.applyVars(footprint, settings);
-  const clipPath = TPP.coverCutClipPath(settings, w, h);
-  if (clipPath) footprint.style.clipPath = clipPath;
   sheet.appendChild(footprint);
 };
 TPP.guides = function (sheet, settings, x, y, w, h, spineW) {
@@ -260,14 +352,15 @@ TPP.renderCover = function () {
     const row = Math.floor(i / grid.cols);
     const x = sx + col * grid.w;
     const y = sy + row * grid.h;
-    const ix = x + wrap;
-    const iy = y + wrap;
-    TPP.coverFootprint(sheet, settings, x, y, w, h);
-    sheet.appendChild(TPP.pageEl(back, settings, ix, iy, false, false, { w: settings.page.w, h: settings.page.h }));
-    if (spineW > 0) sheet.appendChild(TPP.spineEl(settings, ix + settings.page.w + spineW / 2, iy, settings.page.h));
-    sheet.appendChild(TPP.pageEl(front, settings, ix + settings.page.w + spineW, iy, false, false, { w: settings.page.w, h: settings.page.h }));
+    const artwork = TPP.coverArtworkGroup(settings, x, y, w, h);
+    sheet.appendChild(artwork);
+    TPP.coverFootprint(artwork, settings, 0, 0, w, h);
+    artwork.appendChild(TPP.pageEl(back, settings, wrap, wrap, false, false, { w: settings.page.w, h: settings.page.h }));
+    if (spineW > 0) artwork.appendChild(TPP.spineEl(settings, wrap + settings.page.w + spineW / 2, wrap, settings.page.h));
+    artwork.appendChild(TPP.pageEl(front, settings, wrap + settings.page.w + spineW, wrap, false, false, { w: settings.page.w, h: settings.page.h }));
     TPP.guides(sheet, settings, x, y, w, h, spineW);
     TPP.coverPerimeter(sheet, settings, x, y, w, h, spineW);
+    TPP.coverCutSegments(sheet, settings, x, y, w, h, spineW);
   }
   preview.appendChild(sheet);
 };
