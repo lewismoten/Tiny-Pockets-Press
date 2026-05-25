@@ -32,6 +32,27 @@ TPP.guide = function (sheet, cls, x, y, w, h) {
   guide.style.height = h + "in";
   sheet.appendChild(guide);
 };
+TPP.coverPerimeter = function (sheet, settings, x, y, w, h) {
+  if (!settings.coverPerimeterOn) return;
+  const outline = document.createElement("div");
+  outline.className = "cover-perimeter";
+  outline.style.left = x + "in";
+  outline.style.top = y + "in";
+  outline.style.width = w + "in";
+  outline.style.height = h + "in";
+  outline.style.borderColor = settings.coverBorder;
+  sheet.appendChild(outline);
+};
+TPP.coverFootprint = function (sheet, settings, x, y, w, h) {
+  const footprint = document.createElement("div");
+  footprint.className = "cover-footprint";
+  footprint.style.left = x + "in";
+  footprint.style.top = y + "in";
+  footprint.style.width = w + "in";
+  footprint.style.height = h + "in";
+  TPP.applyVars(footprint, settings);
+  sheet.appendChild(footprint);
+};
 TPP.guides = function (sheet, settings, x, y, w, h, spineW) {
   if (settings.showCutGuides) {
     const len = Math.min(0.12, w / 8, h / 8);
@@ -133,6 +154,7 @@ TPP.renderCover = function () {
     const y = sy + row * grid.h;
     const ix = x + wrap + board;
     const iy = y + wrap + board;
+    TPP.coverFootprint(sheet, settings, x, y, w, h);
     sheet.appendChild(TPP.pageEl(back, settings, ix, iy, false, false, { w: settings.page.w, h: settings.page.h }));
     if (spineW > 0) sheet.appendChild(TPP.spineEl(settings, ix + settings.page.w + spineW / 2, iy, settings.page.h));
     sheet.appendChild(TPP.pageEl(front, settings, ix + settings.page.w + spineW, iy, false, false, { w: settings.page.w, h: settings.page.h }));
@@ -150,6 +172,7 @@ TPP.renderCover = function () {
         sheet.appendChild(el);
       });
     }
+    TPP.coverPerimeter(sheet, settings, x, y, w, h);
   }
   preview.appendChild(sheet);
 };
