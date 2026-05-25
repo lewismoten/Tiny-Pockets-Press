@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tiny Book Maker</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>Tiny Book Maker</h1>
+      <p>Paste a short story, design a cover, then export printable double-sided booklet sheets.</p>
+    </div>
+    <button id="exportPdfBtn" class="primary">Export PDF</button>
+  </header>
+
+  <main class="layout">
+    <section class="panel controls" aria-label="Book settings">
+      <h2>Story</h2>
+      <label>Title <input id="title" value="The Cursed Brewer’s Soliloquy"></label>
+      <label>Author <input id="author" value="Lewis Moten"></label>
+      <label>Publishing Date <input id="pubDate" type="date"></label>
+      <label>Publisher <input id="publisher" value="100 Word Stories"></label>
+
+      <div class="two-col">
+        <label>Series Name <input id="seriesName" value="100 Word Stories Weekly Challenge"></label>
+        <label>Series No. <input id="seriesNumber" value="1048"></label>
+      </div>
+
+      <label>Story Text
+        <textarea id="story" rows="12">Paste your story here. The app will paginate it into tiny book pages, arrange pages into printable double-sided sheets, and add optional sewing/signature marks when the book needs a spine.</textarea>
+      </label>
+
+      <h2>Page Setup</h2>
+      <div class="two-col">
+        <label>Finished Page Size
+          <select id="pageSize">
+            <option value="quarter-letter">Quarter Letter — 4.25 × 5.5 in</option>
+            <option value="sixth-letter">Sixth Letter — 2.83 × 5.5 in</option>
+            <option value="a6">A6 — 105 × 148 mm</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+        <label>Sheet Size
+          <select id="sheetSize">
+            <option value="letter">US Letter — 8.5 × 11 in</option>
+            <option value="legal">US Legal — 8.5 × 14 in</option>
+            <option value="a4">A4 — 210 × 297 mm</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="two-col custom-size" hidden>
+        <label>Page Width (in) <input id="customPageWidth" type="number" min="1" step="0.01" value="4.25"></label>
+        <label>Page Height (in) <input id="customPageHeight" type="number" min="1" step="0.01" value="5.5"></label>
+      </div>
+
+      <div class="two-col">
+        <label>Page Margin (in) <input id="margin" type="number" min="0" step="0.01" value="0.25"></label>
+        <label>Font Size (pt) <input id="fontSize" type="number" min="6" step="1" value="11"></label>
+      </div>
+
+      <div class="two-col">
+        <label>Font
+          <select id="fontFamily">
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="Garamond, serif">Garamond</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="Verdana, sans-serif">Verdana</option>
+            <option value="'Courier New', monospace">Courier New</option>
+          </select>
+        </label>
+        <label>Paper Thickness (in) <input id="paperThickness" type="number" min="0.001" step="0.001" value="0.004"></label>
+      </div>
+
+      <div class="checks">
+        <label><input id="showPageNumbers" type="checkbox" checked> Show page numbers</label>
+        <label><input id="showBorder" type="checkbox" checked> Framed cover border</label>
+        <label><input id="forceSpine" type="checkbox"> Force spine even for short books</label>
+      </div>
+
+      <h2>Cover</h2>
+      <div class="two-col">
+        <label>Cover Background <input id="coverBg" type="color" value="#7b1f2a"></label>
+        <label>Cover Text <input id="coverTextColor" type="color" value="#fff8e8"></label>
+      </div>
+      <label>Cover Image <input id="coverImage" type="file" accept="image/*"></label>
+
+      <div class="two-col">
+        <label>Image X (%) <input id="imageX" type="range" min="-100" max="100" value="0"></label>
+        <label>Image Y (%) <input id="imageY" type="range" min="-100" max="100" value="20"></label>
+      </div>
+      <label>Image Zoom <input id="imageZoom" type="range" min="10" max="300" value="85"></label>
+
+      <h2>Binding</h2>
+      <div class="two-col">
+        <label>Staple Limit, Pages <input id="stapleLimit" type="number" min="4" step="4" value="16"></label>
+        <label>Signature Size, Pages <input id="signatureSize" type="number" min="4" step="4" value="16"></label>
+      </div>
+
+      <div class="button-row">
+        <button id="refreshBtn">Refresh Preview</button>
+        <button id="printBtn">Print Preview</button>
+      </div>
+    </section>
+
+    <section class="panel preview-panel" aria-label="Preview">
+      <div class="summary" id="summary"></div>
+      <div id="preview" class="preview"></div>
+    </section>
+  </main>
+</body>
+</html>
