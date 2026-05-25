@@ -1,18 +1,276 @@
+document.addEventListener("DOMContentLoaded", async function () {
+  TPP.populate();
+  await TPP.load();
+  TPP.loadForm();
+  TPP.renderAll();
 
-const $=id=>document.getElementById(id);const T={};T.uid=()=>"b-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);T.fonts=[["Georgia, serif","Georgia"],["'Times New Roman', serif","Times New Roman"],["Garamond, serif","Garamond"],["Arial, sans-serif","Arial"],["Verdana, sans-serif","Verdana"],["'Courier New', monospace","Courier New"]];T.papers={white:["White","#fff","#231f20"],eggshell:["Eggshell","#fff8e8","#231f20"],aged:["Aged","#ead8b4","#2c2018"],cream:["Cream","#f7ecd2","#2a241d"]};T.textures={none:"None",noise:"Soft Noise",aged:"Aged Edges",fiber:"Paper Fibers"};T.sizes={half:{w:.5,h:.5},one:{w:1,h:1},grid16:{w:2.125,h:2.75},eighth:{w:2.75,h:4.25},quarter:{w:4.25,h:5.5}};T.sheets={letter:{w:8.5,h:11},legal:{w:8.5,h:14},a4:{w:8.267,h:11.693}};
-T.sample=`A jolly “Ho-ho-ho” came from behind, followed by “Hidey ho, neighbor!”\n\n“Hello Santa,” little Timmy replied.\n\n“Why the long face?” Santa asked.\n\nTimmy showed him a block of wood. “I’m building a pinewood derby car, but I have no tools.”\n\nSanta put his hands on his waist and made grunting sounds, followed by the order: “Never give up. Never surrender!”\n\nSanta went into his bag and grabbed a few presents, handing them over. Timmy quickly ripped open the packages, finding a chainsaw, angle grinder, nail gun, industrial CNC router, plasma cutter, and a flame thrower, while Santa shouted, “More power!”`;
-T.def=()=>({id:T.uid(),title:"Santa’s Little OSHA Violation",author:"Lewis Moten",spineAuthor:"Moten, L.",pubDate:"2026-05-24",publisher:"Tiny Pockets Press",copyright:"© 2026 Lewis Moten. All rights reserved.",seriesName:"100 Word Stories Weekly Challenge",number:"No. 1048",includeToc:true,pageSize:"one",sheetSize:"letter",customW:1,customH:1,margin:.08,fontFamily:"Georgia, serif",paperPreset:"eggshell",texture:"aged",pageBg:"#fff8e8",pageText:"#231f20",bodySize:5.5,captionSize:3.8,lineHeight:1.35,paraGap:.5,justify:false,coverShowAuthor:true,coverShowSeries:true,coverShowPublisher:true,coverOverflowImage:true,coverBg1:"#7b1f2a",coverBg2:"#3c1118",coverText:"#fff8e8",coverBorder:"#fff8e8",coverBorderOn:true,coverImageData:"",coverImgX:0,coverImgY:0,coverImgZoom:120,coverTitleY:12,coverAuthorY:72,coverSeriesY:6,coverPublisherY:84,coverTitleSize:8,coverMetaSize:4.2,coverStroke:true,coverStrokeColor:"#000",coverStrokeSize:1,backText:"A tiny story printed small enough to fit in your pocket.",backTextY:76,backTextSize:4.5,backTextColor:"#fff8e8",backImageData:"",backUseFrontImage:false,spineMode:"auto",paperThickness:.004,bindingAllowance:.025,spineImageData:"",spineImgX:0,spineImgZoom:100,spineTitleRotate:true,spineAuthorOn:true,spineAuthorRotate:false,wrapCover:false,wrapInside:.15,boardThickness:0,separateCover:false,coverCopies:1,coverCopiesMax:true,pageNumMode:"center",pageOrnament:"",pageNumLeft:"",pageNumRight:"",ornamentBySide:false,chapterEndOrnament:"",tocNumberType:"page",tocLeader:"dots",tocLeaderColor:"#6c625a",qrSeparatePage:false,showCutGuides:true,showFoldGuides:true,coverPreview:"",chapters:[{id:T.uid(),title:"Santa’s Little OSHA Violation",text:T.sample,imageData:"",imagePlacement:"none",imageWidth:70}]});
-T.fields=["title","author","spineAuthor","pubDate","publisher","copyright","seriesName","number","includeToc","pageSize","sheetSize","customW","customH","margin","fontFamily","paperPreset","texture","pageBg","pageText","bodySize","captionSize","lineHeight","paraGap","justify","coverShowAuthor","coverShowSeries","coverShowPublisher","coverOverflowImage","coverBg1","coverBg2","coverText","coverBorder","coverBorderOn","coverImgX","coverImgY","coverImgZoom","coverTitleY","coverAuthorY","coverSeriesY","coverPublisherY","coverTitleSize","coverMetaSize","coverStroke","coverStrokeColor","coverStrokeSize","backText","backTextY","backTextSize","backTextColor","backUseFrontImage","spineMode","paperThickness","bindingAllowance","spineImgX","spineImgZoom","spineTitleRotate","spineAuthorOn","spineAuthorRotate","wrapCover","wrapInside","boardThickness","separateCover","coverCopies","coverCopiesMax","pageNumMode","pageOrnament","pageNumLeft","pageNumRight","ornamentBySide","chapterEndOrnament","tocNumberType","tocLeader","tocLeaderColor","qrSeparatePage","showCutGuides","showFoldGuides"];
-T.esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));T.clone=o=>JSON.parse(JSON.stringify(o));T.norm=b=>{let d=T.def(),o={...d,...b,id:b.id||T.uid()};o.chapters=Array.isArray(b.chapters)&&b.chapters.length?b.chapters:d.chapters;return o};T.save=()=>localStorage.setItem("tinyPocketsPressV5",JSON.stringify(T.library));T.load=()=>{try{T.library=JSON.parse(localStorage.getItem("tinyPocketsPressV5")||"[]")}catch{T.library=[]}if(!T.library.length){T.library=[T.def()];T.save()}T.library=T.library.map(T.norm);T.active=T.library.find(b=>b.id===localStorage.getItem("tinyPocketsActiveV5"))||T.library[0]};T.setActive=b=>{T.active=b;localStorage.setItem("tinyPocketsActiveV5",b.id);T.loadForm();T.renderAll()};
-T.populate=()=>{fontFamily.innerHTML=T.fonts.map(([v,l])=>`<option value="${T.esc(v)}">${l}</option>`).join("");paperPreset.innerHTML=Object.entries(T.papers).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("");texture.innerHTML=Object.entries(T.textures).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")};T.loadForm=()=>{let b=T.active;T.fields.forEach(id=>{let e=$(id);if(!e)return;if(e.type==="checkbox")e.checked=!!b[id];else e.value=b[id]??""});document.querySelector(".customSize").hidden=pageSize.value!=="custom";T.renderChapterList();T.renderChapterEditor()};T.sync=()=>{let b=T.active;T.fields.forEach(id=>{let e=$(id);if(!e)return;b[id]=e.type==="checkbox"?e.checked:(e.type==="number"||e.type==="range"?+e.value:e.value)});b.chapters=T.readChapters();T.save()};T.settings=()=>{T.sync();let b=T.active,raw=b.pageSize==="custom"?{w:+b.customW,h:+b.customH}:T.sizes[b.pageSize]||T.sizes.one;return{...b,page:{w:Math.max(.5,+raw.w||1),h:Math.max(.5,+raw.h||1)},sheet:T.sheets[b.sheetSize]||T.sheets.letter}};
-T.isImg=u=>/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(u||"");T.blocks=text=>{let lines=String(text||"").split(/\n/),out=[];for(let i=0;i<lines.length;i++){let m=lines[i].trim().match(/^(https?:\/\/\S+)$/i);if(m){let cap="";if(lines[i+1]&&!/^https?:\/\/\S+$/i.test(lines[i+1].trim())&&lines[i+1].trim()){cap=lines[i+1].trim();i++}out.push({type:T.isImg(m[1])?"image":"qr",url:m[1],caption:cap})}else out.push({type:"text",text:lines[i]})}return out};T.md=t=>{let raw=window.marked?marked.parse(t||"",{gfm:true,breaks:true}):T.esc(t).replace(/\n/g,"<br>");return window.DOMPurify?DOMPurify.sanitize(raw,{ADD_TAGS:["u"],ADD_ATTR:["class","style","data-url","src"]}):raw};T.rich=t=>{let html=[],buf=[];for(let b of T.blocks(t)){if(b.type==="text"){buf.push(b.text);continue}if(buf.length){html.push(`<div class="story-text">${T.md(buf.join("\n"))}</div>`);buf=[]}if(b.type==="image")html.push(`<figure class="figure"><img src="${T.esc(b.url)}"><figcaption class="caption">${T.esc(b.caption)}</figcaption></figure>`);else html.push(`<figure class="figure"><span class="qr-holder" data-url="${T.esc(b.url)}"></span>${b.caption?`<figcaption class="caption">${T.esc(b.caption)}</figcaption>`:""}</figure>`)}if(buf.length)html.push(`<div class="story-text">${T.md(buf.join("\n"))}</div>`);return html.join("")};T.qr=root=>{if(!window.QRCode)return;root.querySelectorAll(".qr-holder").forEach(h=>{if(h.dataset.done)return;new QRCode(h,{text:h.dataset.url,width:80,height:80,correctLevel:QRCode.CorrectLevel.M});h.dataset.done=1})};
-T.measure=(text,s,maxW)=>{let c=T.canvas||(T.canvas=document.createElement("canvas")),ctx=c.getContext("2d");ctx.font=`${s.bodySize}pt ${s.fontFamily}`;let lines=1,w=0;String(text||"").split(/\s+/).filter(Boolean).forEach(word=>{let mw=ctx.measureText(word+" ").width/96;if(mw>maxW){lines+=Math.ceil(mw/maxW);w=0}else if(w+mw>maxW){lines++;w=mw}else w+=mw});return lines};T.split=(text,s)=>{let maxW=Math.max(.05,s.page.w-2*s.margin),maxH=Math.max(.05,s.page.h-2*s.margin-.08),lh=(s.bodySize/72)*(s.lineHeight||1.35),maxLines=Math.max(1,Math.floor(maxH/lh)),words=String(text||"").split(/\s+/).filter(Boolean),chunks=[],cur=[];for(let wd of words){let test=[...cur,wd].join(" ");if(T.measure(test,s,maxW)>maxLines&&cur.length){chunks.push(cur.join(" "));cur=[wd]}else cur.push(wd)}if(cur.length)chunks.push(cur.join(" "));return chunks.length?chunks:[""]};
-T.date=v=>v?new Date(v+"T12:00:00").toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"}):"";T.coverHTML=(s,side)=>{let img=side==="front"?s.coverImageData:(s.backUseFrontImage?s.coverImageData:s.backImageData);if(side==="back")return`${img?`<img class="back-img" src="${img}" style="width:${s.coverImgZoom}%;margin-left:${s.coverImgX}%;margin-top:${s.coverImgY}%">`:""}<div class="back-text"><div class="story-text">${T.md(s.backText||"")}</div></div>`;let ser=[s.seriesName,s.number].filter(Boolean).join(" ");return`${img?`<img class="cover-img" src="${img}" style="width:${s.coverImgZoom}%;margin-left:${s.coverImgX}%;margin-top:${s.coverImgY}%">`:""}<div class="cover-el cover-title">${T.esc(s.title)}</div>${s.coverShowAuthor?`<div class="cover-el cover-author">${T.esc(s.author)}</div>`:""}${s.coverShowSeries?`<div class="cover-el cover-series">${T.esc(ser)}</div>`:""}${s.coverShowPublisher?`<div class="cover-el cover-publisher">${T.esc(s.publisher)}</div>`:""}`};
-T.build=()=>{let s=T.settings(),pages=[],mk=(type,html,extra={})=>pages.push({n:pages.length+1,type,html,...extra});mk("cover",T.coverHTML(s,"front"),{cover:true,role:"front"});mk("inside","",{role:"inside-front"});mk("title",`<div class="story-title">${T.esc(s.title)}</div><div class="story-text" style="text-align:center">${s.author?`By ${T.esc(s.author)}<br>`:""}${T.esc([s.seriesName,s.number].filter(Boolean).join(" "))}</div>`);mk("imprint",`<div class="story-title">Publication</div><div class="story-text" style="text-align:center">${[s.title,s.author,s.publisher,T.date(s.pubDate),s.copyright].filter(Boolean).map(T.esc).join("<br>")}</div>`);let tocIndex=-1,toc=[];if(s.includeToc&&s.chapters.length>1){tocIndex=pages.length;mk("toc","")}s.chapters.forEach((ch,i)=>{let start=pages.length+1,head=`<div class="chapter-heading">${T.esc(ch.title)}</div>`;if(ch.imageData&&ch.imagePlacement!=="none"){let im=`<figure class="figure"><img src="${ch.imageData}" style="width:${ch.imageWidth||70}%"></figure>`;if(ch.imagePlacement==="own")mk("image",head+im);else head+=im}let textOnly=String(ch.text||"").replace(/^https?:\/\/\S+$/gm,"");T.split(textOnly,s).forEach((chunk,j)=>mk("text",(j===0?head:"")+T.rich(chunk)+(j===T.split(textOnly,s).length-1&&s.chapterEndOrnament?`<div class="chapter-end">${T.esc(s.chapterEndOrnament)}</div>`:"")));if(s.qrSeparatePage)T.blocks(ch.text).filter(b=>b.type==="qr").forEach(b=>mk("qr",`<figure class="figure"><span class="qr-holder" data-url="${T.esc(b.url)}"></span>${b.caption?`<figcaption class="caption">${T.esc(b.caption)}</figcaption>`:""}</figure>`));toc.push({title:ch.title||`Chapter ${i+1}`,chapter:i+1,page:start})});if(tocIndex>=0){let cls=s.tocLeader==="line"?"line":s.tocLeader==="none"?"none":"";pages[tocIndex].html=`<div class="story-title">Contents</div><ol class="toc-list">${toc.map(r=>`<li><span>${T.esc(r.title)}</span><span class="leader ${cls}"></span><span>${s.tocNumberType==="chapter"?r.chapter:r.page}</span></li>`).join("")}</ol>`}mk("inside","",{role:"inside-back"});mk("back",T.coverHTML(s,"back"),{cover:true,role:"back"});while(pages.length%4!==0)pages.splice(pages.length-1,0,{n:0,type:"blank",html:"<span>Blank</span>"});pages.forEach((p,i)=>p.n=i+1);return pages};
-T.stroke=s=>s.coverStroke&&+s.coverStrokeSize>0?`${s.coverStrokeSize}px 0 ${s.coverStrokeColor},-${s.coverStrokeSize}px 0 ${s.coverStrokeColor},0 ${s.coverStrokeSize}px ${s.coverStrokeColor},0 -${s.coverStrokeSize}px ${s.coverStrokeColor},0 2px 10px rgb(0 0 0/.35)`:"0 2px 10px rgb(0 0 0/.35)";T.pageEl=(p,s,x=0,y=0,rot=false,stat=false,size=null)=>{let w=size?.w||s.page.w,h=size?.h||s.page.h,d=document.createElement("div");d.className=`page ${p.type} ${p.n%2===0?"even":"odd"} ${p.type==="cover"&&s.coverOverflowImage?"bleed":""} ${["cover","back"].includes(p.type)?(s.coverBorderOn?"frame":""):`texture-${s.texture}`}`;d.style.left=stat?0:x+"in";d.style.top=stat?0:y+"in";d.style.width=w+"in";d.style.height=h+"in";let props={"--page-bg":s.pageBg,"--page-text":s.pageText,"--font":s.fontFamily,"--body-size":s.bodySize+"pt","--caption-size":s.captionSize+"pt","--line-height":s.lineHeight,"--para-gap":s.paraGap+"em","--align":s.justify?"justify":"left","--margin":s.margin+"in","--cover-bg1":s.coverBg1,"--cover-bg2":s.coverBg2,"--cover-text":s.coverText,"--cover-border":s.coverBorder,"--cover-title-size":s.coverTitleSize+"pt","--cover-meta-size":s.coverMetaSize+"pt","--cover-stroke":T.stroke(s),"--title-y":s.coverTitleY+"%","--author-y":s.coverAuthorY+"%","--series-y":s.coverSeriesY+"%","--publisher-y":s.coverPublisherY+"%","--back-y":s.backTextY+"%","--back-size":s.backTextSize+"pt","--back-color":s.backTextColor,"--toc-leader-color":s.tocLeaderColor};Object.entries(props).forEach(([k,v])=>d.style.setProperty(k,v));if(rot&&!stat){d.style.transformOrigin="top left";d.style.transform=`translate(${h}in,0) rotate(90deg)`}let inn=document.createElement("div");inn.className="inner";inn.innerHTML=p.html;if(p.type==="blank")inn.classList.add("blank");d.appendChild(inn);if(s.pageNumMode!=="none"&&!['cover','back','inside','blank'].includes(p.type)){let left=s.pageNumLeft,right=s.pageNumRight;if(s.pageOrnament==="dash"){left="— ";right=" —"}if(s.pageOrnament==="floral"){left="☙ ";right=" ❧"}if(s.pageOrnament==="heart"){left="♥ ";right=" ♥"}if(s.ornamentBySide&&s.pageNumMode==="edge"){if(p.n%2===0)right="";else left=""}let n=document.createElement("div");n.className=`page-number ${s.pageNumMode==="edge"?"edge":""}`;n.textContent=`${left||""}${p.n}${right||""}`;d.appendChild(n)}setTimeout(()=>T.qr(d),0);return d};T.spineWidth=s=>s.spineMode==="none"?0:Math.max(.04,(T.lastCount||16)*(+s.paperThickness||.004)+(+s.bindingAllowance||0)+(+s.boardThickness||0));T.spineEl=(s,x,y,h)=>{let w=T.spineWidth(s),d=document.createElement("div");d.className="spine";d.style.left=(x-w/2)+"in";d.style.top=y+"in";d.style.width=w+"in";d.style.height=h+"in";d.style.setProperty("--cover-bg1",s.coverBg1);d.style.setProperty("--cover-bg2",s.coverBg2);d.style.setProperty("--cover-text",s.coverText);d.innerHTML=`${s.spineImageData?`<img class="spine-img" src="${s.spineImageData}" style="width:${s.spineImgZoom}%;margin-left:${s.spineImgX}%">`:""}<div class="spine-title ${s.spineTitleRotate?"rot":""}">${T.esc(s.title)}</div>${s.spineAuthorOn?`<div class="spine-author ${s.spineAuthorRotate?"rot":""}">${T.esc(s.spineAuthor||s.author)}</div>`:""}`;return d};
-T.best=(sheet,unit)=>[{rot:false,w:unit.w,h:unit.h},{rot:true,w:unit.h,h:unit.w}].map(o=>({...o,cols:Math.max(1,Math.floor(sheet.w/o.w)),rows:Math.max(1,Math.floor(sheet.h/o.h))})).map(o=>({...o,count:o.cols*o.rows})).sort((a,b)=>b.count-a.count)[0];T.pairs=n=>{let p=Math.ceil(n/4)*4,out=[];for(let i=0;i<p/4;i++){out.push({pages:[p-i*2,1+i*2]});out.push({pages:[2+i*2,p-1-i*2]})}return out};T.guide=(sh,c,x,y,w,h)=>{let g=document.createElement("div");g.className=c;g.style.left=x+"in";g.style.top=y+"in";g.style.width=w+"in";g.style.height=h+"in";sh.appendChild(g)};T.guides=(sh,s,x,y,w,h)=>{if(s.showCutGuides){let l=Math.min(.12,w/8,h/8);[x,x+w].forEach(xx=>{T.guide(sh,"cut",xx-.004,y-l,.008,l);T.guide(sh,"cut",xx-.004,y+h,.008,l)});[y,y+h].forEach(yy=>{T.guide(sh,"cut",x-l,yy-.004,l,.008);T.guide(sh,"cut",x+w,yy-.004,l,.008)})}if(s.showFoldGuides)T.guide(sh,"fold v",x+w/2,y,0,h)};
-T.renderPrint=()=>{let s=T.settings(),pages=T.build();T.lastCount=pages.length;let prev=printPreview;prev.innerHTML="";let pairs=T.pairs(pages.length),unit={w:s.page.w*2,h:s.page.h},grid=T.best(s.sheet,unit),per=grid.count,sides=Math.ceil(pairs.length/per),scale=Math.min(1,900/(s.sheet.w*96));summary.innerHTML=`<strong>${pages.length} book pages</strong>. Double-sided booklet imposition: ${pairs.length} side blocks. ${per} blocks fit per sheet side. Spine width: ${T.spineWidth(s).toFixed(3)} in.`;if(s.separateCover)T.coverSheet(prev,s,pages,scale);for(let si=0;si<sides;si++){let sh=document.createElement("div");sh.className="sheet";sh.dataset.pdfPage=1;sh.style.width=s.sheet.w+"in";sh.style.height=s.sheet.h+"in";sh.style.transform=`scale(${scale})`;sh.style.transformOrigin="top center";sh.style.marginBottom=((scale-1)*s.sheet.h)+"in";let lab=document.createElement("div");lab.className="sheet-title";lab.textContent="Interior sheet side "+(si+1);sh.appendChild(lab);let sx=(s.sheet.w-grid.cols*grid.w)/2,sy=(s.sheet.h-grid.rows*grid.h)/2;for(let i=0;i<per;i++){let pair=pairs[si*per+i];if(!pair)continue;let lp=pages[pair.pages[0]-1]||{n:pair.pages[0],type:"blank",html:""},rp=pages[pair.pages[1]-1]||{n:pair.pages[1],type:"blank",html:""};if(s.separateCover&&(lp.cover||rp.cover))continue;let col=i%grid.cols,row=Math.floor(i/grid.cols),x=sx+col*grid.w,y=sy+row*grid.h;sh.appendChild(T.pageEl(lp,s,x,y,grid.rot));sh.appendChild(T.pageEl(rp,s,x+s.page.w,y,grid.rot));T.guides(sh,s,x,y,s.page.w*2,s.page.h);if((s.spineMode==="auto"||s.spineMode==="cover")&&!lp.cover&&!rp.cover){let m=document.createElement("div");m.className="spine-guide";m.style.left=(x+s.page.w-.02)+"in";m.style.top=(y+.05)+"in";m.style.height=Math.min(.18,s.page.h/5)+"in";sh.appendChild(m)}}prev.appendChild(sh)}};T.coverSheet=(prev,s,pages,scale)=>{let w=s.page.w*2+T.spineWidth(s)+(+s.wrapInside||0)*2+(+s.boardThickness||0)*2,h=s.page.h+(+s.wrapInside||0)*2,grid=T.best(s.sheet,{w,h}),copies=s.coverCopiesMax?grid.count:Math.max(1,+s.coverCopies||1),sh=document.createElement("div");sh.className="sheet";sh.dataset.pdfPage=1;sh.style.width=s.sheet.w+"in";sh.style.height=s.sheet.h+"in";sh.style.transform=`scale(${scale})`;sh.style.transformOrigin="top center";let sx=(s.sheet.w-grid.cols*grid.w)/2,sy=(s.sheet.h-grid.rows*grid.h)/2;for(let i=0;i<Math.min(copies,grid.count);i++){let col=i%grid.cols,row=Math.floor(i/grid.cols),x=sx+col*grid.w,y=sy+row*grid.h,wrap=+s.wrapInside||0,back=pages.find(p=>p.role==="back"),front=pages.find(p=>p.role==="front");sh.appendChild(T.pageEl(back,s,x+wrap,y+wrap,false,false,{w:s.page.w,h:s.page.h}));sh.appendChild(T.spineEl(s,x+wrap+s.page.w+T.spineWidth(s)/2,y+wrap,s.page.h));sh.appendChild(T.pageEl(front,s,x+wrap+s.page.w+T.spineWidth(s),y+wrap,false,false,{w:s.page.w,h:s.page.h}));T.guides(sh,s,x,y,w,h);if(s.wrapCover)[[0,0,45],[w-.16,0,-45],[0,h-.01,-45],[w-.16,h-.01,45]].forEach(a=>{let c=document.createElement("div");c.className="cut";c.style.width=".16in";c.style.height=".012in";c.style.left=(x+a[0])+"in";c.style.top=(y+a[1])+"in";c.style.transform=`rotate(${a[2]}deg)`;sh.appendChild(c)})}prev.appendChild(sh)};
-T.readChapters=()=>{let card=document.querySelector(".chapter-card");if(!card)return T.active.chapters;let a=T.active.chapters.map(x=>({...x})),i=+card.dataset.index,ch=a[i];ch.title=card.querySelector(".chapter-title").value;ch.text=card.querySelector(".chapter-text").value;ch.imagePlacement=card.querySelector(".chapter-image-placement").value;ch.imageWidth=+card.querySelector(".chapter-image-width").value||70;return a};T.renderChapterList=()=>{chapterList.innerHTML=T.active.chapters.map((c,i)=>`<button class="pill ${i===T.cur?"active":""}" data-i="${i}">${i+1}. ${T.esc(c.title||"Untitled")}</button>`).join("")};T.preview=t=>T.rich(t).split(/<\/p>/).map((x,i)=>x+(x.includes("<p")?"</p>":"")+(i%2?`<div class="page-break">Page break estimate</div>`:"")).join("");T.renderChapterEditor=()=>{T.cur=T.cur||0;let c=T.active.chapters[T.cur]||T.active.chapters[0];if(!c)return;chapterEditor.innerHTML=`<article class="chapter-card" data-index="${T.cur}"><div class="toolbar"><button data-act="up">↑</button><button data-act="down">↓</button><button data-act="remove">Remove</button><button data-act="read">Read From Here</button></div><label>Chapter Title<input class="chapter-title" value="${T.esc(c.title)}"></label><div class="toolbar"><button data-fmt="bold">Bold</button><button data-fmt="italic">Italic</button><button data-fmt="underline">Underline</button><button data-fmt="strike">Strike</button><button data-fmt="ul">Bullets</button><button data-fmt="h2">Heading</button><button data-fmt="table">Table</button></div><div class="editor-grid"><label>Markdown<textarea class="chapter-text">${T.esc(c.text||"")}</textarea></label><div><strong>Preview</strong><div class="md-preview">${T.preview(c.text||"")}</div></div></div><div class="two"><label>Image Placement<select class="chapter-image-placement"><option value="none" ${c.imagePlacement==="none"?"selected":""}>No Image</option><option value="below" ${c.imagePlacement==="below"?"selected":""}>Below Title</option><option value="own" ${c.imagePlacement==="own"?"selected":""}>Own Page</option></select></label><label>Image Width %<input class="chapter-image-width" type="number" min="10" max="100" value="${c.imageWidth||70}"></label></div><label>Chapter Image<input class="chapter-image" type="file" accept="image/*"></label>${c.imageData?`<img src="${c.imageData}" style="max-width:140px;border-radius:10px">`:""}</article>`;T.qr(chapterEditor)};
-T.renderReader=()=>{let s=T.settings(),pages=T.build();readerJump.innerHTML=`<option value="0">Front Cover</option>`+(pages.findIndex(p=>p.type==="toc")>=0?`<option value="${pages.findIndex(p=>p.type==="toc")}">Table of Contents</option>`:"")+T.active.chapters.map(ch=>{let i=pages.findIndex(p=>p.html.includes(T.esc(ch.title)));return i>=0?`<option value="${i}">Chapter: ${T.esc(ch.title)}</option>`:""}).join("")+`<option value="${pages.length-1}">Last Page</option>`;T.reader=Math.max(0,Math.min(T.reader||0,pages.length-1));readerJump.value=T.reader;let mode=readerMode.value,shown=mode==="spread"?(T.reader===0?[null,pages[0]]:[pages[T.reader],pages[T.reader+1]||null]):[pages[T.reader]],spread=document.createElement("div");spread.className="spread";let scale=Math.min(5,Math.max(1.2,(window.innerWidth-560)/((mode==="spread"?s.page.w*2.25:s.page.w)*96)));spread.style.transform=`scale(${scale})`;shown.forEach(p=>{let sh=document.createElement("div");sh.className="reader-shell";sh.style.width=s.page.w+"in";sh.style.height=s.page.h+"in";if(p)sh.appendChild(T.pageEl(p,s,0,0,false,true));spread.appendChild(sh)});readerPreview.innerHTML="";readerPreview.appendChild(spread)};T.renderLibrary=()=>{libraryGrid.innerHTML=T.library.map(b=>`<article class="library-card" data-id="${b.id}"><div class="library-cover" style="${b.coverPreview?`background-image:url(${b.coverPreview})`:`background:linear-gradient(to bottom,${b.coverBg1},${b.coverBg2})`}"><strong>${T.esc(b.title)}</strong></div><div class="library-card-body"><h3>${T.esc(b.title)}</h3><p>${T.esc(b.author)}</p><div class="toolbar"><button data-act="edit">Edit</button><button data-act="view">View</button><button data-act="dup">Duplicate</button><button data-act="export">Export</button></div></div></article>`).join("")};T.renderAll=()=>{if(T.view==="editor"){T.renderChapterList();T.renderChapterEditor()}if(T.view==="print")T.renderPrint();if(T.view==="reader")T.renderReader();if(T.view==="library")T.renderLibrary()};T.switch=v=>{T.view=v;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.view===v));document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));$(v+"View").classList.add("active");T.renderAll()};
-T.file=(e,cb)=>{let f=e.target.files&&e.target.files[0];if(!f)return;let r=new FileReader;r.onload=()=>cb(r.result);r.readAsDataURL(f)};T.progress=(p,msg)=>{progress.hidden=false;progressBar.style.width=Math.max(2,Math.min(100,p))+"%";progressText.textContent=msg;if(p>=100)setTimeout(()=>progress.hidden=true,600)};T.download=(n,d)=>{let blob=new Blob([JSON.stringify(d,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=n;a.click();URL.revokeObjectURL(u)};T.capture=async()=>{try{let s=T.settings(),p=T.build()[0],w=document.createElement("div");w.style.position="fixed";w.style.left="-9999px";w.style.width=s.page.w+"in";w.style.height=s.page.h+"in";w.appendChild(T.pageEl(p,s,0,0,false,true));document.body.appendChild(w);let c=await html2canvas(w,{scale:1,backgroundColor:null});T.active.coverPreview=c.toDataURL("image/jpeg",.75);w.remove();T.save()}catch{}};T.exportPdf=async()=>{T.switch("print");let s=T.settings(),{jsPDF}=window.jspdf,pdf=new jsPDF({orientation:s.sheet.h>=s.sheet.w?"portrait":"landscape",unit:"in",format:[s.sheet.w,s.sheet.h],compress:true}),els=[...document.querySelectorAll("[data-pdf-page]")];for(let i=0;i<els.length;i++){T.progress(5+Math.round(i/els.length*90),`Rendering PDF page ${i+1} of ${els.length}…`);let el=els[i],ot=el.style.transform,om=el.style.marginBottom;el.style.transform="none";el.style.marginBottom="0";let c=await html2canvas(el,{scale:3,backgroundColor:"#fff"});if(i)pdf.addPage([s.sheet.w,s.sheet.h]);pdf.addImage(c.toDataURL("image/jpeg",.95),"JPEG",0,0,s.sheet.w,s.sheet.h);el.style.transform=ot;el.style.marginBottom=om;await new Promise(requestAnimationFrame)}pdf.save((s.title||"tiny-book").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".pdf");T.progress(100,"PDF complete")};
-document.addEventListener("DOMContentLoaded",()=>{T.populate();T.load();T.cur=0;T.view="editor";T.loadForm();document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>T.switch(b.dataset.view));T.fields.forEach(id=>{let e=$(id);if(e)e.oninput=()=>{if(id==="paperPreset"){let p=T.papers[paperPreset.value];pageBg.value=p[1];pageText.value=p[2]}if(id==="pageSize")document.querySelector(".customSize").hidden=pageSize.value!=="custom";T.sync();T.renderAll()}});coverImage.onchange=e=>T.file(e,f=>{T.active.coverImageData=f;T.save();T.renderAll()});backImage.onchange=e=>T.file(e,f=>{T.active.backImageData=f;T.save();T.renderAll()});spineImage.onchange=e=>T.file(e,f=>{T.active.spineImageData=f;T.save();T.renderAll()});chapterList.onclick=e=>{let b=e.target.closest("[data-i]");if(b){T.sync();T.cur=+b.dataset.i;T.renderAll()}};chapterEditor.oninput=e=>{T.sync();let card=e.target.closest(".chapter-card"),ta=card&&card.querySelector(".chapter-text"),prev=card&&card.querySelector(".md-preview");if(ta&&prev){prev.innerHTML=T.preview(ta.value);T.qr(prev)}T.renderChapterList()};chapterEditor.onclick=e=>{let f=e.target.closest("[data-fmt]");if(f){let ta=chapterEditor.querySelector(".chapter-text"),map={bold:["**","**"],italic:["*","*"],underline:["<u>","</u>"],strike:["~~","~~"],ul:["- ",""],h2:["## ",""],table:["\n| A | B |\n|---|---|\n| 1 | 2 |\n",""]},m=map[f.dataset.fmt],s=ta.selectionStart,en=ta.selectionEnd;ta.value=ta.value.slice(0,s)+m[0]+ta.value.slice(s,en)+m[1]+ta.value.slice(en);ta.dispatchEvent(new Event("input",{bubbles:true}));ta.focus()}let a=e.target.closest("[data-act]");if(!a)return;T.sync();let i=T.cur;if(a.dataset.act==="up"&&i>0){[T.active.chapters[i-1],T.active.chapters[i]]=[T.active.chapters[i],T.active.chapters[i-1]];T.cur--}if(a.dataset.act==="down"&&i<T.active.chapters.length-1){[T.active.chapters[i+1],T.active.chapters[i]]=[T.active.chapters[i],T.active.chapters[i+1]];T.cur++}if(a.dataset.act==="remove"&&T.active.chapters.length>1){T.active.chapters.splice(i,1);T.cur=Math.max(0,i-1)}if(a.dataset.act==="read"){T.reader=T.build().findIndex(p=>p.html.includes(T.esc(T.active.chapters[i].title)));T.switch("reader")}T.save();T.renderAll()};chapterEditor.onchange=e=>{if(e.target.classList.contains("chapter-image"))T.file(e,f=>{T.active.chapters[T.cur].imageData=f;T.save();T.renderAll()})};addChapter.onclick=()=>{T.sync();T.active.chapters.push({id:T.uid(),title:"New Chapter",text:"",imageData:"",imagePlacement:"none",imageWidth:70});T.cur=T.active.chapters.length-1;T.save();T.renderAll()};newBook.onclick=()=>{let b=T.def();b.title="Untitled Tiny Book";b.chapters=[{id:T.uid(),title:"New Chapter",text:"",imageData:"",imagePlacement:"none",imageWidth:70}];T.library.push(b);T.save();T.setActive(b)};duplicateBook.onclick=()=>{T.sync();let name=prompt("Title for duplicated book:",`Copy of ${T.active.title}`);if(name===null)return;let b=T.norm({...T.clone(T.active),id:T.uid(),title:name||`Copy of ${T.active.title}`});T.library.push(b);T.save();T.setActive(b)};deleteBook.onclick=()=>{if(T.library.length<=1)return alert("Keep at least one book.");if(confirm("Delete this book?")){T.library=T.library.filter(b=>b.id!==T.active.id);T.save();T.setActive(T.library[0])}};readerPrev.onclick=()=>{T.reader=Math.max(0,(T.reader||0)-(readerMode.value==="spread"?2:1));T.renderReader()};readerNext.onclick=()=>{T.reader=readerMode.value==="spread"&&T.reader===0?1:(T.reader||0)+(readerMode.value==="spread"?2:1);T.renderReader()};readerJump.onchange=()=>{T.reader=+readerJump.value;T.renderReader()};readerMode.onchange=()=>T.renderReader();libraryGrid.onclick=e=>{let btn=e.target.closest("[data-act]"),card=e.target.closest("[data-id]");if(!btn||!card)return;let b=T.library.find(x=>x.id===card.dataset.id);if(btn.dataset.act==="edit"){T.setActive(b);T.switch("editor")}if(btn.dataset.act==="view"){T.setActive(b);T.switch("reader")}if(btn.dataset.act==="dup"){let name=prompt("Title for duplicated book:",`Copy of ${b.title}`);if(name!==null){let c=T.norm({...T.clone(b),id:T.uid(),title:name||`Copy of ${b.title}`});T.library.push(c);T.save();T.renderLibrary()}}if(btn.dataset.act==="export")T.download((b.title||"book")+".json",b)};saveBook.onclick=async()=>{T.sync();await T.capture();alert("Saved.")};exportPdf.onclick=T.exportPdf;printBrowser.onclick=()=>{T.switch("print");setTimeout(()=>print(),80)};exportBook.onclick=()=>{T.sync();T.download((T.active.title||"book")+".json",T.active)};exportStyle.onclick=()=>{T.sync();let o={type:"tiny-pockets-style-v5",style:{}};T.fields.filter(x=>!["title","author","spineAuthor","pubDate","copyright","seriesName","number","backText"].includes(x)).forEach(f=>o.style[f]=T.active[f]);T.download("tiny-pockets-style.json",o)};exportLibrary.onclick=()=>T.download("tiny-pockets-library.json",{books:T.library});importLibrary.onclick=()=>importJson.click();importJson.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader;r.onload=()=>{let d=JSON.parse(r.result);if(d.books){T.library=d.books.map(T.norm);T.save();T.setActive(T.library[0]);T.switch("library")}else if(d.style){Object.entries(d.style).forEach(([k,v])=>T.active[k]=v);T.save();T.loadForm();T.renderAll()}else{let b=T.norm(d);b.id=T.uid();T.library.push(b);T.save();T.setActive(b)}};r.readAsText(f)}});
+  document.querySelectorAll(".tab").forEach(function (button) {
+    button.onclick = function () { TPP.switchView(button.dataset.view); };
+  });
+
+  TPP.fields.forEach(function (id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.oninput = function () {
+      if (id === "paperPreset") {
+        const p = TPP.papers[document.getElementById("paperPreset").value];
+        document.getElementById("pageBg").value = p[1];
+        document.getElementById("pageText").value = p[2];
+      }
+      if (id === "pageSize") document.querySelector(".customSize").hidden = document.getElementById("pageSize").value !== "custom";
+      TPP.sync();
+      TPP.renderAll();
+    };
+  });
+
+  document.getElementById("coverImage").onchange = function (e) { TPP.file(e, function (data) { TPP.active.coverImageData = data; TPP.save(); TPP.renderAll(); }); };
+  document.getElementById("backImage").onchange = function (e) { TPP.file(e, function (data) { TPP.active.backImageData = data; TPP.save(); TPP.renderAll(); }); };
+  document.getElementById("spineImage").onchange = function (e) { TPP.file(e, function (data) { TPP.active.spineImageData = data; TPP.save(); TPP.renderAll(); }); };
+
+  document.getElementById("chapterList").onclick = function (e) {
+    const row = e.target.closest("[data-i]");
+    if (!row) return;
+    TPP.sync();
+    const index = Number(row.dataset.i);
+    const action = e.target.dataset.act;
+    if (action === "select") TPP.currentChapter = index;
+    else if (action === "up" && index > 0) {
+      [TPP.active.chapters[index - 1], TPP.active.chapters[index]] = [TPP.active.chapters[index], TPP.active.chapters[index - 1]];
+      TPP.currentChapter = index - 1;
+    } else if (action === "down" && index < TPP.active.chapters.length - 1) {
+      [TPP.active.chapters[index + 1], TPP.active.chapters[index]] = [TPP.active.chapters[index], TPP.active.chapters[index + 1]];
+      TPP.currentChapter = index + 1;
+    } else if (action === "indent") {
+      TPP.active.chapters[index].level = Math.min(6, (TPP.active.chapters[index].level || 0) + 1);
+    } else if (action === "outdent") {
+      TPP.active.chapters[index].level = Math.max(0, (TPP.active.chapters[index].level || 0) - 1);
+    }
+    TPP.save();
+    TPP.renderAll();
+  };
+
+  document.getElementById("chapterEditor").oninput = function (e) {
+    const card = e.target.closest(".chapter-card");
+    if (!card) return;
+    TPP.sync();
+    const preview = card.querySelector(".md-preview");
+    const textarea = card.querySelector(".chapter-text");
+    if (preview && textarea) {
+      preview.innerHTML = TPP.previewWithBreaks(textarea.value);
+      TPP.renderQr(preview);
+    }
+    TPP.renderChapterList();
+  };
+
+  document.getElementById("chapterEditor").onclick = function (e) {
+    const fmt = e.target.dataset.fmt;
+    if (fmt) {
+      const textarea = document.querySelector(".chapter-text");
+      const map = {
+        bold: ["**", "**"],
+        italic: ["*", "*"],
+        underline: ["<u>", "</u>"],
+        strike: ["~~", "~~"],
+        ul: ["- ", ""],
+        h2: ["## ", ""],
+        table: ["\n| A | B |\n|---|---|\n| 1 | 2 |\n", ""]
+      };
+      const pair = map[fmt];
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      textarea.value = textarea.value.slice(0, start) + pair[0] + textarea.value.slice(start, end) + pair[1] + textarea.value.slice(end);
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      textarea.focus();
+    }
+    const main = e.target.dataset.main;
+    if (main === "remove" && TPP.active.chapters.length > 1) {
+      TPP.active.chapters.splice(TPP.currentChapter, 1);
+      TPP.currentChapter = Math.max(0, TPP.currentChapter - 1);
+      TPP.save();
+      TPP.renderAll();
+    }
+    if (main === "read") {
+      const pages = TPP.buildPages();
+      const title = TPP.active.chapters[TPP.currentChapter].title;
+      TPP.readerIndex = Math.max(0, pages.findIndex(function (p) { return p.html.includes(TPP.esc(title)); }));
+      TPP.switchView("reader");
+    }
+  };
+
+  document.getElementById("chapterEditor").onchange = function (e) {
+    if (e.target.classList.contains("chapter-image")) {
+      TPP.file(e, function (data) {
+        TPP.active.chapters[TPP.currentChapter].imageData = data;
+        TPP.save();
+        TPP.renderAll();
+      });
+    }
+  };
+
+  document.getElementById("addChapter").onclick = function () {
+    TPP.sync();
+    TPP.active.chapters.push({ id: TPP.uid(), title: "New Chapter", text: "", imageData: "", imagePlacement: "none", imageWidth: 70, level: 0, isSubsection: false, includeInToc: true });
+    TPP.currentChapter = TPP.active.chapters.length - 1;
+    TPP.save();
+    TPP.renderAll();
+  };
+
+  document.getElementById("newBook").onclick = function () {
+    const book = TPP.fallbackBook();
+    book.title = "Untitled Tiny Book";
+    book.chapters = [{ id: TPP.uid(), title: "New Chapter", text: "", imageData: "", imagePlacement: "none", imageWidth: 70, level: 0, isSubsection: false, includeInToc: true }];
+    TPP.library.push(book);
+    TPP.save();
+    TPP.setActive(book);
+  };
+
+  document.getElementById("duplicateBook").onclick = function () {
+    TPP.sync();
+    const name = prompt("Title for duplicated book:", "Copy of " + TPP.active.title);
+    if (name === null) return;
+    const book = TPP.norm(Object.assign({}, TPP.clone(TPP.active), { id: TPP.uid(), title: name || "Copy of " + TPP.active.title }));
+    TPP.library.push(book);
+    TPP.save();
+    TPP.setActive(book);
+  };
+
+  document.getElementById("deleteBook").onclick = function () {
+    if (TPP.library.length <= 1) return alert("Keep at least one book.");
+    if (confirm("Delete this book?")) {
+      TPP.library = TPP.library.filter(function (book) { return book.id !== TPP.active.id; });
+      TPP.save();
+      TPP.setActive(TPP.library[0]);
+    }
+  };
+
+  document.getElementById("readerPrev").onclick = function () {
+    TPP.readerIndex = Math.max(0, TPP.readerIndex - (document.getElementById("readerMode").value === "spread" ? 2 : 1));
+    TPP.renderReader();
+  };
+  document.getElementById("readerNext").onclick = function () {
+    TPP.readerIndex = document.getElementById("readerMode").value === "spread" && TPP.readerIndex === 0 ? 1 : TPP.readerIndex + (document.getElementById("readerMode").value === "spread" ? 2 : 1);
+    TPP.renderReader();
+  };
+  document.getElementById("readerJump").onchange = function () {
+    TPP.readerIndex = Number(document.getElementById("readerJump").value);
+    TPP.renderReader();
+  };
+  document.getElementById("readerMode").onchange = TPP.renderReader;
+
+  document.getElementById("librarySearch").oninput = TPP.renderLibrary;
+  document.getElementById("libraryGrid").onclick = function (e) {
+    const button = e.target.closest("[data-act]");
+    const card = e.target.closest("[data-id]");
+    if (!button || !card) return;
+    const book = TPP.library.find(function (b) { return b.id === card.dataset.id; });
+    if (button.dataset.act === "edit") { TPP.setActive(book); TPP.switchView("editor"); }
+    if (button.dataset.act === "view") { TPP.setActive(book); TPP.switchView("reader"); }
+    if (button.dataset.act === "dup") {
+      const name = prompt("Title for duplicated book:", "Copy of " + book.title);
+      if (name !== null) {
+        const copy = TPP.norm(Object.assign({}, TPP.clone(book), { id: TPP.uid(), title: name || "Copy of " + book.title }));
+        TPP.library.push(copy);
+        TPP.save();
+        TPP.renderLibrary();
+      }
+    }
+    if (button.dataset.act === "export") TPP.download((book.title || "book") + ".json", book);
+  };
+
+  document.getElementById("saveBook").onclick = async function () {
+    TPP.sync();
+    TPP.buildPages();
+    await TPP.captureCover();
+    alert("Saved.");
+  };
+  document.getElementById("exportInteriorPdf").onclick = function () { TPP.exportPdfFrom("interior"); };
+  document.getElementById("exportCoverPdf").onclick = function () { TPP.exportPdfFrom("cover"); };
+  document.getElementById("printBrowser").onclick = function () { setTimeout(function () { print(); }, 80); };
+  document.getElementById("exportBook").onclick = function () { TPP.sync(); TPP.download((TPP.active.title || "book") + ".json", TPP.active); };
+  document.getElementById("exportStyle").onclick = function () {
+    TPP.sync();
+    const out = { type: "tiny-pockets-style-v6-1", style: {} };
+    TPP.styleFields.forEach(function (field) { out.style[field] = TPP.active[field]; });
+    TPP.download("tiny-pockets-style.json", out);
+  };
+  document.getElementById("exportLibrary").onclick = function () { TPP.download("tiny-pockets-library.json", { books: TPP.library }); };
+  document.getElementById("importJson").onchange = function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      const data = JSON.parse(reader.result);
+      if (data.books) {
+        TPP.library = data.books.map(TPP.norm);
+        TPP.save();
+        TPP.setActive(TPP.library[0]);
+        TPP.switchView("library");
+      } else if (data.style) {
+        Object.entries(data.style).forEach(function (entry) { TPP.active[entry[0]] = entry[1]; });
+        TPP.save();
+        TPP.loadForm();
+        TPP.renderAll();
+      } else {
+        const book = TPP.norm(data);
+        book.id = TPP.uid();
+        TPP.library.push(book);
+        TPP.save();
+        TPP.setActive(book);
+      }
+    };
+    reader.readAsText(file);
+  };
+});
+
+TPP.switchView = function (view) {
+  TPP.view = view;
+  document.querySelectorAll(".tab").forEach(function (button) {
+    button.classList.toggle("active", button.dataset.view === view);
+  });
+  document.querySelectorAll(".view").forEach(function (element) {
+    element.classList.remove("active");
+  });
+  document.getElementById(view + "View").classList.add("active");
+  TPP.renderAll();
+};
+TPP.renderAll = function () {
+  if (TPP.view === "editor") { TPP.renderChapterList(); TPP.renderChapterEditor(); }
+  if (TPP.view === "interior") TPP.renderInterior();
+  if (TPP.view === "cover") TPP.renderCover();
+  if (TPP.view === "reader") TPP.renderReader();
+  if (TPP.view === "library") TPP.renderLibrary();
+};
+TPP.readerNav = function (pages) {
+  const options = ['<option value="0">Front Cover</option>'];
+  const tocIndex = pages.findIndex(function (p) { return p.type === "toc"; });
+  if (tocIndex >= 0) options.push('<option value="' + tocIndex + '">Table of Contents</option>');
+  TPP.active.chapters.forEach(function (chapter) {
+    const index = pages.findIndex(function (p) { return p.html.includes(TPP.esc(chapter.title || "")); });
+    if (index >= 0) options.push('<option value="' + index + '">' + "— ".repeat(chapter.level || 0) + TPP.esc(chapter.title || "Untitled") + "</option>");
+  });
+  options.push('<option value="' + (pages.length - 1) + '">Last Page</option>');
+  document.getElementById("readerJump").innerHTML = options.join("");
+  document.getElementById("readerJump").value = TPP.readerIndex;
+};
+TPP.renderReader = function () {
+  const settings = TPP.settings();
+  const pages = TPP.buildPages();
+  TPP.readerNav(pages);
+  TPP.readerIndex = Math.max(0, Math.min(TPP.readerIndex, pages.length - 1));
+  const mode = document.getElementById("readerMode").value;
+  const shown = mode === "spread" ? (TPP.readerIndex === 0 ? [null, pages[0]] : [pages[TPP.readerIndex], pages[TPP.readerIndex + 1] || null]) : [pages[TPP.readerIndex]];
+  const spread = document.createElement("div");
+  spread.className = "spread";
+  const scale = Math.min(5, Math.max(1.2, (window.innerWidth - 560) / ((mode === "spread" ? settings.page.w * 2.25 : settings.page.w) * 96)));
+  spread.style.transform = "scale(" + scale + ")";
+  shown.forEach(function (page) {
+    const shell = document.createElement("div");
+    shell.className = "reader-shell";
+    shell.style.width = settings.page.w + "in";
+    shell.style.height = settings.page.h + "in";
+    if (page) shell.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
+    spread.appendChild(shell);
+  });
+  document.getElementById("readerPreview").innerHTML = "";
+  document.getElementById("readerPreview").appendChild(spread);
+};

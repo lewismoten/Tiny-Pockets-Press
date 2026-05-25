@@ -1,0 +1,144 @@
+window.TPP = window.TPP || {};
+
+TPP.date = function (value) {
+  if (!value) return "";
+  return new Date(value + "T12:00:00").toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+};
+TPP.settings = function () {
+  TPP.sync();
+  const book = TPP.active;
+  const raw = book.pageSize === "custom" ? { w: Number(book.customW), h: Number(book.customH) } : (TPP.sizes[book.pageSize] || TPP.sizes.one);
+  return Object.assign({}, book, {
+    page: { w: Math.max(0.5, Number(raw.w) || 1), h: Math.max(0.5, Number(raw.h) || 1) },
+    sheet: TPP.sheets[book.sheetSize] || TPP.sheets.letter
+  });
+};
+TPP.measureBlock = function (html, settings) {
+  let box = TPP.measureBox;
+  if (!box) {
+    box = document.createElement("div");
+    box.style.cssText = "position:absolute;left:-9999px;top:0;visibility:hidden;overflow:visible;box-sizing:border-box;";
+    document.body.appendChild(box);
+    TPP.measureBox = box;
+  }
+  box.className = "page measure texture-none";
+  box.style.width = Math.max(0.05, settings.page.w - 2 * settings.margin) + "in";
+  box.style.fontFamily = settings.fontFamily;
+  box.style.fontSize = settings.bodySize + "pt";
+  box.style.lineHeight = settings.lineHeight;
+  box.style.setProperty("--caption-size", settings.captionSize + "pt");
+  box.style.setProperty("--para-gap", settings.paraGap + "em");
+  box.style.setProperty("--align", settings.justify ? "justify" : "left");
+  box.innerHTML = html;
+  TPP.renderQr(box);
+  return box.scrollHeight / 96;
+};
+TPP.splitHtmlText = function (text, settings, maxHeight) {
+  const words = String(text || "").split(/\s+/).filter(Boolean);
+  const chunks = [];
+  let current = [];
+  words.forEach(function (word) {
+    const test = current.concat([word]).join(" ");
+    const html = '<div class="story-text"><p>' + TPP.esc(test) + "</p></div>";
+    if (TPP.measureBlock(html, settings) > maxHeight && current.length) {
+      chunks.push(current.join(" "));
+      current = [word];
+    } else {
+      current.push(word);
+    }
+  });
+  if (current.length) chunks.push(current.join(" "));
+  return chunks.length ? chunks : [""];
+};
+TPP.buildPages = function () {
+  const settings = TPP.settings();
+  const pages = [];
+  const series = [settings.seriesName, settings.number].filter(Boolean).join(" ");
+  const maxHeight = Math.max(0.05, settings.page.h - 2 * settings.margin - 0.07);
+  const makePage = function (type, html, extra) {
+    pages.push(Object.assign({ n: pages.length + 1, type, html }, extra || {}));
+  };
+
+  makePage("cover", TPP.coverHTML(settings, "front"), { cover: true, role: "front" });
+  makePage("inside", "", { role: "inside-front" });
+  makePage("title-page", '<div class="story-title">' + TPP.esc(settings.title) + '</div><div class="meta">' + (settings.author ? "By " + TPP.esc(settings.author) + "<br>" : "") + TPP.esc(series) + "</div>");
+  makePage("imprint", '<div class="story-title">Publication</div><div class="imprint">' + [settings.title, settings.author, settings.publisher, TPP.date(settings.pubDate), settings.printing, settings.volume, settings.number, settings.copyright].filter(Boolean).map(TPP.esc).join("<br>") + "</div>");
+
+  let tocIndex = -1;
+  if (settings.includeToc) {
+    tocIndex = pages.length;
+    makePage("toc", '<div class="story-title">Contents</div><ol class="toc-list"></ol>');
+  }
+
+  const toc = [];
+  settings.chapters.forEach(function (chapter, index) {
+    const startPage = pages.length + 1;
+    let heading = '<div class="chapter-heading">' + TPP.esc(chapter.title || "") + "</div>";
+
+    if (chapter.imageData && chapter.imagePlacement !== "none") {
+      const imageHtml = '<figure class="figure image-figure"><img src="' + chapter.imageData + '" style="width:' + Math.min(100, Math.max(10, Number(chapter.imageWidth) || 70)) + '%"><figcaption class="caption"></figcaption></figure>';
+      if (chapter.imagePlacement === "own") makePage("chapter-image", heading + imageHtml);
+      else heading += imageHtml;
+    }
+
+    let pending = heading;
+    TPP.blocksFromText(chapter.text, settings).forEach(function (block) {
+      if (settings.qrDisplayMode === "separate" && block.type === "qr") {
+        makePage("qr-page", block.html);
+        return;
+      }
+      const combinedHeight = TPP.measureBlock(pending + block.html, settings);
+      if (combinedHeight <= maxHeight) {
+        pending += block.html;
+        return;
+      }
+      if (pending) makePage("text", pending);
+      pending = "";
+      const blockHeight = TPP.measureBlock(block.html, settings);
+      if (blockHeight <= maxHeight) {
+        pending = block.html;
+      } else if (block.type === "html") {
+        const textOnly = block.html.replace(/<[^>]+>/g, " ");
+        TPP.splitHtmlText(textOnly, settings, maxHeight).forEach(function (part) {
+          makePage("text", '<div class="story-text"><p>' + TPP.esc(part) + "</p></div>");
+        });
+      } else {
+        makePage("text", '<div class="story-text smallfit">' + block.html + "</div>");
+      }
+    });
+
+    if (settings.chapterEndOrnament) {
+      const ornament = '<span class="chapter-end ' + (settings.chapterEndCentered ? "" : "inline") + '">' + TPP.esc(settings.chapterEndOrnament) + "</span>";
+      if (TPP.measureBlock(pending + ornament, settings) <= maxHeight) {
+        pending += ornament;
+      } else if (/<\/p>\s*$/i.test(pending)) {
+        pending = pending.replace(/(<\/p>\s*)$/i, " " + ornament + "$1");
+      } else {
+        pending += " " + ornament;
+      }
+    }
+    if (pending) makePage("text", pending);
+
+    if (chapter.includeInToc !== false) {
+      toc.push({ title: chapter.title || "Chapter " + (index + 1), chapter: index + 1, page: startPage, level: chapter.level || 0 });
+    }
+  });
+
+  if (tocIndex >= 0) {
+    const leaderClass = settings.tocLeader === "line" ? "line" : settings.tocLeader === "none" ? "none" : "";
+    pages[tocIndex].html = '<div class="story-title">Contents</div><ol class="toc-list">' + toc.map(function (row) {
+      const number = settings.tocNumberType === "chapter" ? row.chapter : row.page;
+      return '<li style="padding-left:' + ((row.level || 0) * 0.12) + 'in"><span class="toc-title">' + TPP.esc(row.title) + '</span><span class="leader ' + leaderClass + '"></span><span>' + number + "</span></li>";
+    }).join("") + "</ol>";
+  }
+
+  makePage("inside", "", { role: "inside-back" });
+  makePage("back", TPP.coverHTML(settings, "back"), { cover: true, role: "back" });
+
+  while (pages.length % 4 !== 0) {
+    pages.splice(pages.length - 1, 0, { n: 0, type: "blank", html: "<span>Blank</span>" });
+  }
+  pages.forEach(function (page, index) { page.n = index + 1; });
+  TPP.lastPages = pages;
+  return pages;
+};

@@ -1,13 +1,309 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tiny Pockets Press v5</title><link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/book.css"><link rel="stylesheet" href="css/print.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script><script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script defer src="js/app.js"></script></head><body>
-<header class="app-header"><div><h1>Tiny Pockets Press</h1><p>Microfiction, tiny booklets, and miniature bindings.</p></div><nav class="tabs"><button class="tab active" data-view="editor">Edit</button><button class="tab" data-view="print">Print Layout</button><button class="tab" data-view="reader">Reader</button><button class="tab" data-view="library">Library</button></nav><div><button id="saveBook">Save</button><button id="exportPdf" class="primary">Export PDF</button></div></header>
-<main class="shell"><aside class="settings"><section class="controls">
-<div class="row"><button id="newBook">New</button><button id="duplicateBook">Duplicate</button><button id="deleteBook">Delete</button></div>
-<details open><summary>Book</summary><label>Title<input id="title"></label><label>Author<input id="author"></label><label>Author Spine Name<input id="spineAuthor"></label><label>Date<input id="pubDate" type="date"></label><label>Publisher<input id="publisher"></label><label>Copyright<input id="copyright"></label><div class="two"><label>Series<input id="seriesName"></label><label>Number<input id="number"></label></div><label><input id="includeToc" type="checkbox"> Include table of contents</label></details>
-<details open><summary>Page & Text</summary><div class="two"><label>Page Size<select id="pageSize"><option value="half">0.5 × 0.5</option><option value="one">1 × 1</option><option value="grid16">2.125 × 2.75</option><option value="eighth">2.75 × 4.25</option><option value="quarter">4.25 × 5.5</option><option value="custom">Custom</option></select></label><label>Sheet<select id="sheetSize"><option value="letter">8.5 × 11</option><option value="legal">8.5 × 14</option><option value="a4">A4</option></select></label></div><div class="two customSize" hidden><label>Width<input id="customW" type="number" min=".5" step=".01"></label><label>Height<input id="customH" type="number" min=".5" step=".01"></label></div><div class="two"><label>Margin<input id="margin" type="number" min="0" step=".01"></label><label>Font<select id="fontFamily"></select></label></div><div class="two"><label>Body Size<input id="bodySize" type="number" min="3" step=".5"></label><label>Caption Size<input id="captionSize" type="number" min="3" step=".5"></label></div><div class="two"><label>Line Spacing<input id="lineHeight" type="number" min="1" step=".05"></label><label>Paragraph Gap<input id="paraGap" type="number" min="0" step=".1"></label></div><label><input id="justify" type="checkbox"> Justify text</label><div class="two"><label>Paper<select id="paperPreset"></select></label><label>Texture<select id="texture"></select></label></div><div class="two"><label>Page Background<input id="pageBg" class="color" type="color"></label><label>Page Text<input id="pageText" class="color" type="color"></label></div></details>
-<details><summary>Cover</summary><label><input id="coverShowAuthor" type="checkbox"> Show author</label><label><input id="coverShowSeries" type="checkbox"> Show series/number</label><label><input id="coverShowPublisher" type="checkbox"> Show publisher</label><label><input id="coverOverflowImage" type="checkbox"> Cover image can bleed past frame</label><div class="two"><label>Top<input id="coverBg1" class="color" type="color"></label><label>Bottom<input id="coverBg2" class="color" type="color"></label></div><div class="two"><label>Text<input id="coverText" class="color" type="color"></label><label>Border<input id="coverBorder" class="color" type="color"></label></div><label><input id="coverBorderOn" type="checkbox"> Border</label><label>Cover Image<input id="coverImage" type="file" accept="image/*"></label><div class="two"><label>Image X<input id="coverImgX" type="range" min="-100" max="100"></label><label>Image Y<input id="coverImgY" type="range" min="-100" max="100"></label></div><label>Image Zoom<input id="coverImgZoom" type="range" min="10" max="400"></label><div class="two"><label>Title Y<input id="coverTitleY" type="range" min="0" max="100"></label><label>Author Y<input id="coverAuthorY" type="range" min="0" max="100"></label></div><div class="two"><label>Series Y<input id="coverSeriesY" type="range" min="0" max="100"></label><label>Publisher Y<input id="coverPublisherY" type="range" min="0" max="100"></label></div><div class="two"><label>Title Size<input id="coverTitleSize" type="number" min="4" step=".5"></label><label>Meta Size<input id="coverMetaSize" type="number" min="3" step=".5"></label></div><label><input id="coverStroke" type="checkbox"> Text outline</label><div class="two"><label>Stroke Color<input id="coverStrokeColor" class="color" type="color"></label><label>Stroke px<input id="coverStrokeSize" type="number" min="0" step=".5"></label></div></details>
-<details><summary>Back Cover</summary><label>Text<textarea id="backText" rows="4"></textarea></label><div class="two"><label>Text Y<input id="backTextY" type="range" min="0" max="100"></label><label>Font Size<input id="backTextSize" type="number" min="3" step=".5"></label></div><label>Color<input id="backTextColor" class="color" type="color"></label><label><input id="backUseFrontImage" type="checkbox"> Use front cover image</label><label>Back Image<input id="backImage" type="file" accept="image/*"></label></details>
-<details><summary>Spine & Covers</summary><label>Spine Mode<select id="spineMode"><option value="auto">Automatic</option><option value="none">No spine</option><option value="cover">Printed with cover</option><option value="separate">Separate cloth/spine strip</option></select></label><div class="two"><label>Paper Thickness<input id="paperThickness" type="number" min=".001" step=".001"></label><label>Thread/Staple Allowance<input id="bindingAllowance" type="number" min="0" step=".005"></label></div><label>Spine Image<input id="spineImage" type="file" accept="image/*"></label><div class="two"><label>Spine Image X<input id="spineImgX" type="range" min="-100" max="100"></label><label>Spine Image Zoom<input id="spineImgZoom" type="range" min="10" max="400"></label></div><label><input id="spineTitleRotate" type="checkbox"> Rotate title 90° toward top</label><label><input id="spineAuthorOn" type="checkbox"> Author at base</label><label><input id="spineAuthorRotate" type="checkbox"> Rotate author 90°</label><label><input id="wrapCover" type="checkbox"> Cover wraps inside with cut-corner angles</label><div class="two"><label>Wrap Inside<input id="wrapInside" type="number" min="0" step=".01"></label><label>Board Thickness<input id="boardThickness" type="number" min="0" step=".01"></label></div><label><input id="separateCover" type="checkbox"> Print cover separately</label><div class="two"><label>Cover Copies<input id="coverCopies" type="number" min="1" step="1"></label><label><input id="coverCopiesMax" type="checkbox"> As many as fit</label></div></details>
-<details><summary>Numbers, TOC, Ornaments</summary><label>Page Numbers<select id="pageNumMode"><option value="none">None</option><option value="center">Center</option><option value="edge">Outer edge</option></select></label><label>Number Ornament<select id="pageOrnament"><option value="">None</option><option value="dash">— 1 —</option><option value="floral">☙ 1 ❧</option><option value="heart">♥ 1 ♥</option><option value="custom">Custom</option></select></label><div class="two"><label>Left<input id="pageNumLeft"></label><label>Right<input id="pageNumRight"></label></div><label><input id="ornamentBySide" type="checkbox"> Use only left/right ornament based on side</label><label>Chapter End Ornament<select id="chapterEndOrnament"><option value="">None</option><option>❦</option><option>☙ ❧</option><option>◆</option><option>***</option></select></label><label>TOC Number<select id="tocNumberType"><option value="page">Page</option><option value="chapter">Chapter</option></select></label><label>TOC Leader<select id="tocLeader"><option value="dots">Dots</option><option value="line">Line</option><option value="none">None</option></select></label><label>Leader Color<input id="tocLeaderColor" class="color" type="color"></label></details>
-<details><summary>QR / Images</summary><label><input id="qrSeparatePage" type="checkbox"> QR codes on separate pages</label><p class="hint">URL lines become QR codes. Image URLs become images. The following line becomes a centered caption.</p></details>
-<details><summary>Print & Files</summary><label><input id="showCutGuides" type="checkbox"> Cut guides</label><label><input id="showFoldGuides" type="checkbox"> Fold guides</label><div class="row"><button id="exportBook">Export Book</button><button id="exportStyle">Export Style</button><button id="exportLibrary">Export Library</button></div><label>Import JSON<input id="importJson" type="file" accept=".json,application/json"></label><button id="printBrowser">Print Browser View</button></details>
-</section></aside><section class="workspace"><section id="editorView" class="view active"><div class="workspace-head"><h2>Chapters</h2><button id="addChapter" class="primary">Add Chapter</button></div><div id="progress" class="progress" hidden><div id="progressBar"></div><span id="progressText"></span></div><div id="chapterList" class="chapter-list"></div><div id="chapterEditor"></div></section><section id="printView" class="view"><div id="summary" class="summary"></div><div id="printPreview" class="print-preview"></div></section><section id="readerView" class="view"><div class="reader-toolbar"><button id="readerPrev">Previous</button><select id="readerJump"></select><select id="readerMode"><option value="single">Single Page</option><option value="spread">Two-Page Spread</option></select><button id="readerNext">Next</button></div><div id="readerPreview" class="reader-preview"></div></section><section id="libraryView" class="view"><div class="workspace-head"><h2>Library</h2><button id="importLibrary">Import JSON</button></div><div id="libraryGrid" class="library-grid"></div></section></section></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tiny Pockets Press v6.1</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/book.css">
+  <link rel="stylesheet" href="css/print.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="js/config.js"></script>
+  <script defer src="js/state.js"></script>
+  <script defer src="js/markdown-media.js"></script>
+  <script defer src="js/layout-engine.js"></script>
+  <script defer src="js/render-page.js"></script>
+  <script defer src="js/imposition.js"></script>
+  <script defer src="js/library.js"></script>
+  <script defer src="js/editor.js"></script>
+  <script defer src="js/export.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+<header class="app-header">
+  <div>
+    <h1>Tiny Pockets Press</h1>
+    <p>Microfiction, chapbooks, miniature bindings, and tiny print experiments.</p>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-view="editor">Edit</button>
+    <button class="tab" data-view="interior">Interior Print</button>
+    <button class="tab" data-view="cover">Cover Print</button>
+    <button class="tab" data-view="reader">Reader</button>
+    <button class="tab" data-view="library">Library</button>
+  </nav>
+  <div class="header-actions">
+    <button id="saveBook">Save</button>
+    <button id="exportInteriorPdf" class="primary">Interior PDF</button>
+    <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
+  </div>
+</header>
+
+<main class="app-shell">
+  <aside class="settings">
+    <section class="controls">
+      <div class="menu-row">
+        <button id="newBook">New</button>
+        <button id="duplicateBook">Duplicate</button>
+        <button id="deleteBook">Delete</button>
+      </div>
+
+      <details open>
+        <summary>Book</summary>
+        <label>Title <input id="title"></label>
+        <label>Author <input id="author"></label>
+        <label>Author Spine Name <input id="spineAuthor"></label>
+        <label>Publishing Date <input id="pubDate" type="date"></label>
+        <label>Publisher <input id="publisher"></label>
+        <label>Copyright <input id="copyright"></label>
+        <div class="two">
+          <label>Series <input id="seriesName"></label>
+          <label>Number <input id="number"></label>
+        </div>
+        <div class="two">
+          <label>Volume <input id="volume"></label>
+          <label>Printing
+            <select id="printing">
+              <option>First Printing</option>
+              <option>Second Printing</option>
+              <option>Third Printing</option>
+              <option>Proof Copy</option>
+              <option>Revised Edition</option>
+            </select>
+          </label>
+        </div>
+        <label><input id="includeToc" type="checkbox"> Include table of contents</label>
+      </details>
+
+      <details open>
+        <summary>Page & Text</summary>
+        <div class="two">
+          <label>Page Size
+            <select id="pageSize">
+              <option value="half">0.5 × 0.5</option>
+              <option value="one">1 × 1</option>
+              <option value="grid16">2.125 × 2.75</option>
+              <option value="eighth">2.75 × 4.25</option>
+              <option value="quarter">4.25 × 5.5</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <label>Sheet
+            <select id="sheetSize">
+              <option value="letter">8.5 × 11</option>
+              <option value="legal">8.5 × 14</option>
+              <option value="a4">A4</option>
+            </select>
+          </label>
+        </div>
+        <div class="two customSize" hidden>
+          <label>Width <input id="customW" type="number" min=".5" step=".01"></label>
+          <label>Height <input id="customH" type="number" min=".5" step=".01"></label>
+        </div>
+        <div class="two">
+          <label>Margin <input id="margin" type="number" min="0" step=".01"></label>
+          <label>Font <select id="fontFamily"></select></label>
+        </div>
+        <div class="two">
+          <label>Body Size <input id="bodySize" type="number" min="3" step=".5"></label>
+          <label>Caption Size <input id="captionSize" type="number" min="3" step=".5"></label>
+        </div>
+        <div class="two">
+          <label>Line Spacing <input id="lineHeight" type="number" min="1" step=".05"></label>
+          <label>Paragraph Gap <input id="paraGap" type="number" min="0" step=".1"></label>
+        </div>
+        <label><input id="justify" type="checkbox"> Justified text</label>
+        <div class="two">
+          <label>Paper <select id="paperPreset"></select></label>
+          <label>Texture <select id="texture"></select></label>
+        </div>
+        <div class="two">
+          <label>Page Background <input id="pageBg" class="color-box" type="color"></label>
+          <label>Page Text <input id="pageText" class="color-box" type="color"></label>
+        </div>
+      </details>
+
+      <details>
+        <summary>QR / URLs / Images</summary>
+        <label>URL Display
+          <select id="qrDisplayMode">
+            <option value="text">Leave URLs As Text</option>
+            <option value="qr">Display URLs As QR Codes</option>
+            <option value="separate">QR Codes On Separate Pages</option>
+          </select>
+        </label>
+        <label>Image URLs
+          <select id="imageUrlMode">
+            <option value="image">Display Image URLs As Images</option>
+            <option value="qr">Display Image URLs As QR Codes</option>
+          </select>
+        </label>
+        <p class="hint">A URL followed by a line of text uses that next line as the centered caption. URLs are hidden when rendered as QR or image blocks.</p>
+      </details>
+
+      <details>
+        <summary>Cover Front</summary>
+        <label><input id="coverShowAuthor" type="checkbox"> Show author</label>
+        <label><input id="coverShowSeries" type="checkbox"> Show series/number</label>
+        <label><input id="coverShowPublisher" type="checkbox"> Show publisher</label>
+        <label><input id="coverOverflowImage" type="checkbox"> Allow image to bleed past page</label>
+        <label><input id="coverClipImageToFrame" type="checkbox"> Clip image inside cover frame</label>
+        <div class="two">
+          <label>Top Color <input id="coverBg1" type="color" class="color-box"></label>
+          <label>Bottom Color <input id="coverBg2" type="color" class="color-box"></label>
+        </div>
+        <div class="two">
+          <label>Text <input id="coverText" type="color" class="color-box"></label>
+          <label>Border <input id="coverBorder" type="color" class="color-box"></label>
+        </div>
+        <label><input id="coverBorderOn" type="checkbox"> Frame on front cover</label>
+        <label>Cover Image <input id="coverImage" type="file" accept="image/*"></label>
+        <div class="two">
+          <label>Image X <input id="coverImgX" type="range" min="-100" max="100"></label>
+          <label>Image Y <input id="coverImgY" type="range" min="-100" max="100"></label>
+        </div>
+        <label>Image Zoom <input id="coverImgZoom" type="range" min="10" max="500"></label>
+        <div class="two">
+          <label>Title Y <input id="coverTitleY" type="range" min="0" max="100"></label>
+          <label>Author Y <input id="coverAuthorY" type="range" min="0" max="100"></label>
+        </div>
+        <div class="two">
+          <label>Series Y <input id="coverSeriesY" type="range" min="0" max="100"></label>
+          <label>Publisher Y <input id="coverPublisherY" type="range" min="0" max="100"></label>
+        </div>
+        <div class="two">
+          <label>Title Size <input id="coverTitleSize" type="number" min="4" step=".5"></label>
+          <label>Meta Size <input id="coverMetaSize" type="number" min="3" step=".5"></label>
+        </div>
+        <label><input id="coverStroke" type="checkbox"> Text outline</label>
+        <div class="two">
+          <label>Stroke <input id="coverStrokeColor" type="color" class="color-box"></label>
+          <label>Stroke px <input id="coverStrokeSize" type="number" min="0" step=".5"></label>
+        </div>
+      </details>
+
+      <details>
+        <summary>Back Cover</summary>
+        <label>Text <textarea id="backText" rows="4"></textarea></label>
+        <div class="two">
+          <label>Text Y <input id="backTextY" type="range" min="0" max="100"></label>
+          <label>Font Size <input id="backTextSize" type="number" min="3" step=".5"></label>
+        </div>
+        <label>Text Color <input id="backTextColor" type="color" class="color-box"></label>
+        <label><input id="backFrameOn" type="checkbox"> Frame on back cover</label>
+        <label><input id="backUseFrontImage" type="checkbox"> Use front cover image</label>
+        <label><input id="backClipImageToFrame" type="checkbox"> Clip back image inside frame</label>
+        <label>Back Image <input id="backImage" type="file" accept="image/*"></label>
+        <div class="two">
+          <label>Image X <input id="backImgX" type="range" min="-100" max="100"></label>
+          <label>Image Y <input id="backImgY" type="range" min="-100" max="100"></label>
+        </div>
+        <label>Image Zoom <input id="backImgZoom" type="range" min="10" max="500"></label>
+      </details>
+
+      <details>
+        <summary>Spine, Wraps, Cover Stock</summary>
+        <label>Spine Mode
+          <select id="spineMode">
+            <option value="auto">Automatic</option>
+            <option value="none">No Spine</option>
+            <option value="cover">Printed With Cover</option>
+            <option value="separate">Separate Spine / Cloth Strip</option>
+          </select>
+        </label>
+        <div class="two">
+          <label>Paper Thickness <input id="paperThickness" type="number" min=".001" step=".001"></label>
+          <label>Thread/Staple Allowance <input id="bindingAllowance" type="number" min="0" step=".005"></label>
+        </div>
+        <label>Spine Image <input id="spineImage" type="file" accept="image/*"></label>
+        <div class="two">
+          <label>Spine Image X <input id="spineImgX" type="range" min="-100" max="100"></label>
+          <label>Spine Image Zoom <input id="spineImgZoom" type="range" min="10" max="500"></label>
+        </div>
+        <div class="two">
+          <label>Title Size <input id="spineTitleSize" type="number" min="3" step=".5"></label>
+          <label>Author Size <input id="spineAuthorSize" type="number" min="3" step=".5"></label>
+        </div>
+        <div class="two">
+          <label>Spine Text <input id="spineTextColor" type="color" class="color-box"></label>
+          <label>Stroke <input id="spineStrokeColor" type="color" class="color-box"></label>
+        </div>
+        <label><input id="spineStroke" type="checkbox"> Spine text outline</label>
+        <label>Stroke Size <input id="spineStrokeSize" type="number" min="0" step=".25"></label>
+        <label><input id="spineTitleRotate" type="checkbox"> Rotate title 90° and align toward top</label>
+        <label><input id="spineAuthorOn" type="checkbox"> Author at base of spine</label>
+        <label><input id="spineAuthorRotate" type="checkbox"> Rotate author 90°</label>
+        <label><input id="wrapCover" type="checkbox"> Cover wraps around boards/edges with angled corners</label>
+        <div class="two">
+          <label>Wrap Inside (in) <input id="wrapInside" type="number" min="0" step=".01"></label>
+          <label>Board/Material Thickness <input id="boardThickness" type="number" min="0" step=".01"></label>
+        </div>
+        <label><input id="separateCover" type="checkbox"> Print cover separately on cover stock</label>
+        <div class="two">
+          <label>Cover Copies <input id="coverCopies" type="number" min="1" step="1"></label>
+          <label><input id="coverCopiesMax" type="checkbox"> As many as fit</label>
+        </div>
+      </details>
+
+      <details>
+        <summary>Numbers, TOC, Ornaments</summary>
+        <label>Page Number Mode
+          <select id="pageNumMode"><option value="none">None</option><option value="center">Center</option><option value="edge">Outer Edge</option></select>
+        </label>
+        <label>Ornament Preset
+          <select id="pageOrnament"><option value="">None</option><option value="dash">— 1 —</option><option value="floral">☙ 1 ❧</option><option value="heart">♥ 1 ♥</option><option value="custom">Custom</option></select>
+        </label>
+        <div class="two"><label>Prefix / Left <input id="pageNumLeft"></label><label>Suffix / Right <input id="pageNumRight"></label></div>
+        <label><input id="ornamentBySide" type="checkbox"> Use one ornament based on page side</label>
+        <label><input id="reverseOrnamentsBySide" type="checkbox"> Reverse odd/even ornament side</label>
+        <label>Chapter End Ornament <select id="chapterEndOrnament"><option value="">None</option><option>❦</option><option>☙ ❧</option><option>◆</option><option>***</option></select></label>
+        <label><input id="chapterEndCentered" type="checkbox"> Center chapter end ornament</label>
+        <label>TOC Number <select id="tocNumberType"><option value="page">Page</option><option value="chapter">Chapter</option></select></label>
+        <label>TOC Leader <select id="tocLeader"><option value="dots">Dots</option><option value="line">Line</option><option value="none">None</option></select></label>
+        <label>Leader Color <input id="tocLeaderColor" type="color" class="color-box"></label>
+      </details>
+
+      <details>
+        <summary>Printing</summary>
+        <label><input id="showCutGuides" type="checkbox"> Cut outlines/guides</label>
+        <label><input id="showFoldGuides" type="checkbox"> Fold guides</label>
+        <label><input id="duplexBackSides" type="checkbox"> Include blank/opposite-side pages for duplex printers</label>
+        <div class="menu-row">
+          <button id="exportBook">Export Book</button>
+          <button id="exportStyle">Export Style</button>
+          <button id="exportLibrary">Export Library</button>
+        </div>
+        <label>Import JSON <input id="importJson" type="file" accept=".json,application/json"></label>
+        <button id="printBrowser">Print Current Preview</button>
+      </details>
+    </section>
+  </aside>
+
+  <section class="workspace">
+    <section id="editorView" class="view active">
+      <div class="workspace-header"><h2>Chapter Outline</h2><button id="addChapter" class="primary">Add Chapter</button></div>
+      <div id="progress" class="progress" hidden><div id="progressBar"></div><span id="progressText">Ready</span></div>
+      <div id="chapterList" class="chapter-list"></div>
+      <div id="chapterEditor"></div>
+    </section>
+
+    <section id="interiorView" class="view"><div id="interiorSummary" class="summary"></div><div id="interiorPreview" class="print-preview"></div></section>
+    <section id="coverView" class="view"><div id="coverSummary" class="summary"></div><div id="coverPreview" class="print-preview"></div></section>
+
+    <section id="readerView" class="view">
+      <div class="reader-toolbar"><button id="readerPrev">Previous</button><select id="readerJump"></select><select id="readerMode"><option value="single">Single Page</option><option value="spread">Two-Page Spread</option></select><button id="readerNext">Next</button></div>
+      <div id="readerPreview" class="reader-preview"></div>
+    </section>
+
+    <section id="libraryView" class="view">
+      <div class="workspace-header"><h2>Library</h2><input id="librarySearch" placeholder="Search title, author, or full text"></div>
+      <div id="libraryGrid" class="library-grid"></div>
+    </section>
+  </section>
+</main>
+</body>
+</html>
