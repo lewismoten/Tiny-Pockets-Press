@@ -98,7 +98,7 @@ TPP.pageEl = function (page, settings, x, y, rotate, staticMode, size) {
     num.textContent = left + page.n + right;
     element.appendChild(num);
   }
-  setTimeout(function () { TPP.renderQr(element); }, 0);
+  setTimeout(function () { TPP.renderQr(element, settings); }, 0);
   return element;
 };
 TPP.spineWidth = function (settings) {

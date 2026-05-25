@@ -142,6 +142,24 @@
             <option value="qr">Display Image URLs As QR Codes</option>
           </select>
         </label>
+        <div class="two">
+          <label>QR Background
+            <select id="qrLightMode">
+              <option value="page">Use Page Background</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <label>QR Background Color <input id="qrLightColor" type="color" class="color-box"></label>
+        </div>
+        <div class="two">
+          <label>QR Code
+            <select id="qrDarkMode">
+              <option value="contrast">Auto Black / White</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <label>QR Code Color <input id="qrDarkColor" type="color" class="color-box"></label>
+        </div>
         <p class="hint">A URL followed by a line of text uses that next line as the centered caption. URLs are hidden when rendered as QR or image blocks.</p>
       </details>
 

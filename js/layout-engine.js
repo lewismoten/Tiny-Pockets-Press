@@ -30,7 +30,7 @@ TPP.measureBlock = function (html, settings) {
   box.style.setProperty("--para-gap", settings.paraGap + "em");
   box.style.setProperty("--align", settings.justify ? "justify" : "left");
   box.innerHTML = html;
-  TPP.renderQr(box);
+  TPP.renderQr(box, settings);
   return box.scrollHeight / 96;
 };
 TPP.splitHtmlText = function (text, settings, maxHeight) {

@@ -69,14 +69,47 @@ TPP.blocksFromText = function (text, settings) {
   }
   return blocks;
 };
-TPP.renderQr = function (root) {
+TPP.hexRgb = function (hex) {
+  const match = String(hex || "").trim().match(/^#?([0-9a-f]{6})$/i);
+  if (!match) return { r: 255, g: 255, b: 255 };
+  const value = parseInt(match[1], 16);
+  return { r: value >> 16 & 255, g: value >> 8 & 255, b: value & 255 };
+};
+TPP.relativeLuminance = function (hex) {
+  const rgb = TPP.hexRgb(hex);
+  const channel = function (value) {
+    value /= 255;
+    return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * channel(rgb.r) + 0.7152 * channel(rgb.g) + 0.0722 * channel(rgb.b);
+};
+TPP.contrastRatio = function (a, b) {
+  const l1 = TPP.relativeLuminance(a);
+  const l2 = TPP.relativeLuminance(b);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+};
+TPP.autoQrDark = function (pageBg) {
+  return TPP.contrastRatio(pageBg, "#000000") >= TPP.contrastRatio(pageBg, "#ffffff") ? "#000000" : "#ffffff";
+};
+TPP.qrColors = function (settings) {
+  settings = settings || TPP.active || {};
+  const light = settings.qrLightMode === "custom" ? (settings.qrLightColor || "#ffffff") : (settings.pageBg || "#ffffff");
+  let dark = settings.qrDarkMode === "custom" ? (settings.qrDarkColor || "#000000") : TPP.autoQrDark(light);
+  if (dark.toLowerCase() === light.toLowerCase()) dark = TPP.autoQrDark(light);
+  return { dark: dark, light: light };
+};
+TPP.renderQr = function (root, settings) {
   if (!window.QRCode) return;
+  const colors = TPP.qrColors(settings);
   root.querySelectorAll(".qr-holder").forEach(function (holder) {
     if (holder.dataset.done) return;
+    holder.style.background = colors.light;
     new QRCode(holder, {
       text: holder.dataset.url,
       width: 96,
       height: 96,
+      colorDark: colors.dark,
+      colorLight: colors.light,
       correctLevel: QRCode.CorrectLevel.M
     });
     holder.dataset.done = "1";
