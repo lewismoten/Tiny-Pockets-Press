@@ -61,24 +61,25 @@ TPP.coverCutOutlinePath = function (settings, w, h) {
   const inset = geo.inset;
   const t = geo.thickness;
   if (!inset || !t) return "M0 0H" + w + "V" + h + "H0Z";
+  const d = Math.max(inset, 2 * inset - t);
   return [
-    "M", inset + t, 0,
-    "H", w - inset - t,
+    "M", d, 0,
+    "H", w - d,
     "L", w - inset, inset - t,
     "V", inset,
     "H", w - inset + t,
-    "L", w, inset + t,
-    "V", h - inset - t,
+    "L", w, d,
+    "V", h - d,
     "L", w - inset + t, h - inset,
     "H", w - inset,
     "V", h - inset + t,
-    "L", w - inset - t, h,
-    "H", inset + t,
+    "L", w - d, h,
+    "H", d,
     "L", inset, h - inset + t,
     "V", h - inset,
     "H", inset - t,
-    "L", 0, h - inset - t,
-    "V", inset + t,
+    "L", 0, h - d,
+    "V", d,
     "L", inset - t, inset,
     "H", inset,
     "V", inset - t,
@@ -90,25 +91,26 @@ TPP.coverCutClipPath = function (settings, w, h) {
   const inset = geo.inset;
   const t = geo.thickness;
   if (!inset || !t) return "";
+  const d = Math.max(inset, 2 * inset - t);
   const pct = function (value, total) { return (value / total * 100).toFixed(4) + "%"; };
   return "polygon(" + [
-    pct(inset + t, w) + " 0",
-    pct(w - inset - t, w) + " 0",
+    pct(d, w) + " 0",
+    pct(w - d, w) + " 0",
     pct(w - inset, w) + " " + pct(inset - t, h),
     pct(w - inset, w) + " " + pct(inset, h),
     pct(w - inset + t, w) + " " + pct(inset, h),
-    "100% " + pct(inset + t, h),
-    "100% " + pct(h - inset - t, h),
+    "100% " + pct(d, h),
+    "100% " + pct(h - d, h),
     pct(w - inset + t, w) + " " + pct(h - inset, h),
     pct(w - inset, w) + " " + pct(h - inset, h),
     pct(w - inset, w) + " " + pct(h - inset + t, h),
-    pct(w - inset - t, w) + " 100%",
-    pct(inset + t, w) + " 100%",
+    pct(w - d, w) + " 100%",
+    pct(d, w) + " 100%",
     pct(inset, w) + " " + pct(h - inset + t, h),
     pct(inset, w) + " " + pct(h - inset, h),
     pct(inset - t, w) + " " + pct(h - inset, h),
-    "0 " + pct(h - inset - t, h),
-    "0 " + pct(inset + t, h),
+    "0 " + pct(h - d, h),
+    "0 " + pct(d, h),
     pct(inset - t, w) + " " + pct(inset, h),
     pct(inset, w) + " " + pct(inset, h),
     pct(inset, w) + " " + pct(inset - t, h)
