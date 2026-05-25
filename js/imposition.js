@@ -75,11 +75,16 @@ TPP.svgLine = function (svg, x1, y1, x2, y2, color, width) {
   svg.appendChild(line);
 };
 TPP.coverCutGeometry = function (settings) {
-  const wrap = Math.max(0, Number(settings.wrapInside) || 0);
+  const wrapCap = Math.min(settings.page.w, settings.page.h) * 0.25;
+  const wrap = Math.min(Math.max(0, Number(settings.wrapInside) || 0), wrapCap);
   const board = Math.max(0, Number(settings.boardThickness) || 0);
   const inset = wrap;
   const thickness = inset && board ? Math.min(inset, board) : 0;
   return { inset: inset, thickness: thickness };
+};
+TPP.coverWrap = function (settings) {
+  const wrapCap = Math.min(settings.page.w, settings.page.h) * 0.25;
+  return settings.wrapCover ? Math.min(Math.max(0, Number(settings.wrapInside) || 0), wrapCap) : 0;
 };
 TPP.coverCornerGeometry = function (settings, w, h) {
   const geo = TPP.coverCutGeometry(settings);
@@ -263,7 +268,7 @@ TPP.guides = function (sheet, settings, x, y, w, h, spineW) {
   }
   if (settings.showFoldGuides) {
     if (spineW) {
-      const wrap = settings.wrapCover ? Math.max(0, Number(settings.wrapInside) || 0) : 0;
+      const wrap = TPP.coverWrap(settings);
       TPP.guide(sheet, "fold v", x + wrap + settings.page.w, y, 0, h);
       TPP.guide(sheet, "fold v", x + wrap + settings.page.w + spineW, y, 0, h);
     } else {
@@ -330,7 +335,7 @@ TPP.renderCover = function () {
   const preview = document.getElementById("coverPreview");
   preview.innerHTML = "";
   const spineW = TPP.spineWidth(settings);
-  const wrap = settings.wrapCover ? Number(settings.wrapInside) || 0 : 0;
+  const wrap = TPP.coverWrap(settings);
   const w = settings.page.w * 2 + spineW + wrap * 2;
   const h = settings.page.h + wrap * 2;
   const grid = TPP.bestGrid(settings.sheet, { w, h });
