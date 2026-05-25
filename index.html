@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tiny Pockets Press</title>
   <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script defer src="app.js"></script>
@@ -13,134 +15,225 @@
   <header class="app-header">
     <div>
       <h1>Tiny Pockets Press</h1>
-      <p>Microfiction, chapbooks, zines, and tiny printable books.</p>
+      <p>Microfiction, chapbooks, zines, and miniature printable books.</p>
     </div>
+    <nav class="tabs" aria-label="App views">
+      <button data-view="editor" class="tab active">Edit</button>
+      <button data-view="print" class="tab">Print Layout</button>
+      <button data-view="reader" class="tab">Reader</button>
+      <button data-view="library" class="tab">Library</button>
+    </nav>
     <div class="header-actions">
-      <button id="printBtn">Print</button>
+      <button id="saveBookBtn">Save Book</button>
       <button id="exportPdfBtn" class="primary">Export PDF</button>
     </div>
   </header>
 
-  <main class="layout">
-    <section class="panel controls" aria-label="Book settings">
-      <h2>Book</h2>
-      <label>Book Title <input id="title"></label>
-      <label>Author <input id="author"></label>
-      <label>Publishing Date <input id="pubDate" type="date"></label>
-      <label>Publisher / Press Name <input id="publisher"></label>
-      <label>Copyright <input id="copyright"></label>
+  <main class="app-shell">
+    <aside class="settings-sidebar" id="settingsSidebar">
+      <section class="panel controls" aria-label="Book settings">
+        <div class="menu-row">
+          <button id="newBookBtn">New</button>
+          <button id="duplicateBookBtn">Duplicate</button>
+          <button id="deleteBookBtn">Delete</button>
+        </div>
 
-      <div class="two-col">
-        <label>Printing
-          <select id="printing">
-            <option>First Printing</option>
-            <option>Second Printing</option>
-            <option>Third Printing</option>
-            <option>Fourth Printing</option>
-            <option>Revised Edition</option>
-            <option>Proof Copy</option>
-          </select>
-        </label>
-        <label>Volume <input id="volume" placeholder="Volume 1"></label>
-      </div>
+        <details open>
+          <summary>Book</summary>
+          <label>Book Title <input id="title"></label>
+          <label>Author <input id="author"></label>
+          <label>Publishing Date <input id="pubDate" type="date"></label>
+          <label>Publisher / Press Name <input id="publisher"></label>
+          <label>Copyright <input id="copyright"></label>
 
-      <div class="two-col">
-        <label>Number <input id="number" placeholder="No. 1048"></label>
-        <label>Series Name <input id="seriesName"></label>
-      </div>
+          <div class="two-col">
+            <label>Printing
+              <select id="printing">
+                <option>First Printing</option>
+                <option>Second Printing</option>
+                <option>Third Printing</option>
+                <option>Fourth Printing</option>
+                <option>Revised Edition</option>
+                <option>Proof Copy</option>
+              </select>
+            </label>
+            <label>Volume <input id="volume" placeholder="Volume 1"></label>
+          </div>
 
-      <h2>Chapters / Stories</h2>
-      <p class="hint">Separate chapters with <code>---</code>. Put the chapter title on the first line.</p>
-      <label>Stories / Chapters
-        <textarea id="story" rows="16"></textarea>
-      </label>
-      <label><input id="includeToc" type="checkbox" checked> Include table of contents</label>
+          <div class="two-col">
+            <label>Number <input id="number" placeholder="No. 1048"></label>
+            <label>Series Name <input id="seriesName"></label>
+          </div>
 
-      <h2>Page Setup</h2>
-      <div class="two-col">
-        <label>Finished Page Size
-          <select id="pageSize">
-            <option value="one-inch">Tiny Square — 1 × 1 in</option>
-            <option value="pocket-16">Letter 4×4 Grid — 2.125 × 2.75 in</option>
-            <option value="business-card">Business Card-ish — 2 × 3.5 in</option>
-            <option value="sixteenth-letter">Sixteenth Letter — 2.125 × 2.75 in</option>
-            <option value="eighth-letter">Eighth Letter — 2.75 × 4.25 in</option>
-            <option value="quarter-letter">Quarter Letter — 4.25 × 5.5 in</option>
-            <option value="sixth-letter">Sixth Letter — 2.83 × 5.5 in</option>
-            <option value="a7">A7 — 74 × 105 mm</option>
-            <option value="a6">A6 — 105 × 148 mm</option>
-            <option value="custom">Custom</option>
-          </select>
-        </label>
-        <label>Sheet Size
-          <select id="sheetSize">
-            <option value="letter">US Letter — 8.5 × 11 in</option>
-            <option value="legal">US Legal — 8.5 × 14 in</option>
-            <option value="a4">A4 — 210 × 297 mm</option>
-          </select>
-        </label>
-      </div>
+          <label><input id="includeToc" type="checkbox"> Include table of contents</label>
+        </details>
 
-      <div class="two-col custom-size" hidden>
-        <label>Page Width (in) <input id="customPageWidth" type="number" min="0.5" step="0.01" value="1"></label>
-        <label>Page Height (in) <input id="customPageHeight" type="number" min="0.5" step="0.01" value="1"></label>
-      </div>
+        <details open>
+          <summary>Page Setup</summary>
+          <div class="two-col">
+            <label>Finished Page Size
+              <select id="pageSize">
+                <option value="half-inch">Mini Square — 0.5 × 0.5 in</option>
+                <option value="one-inch">Tiny Square — 1 × 1 in</option>
+                <option value="pocket-16">Letter 4×4 Grid — 2.125 × 2.75 in</option>
+                <option value="business-card">Business Card-ish — 2 × 3.5 in</option>
+                <option value="sixteenth-letter">Sixteenth Letter — 2.125 × 2.75 in</option>
+                <option value="eighth-letter">Eighth Letter — 2.75 × 4.25 in</option>
+                <option value="quarter-letter">Quarter Letter — 4.25 × 5.5 in</option>
+                <option value="a7">A7 — 74 × 105 mm</option>
+                <option value="a6">A6 — 105 × 148 mm</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label>Sheet Size
+              <select id="sheetSize">
+                <option value="letter">US Letter — 8.5 × 11 in</option>
+                <option value="legal">US Legal — 8.5 × 14 in</option>
+                <option value="a4">A4 — 210 × 297 mm</option>
+              </select>
+            </label>
+          </div>
 
-      <div class="two-col">
-        <label>Page Margin (in) <input id="margin" type="number" min="0" step="0.01" value="0.08"></label>
-        <label>Font Size (pt) <input id="fontSize" type="number" min="3" step="0.5" value="5.5"></label>
-      </div>
+          <div class="two-col custom-size" hidden>
+            <label>Page Width (in) <input id="customPageWidth" type="number" min="0.5" step="0.01"></label>
+            <label>Page Height (in) <input id="customPageHeight" type="number" min="0.5" step="0.01"></label>
+          </div>
 
-      <div class="two-col">
-        <label>Font
-          <select id="fontFamily">
-            <option value="Georgia, serif">Georgia</option>
-            <option value="'Times New Roman', serif">Times New Roman</option>
-            <option value="Garamond, serif">Garamond</option>
-            <option value="Arial, sans-serif">Arial</option>
-            <option value="Verdana, sans-serif">Verdana</option>
-            <option value="'Courier New', monospace">Courier New</option>
-          </select>
-        </label>
-        <label>Paper Thickness (in) <input id="paperThickness" type="number" min="0.001" step="0.001" value="0.004"></label>
-      </div>
+          <div class="two-col">
+            <label>Margin (in) <input id="margin" type="number" min="0" step="0.01"></label>
+            <label>Font <select id="fontFamily"></select></label>
+          </div>
 
-      <div class="checks">
-        <label><input id="showPageNumbers" type="checkbox" checked> Show page numbers</label>
-        <label><input id="showBorder" type="checkbox" checked> Framed cover border</label>
-        <label><input id="showCutGuides" type="checkbox" checked> Show cut guides</label>
-        <label><input id="showFoldGuides" type="checkbox" checked> Show fold guides</label>
-        <label><input id="forceSpine" type="checkbox"> Force spine even for short books</label>
-      </div>
+          <div class="two-col">
+            <label>Paper Preset <select id="paperPreset"></select></label>
+            <label>Texture <select id="texture"></select></label>
+          </div>
 
-      <h2>Cover</h2>
-      <div class="two-col">
-        <label>Cover Background <input id="coverBg" type="color" value="#7b1f2a"></label>
-        <label>Cover Text <input id="coverTextColor" type="color" value="#fff8e8"></label>
-      </div>
-      <label>Cover Image <input id="coverImage" type="file" accept="image/*"></label>
+          <div class="two-col">
+            <label>Page Background <input id="pageBg" type="color" class="color-box"></label>
+            <label>Page Text <input id="pageTextColor" type="color" class="color-box"></label>
+          </div>
 
-      <div class="two-col">
-        <label>Image X (%) <input id="imageX" type="range" min="-100" max="100" value="0"></label>
-        <label>Image Y (%) <input id="imageY" type="range" min="-100" max="100" value="20"></label>
-      </div>
-      <label>Image Zoom <input id="imageZoom" type="range" min="10" max="350" value="85"></label>
+          <div class="two-col">
+            <label>Body Size (pt) <input id="bodyFontSize" type="number" min="3" step="0.5"></label>
+            <label>Title Page Size (pt) <input id="titlePageFontSize" type="number" min="4" step="0.5"></label>
+          </div>
 
-      <h2>Binding</h2>
-      <div class="two-col">
-        <label>Staple Limit, Pages <input id="stapleLimit" type="number" min="4" step="4" value="16"></label>
-        <label>Signature Size, Pages <input id="signatureSize" type="number" min="4" step="4" value="16"></label>
-      </div>
+          <div class="checks">
+            <label><input id="showPageNumbers" type="checkbox"> Show page numbers</label>
+            <label><input id="showCutGuides" type="checkbox"> Show cut guides</label>
+            <label><input id="showFoldGuides" type="checkbox"> Show fold guides</label>
+          </div>
+        </details>
 
-      <div class="button-row">
-        <button id="refreshBtn">Refresh Preview</button>
-        <button id="resetSavedBtn" type="button">Reset Saved Settings</button>
-      </div>
-    </section>
+        <details>
+          <summary>Cover Styling</summary>
+          <div class="two-col">
+            <label>Cover Background 1 <input id="coverBg" type="color" class="color-box"></label>
+            <label>Cover Background 2 <input id="coverBg2" type="color" class="color-box"></label>
+          </div>
 
-    <section class="panel preview-panel" aria-label="Preview">
-      <div class="summary" id="summary"></div>
-      <div id="preview" class="preview"></div>
+          <div class="two-col">
+            <label>Cover Text <input id="coverTextColor" type="color" class="color-box"></label>
+            <label>Cover Border <input id="coverBorderColor" type="color" class="color-box"></label>
+          </div>
+
+          <div class="two-col">
+            <label>Title Size (pt) <input id="coverTitleSize" type="number" min="4" step="0.5"></label>
+            <label>Author Size (pt) <input id="coverAuthorSize" type="number" min="3" step="0.5"></label>
+          </div>
+
+          <div class="two-col">
+            <label>Series Size (pt) <input id="coverSeriesSize" type="number" min="3" step="0.5"></label>
+            <label>Publisher Size (pt) <input id="coverPublisherSize" type="number" min="3" step="0.5"></label>
+          </div>
+
+          <label><input id="showBorder" type="checkbox"> Framed cover border</label>
+          <label>Cover Image <input id="coverImage" type="file" accept="image/*"></label>
+          <div class="two-col">
+            <label>Image X (%) <input id="imageX" type="range" min="-100" max="100"></label>
+            <label>Image Y (%) <input id="imageY" type="range" min="-100" max="100"></label>
+          </div>
+          <label>Image Zoom <input id="imageZoom" type="range" min="10" max="350"></label>
+        </details>
+
+        <details>
+          <summary>Metadata Text Styling</summary>
+          <div class="two-col">
+            <label>TOC Size (pt) <input id="tocFontSize" type="number" min="3" step="0.5"></label>
+            <label>TOC Color <input id="tocTextColor" type="color" class="color-box"></label>
+          </div>
+          <div class="two-col">
+            <label>Chapter Title Size (pt) <input id="chapterTitleSize" type="number" min="3" step="0.5"></label>
+            <label>Chapter Title Color <input id="chapterTitleColor" type="color" class="color-box"></label>
+          </div>
+          <div class="two-col">
+            <label>Page Number Size (pt) <input id="pageNumberSize" type="number" min="3" step="0.5"></label>
+            <label>Page Number Color <input id="pageNumberColor" type="color" class="color-box"></label>
+          </div>
+        </details>
+
+        <details>
+          <summary>Binding</summary>
+          <div class="two-col">
+            <label>Staple Limit, Pages <input id="stapleLimit" type="number" min="4" step="4"></label>
+            <label>Signature Size, Pages <input id="signatureSize" type="number" min="4" step="4"></label>
+          </div>
+          <label>Paper Thickness (in) <input id="paperThickness" type="number" min="0.001" step="0.001"></label>
+          <label><input id="forceSpine" type="checkbox"> Force spine even for short books</label>
+        </details>
+
+        <details>
+          <summary>Import / Export</summary>
+          <div class="menu-row">
+            <button id="exportBookJsonBtn">Export Book JSON</button>
+            <button id="exportLibraryJsonBtn">Export Library JSON</button>
+          </div>
+          <label>Import Book or Library JSON <input id="importJsonInput" type="file" accept="application/json,.json"></label>
+          <button id="printBtn">Print Browser View</button>
+        </details>
+      </section>
+    </aside>
+
+    <section class="workspace">
+      <section id="editorView" class="view active">
+        <div class="workspace-header">
+          <h2>Chapters</h2>
+          <button id="addChapterBtn" class="primary">Add Chapter</button>
+        </div>
+        <p class="hint">Markdown is supported: <code>**bold**</code>, <code>*italic*</code>, <code>&lt;u&gt;underline&lt;/u&gt;</code>, <code>~~strike~~</code>, and Markdown tables.</p>
+        <div id="chaptersEditor" class="chapters-editor"></div>
+      </section>
+
+      <section id="printView" class="view">
+        <div class="summary" id="summary"></div>
+        <div id="printPreview" class="print-preview"></div>
+      </section>
+
+      <section id="readerView" class="view">
+        <div class="reader-toolbar">
+          <button id="prevSpreadBtn">Previous</button>
+          <label>View
+            <select id="readerMode">
+              <option value="single">Single Page</option>
+              <option value="spread">Two-Page Spread</option>
+            </select>
+          </label>
+          <button id="nextSpreadBtn">Next</button>
+        </div>
+        <div id="readerPreview" class="reader-preview"></div>
+      </section>
+
+      <section id="libraryView" class="view">
+        <div class="workspace-header">
+          <h2>Library</h2>
+          <div class="menu-row">
+            <button id="importLibraryBtn">Import JSON</button>
+            <button id="exportLibraryBtn">Export Library</button>
+          </div>
+        </div>
+        <div id="libraryGrid" class="library-grid"></div>
+      </section>
     </section>
   </main>
 </body>

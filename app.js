@@ -1,59 +1,41 @@
 const $ = id => document.getElementById(id);
 
-const STORAGE_KEY = "tinyPocketsPressSettingsV2";
+const LIBRARY_KEY = "tinyPocketsPressLibraryV3";
+const ACTIVE_KEY = "tinyPocketsPressActiveBookV3";
 
-const defaultStory = "Santa\u2019s Little OSHA Violation\n\nA jolly \u201cHo-ho-ho\u201d came from behind, followed by \u201cHidey ho, neighbor!\u201d\n\n\u201cHello Santa,\u201d little Timmy replied.\n\n\u201cWhy the long face?\u201d Santa asked.\n\nTimmy showed him a block of wood. \u201cI\u2019m building a pinewood derby car, but I have no tools.\u201d\n\nSanta put his hands on his waist and made grunting sounds, followed by the order: \u201cNever give up. Never surrender!\u201d\n\nSanta went into his bag and grabbed a few presents, handing them over. Timmy quickly ripped open the packages, finding a chainsaw, angle grinder, nail gun, industrial CNC router, plasma cutter, and a flame thrower, while Santa shouted, \u201cMore power!\u201d";
-
-const defaults = {
-  title: "Santa’s Little OSHA Violation",
-  author: "Lewis Moten",
-  pubDate: "2026-05-24",
-  publisher: "Tiny Pockets Press",
-  copyright: "",
-  printing: "First Printing",
-  volume: "",
-  number: "No. 1048",
-  seriesName: "100 Word Stories Weekly Challenge",
-  story: defaultStory,
-  includeToc: true,
-  pageSize: "one-inch",
-  sheetSize: "letter",
-  customPageWidth: 1,
-  customPageHeight: 1,
-  margin: 0.08,
-  fontSize: 5.5,
-  fontFamily: "Georgia, serif",
-  paperThickness: 0.004,
-  showPageNumbers: true,
-  showBorder: true,
-  showCutGuides: true,
-  showFoldGuides: true,
-  coverBg: "#7b1f2a",
-  coverTextColor: "#fff8e8",
-  imageX: 0,
-  imageY: 20,
-  imageZoom: 85,
-  stapleLimit: 16,
-  signatureSize: 16,
-  forceSpine: false
-};
-
-const reusableIds = [
-  "author", "publisher", "copyright", "printing", "volume", "number", "seriesName",
-  "pageSize", "sheetSize", "customPageWidth", "customPageHeight", "margin", "fontSize",
-  "fontFamily", "paperThickness", "showPageNumbers", "showBorder", "showCutGuides",
-  "showFoldGuides", "coverBg", "coverTextColor", "imageX", "imageY", "imageZoom",
-  "stapleLimit", "signatureSize", "forceSpine", "includeToc"
+const fonts = [
+  ["Georgia, serif", "Georgia"],
+  ["'Times New Roman', serif", "Times New Roman"],
+  ["Garamond, serif", "Garamond"],
+  ["Arial, sans-serif", "Arial"],
+  ["Verdana, sans-serif", "Verdana"],
+  ["'Courier New', monospace", "Courier New"]
 ];
 
+const paperPresets = {
+  white: { label: "White", bg: "#ffffff", text: "#231f20" },
+  eggshell: { label: "Eggshell White", bg: "#fff8e8", text: "#231f20" },
+  aged: { label: "Aged Paper", bg: "#ead8b4", text: "#2c2018" },
+  cream: { label: "Cream", bg: "#f7ecd2", text: "#2a241d" },
+  parchment: { label: "Parchment", bg: "#efe0bd", text: "#2c2018" },
+  gray: { label: "Soft Gray", bg: "#eeeeec", text: "#242424" }
+};
+
+const textures = {
+  none: "None",
+  noise: "Soft Noise",
+  aged: "Aged Edges",
+  fiber: "Paper Fibers"
+};
+
 const sizes = {
+  "half-inch": { w: 0.5, h: 0.5 },
   "one-inch": { w: 1, h: 1 },
   "pocket-16": { w: 2.125, h: 2.75 },
   "business-card": { w: 2, h: 3.5 },
   "sixteenth-letter": { w: 2.125, h: 2.75 },
   "eighth-letter": { w: 2.75, h: 4.25 },
   "quarter-letter": { w: 4.25, h: 5.5 },
-  "sixth-letter": { w: 2.833, h: 5.5 },
   "a7": { w: 2.913, h: 4.134 },
   "a6": { w: 4.134, h: 5.827 }
 };
@@ -64,84 +46,231 @@ const sheetSizes = {
   "a4": { w: 8.267, h: 11.693 }
 };
 
-let coverImageData = "";
+function uid() {
+  return "book-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+}
 
-function savedSettings() {
+const sampleBook = {
+  id: uid(),
+  title: "Santa’s Little OSHA Violation",
+  author: "Lewis Moten",
+  pubDate: "2026-05-24",
+  publisher: "Tiny Pockets Press",
+  copyright: "© 2026 Lewis Moten. All rights reserved.",
+  printing: "First Printing",
+  volume: "",
+  number: "No. 1048",
+  seriesName: "100 Word Stories Weekly Challenge",
+  includeToc: true,
+  pageSize: "one-inch",
+  sheetSize: "letter",
+  customPageWidth: 1,
+  customPageHeight: 1,
+  margin: 0.08,
+  fontFamily: "Georgia, serif",
+  paperPreset: "eggshell",
+  texture: "aged",
+  pageBg: "#fff8e8",
+  pageTextColor: "#231f20",
+  bodyFontSize: 5.5,
+  titlePageFontSize: 7,
+  showPageNumbers: true,
+  showCutGuides: true,
+  showFoldGuides: true,
+  coverBg: "#7b1f2a",
+  coverBg2: "#3c1118",
+  coverTextColor: "#fff8e8",
+  coverBorderColor: "#fff8e8",
+  coverTitleSize: 8,
+  coverAuthorSize: 4.5,
+  coverSeriesSize: 3.8,
+  coverPublisherSize: 3.8,
+  showBorder: true,
+  coverImageData: "",
+  imageX: 0,
+  imageY: 20,
+  imageZoom: 85,
+  tocFontSize: 4.5,
+  tocTextColor: "#231f20",
+  chapterTitleSize: 6,
+  chapterTitleColor: "#231f20",
+  pageNumberSize: 3.5,
+  pageNumberColor: "#6c625a",
+  stapleLimit: 16,
+  signatureSize: 16,
+  paperThickness: 0.004,
+  forceSpine: false,
+  chapters: [
+    {
+      id: uid(),
+      title: "Santa’s Little OSHA Violation",
+      text: "A jolly \u201cHo-ho-ho\u201d came from behind, followed by \u201cHidey ho, neighbor!\u201d\n\n\u201cHello Santa,\u201d little Timmy replied.\n\n\u201cWhy the long face?\u201d Santa asked.\n\nTimmy showed him a block of wood. \u201cI\u2019m building a pinewood derby car, but I have no tools.\u201d\n\nSanta put his hands on his waist and made grunting sounds, followed by the order: \u201cNever give up. Never surrender!\u201d\n\nSanta went into his bag and grabbed a few presents, handing them over. Timmy quickly ripped open the packages, finding a chainsaw, angle grinder, nail gun, industrial CNC router, plasma cutter, and a flame thrower, while Santa shouted, \u201cMore power!\u201d",
+      imageData: "",
+      imagePlacement: "below-title",
+      imageWidth: 70
+    }
+  ]
+};
+
+let library = [];
+let activeBook = null;
+let readerIndex = 0;
+let currentView = "editor";
+
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function loadLibrary() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    library = JSON.parse(localStorage.getItem(LIBRARY_KEY) || "[]");
   } catch {
-    return {};
+    library = [];
   }
+
+  if (!Array.isArray(library) || library.length === 0) {
+    library = [clone(sampleBook)];
+    saveLibrary();
+  }
+
+  const activeId = localStorage.getItem(ACTIVE_KEY) || library[0].id;
+  activeBook = library.find(b => b.id === activeId) || library[0];
 }
 
-function loadInitialValues() {
-  const saved = savedSettings();
-  const combined = { ...defaults, ...saved };
-  // Do not persist story/title; fresh projects start with the sample.
-  combined.story = defaults.story;
-  combined.title = defaults.title;
-
-  for (const [id, value] of Object.entries(combined)) {
-    const el = $(id);
-    if (!el) continue;
-    if (el.type === "checkbox") el.checked = Boolean(value);
-    else el.value = value;
-  }
-
-  if (!$("copyright").value.trim()) {
-    $("copyright").value = `© ${new Date($("pubDate").value || Date.now()).getFullYear()} ${$("author").value || "Author"}. All rights reserved.`;
-  }
-
-  document.querySelector(".custom-size").hidden = $("pageSize").value !== "custom";
+function saveLibrary() {
+  localStorage.setItem(LIBRARY_KEY, JSON.stringify(library));
 }
 
-function saveReusableSettings() {
-  const data = {};
-  reusableIds.forEach(id => {
+function setActiveBook(book) {
+  activeBook = book;
+  localStorage.setItem(ACTIVE_KEY, book.id);
+  loadBookIntoForm();
+  renderAll();
+}
+
+function normalizeBook(book) {
+  return { ...clone(sampleBook), ...book, id: book.id || uid(), chapters: Array.isArray(book.chapters) && book.chapters.length ? book.chapters : clone(sampleBook.chapters) };
+}
+
+function populateSelects() {
+  $("fontFamily").innerHTML = fonts.map(([value, label]) => `<option value="${escapeAttr(value)}">${label}</option>`).join("");
+  $("paperPreset").innerHTML = Object.entries(paperPresets).map(([value, p]) => `<option value="${value}">${p.label}</option>`).join("");
+  $("texture").innerHTML = Object.entries(textures).map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+}
+
+function escapeHtml(text) {
+  return String(text ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[ch]));
+}
+
+function escapeAttr(text) {
+  return escapeHtml(text).replace(/`/g, "&#096;");
+}
+
+function fields() {
+  return [
+    "title", "author", "pubDate", "publisher", "copyright", "printing", "volume", "number", "seriesName",
+    "includeToc", "pageSize", "sheetSize", "customPageWidth", "customPageHeight", "margin", "fontFamily",
+    "paperPreset", "texture", "pageBg", "pageTextColor", "bodyFontSize", "titlePageFontSize",
+    "showPageNumbers", "showCutGuides", "showFoldGuides", "coverBg", "coverBg2", "coverTextColor",
+    "coverBorderColor", "coverTitleSize", "coverAuthorSize", "coverSeriesSize", "coverPublisherSize",
+    "showBorder", "imageX", "imageY", "imageZoom", "tocFontSize", "tocTextColor", "chapterTitleSize",
+    "chapterTitleColor", "pageNumberSize", "pageNumberColor", "stapleLimit", "signatureSize",
+    "paperThickness", "forceSpine"
+  ];
+}
+
+function loadBookIntoForm() {
+  const b = activeBook;
+  fields().forEach(id => {
     const el = $(id);
     if (!el) return;
-    data[id] = el.type === "checkbox" ? el.checked : el.value;
+    if (el.type === "checkbox") el.checked = Boolean(b[id]);
+    else el.value = b[id] ?? "";
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  document.querySelector(".custom-size").hidden = $("pageSize").value !== "custom";
+  renderChapterEditor();
+}
+
+function syncFormToBook() {
+  const b = activeBook;
+  fields().forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    if (el.type === "checkbox") b[id] = el.checked;
+    else if (el.type === "number" || el.type === "range") b[id] = Number(el.value);
+    else b[id] = el.value;
+  });
+  b.chapters = readChaptersFromEditor();
+  saveLibrary();
 }
 
 function readSettings() {
-  const pageSize = $("pageSize").value;
-  const page = pageSize === "custom"
-    ? { w: Number($("customPageWidth").value), h: Number($("customPageHeight").value) }
-    : sizes[pageSize];
-
+  syncFormToBook();
+  const b = activeBook;
+  const page = b.pageSize === "custom" ? { w: Number(b.customPageWidth), h: Number(b.customPageHeight) } : sizes[b.pageSize];
   return {
-    title: $("title").value.trim() || "Untitled",
-    author: $("author").value.trim(),
-    pubDate: $("pubDate").value,
-    publisher: $("publisher").value.trim(),
-    copyright: $("copyright").value.trim(),
-    printing: $("printing").value,
-    volume: $("volume").value.trim(),
-    number: $("number").value.trim(),
-    seriesName: $("seriesName").value.trim(),
-    story: $("story").value.trim(),
-    includeToc: $("includeToc").checked,
-    page,
-    sheet: sheetSizes[$("sheetSize").value],
-    margin: Number($("margin").value),
-    fontSize: Number($("fontSize").value),
-    fontFamily: $("fontFamily").value,
-    showPageNumbers: $("showPageNumbers").checked,
-    showBorder: $("showBorder").checked,
-    showCutGuides: $("showCutGuides").checked,
-    showFoldGuides: $("showFoldGuides").checked,
-    coverBg: $("coverBg").value,
-    coverTextColor: $("coverTextColor").value,
-    imageX: Number($("imageX").value),
-    imageY: Number($("imageY").value),
-    imageZoom: Number($("imageZoom").value),
-    stapleLimit: Number($("stapleLimit").value),
-    signatureSize: Math.max(4, Math.ceil(Number($("signatureSize").value) / 4) * 4),
-    paperThickness: Number($("paperThickness").value),
-    forceSpine: $("forceSpine").checked,
+    ...b,
+    page: {
+      w: Math.max(0.5, Number(page.w) || 1),
+      h: Math.max(0.5, Number(page.h) || 1)
+    },
+    sheet: sheetSizes[b.sheetSize] || sheetSizes.letter,
+    signatureSize: Math.max(4, Math.ceil(Number(b.signatureSize) / 4) * 4),
   };
+}
+
+function renderChapterEditor() {
+  const wrap = $("chaptersEditor");
+  wrap.innerHTML = activeBook.chapters.map((ch, idx) => `
+    <article class="chapter-card" data-chapter-id="${ch.id}">
+      <div class="chapter-card-header">
+        <h3>Chapter ${idx + 1}</h3>
+        <div class="chapter-actions">
+          <button data-action="up">↑</button>
+          <button data-action="down">↓</button>
+          <button data-action="remove">Remove</button>
+        </div>
+      </div>
+      <label>Chapter Title <input class="chapter-title" value="${escapeAttr(ch.title || "")}"></label>
+      <label>Chapter Text
+        <textarea class="chapter-text" rows="10">${escapeHtml(ch.text || "")}</textarea>
+      </label>
+      <div class="two-col">
+        <label>Image Placement
+          <select class="chapter-image-placement">
+            <option value="none" ${ch.imagePlacement === "none" ? "selected" : ""}>No Image</option>
+            <option value="own-page" ${ch.imagePlacement === "own-page" ? "selected" : ""}>Own Page</option>
+            <option value="below-title" ${ch.imagePlacement === "below-title" ? "selected" : ""}>Below Title</option>
+          </select>
+        </label>
+        <label>Image Width (%) <input class="chapter-image-width" type="number" min="10" max="100" step="1" value="${ch.imageWidth ?? 70}"></label>
+      </div>
+      <label>Chapter Image <input class="chapter-image" type="file" accept="image/*"></label>
+      ${ch.imageData ? `<img class="chapter-img-preview" src="${ch.imageData}" alt="" style="max-width:140px;border-radius:10px;">` : ""}
+    </article>
+  `).join("");
+}
+
+function readChaptersFromEditor() {
+  const cards = [...document.querySelectorAll(".chapter-card")];
+  return cards.map(card => {
+    const existing = activeBook.chapters.find(c => c.id === card.dataset.chapterId) || {};
+    return {
+      id: card.dataset.chapterId || uid(),
+      title: card.querySelector(".chapter-title").value,
+      text: card.querySelector(".chapter-text").value,
+      imageData: existing.imageData || "",
+      imagePlacement: card.querySelector(".chapter-image-placement").value,
+      imageWidth: Number(card.querySelector(".chapter-image-width").value) || 70
+    };
+  });
+}
+
+function safeMarkdown(text) {
+  const raw = window.marked ? marked.parse(text || "", { gfm: true, breaks: true }) : escapeHtml(text || "").replace(/\n/g, "<br>");
+  return window.DOMPurify ? DOMPurify.sanitize(raw, { ADD_TAGS: ["u"], ADD_ATTR: ["style"] }) : raw;
 }
 
 function formatDate(value) {
@@ -150,148 +279,142 @@ function formatDate(value) {
   return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
-function escapeHtml(text) {
-  return String(text).replace(/[&<>"']/g, ch => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-  }[ch]));
-}
-
 function makePage(type, html, n, extra = {}) {
   return { type, html, n, ...extra };
 }
 
-function parseChapters(story) {
-  return story.split(/\n\s*---\s*\n/g)
-    .map(block => block.trim())
-    .filter(Boolean)
-    .map((block, index) => {
-      const lines = block.split(/\n/);
-      const first = (lines.shift() || `Chapter ${index + 1}`).trim();
-      return {
-        title: first || `Chapter ${index + 1}`,
-        text: lines.join("\n").trim()
-      };
-    });
+function estimateCharsPerPage(s) {
+  const usableW = Math.max(0.1, s.page.w - s.margin * 2);
+  const usableH = Math.max(0.1, s.page.h - s.margin * 2 - .05);
+  const charsPerLine = Math.floor((usableW * 72) / (s.bodyFontSize * .52));
+  const lines = Math.floor((usableH * 72) / (s.bodyFontSize * 1.35));
+  return Math.max(12, charsPerLine * lines);
 }
 
-function estimateCharsPerPage(settings) {
-  const usableW = Math.max(0.25, settings.page.w - settings.margin * 2);
-  const usableH = Math.max(0.25, settings.page.h - settings.margin * 2 - .05);
-  const charsPerLine = Math.floor((usableW * 72) / (settings.fontSize * .52));
-  const lines = Math.floor((usableH * 72) / (settings.fontSize * 1.35));
-  return Math.max(20, charsPerLine * lines);
-}
-
-function chunkStory(text, charsPerPage) {
-  const paragraphs = text.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+function chunkMarkdown(text, charsPerPage) {
+  const blocks = String(text || "").split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
   const chunks = [];
   let current = "";
-  for (const paragraph of paragraphs) {
-    const words = paragraph.split(/\s+/).filter(Boolean);
-    for (const word of words) {
-      const candidate = (current + " " + word).trim();
-      if (candidate.length > charsPerPage && current) {
-        chunks.push(current.trim());
-        current = word;
-      } else {
-        current = candidate;
-      }
+  for (const block of blocks) {
+    if ((current + "\n\n" + block).trim().length > charsPerPage && current) {
+      chunks.push(current.trim());
+      current = block;
+    } else {
+      current = (current + "\n\n" + block).trim();
     }
-    current += "\n\n";
   }
-  if (current.trim()) chunks.push(current.trim());
+  if (current) chunks.push(current);
   return chunks.length ? chunks : [""];
 }
 
-function buildLogicalPages(settings) {
-  const pages = [];
+function chapterImageHtml(ch, s) {
+  if (!ch.imageData || ch.imagePlacement === "none") return "";
+  const width = Math.max(10, Math.min(100, Number(ch.imageWidth) || 70));
+  return `<img class="chapter-img" src="${ch.imageData}" style="width:${width}%;max-height:${Math.max(.1, s.page.h - s.margin * 2 - .18)}in;margin:.04in auto;object-fit:contain;">`;
+}
 
-  const series = [settings.seriesName, settings.number].filter(Boolean).join(" ");
-  const imprintBits = [
-    settings.publisher,
-    formatDate(settings.pubDate),
-    settings.printing,
-    settings.volume,
-    settings.number,
-    settings.copyright
-  ].filter(Boolean);
+function buildLogicalPages(s) {
+  const pages = [];
+  const series = [s.seriesName, s.number].filter(Boolean).join(" ");
+  const imprintBits = [s.publisher, formatDate(s.pubDate), s.printing, s.volume, s.number, s.copyright].filter(Boolean);
 
   const coverHtml = `
-    ${coverImageData ? `<img class="cover-img" src="${coverImageData}" style="width:${settings.imageZoom}%; margin-left:${settings.imageX}%; margin-top:${settings.imageY}%;">` : ""}
+    ${s.coverImageData ? `<img class="cover-img" src="${s.coverImageData}" style="width:${s.imageZoom}%; margin-left:${s.imageX}%; margin-top:${s.imageY}%;">` : ""}
     <div class="cover-content">
       ${series ? `<div class="cover-series">${escapeHtml(series)}</div>` : ""}
-      <div class="cover-title">${escapeHtml(settings.title)}</div>
-      ${settings.author ? `<div class="cover-author">by ${escapeHtml(settings.author)}</div>` : ""}
-      ${settings.publisher ? `<div class="cover-author">${escapeHtml(settings.publisher)}</div>` : ""}
+      <div class="cover-title">${escapeHtml(s.title)}</div>
+      ${s.author ? `<div class="cover-author">by ${escapeHtml(s.author)}</div>` : ""}
+      ${s.publisher ? `<div class="cover-publisher">${escapeHtml(s.publisher)}</div>` : ""}
     </div>`;
-
   pages.push(makePage("cover", coverHtml, 1, { isCover: true }));
 
   const titleHtml = `
-    <div class="story-title">${escapeHtml(settings.title)}</div>
+    <div class="story-title">${escapeHtml(s.title)}</div>
     <div class="story-meta">
-      ${settings.author ? `By ${escapeHtml(settings.author)}<br>` : ""}
+      ${s.author ? `By ${escapeHtml(s.author)}<br>` : ""}
       ${series ? `${escapeHtml(series)}<br>` : ""}
-      ${settings.publisher ? `${escapeHtml(settings.publisher)}<br>` : ""}
-      ${formatDate(settings.pubDate)}
+      ${s.publisher ? `${escapeHtml(s.publisher)}<br>` : ""}
+      ${formatDate(s.pubDate)}
     </div>
     <div class="copyright-page">${imprintBits.map(escapeHtml).join("<br>")}</div>`;
+  pages.push(makePage("text title-page", titleHtml, 2));
 
-  pages.push(makePage("text", titleHtml, 2));
-
-  const chapters = parseChapters(settings.story);
-
-  if (settings.includeToc && chapters.length > 1) {
-    const tocItems = chapters.map(ch => `<li><span>${escapeHtml(ch.title)}</span><span>…</span></li>`).join("");
+  if (s.includeToc && s.chapters.length > 1) {
+    const tocItems = s.chapters.map((ch, idx) => `<li><span>${escapeHtml(ch.title || "Untitled")}</span><span>${idx + 1}</span></li>`).join("");
     pages.push(makePage("text", `<div class="story-title">Contents</div><ol class="toc-list">${tocItems}</ol>`, pages.length + 1));
   }
 
-  chapters.forEach((chapter) => {
-    const chapterStart = pages.length + 1;
-    pages.push(makePage("text", `<div class="chapter-heading">${escapeHtml(chapter.title)}</div>`, chapterStart, { chapterTitle: chapter.title }));
-    const chunks = chunkStory(chapter.text, estimateCharsPerPage(settings));
-    chunks.forEach((chunk) => {
-      pages.push(makePage("text", `<div class="story-text">${escapeHtml(chunk)}</div>`, pages.length + 1));
-    });
-  });
+  for (const ch of s.chapters) {
+    if (ch.imageData && ch.imagePlacement === "own-page") {
+      pages.push(makePage("text", `<div class="chapter-heading">${escapeHtml(ch.title || "")}</div>${chapterImageHtml(ch, s)}`, pages.length + 1));
+    } else {
+      pages.push(makePage("text", `<div class="chapter-heading">${escapeHtml(ch.title || "")}</div>${chapterImageHtml(ch, s)}`, pages.length + 1));
+    }
 
-  while (pages.length % 4 !== 0) {
-    pages.push(makePage("blank", `<span>Blank</span>`, pages.length + 1));
+    const chunks = chunkMarkdown(ch.text, estimateCharsPerPage(s));
+    for (const chunk of chunks) {
+      pages.push(makePage("text", `<div class="story-text">${safeMarkdown(chunk)}</div>`, pages.length + 1));
+    }
   }
 
+  while (pages.length % 4 !== 0) pages.push(makePage("blank", `<span>Blank</span>`, pages.length + 1));
   return pages;
 }
 
-function bookletOrder(pageCount) {
-  const sheets = [];
-  for (let left = 1, right = pageCount; left < right; left += 2, right -= 2) {
-    sheets.push({
-      front: [right, left],
-      back: [left + 1, right - 1]
-    });
+function bestGrid(sheet, page) {
+  const orientations = [
+    { rotate: false, w: page.w, h: page.h },
+    { rotate: true, w: page.h, h: page.w }
+  ];
+  let best = null;
+  for (const o of orientations) {
+    const cols = Math.floor(sheet.w / o.w);
+    const rows = Math.floor(sheet.h / o.h);
+    const count = cols * rows;
+    if (!best || count > best.count) best = { ...o, cols, rows, count };
   }
-  return sheets;
+  return best;
 }
 
-function pageElement(page, settings, x, y) {
+function pageElement(page, s, x, y, rotate = false, staticMode = false) {
   const div = document.createElement("div");
-  div.className = `page ${page.type} ${settings.showBorder && page.type === "cover" ? "framed" : ""}`;
-  div.style.left = `${x}in`;
-  div.style.top = `${y}in`;
-  div.style.width = `${settings.page.w}in`;
-  div.style.height = `${settings.page.h}in`;
-  div.style.setProperty("--page-margin", `${settings.margin}in`);
-  div.style.setProperty("--cover-bg", settings.coverBg);
-  div.style.setProperty("--cover-text", settings.coverTextColor);
-  div.style.fontSize = `${settings.fontSize}pt`;
-  div.style.fontFamily = settings.fontFamily;
+  div.className = `book-page ${page.type} ${s.showBorder && page.type.includes("cover") ? "framed" : ""} texture-${s.texture}`;
+  div.style.left = staticMode ? "0" : `${x}in`;
+  div.style.top = staticMode ? "0" : `${y}in`;
+  div.style.width = `${s.page.w}in`;
+  div.style.height = `${s.page.h}in`;
+  div.style.setProperty("--page-margin", `${s.margin}in`);
+  div.style.setProperty("--page-bg", s.pageBg);
+  div.style.setProperty("--page-text", s.pageTextColor);
+  div.style.setProperty("--cover-bg", s.coverBg);
+  div.style.setProperty("--cover-bg2", s.coverBg2);
+  div.style.setProperty("--cover-text", s.coverTextColor);
+  div.style.setProperty("--cover-border", s.coverBorderColor);
+  div.style.setProperty("--cover-title-size", `${s.coverTitleSize}pt`);
+  div.style.setProperty("--cover-author-size", `${s.coverAuthorSize}pt`);
+  div.style.setProperty("--cover-series-size", `${s.coverSeriesSize}pt`);
+  div.style.setProperty("--cover-publisher-size", `${s.coverPublisherSize}pt`);
+  div.style.setProperty("--title-page-font-size", `${s.titlePageFontSize}pt`);
+  div.style.setProperty("--toc-font-size", `${s.tocFontSize}pt`);
+  div.style.setProperty("--toc-text-color", s.tocTextColor);
+  div.style.setProperty("--chapter-title-size", `${s.chapterTitleSize}pt`);
+  div.style.setProperty("--chapter-title-color", s.chapterTitleColor);
+  div.style.setProperty("--page-number-size", `${s.pageNumberSize}pt`);
+  div.style.setProperty("--page-number-color", s.pageNumberColor);
+  div.style.fontSize = `${s.bodyFontSize}pt`;
+  div.style.fontFamily = s.fontFamily;
+
+  if (rotate && !staticMode) {
+    div.style.transformOrigin = "top left";
+    div.style.transform = `translate(${s.page.h}in, 0) rotate(90deg)`;
+  }
 
   const inner = document.createElement("div");
   inner.className = "page-inner";
-  if (page.type === "blank") inner.classList.add("blank");
+  if (page.type.includes("blank")) inner.classList.add("blank");
   inner.innerHTML = page.html;
 
-  if (settings.showPageNumbers && page.type !== "cover" && page.type !== "blank") {
+  if (s.showPageNumbers && !page.type.includes("cover") && !page.type.includes("blank")) {
     inner.insertAdjacentHTML("beforeend", `<div class="page-number">${page.n}</div>`);
   }
 
@@ -309,135 +432,182 @@ function guideLine(sheet, className, left, top, width, height) {
   sheet.appendChild(g);
 }
 
-function addGuides(sheet, settings, startX, startY) {
-  const pageW = settings.page.w;
-  const pageH = settings.page.h;
-
-  if (settings.showCutGuides) {
-    const len = Math.min(.12, pageW / 8, pageH / 8);
-    const xs = [startX, startX + pageW, startX + pageW * 2];
-    const ys = [startY, startY + pageH];
-
-    xs.forEach(x => {
-      guideLine(sheet, "cut-guide", x - .005, startY - len, .01, len);
-      guideLine(sheet, "cut-guide", x - .005, startY + pageH, .01, len);
-    });
-    ys.forEach(y => {
-      guideLine(sheet, "cut-guide", startX - len, y - .005, len, .01);
-      guideLine(sheet, "cut-guide", startX + pageW * 2, y - .005, len, .01);
-    });
+function addGridGuides(sheet, s, grid, startX, startY) {
+  if (s.showCutGuides) {
+    const len = Math.min(.12, grid.w / 5, grid.h / 5);
+    for (let c = 0; c <= grid.cols; c++) {
+      const x = startX + c * grid.w;
+      guideLine(sheet, "cut-guide", x - .004, startY - len, .008, len);
+      guideLine(sheet, "cut-guide", x - .004, startY + grid.rows * grid.h, .008, len);
+    }
+    for (let r = 0; r <= grid.rows; r++) {
+      const y = startY + r * grid.h;
+      guideLine(sheet, "cut-guide", startX - len, y - .004, len, .008);
+      guideLine(sheet, "cut-guide", startX + grid.cols * grid.w, y - .004, len, .008);
+    }
   }
-
-  if (settings.showFoldGuides) {
-    guideLine(sheet, "fold-guide vertical", startX + pageW, startY, 0, pageH);
+  if (s.showFoldGuides) {
+    for (let c = 1; c < grid.cols; c++) guideLine(sheet, "fold-guide vertical", startX + c * grid.w, startY, 0, grid.rows * grid.h);
+    for (let r = 1; r < grid.rows; r++) guideLine(sheet, "fold-guide horizontal", startX, startY + r * grid.h, grid.cols * grid.w, 0);
   }
 }
 
-function addSewingMarks(sheet, signatureIndex, signatureCount, settings, leftEdgeIn, topIn, heightIn) {
-  const boxHeight = Math.max(.08, Math.min(.28, heightIn / Math.max(signatureCount + 2, 1)));
-  const usable = heightIn - boxHeight;
-  const y = topIn + (signatureCount <= 1 ? usable / 2 : usable * (signatureIndex / (signatureCount - 1)));
-
+function addSpineGuide(sheet, s, x, y, slotHeight, signatureIndex, signatureCount) {
+  const h = Math.max(.06, Math.min(.20, slotHeight / Math.max(signatureCount + 2, 1)));
+  const usable = slotHeight - h;
+  const top = y + (signatureCount <= 1 ? usable / 2 : usable * signatureIndex / (signatureCount - 1));
   const mark = document.createElement("div");
-  mark.className = "sewing-mark";
-  mark.style.left = `${leftEdgeIn}in`;
-  mark.style.top = `${y}in`;
-  mark.style.height = `${boxHeight}in`;
+  mark.className = "spine-guide";
+  mark.style.left = `${x}in`;
+  mark.style.top = `${top}in`;
+  mark.style.height = `${h}in`;
   sheet.appendChild(mark);
-
-  const label = document.createElement("div");
-  label.className = "signature-label";
-  label.textContent = `S${signatureIndex + 1}`;
-  label.style.left = `${leftEdgeIn + .065}in`;
-  label.style.top = `${y}in`;
-  sheet.appendChild(label);
 }
 
-function addSpine(sheet, settings, x, y, height, pageCount) {
-  const spineWidth = Math.max(.04, pageCount * settings.paperThickness);
-  const spine = document.createElement("div");
-  spine.className = "spine";
-  spine.style.left = `${x - spineWidth / 2}in`;
-  spine.style.top = `${y}in`;
-  spine.style.width = `${spineWidth}in`;
-  spine.style.height = `${height}in`;
-  spine.style.setProperty("--cover-bg", settings.coverBg);
-  spine.style.setProperty("--cover-text", settings.coverTextColor);
-  spine.innerHTML = `<span>${escapeHtml(settings.title)}</span>`;
-  sheet.appendChild(spine);
-}
-
-function render() {
-  const settings = readSettings();
-  const pages = buildLogicalPages(settings);
-  const preview = $("preview");
+function renderPrintPreview() {
+  const s = readSettings();
+  const pages = buildLogicalPages(s);
+  const grid = bestGrid(s.sheet, s.page);
+  const perSide = Math.max(1, grid.count);
+  const totalSides = Math.ceil(pages.length / perSide);
+  const hasSpine = s.forceSpine || pages.length > s.stapleLimit;
+  const signatureCount = Math.ceil(pages.length / s.signatureSize);
+  const preview = $("printPreview");
   preview.innerHTML = "";
 
-  const hasSpine = settings.forceSpine || pages.length > settings.stapleLimit;
-  const signatureCount = Math.ceil(pages.length / settings.signatureSize);
-  const orders = bookletOrder(pages.length);
-
   $("summary").innerHTML = `
-    <strong>${pages.length} booklet pages</strong> on ${orders.length} sheets, double-sided.
-    Finished size: ${settings.page.w.toFixed(3)} × ${settings.page.h.toFixed(3)} in.
-    Binding: ${hasSpine ? `sewn signatures with an estimated ${Math.max(.04, pages.length * settings.paperThickness).toFixed(3)} in spine` : "stapled booklet / no spine"}.
-    ${hasSpine ? `Signature marks: ${signatureCount} group${signatureCount === 1 ? "" : "s"}. Cover/spine sheets do not receive binding alignment marks.` : ""}
+    <strong>${pages.length} book pages</strong>. ${perSide} page${perSide === 1 ? "" : "s"} fit per ${s.sheet.w} × ${s.sheet.h} in sheet side.
+    Grid: ${grid.cols} × ${grid.rows}${grid.rotate ? ", rotated 90°" : ""}.
+    Finished page: ${s.page.w.toFixed(2)} × ${s.page.h.toFixed(2)} in.
+    Binding: ${hasSpine ? "spine/sewn signature guides shown as small black edge blocks only" : "stapled/folded booklet; no spine"}.
   `;
 
-  const scale = Math.min(1, 900 / (settings.sheet.w * 96));
-  preview.style.setProperty("--scale", scale);
+  const scale = Math.min(1, 900 / (s.sheet.w * 96));
+  for (let side = 0; side < totalSides; side++) {
+    const sheet = document.createElement("div");
+    sheet.className = "sheet";
+    sheet.dataset.pdfPage = "true";
+    sheet.style.width = `${s.sheet.w}in`;
+    sheet.style.height = `${s.sheet.h}in`;
+    sheet.style.transformOrigin = "top center";
+    sheet.style.transform = `scale(${scale})`;
+    sheet.style.marginBottom = `${(scale - 1) * s.sheet.h}in`;
 
-  orders.forEach((order, sheetIndex) => {
-    ["front", "back"].forEach(side => {
-      const sheet = document.createElement("div");
-      sheet.className = "sheet";
-      sheet.dataset.pdfPage = "true";
-      sheet.style.width = `${settings.sheet.w}in`;
-      sheet.style.height = `${settings.sheet.h}in`;
-      sheet.style.transformOrigin = "top center";
-      sheet.style.transform = `scale(${scale})`;
-      sheet.style.marginBottom = `${(scale - 1) * settings.sheet.h}in`;
+    const label = document.createElement("div");
+    label.className = "sheet-title";
+    label.textContent = `Sheet side ${side + 1}`;
+    sheet.appendChild(label);
 
-      const label = document.createElement("div");
-      label.className = "sheet-title";
-      label.textContent = `Sheet ${sheetIndex + 1} — ${side}`;
-      sheet.appendChild(label);
+    const startX = (s.sheet.w - grid.cols * grid.w) / 2;
+    const startY = (s.sheet.h - grid.rows * grid.h) / 2;
 
-      const totalBookletWidth = settings.page.w * 2;
-      const startX = (settings.sheet.w - totalBookletWidth) / 2;
-      const startY = (settings.sheet.h - settings.page.h) / 2;
-
-      const [leftPageNo, rightPageNo] = order[side];
-      const leftPage = pages[leftPageNo - 1];
-      const rightPage = pages[rightPageNo - 1];
-
-      sheet.appendChild(pageElement(leftPage, settings, startX, startY));
-      sheet.appendChild(pageElement(rightPage, settings, startX + settings.page.w, startY));
-      addGuides(sheet, settings, startX, startY);
-
-      if (hasSpine && side === "front") {
-        const hasCoverOrSpine = leftPage?.isCover || rightPage?.isCover;
-        if (hasCoverOrSpine) {
-          addSpine(sheet, settings, startX + settings.page.w, startY, settings.page.h, pages.length);
-        } else {
-          const signatureIndex = Math.floor(sheetIndex * 4 / settings.signatureSize);
-          addSewingMarks(sheet, signatureIndex, signatureCount, settings, startX + settings.page.w - .03, startY, settings.page.h);
-        }
+    for (let i = 0; i < perSide; i++) {
+      const page = pages[side * perSide + i];
+      if (!page) continue;
+      const col = i % grid.cols;
+      const row = Math.floor(i / grid.cols);
+      const x = startX + col * grid.w;
+      const y = startY + row * grid.h;
+      sheet.appendChild(pageElement(page, s, x, y, grid.rotate));
+      if (hasSpine && !page.isCover && !page.type.includes("cover")) {
+        const sigIndex = Math.floor((page.n - 1) / s.signatureSize);
+        addSpineGuide(sheet, s, x + .01, y + .02, grid.h - .04, sigIndex, signatureCount);
       }
+    }
 
-      preview.appendChild(sheet);
-    });
-  });
+    addGridGuides(sheet, s, grid, startX, startY);
+    preview.appendChild(sheet);
+  }
+}
+
+function renderReader() {
+  const s = readSettings();
+  const pages = buildLogicalPages(s);
+  const mode = $("readerMode").value;
+  readerIndex = Math.max(0, Math.min(readerIndex, pages.length - 1));
+  const wrap = $("readerPreview");
+  wrap.innerHTML = "";
+
+  const spread = document.createElement("div");
+  spread.className = "reader-spread";
+
+  const maxW = Math.min(window.innerWidth - 520, 900);
+  const scale = Math.min(4, Math.max(1.2, maxW / ((mode === "spread" ? s.page.w * 2.2 : s.page.w) * 96)));
+  spread.style.transform = `scale(${scale})`;
+
+  const pageList = [];
+  if (mode === "spread") {
+    if (readerIndex === 0) pageList.push(null, pages[0]);
+    else pageList.push(pages[readerIndex], pages[readerIndex + 1]);
+  } else {
+    pageList.push(pages[readerIndex]);
+  }
+
+  for (const p of pageList) {
+    const shell = document.createElement("div");
+    shell.className = "reader-page-shell";
+    shell.style.width = `${s.page.w}in`;
+    shell.style.height = `${s.page.h}in`;
+    if (p) shell.appendChild(pageElement(p, s, 0, 0, false, true));
+    spread.appendChild(shell);
+  }
+  wrap.appendChild(spread);
+}
+
+function renderLibrary() {
+  const grid = $("libraryGrid");
+  grid.innerHTML = library.map(book => `
+    <article class="library-card" data-book-id="${book.id}">
+      <div class="library-cover" style="background:linear-gradient(to bottom, ${book.coverBg || "#7b1f2a"}, ${book.coverBg2 || "#421117"}); color:${book.coverTextColor || "#fff8e8"};">
+        <strong>${escapeHtml(book.title || "Untitled")}</strong>
+      </div>
+      <div class="library-card-body">
+        <h3>${escapeHtml(book.title || "Untitled")}</h3>
+        <p>${escapeHtml(book.author || "")}</p>
+        <div class="library-card-actions">
+          <button data-action="edit">Edit</button>
+          <button data-action="view">View</button>
+          <button data-action="export">Export</button>
+        </div>
+      </div>
+    </article>
+  `).join("");
+}
+
+function renderAll() {
+  if (currentView === "print") renderPrintPreview();
+  if (currentView === "reader") renderReader();
+  if (currentView === "library") renderLibrary();
+  if (currentView === "editor") renderChapterEditor();
+}
+
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll(".tab").forEach(btn => btn.classList.toggle("active", btn.dataset.view === view));
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  $(`${view}View`).classList.add("active");
+  renderAll();
+}
+
+function downloadJson(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 async function exportPDF() {
-  render();
-  const settings = readSettings();
+  switchView("print");
+  renderPrintPreview();
+  const s = readSettings();
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({
-    orientation: settings.sheet.h >= settings.sheet.w ? "portrait" : "landscape",
+    orientation: s.sheet.h >= s.sheet.w ? "portrait" : "landscape",
     unit: "in",
-    format: [settings.sheet.w, settings.sheet.h],
+    format: [s.sheet.w, s.sheet.h],
     compress: true,
   });
 
@@ -450,70 +620,181 @@ async function exportPDF() {
     sheet.style.marginBottom = "0";
     const canvas = await html2canvas(sheet, { scale: 3, backgroundColor: "#ffffff" });
     const img = canvas.toDataURL("image/jpeg", 0.95);
-    if (i > 0) pdf.addPage([settings.sheet.w, settings.sheet.h]);
-    pdf.addImage(img, "JPEG", 0, 0, settings.sheet.w, settings.sheet.h);
+    if (i > 0) pdf.addPage([s.sheet.w, s.sheet.h]);
+    pdf.addImage(img, "JPEG", 0, 0, s.sheet.w, s.sheet.h);
     sheet.style.transform = oldTransform;
     sheet.style.marginBottom = oldMargin;
   }
 
-  const safeTitle = (settings.title || "tiny-book").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const safeTitle = (s.title || "tiny-book").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   pdf.save(`${safeTitle || "tiny-book"}.pdf`);
 }
 
+function importJsonFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (Array.isArray(data.books)) {
+        library = data.books.map(normalizeBook);
+        saveLibrary();
+        setActiveBook(library[0]);
+        switchView("library");
+      } else {
+        const book = normalizeBook(data);
+        book.id = uid();
+        library.push(book);
+        saveLibrary();
+        setActiveBook(book);
+        switchView("editor");
+      }
+    } catch (err) {
+      alert("That JSON file could not be imported.");
+    }
+  };
+  reader.readAsText(file);
+}
+
 function wireEvents() {
-  const inputs = document.querySelectorAll("input, textarea, select");
-  inputs.forEach(input => input.addEventListener("input", () => {
-    if (reusableIds.includes(input.id)) saveReusableSettings();
-    render();
-  }));
+  document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => switchView(btn.dataset.view)));
 
-  $("author").addEventListener("input", () => {
-    if (!$("copyright").dataset.touched) {
-      $("copyright").value = `© ${new Date($("pubDate").value || Date.now()).getFullYear()} ${$("author").value || "Author"}. All rights reserved.`;
-    }
+  fields().forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      if (id === "paperPreset") {
+        const p = paperPresets[$("paperPreset").value];
+        $("pageBg").value = p.bg;
+        $("pageTextColor").value = p.text;
+      }
+      if (id === "pageSize") document.querySelector(".custom-size").hidden = $("pageSize").value !== "custom";
+      syncFormToBook();
+      if (currentView === "print") renderPrintPreview();
+      if (currentView === "reader") renderReader();
+      if (currentView === "library") renderLibrary();
+    });
   });
 
-  $("pubDate").addEventListener("input", () => {
-    if (!$("copyright").dataset.touched) {
-      $("copyright").value = `© ${new Date($("pubDate").value || Date.now()).getFullYear()} ${$("author").value || "Author"}. All rights reserved.`;
-    }
-  });
-
-  $("copyright").addEventListener("input", () => $("copyright").dataset.touched = "true");
-
-  $("refreshBtn").addEventListener("click", render);
-  $("printBtn").addEventListener("click", () => window.print());
-  $("exportPdfBtn").addEventListener("click", exportPDF);
-
-  $("resetSavedBtn").addEventListener("click", () => {
-    localStorage.removeItem(STORAGE_KEY);
-    location.reload();
-  });
-
-  $("pageSize").addEventListener("change", () => {
-    document.querySelector(".custom-size").hidden = $("pageSize").value !== "custom";
-    saveReusableSettings();
-    render();
-  });
-
-  $("coverImage").addEventListener("change", event => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      coverImageData = "";
-      render();
-      return;
-    }
+  $("coverImage").addEventListener("change", e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      coverImageData = reader.result;
-      render();
+      activeBook.coverImageData = reader.result;
+      saveLibrary();
+      renderAll();
     };
     reader.readAsDataURL(file);
   });
+
+  $("chaptersEditor").addEventListener("input", e => {
+    activeBook.chapters = readChaptersFromEditor();
+    saveLibrary();
+    if (currentView === "reader") renderReader();
+  });
+
+  $("chaptersEditor").addEventListener("change", e => {
+    if (!e.target.classList.contains("chapter-image")) return;
+    const card = e.target.closest(".chapter-card");
+    const id = card.dataset.chapterId;
+    const chapter = activeBook.chapters.find(c => c.id === id);
+    const file = e.target.files?.[0];
+    if (!file || !chapter) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      chapter.imageData = reader.result;
+      saveLibrary();
+      renderChapterEditor();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  $("chaptersEditor").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    activeBook.chapters = readChaptersFromEditor();
+    const card = btn.closest(".chapter-card");
+    const id = card.dataset.chapterId;
+    const idx = activeBook.chapters.findIndex(c => c.id === id);
+    if (btn.dataset.action === "remove" && activeBook.chapters.length > 1) activeBook.chapters.splice(idx, 1);
+    if (btn.dataset.action === "up" && idx > 0) [activeBook.chapters[idx - 1], activeBook.chapters[idx]] = [activeBook.chapters[idx], activeBook.chapters[idx - 1]];
+    if (btn.dataset.action === "down" && idx < activeBook.chapters.length - 1) [activeBook.chapters[idx + 1], activeBook.chapters[idx]] = [activeBook.chapters[idx], activeBook.chapters[idx + 1]];
+    saveLibrary();
+    renderChapterEditor();
+  });
+
+  $("addChapterBtn").addEventListener("click", () => {
+    activeBook.chapters = readChaptersFromEditor();
+    activeBook.chapters.push({ id: uid(), title: "New Chapter", text: "", imageData: "", imagePlacement: "none", imageWidth: 70 });
+    saveLibrary();
+    renderChapterEditor();
+  });
+
+  $("saveBookBtn").addEventListener("click", () => {
+    syncFormToBook();
+    alert("Book saved to local library.");
+  });
+
+  $("newBookBtn").addEventListener("click", () => {
+    const b = normalizeBook({ ...clone(sampleBook), id: uid(), title: "Untitled Tiny Book", chapters: [{ id: uid(), title: "New Chapter", text: "", imageData: "", imagePlacement: "none", imageWidth: 70 }] });
+    library.push(b);
+    saveLibrary();
+    setActiveBook(b);
+  });
+
+  $("duplicateBookBtn").addEventListener("click", () => {
+    syncFormToBook();
+    const b = normalizeBook({ ...clone(activeBook), id: uid(), title: activeBook.title + " Copy" });
+    library.push(b);
+    saveLibrary();
+    setActiveBook(b);
+  });
+
+  $("deleteBookBtn").addEventListener("click", () => {
+    if (library.length <= 1) return alert("Keep at least one book in the library.");
+    if (!confirm("Delete this book from local storage?")) return;
+    library = library.filter(b => b.id !== activeBook.id);
+    saveLibrary();
+    setActiveBook(library[0]);
+  });
+
+  $("readerMode").addEventListener("change", renderReader);
+  $("prevSpreadBtn").addEventListener("click", () => {
+    readerIndex = Math.max(0, readerIndex - ($("readerMode").value === "spread" ? 2 : 1));
+    renderReader();
+  });
+  $("nextSpreadBtn").addEventListener("click", () => {
+    readerIndex += $("readerMode").value === "spread" ? 2 : 1;
+    renderReader();
+  });
+
+  $("libraryGrid").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    const card = btn.closest(".library-card");
+    const book = library.find(b => b.id === card.dataset.bookId);
+    if (!book) return;
+    if (btn.dataset.action === "edit") { setActiveBook(book); switchView("editor"); }
+    if (btn.dataset.action === "view") { setActiveBook(book); switchView("reader"); }
+    if (btn.dataset.action === "export") downloadJson(`${(book.title || "book").replace(/[^a-z0-9]+/gi, "-")}.json`, book);
+  });
+
+  $("exportBookJsonBtn").addEventListener("click", () => {
+    syncFormToBook();
+    downloadJson(`${(activeBook.title || "book").replace(/[^a-z0-9]+/gi, "-")}.json`, activeBook);
+  });
+  $("exportLibraryJsonBtn").addEventListener("click", () => downloadJson("tiny-pockets-press-library.json", { books: library }));
+  $("exportLibraryBtn").addEventListener("click", () => downloadJson("tiny-pockets-press-library.json", { books: library }));
+  $("importJsonInput").addEventListener("change", e => e.target.files?.[0] && importJsonFile(e.target.files[0]));
+  $("importLibraryBtn").addEventListener("click", () => $("importJsonInput").click());
+  $("exportPdfBtn").addEventListener("click", exportPDF);
+  $("printBtn").addEventListener("click", () => { switchView("print"); setTimeout(() => window.print(), 50); });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadInitialValues();
+  populateSelects();
+  loadLibrary();
+  loadBookIntoForm();
   wireEvents();
-  render();
+  renderAll();
 });

@@ -1,42 +1,37 @@
-# Tiny Pockets Press
+# Tiny Pockets Press v3
 
-A static HTML/CSS/JavaScript app for creating printable tiny books, microfiction chapbooks, zines, and miniature folded booklets.
+A static browser app for making tiny printable books, microfiction collections, zines, and miniature chapbooks.
 
-## What changed in this version
+## Major features
 
-- Supports very small custom page sizes, down to around 1 × 1 inch.
-- Includes a Letter 4×4 grid preset: 2.125 × 2.75 inch finished pages.
-- Removes physical sheet borders from print output.
-- Adds cut guides and fold guides.
-- Prevents sewn-signature alignment marks from appearing on the cover/spine sheet.
-- Adds chapter/story support.
-- Adds optional table of contents.
-- Adds publisher, copyright, printing, volume, number, and series metadata.
-- Reusable settings are saved in `localStorage`, while story/title stay fresh.
-- Includes the default sample story: “Santa’s Little OSHA Violation.”
+- Finished page sizes down to 0.5 × 0.5 inches.
+- Automatically fits as many book pages as possible onto the selected sheet size.
+- Rotates pages 90° when that allows more pages per sheet.
+- Print-layout view shows the full 8.5 × 11 paper layout with cut/fold guides.
+- Reader view supports single-page and two-page spread flipping.
+- The settings sidebar is independently scrollable from the workspace.
+- Separate editable chapters instead of one giant story textbox.
+- Per-chapter images with placement and width controls.
+- Markdown support for bold, italic, underline via HTML, strikethrough, and tables.
+- Book JSON import/export.
+- Whole library JSON import/export.
+- Local-storage library with cover cards.
+- Paper color presets and texture effects.
+- Page background/text colors plus cover gradient options.
+- Editable text sizes and colors for cover, title page, TOC, chapter headings, body, and page numbers.
+- Spine guides appear as simple black edge boxes only.
 
-## Chapter format
+## CDN libraries
 
-Separate stories or chapters with a line containing three dashes:
+The app uses these browser-side CDN libraries:
 
-```text
-First Story Title
+- Marked
+- DOMPurify
+- html2canvas
+- jsPDF
 
-Story text...
+No backend is required.
 
----
+## Notes
 
-Second Story Title
-
-Story text...
-```
-
-## Printing
-
-Export to PDF or print directly. For double-sided booklet tests, try a small sample first and confirm your printer’s flip direction.
-
-## Files
-
-- `index.html`
-- `styles.css`
-- `app.js`
+This is still a prototype. It lays pages onto print sheets as a cut-and-stack/grid workflow. Traditional imposed booklet signatures are more complex and would be a future mode.
