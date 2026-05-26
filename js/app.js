@@ -1,8 +1,10 @@
 document.addEventListener("DOMContentLoaded", async function () {
   TPP.populate();
   await TPP.load();
+  TPP.view = TPP.initialView();
+  if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();
-  TPP.renderAll();
+  TPP.switchView(TPP.view, true);
   TPP.restoreSettingsUi();
   TPP.bindSettingsUiPersistence();
 
@@ -228,6 +230,16 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
 });
 
+TPP.validViews = function () {
+  return ["editor", "interior", "cover", "reader", "library"];
+};
+TPP.initialView = function () {
+  const hash = window.location.hash.replace(/^#/, "");
+  const stored = TPP.readSettingsUi().view;
+  if (TPP.validViews().includes(hash)) return hash;
+  if (TPP.validViews().includes(stored)) return stored;
+  return TPP.view || "editor";
+};
 TPP.readSettingsUi = function () {
   try {
     return JSON.parse(localStorage.getItem(TPP.UI) || "{}");
@@ -264,7 +276,8 @@ TPP.saveSettingsUi = function () {
   });
   TPP.writeSettingsUi({
     open: open,
-    scrollTop: controls ? controls.scrollTop : 0
+    scrollTop: controls ? controls.scrollTop : 0,
+    view: TPP.view
   });
 };
 TPP.bindSettingsUiPersistence = function () {
@@ -281,10 +294,19 @@ TPP.bindSettingsUiPersistence = function () {
     });
   }
   window.addEventListener("beforeunload", TPP.saveSettingsUi);
+  window.addEventListener("hashchange", function () {
+    const view = TPP.initialView();
+    if (view !== TPP.view) TPP.switchView(view, true);
+  });
 };
 
-TPP.switchView = function (view) {
+TPP.switchView = function (view, fromHash) {
+  if (!TPP.validViews().includes(view)) view = "editor";
   TPP.view = view;
+  if (!fromHash && window.location.hash !== "#" + view) {
+    history.replaceState(null, "", "#" + view);
+  }
+  TPP.saveSettingsUi();
   document.querySelectorAll(".tab").forEach(function (button) {
     button.classList.toggle("active", button.dataset.view === view);
   });
