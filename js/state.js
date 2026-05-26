@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 2;
+TPP.SCHEMA_VERSION = 3;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -49,11 +49,28 @@ TPP.fileFieldRefs = function (book) {
     refs[fileId] = refs[fileId] || [];
     refs[fileId].push(ref);
   };
-  push(book && book.coverImageId, { key: "coverImageId", label: "Front Cover Image" });
-  push(book && book.backImageId, { key: "backImageId", label: "Back Cover Image" });
-  push(book && book.spineImageId, { key: "spineImageId", label: "Spine Image" });
+  (Array.isArray(book && book.imageElements) ? book.imageElements : []).forEach(function (element) {
+    if (!element || !element.fileId) return;
+    let label = "Image";
+    if (element.location === "front") label = "Front Cover Image";
+    else if (element.location === "back") label = "Back Cover Image";
+    else if (element.location === "spine") label = "Spine Image";
+    else if (element.location === "chapter") {
+      const chapter = ((book && book.chapters) || []).find(function (entry) { return entry && entry.id === element.part; });
+      label = 'Chapter Image: "' + ((chapter && chapter.title) || "Untitled") + '"';
+    }
+    push(element.fileId, {
+      key: "imageElement:" + (element.id || TPP.imageElementKey(element.location, element.part)),
+      label: label,
+      imageElementId: element.id || "",
+      location: element.location || "",
+      part: element.part || ""
+    });
+  });
   (Array.isArray(book && book.chapters) ? book.chapters : []).forEach(function (chapter, index) {
-    push(chapter && chapter.imageId, {
+    if (!chapter || !chapter.imageId) return;
+    if ((refs[chapter.imageId] || []).some(function (ref) { return ref.chapterId === chapter.id; })) return;
+    push(chapter.imageId, {
       key: "chapter:" + (chapter && chapter.id ? chapter.id : index),
       label: 'Chapter Image: "' + ((chapter && chapter.title) || ("Chapter " + (index + 1))) + '"',
       chapterId: chapter && chapter.id ? chapter.id : "",
@@ -133,6 +150,9 @@ TPP.normalizeFiles = function (book) {
   TPP.migrateInlineImage(book, "spineImageData", "spineImageId");
   ["coverImageId", "backImageId", "spineImageId"].forEach(function (key) {
     if (book[key] && idMap[book[key]]) book[key] = idMap[book[key]];
+  });
+  (Array.isArray(book.imageElements) ? book.imageElements : []).forEach(function (element) {
+    if (element && element.fileId && idMap[element.fileId]) element.fileId = idMap[element.fileId];
   });
   (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
     if (chapter && chapter.imageId && idMap[chapter.imageId]) chapter.imageId = idMap[chapter.imageId];
@@ -281,6 +301,131 @@ TPP.markBookExported = function (book, stamp) {
 TPP.markBookImported = function (book, stamp) {
   if (!book) return;
   book.lastImportedAt = stamp || TPP.nowIso();
+};
+TPP.imageElementKey = function (location, part) {
+  return String(location || "") + ":" + String(part || "");
+};
+TPP.findImageElement = function (book, location, part) {
+  const key = TPP.imageElementKey(location, part);
+  const list = Array.isArray(book && book.imageElements) ? book.imageElements : [];
+  return list.find(function (entry) {
+    return TPP.imageElementKey(entry && entry.location, entry && entry.part) === key;
+  }) || null;
+};
+TPP.findChapterImageElement = function (book, chapter) {
+  if (!book || !chapter) return null;
+  const list = Array.isArray(book.imageElements) ? book.imageElements : [];
+  if (chapter.imageElementId) {
+    const byId = list.find(function (entry) { return entry && entry.id === chapter.imageElementId; });
+    if (byId) return byId;
+  }
+  return TPP.findImageElement(book, "chapter", chapter.id);
+};
+TPP.defaultImageElements = function (book, base) {
+  const source = book || {};
+  const fallback = base || source || {};
+  return [
+    { id: "front-cover-image", location: "front", part: "cover", fileId: source.coverImageId || fallback.coverImageId || "", x: Number(source.coverImgX) || 0, y: Number(source.coverImgY) || 0, zoom: Number(source.coverImgZoom) || Number(fallback.coverImgZoom) || 120, rotate: Number(source.coverImgRotate) || 0, placement: "cover" },
+    { id: "back-cover-image", location: "back", part: "cover", fileId: source.backImageId || fallback.backImageId || "", x: Number(source.backImgX) || 0, y: Number(source.backImgY) || 0, zoom: Number(source.backImgZoom) || Number(fallback.backImgZoom) || 120, rotate: Number(source.backImgRotate) || 0, placement: "cover" },
+    { id: "spine-image", location: "spine", part: "cover", fileId: source.spineImageId || fallback.spineImageId || "", x: Number(source.spineImgX) || 0, y: Number(source.spineImgY) || 0, zoom: Number(source.spineImgZoom) || Number(fallback.spineImgZoom) || 100, rotate: Number(source.spineImgRotate) || 0, placement: "cover" }
+  ];
+};
+TPP.ensureChapterImageElements = function (book) {
+  if (!book) return;
+  book.imageElements = Array.isArray(book.imageElements) ? book.imageElements : [];
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
+    if (!chapter) return;
+    let element = TPP.findChapterImageElement(book, chapter);
+    if (!element) {
+      element = {
+        id: TPP.uid(),
+        location: "chapter",
+        part: chapter.id,
+        fileId: chapter.imageId || "",
+        x: 0,
+        y: 0,
+        zoom: Math.min(100, Math.max(10, Number(chapter.imageZoom || chapter.imageWidth) || 70)),
+        rotate: Number(chapter.imageRotate) || 0,
+        placement: chapter.imagePlacement || "none"
+      };
+      book.imageElements.push(element);
+    }
+    if (!element.id) element.id = TPP.uid();
+    element.location = "chapter";
+    element.part = chapter.id;
+    chapter.imageElementId = element.id;
+  });
+  const chapterIds = new Set((Array.isArray(book.chapters) ? book.chapters : []).map(function (chapter) { return chapter && chapter.id; }));
+  book.imageElements = book.imageElements.filter(function (element) {
+    return element && element.location !== "chapter" || chapterIds.has(element && element.part);
+  });
+};
+TPP.migrateImageElements = function (book, base) {
+  const defaults = TPP.defaultImageElements(book, base);
+  const existing = Array.isArray(book.imageElements) ? book.imageElements : [];
+  const byKey = new Map(existing.map(function (entry) {
+    return [TPP.imageElementKey(entry && entry.location, entry && entry.part), entry];
+  }));
+  const chapterElements = existing.filter(function (entry) {
+    return entry && entry.location === "chapter";
+  });
+  book.imageElements = defaults.map(function (entry) {
+    return Object.assign({}, entry, byKey.get(TPP.imageElementKey(entry.location, entry.part)) || {});
+  }).concat(chapterElements);
+  TPP.ensureChapterImageElements(book);
+};
+TPP.syncLegacyImageFieldsFromElements = function (book) {
+  const front = TPP.findImageElement(book, "front", "cover");
+  const back = TPP.findImageElement(book, "back", "cover");
+  const spine = TPP.findImageElement(book, "spine", "cover");
+  if (front) {
+    book.coverImageId = front.fileId || "";
+    book.coverImgX = Number(front.x) || 0;
+    book.coverImgY = Number(front.y) || 0;
+    book.coverImgZoom = Number(front.zoom) || 120;
+    book.coverImgRotate = Number(front.rotate) || 0;
+  }
+  if (back) {
+    book.backImageId = back.fileId || "";
+    book.backImgX = Number(back.x) || 0;
+    book.backImgY = Number(back.y) || 0;
+    book.backImgZoom = Number(back.zoom) || 120;
+    book.backImgRotate = Number(back.rotate) || 0;
+  }
+  if (spine) {
+    book.spineImageId = spine.fileId || "";
+    book.spineImgX = Number(spine.x) || 0;
+    book.spineImgY = Number(spine.y) || 0;
+    book.spineImgZoom = Number(spine.zoom) || 100;
+    book.spineImgRotate = Number(spine.rotate) || 0;
+  }
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
+    const element = TPP.findChapterImageElement(book, chapter);
+    if (!element) return;
+    chapter.imageElementId = element.id || "";
+    chapter.imageId = element.fileId || "";
+    chapter.imagePlacement = element.placement || "none";
+    chapter.imageZoom = Math.min(100, Math.max(10, Number(element.zoom) || 70));
+    chapter.imageWidth = chapter.imageZoom;
+    chapter.imageRotate = Number(element.rotate) || 0;
+  });
+};
+TPP.syncImageElementsFromLegacyFields = function (book) {
+  const front = TPP.findImageElement(book, "front", "cover");
+  const back = TPP.findImageElement(book, "back", "cover");
+  const spine = TPP.findImageElement(book, "spine", "cover");
+  if (front) Object.assign(front, { fileId: book.coverImageId || "", x: Number(book.coverImgX) || 0, y: Number(book.coverImgY) || 0, zoom: Number(book.coverImgZoom) || 120, rotate: Number(book.coverImgRotate) || 0, placement: "cover" });
+  if (back) Object.assign(back, { fileId: book.backImageId || "", x: Number(book.backImgX) || 0, y: Number(book.backImgY) || 0, zoom: Number(book.backImgZoom) || 120, rotate: Number(book.backImgRotate) || 0, placement: "cover" });
+  if (spine) Object.assign(spine, { fileId: book.spineImageId || "", x: Number(book.spineImgX) || 0, y: Number(book.spineImgY) || 0, zoom: Number(book.spineImgZoom) || 100, rotate: Number(book.spineImgRotate) || 0, placement: "cover" });
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
+    const element = TPP.findChapterImageElement(book, chapter);
+    if (!element) return;
+    element.fileId = chapter.imageId || element.fileId || "";
+    element.zoom = Math.min(100, Math.max(10, Number(chapter.imageZoom || chapter.imageWidth) || 70));
+    element.rotate = Number(chapter.imageRotate) || 0;
+    element.placement = chapter.imagePlacement || "none";
+    chapter.imageElementId = element.id || "";
+  });
 };
 TPP.textElementKey = function (location, part) {
   return String(location || "") + ":" + String(part || "");
@@ -449,10 +594,6 @@ TPP.norm = function (book) {
   out.imageExportDpi = TPP.dpi(out.imageExportDpi);
   out.mediaCaptionSize = TPP.mediaCaptionSize(out.mediaCaptionSize, base.mediaCaptionSize);
   TPP.migrateCoverTextSettings(out, base);
-  TPP.migrateTextElements(out, base);
-  TPP.syncLegacyTextFieldsFromElements(out);
-  TPP.hydrateBookDates(out);
-  TPP.normalizeFiles(out);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
     const normalized = Object.assign({
@@ -460,7 +601,9 @@ TPP.norm = function (book) {
       title: "Chapter " + (index + 1),
       text: "",
       imageId: "",
+      imageElementId: "",
       imagePlacement: "none",
+      imageZoom: 70,
       imageWidth: 70,
       imageRotate: 0,
       level: 0,
@@ -470,15 +613,27 @@ TPP.norm = function (book) {
       tocTitle: ""
     }, chapter);
     TPP.migrateChapterInlineImage(out, normalized);
+    normalized.imageZoom = Math.min(100, Math.max(10, Number(normalized.imageZoom || normalized.imageWidth) || 70));
+    normalized.imageWidth = normalized.imageZoom;
     return normalized;
   });
+  TPP.migrateTextElements(out, base);
+  TPP.migrateImageElements(out, base);
+  TPP.syncLegacyTextFieldsFromElements(out);
+  TPP.syncLegacyImageFieldsFromElements(out);
+  TPP.hydrateBookDates(out);
+  TPP.normalizeFiles(out);
   const fileIds = new Set(out.files.map(function (file) { return file.id; }));
   ["coverImageId", "backImageId", "spineImageId"].forEach(function (key) {
     if (out[key] && !fileIds.has(out[key])) out[key] = "";
   });
+  (Array.isArray(out.imageElements) ? out.imageElements : []).forEach(function (element) {
+    if (element && element.fileId && !fileIds.has(element.fileId)) element.fileId = "";
+  });
   out.chapters.forEach(function (chapter) {
     if (chapter.imageId && !fileIds.has(chapter.imageId)) chapter.imageId = "";
   });
+  TPP.syncLegacyImageFieldsFromElements(out);
   return out;
 };
 TPP.load = async function () {

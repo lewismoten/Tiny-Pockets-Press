@@ -152,16 +152,20 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   document.getElementById("addChapter").onclick = function () {
     TPP.sync();
-    TPP.active.chapters.push({ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imagePlacement: "none", imageWidth: 70, imageRotate: 0, level: 0, isSubsection: false, isMetadata: false, includeInToc: true });
+    TPP.active.chapters.push({ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imageElementId: "", imagePlacement: "none", imageZoom: 70, imageWidth: 70, imageRotate: 0, level: 0, isSubsection: false, isMetadata: false, includeInToc: true });
+    if (TPP.migrateImageElements) TPP.migrateImageElements(TPP.active, TPP.fallbackBook());
+    if (TPP.syncLegacyImageFieldsFromElements) TPP.syncLegacyImageFieldsFromElements(TPP.active);
     TPP.currentChapter = TPP.active.chapters.length - 1;
     TPP.save();
     TPP.renderAll();
   };
 
   document.getElementById("newBook").onclick = function () {
-    const book = TPP.fallbackBook();
+    const book = TPP.norm(TPP.fallbackBook());
     book.title = "Untitled Tiny Book";
-    book.chapters = [{ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imagePlacement: "none", imageWidth: 70, imageRotate: 0, level: 0, isSubsection: false, isMetadata: false, includeInToc: true }];
+    book.chapters = [{ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imageElementId: "", imagePlacement: "none", imageZoom: 70, imageWidth: 70, imageRotate: 0, level: 0, isSubsection: false, isMetadata: false, includeInToc: true }];
+    if (TPP.migrateImageElements) TPP.migrateImageElements(book, TPP.fallbackBook());
+    if (TPP.syncLegacyImageFieldsFromElements) TPP.syncLegacyImageFieldsFromElements(book);
     TPP.library.push(book);
     TPP.save();
     TPP.setActive(book);
@@ -461,29 +465,31 @@ TPP.assetDialogTarget = null;
 TPP.assetTargetSpec = function (targetType, targetKey) {
   if (targetType === "book") {
     const map = {
-      coverImageId: { field: "coverImageId", label: "Front Cover Image" },
-      backImageId: { field: "backImageId", label: "Back Cover Image" },
-      spineImageId: { field: "spineImageId", label: "Spine Image" }
+      coverImageId: { imageElement: TPP.findImageElement(TPP.active, "front", "cover"), label: "Front Cover Image" },
+      backImageId: { imageElement: TPP.findImageElement(TPP.active, "back", "cover"), label: "Back Cover Image" },
+      spineImageId: { imageElement: TPP.findImageElement(TPP.active, "spine", "cover"), label: "Spine Image" }
     };
     return map[targetKey] || null;
   }
   if (targetType === "chapter") {
     const chapter = (TPP.active && TPP.active.chapters || []).find(function (entry) { return entry.id === targetKey; });
     if (!chapter) return null;
-    return { chapter: chapter, field: "imageId", label: 'Chapter Image: "' + (chapter.title || "Untitled") + '"' };
+    return { chapter: chapter, imageElement: TPP.findChapterImageElement(TPP.active, chapter), label: 'Chapter Image: "' + (chapter.title || "Untitled") + '"' };
   }
   return null;
 };
 TPP.assetTargetValue = function (targetType, targetKey) {
   const spec = TPP.assetTargetSpec(targetType, targetKey);
   if (!spec) return "";
-  return spec.chapter ? (spec.chapter[spec.field] || "") : (TPP.active[spec.field] || "");
+  return spec.imageElement ? (spec.imageElement.fileId || "") : "";
 };
 TPP.setAssetTargetValue = function (targetType, targetKey, fileId) {
   const spec = TPP.assetTargetSpec(targetType, targetKey);
   if (!spec) return false;
-  if (spec.chapter) spec.chapter[spec.field] = fileId || "";
-  else TPP.active[spec.field] = fileId || "";
+  if (!spec.imageElement) return false;
+  spec.imageElement.fileId = fileId || "";
+  if (spec.chapter) spec.chapter.imageId = spec.imageElement.fileId;
+  if (TPP.syncLegacyImageFieldsFromElements) TPP.syncLegacyImageFieldsFromElements(TPP.active);
   return true;
 };
 TPP.assetSlotHtml = function (label, targetKey, fileId, alt) {
@@ -494,9 +500,12 @@ TPP.refreshAssetSlots = function () {
   const coverSlot = document.getElementById("coverImageSlot");
   const backSlot = document.getElementById("backImageSlot");
   const spineSlot = document.getElementById("spineImageSlot");
-  if (coverSlot) coverSlot.innerHTML = TPP.assetSlotHtml("Cover Image", "coverImageId", TPP.active.coverImageId, TPP.active.title || "Cover image");
-  if (backSlot) backSlot.innerHTML = TPP.assetSlotHtml("Back Image", "backImageId", TPP.active.backImageId, (TPP.active.title || "Book") + " back image");
-  if (spineSlot) spineSlot.innerHTML = TPP.assetSlotHtml("Spine Image", "spineImageId", TPP.active.spineImageId, (TPP.active.title || "Book") + " spine image");
+  const front = TPP.findImageElement(TPP.active, "front", "cover");
+  const back = TPP.findImageElement(TPP.active, "back", "cover");
+  const spine = TPP.findImageElement(TPP.active, "spine", "cover");
+  if (coverSlot) coverSlot.innerHTML = TPP.assetSlotHtml("Cover Image", "coverImageId", front && front.fileId, TPP.active.title || "Cover image");
+  if (backSlot) backSlot.innerHTML = TPP.assetSlotHtml("Back Image", "backImageId", back && back.fileId, (TPP.active.title || "Book") + " back image");
+  if (spineSlot) spineSlot.innerHTML = TPP.assetSlotHtml("Spine Image", "spineImageId", spine && spine.fileId, (TPP.active.title || "Book") + " spine image");
 };
 TPP.assetCardHtml = function (file, currentId) {
   const refs = TPP.fileReferences(TPP.active, file.id);

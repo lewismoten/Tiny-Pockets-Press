@@ -184,10 +184,12 @@ TPP.buildPages = function () {
       return;
     }
 
-    const chapterImage = TPP.fileData(settings, chapter.imageId);
-    if (chapterImage && chapter.imagePlacement !== "none") {
-      const imageHtml = '<figure class="figure image-figure"><img src="' + chapterImage + '" style="width:' + Math.min(100, Math.max(10, Number(chapter.imageWidth) || 70)) + '%;transform:rotate(' + (Number(chapter.imageRotate) || 0) + 'deg)"><figcaption class="caption"></figcaption></figure>';
-      if (chapter.imagePlacement === "own") {
+    const chapterImageElement = TPP.findChapterImageElement(settings, chapter);
+    const chapterImage = TPP.fileData(settings, chapterImageElement && chapterImageElement.fileId);
+    const chapterPlacement = (chapterImageElement && chapterImageElement.placement) || chapter.imagePlacement;
+    if (chapterImage && chapterPlacement !== "none") {
+      const imageHtml = '<figure class="figure image-figure"><img src="' + chapterImage + '" style="width:' + Math.min(100, Math.max(10, Number((chapterImageElement && chapterImageElement.zoom) || chapter.imageZoom || chapter.imageWidth) || 70)) + '%;transform:translate(' + (Number(chapterImageElement && chapterImageElement.x) || 0) + '%,' + (Number(chapterImageElement && chapterImageElement.y) || 0) + '%) rotate(' + (Number((chapterImageElement && chapterImageElement.rotate) || chapter.imageRotate) || 0) + 'deg)"><figcaption class="caption"></figcaption></figure>';
+      if (chapterPlacement === "own") {
         makePage("chapter-image", heading + imageHtml);
         heading = "";
       } else heading += imageHtml;

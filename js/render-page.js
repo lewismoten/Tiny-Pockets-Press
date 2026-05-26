@@ -64,19 +64,28 @@ TPP.coverTextBox = function (settings, part, className) {
   if (!element || element.enabled === false || !String(text || "").trim()) return "";
   return '<div class="cover-el ' + className + '" style="' + TPP.textBoxStyle(element, { centerX: 50 }) + '">' + TPP.esc(text) + "</div>";
 };
+TPP.imageElementStyle = function (element, fallbackZoom) {
+  const entry = element || {};
+  return "width:" + (Number(entry.zoom) || fallbackZoom || 100) + "%;" +
+    "margin-left:" + (Number(entry.x) || 0) + "%;" +
+    "margin-top:" + (Number(entry.y) || 0) + "%;" +
+    "transform:translate(-50%,-50%) rotate(" + (Number(entry.rotate) || 0) + "deg)";
+};
 TPP.coverImageSrc = function (settings, side) {
-  if (side === "front") return TPP.fileData(settings, settings.coverImageId);
-  return TPP.fileData(settings, settings.backImageId);
+  const element = TPP.findImageElement(settings, side === "front" ? "front" : "back", "cover");
+  return TPP.fileData(settings, element && element.fileId);
 };
 TPP.coverHTML = function (settings, side) {
   const image = TPP.coverImageSrc(settings, side);
   if (side === "back") {
+    const imageElement = TPP.findImageElement(settings, "back", "cover");
     const align = ["left", "center", "justify"].includes(settings.backTextAlign) ? settings.backTextAlign : "center";
     const last = ["auto", "center", "justify"].includes(settings.backTextLastLine) ? settings.backTextLastLine : "auto";
-    return (image ? '<img class="back-img" src="' + image + '" style="width:' + settings.backImgZoom + '%;margin-left:' + settings.backImgX + '%;margin-top:' + settings.backImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.backImgRotate) || 0) + 'deg)">' : "") +
+    return (image ? '<img class="back-img" src="' + image + '" style="' + TPP.imageElementStyle(imageElement, 120) + '">' : "") +
       '<div class="back-text align-' + align + ' last-' + last + '"><div class="story-text">' + TPP.safeMarkdown(settings.backText || "") + "</div></div>";
   }
-  return (image ? '<img class="cover-img" src="' + image + '" style="width:' + settings.coverImgZoom + '%;margin-left:' + settings.coverImgX + '%;margin-top:' + settings.coverImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.coverImgRotate) || 0) + 'deg)">' : "") +
+  const imageElement = TPP.findImageElement(settings, "front", "cover");
+  return (image ? '<img class="cover-img" src="' + image + '" style="' + TPP.imageElementStyle(imageElement, 120) + '">' : "") +
     TPP.coverTextBox(settings, "title", "cover-title") +
     TPP.coverTextBox(settings, "author", "cover-author") +
     TPP.coverTextBox(settings, "series", "cover-series") +
@@ -187,8 +196,9 @@ TPP.spineEl = function (settings, x, y, height) {
   const titleLength = Math.max(0.1, height - authorReserve);
   const titleStyle = spineTitle ? TPP.spineTextStyle(spineTitle, titleLength) : "";
   const authorStyle = spineAuthor ? TPP.spineTextStyle(spineAuthor, titleLength) : "";
+  const spineImage = TPP.findImageElement(settings, "spine", "cover");
   element.innerHTML =
-    (settings.spineImageId ? '<img class="spine-img" src="' + TPP.fileData(settings, settings.spineImageId) + '" style="width:' + settings.spineImgZoom + '%;margin-left:' + settings.spineImgX + '%;margin-top:' + settings.spineImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.spineImgRotate) || 0) + 'deg)">' : "") +
+    (spineImage && spineImage.fileId ? '<img class="spine-img" src="' + TPP.fileData(settings, spineImage.fileId) + '" style="' + TPP.imageElementStyle(spineImage, 100) + '">' : "") +
     (spineTitle && spineTitle.enabled !== false && String(titleText || "").trim() ? '<div class="spine-title' + (spineTitle.rotate ? " rot" : "") + '" style="' + titleStyle + '">' + TPP.esc(titleText) + "</div>" : "") +
     (hasAuthor ? '<div class="spine-author' + (spineAuthor.rotate ? " rot" : "") + '" style="' + authorStyle + '">' + TPP.esc(authorText) + "</div>" : "");
   return element;
