@@ -1,5 +1,17 @@
 window.TPP = window.TPP || {};
 
+TPP.waitForImages = async function (root) {
+  const images = Array.from(root.querySelectorAll("img"));
+  await Promise.all(images.map(function (img) {
+    if (img.complete && img.naturalWidth) return Promise.resolve();
+    return new Promise(function (resolve) {
+      const done = function () { resolve(); };
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
+    });
+  }));
+};
+
 TPP.exportPdfFrom = async function (which) {
   TPP.switchView(which);
   if (which === "interior") TPP.renderInterior();
@@ -47,15 +59,19 @@ TPP.exportReadablePdf = async function () {
   document.body.appendChild(mount);
   try {
     for (let i = 0; i < pages.length; i++) {
-      TPP.showProgress(5 + Math.round((i / pages.length) * 90), "Rendering readable PDF page " + (i + 1) + " of " + pages.length + "...");
+      TPP.showProgress(5 + Math.round((i / pages.length) * 90), "Rendering eBook PDF page " + (i + 1) + " of " + pages.length + "...");
       const page = pages[i];
       const shell = document.createElement("div");
       shell.style.position = "relative";
       shell.style.width = settings.page.w + "in";
       shell.style.height = settings.page.h + "in";
       shell.style.background = "#fff";
-      shell.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
+      const pageEl = TPP.pageEl(page, settings, 0, 0, false, true);
+      shell.appendChild(pageEl);
       mount.appendChild(shell);
+      TPP.renderQr(shell, settings);
+      await TPP.waitForImages(shell);
+      await new Promise(requestAnimationFrame);
       const canvas = await html2canvas(shell, { scale: 3, backgroundColor: "#fff" });
       if (i) pdf.addPage([settings.page.w, settings.page.h]);
       pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, settings.page.w, settings.page.h);
@@ -65,7 +81,7 @@ TPP.exportReadablePdf = async function () {
   } finally {
     mount.remove();
   }
-  const name = (settings.title || "tiny-book").toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-readable.pdf";
+  const name = (settings.title || "tiny-book").toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-ebook.pdf";
   pdf.save(name);
-  TPP.showProgress(100, "Readable PDF complete");
+  TPP.showProgress(100, "eBook PDF complete");
 };
