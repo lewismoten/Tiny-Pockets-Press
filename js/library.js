@@ -12,6 +12,61 @@ TPP.dateTime = function (value) {
     minute: "2-digit"
   });
 };
+TPP.timeOnly = function (value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+};
+TPP.shortDateTime = function (value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+};
+TPP.relativeDateTime = function (value) {
+  if (!value) return { relative: "", exact: "", label: "" };
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return { relative: String(value), exact: "", label: String(value) };
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfTarget = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const dayDiff = Math.round((startOfToday.getTime() - startOfTarget.getTime()) / day);
+  let relative = "";
+  if (diffMs < 45 * 1000) relative = "just now";
+  else if (diffMs < 90 * 1000) relative = "1 minute ago";
+  else if (diffMs < 45 * minute) relative = Math.round(diffMs / minute) + " minutes ago";
+  else if (diffMs < 90 * minute) relative = "1 hour ago";
+  else if (dayDiff === 0 && diffMs < 22 * hour) relative = Math.round(diffMs / hour) + " hours ago";
+  else if (dayDiff === 0) relative = "today";
+  else if (dayDiff === 1) relative = "yesterday";
+  else if (dayDiff < 7) relative = dayDiff + " days ago";
+  else if (dayDiff < 14) relative = "1 week ago";
+  else if (dayDiff < 31) relative = Math.round(dayDiff / 7) + " weeks ago";
+  else if (dayDiff < 45) relative = "1 month ago";
+  else if (dayDiff < 365) relative = Math.round(dayDiff / 30) + " months ago";
+  else if (dayDiff < 545) relative = "1 year ago";
+  else relative = Math.round(dayDiff / 365) + " years ago";
+  const exact = dayDiff === 0 ? TPP.timeOnly(value) : TPP.shortDateTime(value);
+  return {
+    relative: relative,
+    exact: exact,
+    label: exact ? relative + " · " + exact : relative
+  };
+};
 TPP.bookDimensions = function (book) {
   const size = TPP.sizes[book.pageSize] || { w: book.customW || 1, h: book.customH || 1 };
   return {
@@ -42,9 +97,10 @@ TPP.renderLibrary = function () {
   document.getElementById("libraryGrid").innerHTML = books.map(function (book) {
     const size = TPP.sizes[book.pageSize] || { w: book.customW || 1, h: book.customH || 1 };
     const pages = book._pageCount || "—";
+    const modified = TPP.relativeDateTime(book.updatedAt);
     return '<article class="library-card" data-id="' + book.id + '">' +
       '<div class="library-cover" style="' + (book.coverPreview ? "background-image:url(" + book.coverPreview + ")" : "background:linear-gradient(to bottom," + book.coverBg1 + "," + book.coverBg2 + ")") + '"></div>' +
-      '<div class="library-card-body"><h3>' + TPP.esc(book.title) + "</h3><p>" + TPP.esc(book.author) + "</p><p>" + pages + " pages · " + Number(size.w).toFixed(2) + "×" + Number(size.h).toFixed(2) + ' in</p><div class="toolbar"><button data-act="edit">Edit</button><button data-act="about">About</button><button data-act="view">View</button><button data-act="dup">Duplicate</button><button data-act="export">Export</button></div></div></article>';
+      '<div class="library-card-body"><h3>' + TPP.esc(book.title) + "</h3><p>" + TPP.esc(book.author) + "</p><p>" + pages + " pages · " + Number(size.w).toFixed(2) + "×" + Number(size.h).toFixed(2) + ' in</p><p class="library-meta">Modified ' + TPP.esc(modified.label || "—") + '</p><div class="toolbar"><button data-act="edit">Edit</button><button data-act="about">About</button><button data-act="view">View</button><button data-act="dup">Duplicate</button><button data-act="export">Export</button></div></div></article>';
   }).join("");
 };
 TPP.renderAbout = function () {
