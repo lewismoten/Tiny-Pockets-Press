@@ -198,6 +198,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!button || !card) return;
     const book = TPP.library.find(function (b) { return b.id === card.dataset.id; });
     if (button.dataset.act === "edit") { TPP.setActive(book); TPP.switchView("editor"); }
+    if (button.dataset.act === "about") { TPP.setActive(book); TPP.switchView("about"); }
     if (button.dataset.act === "view") { TPP.setActive(book); TPP.switchView("reader"); }
     if (button.dataset.act === "dup") {
       const name = prompt("Title for duplicated book:", "Copy of " + book.title);
@@ -280,7 +281,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 TPP.validViews = function () {
-  return ["editor", "interior", "cover", "reader", "library"];
+  return ["editor", "about", "interior", "cover", "reader", "library"];
 };
 TPP.toast = function (message) {
   const toast = document.getElementById("toast");
@@ -398,6 +399,7 @@ TPP.switchView = function (view, fromHash) {
 };
 TPP.renderAll = function () {
   if (TPP.view === "editor") { TPP.renderChapterList(); TPP.renderChapterEditor(); }
+  if (TPP.view === "about") TPP.renderAbout();
   if (TPP.view === "interior") TPP.renderInterior();
   if (TPP.view === "cover") TPP.renderCover();
   if (TPP.view === "reader") TPP.renderReader();
