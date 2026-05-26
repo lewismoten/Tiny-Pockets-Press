@@ -205,12 +205,34 @@ TPP.dataFileHtml = function (book, key, value) {
   return '<div class="data-file-value">' +
     imagePart +
     '<div class="data-file-meta">' +
-      '<span class="data-file-pill">' + TPP.esc(info.format) + "</span>" +
-      '<span class="data-file-pill" title="' + TPP.esc(info.exactSize) + '" data-bytes="' + TPP.esc(info.exactSize) + '">' + TPP.esc(info.friendlySize) + "</span>" +
       '<button type="button" class="data-file-action" data-data-view="' + TPP.esc(textId) + '">View</button>' +
       '<button type="button" class="data-file-action" data-data-hex="' + TPP.esc(hexId) + '">View Hex</button>' +
     "</div>" +
   "</div>";
+};
+TPP.dataFileArray = function (list) {
+  return Array.isArray(list) && list.every(function (item) {
+    return item && typeof item === "object" && !Array.isArray(item) && typeof item.data === "string";
+  });
+};
+TPP.dataFilesTable = function (book, list) {
+  return '<table class="data-table"><thead><tr><th>#</th><th>Preview</th><th>Name</th><th>Type</th><th>Encoding</th><th>Size</th><th>ID</th><th>Hash</th><th>Data</th></tr></thead><tbody>' + list.map(function (item, index) {
+    const info = TPP.dataBinaryInfo(book, item.name || item.id || ("file-" + (index + 1)), item) || {
+      format: "unknown",
+      friendlySize: "0 bytes",
+      exactSize: "0 bytes"
+    };
+    const preview = TPP.dataImageCell(book, item.name || item.id || "Image", item) || '<span class="data-empty">—</span>';
+    return "<tr><td>" + (index + 1) + "</td>" +
+      "<td>" + preview + "</td>" +
+      "<td>" + (item.name ? TPP.esc(item.name) : '<span class="data-empty">—</span>') + "</td>" +
+      "<td>" + (item.type ? TPP.esc(item.type) : '<span class="data-empty">—</span>') + "</td>" +
+      "<td><span class=\"data-file-pill\">" + TPP.esc(info.format) + "</span></td>" +
+      "<td><span class=\"data-file-pill\" title=\"" + TPP.esc(info.exactSize) + "\" data-bytes=\"" + TPP.esc(info.exactSize) + "\">" + TPP.esc(info.friendlySize) + "</span></td>" +
+      "<td>" + (item.id ? TPP.esc(item.id) : '<span class="data-empty">—</span>') + "</td>" +
+      "<td>" + (item.hash ? TPP.esc(item.hash) : '<span class="data-empty">—</span>') + "</td>" +
+      "<td>" + TPP.dataFileHtml(book, item.name || item.id || "data", item) + "</td></tr>";
+  }).join("") + "</tbody></table>";
 };
 TPP.dataPrimitiveHtml = function (book, key, value) {
   const file = TPP.dataFileHtml(book, key, value);
@@ -244,6 +266,7 @@ TPP.dataValueHtml = function (book, key, value, compact) {
 };
 TPP.dataArrayHtml = function (book, key, list, compact) {
   if (!list.length) return '<div class="data-empty">[]</div>';
+  if (TPP.dataFileArray(list)) return TPP.dataFilesTable(book, list);
   const allObjects = list.every(function (item) {
     return item && typeof item === "object" && !Array.isArray(item);
   });
