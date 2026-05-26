@@ -69,6 +69,15 @@ TPP.parseChapterMetadata = function (chapter) {
     return null;
   }
 };
+TPP.fitChapterOrnament = function (html, ornament, maxHeight, settings) {
+  const inlineOrnament = ornament.replace('class="chapter-end"', 'class="chapter-end inline"');
+  const inlineAtParagraphEnd = /<\/p>\s*$/i.test(html) ? html.replace(/(<\/p>\s*)$/i, " " + inlineOrnament + "$1") : "";
+  const inlineAtEnd = html ? html + " " + inlineOrnament : inlineOrnament;
+  if (TPP.measureBlock(html + ornament, settings) <= maxHeight) return html + ornament;
+  if (inlineAtParagraphEnd && TPP.measureBlock(inlineAtParagraphEnd, settings) <= maxHeight) return inlineAtParagraphEnd;
+  if (TPP.measureBlock(inlineAtEnd, settings) <= maxHeight) return inlineAtEnd;
+  return "";
+};
 TPP.buildPages = function () {
   const settings = TPP.settings();
   const pages = [];
@@ -92,6 +101,7 @@ TPP.buildPages = function () {
   const toc = [];
   settings.chapters.forEach(function (chapter, index) {
     const startPage = pages.length + 1;
+    const chapterStartIndex = pages.length;
     let heading = '<div class="chapter-heading">' + TPP.esc(chapter.title || "") + "</div>";
 
     if (chapter.isMetadata) {
@@ -142,13 +152,22 @@ TPP.buildPages = function () {
     });
 
     if (settings.chapterEndOrnament) {
-      const ornament = '<span class="chapter-end ' + (settings.chapterEndCentered ? "" : "inline") + '">' + TPP.esc(settings.chapterEndOrnament) + "</span>";
-      if (TPP.measureBlock(pending + ornament, settings) <= maxHeight) {
-        pending += ornament;
-      } else if (/<\/p>\s*$/i.test(pending)) {
-        pending = pending.replace(/(<\/p>\s*)$/i, " " + ornament + "$1");
+      const preferred = '<span class="chapter-end' + (settings.chapterEndCentered ? "" : " inline") + '">' + TPP.esc(settings.chapterEndOrnament) + "</span>";
+      const fittedPending = pending ? TPP.fitChapterOrnament(pending, preferred, maxHeight, settings) : "";
+      if (fittedPending) {
+        pending = fittedPending;
+      } else if (pages.length > chapterStartIndex) {
+        const last = pages[pages.length - 1];
+        const fittedLast = last && !last.cover ? TPP.fitChapterOrnament(last.html || "", preferred, maxHeight, settings) : "";
+        if (fittedLast) {
+          last.html = fittedLast;
+        } else {
+          if (pending) makePage("text", pending);
+          pending = preferred;
+        }
       } else {
-        pending += " " + ornament;
+        if (pending) makePage("text", pending);
+        pending = preferred;
       }
     }
     if (pending) makePage("text", pending);
