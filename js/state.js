@@ -36,6 +36,12 @@ TPP.dpi = function (value) {
   const n = Math.round(Number(value) || 0);
   return Math.max(72, Math.min(1200, n || 300));
 };
+TPP.mediaCaptionSize = function (value, fallback) {
+  const n = Number(value);
+  const base = Number(fallback) || 3;
+  if (!Number.isFinite(n)) return base;
+  return Math.max(2, Math.min(12, n));
+};
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
   const out = Object.assign({}, base, book || {});
@@ -45,6 +51,7 @@ TPP.norm = function (book) {
   out.sewingGuideOpacity = TPP.opacity(out.sewingGuideOpacity, 0.65);
   out.signatureGuideOpacity = TPP.opacity(out.signatureGuideOpacity, 0.65);
   out.imageExportDpi = TPP.dpi(out.imageExportDpi);
+  out.mediaCaptionSize = TPP.mediaCaptionSize(out.mediaCaptionSize, base.mediaCaptionSize);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
     return Object.assign({

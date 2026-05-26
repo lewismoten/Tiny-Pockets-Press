@@ -26,6 +26,7 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--font", settings.fontFamily);
   element.style.setProperty("--body-size", settings.bodySize + "pt");
   element.style.setProperty("--caption-size", settings.captionSize + "pt");
+  element.style.setProperty("--media-caption-size", settings.mediaCaptionSize + "pt");
   element.style.setProperty("--line-height", settings.lineHeight);
   element.style.setProperty("--para-gap", settings.paraGap + "em");
   element.style.setProperty("--align", settings.justify ? "justify" : "left");

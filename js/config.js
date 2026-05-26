@@ -33,7 +33,7 @@ TPP.sheets = {
 TPP.fields = [
   "title","author","spineAuthor","pubDate","publisher","copyright","seriesName","number","volume","printing","includeToc",
   "pageSize","sheetSize","signatureSize","customW","customH","margin","gutterMargin","fontFamily","paperPreset","texture","pageBg","pageText","bodySize","captionSize","lineHeight","paraGap","justify",
-  "qrDisplayMode","imageUrlMode","qrLightMode","qrLightColor","qrDarkMode","qrDarkColor",
+  "qrDisplayMode","imageUrlMode","mediaCaptionSize","qrLightMode","qrLightColor","qrDarkMode","qrDarkColor",
   "coverShowAuthor","coverShowSeries","coverShowPublisher","coverOverflowImage","coverClipImageToFrame","coverBg1","coverBg2","coverText","coverBorder","coverBorderOn","coverImgX","coverImgY","coverImgZoom","coverTitleY","coverAuthorY","coverSeriesY","coverPublisherY","coverTitleSize","coverMetaSize","coverStroke","coverStrokeColor","coverStrokeSize",
   "backText","backTextY","backTextSize","backTextColor","backTextAlign","backTextLastLine","backFrameOn","backUseFrontImage","backClipImageToFrame","backImgX","backImgY","backImgZoom",
   "spineMode","paperThickness","bindingAllowance","spineImgX","spineImgZoom","spineTitleSize","spineTitleX","spineTitleY","spineAuthorSize","spineTextColor","spineStroke","spineStrokeColor","spineStrokeSize","spineTitleRotate","spineAuthorOn","spineAuthorRotate","wrapCover","wrapInside","boardThickness","coverPerimeterOn","separateCover","coverCopies","coverCopiesMax",
@@ -71,6 +71,7 @@ TPP.fallbackBook = function () {
     pageText: "#2c2018",
     bodySize: 4.5,
     captionSize: 3.8,
+    mediaCaptionSize: 3,
     lineHeight: 1.5,
     paraGap: 1.5,
     justify: true,

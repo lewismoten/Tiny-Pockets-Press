@@ -14,6 +14,7 @@ TPP.settings = function () {
     sewingGuideOpacity: TPP.opacity(book.sewingGuideOpacity, 0.65),
     signatureGuideOpacity: TPP.opacity(book.signatureGuideOpacity, 0.65),
     imageExportDpi: TPP.dpi(book.imageExportDpi),
+    mediaCaptionSize: TPP.mediaCaptionSize(book.mediaCaptionSize, book.captionSize),
     gutterMargin: Math.max(0, Number(book.gutterMargin) || 0),
     page: { w: Math.max(0.5, Number(raw.w) || 1), h: Math.max(0.5, Number(raw.h) || 1) },
     sheet: TPP.sheets[book.sheetSize] || TPP.sheets.letter
@@ -33,6 +34,7 @@ TPP.measureBlock = function (html, settings) {
   box.style.fontSize = settings.bodySize + "pt";
   box.style.lineHeight = settings.lineHeight;
   box.style.setProperty("--caption-size", settings.captionSize + "pt");
+  box.style.setProperty("--media-caption-size", settings.mediaCaptionSize + "pt");
   box.style.setProperty("--para-gap", settings.paraGap + "em");
   box.style.setProperty("--align", settings.justify ? "justify" : "left");
   box.innerHTML = html;
@@ -41,6 +43,12 @@ TPP.measureBlock = function (html, settings) {
 };
 TPP.storyTextHtml = function (innerHtml) {
   return '<div class="story-text">' + (innerHtml || "") + "</div>";
+};
+TPP.qrFigureHtml = function (url) {
+  return '<figure class="figure qr-figure qr-figure-separate"><span class="qr-holder" data-url="' + TPP.esc(url || "") + '"></span></figure>';
+};
+TPP.qrCaptionHtml = function (caption) {
+  return caption ? TPP.storyTextHtml("<p>" + TPP.esc(caption) + "</p>") : "";
 };
 TPP.serializeNodes = function (nodes) {
   const box = document.createElement("div");
@@ -126,6 +134,14 @@ TPP.fitChapterOrnament = function (html, ornament, maxHeight, settings) {
   if (TPP.measureBlock(inlineAtEnd, settings) <= maxHeight) return inlineAtEnd;
   return "";
 };
+TPP.appendQrCaptionPages = function (pages, settings, maxHeight, makePage, baseHtml, caption) {
+  const captionHtml = TPP.qrCaptionHtml(caption);
+  makePage("qr-page", baseHtml);
+  if (!captionHtml) return;
+  TPP.splitHtmlText(captionHtml, settings, maxHeight).forEach(function (part) {
+    if (TPP.measureBlock(part, settings) > 0.01) makePage("text", part);
+  });
+};
 TPP.buildPages = function () {
   const settings = TPP.settings();
   const pages = [];
@@ -178,7 +194,14 @@ TPP.buildPages = function () {
     let pending = heading;
     TPP.blocksFromText(chapter.text, settings).forEach(function (block) {
       if (settings.qrDisplayMode === "separate" && block.type === "qr") {
-        makePage("qr-page", block.html);
+        let qrHtml = TPP.qrFigureHtml(block.url);
+        if (pending && TPP.measureBlock(pending + qrHtml, settings) <= maxHeight) {
+          qrHtml = pending + qrHtml;
+        } else if (pending) {
+          makePage("text", pending);
+        }
+        pending = "";
+        TPP.appendQrCaptionPages(pages, settings, maxHeight, makePage, qrHtml, block.caption);
         return;
       }
       const combinedHeight = TPP.measureBlock(pending + block.html, settings);

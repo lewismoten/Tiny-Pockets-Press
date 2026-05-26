@@ -60,6 +60,8 @@ TPP.blocksFromText = function (text, settings) {
     } else {
       blocks.push({
         type: "qr",
+        url: item.url,
+        caption: item.caption,
         html: '<figure class="figure qr-figure"><span class="qr-holder" data-url="' + TPP.esc(item.url) + '"></span>' + (item.caption ? '<figcaption class="caption">' + TPP.esc(item.caption) + "</figcaption>" : "") + "</figure>"
       });
     }
