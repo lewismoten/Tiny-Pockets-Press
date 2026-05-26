@@ -483,11 +483,16 @@ TPP.commitAssetChange = function () {
   TPP.renderAll();
   if (document.getElementById("assetDialog") && document.getElementById("assetDialog").open) TPP.renderAssetDialog();
 };
+TPP.closeAssetDialog = function () {
+  const dialog = document.getElementById("assetDialog");
+  if (dialog && dialog.open) dialog.close();
+};
 TPP.assignAssetToCurrentTarget = function (fileId) {
   const target = TPP.assetDialogTarget;
   if (!target || !TPP.active) return;
   if (!TPP.setAssetTargetValue(target.type, target.key, fileId)) return;
   TPP.commitAssetChange();
+  TPP.closeAssetDialog();
 };
 TPP.uploadAssetToCurrentTarget = function (data, file) {
   if (!TPP.active) return;
