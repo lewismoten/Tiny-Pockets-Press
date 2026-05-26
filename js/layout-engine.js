@@ -121,8 +121,10 @@ TPP.buildPages = function () {
 
     if (chapter.imageData && chapter.imagePlacement !== "none") {
       const imageHtml = '<figure class="figure image-figure"><img src="' + chapter.imageData + '" style="width:' + Math.min(100, Math.max(10, Number(chapter.imageWidth) || 70)) + '%"><figcaption class="caption"></figcaption></figure>';
-      if (chapter.imagePlacement === "own") makePage("chapter-image", heading + imageHtml);
-      else heading += imageHtml;
+      if (chapter.imagePlacement === "own") {
+        makePage("chapter-image", heading + imageHtml);
+        heading = "";
+      } else heading += imageHtml;
     }
 
     let pending = heading;
