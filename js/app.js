@@ -272,30 +272,32 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.save();
     TPP.download("tiny-pockets-library.json", { books: TPP.library });
   };
-  document.getElementById("importJson").onchange = function (e) {
+  document.getElementById("importJson").onchange = async function (e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function () {
+    reader.onload = async function () {
       const data = JSON.parse(reader.result);
       if (data.books) {
         const stamp = TPP.nowIso();
-        data.books.forEach(function (rawBook) {
+        for (const rawBook of data.books) {
           const incoming = TPP.bookImported(rawBook, stamp);
           const existingIndex = TPP.library.findIndex(function (book) { return book.id === incoming.id; });
           if (existingIndex < 0) {
             TPP.library.push(incoming);
-            return;
+            continue;
           }
           const existing = TPP.library[existingIndex];
-          const action = TPP.resolveImportConflict(incoming, existing);
+          const action = await TPP.resolveImportConflict(incoming, existing);
           if (action === "merge") {
             TPP.library[existingIndex] = TPP.mergeImportedBook(existing, incoming, stamp);
           } else if (action === "overwrite") {
             incoming.lastExportedAt = existing.lastExportedAt || incoming.lastExportedAt || "";
             TPP.library[existingIndex] = incoming;
+          } else if (action === "copy") {
+            TPP.library.push(TPP.bookDescendant(incoming, { id: TPP.uid() }, "import", stamp));
           }
-        });
+        }
         TPP.save();
         TPP.setActive(TPP.library[0]);
         TPP.switchView("library");
@@ -314,13 +316,19 @@ document.addEventListener("DOMContentLoaded", async function () {
           TPP.setActive(incoming);
         } else {
           const existing = TPP.library[existingIndex];
-          const action = TPP.resolveImportConflict(incoming, existing);
+          const action = await TPP.resolveImportConflict(incoming, existing);
           if (action === "cancel") return;
           if (action === "merge") {
             TPP.library[existingIndex] = TPP.mergeImportedBook(existing, incoming, stamp);
           } else if (action === "overwrite") {
             incoming.lastExportedAt = existing.lastExportedAt || incoming.lastExportedAt || "";
             TPP.library[existingIndex] = incoming;
+          } else if (action === "copy") {
+            const copy = TPP.bookDescendant(incoming, { id: TPP.uid() }, "import", stamp);
+            TPP.library.push(copy);
+            TPP.save();
+            TPP.setActive(copy);
+            return;
           }
           TPP.save();
           TPP.setActive(TPP.library[existingIndex]);
@@ -330,6 +338,62 @@ document.addEventListener("DOMContentLoaded", async function () {
     reader.readAsText(file);
   };
 });
+
+TPP.importConflictStamp = function (book) {
+  const date = new Date(book && book.updatedAt);
+  if (Number.isNaN(date.getTime())) return book && book.updatedAt ? String(book.updatedAt) : "Unknown";
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+};
+TPP.importConflictPreview = function (book) {
+  const cover = book && book.coverPreview
+    ? '<img src="' + TPP.esc(book.coverPreview) + '" alt="' + TPP.esc((book && book.title) || "Book cover") + '" style="display:block;max-width:100%;height:auto;border-radius:14px;box-shadow:0 14px 30px rgb(0 0 0/.18)">'
+    : '<div class="conflict-cover-fallback" style="background:linear-gradient(to bottom,' + TPP.esc((book && book.coverBg1) || "#7b1f2a") + "," + TPP.esc((book && book.coverBg2) || "#251d1d") + ')">' + TPP.esc((book && book.title) || "Untitled") + "</div>";
+  return '<article class="conflict-book">' +
+    '<h3>' + TPP.esc((book && book.title) || "Untitled") + "</h3>" +
+    '<div class="conflict-cover">' + cover + "</div>" +
+    '<div class="conflict-meta">' +
+      '<div><strong>ID:</strong> ' + TPP.esc((book && book.id) || "—") + "</div>" +
+      '<div><strong>Revision:</strong> ' + TPP.esc(String((book && book.revision) || 1)) + "." + TPP.esc(String((book && book.subrevision) || 0)) + "</div>" +
+      '<div><strong>Modified:</strong> ' + TPP.esc(TPP.importConflictStamp(book)) + "</div>" +
+    "</div>" +
+  "</article>";
+};
+TPP.resolveImportConflict = function (incoming, existing) {
+  const dialog = document.getElementById("importConflictDialog");
+  const text = document.getElementById("importConflictText");
+  const books = document.getElementById("importConflictBooks");
+  if (!dialog || !text || !books || typeof dialog.showModal !== "function") return Promise.resolve("cancel");
+  text.textContent = 'A book with id "' + ((incoming && incoming.id) || "") + '" already exists. Choose how to handle this import.';
+  books.innerHTML =
+    '<div><div class="about-meta-label">Current Library Book</div>' + TPP.importConflictPreview(existing) + "</div>" +
+    '<div><div class="about-meta-label">Incoming Import</div>' + TPP.importConflictPreview(incoming) + "</div>";
+  return new Promise(function (resolve) {
+    const close = function (action) {
+      dialog.close();
+      resolve(action || "cancel");
+    };
+    const handlers = Array.from(dialog.querySelectorAll("[data-action]")).map(function (button) {
+      const handler = function () { close(button.dataset.action); };
+      button.addEventListener("click", handler, { once: true });
+      return { button: button, handler: handler };
+    });
+    const cancelHandler = function () { close("cancel"); };
+    dialog.addEventListener("cancel", cancelHandler, { once: true });
+    dialog.addEventListener("close", function cleanup() {
+      handlers.forEach(function (entry) {
+        entry.button.removeEventListener("click", entry.handler);
+      });
+      dialog.removeEventListener("cancel", cancelHandler);
+    }, { once: true });
+    dialog.showModal();
+  });
+};
 
 TPP.validViews = function () {
   return ["editor", "about", "interior", "cover", "reader", "library"];

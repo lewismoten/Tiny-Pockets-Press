@@ -141,17 +141,7 @@ TPP.mergeImportedBook = function (existing, incoming, stamp) {
   return merged;
 };
 TPP.resolveImportConflict = function (incoming, existing) {
-  const title = (incoming && incoming.title) || (existing && existing.title) || "Untitled";
-  const choice = prompt(
-    'A book with id "' + ((incoming && incoming.id) || "") + '" already exists.\n\n' +
-    'Book: ' + title + '\n' +
-    'Type "merge", "overwrite", or "cancel".',
-    "merge"
-  );
-  const value = String(choice || "").trim().toLowerCase();
-  if (value === "merge" || value === "m") return "merge";
-  if (value === "overwrite" || value === "o") return "overwrite";
-  return "cancel";
+  return Promise.resolve("cancel");
 };
 TPP.markBookExported = function (book, stamp) {
   if (!book) return;
