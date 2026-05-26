@@ -79,6 +79,7 @@ TPP.setActive = function (book) {
   TPP.active = book;
   localStorage.setItem(TPP.ACTIVE, book.id);
   TPP.loadForm();
+  if (TPP.restoreReaderUi) TPP.restoreReaderUi(TPP.readSettingsUi ? TPP.readSettingsUi() : {});
   TPP.renderAll();
 };
 TPP.download = function (name, data) {

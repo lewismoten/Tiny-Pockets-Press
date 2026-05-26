@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.view = TPP.initialView();
   if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();
-  TPP.switchView(TPP.view, true);
   TPP.restoreSettingsUi();
+  TPP.switchView(TPP.view, true);
   TPP.bindSettingsUiPersistence();
 
   document.querySelectorAll(".tab").forEach(function (button) {
@@ -274,6 +274,22 @@ TPP.readSettingsUi = function () {
 TPP.writeSettingsUi = function (state) {
   localStorage.setItem(TPP.UI, JSON.stringify(state || {}));
 };
+TPP.readerUiState = function () {
+  const mode = document.getElementById("readerMode");
+  return {
+    mode: mode ? mode.value : "single",
+    index: Math.max(0, Number(TPP.readerIndex) || 0)
+  };
+};
+TPP.restoreReaderUi = function (state) {
+  if (!TPP.active) return;
+  const mode = document.getElementById("readerMode");
+  const saved = state && state.readerByBook && state.readerByBook[TPP.active.id];
+  if (mode && saved && ["single", "spread", "duplex"].includes(saved.mode)) {
+    mode.value = saved.mode;
+  }
+  TPP.readerIndex = Math.max(0, Number(saved && saved.index) || 0);
+};
 TPP.settingsDetails = function () {
   return Array.from(document.querySelectorAll(".controls details"));
 };
@@ -291,14 +307,19 @@ TPP.restoreSettingsUi = function () {
       controls.scrollTop = Number(state.scrollTop) || 0;
     });
   }
+  TPP.restoreReaderUi(state);
 };
 TPP.saveSettingsUi = function () {
   const controls = document.querySelector(".controls");
   const open = {};
+  const state = TPP.readSettingsUi();
+  const readerByBook = Object.assign({}, state.readerByBook || {});
   TPP.settingsDetails().forEach(function (details, index) {
     open[index] = details.open;
   });
+  if (TPP.active) readerByBook[TPP.active.id] = TPP.readerUiState();
   TPP.writeSettingsUi({
+    readerByBook: readerByBook,
     open: open,
     scrollTop: controls ? controls.scrollTop : 0,
     view: TPP.view
@@ -495,6 +516,7 @@ TPP.renderReader = function () {
   const pages = TPP.buildPages();
   const mode = document.getElementById("readerMode").value;
   TPP.readerIndex = TPP.readerNormalizeIndex(TPP.readerIndex, pages, mode, settings);
+  TPP.saveSettingsUi();
   TPP.readerNav(pages, mode, settings);
   TPP.syncReaderProgress(pages, TPP.readerIndex, mode, settings);
   if (mode === "duplex") {
