@@ -439,7 +439,7 @@ TPP.assetCardHtml = function (file, currentId) {
     '<img class="asset-card-preview" src="' + TPP.esc(file.data) + '" alt="' + TPP.esc(file.name || file.type || "Image asset") + '">' +
     '<div class="asset-card-meta">' +
       '<div class="asset-card-title">' + TPP.esc(file.name || "Image Asset") + "</div>" +
-      '<div class="asset-card-sub">' + TPP.esc(file.type || "image/*") + " · " + TPP.esc(file.id) + "</div>" +
+      '<div class="asset-card-sub">' + TPP.esc(file.id) + "</div>" +
       '<div class="asset-card-sub">Hash: ' + TPP.esc(file.hash || "") + "</div>" +
       '<div class="asset-card-refs">' + (refs.length ? refs.map(function (ref) {
         return '<span class="asset-ref">' + TPP.esc(ref.label) + "</span>";

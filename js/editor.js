@@ -3,7 +3,7 @@ window.TPP = window.TPP || {};
 TPP.assetName = function (book, fileId) {
   const file = TPP.fileAsset(book, fileId);
   if (!file) return "No image selected";
-  return file.name || file.type || "Image asset";
+  return file.name || "Image selected";
 };
 TPP.assetPreviewHtml = function (book, fileId, alt) {
   const src = TPP.fileData(book, fileId);
@@ -12,9 +12,11 @@ TPP.assetPreviewHtml = function (book, fileId, alt) {
 };
 TPP.assetFieldHtml = function (label, targetType, targetKey, fileId, alt) {
   return '<div class="asset-field">' +
-    '<div class="asset-field-head"><strong>' + TPP.esc(label) + '</strong><button type="button" class="small asset-picker-open" data-target-type="' + TPP.esc(targetType) + '" data-target-key="' + TPP.esc(targetKey) + '">Choose Image</button></div>' +
-    '<div class="asset-field-meta">' + TPP.esc(TPP.assetName(TPP.active, fileId)) + "</div>" +
-    TPP.assetPreviewHtml(TPP.active, fileId, alt) +
+    '<button type="button" class="asset-picker-surface asset-picker-open" data-target-type="' + TPP.esc(targetType) + '" data-target-key="' + TPP.esc(targetKey) + '">' +
+      '<div class="asset-field-copy"><div class="asset-field-head"><strong>' + TPP.esc(label) + '</strong><span class="small asset-inline-action">Choose Image</span></div>' +
+      '<div class="asset-field-meta">' + TPP.esc(TPP.assetName(TPP.active, fileId)) + "</div></div>" +
+      TPP.assetPreviewHtml(TPP.active, fileId, alt) +
+    "</button>" +
     "</div>";
 };
 
