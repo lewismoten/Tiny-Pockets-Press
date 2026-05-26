@@ -74,6 +74,13 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--spine-title-size", settings.spineTitleSize + "pt");
   element.style.setProperty("--spine-title-x", (Number(settings.spineTitleX) || 0) + "%");
   element.style.setProperty("--spine-title-y", (Number(settings.spineTitleY) || 0) + "%");
+  const spineTitleWidth = Math.max(10, Math.min(100, Number(settings.spineTitleWidth) || 100));
+  element.style.setProperty("--spine-title-width", spineTitleWidth + "%");
+  element.style.setProperty("--spine-title-width-ratio", String(spineTitleWidth / 100));
+  element.style.setProperty("--spine-title-align", ["left", "right", "justify"].includes(settings.spineTitleAlign) ? settings.spineTitleAlign : "left");
+  element.style.setProperty("--spine-title-wrap", settings.spineTitleAlign === "clip" ? "nowrap" : "normal");
+  element.style.setProperty("--spine-title-overflow", settings.spineTitleAlign === "clip" ? "hidden" : "visible");
+  element.style.setProperty("--spine-title-text-overflow", settings.spineTitleAlign === "clip" ? "clip" : "initial");
   element.style.setProperty("--spine-author-size", settings.spineAuthorSize + "pt");
   element.style.setProperty("--spine-text-color", settings.spineTextColor);
   element.style.setProperty("--spine-stroke-width", TPP.strokeWidth(settings.spineStrokeSize));
