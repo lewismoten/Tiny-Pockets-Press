@@ -33,6 +33,9 @@ TPP.exportPdfFrom = async function (which) {
     const oldMargin = el.style.marginBottom;
     el.style.transform = "none";
     el.style.marginBottom = "0";
+    TPP.renderQr(el, settings);
+    await TPP.waitForImages(el);
+    await new Promise(requestAnimationFrame);
     const canvas = await html2canvas(el, { scale: 3, backgroundColor: "#fff" });
     if (i) pdf.addPage([settings.sheet.w, settings.sheet.h]);
     pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, settings.sheet.w, settings.sheet.h);
