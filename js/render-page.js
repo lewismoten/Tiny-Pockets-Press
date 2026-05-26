@@ -6,7 +6,6 @@ TPP.stroke = function (enabled, size, color) {
 };
 TPP.coverImageSrc = function (settings, side) {
   if (side === "front") return TPP.fileData(settings, settings.coverImageId);
-  if (settings.backUseFrontImage) return TPP.fileData(settings, settings.coverImageId);
   return TPP.fileData(settings, settings.backImageId);
 };
 TPP.coverHTML = function (settings, side) {
