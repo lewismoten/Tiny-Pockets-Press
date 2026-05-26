@@ -443,7 +443,9 @@ TPP.assetCardHtml = function (file, currentId) {
   const refs = TPP.fileReferences(TPP.active, file.id);
   const canDelete = refs.length === 0;
   return '<article class="asset-card ' + (file.id === currentId ? "current" : "") + '">' +
-    '<img class="asset-card-preview" src="' + TPP.esc(file.data) + '" alt="' + TPP.esc(file.name || file.type || "Image asset") + '">' +
+    '<button type="button" class="asset-card-preview-button" data-asset-use="' + TPP.esc(file.id) + '">' +
+      '<img class="asset-card-preview" src="' + TPP.esc(file.data) + '" alt="' + TPP.esc(file.name || file.type || "Image asset") + '">' +
+    "</button>" +
     '<div class="asset-card-meta">' +
       '<div class="asset-card-title">' + TPP.esc(file.name || "Image Asset") + "</div>" +
       '<div class="asset-card-sub">' + TPP.esc(file.id) + "</div>" +
