@@ -48,6 +48,8 @@ TPP.mediaCaptionSize = function (value, fallback) {
 };
 TPP.bookFingerprint = function (book) {
   const copy = TPP.clone(book || {});
+  delete copy.revision;
+  delete copy.provenance;
   delete copy.createdAt;
   delete copy.updatedAt;
   delete copy.lastExportedAt;
@@ -58,12 +60,42 @@ TPP.bookFingerprint = function (book) {
 };
 TPP.hydrateBookDates = function (book) {
   const now = TPP.nowIso();
+  if (!Number.isFinite(Number(book.revision)) || Number(book.revision) < 1) book.revision = 1;
+  book.revision = Math.max(1, Math.floor(Number(book.revision) || 1));
+  if (!Array.isArray(book.provenance) && Array.isArray(book.ancestry)) book.provenance = TPP.clone(book.ancestry);
+  if (!Array.isArray(book.provenance)) book.provenance = [];
+  delete book.ancestry;
   if (!book.createdAt && book.updatedAt) book.createdAt = book.updatedAt;
   if (!book.createdAt) book.createdAt = now;
   if (!book.updatedAt) book.updatedAt = book.createdAt;
   if (!("lastExportedAt" in book)) book.lastExportedAt = "";
   if (!("lastImportedAt" in book)) book.lastImportedAt = "";
   return book;
+};
+TPP.bookSourceEntry = function (book, action, stamp) {
+  const when = stamp || TPP.nowIso();
+  return {
+    action: action || "copy",
+    sourceId: book && book.id ? book.id : "",
+    sourceTitle: book && book.title ? book.title : "",
+    sourceRevision: Math.max(1, Math.floor(Number(book && book.revision) || 1)),
+    sourceUpdatedAt: book && book.updatedAt ? book.updatedAt : when,
+    sourceCreatedAt: book && book.createdAt ? book.createdAt : when,
+    recordedAt: when
+  };
+};
+TPP.bookDescendant = function (source, overrides, action, stamp) {
+  const when = stamp || TPP.nowIso();
+  const descendant = TPP.norm(Object.assign({}, TPP.clone(source || {}), overrides || {}));
+  descendant.id = (overrides && overrides.id) || descendant.id || TPP.uid();
+  descendant.revision = 1;
+  descendant.createdAt = when;
+  descendant.updatedAt = when;
+  descendant.lastExportedAt = "";
+  descendant.lastImportedAt = action === "import" ? when : "";
+  descendant.provenance = (Array.isArray(source && source.provenance) ? TPP.clone(source.provenance) : []);
+  descendant.provenance.push(TPP.bookSourceEntry(source, action, when));
+  return descendant;
 };
 TPP.markBookExported = function (book, stamp) {
   if (!book) return;
@@ -134,6 +166,7 @@ TPP.save = function () {
     const previous = TPP.bookFingerprints[book.id];
     const current = TPP.bookFingerprint(book);
     if (previous !== undefined && current !== previous) {
+      book.revision = Math.max(1, Math.floor(Number(book.revision) || 1)) + 1;
       book.updatedAt = TPP.nowIso();
     }
     TPP.bookFingerprints[book.id] = TPP.bookFingerprint(book);

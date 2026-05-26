@@ -47,6 +47,8 @@ TPP.fallbackBook = function () {
   const stamp = new Date().toISOString();
   return {
     id: TPP.uid(),
+    revision: 1,
+    provenance: [],
     createdAt: stamp,
     updatedAt: stamp,
     lastExportedAt: "",

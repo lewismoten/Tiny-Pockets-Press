@@ -143,12 +143,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     const name = prompt("Title for duplicated book:", "Copy of " + TPP.active.title);
     if (name === null) return;
     const stamp = TPP.nowIso();
-    const book = TPP.norm(Object.assign({}, TPP.clone(TPP.active), {
+    const book = TPP.bookDescendant(TPP.active, {
       id: TPP.uid(),
-      title: name || "Copy of " + TPP.active.title,
-      createdAt: stamp,
-      updatedAt: stamp
-    }));
+      title: name || "Copy of " + TPP.active.title
+    }, "copy", stamp);
     TPP.library.push(book);
     TPP.save();
     TPP.setActive(book);
@@ -205,12 +203,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       const name = prompt("Title for duplicated book:", "Copy of " + book.title);
       if (name !== null) {
         const stamp = TPP.nowIso();
-        const copy = TPP.norm(Object.assign({}, TPP.clone(book), {
+        const copy = TPP.bookDescendant(book, {
           id: TPP.uid(),
-          title: name || "Copy of " + book.title,
-          createdAt: stamp,
-          updatedAt: stamp
-        }));
+          title: name || "Copy of " + book.title
+        }, "copy", stamp);
         TPP.library.push(copy);
         TPP.save();
         TPP.renderLibrary();
@@ -261,8 +257,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (data.books) {
         const stamp = TPP.nowIso();
         TPP.library = data.books.map(function (book) {
-          const imported = TPP.norm(book);
-          TPP.markBookImported(imported, stamp);
+          const imported = TPP.bookDescendant(TPP.norm(book), { id: TPP.uid() }, "import", stamp);
           return imported;
         });
         TPP.save();
@@ -274,9 +269,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.loadForm();
         TPP.renderAll();
       } else {
-        const book = TPP.norm(data);
-        book.id = TPP.uid();
-        TPP.markBookImported(book);
+        const book = TPP.bookDescendant(TPP.norm(data), { id: TPP.uid() }, "import");
         TPP.library.push(book);
         TPP.save();
         TPP.setActive(book);
