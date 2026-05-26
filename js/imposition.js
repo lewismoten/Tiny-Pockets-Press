@@ -430,7 +430,7 @@ TPP.renderInterior = function () {
     " at " + settings.signatureSize + " pages max. Interior booklet imposition has " + (frontBlocks.length * 2) +
     " front/back side blocks. " + per + " blocks fit per sheet side. " +
     (settings.duplexBackSides ? "Duplex output keeps front/back pages aligned for automatic duplex printing." : "Non-duplex output rotates the reverse sides for manual folding and feeding.");
-  const renderSidePage = function (label, blocks, pageIndex, rotate180) {
+  const renderSidePage = function (label, blocks, pageIndex, rotate180, mirrorX) {
     const sheet = TPP.makeSheet(settings, label);
     sheet.classList.add("interior-sheet");
     const sx = (settings.sheet.w - grid.cols * grid.w) / 2;
@@ -442,7 +442,8 @@ TPP.renderInterior = function () {
       const right = pages[block.pages[1] - 1] || { n: block.pages[1], type: "blank", html: "" };
       const col = i % grid.cols;
       const row = Math.floor(i / grid.cols);
-      const x = sx + col * grid.w;
+      const drawCol = mirrorX ? (grid.cols - 1 - col) : col;
+      const x = sx + drawCol * grid.w;
       const y = sy + row * grid.h;
       TPP.interiorBlock(sheet, settings, left, right, x, y, grid.rot, rotate180);
       if (settings.showSignatureOverlay) {
@@ -469,8 +470,14 @@ TPP.renderInterior = function () {
     preview.appendChild(sheet);
   };
   for (let side = 0; side < printSheets; side++) {
-    renderSidePage("Interior sheet front " + (side + 1), frontBlocks, side, false);
-    renderSidePage(settings.duplexBackSides ? "Interior sheet back " + (side + 1) : "Interior reverse side " + (side + 1), backBlocks, side, !settings.duplexBackSides);
+    renderSidePage("Interior sheet front " + (side + 1), frontBlocks, side, false, false);
+    renderSidePage(
+      settings.duplexBackSides ? "Interior sheet back " + (side + 1) : "Interior reverse side " + (side + 1),
+      backBlocks,
+      side,
+      !settings.duplexBackSides,
+      settings.duplexBackSides
+    );
   }
 };
 TPP.renderCover = function () {
