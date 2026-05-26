@@ -22,6 +22,7 @@ TPP.coverHTML = function (settings, side) {
 TPP.applyVars = function (element, settings) {
   element.style.setProperty("--page-bg", settings.pageBg);
   element.style.setProperty("--page-text", settings.pageText);
+  element.style.setProperty("--page-outline", settings.showPageGuides ? ".5px solid #d8d0c3" : "0");
   element.style.setProperty("--font", settings.fontFamily);
   element.style.setProperty("--body-size", settings.bodySize + "pt");
   element.style.setProperty("--caption-size", settings.captionSize + "pt");
