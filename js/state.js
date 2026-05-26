@@ -1,4 +1,5 @@
 window.TPP = window.TPP || {};
+TPP.SCHEMA_VERSION = 1;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -50,6 +51,7 @@ TPP.mediaCaptionSize = function (value, fallback) {
 };
 TPP.bookFingerprint = function (book) {
   const copy = TPP.clone(book || {});
+  delete copy.schemaVersion;
   delete copy.revision;
   delete copy.subrevision;
   delete copy.provenance;
@@ -63,6 +65,8 @@ TPP.bookFingerprint = function (book) {
 };
 TPP.hydrateBookDates = function (book) {
   const now = TPP.nowIso();
+  if (!Number.isFinite(Number(book.schemaVersion)) || Number(book.schemaVersion) < 1) book.schemaVersion = 1;
+  book.schemaVersion = Math.max(1, Math.floor(Number(book.schemaVersion) || 1));
   if (!Number.isFinite(Number(book.revision)) || Number(book.revision) < 1) book.revision = 1;
   book.revision = Math.max(1, Math.floor(Number(book.revision) || 1));
   if (!Number.isFinite(Number(book.subrevision)) || Number(book.subrevision) < 0) book.subrevision = 0;
@@ -75,7 +79,15 @@ TPP.hydrateBookDates = function (book) {
   if (!book.updatedAt) book.updatedAt = book.createdAt;
   if (!("lastExportedAt" in book)) book.lastExportedAt = "";
   if (!("lastImportedAt" in book)) book.lastImportedAt = "";
+  book.schemaVersion = TPP.SCHEMA_VERSION;
   return book;
+};
+TPP.unwrapImportPayload = function (data) {
+  if (!data || typeof data !== "object") return { kind: "book", value: data };
+  if (Array.isArray(data.books)) return { kind: "library", value: data.books, schemaVersion: Number(data.schemaVersion) || 1 };
+  if (data.book && typeof data.book === "object") return { kind: "book", value: data.book, schemaVersion: Number(data.schemaVersion) || Number(data.book.schemaVersion) || 1 };
+  if (data.style && typeof data.style === "object") return { kind: "style", value: data.style, schemaVersion: Number(data.schemaVersion) || 1 };
+  return { kind: "book", value: data, schemaVersion: Number(data.schemaVersion) || 1 };
 };
 TPP.bookSourceEntry = function (book, action, stamp) {
   const when = stamp || TPP.nowIso();

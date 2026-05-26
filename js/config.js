@@ -46,6 +46,7 @@ TPP.styleFields = TPP.fields.filter(function (x) {
 TPP.fallbackBook = function () {
   const stamp = new Date().toISOString();
   return {
+    schemaVersion: TPP.SCHEMA_VERSION || 1,
     id: TPP.uid(),
     revision: 1,
     subrevision: 0,

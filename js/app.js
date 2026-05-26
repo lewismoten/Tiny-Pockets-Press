@@ -239,7 +239,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (button.dataset.act === "export") {
       TPP.markBookExported(book);
       TPP.save();
-      TPP.download((book.title || "book") + ".json", book);
+      TPP.download((book.title || "book") + ".json", {
+        type: "tiny-pockets-book",
+        schemaVersion: TPP.SCHEMA_VERSION,
+        book: book
+      });
     }
   };
 
@@ -258,11 +262,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.sync();
     TPP.markBookExported(TPP.active);
     TPP.save();
-    TPP.download((TPP.active.title || "book") + ".json", TPP.active);
+    TPP.download((TPP.active.title || "book") + ".json", {
+      type: "tiny-pockets-book",
+      schemaVersion: TPP.SCHEMA_VERSION,
+      book: TPP.active
+    });
   };
   document.getElementById("exportStyle").onclick = function () {
     TPP.sync();
-    const out = { type: "tiny-pockets-style-v6-1", style: {} };
+    const out = { type: "tiny-pockets-style-v6-1", schemaVersion: TPP.SCHEMA_VERSION, style: {} };
     TPP.styleFields.forEach(function (field) { out.style[field] = TPP.active[field]; });
     TPP.download("tiny-pockets-style.json", out);
   };
@@ -270,17 +278,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     const stamp = TPP.nowIso();
     TPP.library.forEach(function (book) { TPP.markBookExported(book, stamp); });
     TPP.save();
-    TPP.download("tiny-pockets-library.json", { books: TPP.library });
+    TPP.download("tiny-pockets-library.json", {
+      type: "tiny-pockets-library",
+      schemaVersion: TPP.SCHEMA_VERSION,
+      books: TPP.library
+    });
   };
   document.getElementById("importJson").onchange = async function (e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async function () {
-      const data = JSON.parse(reader.result);
-      if (data.books) {
+      const payload = TPP.unwrapImportPayload(JSON.parse(reader.result));
+      if (payload.kind === "library") {
         const stamp = TPP.nowIso();
-        for (const rawBook of data.books) {
+        for (const rawBook of payload.value) {
           const incoming = TPP.bookImported(rawBook, stamp);
           const existingIndex = TPP.library.findIndex(function (book) { return book.id === incoming.id; });
           if (existingIndex < 0) {
@@ -301,14 +313,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.save();
         TPP.setActive(TPP.library[0]);
         TPP.switchView("library");
-      } else if (data.style) {
-        Object.entries(data.style).forEach(function (entry) { TPP.active[entry[0]] = entry[1]; });
+      } else if (payload.kind === "style") {
+        Object.entries(payload.value).forEach(function (entry) { TPP.active[entry[0]] = entry[1]; });
         TPP.save();
         TPP.loadForm();
         TPP.renderAll();
       } else {
         const stamp = TPP.nowIso();
-        const incoming = TPP.bookImported(data, stamp);
+        const incoming = TPP.bookImported(payload.value, stamp);
         const existingIndex = TPP.library.findIndex(function (book) { return book.id === incoming.id; });
         if (existingIndex < 0) {
           TPP.library.push(incoming);
