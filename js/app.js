@@ -164,6 +164,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.readerIndex = TPP.readerNormalizeIndex(TPP.readerIndex - (mode === "spread" ? 2 : 1), pages, mode, settings);
     TPP.renderReader();
   };
+  document.getElementById("readerStagePrev").onclick = document.getElementById("readerPrev").onclick;
   document.getElementById("readerNext").onclick = function () {
     const pages = TPP.buildPages();
     const mode = document.getElementById("readerMode").value;
@@ -172,6 +173,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.readerIndex = TPP.readerNormalizeIndex(next, pages, mode, settings);
     TPP.renderReader();
   };
+  document.getElementById("readerStageNext").onclick = document.getElementById("readerNext").onclick;
   document.getElementById("readerJump").onchange = function () {
     TPP.readerIndex = Number(document.getElementById("readerJump").value);
     TPP.renderReader();
@@ -539,7 +541,7 @@ TPP.renderReader = function () {
   const readerWidth = frontCover ? settings.page.w + spineW : (mode === "spread" ? settings.page.w * 2.25 : settings.page.w);
   const scale = Math.min(5, Math.max(1.2, (window.innerWidth - 560) / (readerWidth * 96)));
   spread.style.transform = "scale(" + scale + ")";
-  shown.forEach(function (page) {
+  shown.forEach(function (page, shownIndex) {
     const shell = document.createElement("div");
     shell.className = "reader-shell";
     const withSpine = page && page.role === "front" && spineW > 0;
@@ -551,6 +553,13 @@ TPP.renderReader = function () {
     } else if (page) {
       shell.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
     }
+    shell.onclick = function () {
+      if (mode === "spread" && shown.length > 1 && shownIndex === 0) {
+        document.getElementById("readerPrev").click();
+      } else {
+        document.getElementById("readerNext").click();
+      }
+    };
     spread.appendChild(shell);
   });
   document.getElementById("readerPreview").innerHTML = "";
