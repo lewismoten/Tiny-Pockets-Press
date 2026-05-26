@@ -19,6 +19,12 @@ TPP.clone = function (obj) {
 TPP.nowIso = function () {
   return new Date().toISOString();
 };
+TPP.bookExportName = function (book) {
+  if (!book) return "book.json";
+  if (TPP.active && book.id === TPP.active.id && TPP.sync) TPP.sync("nosave");
+  const title = (book.title || "").trim();
+  return (title || "book") + ".json";
+};
 TPP.esc = function (value) {
   return String(value ?? "").replace(/[&<>"']/g, function (ch) {
     return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[ch];

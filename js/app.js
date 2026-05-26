@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (button.dataset.act === "export") {
       TPP.markBookExported(book);
       TPP.save();
-      TPP.download((book.title || "book") + ".json", {
+      TPP.download(TPP.bookExportName(book), {
         type: "tiny-pockets-book",
         schemaVersion: TPP.SCHEMA_VERSION,
         book: book
@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.sync();
     TPP.markBookExported(TPP.active);
     TPP.save();
-    TPP.download((TPP.active.title || "book") + ".json", {
+    TPP.download(TPP.bookExportName(TPP.active), {
       type: "tiny-pockets-book",
       schemaVersion: TPP.SCHEMA_VERSION,
       book: TPP.active
