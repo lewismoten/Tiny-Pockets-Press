@@ -358,6 +358,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.assetDialogTarget = null;
     });
     assetDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === assetDialog && !card && assetDialog.open) {
+        assetDialog.close();
+        return;
+      }
+    });
+    assetDialog.addEventListener("click", function (e) {
       const useButton = e.target.closest("[data-asset-use]");
       if (useButton) {
         TPP.assignAssetToCurrentTarget(useButton.dataset.assetUse || "");
