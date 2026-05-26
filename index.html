@@ -284,18 +284,6 @@
 
       <details>
         <summary>Spine, Wraps, Cover Stock</summary>
-        <label>Spine Mode
-          <select id="spineMode">
-            <option value="auto">Automatic</option>
-            <option value="none">No Spine</option>
-            <option value="cover">Printed With Cover</option>
-            <option value="separate">Separate Spine / Cloth Strip</option>
-          </select>
-        </label>
-        <div class="two">
-          <label>Paper Thickness <input id="paperThickness" type="number" min=".001" step=".001"></label>
-          <label>Thread/Staple Allowance <input id="bindingAllowance" type="number" min="0" step=".005"></label>
-        </div>
         <div class="asset-control-group">
           <div id="spineImageSlot"></div>
           <div class="asset-slider-grid">
@@ -332,17 +320,6 @@
         <label><input id="spineTitleRotate" type="checkbox"> Rotate title 90° and align toward top</label>
         <label><input id="spineAuthorOn" type="checkbox"> Author at base of spine</label>
         <label><input id="spineAuthorRotate" type="checkbox"> Rotate author 90°</label>
-        <label><input id="wrapCover" type="checkbox"> Cover wraps around boards/edges with angled corners</label>
-        <div class="two">
-          <label>Wrap Inside (in) <input id="wrapInside" type="number" min="0" step=".01"></label>
-          <label>Board/Material Thickness <input id="boardThickness" type="number" min="0" step=".01"></label>
-        </div>
-        <label><input id="coverPerimeterOn" type="checkbox"> Full cover perimeter outline</label>
-        <label><input id="separateCover" type="checkbox"> Print cover separately on cover stock</label>
-        <div class="two">
-          <label>Cover Copies <input id="coverCopies" type="number" min="1" step="1"></label>
-          <label><input id="coverCopiesMax" type="checkbox"> As many as fit</label>
-        </div>
       </details>
 
       <details>
@@ -365,6 +342,29 @@
 
       <details>
         <summary>Printing</summary>
+        <label>Spine Mode
+          <select id="spineMode">
+            <option value="auto">Automatic</option>
+            <option value="none">No Spine</option>
+            <option value="cover">Printed With Cover</option>
+            <option value="separate">Separate Spine / Cloth Strip</option>
+          </select>
+        </label>
+        <div class="two">
+          <label>Paper Thickness <input id="paperThickness" type="number" min=".001" step=".001"></label>
+          <label>Thread/Staple Allowance <input id="bindingAllowance" type="number" min="0" step=".005"></label>
+        </div>
+        <label><input id="wrapCover" type="checkbox"> Cover wraps around boards/edges with angled corners</label>
+        <div class="two">
+          <label>Wrap Inside (in) <input id="wrapInside" type="number" min="0" step=".01"></label>
+          <label>Board/Material Thickness <input id="boardThickness" type="number" min="0" step=".01"></label>
+        </div>
+        <label><input id="coverPerimeterOn" type="checkbox"> Full cover perimeter outline</label>
+        <label><input id="separateCover" type="checkbox"> Print cover separately on cover stock</label>
+        <div class="two">
+          <label>Cover Copies <input id="coverCopies" type="number" min="1" step="1"></label>
+          <label><input id="coverCopiesMax" type="checkbox"> As many as fit</label>
+        </div>
         <label><input id="showCutGuides" type="checkbox"> Cut outlines/guides</label>
         <label><input id="showFoldGuides" type="checkbox"> Sewing/fold guides</label>
         <label><input id="showPageGuides" type="checkbox"> Light page outlines</label>
