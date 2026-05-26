@@ -184,8 +184,9 @@ TPP.buildPages = function () {
       return;
     }
 
-    if (chapter.imageData && chapter.imagePlacement !== "none") {
-      const imageHtml = '<figure class="figure image-figure"><img src="' + chapter.imageData + '" style="width:' + Math.min(100, Math.max(10, Number(chapter.imageWidth) || 70)) + '%"><figcaption class="caption"></figcaption></figure>';
+    const chapterImage = TPP.fileData(settings, chapter.imageId);
+    if (chapterImage && chapter.imagePlacement !== "none") {
+      const imageHtml = '<figure class="figure image-figure"><img src="' + chapterImage + '" style="width:' + Math.min(100, Math.max(10, Number(chapter.imageWidth) || 70)) + '%"><figcaption class="caption"></figcaption></figure>';
       if (chapter.imagePlacement === "own") {
         makePage("chapter-image", heading + imageHtml);
         heading = "";

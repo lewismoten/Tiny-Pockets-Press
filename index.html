@@ -188,7 +188,7 @@
           <label>Border <input id="coverBorder" type="color" class="color-box"></label>
         </div>
         <label><input id="coverBorderOn" type="checkbox"> Frame on front cover</label>
-        <label>Cover Image <input id="coverImage" type="file" accept="image/*"></label>
+        <div id="coverImageSlot"></div>
         <div class="two">
           <label>Image X <input id="coverImgX" type="range" min="-100" max="100"></label>
           <label>Image Y <input id="coverImgY" type="range" min="-100" max="100"></label>
@@ -240,7 +240,7 @@
         <label><input id="backFrameOn" type="checkbox"> Frame on back cover</label>
         <label><input id="backUseFrontImage" type="checkbox"> Use front cover image</label>
         <label><input id="backClipImageToFrame" type="checkbox"> Clip back image inside frame</label>
-        <label>Back Image <input id="backImage" type="file" accept="image/*"></label>
+        <div id="backImageSlot"></div>
         <div class="two">
           <label>Image X <input id="backImgX" type="range" min="-100" max="100"></label>
           <label>Image Y <input id="backImgY" type="range" min="-100" max="100"></label>
@@ -262,7 +262,7 @@
           <label>Paper Thickness <input id="paperThickness" type="number" min=".001" step=".001"></label>
           <label>Thread/Staple Allowance <input id="bindingAllowance" type="number" min="0" step=".005"></label>
         </div>
-        <label>Spine Image <input id="spineImage" type="file" accept="image/*"></label>
+        <div id="spineImageSlot"></div>
         <div class="two">
           <label>Spine Image X <input id="spineImgX" type="range" min="-100" max="100"></label>
           <label>Spine Image Zoom <input id="spineImgZoom" type="range" min="10" max="500"></label>
@@ -391,6 +391,21 @@
       <button type="button" data-action="overwrite">Overwrite</button>
       <button type="button" data-action="copy" class="primary alt">Create Copy</button>
       <button type="button" data-action="cancel">Cancel</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="assetDialog" class="modal">
+  <form method="dialog" class="modal-card asset-dialog-card">
+    <h2 id="assetDialogTitle">Choose Image</h2>
+    <p id="assetDialogText" class="about-note"></p>
+    <div class="asset-upload-row">
+      <button type="button" id="assetUploadButton" class="primary alt">Upload New Image</button>
+      <input id="assetUploadInput" type="file" accept="image/*" hidden>
+      <button type="button" id="assetClearButton">Remove From This Field</button>
+    </div>
+    <div id="assetDialogList" class="asset-dialog-list"></div>
+    <div class="modal-actions">
+      <button type="button" data-action="close">Close</button>
     </div>
   </form>
 </dialog>

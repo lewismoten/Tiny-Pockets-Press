@@ -37,9 +37,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   });
 
-  document.getElementById("coverImage").onchange = function (e) { TPP.file(e, function (data) { TPP.active.coverImageData = data; TPP.save(); TPP.renderAll(); }); };
-  document.getElementById("backImage").onchange = function (e) { TPP.file(e, function (data) { TPP.active.backImageData = data; TPP.save(); TPP.renderAll(); }); };
-  document.getElementById("spineImage").onchange = function (e) { TPP.file(e, function (data) { TPP.active.spineImageData = data; TPP.save(); TPP.renderAll(); }); };
+  ["coverImageSlot", "backImageSlot", "spineImageSlot"].forEach(function (id) {
+    const node = document.getElementById(id);
+    if (!node) return;
+    node.onclick = function (e) {
+      const button = e.target.closest(".asset-picker-open");
+      if (!button) return;
+      TPP.openAssetDialog(button.dataset.targetType, button.dataset.targetKey);
+    };
+  });
 
   document.getElementById("chapterList").onclick = function (e) {
     const row = e.target.closest("[data-i]");
@@ -80,7 +86,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.renderChapterList();
   };
   document.getElementById("chapterEditor").addEventListener("change", function (e) {
-    if (e.target.classList.contains("chapter-image")) return;
     const card = e.target.closest(".chapter-card");
     if (!card) return;
     TPP.sync("commit");
@@ -126,21 +131,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.readerIndex = Math.max(0, pages.findIndex(function (p) { return p.html.includes(TPP.esc(title)); }));
       TPP.switchView("reader");
     }
-  };
-
-  document.getElementById("chapterEditor").onchange = function (e) {
-    if (e.target.classList.contains("chapter-image")) {
-      TPP.file(e, function (data) {
-        TPP.active.chapters[TPP.currentChapter].imageData = data;
-        TPP.save();
-        TPP.renderAll();
-      });
+    const assetButton = e.target.closest(".asset-picker-open");
+    if (assetButton) {
+      TPP.openAssetDialog(assetButton.dataset.targetType, assetButton.dataset.targetKey);
     }
   };
 
   document.getElementById("addChapter").onclick = function () {
     TPP.sync();
-    TPP.active.chapters.push({ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageData: "", imagePlacement: "none", imageWidth: 70, level: 0, isSubsection: false, isMetadata: false, includeInToc: true });
+    TPP.active.chapters.push({ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imagePlacement: "none", imageWidth: 70, level: 0, isSubsection: false, isMetadata: false, includeInToc: true });
     TPP.currentChapter = TPP.active.chapters.length - 1;
     TPP.save();
     TPP.renderAll();
@@ -149,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("newBook").onclick = function () {
     const book = TPP.fallbackBook();
     book.title = "Untitled Tiny Book";
-    book.chapters = [{ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageData: "", imagePlacement: "none", imageWidth: 70, level: 0, isSubsection: false, isMetadata: false, includeInToc: true }];
+    book.chapters = [{ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imagePlacement: "none", imageWidth: 70, level: 0, isSubsection: false, isMetadata: false, includeInToc: true }];
     TPP.library.push(book);
     TPP.save();
     TPP.setActive(book);
@@ -349,7 +348,157 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
     reader.readAsText(file);
   };
+
+  const assetDialog = document.getElementById("assetDialog");
+  const assetUploadButton = document.getElementById("assetUploadButton");
+  const assetUploadInput = document.getElementById("assetUploadInput");
+  const assetClearButton = document.getElementById("assetClearButton");
+  if (assetDialog) {
+    assetDialog.addEventListener("close", function () {
+      TPP.assetDialogTarget = null;
+    });
+    assetDialog.addEventListener("click", function (e) {
+      const useButton = e.target.closest("[data-asset-use]");
+      if (useButton) {
+        TPP.assignAssetToCurrentTarget(useButton.dataset.assetUse || "");
+        return;
+      }
+      const deleteButton = e.target.closest("[data-asset-delete]");
+      if (deleteButton) {
+        TPP.deleteAsset(deleteButton.dataset.assetDelete || "");
+        return;
+      }
+      const closeButton = e.target.closest("[data-action='close']");
+      if (closeButton && assetDialog.open) assetDialog.close();
+    });
+  }
+  if (assetUploadButton && assetUploadInput) {
+    assetUploadButton.onclick = function () {
+      assetUploadInput.value = "";
+      assetUploadInput.click();
+    };
+    assetUploadInput.onchange = function (e) {
+      TPP.file(e, function (data, file) {
+        TPP.uploadAssetToCurrentTarget(data, file);
+        assetUploadInput.value = "";
+      });
+    };
+  }
+  if (assetClearButton) {
+    assetClearButton.onclick = function () {
+      TPP.assignAssetToCurrentTarget("");
+    };
+  }
 });
+
+TPP.assetDialogTarget = null;
+TPP.assetTargetSpec = function (targetType, targetKey) {
+  if (targetType === "book") {
+    const map = {
+      coverImageId: { field: "coverImageId", label: "Front Cover Image" },
+      backImageId: { field: "backImageId", label: "Back Cover Image" },
+      spineImageId: { field: "spineImageId", label: "Spine Image" }
+    };
+    return map[targetKey] || null;
+  }
+  if (targetType === "chapter") {
+    const chapter = (TPP.active && TPP.active.chapters || []).find(function (entry) { return entry.id === targetKey; });
+    if (!chapter) return null;
+    return { chapter: chapter, field: "imageId", label: 'Chapter Image: "' + (chapter.title || "Untitled") + '"' };
+  }
+  return null;
+};
+TPP.assetTargetValue = function (targetType, targetKey) {
+  const spec = TPP.assetTargetSpec(targetType, targetKey);
+  if (!spec) return "";
+  return spec.chapter ? (spec.chapter[spec.field] || "") : (TPP.active[spec.field] || "");
+};
+TPP.setAssetTargetValue = function (targetType, targetKey, fileId) {
+  const spec = TPP.assetTargetSpec(targetType, targetKey);
+  if (!spec) return false;
+  if (spec.chapter) spec.chapter[spec.field] = fileId || "";
+  else TPP.active[spec.field] = fileId || "";
+  return true;
+};
+TPP.assetSlotHtml = function (label, targetKey, fileId, alt) {
+  return TPP.assetFieldHtml(label, "book", targetKey, fileId, alt);
+};
+TPP.refreshAssetSlots = function () {
+  if (!TPP.active) return;
+  const coverSlot = document.getElementById("coverImageSlot");
+  const backSlot = document.getElementById("backImageSlot");
+  const spineSlot = document.getElementById("spineImageSlot");
+  if (coverSlot) coverSlot.innerHTML = TPP.assetSlotHtml("Cover Image", "coverImageId", TPP.active.coverImageId, TPP.active.title || "Cover image");
+  if (backSlot) backSlot.innerHTML = TPP.assetSlotHtml("Back Image", "backImageId", TPP.active.backImageId, (TPP.active.title || "Book") + " back image");
+  if (spineSlot) spineSlot.innerHTML = TPP.assetSlotHtml("Spine Image", "spineImageId", TPP.active.spineImageId, (TPP.active.title || "Book") + " spine image");
+};
+TPP.assetCardHtml = function (file, currentId) {
+  const refs = TPP.fileReferences(TPP.active, file.id);
+  const canDelete = refs.length === 0;
+  return '<article class="asset-card ' + (file.id === currentId ? "current" : "") + '">' +
+    '<img class="asset-card-preview" src="' + TPP.esc(file.data) + '" alt="' + TPP.esc(file.name || file.type || "Image asset") + '">' +
+    '<div class="asset-card-meta">' +
+      '<div class="asset-card-title">' + TPP.esc(file.name || "Image Asset") + "</div>" +
+      '<div class="asset-card-sub">' + TPP.esc(file.type || "image/*") + " · " + TPP.esc(file.id) + "</div>" +
+      '<div class="asset-card-sub">Hash: ' + TPP.esc(file.hash || "") + "</div>" +
+      '<div class="asset-card-refs">' + (refs.length ? refs.map(function (ref) {
+        return '<span class="asset-ref">' + TPP.esc(ref.label) + "</span>";
+      }).join("") : '<span class="asset-ref">Unused</span>') + "</div>" +
+    "</div>" +
+    '<div class="asset-card-actions">' +
+      '<button type="button" data-asset-use="' + TPP.esc(file.id) + '" class="primary alt">' + (file.id === currentId ? "Selected" : "Use This Image") + "</button>" +
+      '<button type="button" data-asset-delete="' + TPP.esc(file.id) + '"' + (canDelete ? "" : " disabled") + ">Delete</button>" +
+    "</div>" +
+  "</article>";
+};
+TPP.renderAssetDialog = function () {
+  const dialog = document.getElementById("assetDialog");
+  const title = document.getElementById("assetDialogTitle");
+  const text = document.getElementById("assetDialogText");
+  const list = document.getElementById("assetDialogList");
+  const clearButton = document.getElementById("assetClearButton");
+  if (!dialog || !title || !text || !list) return;
+  const target = TPP.assetDialogTarget;
+  const spec = target ? TPP.assetTargetSpec(target.type, target.key) : null;
+  const currentId = target ? TPP.assetTargetValue(target.type, target.key) : "";
+  title.textContent = spec ? spec.label : "Choose Image";
+  text.textContent = spec ? "Reuse an existing image, upload a new one, or remove the current assignment." : "";
+  if (clearButton) clearButton.disabled = !currentId;
+  const files = (TPP.active && Array.isArray(TPP.active.files)) ? TPP.active.files : [];
+  list.innerHTML = files.length
+    ? files.map(function (file) { return TPP.assetCardHtml(file, currentId); }).join("")
+    : '<div class="asset-empty">No images have been uploaded for this book yet.</div>';
+};
+TPP.openAssetDialog = function (targetType, targetKey) {
+  const dialog = document.getElementById("assetDialog");
+  if (!dialog || typeof dialog.showModal !== "function") return;
+  TPP.sync("nosave");
+  TPP.assetDialogTarget = { type: targetType, key: targetKey };
+  TPP.renderAssetDialog();
+  if (!dialog.open) dialog.showModal();
+};
+TPP.commitAssetChange = function () {
+  TPP.save("commit", TPP.active && TPP.active.id);
+  TPP.loadForm();
+  TPP.renderAll();
+  if (document.getElementById("assetDialog") && document.getElementById("assetDialog").open) TPP.renderAssetDialog();
+};
+TPP.assignAssetToCurrentTarget = function (fileId) {
+  const target = TPP.assetDialogTarget;
+  if (!target || !TPP.active) return;
+  if (!TPP.setAssetTargetValue(target.type, target.key, fileId)) return;
+  TPP.commitAssetChange();
+};
+TPP.uploadAssetToCurrentTarget = function (data, file) {
+  if (!TPP.active) return;
+  const fileId = TPP.upsertFileAsset(TPP.active, data, file && file.type, file && file.name);
+  TPP.assignAssetToCurrentTarget(fileId);
+};
+TPP.deleteAsset = function (fileId) {
+  if (!TPP.active || !fileId) return;
+  if (!TPP.removeFileAsset(TPP.active, fileId)) return;
+  TPP.commitAssetChange();
+};
 
 TPP.importConflictStamp = function (book) {
   const date = new Date(book && book.updatedAt);

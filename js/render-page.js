@@ -4,8 +4,13 @@ TPP.stroke = function (enabled, size, color) {
   if (!enabled || Number(size) <= 0) return "0 2px 10px rgb(0 0 0 / .35)";
   return size + "px 0 " + color + ",-" + size + "px 0 " + color + ",0 " + size + "px " + color + ",0 -" + size + "px " + color + ",0 2px 10px rgb(0 0 0 / .35)";
 };
+TPP.coverImageSrc = function (settings, side) {
+  if (side === "front") return TPP.fileData(settings, settings.coverImageId);
+  if (settings.backUseFrontImage) return TPP.fileData(settings, settings.coverImageId);
+  return TPP.fileData(settings, settings.backImageId);
+};
 TPP.coverHTML = function (settings, side) {
-  const image = side === "front" ? settings.coverImageData : (settings.backUseFrontImage ? settings.coverImageData : settings.backImageData);
+  const image = TPP.coverImageSrc(settings, side);
   if (side === "back") {
     const align = ["left", "center", "justify"].includes(settings.backTextAlign) ? settings.backTextAlign : "center";
     const last = ["auto", "center", "justify"].includes(settings.backTextLastLine) ? settings.backTextLastLine : "auto";
@@ -125,7 +130,7 @@ TPP.spineEl = function (settings, x, y, height) {
   const authorReserve = hasAuthor ? Math.max(0.12, ((Number(settings.spineAuthorSize) || 4) / 72) * 1.6) : 0;
   element.style.setProperty("--spine-title-length", Math.max(0.1, height - authorReserve) + "in");
   element.innerHTML =
-    (settings.spineImageData ? '<img class="spine-img" src="' + settings.spineImageData + '" style="width:' + settings.spineImgZoom + '%;margin-left:' + settings.spineImgX + '%">' : "") +
+    (settings.spineImageId ? '<img class="spine-img" src="' + TPP.fileData(settings, settings.spineImageId) + '" style="width:' + settings.spineImgZoom + '%;margin-left:' + settings.spineImgX + '%">' : "") +
     '<div class="spine-title ' + (settings.spineTitleRotate ? "rot" : "") + '">' + TPP.esc(settings.title) + "</div>" +
     (hasAuthor ? '<div class="spine-author ' + (settings.spineAuthorRotate ? "rot" : "") + '">' + TPP.esc(settings.spineAuthor || settings.author) + "</div>" : "");
   return element;

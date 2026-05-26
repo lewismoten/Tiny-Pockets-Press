@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 1;
+TPP.SCHEMA_VERSION = 2;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -24,6 +24,119 @@ TPP.bookExportName = function (book) {
   if (TPP.active && book.id === TPP.active.id && TPP.sync) TPP.sync("nosave");
   const title = (book.title || "").trim();
   return (title || "book") + ".json";
+};
+TPP.hashString = function (value) {
+  let hash = 2166136261;
+  const text = String(value || "");
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return ("0000000" + (hash >>> 0).toString(16)).slice(-8);
+};
+TPP.fileAsset = function (book, id) {
+  const files = Array.isArray(book && book.files) ? book.files : [];
+  return files.find(function (file) { return file && file.id === id; }) || null;
+};
+TPP.fileData = function (book, id) {
+  const file = TPP.fileAsset(book, id);
+  return file && file.data ? file.data : "";
+};
+TPP.fileFieldRefs = function (book) {
+  const refs = {};
+  const push = function (fileId, ref) {
+    if (!fileId) return;
+    refs[fileId] = refs[fileId] || [];
+    refs[fileId].push(ref);
+  };
+  push(book && book.coverImageId, { key: "coverImageId", label: "Front Cover Image" });
+  push(book && book.backImageId, { key: "backImageId", label: "Back Cover Image" });
+  push(book && book.spineImageId, { key: "spineImageId", label: "Spine Image" });
+  (Array.isArray(book && book.chapters) ? book.chapters : []).forEach(function (chapter, index) {
+    push(chapter && chapter.imageId, {
+      key: "chapter:" + (chapter && chapter.id ? chapter.id : index),
+      label: 'Chapter Image: "' + ((chapter && chapter.title) || ("Chapter " + (index + 1))) + '"',
+      chapterId: chapter && chapter.id ? chapter.id : "",
+      chapterIndex: index
+    });
+  });
+  return refs;
+};
+TPP.fileReferences = function (book, fileId) {
+  const refs = TPP.fileFieldRefs(book);
+  return refs[fileId] || [];
+};
+TPP.upsertFileAsset = function (book, data, type, name) {
+  if (!book) return "";
+  if (!Array.isArray(book.files)) book.files = [];
+  const assetData = String(data || "").trim();
+  if (!assetData) return "";
+  const assetType = type || ((assetData.match(/^data:([^;,]+)/) || [])[1]) || "application/octet-stream";
+  const hash = TPP.hashString(assetType + ":" + assetData);
+  const existing = book.files.find(function (file) { return file && file.hash === hash && file.data === assetData; });
+  if (existing) return existing.id;
+  const id = TPP.uid();
+  book.files.push({
+    id: id,
+    type: assetType,
+    name: name || "",
+    data: assetData,
+    hash: hash
+  });
+  return id;
+};
+TPP.removeFileAsset = function (book, fileId) {
+  if (!book || !Array.isArray(book.files) || !fileId) return false;
+  if (TPP.fileReferences(book, fileId).length) return false;
+  const before = book.files.length;
+  book.files = book.files.filter(function (file) { return !file || file.id !== fileId; });
+  return book.files.length !== before;
+};
+TPP.migrateInlineImage = function (book, sourceKey, targetKey) {
+  if (!book) return;
+  const data = String(book[sourceKey] || "").trim();
+  if (data && !book[targetKey]) book[targetKey] = TPP.upsertFileAsset(book, data);
+  delete book[sourceKey];
+};
+TPP.migrateChapterInlineImage = function (book, chapter) {
+  if (!book || !chapter) return;
+  const data = String(chapter.imageData || "").trim();
+  if (data && !chapter.imageId) chapter.imageId = TPP.upsertFileAsset(book, data);
+  delete chapter.imageData;
+};
+TPP.normalizeFiles = function (book) {
+  if (!book) return;
+  book.files = Array.isArray(book.files) ? book.files : [];
+  const seen = new Map();
+  const idMap = {};
+  book.files = book.files.reduce(function (list, file) {
+    if (!file || !file.data) return list;
+    const normalized = {
+      id: file.id || TPP.uid(),
+      type: file.type || ((String(file.data).match(/^data:([^;,]+)/) || [])[1]) || "application/octet-stream",
+      name: file.name || "",
+      data: file.data,
+      hash: file.hash || TPP.hashString((file.type || "") + ":" + file.data)
+    };
+    const key = normalized.hash + "::" + normalized.data;
+    if (seen.has(key)) {
+      idMap[normalized.id] = seen.get(key);
+      return list;
+    }
+    seen.set(key, normalized.id);
+    idMap[normalized.id] = normalized.id;
+    list.push(normalized);
+    return list;
+  }, []);
+  TPP.migrateInlineImage(book, "coverImageData", "coverImageId");
+  TPP.migrateInlineImage(book, "backImageData", "backImageId");
+  TPP.migrateInlineImage(book, "spineImageData", "spineImageId");
+  ["coverImageId", "backImageId", "spineImageId"].forEach(function (key) {
+    if (book[key] && idMap[book[key]]) book[key] = idMap[book[key]];
+  });
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
+    if (chapter && chapter.imageId && idMap[chapter.imageId]) chapter.imageId = idMap[chapter.imageId];
+  });
 };
 TPP.esc = function (value) {
   return String(value ?? "").replace(/[&<>"']/g, function (ch) {
@@ -180,13 +293,14 @@ TPP.norm = function (book) {
   out.imageExportDpi = TPP.dpi(out.imageExportDpi);
   out.mediaCaptionSize = TPP.mediaCaptionSize(out.mediaCaptionSize, base.mediaCaptionSize);
   TPP.hydrateBookDates(out);
+  TPP.normalizeFiles(out);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
-    return Object.assign({
+    const normalized = Object.assign({
       id: TPP.uid(),
       title: "Chapter " + (index + 1),
       text: "",
-      imageData: "",
+      imageId: "",
       imagePlacement: "none",
       imageWidth: 70,
       level: 0,
@@ -195,6 +309,15 @@ TPP.norm = function (book) {
       includeInToc: true,
       tocTitle: ""
     }, chapter);
+    TPP.migrateChapterInlineImage(out, normalized);
+    return normalized;
+  });
+  const fileIds = new Set(out.files.map(function (file) { return file.id; }));
+  ["coverImageId", "backImageId", "spineImageId"].forEach(function (key) {
+    if (out[key] && !fileIds.has(out[key])) out[key] = "";
+  });
+  out.chapters.forEach(function (chapter) {
+    if (chapter.imageId && !fileIds.has(chapter.imageId)) chapter.imageId = "";
   });
   return out;
 };
@@ -308,6 +431,6 @@ TPP.file = function (event, callback) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function () { callback(reader.result); };
+  reader.onload = function () { callback(reader.result, file); };
   reader.readAsDataURL(file);
 };
