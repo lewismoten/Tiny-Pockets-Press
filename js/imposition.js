@@ -55,6 +55,24 @@ TPP.signaturePlan = function (pages, signatureSize) {
   }
   return signatures;
 };
+TPP.signatureMarkY = function (settings, signatureIndex, signatureCount, size) {
+  const mark = size || 0.1;
+  const top = 0.18;
+  const bottom = Math.max(top, settings.page.h - mark - 0.18);
+  if (signatureCount <= 1) return (top + bottom) / 2;
+  return top + ((bottom - top) * signatureIndex / (signatureCount - 1));
+};
+TPP.signatureMark = function (sheet, settings, x, y, signatureIndex, signatureCount) {
+  const mark = document.createElement("div");
+  const size = Math.max(0.08, Math.min(0.14, settings.page.w * 0.08, settings.page.h * 0.08));
+  mark.className = "signature-mark";
+  mark.style.left = (x + settings.page.w - size / 2) + "in";
+  mark.style.top = (y + TPP.signatureMarkY(settings, signatureIndex, signatureCount, size)) + "in";
+  mark.style.width = size + "in";
+  mark.style.height = size + "in";
+  mark.style.background = signatureIndex % 2 === 0 ? "#111111" : "#b3261e";
+  sheet.appendChild(mark);
+};
 TPP.guide = function (sheet, cls, x, y, w, h) {
   const guide = document.createElement("div");
   guide.className = cls;
@@ -370,6 +388,7 @@ TPP.renderInterior = function () {
         tag.textContent = "Sig " + (block.signature + 1) + " · Sheet " + (block.sheet + 1) + " · " + block.side;
         sheet.appendChild(tag);
       }
+      TPP.signatureMark(sheet, settings, x, y, block.signature, signatures.length);
       TPP.guides(sheet, settings, x, y, settings.page.w * 2, settings.page.h, 0);
     }
     preview.appendChild(sheet);
