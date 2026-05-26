@@ -10,6 +10,7 @@ TPP.settings = function () {
   const raw = book.pageSize === "custom" ? { w: Number(book.customW), h: Number(book.customH) } : (TPP.sizes[book.pageSize] || TPP.sizes.one);
   return Object.assign({}, book, {
     signatureSize: TPP.signatureSize(book.signatureSize),
+    gutterMargin: Math.max(0, Number(book.gutterMargin) || 0),
     page: { w: Math.max(0.5, Number(raw.w) || 1), h: Math.max(0.5, Number(raw.h) || 1) },
     sheet: TPP.sheets[book.sheetSize] || TPP.sheets.letter
   });
@@ -23,7 +24,7 @@ TPP.measureBlock = function (html, settings) {
     TPP.measureBox = box;
   }
   box.className = "page measure texture-none";
-  box.style.width = Math.max(0.05, settings.page.w - 2 * settings.margin) + "in";
+  box.style.width = Math.max(0.05, settings.page.w - 2 * settings.margin - settings.gutterMargin) + "in";
   box.style.fontFamily = settings.fontFamily;
   box.style.fontSize = settings.bodySize + "pt";
   box.style.lineHeight = settings.lineHeight;

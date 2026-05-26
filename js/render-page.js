@@ -29,6 +29,7 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--para-gap", settings.paraGap + "em");
   element.style.setProperty("--align", settings.justify ? "justify" : "left");
   element.style.setProperty("--margin", settings.margin + "in");
+  element.style.setProperty("--gutter-margin", Math.max(0, Number(settings.gutterMargin) || 0) + "in");
   element.style.setProperty("--cover-bg1", settings.coverBg1);
   element.style.setProperty("--cover-bg2", settings.coverBg2);
   element.style.setProperty("--cover-text", settings.coverText);
