@@ -39,22 +39,67 @@ TPP.measureBlock = function (html, settings) {
   TPP.renderQr(box, settings);
   return box.scrollHeight / 96;
 };
-TPP.splitHtmlText = function (text, settings, maxHeight) {
-  const words = String(text || "").split(/\s+/).filter(Boolean);
+TPP.storyTextHtml = function (innerHtml) {
+  return '<div class="story-text">' + (innerHtml || "") + "</div>";
+};
+TPP.serializeNodes = function (nodes) {
+  const box = document.createElement("div");
+  (nodes || []).forEach(function (node) {
+    box.appendChild(node.cloneNode(true));
+  });
+  return box.innerHTML;
+};
+TPP.splitHtmlText = function (html, settings, maxHeight) {
+  const parse = document.createElement("div");
+  parse.innerHTML = html || "";
+  const story = parse.querySelector(".story-text") || parse;
+  const fits = function (innerHtml) {
+    return TPP.measureBlock(TPP.storyTextHtml(innerHtml), settings) <= maxHeight;
+  };
+  const splitTextNode = function (node) {
+    const tokens = String(node.textContent || "").match(/\S+\s*|\s+/g) || [node.textContent || ""];
+    return tokens.filter(Boolean).map(function (token) {
+      return document.createTextNode(token);
+    });
+  };
+  const splitNode = function (node) {
+    if (!node) return [];
+    if (node.nodeType === Node.TEXT_NODE) return splitTextNode(node);
+    if (node.nodeType !== Node.ELEMENT_NODE) return [];
+    const outer = node.outerHTML || "";
+    if (outer && fits(outer)) return [node.cloneNode(true)];
+    if (!node.childNodes.length) return [node.cloneNode(true)];
+    const chunks = [];
+    let shell = node.cloneNode(false);
+    Array.from(node.childNodes).forEach(function (child) {
+      splitNode(child).forEach(function (piece) {
+        const test = shell.cloneNode(true);
+        test.appendChild(piece.cloneNode(true));
+        if (shell.childNodes.length && !fits(test.outerHTML || test.textContent || "")) {
+          chunks.push(shell);
+          shell = node.cloneNode(false);
+        }
+        shell.appendChild(piece.cloneNode(true));
+      });
+    });
+    if (shell.childNodes.length) chunks.push(shell);
+    return chunks.length ? chunks : [node.cloneNode(true)];
+  };
+
   const chunks = [];
   let current = [];
-  words.forEach(function (word) {
-    const test = current.concat([word]).join(" ");
-    const html = '<div class="story-text"><p>' + TPP.esc(test) + "</p></div>";
-    if (TPP.measureBlock(html, settings) > maxHeight && current.length) {
-      chunks.push(current.join(" "));
-      current = [word];
-    } else {
-      current.push(word);
-    }
+  Array.from(story.childNodes).forEach(function (child) {
+    splitNode(child).forEach(function (piece) {
+      const test = current.concat([piece]);
+      if (current.length && !fits(TPP.serializeNodes(test))) {
+        chunks.push(TPP.storyTextHtml(TPP.serializeNodes(current)));
+        current = [];
+      }
+      current.push(piece.cloneNode(true));
+    });
   });
-  if (current.length) chunks.push(current.join(" "));
-  return chunks.length ? chunks : [""];
+  if (current.length) chunks.push(TPP.storyTextHtml(TPP.serializeNodes(current)));
+  return chunks.length ? chunks : [TPP.storyTextHtml(story.innerHTML)];
 };
 TPP.parseChapterMetadata = function (chapter) {
   let text = String((chapter && chapter.text) || "").trim();
@@ -147,9 +192,8 @@ TPP.buildPages = function () {
       if (blockHeight <= maxHeight) {
         pending = block.html;
       } else if (block.type === "html") {
-        const textOnly = block.html.replace(/<[^>]+>/g, " ");
-        TPP.splitHtmlText(textOnly, settings, maxHeight).forEach(function (part) {
-          makePage("text", '<div class="story-text"><p>' + TPP.esc(part) + "</p></div>");
+        TPP.splitHtmlText(block.html, settings, maxHeight).forEach(function (part) {
+          makePage("text", part);
         });
       } else {
         makePage("text", '<div class="story-text smallfit">' + block.html + "</div>");
