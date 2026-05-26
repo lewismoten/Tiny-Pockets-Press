@@ -4,6 +4,9 @@ TPP.stroke = function (enabled, size, color) {
   if (!enabled || Number(size) <= 0) return "0 2px 10px rgb(0 0 0 / .35)";
   return size + "px 0 " + color + ",-" + size + "px 0 " + color + ",0 " + size + "px " + color + ",0 -" + size + "px " + color + ",0 2px 10px rgb(0 0 0 / .35)";
 };
+TPP.strokeWidth = function (enabled, size) {
+  return enabled && Number(size) > 0 ? Number(size) + "px" : "0px";
+};
 TPP.coverImageSrc = function (settings, side) {
   if (side === "front") return TPP.fileData(settings, settings.coverImageId);
   return TPP.fileData(settings, settings.backImageId);
@@ -48,10 +51,14 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--cover-author-color", settings.coverAuthorColor);
   element.style.setProperty("--cover-series-color", settings.coverSeriesColor);
   element.style.setProperty("--cover-publisher-color", settings.coverPublisherColor);
-  element.style.setProperty("--cover-title-stroke", TPP.stroke(settings.coverTitleStroke, settings.coverTitleStrokeSize, settings.coverTitleStrokeColor));
-  element.style.setProperty("--cover-author-stroke", TPP.stroke(settings.coverAuthorStroke, settings.coverAuthorStrokeSize, settings.coverAuthorStrokeColor));
-  element.style.setProperty("--cover-series-stroke", TPP.stroke(settings.coverSeriesStroke, settings.coverSeriesStrokeSize, settings.coverSeriesStrokeColor));
-  element.style.setProperty("--cover-publisher-stroke", TPP.stroke(settings.coverPublisherStroke, settings.coverPublisherStrokeSize, settings.coverPublisherStrokeColor));
+  element.style.setProperty("--cover-title-stroke-width", TPP.strokeWidth(settings.coverTitleStroke, settings.coverTitleStrokeSize));
+  element.style.setProperty("--cover-author-stroke-width", TPP.strokeWidth(settings.coverAuthorStroke, settings.coverAuthorStrokeSize));
+  element.style.setProperty("--cover-series-stroke-width", TPP.strokeWidth(settings.coverSeriesStroke, settings.coverSeriesStrokeSize));
+  element.style.setProperty("--cover-publisher-stroke-width", TPP.strokeWidth(settings.coverPublisherStroke, settings.coverPublisherStrokeSize));
+  element.style.setProperty("--cover-title-stroke-color", settings.coverTitleStrokeColor);
+  element.style.setProperty("--cover-author-stroke-color", settings.coverAuthorStrokeColor);
+  element.style.setProperty("--cover-series-stroke-color", settings.coverSeriesStrokeColor);
+  element.style.setProperty("--cover-publisher-stroke-color", settings.coverPublisherStrokeColor);
   element.style.setProperty("--title-y", settings.coverTitleY + "%");
   element.style.setProperty("--author-y", settings.coverAuthorY + "%");
   element.style.setProperty("--series-y", settings.coverSeriesY + "%");
@@ -69,7 +76,8 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--spine-title-y", (Number(settings.spineTitleY) || 0) + "%");
   element.style.setProperty("--spine-author-size", settings.spineAuthorSize + "pt");
   element.style.setProperty("--spine-text-color", settings.spineTextColor);
-  element.style.setProperty("--spine-stroke", TPP.stroke(settings.spineStroke, settings.spineStrokeSize, settings.spineStrokeColor));
+  element.style.setProperty("--spine-stroke-width", TPP.strokeWidth(settings.spineStroke, settings.spineStrokeSize));
+  element.style.setProperty("--spine-stroke-color", settings.spineStrokeColor);
 };
 TPP.pageEl = function (page, settings, x, y, rotate, staticMode, size) {
   const width = (size && size.w) || settings.page.w;
