@@ -157,15 +157,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   };
 
-  document.getElementById("readerPrev").onclick = function () {
+  TPP.readerGoPrev = function () {
     const pages = TPP.buildPages();
     const mode = document.getElementById("readerMode").value;
     const settings = TPP.settings();
     TPP.readerIndex = TPP.readerNormalizeIndex(TPP.readerIndex - (mode === "spread" ? 2 : 1), pages, mode, settings);
     TPP.renderReader();
   };
-  document.getElementById("readerStagePrev").onclick = document.getElementById("readerPrev").onclick;
-  document.getElementById("readerNext").onclick = function () {
+  document.getElementById("readerStagePrev").onclick = TPP.readerGoPrev;
+  TPP.readerGoNext = function () {
     const pages = TPP.buildPages();
     const mode = document.getElementById("readerMode").value;
     const settings = TPP.settings();
@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.readerIndex = TPP.readerNormalizeIndex(next, pages, mode, settings);
     TPP.renderReader();
   };
-  document.getElementById("readerStageNext").onclick = document.getElementById("readerNext").onclick;
+  document.getElementById("readerStageNext").onclick = TPP.readerGoNext;
   document.getElementById("readerJump").onchange = function () {
     TPP.readerIndex = Number(document.getElementById("readerJump").value);
     TPP.renderReader();
@@ -569,9 +569,9 @@ TPP.renderReader = function () {
     }
     shell.onclick = function () {
       if (mode === "spread" && shown.length > 1 && shownIndex === 0) {
-        document.getElementById("readerPrev").click();
+        TPP.readerGoPrev();
       } else {
-        document.getElementById("readerNext").click();
+        TPP.readerGoNext();
       }
     };
     spread.appendChild(shell);
