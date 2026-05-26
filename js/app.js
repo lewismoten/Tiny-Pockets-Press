@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   document.getElementById("addChapter").onclick = function () {
     TPP.sync();
-    TPP.active.chapters.push({ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imagePlacement: "none", imageWidth: 70, level: 0, isSubsection: false, isMetadata: false, includeInToc: true });
+    TPP.active.chapters.push({ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imagePlacement: "none", imageWidth: 70, imageRotate: 0, level: 0, isSubsection: false, isMetadata: false, includeInToc: true });
     TPP.currentChapter = TPP.active.chapters.length - 1;
     TPP.save();
     TPP.renderAll();
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("newBook").onclick = function () {
     const book = TPP.fallbackBook();
     book.title = "Untitled Tiny Book";
-    book.chapters = [{ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imagePlacement: "none", imageWidth: 70, level: 0, isSubsection: false, isMetadata: false, includeInToc: true }];
+    book.chapters = [{ id: TPP.uid(), title: "New Chapter", tocTitle: "", text: "", imageId: "", imagePlacement: "none", imageWidth: 70, imageRotate: 0, level: 0, isSubsection: false, isMetadata: false, includeInToc: true }];
     TPP.library.push(book);
     TPP.save();
     TPP.setActive(book);

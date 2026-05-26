@@ -340,6 +340,7 @@ TPP.norm = function (book) {
       imageId: "",
       imagePlacement: "none",
       imageWidth: 70,
+      imageRotate: 0,
       level: 0,
       isSubsection: false,
       isMetadata: false,

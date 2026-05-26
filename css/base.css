@@ -34,7 +34,7 @@ input[type=checkbox]{width:auto}.color-box{width:3rem!important;height:2.25rem!i
 .asset-preview,.asset-empty{width:100%;aspect-ratio:1/1;border-radius:12px}
 .asset-preview{display:block;background:#f1e8dd;border:1px solid #e2d6c8;object-fit:cover}
 .asset-empty{display:grid;place-items:center;padding:.45rem;border:1px dashed #d3c8bb;background:#faf5ee;color:#8a7d70;font-size:.74rem;text-align:center}
-.asset-slider-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem}
+.asset-slider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(5.5rem,1fr));gap:.65rem}
 .asset-slider-grid label{margin-bottom:0}
 .cover-text-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.65rem}
 .cover-text-group{display:grid;gap:.45rem;padding:.75rem;border:1px solid var(--line);border-radius:14px;background:#fff}

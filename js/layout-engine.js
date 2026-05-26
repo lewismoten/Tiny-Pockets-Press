@@ -186,7 +186,7 @@ TPP.buildPages = function () {
 
     const chapterImage = TPP.fileData(settings, chapter.imageId);
     if (chapterImage && chapter.imagePlacement !== "none") {
-      const imageHtml = '<figure class="figure image-figure"><img src="' + chapterImage + '" style="width:' + Math.min(100, Math.max(10, Number(chapter.imageWidth) || 70)) + '%"><figcaption class="caption"></figcaption></figure>';
+      const imageHtml = '<figure class="figure image-figure"><img src="' + chapterImage + '" style="width:' + Math.min(100, Math.max(10, Number(chapter.imageWidth) || 70)) + '%;transform:rotate(' + (Number(chapter.imageRotate) || 0) + 'deg)"><figcaption class="caption"></figcaption></figure>';
       if (chapter.imagePlacement === "own") {
         makePage("chapter-image", heading + imageHtml);
         heading = "";

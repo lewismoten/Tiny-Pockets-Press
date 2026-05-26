@@ -16,11 +16,11 @@ TPP.coverHTML = function (settings, side) {
   if (side === "back") {
     const align = ["left", "center", "justify"].includes(settings.backTextAlign) ? settings.backTextAlign : "center";
     const last = ["auto", "center", "justify"].includes(settings.backTextLastLine) ? settings.backTextLastLine : "auto";
-    return (image ? '<img class="back-img" src="' + image + '" style="width:' + settings.backImgZoom + '%;margin-left:' + settings.backImgX + '%;margin-top:' + settings.backImgY + '%">' : "") +
+    return (image ? '<img class="back-img" src="' + image + '" style="width:' + settings.backImgZoom + '%;margin-left:' + settings.backImgX + '%;margin-top:' + settings.backImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.backImgRotate) || 0) + 'deg)">' : "") +
       '<div class="back-text align-' + align + ' last-' + last + '"><div class="story-text">' + TPP.safeMarkdown(settings.backText || "") + "</div></div>";
   }
   const series = [settings.seriesName, settings.number].filter(Boolean).join(" ");
-  return (image ? '<img class="cover-img" src="' + image + '" style="width:' + settings.coverImgZoom + '%;margin-left:' + settings.coverImgX + '%;margin-top:' + settings.coverImgY + '%">' : "") +
+  return (image ? '<img class="cover-img" src="' + image + '" style="width:' + settings.coverImgZoom + '%;margin-left:' + settings.coverImgX + '%;margin-top:' + settings.coverImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.coverImgRotate) || 0) + 'deg)">' : "") +
     (settings.coverShowTitle !== false ? '<div class="cover-el cover-title">' + TPP.esc(settings.title) + "</div>" : "") +
     (settings.coverShowAuthor ? '<div class="cover-el cover-author">' + TPP.esc(settings.author) + "</div>" : "") +
     (settings.coverShowSeries ? '<div class="cover-el cover-series">' + TPP.esc(series) + "</div>" : "") +
@@ -146,7 +146,7 @@ TPP.spineEl = function (settings, x, y, height) {
   const authorReserve = hasAuthor ? Math.max(0.12, ((Number(settings.spineAuthorSize) || 4) / 72) * 1.6) : 0;
   element.style.setProperty("--spine-title-length", Math.max(0.1, height - authorReserve) + "in");
   element.innerHTML =
-    (settings.spineImageId ? '<img class="spine-img" src="' + TPP.fileData(settings, settings.spineImageId) + '" style="width:' + settings.spineImgZoom + '%;margin-left:' + settings.spineImgX + '%;margin-top:' + settings.spineImgY + '%">' : "") +
+    (settings.spineImageId ? '<img class="spine-img" src="' + TPP.fileData(settings, settings.spineImageId) + '" style="width:' + settings.spineImgZoom + '%;margin-left:' + settings.spineImgX + '%;margin-top:' + settings.spineImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.spineImgRotate) || 0) + 'deg)">' : "") +
     '<div class="spine-title ' + (settings.spineTitleRotate ? "rot" : "") + '">' + TPP.esc(settings.title) + "</div>" +
     (hasAuthor ? '<div class="spine-author ' + (settings.spineAuthorRotate ? "rot" : "") + '">' + TPP.esc(settings.spineAuthor || settings.author) + "</div>" : "");
   return element;

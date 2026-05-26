@@ -95,6 +95,7 @@ TPP.readChapterFromEditor = function () {
     chapter.text = card.querySelector(".chapter-text").value;
     chapter.imagePlacement = card.querySelector(".chapter-image-placement").value;
     chapter.imageWidth = Number(card.querySelector(".chapter-image-width").value) || 70;
+    chapter.imageRotate = Number(card.querySelector(".chapter-image-rotate").value) || 0;
     chapter.level = Number(card.querySelector(".chapter-level").value) || 0;
     chapter.isSubsection = card.querySelector(".chapter-subsection").checked;
     chapter.isMetadata = card.querySelector(".chapter-metadata").checked;
@@ -140,6 +141,7 @@ TPP.renderChapterEditor = function () {
     '<div class="toolbar"><button data-fmt="bold">Bold</button><button data-fmt="italic">Italic</button><button data-fmt="underline">Underline</button><button data-fmt="strike">Strike</button><button data-fmt="ul">Bullets</button><button data-fmt="h2">Heading</button><button data-fmt="table">Table</button></div>' +
     '<div class="editor-grid"><label>' + (chapter.isMetadata ? "Metadata JSON" : "Markdown") + '<textarea class="chapter-text" placeholder="' + (chapter.isMetadata ? '{&quot;type&quot;:&quot;blank&quot;,&quot;pages&quot;:12}' : "") + '">' + TPP.esc(chapter.text || "") + '</textarea></label><div><strong>Preview</strong><div class="md-preview">' + (chapter.isMetadata ? TPP.metadataPreview(chapter.text || "") : TPP.previewWithBreaks(chapter.text || "")) + "</div></div></div>" +
     '<div class="two"><label>Image Placement<select class="chapter-image-placement"><option value="none" ' + (chapter.imagePlacement === "none" ? "selected" : "") + '>No Image</option><option value="below" ' + (chapter.imagePlacement === "below" ? "selected" : "") + '>Below Title</option><option value="own" ' + (chapter.imagePlacement === "own" ? "selected" : "") + '>Own Page</option></select></label><label>Image Width %<input class="chapter-image-width" type="number" min="10" max="100" value="' + (chapter.imageWidth || 70) + '"></label></div>' +
+    '<label>Image Rotate <input class="chapter-image-rotate" type="range" min="-180" max="180" step="1" value="' + (Number(chapter.imageRotate) || 0) + '"></label>' +
     TPP.assetFieldHtml("Chapter Image", "chapter", chapter.id, chapter.imageId, chapter.title || "Chapter image") +
     "</article>";
   TPP.renderQr(document.getElementById("chapterEditor"));
