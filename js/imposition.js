@@ -316,7 +316,7 @@ TPP.coverFootprint = function (sheet, settings, x, y, w, h) {
   TPP.applyVars(footprint, settings);
   sheet.appendChild(footprint);
 };
-TPP.guides = function (sheet, settings, x, y, w, h, spineW) {
+TPP.guides = function (sheet, settings, x, y, w, h, spineW, rotate90) {
   if (settings.showCutGuides) {
     const len = Math.min(0.12, w / 8, h / 8);
     [x, x + w].forEach(function (xx) {
@@ -333,6 +333,8 @@ TPP.guides = function (sheet, settings, x, y, w, h, spineW) {
       const wrap = TPP.coverWrap(settings);
       TPP.guide(sheet, "fold v", x + wrap + settings.page.w, y, 0, h);
       TPP.guide(sheet, "fold v", x + wrap + settings.page.w + spineW, y, 0, h);
+    } else if (rotate90) {
+      TPP.guide(sheet, "fold h", x, y + h / 2, w, 0);
     } else {
       TPP.guide(sheet, "fold v", x + w / 2, y, 0, h);
     }
@@ -419,12 +421,14 @@ TPP.renderInterior = function () {
         tag.textContent = "Sig " + (block.signature + 1) + " · Sheet " + (block.sheet + 1) + " · " + block.side;
         sheet.appendChild(tag);
       }
+      const guideW = grid.rot ? settings.page.h : settings.page.w * 2;
+      const guideH = grid.rot ? settings.page.w * 2 : settings.page.h;
       if (TPP.signatureSpineSide(block.side)) {
         TPP.signatureMark(sheet, settings, x, y, block.signature, signatures.length);
       }
       TPP.guides(sheet, Object.assign({}, settings, {
         showFoldGuides: settings.showFoldGuides && TPP.signatureSpineSide(block.side)
-      }), x, y, settings.page.w * 2, settings.page.h, 0);
+      }), x, y, guideW, guideH, 0, grid.rot);
     }
     preview.appendChild(sheet);
   };
@@ -463,7 +467,7 @@ TPP.renderCover = function () {
     artwork.appendChild(TPP.pageEl(back, settings, wrap, wrap, false, false, { w: settings.page.w, h: settings.page.h }));
     if (spineW > 0) artwork.appendChild(TPP.spineEl(settings, wrap + settings.page.w + spineW / 2, wrap, settings.page.h));
     artwork.appendChild(TPP.pageEl(front, settings, wrap + settings.page.w + spineW, wrap, false, false, { w: settings.page.w, h: settings.page.h }));
-    TPP.guides(sheet, Object.assign({}, settings, { showFoldGuides: false }), x, y, w, h, spineW);
+    TPP.guides(sheet, Object.assign({}, settings, { showFoldGuides: false }), x, y, w, h, spineW, false);
     TPP.coverPerimeter(sheet, settings, x, y, w, h, spineW);
     TPP.coverCutSegments(sheet, settings, x, y, w, h, spineW);
   }
