@@ -282,6 +282,126 @@ TPP.markBookImported = function (book, stamp) {
   if (!book) return;
   book.lastImportedAt = stamp || TPP.nowIso();
 };
+TPP.textElementKey = function (location, part) {
+  return String(location || "") + ":" + String(part || "");
+};
+TPP.findTextElement = function (book, location, part) {
+  const key = TPP.textElementKey(location, part);
+  const list = Array.isArray(book && book.textElements) ? book.textElements : [];
+  return list.find(function (entry) {
+    return TPP.textElementKey(entry && entry.location, entry && entry.part) === key;
+  }) || null;
+};
+TPP.defaultTextElements = function (book, base) {
+  const source = book || {};
+  const fallback = base || source || {};
+  const sharedColor = source.coverText || fallback.coverText || "#ffffff";
+  const sharedStrokeColor = source.coverStrokeColor || fallback.coverStrokeColor || "#000000";
+  const sharedStrokeSize = Number.isFinite(Number(source.coverStrokeSize)) ? Number(source.coverStrokeSize) : (Number(fallback.coverStrokeSize) || 0);
+  return [
+    { location: "front", part: "title", enabled: source.coverShowTitle !== false, size: Number(source.coverTitleSize) || Number(fallback.coverTitleSize) || 8, x: 0, y: Number(source.coverTitleY) || Number(fallback.coverTitleY) || 12, width: 100, align: "center", color: source.coverTitleColor || sharedColor, outlineColor: source.coverTitleStrokeColor || sharedStrokeColor, outlineSize: Number(source.coverTitleStrokeSize) || sharedStrokeSize, rotate: false, customText: "" },
+    { location: "front", part: "author", enabled: Boolean(source.coverShowAuthor), size: Number(source.coverAuthorSize) || Number(source.coverMetaSize) || Number(fallback.coverAuthorSize) || 4.2, x: 0, y: Number(source.coverAuthorY) || Number(fallback.coverAuthorY) || 72, width: 100, align: "center", color: source.coverAuthorColor || sharedColor, outlineColor: source.coverAuthorStrokeColor || sharedStrokeColor, outlineSize: Number(source.coverAuthorStrokeSize) || sharedStrokeSize, rotate: false, customText: "" },
+    { location: "front", part: "series", enabled: Boolean(source.coverShowSeries), size: Number(source.coverSeriesSize) || Number(source.coverMetaSize) || Number(fallback.coverSeriesSize) || 4.2, x: 0, y: Number(source.coverSeriesY) || Number(fallback.coverSeriesY) || 6, width: 100, align: "center", color: source.coverSeriesColor || sharedColor, outlineColor: source.coverSeriesStrokeColor || sharedStrokeColor, outlineSize: Number(source.coverSeriesStrokeSize) || sharedStrokeSize, rotate: false, customText: "" },
+    { location: "front", part: "publisher", enabled: Boolean(source.coverShowPublisher), size: Number(source.coverPublisherSize) || Number(source.coverMetaSize) || Number(fallback.coverPublisherSize) || 4.2, x: 0, y: Number(source.coverPublisherY) || Number(fallback.coverPublisherY) || 84, width: 100, align: "center", color: source.coverPublisherColor || sharedColor, outlineColor: source.coverPublisherStrokeColor || sharedStrokeColor, outlineSize: Number(source.coverPublisherStrokeSize) || sharedStrokeSize, rotate: false, customText: "" },
+    { location: "back", part: "custom", enabled: true, size: Number(source.backTextSize) || Number(fallback.backTextSize) || 4.5, x: 50, y: Number(source.backTextY) || Number(fallback.backTextY) || 76, width: 100, align: source.backTextAlign || fallback.backTextAlign || "center", color: source.backTextColor || fallback.backTextColor || "#ffffff", outlineColor: "#000000", outlineSize: 0, rotate: false, customText: source.backText || fallback.backText || "" },
+    { location: "spine", part: "title", enabled: true, size: Number(source.spineTitleSize) || Number(fallback.spineTitleSize) || 5, x: Number(source.spineTitleX) || Number(fallback.spineTitleX) || 50, y: Number(source.spineTitleY) || Number(fallback.spineTitleY) || 4, width: Number(source.spineTitleWidth) || Number(fallback.spineTitleWidth) || 100, align: source.spineTitleAlign || fallback.spineTitleAlign || "left", color: source.spineTextColor || fallback.spineTextColor || "#ffffff", outlineColor: source.spineStrokeColor || fallback.spineStrokeColor || "#000000", outlineSize: Number(source.spineStrokeSize) || Number(fallback.spineStrokeSize) || 0, rotate: source.spineTitleRotate !== false, customText: "" },
+    { location: "spine", part: "author", enabled: source.spineAuthorOn !== false, size: Number(source.spineAuthorSize) || Number(fallback.spineAuthorSize) || 4, x: 50, y: 94, width: 100, align: "center", color: source.spineTextColor || fallback.spineTextColor || "#ffffff", outlineColor: source.spineStrokeColor || fallback.spineStrokeColor || "#000000", outlineSize: Number(source.spineStrokeSize) || Number(fallback.spineStrokeSize) || 0, rotate: Boolean(source.spineAuthorRotate), customText: "" }
+  ];
+};
+TPP.migrateTextElements = function (book, base) {
+  const defaults = TPP.defaultTextElements(book, base);
+  const existing = Array.isArray(book.textElements) ? book.textElements : [];
+  const byKey = new Map(existing.map(function (entry) {
+    return [TPP.textElementKey(entry && entry.location, entry && entry.part), entry];
+  }));
+  book.textElements = defaults.map(function (entry) {
+    return Object.assign({}, entry, byKey.get(TPP.textElementKey(entry.location, entry.part)) || {});
+  });
+};
+TPP.textElementContent = function (book, location, part) {
+  const element = TPP.findTextElement(book, location, part);
+  if (element && element.part === "custom") return element.customText || "";
+  if (part === "title") return String((book && book.title) || "");
+  if (part === "author") return location === "spine" ? String((book && (book.spineAuthor || book.author)) || "") : String((book && book.author) || "");
+  if (part === "series") return [book && book.seriesName, book && book.number].filter(Boolean).join(" ");
+  if (part === "publisher") return String((book && book.publisher) || "");
+  if (part === "copyright") return String((book && book.copyright) || "");
+  return element && element.customText ? String(element.customText) : "";
+};
+TPP.syncLegacyTextFieldsFromElements = function (book) {
+  const coverTitle = TPP.findTextElement(book, "front", "title");
+  const coverAuthor = TPP.findTextElement(book, "front", "author");
+  const coverSeries = TPP.findTextElement(book, "front", "series");
+  const coverPublisher = TPP.findTextElement(book, "front", "publisher");
+  const backCustom = TPP.findTextElement(book, "back", "custom");
+  const spineTitle = TPP.findTextElement(book, "spine", "title");
+  const spineAuthor = TPP.findTextElement(book, "spine", "author");
+  if (coverTitle) {
+    book.coverShowTitle = coverTitle.enabled !== false;
+    book.coverTitleSize = Number(coverTitle.size) || book.coverTitleSize;
+    book.coverTitleY = Number(coverTitle.y) || 0;
+    book.coverTitleColor = coverTitle.color || book.coverTitleColor;
+    book.coverTitleStrokeColor = coverTitle.outlineColor || book.coverTitleStrokeColor;
+    book.coverTitleStrokeSize = Math.max(0, Number(coverTitle.outlineSize) || 0);
+  }
+  if (coverAuthor) {
+    book.coverShowAuthor = coverAuthor.enabled !== false;
+    book.coverAuthorSize = Number(coverAuthor.size) || book.coverAuthorSize;
+    book.coverAuthorY = Number(coverAuthor.y) || 0;
+    book.coverAuthorColor = coverAuthor.color || book.coverAuthorColor;
+    book.coverAuthorStrokeColor = coverAuthor.outlineColor || book.coverAuthorStrokeColor;
+    book.coverAuthorStrokeSize = Math.max(0, Number(coverAuthor.outlineSize) || 0);
+  }
+  if (coverSeries) {
+    book.coverShowSeries = coverSeries.enabled !== false;
+    book.coverSeriesSize = Number(coverSeries.size) || book.coverSeriesSize;
+    book.coverSeriesY = Number(coverSeries.y) || 0;
+    book.coverSeriesColor = coverSeries.color || book.coverSeriesColor;
+    book.coverSeriesStrokeColor = coverSeries.outlineColor || book.coverSeriesStrokeColor;
+    book.coverSeriesStrokeSize = Math.max(0, Number(coverSeries.outlineSize) || 0);
+  }
+  if (coverPublisher) {
+    book.coverShowPublisher = coverPublisher.enabled !== false;
+    book.coverPublisherSize = Number(coverPublisher.size) || book.coverPublisherSize;
+    book.coverPublisherY = Number(coverPublisher.y) || 0;
+    book.coverPublisherColor = coverPublisher.color || book.coverPublisherColor;
+    book.coverPublisherStrokeColor = coverPublisher.outlineColor || book.coverPublisherStrokeColor;
+    book.coverPublisherStrokeSize = Math.max(0, Number(coverPublisher.outlineSize) || 0);
+  }
+  if (backCustom) {
+    book.backText = String(backCustom.customText || "");
+    book.backTextY = Number(backCustom.y) || 0;
+    book.backTextSize = Number(backCustom.size) || book.backTextSize;
+    book.backTextAlign = backCustom.align || book.backTextAlign;
+    book.backTextColor = backCustom.color || book.backTextColor;
+  }
+  if (spineTitle) {
+    book.spineTitleSize = Number(spineTitle.size) || book.spineTitleSize;
+    book.spineTitleX = Number(spineTitle.x) || 50;
+    book.spineTitleY = Number(spineTitle.y) || 0;
+    book.spineTitleWidth = Math.max(10, Math.min(100, Number(spineTitle.width) || 100));
+    book.spineTitleAlign = spineTitle.align || "left";
+    book.spineTextColor = spineTitle.color || book.spineTextColor;
+    book.spineStrokeColor = spineTitle.outlineColor || book.spineStrokeColor;
+    book.spineStrokeSize = Math.max(0, Number(spineTitle.outlineSize) || 0);
+    book.spineTitleRotate = spineTitle.rotate !== false;
+  }
+  if (spineAuthor) {
+    book.spineAuthorOn = spineAuthor.enabled !== false;
+    book.spineAuthorSize = Number(spineAuthor.size) || book.spineAuthorSize;
+    book.spineAuthorRotate = Boolean(spineAuthor.rotate);
+  }
+};
+TPP.syncTextElementsFromLegacyFields = function (book) {
+  const backCustom = TPP.findTextElement(book, "back", "custom");
+  if (backCustom) {
+    backCustom.customText = String(book.backText || "");
+    backCustom.size = Number(book.backTextSize) || backCustom.size || 4.5;
+    backCustom.y = Number(book.backTextY) || 0;
+    backCustom.align = book.backTextAlign || backCustom.align || "center";
+    backCustom.color = book.backTextColor || backCustom.color || "#ffffff";
+  }
+};
 TPP.migrateCoverTextSettings = function (book, base) {
   const sharedColor = book.coverText || base.coverText;
   const sharedStroke = "coverStroke" in book ? book.coverStroke : base.coverStroke;
@@ -329,6 +449,8 @@ TPP.norm = function (book) {
   out.imageExportDpi = TPP.dpi(out.imageExportDpi);
   out.mediaCaptionSize = TPP.mediaCaptionSize(out.mediaCaptionSize, base.mediaCaptionSize);
   TPP.migrateCoverTextSettings(out, base);
+  TPP.migrateTextElements(out, base);
+  TPP.syncLegacyTextFieldsFromElements(out);
   TPP.hydrateBookDates(out);
   TPP.normalizeFiles(out);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;

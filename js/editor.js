@@ -19,6 +19,69 @@ TPP.assetFieldHtml = function (label, targetType, targetKey, fileId, alt) {
     "</button>" +
     "</div>";
 };
+TPP.textElementUiSpecs = {
+  cover: [
+    { location: "front", part: "title", label: "Title", minSize: 4, supportsX: false, supportsWidth: false, supportsAlign: false, supportsRotate: false },
+    { location: "front", part: "author", label: "Author", minSize: 3, supportsX: false, supportsWidth: false, supportsAlign: false, supportsRotate: false },
+    { location: "front", part: "series", label: "Series / Number", minSize: 3, supportsX: false, supportsWidth: false, supportsAlign: false, supportsRotate: false },
+    { location: "front", part: "publisher", label: "Publisher", minSize: 3, supportsX: false, supportsWidth: false, supportsAlign: false, supportsRotate: false }
+  ],
+  spine: [
+    { location: "spine", part: "title", label: "Title", minSize: 3, supportsX: true, supportsWidth: true, supportsAlign: true, supportsRotate: true },
+    { location: "spine", part: "author", label: "Author", minSize: 3, supportsX: true, supportsWidth: true, supportsAlign: true, supportsRotate: true }
+  ]
+};
+TPP.textElementGroupHtml = function (book, spec) {
+  const element = TPP.findTextElement(book, spec.location, spec.part) || {};
+  const key = TPP.textElementKey(spec.location, spec.part);
+  const align = element.align || (spec.location === "front" ? "center" : "left");
+  return '<section class="cover-text-group text-element-group" data-text-key="' + TPP.esc(key) + '" data-location="' + TPP.esc(spec.location) + '" data-part="' + TPP.esc(spec.part) + '">' +
+    '<label><input class="text-enabled" type="checkbox" ' + (element.enabled !== false ? "checked" : "") + '> Show ' + TPP.esc(spec.label.toLowerCase()) + "</label>" +
+    '<div class="two">' +
+      '<label>Size <input class="text-size" type="number" min="' + spec.minSize + '" step=".5" value="' + TPP.esc(String(Number(element.size) || spec.minSize)) + '"></label>' +
+      '<label>Y <input class="text-y" type="range" min="0" max="100" value="' + TPP.esc(String(Number(element.y) || 0)) + '"></label>' +
+    "</div>" +
+    (spec.supportsX ? '<div class="two"><label>X <input class="text-x" type="range" min="0" max="100" value="' + TPP.esc(String(Number(element.x) || 50)) + '"></label><label>Width <input class="text-width" type="range" min="10" max="100" value="' + TPP.esc(String(Number(element.width) || 100)) + '"></label></div>' : "") +
+    (spec.supportsAlign ? '<div class="two"><label>Align<select class="text-align"><option value="left"' + (align === "left" ? " selected" : "") + '>Left</option><option value="center"' + (align === "center" ? " selected" : "") + '>Center</option><option value="justify"' + (align === "justify" ? " selected" : "") + '>Justify</option><option value="right"' + (align === "right" ? " selected" : "") + '>Right</option><option value="clip"' + (align === "clip" ? " selected" : "") + '>Clip</option></select></label>' + (spec.supportsRotate ? '<label><input class="text-rotate" type="checkbox" ' + (element.rotate ? "checked" : "") + '> Rotate 90°</label>' : "") + "</div>" : "") +
+    '<div class="two"><label>Color <input class="text-color color-box" type="color" value="' + TPP.esc(element.color || "#ffffff") + '"></label><label>Outline <input class="text-outline-color color-box" type="color" value="' + TPP.esc(element.outlineColor || "#000000") + '"></label></div>' +
+    '<label>Outline px <input class="text-outline-size" type="number" min="0" step=".25" value="' + TPP.esc(String(Math.max(0, Number(element.outlineSize) || 0))) + '"></label>' +
+  "</section>";
+};
+TPP.renderTextElementControls = function () {
+  const cover = document.getElementById("coverTextElements");
+  const spine = document.getElementById("spineTextElements");
+  if (cover) {
+    cover.className = "cover-text-grid";
+    cover.innerHTML = TPP.textElementUiSpecs.cover.map(function (spec) {
+      return TPP.textElementGroupHtml(TPP.active, spec);
+    }).join("");
+  }
+  if (spine) {
+    spine.className = "cover-text-grid";
+    spine.innerHTML = TPP.textElementUiSpecs.spine.map(function (spec) {
+      return TPP.textElementGroupHtml(TPP.active, spec);
+    }).join("");
+  }
+};
+TPP.readTextElementControls = function (book) {
+  const groups = Array.from(document.querySelectorAll(".text-element-group"));
+  if (!groups.length || !book) return;
+  groups.forEach(function (group) {
+    const element = TPP.findTextElement(book, group.dataset.location, group.dataset.part);
+    if (!element) return;
+    element.enabled = group.querySelector(".text-enabled")?.checked !== false;
+    element.size = Number(group.querySelector(".text-size")?.value) || element.size || 4;
+    element.y = Number(group.querySelector(".text-y")?.value) || 0;
+    if (group.querySelector(".text-x")) element.x = Number(group.querySelector(".text-x").value) || 50;
+    if (group.querySelector(".text-width")) element.width = Math.max(10, Math.min(100, Number(group.querySelector(".text-width").value) || 100));
+    if (group.querySelector(".text-align")) element.align = group.querySelector(".text-align").value || "left";
+    if (group.querySelector(".text-rotate")) element.rotate = group.querySelector(".text-rotate").checked;
+    element.color = group.querySelector(".text-color")?.value || element.color;
+    element.outlineColor = group.querySelector(".text-outline-color")?.value || element.outlineColor;
+    element.outlineSize = Math.max(0, Number(group.querySelector(".text-outline-size")?.value) || 0);
+  });
+  if (TPP.syncLegacyTextFieldsFromElements) TPP.syncLegacyTextFieldsFromElements(book);
+};
 
 TPP.populate = function () {
   document.getElementById("fontFamily").innerHTML = TPP.fonts.map(function (pair) {
@@ -46,6 +109,7 @@ TPP.loadForm = function () {
     else el.value = book[id] ?? "";
   });
   document.querySelector(".customSize").hidden = document.getElementById("pageSize").value !== "custom";
+  if (TPP.renderTextElementControls) TPP.renderTextElementControls();
   TPP.renderChapterList();
   TPP.renderChapterEditor();
   if (TPP.refreshAssetSlots) TPP.refreshAssetSlots();
@@ -60,6 +124,7 @@ TPP.sync = function (mode) {
     else if (el.type === "number" || el.type === "range") book[id] = Number(el.value);
     else book[id] = el.value;
   });
+  if (TPP.syncTextElementsFromLegacyFields) TPP.syncTextElementsFromLegacyFields(book);
   book.signatureSize = TPP.signatureSize(book.signatureSize);
   book.sewingStations = TPP.sewingStations(book.sewingStations);
   book.sewingGuideOpacity = TPP.opacity(book.sewingGuideOpacity, 0.65);
@@ -78,6 +143,7 @@ TPP.sync = function (mode) {
   if (imageExportDpi) imageExportDpi.value = book.imageExportDpi;
   const mediaCaptionSize = document.getElementById("mediaCaptionSize");
   if (mediaCaptionSize) mediaCaptionSize.value = book.mediaCaptionSize;
+  if (TPP.readTextElementControls) TPP.readTextElementControls(book);
   book.chapters = TPP.readChapterFromEditor();
   if (mode !== "nosave") {
     TPP.save(mode || "commit", book.id);

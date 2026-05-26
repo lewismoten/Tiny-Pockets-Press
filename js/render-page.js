@@ -7,6 +7,63 @@ TPP.stroke = function (enabled, size, color) {
 TPP.strokeWidth = function (size) {
   return Number(size) > 0 ? Number(size) + "px" : "0px";
 };
+TPP.textBoxStyle = function (element, options) {
+  const entry = element || {};
+  const centerX = Number(options && options.centerX);
+  const x = Number(entry.x) || 0;
+  const y = Number(entry.y) || 0;
+  const width = Math.max(10, Math.min(100, Number(entry.width) || 100));
+  const align = ["left", "center", "right", "justify"].includes(entry.align) ? entry.align : "center";
+  const clip = entry.align === "clip";
+  const rotate = entry.rotate ? " rotate(90deg)" : "";
+  return [
+    "left:" + (Number.isFinite(centerX) ? centerX : 50) + "%",
+    "top:" + y + "%",
+    "width:" + width + "%",
+    "transform:translateX(calc(-50% + " + x + "%))" + rotate,
+    "text-align:" + (clip ? "left" : align),
+    "text-align-last:" + (clip ? "left" : align),
+    "color:" + (entry.color || "#ffffff"),
+    "font-size:" + (Number(entry.size) || 4) + "pt",
+    "-webkit-text-stroke-width:" + TPP.strokeWidth(entry.outlineSize),
+    "-webkit-text-stroke-color:" + (entry.outlineColor || "#000000"),
+    "white-space:" + (clip ? "nowrap" : "normal"),
+    "overflow:" + (clip ? "hidden" : "visible"),
+    "text-overflow:" + (clip ? "clip" : "initial")
+  ].join(";");
+};
+TPP.spineTextStyle = function (element, titleLengthIn) {
+  const entry = element || {};
+  const x = Number(entry.x) || 50;
+  const y = Number(entry.y) || 0;
+  const width = Math.max(10, Math.min(100, Number(entry.width) || 100));
+  const align = ["left", "center", "right", "justify"].includes(entry.align) ? entry.align : "left";
+  const clip = entry.align === "clip";
+  const widthCss = entry.rotate
+    ? "calc(" + Math.max(0.1, Number(titleLengthIn) || 0.1) + "in * " + (width / 100) + ")"
+    : width + "%";
+  return [
+    "left:" + x + "%",
+    "top:" + y + "%",
+    "width:" + widthCss,
+    "transform:translateX(-50%)" + (entry.rotate ? " rotate(90deg)" : ""),
+    "text-align:" + (clip ? "left" : align),
+    "text-align-last:" + (clip ? "left" : align),
+    "color:" + (entry.color || "#ffffff"),
+    "font-size:" + (Number(entry.size) || 4) + "pt",
+    "-webkit-text-stroke-width:" + TPP.strokeWidth(entry.outlineSize),
+    "-webkit-text-stroke-color:" + (entry.outlineColor || "#000000"),
+    "white-space:" + (clip ? "nowrap" : "normal"),
+    "overflow:" + (clip ? "hidden" : "visible"),
+    "text-overflow:" + (clip ? "clip" : "initial")
+  ].join(";");
+};
+TPP.coverTextBox = function (settings, part, className) {
+  const element = TPP.findTextElement(settings, "front", part);
+  const text = TPP.textElementContent(settings, "front", part);
+  if (!element || element.enabled === false || !String(text || "").trim()) return "";
+  return '<div class="cover-el ' + className + '" style="' + TPP.textBoxStyle(element, { centerX: 50 }) + '">' + TPP.esc(text) + "</div>";
+};
 TPP.coverImageSrc = function (settings, side) {
   if (side === "front") return TPP.fileData(settings, settings.coverImageId);
   return TPP.fileData(settings, settings.backImageId);
@@ -19,12 +76,11 @@ TPP.coverHTML = function (settings, side) {
     return (image ? '<img class="back-img" src="' + image + '" style="width:' + settings.backImgZoom + '%;margin-left:' + settings.backImgX + '%;margin-top:' + settings.backImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.backImgRotate) || 0) + 'deg)">' : "") +
       '<div class="back-text align-' + align + ' last-' + last + '"><div class="story-text">' + TPP.safeMarkdown(settings.backText || "") + "</div></div>";
   }
-  const series = [settings.seriesName, settings.number].filter(Boolean).join(" ");
   return (image ? '<img class="cover-img" src="' + image + '" style="width:' + settings.coverImgZoom + '%;margin-left:' + settings.coverImgX + '%;margin-top:' + settings.coverImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.coverImgRotate) || 0) + 'deg)">' : "") +
-    (settings.coverShowTitle !== false ? '<div class="cover-el cover-title">' + TPP.esc(settings.title) + "</div>" : "") +
-    (settings.coverShowAuthor ? '<div class="cover-el cover-author">' + TPP.esc(settings.author) + "</div>" : "") +
-    (settings.coverShowSeries ? '<div class="cover-el cover-series">' + TPP.esc(series) + "</div>" : "") +
-    (settings.coverShowPublisher ? '<div class="cover-el cover-publisher">' + TPP.esc(settings.publisher) + "</div>" : "");
+    TPP.coverTextBox(settings, "title", "cover-title") +
+    TPP.coverTextBox(settings, "author", "cover-author") +
+    TPP.coverTextBox(settings, "series", "cover-series") +
+    TPP.coverTextBox(settings, "publisher", "cover-publisher");
 };
 TPP.applyVars = function (element, settings) {
   element.style.setProperty("--page-bg", settings.pageBg);
@@ -43,26 +99,6 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--cover-bg2", settings.coverBg2);
   element.style.setProperty("--cover-text", settings.coverText);
   element.style.setProperty("--cover-border", settings.coverBorder);
-  element.style.setProperty("--cover-title-size", settings.coverTitleSize + "pt");
-  element.style.setProperty("--cover-author-size", settings.coverAuthorSize + "pt");
-  element.style.setProperty("--cover-series-size", settings.coverSeriesSize + "pt");
-  element.style.setProperty("--cover-publisher-size", settings.coverPublisherSize + "pt");
-  element.style.setProperty("--cover-title-color", settings.coverTitleColor);
-  element.style.setProperty("--cover-author-color", settings.coverAuthorColor);
-  element.style.setProperty("--cover-series-color", settings.coverSeriesColor);
-  element.style.setProperty("--cover-publisher-color", settings.coverPublisherColor);
-  element.style.setProperty("--cover-title-stroke-width", TPP.strokeWidth(settings.coverTitleStrokeSize));
-  element.style.setProperty("--cover-author-stroke-width", TPP.strokeWidth(settings.coverAuthorStrokeSize));
-  element.style.setProperty("--cover-series-stroke-width", TPP.strokeWidth(settings.coverSeriesStrokeSize));
-  element.style.setProperty("--cover-publisher-stroke-width", TPP.strokeWidth(settings.coverPublisherStrokeSize));
-  element.style.setProperty("--cover-title-stroke-color", settings.coverTitleStrokeColor);
-  element.style.setProperty("--cover-author-stroke-color", settings.coverAuthorStrokeColor);
-  element.style.setProperty("--cover-series-stroke-color", settings.coverSeriesStrokeColor);
-  element.style.setProperty("--cover-publisher-stroke-color", settings.coverPublisherStrokeColor);
-  element.style.setProperty("--title-y", settings.coverTitleY + "%");
-  element.style.setProperty("--author-y", settings.coverAuthorY + "%");
-  element.style.setProperty("--series-y", settings.coverSeriesY + "%");
-  element.style.setProperty("--publisher-y", settings.coverPublisherY + "%");
   element.style.setProperty("--back-y", settings.backTextY + "%");
   element.style.setProperty("--back-size", settings.backTextSize + "pt");
   element.style.setProperty("--back-color", settings.backTextColor);
@@ -74,13 +110,6 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--spine-title-size", settings.spineTitleSize + "pt");
   element.style.setProperty("--spine-title-x", (Number(settings.spineTitleX) || 0) + "%");
   element.style.setProperty("--spine-title-y", (Number(settings.spineTitleY) || 0) + "%");
-  const spineTitleWidth = Math.max(10, Math.min(100, Number(settings.spineTitleWidth) || 100));
-  element.style.setProperty("--spine-title-width", spineTitleWidth + "%");
-  element.style.setProperty("--spine-title-width-ratio", String(spineTitleWidth / 100));
-  element.style.setProperty("--spine-title-align", ["left", "right", "justify"].includes(settings.spineTitleAlign) ? settings.spineTitleAlign : "left");
-  element.style.setProperty("--spine-title-wrap", settings.spineTitleAlign === "clip" ? "nowrap" : "normal");
-  element.style.setProperty("--spine-title-overflow", settings.spineTitleAlign === "clip" ? "hidden" : "visible");
-  element.style.setProperty("--spine-title-text-overflow", settings.spineTitleAlign === "clip" ? "clip" : "initial");
   element.style.setProperty("--spine-author-size", settings.spineAuthorSize + "pt");
   element.style.setProperty("--spine-text-color", settings.spineTextColor);
   element.style.setProperty("--spine-stroke-width", TPP.strokeWidth(settings.spineStrokeSize));
@@ -149,12 +178,18 @@ TPP.spineEl = function (settings, x, y, height) {
   element.style.width = width + "in";
   element.style.height = height + "in";
   TPP.applyVars(element, settings);
-  const hasAuthor = settings.spineAuthorOn && String(settings.spineAuthor || settings.author || "").trim();
-  const authorReserve = hasAuthor ? Math.max(0.12, ((Number(settings.spineAuthorSize) || 4) / 72) * 1.6) : 0;
-  element.style.setProperty("--spine-title-length", Math.max(0.1, height - authorReserve) + "in");
+  const spineTitle = TPP.findTextElement(settings, "spine", "title");
+  const spineAuthor = TPP.findTextElement(settings, "spine", "author");
+  const titleText = TPP.textElementContent(settings, "spine", "title");
+  const authorText = TPP.textElementContent(settings, "spine", "author");
+  const hasAuthor = spineAuthor && spineAuthor.enabled !== false && String(authorText || "").trim();
+  const authorReserve = hasAuthor ? Math.max(0.12, ((Number(spineAuthor.size) || 4) / 72) * 1.6) : 0;
+  const titleLength = Math.max(0.1, height - authorReserve);
+  const titleStyle = spineTitle ? TPP.spineTextStyle(spineTitle, titleLength) : "";
+  const authorStyle = spineAuthor ? TPP.spineTextStyle(spineAuthor, titleLength) : "";
   element.innerHTML =
     (settings.spineImageId ? '<img class="spine-img" src="' + TPP.fileData(settings, settings.spineImageId) + '" style="width:' + settings.spineImgZoom + '%;margin-left:' + settings.spineImgX + '%;margin-top:' + settings.spineImgY + '%;transform:translate(-50%,-50%) rotate(' + (Number(settings.spineImgRotate) || 0) + 'deg)">' : "") +
-    '<div class="spine-title ' + (settings.spineTitleRotate ? "rot" : "") + '">' + TPP.esc(settings.title) + "</div>" +
-    (hasAuthor ? '<div class="spine-author ' + (settings.spineAuthorRotate ? "rot" : "") + '">' + TPP.esc(settings.spineAuthor || settings.author) + "</div>" : "");
+    (spineTitle && spineTitle.enabled !== false && String(titleText || "").trim() ? '<div class="spine-title' + (spineTitle.rotate ? " rot" : "") + '" style="' + titleStyle + '">' + TPP.esc(titleText) + "</div>" : "") +
+    (hasAuthor ? '<div class="spine-author' + (spineAuthor.rotate ? " rot" : "") + '" style="' + authorStyle + '">' + TPP.esc(authorText) + "</div>" : "");
   return element;
 };

@@ -191,58 +191,7 @@
             <label>Rotate <input id="coverImgRotate" type="range" min="-180" max="180" step="1"></label>
           </div>
         </div>
-        <div class="cover-text-grid">
-          <section class="cover-text-group">
-            <label><input id="coverShowTitle" type="checkbox"> Show title</label>
-            <div class="two">
-              <label>Size <input id="coverTitleSize" type="number" min="4" step=".5"></label>
-              <label>Y <input id="coverTitleY" type="range" min="0" max="100"></label>
-            </div>
-            <div class="two">
-              <label>Color <input id="coverTitleColor" type="color" class="color-box"></label>
-              <label>Outline <input id="coverTitleStrokeColor" type="color" class="color-box"></label>
-            </div>
-            <label>Outline px <input id="coverTitleStrokeSize" type="number" min="0" step=".25"></label>
-          </section>
-          <section class="cover-text-group">
-            <label><input id="coverShowAuthor" type="checkbox"> Show author</label>
-            <div class="two">
-              <label>Size <input id="coverAuthorSize" type="number" min="3" step=".5"></label>
-              <label>Y <input id="coverAuthorY" type="range" min="0" max="100"></label>
-            </div>
-            <div class="two">
-              <label>Color <input id="coverAuthorColor" type="color" class="color-box"></label>
-              <label>Outline <input id="coverAuthorStrokeColor" type="color" class="color-box"></label>
-            </div>
-            <label>Outline px <input id="coverAuthorStrokeSize" type="number" min="0" step=".25"></label>
-          </section>
-        </div>
-        <div class="cover-text-grid">
-          <section class="cover-text-group">
-            <label><input id="coverShowSeries" type="checkbox"> Show series/number</label>
-            <div class="two">
-              <label>Size <input id="coverSeriesSize" type="number" min="3" step=".5"></label>
-              <label>Y <input id="coverSeriesY" type="range" min="0" max="100"></label>
-            </div>
-            <div class="two">
-              <label>Color <input id="coverSeriesColor" type="color" class="color-box"></label>
-              <label>Outline <input id="coverSeriesStrokeColor" type="color" class="color-box"></label>
-            </div>
-            <label>Outline px <input id="coverSeriesStrokeSize" type="number" min="0" step=".25"></label>
-          </section>
-          <section class="cover-text-group">
-            <label><input id="coverShowPublisher" type="checkbox"> Show publisher</label>
-            <div class="two">
-              <label>Size <input id="coverPublisherSize" type="number" min="3" step=".5"></label>
-              <label>Y <input id="coverPublisherY" type="range" min="0" max="100"></label>
-            </div>
-            <div class="two">
-              <label>Color <input id="coverPublisherColor" type="color" class="color-box"></label>
-              <label>Outline <input id="coverPublisherStrokeColor" type="color" class="color-box"></label>
-            </div>
-            <label>Outline px <input id="coverPublisherStrokeSize" type="number" min="0" step=".25"></label>
-          </section>
-        </div>
+        <div id="coverTextElements"></div>
       </details>
 
       <details>
@@ -293,33 +242,7 @@
             <label>Rotate <input id="spineImgRotate" type="range" min="-180" max="180" step="1"></label>
           </div>
         </div>
-        <div class="two">
-          <label>Title Size <input id="spineTitleSize" type="number" min="3" step=".5"></label>
-          <label>Title X <input id="spineTitleX" type="range" min="0" max="100"></label>
-        </div>
-        <div class="two">
-          <label>Title Y <input id="spineTitleY" type="range" min="0" max="100"></label>
-          <label>Author Size <input id="spineAuthorSize" type="number" min="3" step=".5"></label>
-        </div>
-        <div class="two">
-          <label>Title Width <input id="spineTitleWidth" type="range" min="10" max="100" step="1"></label>
-          <label>Title Layout
-            <select id="spineTitleAlign">
-              <option value="left">Left Align</option>
-              <option value="justify">Justify</option>
-              <option value="right">Right Align</option>
-              <option value="clip">Clip</option>
-            </select>
-          </label>
-        </div>
-        <div class="two">
-          <label>Spine Text <input id="spineTextColor" type="color" class="color-box"></label>
-          <label>Stroke <input id="spineStrokeColor" type="color" class="color-box"></label>
-        </div>
-        <label>Stroke Size <input id="spineStrokeSize" type="number" min="0" step=".25"></label>
-        <label><input id="spineTitleRotate" type="checkbox"> Rotate title 90° and align toward top</label>
-        <label><input id="spineAuthorOn" type="checkbox"> Author at base of spine</label>
-        <label><input id="spineAuthorRotate" type="checkbox"> Rotate author 90°</label>
+        <div id="spineTextElements"></div>
       </details>
 
       <details>

@@ -36,6 +36,19 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.renderAll();
     };
   });
+  const controls = document.querySelector(".controls");
+  if (controls) {
+    controls.addEventListener("input", function (e) {
+      if (!e.target.closest(".text-element-group")) return;
+      TPP.sync("draft");
+      TPP.renderAll();
+    });
+    controls.addEventListener("change", function (e) {
+      if (!e.target.closest(".text-element-group")) return;
+      TPP.sync("commit");
+      TPP.renderAll();
+    });
+  }
 
   ["coverImageSlot", "backImageSlot", "spineImageSlot"].forEach(function (id) {
     const node = document.getElementById(id);
