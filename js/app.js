@@ -404,6 +404,16 @@ TPP.readerPageToDuplexSheet = function (pages, pageIndex, signatureSize) {
   });
   return match >= 0 ? match : 0;
 };
+TPP.readerGoToDuplexNeighbor = function (pages, settings, pageNumber, delta) {
+  const nextPage = Math.max(1, Math.min(pages.length, Number(pageNumber || 0) + delta));
+  TPP.readerIndex = TPP.readerNormalizeIndex(
+    TPP.readerPageToDuplexSheet(pages, nextPage - 1, settings.signatureSize),
+    pages,
+    "duplex",
+    settings
+  );
+  TPP.renderReader();
+};
 TPP.readerNav = function (pages, mode, settings) {
   const duplex = mode === "duplex";
   const options = ['<option value="0">' + (duplex ? "First Sheet" : "Front Cover") + "</option>"];
@@ -505,8 +515,8 @@ TPP.renderReaderDuplex = function (pages, settings, sheetIndex) {
     title.textContent = leaf.title;
     leafEl.appendChild(title);
     [
-      ["Front side", leaf.front, leaf.side],
-      ["Back side", leaf.back, TPP.oppositePageSide(leaf.side)]
+      ["Front side", leaf.front, leaf.side, leaf.side === "left" ? 1 : -1],
+      ["Back side", leaf.back, TPP.oppositePageSide(leaf.side), leaf.side === "left" ? -1 : 1]
     ].forEach(function (face) {
       const faceEl = document.createElement("div");
       faceEl.className = "duplex-face";
@@ -514,7 +524,11 @@ TPP.renderReaderDuplex = function (pages, settings, sheetIndex) {
       label.className = "duplex-face-label";
       label.textContent = face[0];
       faceEl.appendChild(label);
-      faceEl.appendChild(TPP.readerMiniPage(face[1], settings, face[2]));
+      const mini = TPP.readerMiniPage(face[1], settings, face[2]);
+      mini.onclick = function () {
+        TPP.readerGoToDuplexNeighbor(pages, settings, face[1] && face[1].n, face[3]);
+      };
+      faceEl.appendChild(mini);
       leafEl.appendChild(faceEl);
     });
     duplex.appendChild(leafEl);
