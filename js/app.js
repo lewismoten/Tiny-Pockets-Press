@@ -92,8 +92,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     const main = e.target.dataset.main;
     if (main === "remove" && TPP.active.chapters.length > 1) {
-      TPP.active.chapters.splice(TPP.currentChapter, 1);
-      TPP.currentChapter = Math.max(0, TPP.currentChapter - 1);
+      TPP.sync();
+      const card = e.target.closest(".chapter-card");
+      const removeIndex = Math.max(0, Math.min(
+        Number(card && card.dataset.index),
+        TPP.active.chapters.length - 1
+      ));
+      TPP.active.chapters.splice(removeIndex, 1);
+      TPP.currentChapter = Math.min(removeIndex, TPP.active.chapters.length - 1);
       TPP.save();
       TPP.renderAll();
     }
