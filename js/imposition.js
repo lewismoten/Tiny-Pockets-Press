@@ -398,6 +398,7 @@ TPP.renderInterior = function () {
     (settings.duplexBackSides ? "Duplex output keeps front/back pages aligned for automatic duplex printing." : "Non-duplex output rotates the reverse sides for manual folding and feeding.");
   const renderSidePage = function (label, blocks, pageIndex, rotate180) {
     const sheet = TPP.makeSheet(settings, label);
+    sheet.classList.add("interior-sheet");
     const sx = (settings.sheet.w - grid.cols * grid.w) / 2;
     const sy = (settings.sheet.h - grid.rows * grid.h) / 2;
     for (let i = 0; i < per; i++) {
