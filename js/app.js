@@ -212,6 +212,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.toast("Saved.");
   };
   document.getElementById("exportInteriorPdf").onclick = function () { TPP.exportPdfFrom("interior"); };
+  document.getElementById("exportReadablePdf").onclick = function () { TPP.exportReadablePdf(); };
   document.getElementById("exportCoverPdf").onclick = function () { TPP.exportPdfFrom("cover"); };
   document.getElementById("printBrowser").onclick = function () { setTimeout(function () { print(); }, 80); };
   document.getElementById("exportBook").onclick = function () { TPP.sync(); TPP.download((TPP.active.title || "book") + ".json", TPP.active); };
