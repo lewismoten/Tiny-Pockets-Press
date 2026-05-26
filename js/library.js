@@ -198,12 +198,9 @@ TPP.dataImageCell = function (book, key, value) {
 TPP.dataFileHtml = function (book, key, value) {
   const info = TPP.dataBinaryInfo(book, key, value);
   if (!info) return "";
-  const image = TPP.dataImageCell(book, key, value);
-  const imagePart = image ? '<span class="data-file-preview">' + image + "</span>" : "";
   const textId = TPP.registerDataPreview(info.name + " (" + info.format + ")", info.raw, "text");
   const hexId = TPP.registerDataPreview(info.name + " (hex)", TPP.hexDump(info.bytes), "hex");
   return '<div class="data-file-value">' +
-    imagePart +
     '<div class="data-file-meta">' +
       '<button type="button" class="data-file-action" data-data-view="' + TPP.esc(textId) + '">View</button>' +
       '<button type="button" class="data-file-action" data-data-hex="' + TPP.esc(hexId) + '">View Hex</button>' +
