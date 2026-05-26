@@ -354,35 +354,54 @@ TPP.makeSheet = function (settings, title) {
   sheet.appendChild(label);
   return sheet;
 };
+TPP.interiorBlock = function (sheet, settings, left, right, x, y, rotate90, rotate180) {
+  const blockW = rotate90 ? settings.page.h : settings.page.w * 2;
+  const blockH = rotate90 ? settings.page.w * 2 : settings.page.h;
+  const shell = document.createElement("div");
+  shell.style.position = "absolute";
+  shell.style.left = x + "in";
+  shell.style.top = y + "in";
+  shell.style.width = blockW + "in";
+  shell.style.height = blockH + "in";
+  if (rotate180) {
+    shell.style.transform = "rotate(180deg)";
+    shell.style.transformOrigin = "center center";
+  }
+  shell.appendChild(TPP.pageEl(left, settings, 0, 0, rotate90, false));
+  shell.appendChild(TPP.pageEl(right, settings, settings.page.w, 0, rotate90, false));
+  sheet.appendChild(shell);
+};
 TPP.renderInterior = function () {
   const settings = TPP.settings();
   const pages = TPP.buildPages();
   const preview = document.getElementById("interiorPreview");
   preview.innerHTML = "";
   const signatures = TPP.signaturePlan(pages, settings.signatureSize);
-  const sideBlocks = signatures.flatMap(function (signature) {
-    return signature.sheets.flatMap(function (sheet) {
-      return [
-        { signature: signature.index, sheet: sheet.index, side: "front", pages: sheet.front.pages },
-        { signature: signature.index, sheet: sheet.index, side: "back", pages: sheet.back.pages }
-      ];
+  const frontBlocks = signatures.flatMap(function (signature) {
+    return signature.sheets.map(function (sheet) {
+      return { signature: signature.index, sheet: sheet.index, side: "front", pages: sheet.front.pages };
+    });
+  });
+  const backBlocks = signatures.flatMap(function (signature) {
+    return signature.sheets.map(function (sheet) {
+      return { signature: signature.index, sheet: sheet.index, side: "back", pages: sheet.back.pages };
     });
   });
   const unit = { w: settings.page.w * 2, h: settings.page.h };
   const grid = TPP.bestGrid(settings.sheet, unit);
   const per = grid.count;
-  const sides = Math.ceil(sideBlocks.length / per);
+  const printSheets = Math.ceil(frontBlocks.length / per);
   document.getElementById("interiorSummary").innerHTML =
     "<strong>" + pages.length + " book pages</strong>. " + signatures.length + " signature" + (signatures.length === 1 ? "" : "s") +
-    " at " + settings.signatureSize + " pages max. Interior booklet imposition has " + sideBlocks.length +
+    " at " + settings.signatureSize + " pages max. Interior booklet imposition has " + (frontBlocks.length * 2) +
     " front/back side blocks. " + per + " blocks fit per sheet side. " +
-    (settings.duplexBackSides ? "Duplex blank/opposite sheets are included." : "");
-  for (let side = 0; side < sides; side++) {
-    const sheet = TPP.makeSheet(settings, "Interior sheet side " + (side + 1));
+    (settings.duplexBackSides ? "Duplex output keeps front/back pages aligned for automatic duplex printing." : "Non-duplex output rotates the reverse sides for manual folding and feeding.");
+  const renderSidePage = function (label, blocks, pageIndex, rotate180) {
+    const sheet = TPP.makeSheet(settings, label);
     const sx = (settings.sheet.w - grid.cols * grid.w) / 2;
     const sy = (settings.sheet.h - grid.rows * grid.h) / 2;
     for (let i = 0; i < per; i++) {
-      const block = sideBlocks[side * per + i];
+      const block = blocks[pageIndex * per + i];
       if (!block) continue;
       const left = pages[block.pages[0] - 1] || { n: block.pages[0], type: "blank", html: "<span>Blank</span>" };
       const right = pages[block.pages[1] - 1] || { n: block.pages[1], type: "blank", html: "<span>Blank</span>" };
@@ -390,8 +409,7 @@ TPP.renderInterior = function () {
       const row = Math.floor(i / grid.cols);
       const x = sx + col * grid.w;
       const y = sy + row * grid.h;
-      sheet.appendChild(TPP.pageEl(left, settings, x, y, grid.rot));
-      sheet.appendChild(TPP.pageEl(right, settings, x + settings.page.w, y, grid.rot));
+      TPP.interiorBlock(sheet, settings, left, right, x, y, grid.rot, rotate180);
       if (settings.showSignatureOverlay) {
         const tag = document.createElement("div");
         tag.className = "sheet-title";
@@ -408,7 +426,10 @@ TPP.renderInterior = function () {
       }), x, y, settings.page.w * 2, settings.page.h, 0);
     }
     preview.appendChild(sheet);
-    if (settings.duplexBackSides) preview.appendChild(TPP.makeSheet(settings, "Duplex opposite side " + (side + 1)));
+  };
+  for (let side = 0; side < printSheets; side++) {
+    renderSidePage("Interior sheet front " + (side + 1), frontBlocks, side, false);
+    renderSidePage(settings.duplexBackSides ? "Interior sheet back " + (side + 1) : "Interior reverse side " + (side + 1), backBlocks, side, !settings.duplexBackSides);
   }
 };
 TPP.renderCover = function () {
