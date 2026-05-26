@@ -256,6 +256,10 @@ TPP.dataTableColumns = function (items) {
   });
   return columns;
 };
+TPP.dataDisplayKey = function (key) {
+  if (key === "coverPreviewId") return "coverPreviewImageId";
+  return key;
+};
 TPP.dataValueHtml = function (book, key, value, compact) {
   if (Array.isArray(value)) return TPP.dataArrayHtml(book, key, value, compact);
   if (value && typeof value === "object") return TPP.dataObjectHtml(book, value, compact);
@@ -282,10 +286,12 @@ TPP.dataArrayHtml = function (book, key, list, compact) {
   }).join("") + "</tbody></table>";
 };
 TPP.dataObjectHtml = function (book, obj, compact) {
-  const entries = Object.entries(obj || {});
+  const entries = Object.entries(obj || {}).filter(function (entry) {
+    return !(entry[0] === "coverPreview" && obj && obj.coverPreviewId);
+  });
   if (!entries.length) return '<div class="data-empty">{}</div>';
   return '<div class="' + (compact ? "data-inline-object" : "data-object") + '">' + entries.map(function (entry) {
-    return '<div class="data-field"><div class="data-field-name">' + TPP.esc(entry[0]) + '</div><div class="data-field-value">' + TPP.dataValueHtml(book, entry[0], entry[1], compact) + "</div></div>";
+    return '<div class="data-field"><div class="data-field-name">' + TPP.esc(TPP.dataDisplayKey(entry[0])) + '</div><div class="data-field-value">' + TPP.dataValueHtml(book, entry[0], entry[1], compact) + "</div></div>";
   }).join("") + "</div>";
 };
 TPP.renderData = function () {
