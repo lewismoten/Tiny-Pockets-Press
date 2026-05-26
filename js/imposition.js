@@ -362,12 +362,14 @@ TPP.renderInterior = function () {
       const y = sy + row * grid.h;
       sheet.appendChild(TPP.pageEl(left, settings, x, y, grid.rot));
       sheet.appendChild(TPP.pageEl(right, settings, x + settings.page.w, y, grid.rot));
-      const tag = document.createElement("div");
-      tag.className = "sheet-title";
-      tag.style.left = (x + 0.08) + "in";
-      tag.style.top = (y + 0.08) + "in";
-      tag.textContent = "Sig " + (block.signature + 1) + " · Sheet " + (block.sheet + 1) + " · " + block.side;
-      sheet.appendChild(tag);
+      if (settings.showSignatureOverlay) {
+        const tag = document.createElement("div");
+        tag.className = "sheet-title";
+        tag.style.left = (x + 0.08) + "in";
+        tag.style.top = (y + 0.08) + "in";
+        tag.textContent = "Sig " + (block.signature + 1) + " · Sheet " + (block.sheet + 1) + " · " + block.side;
+        sheet.appendChild(tag);
+      }
       TPP.guides(sheet, settings, x, y, settings.page.w * 2, settings.page.h, 0);
     }
     preview.appendChild(sheet);

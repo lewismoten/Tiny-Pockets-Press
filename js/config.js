@@ -38,7 +38,7 @@ TPP.fields = [
   "backText","backTextY","backTextSize","backTextColor","backTextAlign","backTextLastLine","backFrameOn","backUseFrontImage","backClipImageToFrame","backImgX","backImgY","backImgZoom",
   "spineMode","paperThickness","bindingAllowance","spineImgX","spineImgZoom","spineTitleSize","spineTitleX","spineTitleY","spineAuthorSize","spineTextColor","spineStroke","spineStrokeColor","spineStrokeSize","spineTitleRotate","spineAuthorOn","spineAuthorRotate","wrapCover","wrapInside","boardThickness","coverPerimeterOn","separateCover","coverCopies","coverCopiesMax",
   "pageNumMode","pageOrnament","pageNumLeft","pageNumRight","ornamentBySide","reverseOrnamentsBySide","chapterEndOrnament","chapterEndCentered","tocNumberType","tocLeader","tocLeaderColor",
-  "showCutGuides","showFoldGuides","duplexBackSides"
+  "showCutGuides","showFoldGuides","showSignatureOverlay","duplexBackSides"
 ];
 TPP.styleFields = TPP.fields.filter(function (x) {
   return !["title","author","spineAuthor","pubDate","copyright","seriesName","number","volume","backText"].includes(x);
@@ -152,6 +152,7 @@ TPP.fallbackBook = function () {
     tocLeaderColor: "#6c625a",
     showCutGuides: true,
     showFoldGuides: true,
+    showSignatureOverlay: true,
     duplexBackSides: false,
     coverPreview: "",
     chapters: [{
