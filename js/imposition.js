@@ -71,6 +71,9 @@ TPP.signatureMarkColor = function (signatureIndex, signatureCount) {
   };
   return "#" + mix(start[0], end[0]) + mix(start[1], end[1]) + mix(start[2], end[2]);
 };
+TPP.signatureSpineSide = function (side) {
+  return side === "back";
+};
 TPP.signatureMark = function (sheet, settings, x, y, signatureIndex, signatureCount) {
   const mark = document.createElement("div");
   const size = Math.max(0.08, Math.min(0.14, settings.page.w * 0.08, settings.page.h * 0.08));
@@ -397,8 +400,12 @@ TPP.renderInterior = function () {
         tag.textContent = "Sig " + (block.signature + 1) + " · Sheet " + (block.sheet + 1) + " · " + block.side;
         sheet.appendChild(tag);
       }
-      TPP.signatureMark(sheet, settings, x, y, block.signature, signatures.length);
-      TPP.guides(sheet, settings, x, y, settings.page.w * 2, settings.page.h, 0);
+      if (TPP.signatureSpineSide(block.side)) {
+        TPP.signatureMark(sheet, settings, x, y, block.signature, signatures.length);
+      }
+      TPP.guides(sheet, Object.assign({}, settings, {
+        showFoldGuides: settings.showFoldGuides && TPP.signatureSpineSide(block.side)
+      }), x, y, settings.page.w * 2, settings.page.h, 0);
     }
     preview.appendChild(sheet);
     if (settings.duplexBackSides) preview.appendChild(TPP.makeSheet(settings, "Duplex opposite side " + (side + 1)));
