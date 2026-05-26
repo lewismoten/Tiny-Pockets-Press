@@ -436,7 +436,7 @@ TPP.renderInterior = function () {
     const sheet = TPP.makeSheet(settings, label);
     sheet.classList.add("interior-sheet");
     const sx = (settings.sheet.w - grid.cols * grid.w) / 2;
-    const sy = (settings.sheet.h - grid.rows * grid.h) / 2;
+    const sy = (settings.sheet.h - grid.rows * grid.h) / 2 + settings.printTopOffset;
     for (let i = 0; i < per; i++) {
       const block = blocks[pageIndex * per + i];
       if (!block) continue;
@@ -498,7 +498,7 @@ TPP.renderCover = function () {
     " in, including spine/wrap/material allowances. " + copies + " cop" + (copies === 1 ? "y" : "ies") + " shown.";
   const sheet = TPP.makeSheet(settings, "Cover print sheet");
   const sx = copies === 1 ? (settings.sheet.w - w) / 2 : (settings.sheet.w - grid.cols * grid.w) / 2;
-  const sy = copies === 1 ? (settings.sheet.h - h) / 2 : (settings.sheet.h - grid.rows * grid.h) / 2;
+  const sy = (copies === 1 ? (settings.sheet.h - h) / 2 : (settings.sheet.h - grid.rows * grid.h) / 2) + settings.printTopOffset;
   const front = pages.find(function (p) { return p.role === "front"; });
   const back = pages.find(function (p) { return p.role === "back"; });
   for (let i = 0; i < copies; i++) {

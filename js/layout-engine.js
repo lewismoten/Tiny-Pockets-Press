@@ -15,6 +15,7 @@ TPP.settings = function () {
     signatureGuideOpacity: TPP.opacity(book.signatureGuideOpacity, 0.65),
     imageExportDpi: TPP.dpi(book.imageExportDpi),
     mediaCaptionSize: TPP.mediaCaptionSize(book.mediaCaptionSize, book.captionSize),
+    printTopOffset: Math.max(0, Number(book.printTopOffset) || 0),
     gutterMargin: Math.max(0, Number(book.gutterMargin) || 0),
     page: { w: Math.max(0.5, Number(raw.w) || 1), h: Math.max(0.5, Number(raw.h) || 1) },
     sheet: TPP.sheets[book.sheetSize] || TPP.sheets.letter

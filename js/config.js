@@ -38,14 +38,17 @@ TPP.fields = [
   "backText","backTextY","backTextSize","backTextColor","backTextAlign","backTextLastLine","backFrameOn","backUseFrontImage","backClipImageToFrame","backImgX","backImgY","backImgZoom",
   "spineMode","paperThickness","bindingAllowance","spineImgX","spineImgZoom","spineTitleSize","spineTitleX","spineTitleY","spineAuthorSize","spineTextColor","spineStroke","spineStrokeColor","spineStrokeSize","spineTitleRotate","spineAuthorOn","spineAuthorRotate","wrapCover","wrapInside","boardThickness","coverPerimeterOn","separateCover","coverCopies","coverCopiesMax",
   "pageNumMode","pageOrnament","pageNumLeft","pageNumRight","ornamentBySide","reverseOrnamentsBySide","chapterEndOrnament","chapterEndCentered","tocNumberType","tocLeader","tocLeaderColor",
-  "showCutGuides","showFoldGuides","showPageGuides","imageExportDpi","sewingStations","sewingGuideOpacity","showSignatureOverlay","signatureGuideOpacity","duplexBackSides"
+  "showCutGuides","showFoldGuides","showPageGuides","printTopOffset","imageExportDpi","sewingStations","sewingGuideOpacity","showSignatureOverlay","signatureGuideOpacity","duplexBackSides"
 ];
 TPP.styleFields = TPP.fields.filter(function (x) {
   return !["title","author","spineAuthor","pubDate","copyright","seriesName","number","volume","backText"].includes(x);
 });
 TPP.fallbackBook = function () {
+  const stamp = new Date().toISOString();
   return {
     id: TPP.uid(),
+    createdAt: stamp,
+    updatedAt: stamp,
     title: "Santa’s Little OSHA Violation",
     author: "Lewis Moten",
     spineAuthor: "Moten, L.",
@@ -155,6 +158,7 @@ TPP.fallbackBook = function () {
     showCutGuides: true,
     showFoldGuides: true,
     showPageGuides: true,
+    printTopOffset: 0,
     imageExportDpi: 300,
     sewingStations: 3,
     showSignatureOverlay: true,

@@ -8,9 +8,13 @@ TPP.view = "editor";
 TPP.currentChapter = 0;
 TPP.readerIndex = 0;
 TPP.lastPages = [];
+TPP.bookFingerprints = {};
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
+};
+TPP.nowIso = function () {
+  return new Date().toISOString();
 };
 TPP.esc = function (value) {
   return String(value ?? "").replace(/[&<>"']/g, function (ch) {
@@ -42,6 +46,21 @@ TPP.mediaCaptionSize = function (value, fallback) {
   if (!Number.isFinite(n)) return base;
   return Math.max(2, Math.min(12, n));
 };
+TPP.bookFingerprint = function (book) {
+  const copy = TPP.clone(book || {});
+  delete copy.createdAt;
+  delete copy.updatedAt;
+  delete copy.coverPreview;
+  delete copy._pageCount;
+  return JSON.stringify(copy);
+};
+TPP.hydrateBookDates = function (book) {
+  const now = TPP.nowIso();
+  if (!book.createdAt && book.updatedAt) book.createdAt = book.updatedAt;
+  if (!book.createdAt) book.createdAt = now;
+  if (!book.updatedAt) book.updatedAt = book.createdAt;
+  return book;
+};
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
   const out = Object.assign({}, base, book || {});
@@ -52,6 +71,7 @@ TPP.norm = function (book) {
   out.signatureGuideOpacity = TPP.opacity(out.signatureGuideOpacity, 0.65);
   out.imageExportDpi = TPP.dpi(out.imageExportDpi);
   out.mediaCaptionSize = TPP.mediaCaptionSize(out.mediaCaptionSize, base.mediaCaptionSize);
+  TPP.hydrateBookDates(out);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
     return Object.assign({
@@ -89,10 +109,23 @@ TPP.load = async function () {
     TPP.save();
   }
   TPP.library = TPP.library.map(TPP.norm);
+  TPP.bookFingerprints = {};
+  TPP.library.forEach(function (book) {
+    TPP.bookFingerprints[book.id] = TPP.bookFingerprint(book);
+  });
   const activeId = localStorage.getItem(TPP.ACTIVE);
   TPP.active = TPP.library.find(function (book) { return book.id === activeId; }) || TPP.library[0];
 };
 TPP.save = function () {
+  TPP.library.forEach(function (book) {
+    TPP.hydrateBookDates(book);
+    const previous = TPP.bookFingerprints[book.id];
+    const current = TPP.bookFingerprint(book);
+    if (previous !== undefined && current !== previous) {
+      book.updatedAt = TPP.nowIso();
+    }
+    TPP.bookFingerprints[book.id] = TPP.bookFingerprint(book);
+  });
   localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
 };
 TPP.setActive = function (book) {

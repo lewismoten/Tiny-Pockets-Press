@@ -142,7 +142,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.sync();
     const name = prompt("Title for duplicated book:", "Copy of " + TPP.active.title);
     if (name === null) return;
-    const book = TPP.norm(Object.assign({}, TPP.clone(TPP.active), { id: TPP.uid(), title: name || "Copy of " + TPP.active.title }));
+    const stamp = TPP.nowIso();
+    const book = TPP.norm(Object.assign({}, TPP.clone(TPP.active), {
+      id: TPP.uid(),
+      title: name || "Copy of " + TPP.active.title,
+      createdAt: stamp,
+      updatedAt: stamp
+    }));
     TPP.library.push(book);
     TPP.save();
     TPP.setActive(book);
@@ -198,7 +204,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (button.dataset.act === "dup") {
       const name = prompt("Title for duplicated book:", "Copy of " + book.title);
       if (name !== null) {
-        const copy = TPP.norm(Object.assign({}, TPP.clone(book), { id: TPP.uid(), title: name || "Copy of " + book.title }));
+        const stamp = TPP.nowIso();
+        const copy = TPP.norm(Object.assign({}, TPP.clone(book), {
+          id: TPP.uid(),
+          title: name || "Copy of " + book.title,
+          createdAt: stamp,
+          updatedAt: stamp
+        }));
         TPP.library.push(copy);
         TPP.save();
         TPP.renderLibrary();
