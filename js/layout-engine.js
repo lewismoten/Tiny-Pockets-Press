@@ -9,6 +9,7 @@ TPP.settings = function () {
   const book = TPP.active;
   const raw = book.pageSize === "custom" ? { w: Number(book.customW), h: Number(book.customH) } : (TPP.sizes[book.pageSize] || TPP.sizes.one);
   return Object.assign({}, book, {
+    signatureSize: TPP.signatureSize(book.signatureSize),
     page: { w: Math.max(0.5, Number(raw.w) || 1), h: Math.max(0.5, Number(raw.h) || 1) },
     sheet: TPP.sheets[book.sheetSize] || TPP.sheets.letter
   });

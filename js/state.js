@@ -17,10 +17,17 @@ TPP.esc = function (value) {
     return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[ch];
   });
 };
+TPP.signatureSize = function (value) {
+  const fallback = 16;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(4, Math.min(64, Math.round(n / 4) * 4)) || fallback;
+};
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
   const out = Object.assign({}, base, book || {});
   out.id = out.id || TPP.uid();
+  out.signatureSize = TPP.signatureSize(out.signatureSize);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
     return Object.assign({

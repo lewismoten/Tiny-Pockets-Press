@@ -23,6 +23,38 @@ TPP.pairs = function (count) {
   }
   return out;
 };
+TPP.signaturePlan = function (pages, signatureSize) {
+  const interior = pages.filter(function (page) { return !page.cover; });
+  const size = TPP.signatureSize(signatureSize);
+  const signatures = [];
+  for (let start = 0; start < interior.length; start += size) {
+    const chunk = interior.slice(start, start + size);
+    const pairs = TPP.pairs(chunk.length);
+    const sheets = [];
+    for (let i = 0; i < pairs.length; i += 2) {
+      const front = pairs[i];
+      const back = pairs[i + 1] || { side: "back", pages: [0, 0] };
+      const mapPages = function (pair) {
+        return pair.pages.map(function (n) {
+          return (chunk[n - 1] && chunk[n - 1].n) || 0;
+        });
+      };
+      sheets.push({
+        index: sheets.length,
+        front: { side: front.side, pages: mapPages(front) },
+        back: { side: back.side, pages: mapPages(back) }
+      });
+    }
+    signatures.push({
+      index: signatures.length,
+      startPage: chunk[0] ? chunk[0].n : 0,
+      endPage: chunk[chunk.length - 1] ? chunk[chunk.length - 1].n : 0,
+      pages: chunk.map(function (page) { return page.n; }),
+      sheets: sheets
+    });
+  }
+  return signatures;
+};
 TPP.guide = function (sheet, cls, x, y, w, h) {
   const guide = document.createElement("div");
   guide.className = cls;
@@ -297,15 +329,22 @@ TPP.renderInterior = function () {
   const pages = TPP.buildPages();
   const preview = document.getElementById("interiorPreview");
   preview.innerHTML = "";
-  const pairs = TPP.pairs(pages.length).filter(function (pair) {
-    return !pair.pages.some(function (n) { return pages[n - 1] && pages[n - 1].cover; });
+  const signatures = TPP.signaturePlan(pages, settings.signatureSize);
+  const sideBlocks = signatures.flatMap(function (signature) {
+    return signature.sheets.flatMap(function (sheet) {
+      return [
+        { signature: signature.index, sheet: sheet.index, side: "front", pages: sheet.front.pages },
+        { signature: signature.index, sheet: sheet.index, side: "back", pages: sheet.back.pages }
+      ];
+    });
   });
   const unit = { w: settings.page.w * 2, h: settings.page.h };
   const grid = TPP.bestGrid(settings.sheet, unit);
   const per = grid.count;
-  const sides = Math.ceil(pairs.length / per);
+  const sides = Math.ceil(sideBlocks.length / per);
   document.getElementById("interiorSummary").innerHTML =
-    "<strong>" + pages.length + " book pages</strong>. Interior booklet imposition has " + pairs.length +
+    "<strong>" + pages.length + " book pages</strong>. " + signatures.length + " signature" + (signatures.length === 1 ? "" : "s") +
+    " at " + settings.signatureSize + " pages max. Interior booklet imposition has " + sideBlocks.length +
     " front/back side blocks. " + per + " blocks fit per sheet side. " +
     (settings.duplexBackSides ? "Duplex blank/opposite sheets are included." : "");
   for (let side = 0; side < sides; side++) {
@@ -313,16 +352,22 @@ TPP.renderInterior = function () {
     const sx = (settings.sheet.w - grid.cols * grid.w) / 2;
     const sy = (settings.sheet.h - grid.rows * grid.h) / 2;
     for (let i = 0; i < per; i++) {
-      const pair = pairs[side * per + i];
-      if (!pair) continue;
-      const left = pages[pair.pages[0] - 1] || { n: pair.pages[0], type: "blank", html: "" };
-      const right = pages[pair.pages[1] - 1] || { n: pair.pages[1], type: "blank", html: "" };
+      const block = sideBlocks[side * per + i];
+      if (!block) continue;
+      const left = pages[block.pages[0] - 1] || { n: block.pages[0], type: "blank", html: "<span>Blank</span>" };
+      const right = pages[block.pages[1] - 1] || { n: block.pages[1], type: "blank", html: "<span>Blank</span>" };
       const col = i % grid.cols;
       const row = Math.floor(i / grid.cols);
       const x = sx + col * grid.w;
       const y = sy + row * grid.h;
       sheet.appendChild(TPP.pageEl(left, settings, x, y, grid.rot));
       sheet.appendChild(TPP.pageEl(right, settings, x + settings.page.w, y, grid.rot));
+      const tag = document.createElement("div");
+      tag.className = "sheet-title";
+      tag.style.left = (x + 0.08) + "in";
+      tag.style.top = (y + 0.08) + "in";
+      tag.textContent = "Sig " + (block.signature + 1) + " · Sheet " + (block.sheet + 1) + " · " + block.side;
+      sheet.appendChild(tag);
       TPP.guides(sheet, settings, x, y, settings.page.w * 2, settings.page.h, 0);
     }
     preview.appendChild(sheet);

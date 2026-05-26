@@ -32,7 +32,7 @@ TPP.sheets = {
 };
 TPP.fields = [
   "title","author","spineAuthor","pubDate","publisher","copyright","seriesName","number","volume","printing","includeToc",
-  "pageSize","sheetSize","customW","customH","margin","fontFamily","paperPreset","texture","pageBg","pageText","bodySize","captionSize","lineHeight","paraGap","justify",
+  "pageSize","sheetSize","signatureSize","customW","customH","margin","fontFamily","paperPreset","texture","pageBg","pageText","bodySize","captionSize","lineHeight","paraGap","justify",
   "qrDisplayMode","imageUrlMode","qrLightMode","qrLightColor","qrDarkMode","qrDarkColor",
   "coverShowAuthor","coverShowSeries","coverShowPublisher","coverOverflowImage","coverClipImageToFrame","coverBg1","coverBg2","coverText","coverBorder","coverBorderOn","coverImgX","coverImgY","coverImgZoom","coverTitleY","coverAuthorY","coverSeriesY","coverPublisherY","coverTitleSize","coverMetaSize","coverStroke","coverStrokeColor","coverStrokeSize",
   "backText","backTextY","backTextSize","backTextColor","backTextAlign","backTextLastLine","backFrameOn","backUseFrontImage","backClipImageToFrame","backImgX","backImgY","backImgZoom",
@@ -59,6 +59,7 @@ TPP.fallbackBook = function () {
     includeToc: true,
     pageSize: "one",
     sheetSize: "letter",
+    signatureSize: 16,
     customW: 1,
     customH: 1,
     margin: 0.08,

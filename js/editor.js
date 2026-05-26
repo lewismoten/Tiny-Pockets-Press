@@ -13,6 +13,7 @@ TPP.populate = function () {
 };
 TPP.loadForm = function () {
   const book = TPP.active;
+  if (book) book.signatureSize = TPP.signatureSize(book.signatureSize);
   TPP.fields.forEach(function (id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -33,6 +34,9 @@ TPP.sync = function () {
     else if (el.type === "number" || el.type === "range") book[id] = Number(el.value);
     else book[id] = el.value;
   });
+  book.signatureSize = TPP.signatureSize(book.signatureSize);
+  const signature = document.getElementById("signatureSize");
+  if (signature) signature.value = book.signatureSize;
   book.chapters = TPP.readChapterFromEditor();
   TPP.save();
 };
