@@ -38,6 +38,12 @@ TPP.fileAsset = function (book, id) {
   const files = Array.isArray(book && book.files) ? book.files : [];
   return files.find(function (file) { return file && file.id === id; }) || null;
 };
+TPP.filePickerAssets = function (book) {
+  const files = Array.isArray(book && book.files) ? book.files : [];
+  return files.filter(function (file) {
+    return file && !file.hiddenFromPicker;
+  });
+};
 TPP.fileData = function (book, id) {
   const file = TPP.fileAsset(book, id);
   return file && file.data ? file.data : "";
@@ -83,14 +89,15 @@ TPP.fileReferences = function (book, fileId) {
   const refs = TPP.fileFieldRefs(book);
   return refs[fileId] || [];
 };
-TPP.upsertFileAsset = function (book, data, type, name) {
+TPP.upsertFileAsset = function (book, data, type, name, options) {
   if (!book) return "";
   if (!Array.isArray(book.files)) book.files = [];
   const assetData = String(data || "").trim();
   if (!assetData) return "";
   const assetType = type || ((assetData.match(/^data:([^;,]+)/) || [])[1]) || "application/octet-stream";
   const hash = TPP.hashString(assetType + ":" + assetData);
-  const existing = book.files.find(function (file) { return file && file.hash === hash && file.data === assetData; });
+  const meta = options || {};
+  const existing = book.files.find(function (file) { return file && file.hash === hash && file.data === assetData && (file.role || "") === (meta.role || ""); });
   if (existing) return existing.id;
   const id = TPP.uid();
   book.files.push({
@@ -98,9 +105,57 @@ TPP.upsertFileAsset = function (book, data, type, name) {
     type: assetType,
     name: name || "",
     data: assetData,
-    hash: hash
+    hash: hash,
+    role: meta.role || "",
+    hiddenFromPicker: Boolean(meta.hiddenFromPicker)
   });
   return id;
+};
+TPP.setCoverPreviewAsset = function (book, data) {
+  if (!book) return "";
+  const assetData = String(data || "").trim();
+  if (!assetData) {
+    book.coverPreview = "";
+    book.coverPreviewId = "";
+    return "";
+  }
+  const existing = book.coverPreviewId ? TPP.fileAsset(book, book.coverPreviewId) : null;
+  const type = ((assetData.match(/^data:([^;,]+)/) || [])[1]) || "image/jpeg";
+  const hash = TPP.hashString(type + ":" + assetData);
+  if (existing) {
+    existing.type = type;
+    existing.name = "Generated Cover Preview";
+    existing.data = assetData;
+    existing.hash = hash;
+    existing.role = "coverPreview";
+    existing.hiddenFromPicker = true;
+    book.coverPreview = assetData;
+    return existing.id;
+  }
+  const id = TPP.upsertFileAsset(book, assetData, type, "Generated Cover Preview", {
+    role: "coverPreview",
+    hiddenFromPicker: true
+  });
+  book.coverPreviewId = id;
+  book.coverPreview = assetData;
+  return id;
+};
+TPP.syncCoverPreviewAsset = function (book) {
+  if (!book) return;
+  if (book.coverPreview && !book.coverPreviewId) {
+    TPP.setCoverPreviewAsset(book, book.coverPreview);
+    return;
+  }
+  const file = book.coverPreviewId ? TPP.fileAsset(book, book.coverPreviewId) : null;
+  if (file) {
+    file.role = "coverPreview";
+    file.hiddenFromPicker = true;
+    if (!file.name) file.name = "Generated Cover Preview";
+    book.coverPreview = file.data || "";
+  } else {
+    book.coverPreview = "";
+    book.coverPreviewId = "";
+  }
 };
 TPP.removeFileAsset = function (book, fileId) {
   if (!book || !Array.isArray(book.files) || !fileId) return false;
@@ -133,7 +188,9 @@ TPP.normalizeFiles = function (book) {
       type: file.type || ((String(file.data).match(/^data:([^;,]+)/) || [])[1]) || "application/octet-stream",
       name: file.name || "",
       data: file.data,
-      hash: file.hash || TPP.hashString((file.type || "") + ":" + file.data)
+      hash: file.hash || TPP.hashString((file.type || "") + ":" + file.data),
+      role: file.role || "",
+      hiddenFromPicker: Boolean(file.hiddenFromPicker)
     };
     const key = normalized.hash + "::" + normalized.data;
     if (seen.has(key)) {
@@ -198,8 +255,12 @@ TPP.bookFingerprint = function (book) {
   delete copy.updatedAt;
   delete copy.lastExportedAt;
   delete copy.lastImportedAt;
+  delete copy.coverPreviewId;
   delete copy.coverPreview;
   delete copy._pageCount;
+  copy.files = (Array.isArray(copy.files) ? copy.files : []).filter(function (file) {
+    return file && file.role !== "coverPreview";
+  });
   return JSON.stringify(copy);
 };
 TPP.hydrateBookDates = function (book) {
@@ -623,6 +684,7 @@ TPP.norm = function (book) {
   TPP.syncLegacyImageFieldsFromElements(out);
   TPP.hydrateBookDates(out);
   TPP.normalizeFiles(out);
+  TPP.syncCoverPreviewAsset(out);
   const fileIds = new Set(out.files.map(function (file) { return file.id; }));
   ["coverImageId", "backImageId", "spineImageId"].forEach(function (key) {
     if (out[key] && !fileIds.has(out[key])) out[key] = "";
@@ -634,6 +696,7 @@ TPP.norm = function (book) {
     if (chapter.imageId && !fileIds.has(chapter.imageId)) chapter.imageId = "";
   });
   TPP.syncLegacyImageFieldsFromElements(out);
+  TPP.syncCoverPreviewAsset(out);
   return out;
 };
 TPP.load = async function () {

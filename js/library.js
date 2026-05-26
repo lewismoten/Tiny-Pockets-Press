@@ -443,7 +443,7 @@ TPP.captureCover = async function () {
     wrap.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
     document.body.appendChild(wrap);
     const canvas = await html2canvas(wrap, { scale: 4, backgroundColor: null });
-    TPP.active.coverPreview = canvas.toDataURL("image/jpeg", 0.9);
+    TPP.setCoverPreviewAsset(TPP.active, canvas.toDataURL("image/jpeg", 0.9));
     TPP.active._pageCount = TPP.lastPages.length;
     wrap.remove();
     TPP.save();

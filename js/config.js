@@ -55,6 +55,7 @@ TPP.fallbackBook = function () {
     updatedAt: stamp,
     lastExportedAt: "",
     lastImportedAt: "",
+    coverPreviewId: "",
     title: "Santa’s Little OSHA Violation",
     author: "Lewis Moten",
     spineAuthor: "Moten, L.",

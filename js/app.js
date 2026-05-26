@@ -541,7 +541,7 @@ TPP.renderAssetDialog = function () {
   title.textContent = spec ? spec.label : "Choose Image";
   text.textContent = spec ? "Reuse an existing image, upload a new one, or remove the current assignment." : "";
   if (clearButton) clearButton.disabled = !currentId;
-  const files = (TPP.active && Array.isArray(TPP.active.files)) ? TPP.active.files : [];
+  const files = TPP.filePickerAssets ? TPP.filePickerAssets(TPP.active) : ((TPP.active && Array.isArray(TPP.active.files)) ? TPP.active.files : []);
   list.innerHTML = files.length
     ? files.map(function (file) { return TPP.assetCardHtml(file, currentId); }).join("")
     : '<div class="asset-empty">No images have been uploaded for this book yet.</div>';
