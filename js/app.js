@@ -209,6 +209,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("readerMode").onchange = TPP.renderReader;
 
   document.getElementById("librarySearch").oninput = TPP.renderLibrary;
+  document.getElementById("libraryImport").onclick = function () {
+    const input = document.getElementById("importJson");
+    if (!input) return;
+    input.value = "";
+    input.click();
+  };
   document.getElementById("libraryGrid").onclick = function (e) {
     const button = e.target.closest("[data-act]");
     const card = e.target.closest("[data-id]");
