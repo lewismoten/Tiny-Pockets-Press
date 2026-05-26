@@ -335,6 +335,14 @@
 
     <section id="readerView" class="view">
       <div class="reader-toolbar"><button id="readerPrev">Previous</button><select id="readerJump"></select><select id="readerMode"><option value="single">Single Page</option><option value="spread">Two-Page Spread</option></select><button id="readerNext">Next</button></div>
+      <div class="reader-progress" aria-label="Reading progress">
+        <span id="readerProgressStart" class="reader-progress-edge">Start</span>
+        <label class="reader-progress-track" for="readerScrub">
+          <span id="readerProgressLabel" class="reader-progress-label">Page 1 of 1</span>
+          <input id="readerScrub" type="range" min="0" max="0" value="0" step="1">
+        </label>
+        <span id="readerProgressEnd" class="reader-progress-edge">Finish</span>
+      </div>
       <div id="readerPreview" class="reader-preview"></div>
     </section>
 

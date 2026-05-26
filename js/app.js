@@ -152,15 +152,26 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
 
   document.getElementById("readerPrev").onclick = function () {
-    TPP.readerIndex = Math.max(0, TPP.readerIndex - (document.getElementById("readerMode").value === "spread" ? 2 : 1));
+    const pages = TPP.buildPages();
+    const mode = document.getElementById("readerMode").value;
+    TPP.readerIndex = TPP.readerNormalizeIndex(TPP.readerIndex - (mode === "spread" ? 2 : 1), pages, mode);
     TPP.renderReader();
   };
   document.getElementById("readerNext").onclick = function () {
-    TPP.readerIndex = document.getElementById("readerMode").value === "spread" && TPP.readerIndex === 0 ? 1 : TPP.readerIndex + (document.getElementById("readerMode").value === "spread" ? 2 : 1);
+    const pages = TPP.buildPages();
+    const mode = document.getElementById("readerMode").value;
+    const next = mode === "spread" && TPP.readerIndex === 0 ? 1 : TPP.readerIndex + (mode === "spread" ? 2 : 1);
+    TPP.readerIndex = TPP.readerNormalizeIndex(next, pages, mode);
     TPP.renderReader();
   };
   document.getElementById("readerJump").onchange = function () {
     TPP.readerIndex = Number(document.getElementById("readerJump").value);
+    TPP.renderReader();
+  };
+  document.getElementById("readerScrub").oninput = function () {
+    const pages = TPP.buildPages();
+    const mode = document.getElementById("readerMode").value;
+    TPP.readerIndex = TPP.readerNormalizeIndex(Number(document.getElementById("readerScrub").value), pages, mode);
     TPP.renderReader();
   };
   document.getElementById("readerMode").onchange = TPP.renderReader;
@@ -345,12 +356,38 @@ TPP.readerNav = function (pages) {
   document.getElementById("readerJump").innerHTML = options.join("");
   document.getElementById("readerJump").value = TPP.readerIndex;
 };
+TPP.readerNormalizeIndex = function (index, pages, mode) {
+  const last = Math.max(0, pages.length - 1);
+  let next = Math.max(0, Math.min(Number(index) || 0, last));
+  if (mode === "spread" && next > 0 && next % 2 === 0) next -= 1;
+  return next;
+};
+TPP.readerProgressText = function (pages, index, mode) {
+  const start = Math.min(pages.length, index + 1);
+  if (mode !== "spread" || index === 0 || index >= pages.length - 1) return "Page " + start + " of " + pages.length;
+  return "Pages " + start + "-" + Math.min(pages.length, index + 2) + " of " + pages.length;
+};
+TPP.syncReaderProgress = function (pages, index, mode) {
+  const scrub = document.getElementById("readerScrub");
+  const label = document.getElementById("readerProgressLabel");
+  const start = document.getElementById("readerProgressStart");
+  const end = document.getElementById("readerProgressEnd");
+  if (!scrub || !label || !start || !end) return;
+  scrub.max = Math.max(0, pages.length - 1);
+  scrub.value = index;
+  const pct = pages.length <= 1 ? 0 : (index / (pages.length - 1)) * 100;
+  scrub.style.setProperty("--reader-progress", pct + "%");
+  label.textContent = TPP.readerProgressText(pages, index, mode);
+  start.textContent = "1";
+  end.textContent = String(pages.length);
+};
 TPP.renderReader = function () {
   const settings = TPP.settings();
   const pages = TPP.buildPages();
-  TPP.readerNav(pages);
-  TPP.readerIndex = Math.max(0, Math.min(TPP.readerIndex, pages.length - 1));
   const mode = document.getElementById("readerMode").value;
+  TPP.readerIndex = TPP.readerNormalizeIndex(TPP.readerIndex, pages, mode);
+  TPP.readerNav(pages);
+  TPP.syncReaderProgress(pages, TPP.readerIndex, mode);
   const frontCover = pages[TPP.readerIndex] && pages[TPP.readerIndex].role === "front";
   const spineW = frontCover ? TPP.spineWidth(settings) : 0;
   const shown = mode === "spread" ? (frontCover ? [pages[TPP.readerIndex]] : [pages[TPP.readerIndex], pages[TPP.readerIndex + 1] || null]) : [pages[TPP.readerIndex]];
