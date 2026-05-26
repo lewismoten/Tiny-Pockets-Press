@@ -425,13 +425,18 @@ TPP.syncReaderProgress = function (pages, index, mode, settings) {
 TPP.readerPageOrBlank = function (pages, number) {
   return pages[number - 1] || { n: number, type: "blank", html: "" };
 };
-TPP.readerMiniPage = function (page, settings) {
+TPP.readerMiniPage = function (page, settings, pageSide) {
   const shell = document.createElement("div");
   shell.className = "reader-shell";
   shell.style.width = settings.page.w + "in";
   shell.style.height = settings.page.h + "in";
-  shell.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
+  const pageEl = TPP.pageEl(page, settings, 0, 0, false, true);
+  if (pageSide) pageEl.classList.add("page-side-" + pageSide);
+  shell.appendChild(pageEl);
   return shell;
+};
+TPP.oppositePageSide = function (side) {
+  return side === "left" ? "right" : "left";
 };
 TPP.renderReaderDuplex = function (pages, settings, sheetIndex) {
   const preview = document.getElementById("readerPreview");
@@ -445,11 +450,13 @@ TPP.renderReaderDuplex = function (pages, settings, sheetIndex) {
   duplex.className = "duplex-sheet";
   const layout = [
     {
+      side: "left",
       title: "Leaf " + sheet.front.pages[0] + " / " + sheet.back.pages[1],
       front: TPP.readerPageOrBlank(pages, sheet.front.pages[0]),
       back: TPP.readerPageOrBlank(pages, sheet.back.pages[1])
     },
     {
+      side: "right",
       title: "Leaf " + sheet.front.pages[1] + " / " + sheet.back.pages[0],
       front: TPP.readerPageOrBlank(pages, sheet.front.pages[1]),
       back: TPP.readerPageOrBlank(pages, sheet.back.pages[0])
@@ -466,14 +473,17 @@ TPP.renderReaderDuplex = function (pages, settings, sheetIndex) {
     title.className = "duplex-leaf-label";
     title.textContent = leaf.title;
     leafEl.appendChild(title);
-    [["Front side", leaf.front], ["Back side", leaf.back]].forEach(function (face) {
+    [
+      ["Front side", leaf.front, leaf.side],
+      ["Back side", leaf.back, TPP.oppositePageSide(leaf.side)]
+    ].forEach(function (face) {
       const faceEl = document.createElement("div");
       faceEl.className = "duplex-face";
       const label = document.createElement("div");
       label.className = "duplex-face-label";
       label.textContent = face[0];
       faceEl.appendChild(label);
-      faceEl.appendChild(TPP.readerMiniPage(face[1], settings));
+      faceEl.appendChild(TPP.readerMiniPage(face[1], settings, face[2]));
       leafEl.appendChild(faceEl);
     });
     duplex.appendChild(leafEl);
