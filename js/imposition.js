@@ -404,8 +404,8 @@ TPP.renderInterior = function () {
     for (let i = 0; i < per; i++) {
       const block = blocks[pageIndex * per + i];
       if (!block) continue;
-      const left = pages[block.pages[0] - 1] || { n: block.pages[0], type: "blank", html: "<span>Blank</span>" };
-      const right = pages[block.pages[1] - 1] || { n: block.pages[1], type: "blank", html: "<span>Blank</span>" };
+      const left = pages[block.pages[0] - 1] || { n: block.pages[0], type: "blank", html: "" };
+      const right = pages[block.pages[1] - 1] || { n: block.pages[1], type: "blank", html: "" };
       const col = i % grid.cols;
       const row = Math.floor(i / grid.cols);
       const x = sx + col * grid.w;

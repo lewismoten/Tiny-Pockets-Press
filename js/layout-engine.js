@@ -169,7 +169,7 @@ TPP.buildPages = function () {
   makePage("back", TPP.coverHTML(settings, "back"), { cover: true, role: "back" });
 
   while (pages.length % 4 !== 0) {
-    pages.splice(pages.length - 1, 0, { n: 0, type: "blank", html: "<span>Blank</span>" });
+    pages.splice(pages.length - 1, 0, { n: 0, type: "blank", html: "" });
   }
   pages.forEach(function (page, index) { page.n = index + 1; });
   TPP.lastPages = pages;

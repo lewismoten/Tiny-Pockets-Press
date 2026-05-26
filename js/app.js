@@ -423,7 +423,7 @@ TPP.syncReaderProgress = function (pages, index, mode, settings) {
   end.textContent = mode === "duplex" ? "Sheet " + (Number(scrub.max) + 1 || 1) : String(pages.length);
 };
 TPP.readerPageOrBlank = function (pages, number) {
-  return pages[number - 1] || { n: number, type: "blank", html: "<span>Blank</span>" };
+  return pages[number - 1] || { n: number, type: "blank", html: "" };
 };
 TPP.readerMiniPage = function (page, settings) {
   const shell = document.createElement("div");
