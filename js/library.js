@@ -98,7 +98,7 @@ TPP.renderLibrary = function () {
     const size = TPP.sizes[book.pageSize] || { w: book.customW || 1, h: book.customH || 1 };
     const pages = book._pageCount || "—";
     const modified = TPP.relativeDateTime(book.updatedAt);
-    return '<article class="library-card" data-id="' + book.id + '">' +
+    return '<article class="library-card ' + (TPP.active && TPP.active.id === book.id ? "active" : "") + '" data-id="' + book.id + '">' +
       '<div class="library-cover" style="' + (book.coverPreview ? "background-image:url(" + book.coverPreview + ")" : "background:linear-gradient(to bottom," + book.coverBg1 + "," + book.coverBg2 + ")") + '"></div>' +
       '<div class="library-card-body"><h3>' + TPP.esc(book.title) + "</h3><p>" + TPP.esc(book.author) + "</p><p>" + pages + " pages · " + Number(size.w).toFixed(2) + "×" + Number(size.h).toFixed(2) + ' in</p><p class="library-meta">Modified ' + TPP.esc(modified.label || "—") + '</p><div class="toolbar"><button data-act="edit">Edit</button><button data-act="about">About</button><button data-act="view">View</button><button data-act="dup">Duplicate</button><button data-act="export">Export</button></div></div></article>';
   }).join("");
