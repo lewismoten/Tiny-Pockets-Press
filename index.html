@@ -313,8 +313,12 @@
         <label><input id="showCutGuides" type="checkbox"> Cut outlines/guides</label>
         <label><input id="showFoldGuides" type="checkbox"> Sewing/fold guides</label>
         <label><input id="showPageGuides" type="checkbox"> Light page outlines</label>
-        <label>Sewing Stations <input id="sewingStations" type="number" min="2" max="5" step="1"></label>
+        <div class="two">
+          <label>Sewing Stations <input id="sewingStations" type="number" min="2" max="5" step="1"></label>
+          <label>Sewing Opacity <input id="sewingGuideOpacity" type="number" min="0" max="1" step=".05"></label>
+        </div>
         <label><input id="showSignatureOverlay" type="checkbox"> Signature/sheet text overlay</label>
+        <label>Signature Marker Opacity <input id="signatureGuideOpacity" type="number" min="0" max="1" step=".05"></label>
         <label><input id="duplexBackSides" type="checkbox"> Include blank/opposite-side pages for duplex printers</label>
         <div class="menu-row">
           <button id="exportBook">Export Book</button>

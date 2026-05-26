@@ -15,6 +15,8 @@ TPP.loadForm = function () {
   const book = TPP.active;
   if (book) book.signatureSize = TPP.signatureSize(book.signatureSize);
   if (book) book.sewingStations = TPP.sewingStations(book.sewingStations);
+  if (book) book.sewingGuideOpacity = TPP.opacity(book.sewingGuideOpacity, 0.65);
+  if (book) book.signatureGuideOpacity = TPP.opacity(book.signatureGuideOpacity, 0.65);
   TPP.fields.forEach(function (id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -37,10 +39,16 @@ TPP.sync = function () {
   });
   book.signatureSize = TPP.signatureSize(book.signatureSize);
   book.sewingStations = TPP.sewingStations(book.sewingStations);
+  book.sewingGuideOpacity = TPP.opacity(book.sewingGuideOpacity, 0.65);
+  book.signatureGuideOpacity = TPP.opacity(book.signatureGuideOpacity, 0.65);
   const signature = document.getElementById("signatureSize");
   if (signature) signature.value = book.signatureSize;
   const sewing = document.getElementById("sewingStations");
   if (sewing) sewing.value = book.sewingStations;
+  const sewingOpacity = document.getElementById("sewingGuideOpacity");
+  if (sewingOpacity) sewingOpacity.value = book.sewingGuideOpacity;
+  const signatureOpacity = document.getElementById("signatureGuideOpacity");
+  if (signatureOpacity) signatureOpacity.value = book.signatureGuideOpacity;
   book.chapters = TPP.readChapterFromEditor();
   TPP.save();
 };

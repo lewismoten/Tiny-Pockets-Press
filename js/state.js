@@ -27,12 +27,19 @@ TPP.sewingStations = function (value) {
   const n = Math.round(Number(value) || 0);
   return Math.max(2, Math.min(5, n || 3));
 };
+TPP.opacity = function (value, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(0, Math.min(1, n));
+};
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
   const out = Object.assign({}, base, book || {});
   out.id = out.id || TPP.uid();
   out.signatureSize = TPP.signatureSize(out.signatureSize);
   out.sewingStations = TPP.sewingStations(out.sewingStations);
+  out.sewingGuideOpacity = TPP.opacity(out.sewingGuideOpacity, 0.65);
+  out.signatureGuideOpacity = TPP.opacity(out.signatureGuideOpacity, 0.65);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
     return Object.assign({

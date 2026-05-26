@@ -11,6 +11,8 @@ TPP.settings = function () {
   return Object.assign({}, book, {
     signatureSize: TPP.signatureSize(book.signatureSize),
     sewingStations: TPP.sewingStations(book.sewingStations),
+    sewingGuideOpacity: TPP.opacity(book.sewingGuideOpacity, 0.65),
+    signatureGuideOpacity: TPP.opacity(book.signatureGuideOpacity, 0.65),
     gutterMargin: Math.max(0, Number(book.gutterMargin) || 0),
     page: { w: Math.max(0.5, Number(raw.w) || 1), h: Math.max(0.5, Number(raw.h) || 1) },
     sheet: TPP.sheets[book.sheetSize] || TPP.sheets.letter

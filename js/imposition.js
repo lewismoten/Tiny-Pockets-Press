@@ -83,6 +83,7 @@ TPP.signatureMark = function (sheet, settings, x, y, signatureIndex, signatureCo
   mark.style.width = size + "in";
   mark.style.height = size + "in";
   mark.style.background = TPP.signatureMarkColor(signatureIndex, signatureCount);
+  mark.style.opacity = TPP.opacity(settings.signatureGuideOpacity, 0.65);
   sheet.appendChild(mark);
 };
 TPP.guide = function (sheet, cls, x, y, w, h) {
@@ -345,6 +346,7 @@ TPP.sewingGuides = function (sheet, settings, x, y, w, h, rotate90) {
       guide.style.width = thick + "in";
       guide.style.height = len + "in";
     }
+    guide.style.opacity = TPP.opacity(settings.sewingGuideOpacity, 0.65);
     sheet.appendChild(guide);
   });
 };
