@@ -50,6 +50,8 @@ TPP.bookFingerprint = function (book) {
   const copy = TPP.clone(book || {});
   delete copy.createdAt;
   delete copy.updatedAt;
+  delete copy.lastExportedAt;
+  delete copy.lastImportedAt;
   delete copy.coverPreview;
   delete copy._pageCount;
   return JSON.stringify(copy);
@@ -59,7 +61,17 @@ TPP.hydrateBookDates = function (book) {
   if (!book.createdAt && book.updatedAt) book.createdAt = book.updatedAt;
   if (!book.createdAt) book.createdAt = now;
   if (!book.updatedAt) book.updatedAt = book.createdAt;
+  if (!("lastExportedAt" in book)) book.lastExportedAt = "";
+  if (!("lastImportedAt" in book)) book.lastImportedAt = "";
   return book;
+};
+TPP.markBookExported = function (book, stamp) {
+  if (!book) return;
+  book.lastExportedAt = stamp || TPP.nowIso();
+};
+TPP.markBookImported = function (book, stamp) {
+  if (!book) return;
+  book.lastImportedAt = stamp || TPP.nowIso();
 };
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();

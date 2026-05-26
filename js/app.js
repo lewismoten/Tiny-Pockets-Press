@@ -216,7 +216,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.renderLibrary();
       }
     }
-    if (button.dataset.act === "export") TPP.download((book.title || "book") + ".json", book);
+    if (button.dataset.act === "export") {
+      TPP.markBookExported(book);
+      TPP.save();
+      TPP.download((book.title || "book") + ".json", book);
+    }
   };
 
   document.getElementById("saveBook").onclick = async function () {
@@ -230,14 +234,24 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("exportImagesZip").onclick = function () { TPP.exportImagesZip(); };
   document.getElementById("exportCoverPdf").onclick = function () { TPP.exportPdfFrom("cover"); };
   document.getElementById("printBrowser").onclick = function () { setTimeout(function () { print(); }, 80); };
-  document.getElementById("exportBook").onclick = function () { TPP.sync(); TPP.download((TPP.active.title || "book") + ".json", TPP.active); };
+  document.getElementById("exportBook").onclick = function () {
+    TPP.sync();
+    TPP.markBookExported(TPP.active);
+    TPP.save();
+    TPP.download((TPP.active.title || "book") + ".json", TPP.active);
+  };
   document.getElementById("exportStyle").onclick = function () {
     TPP.sync();
     const out = { type: "tiny-pockets-style-v6-1", style: {} };
     TPP.styleFields.forEach(function (field) { out.style[field] = TPP.active[field]; });
     TPP.download("tiny-pockets-style.json", out);
   };
-  document.getElementById("exportLibrary").onclick = function () { TPP.download("tiny-pockets-library.json", { books: TPP.library }); };
+  document.getElementById("exportLibrary").onclick = function () {
+    const stamp = TPP.nowIso();
+    TPP.library.forEach(function (book) { TPP.markBookExported(book, stamp); });
+    TPP.save();
+    TPP.download("tiny-pockets-library.json", { books: TPP.library });
+  };
   document.getElementById("importJson").onchange = function (e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -245,7 +259,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     reader.onload = function () {
       const data = JSON.parse(reader.result);
       if (data.books) {
-        TPP.library = data.books.map(TPP.norm);
+        const stamp = TPP.nowIso();
+        TPP.library = data.books.map(function (book) {
+          const imported = TPP.norm(book);
+          TPP.markBookImported(imported, stamp);
+          return imported;
+        });
         TPP.save();
         TPP.setActive(TPP.library[0]);
         TPP.switchView("library");
@@ -257,6 +276,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       } else {
         const book = TPP.norm(data);
         book.id = TPP.uid();
+        TPP.markBookImported(book);
         TPP.library.push(book);
         TPP.save();
         TPP.setActive(book);
