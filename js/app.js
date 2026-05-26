@@ -344,25 +344,56 @@ TPP.renderAll = function () {
   if (TPP.view === "reader") TPP.renderReader();
   if (TPP.view === "library") TPP.renderLibrary();
 };
-TPP.readerNav = function (pages) {
-  const options = ['<option value="0">Front Cover</option>'];
-  const tocIndex = pages.findIndex(function (p) { return p.type === "toc"; });
-  if (tocIndex >= 0) options.push('<option value="' + tocIndex + '">Table of Contents</option>');
-  TPP.active.chapters.forEach(function (chapter) {
-    const index = pages.findIndex(function (p) { return p.html.includes(TPP.esc(chapter.title || "")); });
-    if (index >= 0) options.push('<option value="' + index + '">' + "— ".repeat(chapter.level || 0) + TPP.esc(chapter.title || "Untitled") + "</option>");
+TPP.readerDuplexSheets = function (pages) {
+  return TPP.pairs(pages.length).filter(function (pair) {
+    return !pair.pages.some(function (n) { return pages[n - 1] && pages[n - 1].cover; });
+  }).reduce(function (out, pair, index, all) {
+    if (index % 2 === 0) {
+      out.push({ front: pair, back: all[index + 1] || { pages: [0, 0] } });
+    }
+    return out;
+  }, []);
+};
+TPP.readerDuplexSheetPages = function (pages, sheetIndex) {
+  const sheets = TPP.readerDuplexSheets(pages);
+  return sheets[Math.max(0, Math.min(sheetIndex, sheets.length - 1))] || null;
+};
+TPP.readerPageToDuplexSheet = function (pages, pageIndex) {
+  const target = Math.max(1, pageIndex + 1);
+  const sheets = TPP.readerDuplexSheets(pages);
+  const match = sheets.findIndex(function (sheet) {
+    return sheet.front.pages.concat(sheet.back.pages).includes(target);
   });
-  options.push('<option value="' + (pages.length - 1) + '">Last Page</option>');
+  return match >= 0 ? match : 0;
+};
+TPP.readerNav = function (pages, mode) {
+  const duplex = mode === "duplex";
+  const options = ['<option value="0">' + (duplex ? "First Sheet" : "Front Cover") + "</option>"];
+  const tocIndex = pages.findIndex(function (p) { return p.type === "toc"; });
+  const tocValue = duplex ? TPP.readerPageToDuplexSheet(pages, tocIndex) : tocIndex;
+  if (tocIndex >= 0) options.push('<option value="' + tocValue + '">Table of Contents</option>');
+  TPP.active.chapters.forEach(function (chapter) {
+    const pageIndex = pages.findIndex(function (p) { return p.html.includes(TPP.esc(chapter.title || "")); });
+    const index = duplex ? TPP.readerPageToDuplexSheet(pages, pageIndex) : pageIndex;
+    if (pageIndex >= 0) options.push('<option value="' + index + '">' + "— ".repeat(chapter.level || 0) + TPP.esc(chapter.title || "Untitled") + "</option>");
+  });
+  options.push('<option value="' + (duplex ? Math.max(0, TPP.readerDuplexSheets(pages).length - 1) : pages.length - 1) + '">' + (duplex ? "Last Sheet" : "Last Page") + "</option>");
   document.getElementById("readerJump").innerHTML = options.join("");
   document.getElementById("readerJump").value = TPP.readerIndex;
 };
 TPP.readerNormalizeIndex = function (index, pages, mode) {
-  const last = Math.max(0, pages.length - 1);
+  const last = mode === "duplex" ? Math.max(0, TPP.readerDuplexSheets(pages).length - 1) : Math.max(0, pages.length - 1);
   let next = Math.max(0, Math.min(Number(index) || 0, last));
   if (mode === "spread" && next > 0 && next % 2 === 0) next -= 1;
   return next;
 };
 TPP.readerProgressText = function (pages, index, mode) {
+  if (mode === "duplex") {
+    const sheet = TPP.readerDuplexSheetPages(pages, index);
+    if (!sheet) return "No interior sheets";
+    return "Sheet " + (index + 1) + " of " + TPP.readerDuplexSheets(pages).length + " • " +
+      sheet.front.pages[0] + ", " + sheet.front.pages[1] + " / " + sheet.back.pages[0] + ", " + sheet.back.pages[1];
+  }
   const start = Math.min(pages.length, index + 1);
   if (mode !== "spread" || index === 0 || index >= pages.length - 1) return "Page " + start + " of " + pages.length;
   return "Pages " + start + "-" + Math.min(pages.length, index + 2) + " of " + pages.length;
@@ -373,21 +404,84 @@ TPP.syncReaderProgress = function (pages, index, mode) {
   const start = document.getElementById("readerProgressStart");
   const end = document.getElementById("readerProgressEnd");
   if (!scrub || !label || !start || !end) return;
-  scrub.max = Math.max(0, pages.length - 1);
+  scrub.max = mode === "duplex" ? Math.max(0, TPP.readerDuplexSheets(pages).length - 1) : Math.max(0, pages.length - 1);
   scrub.value = index;
-  const pct = pages.length <= 1 ? 0 : (index / (pages.length - 1)) * 100;
+  const span = Number(scrub.max) || 0;
+  const pct = span <= 0 ? 0 : (index / span) * 100;
   scrub.style.setProperty("--reader-progress", pct + "%");
   label.textContent = TPP.readerProgressText(pages, index, mode);
-  start.textContent = "1";
-  end.textContent = String(pages.length);
+  start.textContent = mode === "duplex" ? "Sheet 1" : "1";
+  end.textContent = mode === "duplex" ? "Sheet " + (Number(scrub.max) + 1 || 1) : String(pages.length);
+};
+TPP.readerPageOrBlank = function (pages, number) {
+  return pages[number - 1] || { n: number, type: "blank", html: "<span>Blank</span>" };
+};
+TPP.readerMiniPage = function (page, settings) {
+  const shell = document.createElement("div");
+  shell.className = "reader-shell";
+  shell.style.width = settings.page.w + "in";
+  shell.style.height = settings.page.h + "in";
+  shell.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
+  return shell;
+};
+TPP.renderReaderDuplex = function (pages, settings, sheetIndex) {
+  const preview = document.getElementById("readerPreview");
+  const sheet = TPP.readerDuplexSheetPages(pages, sheetIndex);
+  preview.innerHTML = "";
+  if (!sheet) {
+    preview.textContent = "No interior duplex sheets to preview yet.";
+    return;
+  }
+  const duplex = document.createElement("div");
+  duplex.className = "duplex-sheet";
+  const layout = [
+    {
+      title: "Leaf " + sheet.front.pages[0] + " / " + sheet.back.pages[1],
+      front: TPP.readerPageOrBlank(pages, sheet.front.pages[0]),
+      back: TPP.readerPageOrBlank(pages, sheet.back.pages[1])
+    },
+    {
+      title: "Leaf " + sheet.front.pages[1] + " / " + sheet.back.pages[0],
+      front: TPP.readerPageOrBlank(pages, sheet.front.pages[1]),
+      back: TPP.readerPageOrBlank(pages, sheet.back.pages[0])
+    }
+  ];
+  const readerWidth = settings.page.w * 2.45;
+  const readerHeight = settings.page.h * 2.2;
+  const scale = Math.min(4, Math.max(.75, Math.min((window.innerWidth - 560) / (readerWidth * 96), (window.innerHeight - 240) / (readerHeight * 96))));
+  duplex.style.transform = "scale(" + scale + ")";
+  layout.forEach(function (leaf) {
+    const leafEl = document.createElement("div");
+    leafEl.className = "duplex-leaf";
+    const title = document.createElement("div");
+    title.className = "duplex-leaf-label";
+    title.textContent = leaf.title;
+    leafEl.appendChild(title);
+    [["Front side", leaf.front], ["Back side", leaf.back]].forEach(function (face) {
+      const faceEl = document.createElement("div");
+      faceEl.className = "duplex-face";
+      const label = document.createElement("div");
+      label.className = "duplex-face-label";
+      label.textContent = face[0];
+      faceEl.appendChild(label);
+      faceEl.appendChild(TPP.readerMiniPage(face[1], settings));
+      leafEl.appendChild(faceEl);
+    });
+    duplex.appendChild(leafEl);
+  });
+  preview.appendChild(duplex);
 };
 TPP.renderReader = function () {
   const settings = TPP.settings();
   const pages = TPP.buildPages();
   const mode = document.getElementById("readerMode").value;
   TPP.readerIndex = TPP.readerNormalizeIndex(TPP.readerIndex, pages, mode);
-  TPP.readerNav(pages);
+  TPP.readerNav(pages, mode);
   TPP.syncReaderProgress(pages, TPP.readerIndex, mode);
+  if (mode === "duplex") {
+    TPP.renderReaderDuplex(pages, settings, TPP.readerIndex);
+    return;
+  }
   const frontCover = pages[TPP.readerIndex] && pages[TPP.readerIndex].role === "front";
   const spineW = frontCover ? TPP.spineWidth(settings) : 0;
   const shown = mode === "spread" ? (frontCover ? [pages[TPP.readerIndex]] : [pages[TPP.readerIndex], pages[TPP.readerIndex + 1] || null]) : [pages[TPP.readerIndex]];
