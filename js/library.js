@@ -55,13 +55,15 @@ TPP.renderAbout = function () {
   const front = pages.find(function (page) { return page.role === "front"; }) || pages[0];
   const size = TPP.bookDimensions(book);
   const latest = TPP.bookLatestSource(book);
+  const latestRevisionLabel = latest ? (String(latest.sourceRevision || 1) + "." + String(latest.sourceSubrevision || 0)) : "";
   const original = latest ? TPP.library.find(function (candidate) { return candidate.id === latest.sourceId; }) : null;
   const summary = document.getElementById("aboutSummary");
   const panel = document.getElementById("aboutPanel");
   if (!summary || !panel) return;
-  summary.innerHTML = "<strong>Revision " + TPP.esc(String(book.revision || 1)) + "</strong>. " +
+  const revisionLabel = String(book.revision || 1) + "." + String(book.subrevision || 0);
+  summary.innerHTML = "<strong>Revision " + TPP.esc(revisionLabel) + "</strong>. " +
     TPP.esc(String(pages.length)) + " pages at " + TPP.esc(size.w.toFixed(2) + " × " + size.h.toFixed(2)) + " in. " +
-    (latest ? ("Latest source: " + TPP.esc((latest.action === "import" ? "Imported" : "Copied") + " from revision " + latest.sourceRevision + ".")) : "No copy/import provenance recorded.");
+    (latest ? ("Latest source: " + TPP.esc((latest.action === "import" ? "Imported" : "Copied") + " from revision " + latestRevisionLabel + ".")) : "No copy/import provenance recorded.");
   panel.innerHTML =
     '<div>' +
       '<article class="about-card">' +
@@ -90,6 +92,7 @@ TPP.renderAbout = function () {
             TPP.aboutMetaItem("Dimensions", size.w.toFixed(2) + " × " + size.h.toFixed(2) + " in"),
             TPP.aboutMetaItem("Book ID", book.id),
             TPP.aboutMetaItem("Revision", String(book.revision || 1)),
+            TPP.aboutMetaItem("Subrevision", String(book.subrevision || 0)),
             TPP.aboutMetaItem("Created", TPP.dateTime(book.createdAt)),
             TPP.aboutMetaItem("Last Edited", TPP.dateTime(book.updatedAt)),
             TPP.aboutMetaItem("Last Imported", TPP.dateTime(book.lastImportedAt)),
@@ -106,6 +109,7 @@ TPP.renderAbout = function () {
               TPP.aboutMetaItem("Original ID", latest.sourceId) +
               TPP.aboutMetaItem("Original Title", latest.sourceTitle) +
               TPP.aboutMetaItem("Original Revision", String(latest.sourceRevision || 1)) +
+              TPP.aboutMetaItem("Original Subrevision", String(latest.sourceSubrevision || 0)) +
               TPP.aboutMetaItem("Original Updated", TPP.dateTime(latest.sourceUpdatedAt)) +
               TPP.aboutMetaItem("Recorded", TPP.dateTime(latest.recordedAt)) +
             "</div>" +

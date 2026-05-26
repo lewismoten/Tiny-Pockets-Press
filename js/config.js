@@ -48,6 +48,7 @@ TPP.fallbackBook = function () {
   return {
     id: TPP.uid(),
     revision: 1,
+    subrevision: 0,
     provenance: [],
     createdAt: stamp,
     updatedAt: stamp,

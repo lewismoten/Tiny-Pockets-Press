@@ -9,6 +9,8 @@ TPP.currentChapter = 0;
 TPP.readerIndex = 0;
 TPP.lastPages = [];
 TPP.bookFingerprints = {};
+TPP.bookDraftFingerprints = {};
+TPP.bookRevisionTimers = {};
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -49,6 +51,7 @@ TPP.mediaCaptionSize = function (value, fallback) {
 TPP.bookFingerprint = function (book) {
   const copy = TPP.clone(book || {});
   delete copy.revision;
+  delete copy.subrevision;
   delete copy.provenance;
   delete copy.createdAt;
   delete copy.updatedAt;
@@ -62,6 +65,8 @@ TPP.hydrateBookDates = function (book) {
   const now = TPP.nowIso();
   if (!Number.isFinite(Number(book.revision)) || Number(book.revision) < 1) book.revision = 1;
   book.revision = Math.max(1, Math.floor(Number(book.revision) || 1));
+  if (!Number.isFinite(Number(book.subrevision)) || Number(book.subrevision) < 0) book.subrevision = 0;
+  book.subrevision = Math.max(0, Math.floor(Number(book.subrevision) || 0));
   if (!Array.isArray(book.provenance) && Array.isArray(book.ancestry)) book.provenance = TPP.clone(book.ancestry);
   if (!Array.isArray(book.provenance)) book.provenance = [];
   delete book.ancestry;
@@ -79,6 +84,7 @@ TPP.bookSourceEntry = function (book, action, stamp) {
     sourceId: book && book.id ? book.id : "",
     sourceTitle: book && book.title ? book.title : "",
     sourceRevision: Math.max(1, Math.floor(Number(book && book.revision) || 1)),
+    sourceSubrevision: Math.max(0, Math.floor(Number(book && book.subrevision) || 0)),
     sourceUpdatedAt: book && book.updatedAt ? book.updatedAt : when,
     sourceCreatedAt: book && book.createdAt ? book.createdAt : when,
     recordedAt: when
@@ -89,6 +95,7 @@ TPP.bookDescendant = function (source, overrides, action, stamp) {
   const descendant = TPP.norm(Object.assign({}, TPP.clone(source || {}), overrides || {}));
   descendant.id = (overrides && overrides.id) || descendant.id || TPP.uid();
   descendant.revision = 1;
+  descendant.subrevision = 0;
   descendant.createdAt = when;
   descendant.updatedAt = when;
   descendant.lastExportedAt = "";
@@ -154,22 +161,60 @@ TPP.load = async function () {
   }
   TPP.library = TPP.library.map(TPP.norm);
   TPP.bookFingerprints = {};
+  TPP.bookDraftFingerprints = {};
   TPP.library.forEach(function (book) {
-    TPP.bookFingerprints[book.id] = TPP.bookFingerprint(book);
+    const fingerprint = TPP.bookFingerprint(book);
+    TPP.bookFingerprints[book.id] = fingerprint;
+    TPP.bookDraftFingerprints[book.id] = fingerprint;
   });
   const activeId = localStorage.getItem(TPP.ACTIVE);
   TPP.active = TPP.library.find(function (book) { return book.id === activeId; }) || TPP.library[0];
 };
-TPP.save = function () {
+TPP.clearRevisionTimer = function (bookId) {
+  if (!TPP.bookRevisionTimers[bookId]) return;
+  clearTimeout(TPP.bookRevisionTimers[bookId]);
+  delete TPP.bookRevisionTimers[bookId];
+};
+TPP.scheduleRevisionCommit = function (bookId, delay) {
+  if (!bookId) return;
+  TPP.clearRevisionTimer(bookId);
+  TPP.bookRevisionTimers[bookId] = setTimeout(function () {
+    const book = TPP.library.find(function (entry) { return entry.id === bookId; });
+    if (!book) return;
+    TPP.save("commit", bookId);
+  }, Math.max(100, Number(delay) || 900));
+};
+TPP.save = function (mode, bookId) {
+  mode = mode || "commit";
+  const targetIds = bookId ? [bookId] : TPP.library.map(function (book) { return book.id; });
   TPP.library.forEach(function (book) {
+    if (!targetIds.includes(book.id)) return;
     TPP.hydrateBookDates(book);
     const previous = TPP.bookFingerprints[book.id];
+    const priorDraft = TPP.bookDraftFingerprints[book.id];
     const current = TPP.bookFingerprint(book);
-    if (previous !== undefined && current !== previous) {
-      book.revision = Math.max(1, Math.floor(Number(book.revision) || 1)) + 1;
-      book.updatedAt = TPP.nowIso();
+    if (mode === "draft") {
+      if (priorDraft !== current) {
+        if (previous !== undefined && current !== previous) {
+          book.subrevision = Math.max(0, Math.floor(Number(book.subrevision) || 0)) + 1;
+          book.updatedAt = TPP.nowIso();
+        } else {
+          book.subrevision = 0;
+        }
+      }
+      TPP.bookDraftFingerprints[book.id] = current;
+    } else {
+      TPP.clearRevisionTimer(book.id);
+      if (previous !== undefined && current !== previous) {
+        book.revision = Math.max(1, Math.floor(Number(book.revision) || 1)) + 1;
+        book.subrevision = 0;
+        book.updatedAt = TPP.nowIso();
+      } else if (book.subrevision) {
+        book.subrevision = 0;
+      }
+      TPP.bookFingerprints[book.id] = current;
+      TPP.bookDraftFingerprints[book.id] = current;
     }
-    TPP.bookFingerprints[book.id] = TPP.bookFingerprint(book);
   });
   localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
 };

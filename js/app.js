@@ -22,7 +22,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         document.getElementById("pageText").value = p[2];
       }
       if (id === "pageSize") document.querySelector(".customSize").hidden = document.getElementById("pageSize").value !== "custom";
-      TPP.sync();
+      TPP.sync("draft");
+      TPP.renderAll();
+    };
+    el.onchange = function () {
+      if (id === "paperPreset") {
+        const p = TPP.papers[document.getElementById("paperPreset").value];
+        document.getElementById("pageBg").value = p[1];
+        document.getElementById("pageText").value = p[2];
+      }
+      if (id === "pageSize") document.querySelector(".customSize").hidden = document.getElementById("pageSize").value !== "custom";
+      TPP.sync("commit");
       TPP.renderAll();
     };
   });
@@ -60,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const textarea = card.querySelector(".chapter-text");
       if (textarea && !textarea.value.trim()) textarea.value = '{\n  "type": "blank",\n  "pages": 12\n}';
     }
-    TPP.sync();
+    TPP.sync("draft");
     const preview = card.querySelector(".md-preview");
     const textarea = card.querySelector(".chapter-text");
     if (preview && textarea) {
@@ -69,6 +79,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     TPP.renderChapterList();
   };
+  document.getElementById("chapterEditor").addEventListener("change", function (e) {
+    if (e.target.classList.contains("chapter-image")) return;
+    const card = e.target.closest(".chapter-card");
+    if (!card) return;
+    TPP.sync("commit");
+    TPP.renderAll();
+  });
 
   document.getElementById("chapterEditor").onclick = function (e) {
     const fmt = e.target.dataset.fmt;

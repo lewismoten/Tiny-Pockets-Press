@@ -29,7 +29,7 @@ TPP.loadForm = function () {
   TPP.renderChapterList();
   TPP.renderChapterEditor();
 };
-TPP.sync = function () {
+TPP.sync = function (mode) {
   const book = TPP.active;
   if (!book) return;
   TPP.fields.forEach(function (id) {
@@ -58,7 +58,10 @@ TPP.sync = function () {
   const mediaCaptionSize = document.getElementById("mediaCaptionSize");
   if (mediaCaptionSize) mediaCaptionSize.value = book.mediaCaptionSize;
   book.chapters = TPP.readChapterFromEditor();
-  TPP.save();
+  if (mode !== "nosave") {
+    TPP.save(mode || "commit", book.id);
+    if (mode === "draft") TPP.scheduleRevisionCommit(book.id);
+  }
 };
 TPP.readChapterFromEditor = function () {
   const card = document.querySelector(".chapter-card");

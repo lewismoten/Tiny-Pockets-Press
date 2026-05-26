@@ -5,7 +5,7 @@ TPP.date = function (value) {
   return new Date(value + "T12:00:00").toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 };
 TPP.settings = function () {
-  TPP.sync();
+  TPP.sync("nosave");
   const book = TPP.active;
   const raw = book.pageSize === "custom" ? { w: Number(book.customW), h: Number(book.customH) } : (TPP.sizes[book.pageSize] || TPP.sizes.one);
   return Object.assign({}, book, {
