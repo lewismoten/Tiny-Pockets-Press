@@ -38,15 +38,20 @@ TPP.extractLines = function (text) {
 TPP.blocksFromText = function (text, settings) {
   const blocks = [];
   let buffer = [];
+  const flushBuffer = function () {
+    if (!buffer.length) return;
+    const markdown = buffer.join("\n");
+    if (markdown.trim()) {
+      blocks.push({ type: "html", html: '<div class="story-text">' + TPP.safeMarkdown(markdown) + "</div>" });
+    }
+    buffer = [];
+  };
   TPP.extractLines(text).forEach(function (item) {
     if (item.type === "text") {
       buffer.push(item.text);
       return;
     }
-    if (buffer.length) {
-      blocks.push({ type: "html", html: '<div class="story-text">' + TPP.safeMarkdown(buffer.join("\n")) + "</div>" });
-      buffer = [];
-    }
+    flushBuffer();
     if (item.type === "imageUrl" && settings.imageUrlMode === "image") {
       blocks.push({
         type: "figure",
@@ -66,9 +71,7 @@ TPP.blocksFromText = function (text, settings) {
       });
     }
   });
-  if (buffer.length) {
-    blocks.push({ type: "html", html: '<div class="story-text">' + TPP.safeMarkdown(buffer.join("\n")) + "</div>" });
-  }
+  flushBuffer();
   return blocks;
 };
 TPP.hexRgb = function (hex) {
