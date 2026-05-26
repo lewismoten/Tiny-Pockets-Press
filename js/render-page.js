@@ -7,8 +7,10 @@ TPP.stroke = function (enabled, size, color) {
 TPP.coverHTML = function (settings, side) {
   const image = side === "front" ? settings.coverImageData : (settings.backUseFrontImage ? settings.coverImageData : settings.backImageData);
   if (side === "back") {
+    const align = ["left", "center", "justify"].includes(settings.backTextAlign) ? settings.backTextAlign : "center";
+    const last = ["auto", "center", "justify"].includes(settings.backTextLastLine) ? settings.backTextLastLine : "auto";
     return (image ? '<img class="back-img" src="' + image + '" style="width:' + settings.backImgZoom + '%;margin-left:' + settings.backImgX + '%;margin-top:' + settings.backImgY + '%">' : "") +
-      '<div class="back-text"><div class="story-text">' + TPP.safeMarkdown(settings.backText || "") + "</div></div>";
+      '<div class="back-text align-' + align + ' last-' + last + '"><div class="story-text">' + TPP.safeMarkdown(settings.backText || "") + "</div></div>";
   }
   const series = [settings.seriesName, settings.number].filter(Boolean).join(" ");
   return (image ? '<img class="cover-img" src="' + image + '" style="width:' + settings.coverImgZoom + '%;margin-left:' + settings.coverImgX + '%;margin-top:' + settings.coverImgY + '%">' : "") +

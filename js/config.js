@@ -35,7 +35,7 @@ TPP.fields = [
   "pageSize","sheetSize","customW","customH","margin","fontFamily","paperPreset","texture","pageBg","pageText","bodySize","captionSize","lineHeight","paraGap","justify",
   "qrDisplayMode","imageUrlMode","qrLightMode","qrLightColor","qrDarkMode","qrDarkColor",
   "coverShowAuthor","coverShowSeries","coverShowPublisher","coverOverflowImage","coverClipImageToFrame","coverBg1","coverBg2","coverText","coverBorder","coverBorderOn","coverImgX","coverImgY","coverImgZoom","coverTitleY","coverAuthorY","coverSeriesY","coverPublisherY","coverTitleSize","coverMetaSize","coverStroke","coverStrokeColor","coverStrokeSize",
-  "backText","backTextY","backTextSize","backTextColor","backFrameOn","backUseFrontImage","backClipImageToFrame","backImgX","backImgY","backImgZoom",
+  "backText","backTextY","backTextSize","backTextColor","backTextAlign","backTextLastLine","backFrameOn","backUseFrontImage","backClipImageToFrame","backImgX","backImgY","backImgZoom",
   "spineMode","paperThickness","bindingAllowance","spineImgX","spineImgZoom","spineTitleSize","spineTitleX","spineTitleY","spineAuthorSize","spineTextColor","spineStroke","spineStrokeColor","spineStrokeSize","spineTitleRotate","spineAuthorOn","spineAuthorRotate","wrapCover","wrapInside","boardThickness","coverPerimeterOn","separateCover","coverCopies","coverCopiesMax",
   "pageNumMode","pageOrnament","pageNumLeft","pageNumRight","ornamentBySide","reverseOrnamentsBySide","chapterEndOrnament","chapterEndCentered","tocNumberType","tocLeader","tocLeaderColor",
   "showCutGuides","showFoldGuides","duplexBackSides"
@@ -105,6 +105,8 @@ TPP.fallbackBook = function () {
     backTextY: 76,
     backTextSize: 4.5,
     backTextColor: "#fff8e8",
+    backTextAlign: "center",
+    backTextLastLine: "auto",
     backFrameOn: true,
     backImageData: "",
     backUseFrontImage: false,
