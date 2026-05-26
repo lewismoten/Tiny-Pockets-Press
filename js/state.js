@@ -307,6 +307,16 @@ TPP.migrateCoverTextSettings = function (book, base) {
   if (!("coverAuthorStrokeSize" in book)) book.coverAuthorStrokeSize = sharedStrokeSize;
   if (!("coverSeriesStrokeSize" in book)) book.coverSeriesStrokeSize = sharedStrokeSize;
   if (!("coverPublisherStrokeSize" in book)) book.coverPublisherStrokeSize = sharedStrokeSize;
+  if (book.coverTitleStroke === false) book.coverTitleStrokeSize = 0;
+  if (book.coverAuthorStroke === false) book.coverAuthorStrokeSize = 0;
+  if (book.coverSeriesStroke === false) book.coverSeriesStrokeSize = 0;
+  if (book.coverPublisherStroke === false) book.coverPublisherStrokeSize = 0;
+  book.coverTitleStroke = true;
+  book.coverAuthorStroke = true;
+  book.coverSeriesStroke = true;
+  book.coverPublisherStroke = true;
+  if (book.spineStroke === false) book.spineStrokeSize = 0;
+  book.spineStroke = true;
 };
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
