@@ -1,4 +1,5 @@
 window.TPP = window.TPP || {};
+TPP.dataPreviewStore = {};
 
 TPP.dateTime = function (value) {
   if (!value) return "";
@@ -98,12 +99,122 @@ TPP.dataImageValue = function (book, key, value) {
   if (value && typeof value === "object" && typeof value.data === "string" && /^data:image\//.test(value.data)) return value.data;
   return "";
 };
+TPP.dataUriParts = function (value) {
+  if (typeof value !== "string") return null;
+  const match = value.match(/^data:([^;,]+)?(?:;charset=([^;,]+))?(;base64)?,([\s\S]*)$/i);
+  if (!match) return null;
+  return {
+    mime: match[1] || "application/octet-stream",
+    charset: match[2] || "",
+    base64: !!match[3],
+    payload: match[4] || ""
+  };
+};
+TPP.base64Bytes = function (value) {
+  if (typeof value !== "string") return null;
+  const clean = value.replace(/\s+/g, "");
+  try {
+    const binary = atob(clean);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  } catch (_error) {
+    return null;
+  }
+};
+TPP.fileBytes = function (value) {
+  const uri = TPP.dataUriParts(value);
+  if (!uri) return null;
+  if (uri.base64) return TPP.base64Bytes(uri.payload);
+  try {
+    const text = decodeURIComponent(uri.payload.replace(/\+/g, "%20"));
+    return new TextEncoder().encode(text);
+  } catch (_error) {
+    return new TextEncoder().encode(uri.payload);
+  }
+};
+TPP.fileBytesLabel = function (count) {
+  const bytes = Number(count) || 0;
+  if (bytes === 1) return "1 byte";
+  if (bytes < 1024) return bytes + " bytes";
+  const kb = bytes / 1024;
+  if (kb < 10) return kb.toFixed(1).replace(/\.0$/, "") + " KB";
+  if (kb < 1024) return Math.round(kb) + " KB";
+  const mb = kb / 1024;
+  if (mb < 10) return mb.toFixed(1).replace(/\.0$/, "") + " MB";
+  return Math.round(mb) + " MB";
+};
+TPP.hexLine = function (bytes, offset, width) {
+  const slice = Array.from(bytes.slice(offset, offset + width));
+  const hex = slice.map(function (value) {
+    return value.toString(16).toUpperCase().padStart(2, "0");
+  });
+  while (hex.length < width) hex.push("  ");
+  const ascii = slice.map(function (value) {
+    return value >= 32 && value <= 126 ? String.fromCharCode(value) : ".";
+  }).join("");
+  return "0x" + offset.toString(16).toUpperCase().padStart(4, "0") + "  " + hex.join(" ") + "  " + ascii;
+};
+TPP.hexDump = function (bytes) {
+  if (!bytes || !bytes.length) return "0x0000";
+  const width = 16;
+  const lines = [];
+  for (let i = 0; i < bytes.length; i += width) lines.push(TPP.hexLine(bytes, i, width));
+  return lines.join("\n");
+};
+TPP.dataBinaryInfo = function (book, key, value) {
+  let record = null;
+  let source = "";
+  if (value && typeof value === "object" && typeof value.data === "string") {
+    record = value;
+    source = value.data;
+  } else if (typeof value === "string" && /^data:/i.test(value)) {
+    source = value;
+  } else {
+    return null;
+  }
+  const uri = TPP.dataUriParts(source);
+  if (!uri) return null;
+  const bytes = TPP.fileBytes(source) || new Uint8Array();
+  const mime = (record && record.type) || uri.mime || "application/octet-stream";
+  const name = (record && record.name) || String(key || "data");
+  return {
+    key: String(key || "data"),
+    name: name,
+    mime: mime,
+    format: uri.base64 ? "base64" : "text",
+    raw: source,
+    bytes: bytes,
+    size: bytes.length,
+    friendlySize: TPP.fileBytesLabel(bytes.length),
+    exactSize: String(bytes.length) + (bytes.length === 1 ? " byte" : " bytes")
+  };
+};
 TPP.dataImageCell = function (book, key, value) {
   const src = TPP.dataImageValue(book, key, value);
   if (!src) return "";
   return '<button type="button" class="data-image-chip" data-image-src="' + TPP.esc(src) + '" data-image-title="' + TPP.esc(String(key || "Image")) + '"><img src="' + TPP.esc(src) + '" alt="' + TPP.esc(String(key || "Image")) + '"></button>';
 };
+TPP.dataFileHtml = function (book, key, value) {
+  const info = TPP.dataBinaryInfo(book, key, value);
+  if (!info) return "";
+  const image = TPP.dataImageCell(book, key, value);
+  const imagePart = image ? '<span class="data-file-preview">' + image + "</span>" : "";
+  const textId = TPP.registerDataPreview(info.name + " (" + info.format + ")", info.raw, "text");
+  const hexId = TPP.registerDataPreview(info.name + " (hex)", TPP.hexDump(info.bytes), "hex");
+  return '<div class="data-file-value">' +
+    imagePart +
+    '<div class="data-file-meta">' +
+      '<span class="data-file-pill">' + TPP.esc(info.format) + "</span>" +
+      '<span class="data-file-pill" title="' + TPP.esc(info.exactSize) + '" data-bytes="' + TPP.esc(info.exactSize) + '">' + TPP.esc(info.friendlySize) + "</span>" +
+      '<button type="button" class="data-file-action" data-data-view="' + TPP.esc(textId) + '">View</button>' +
+      '<button type="button" class="data-file-action" data-data-hex="' + TPP.esc(hexId) + '">View Hex</button>' +
+    "</div>" +
+  "</div>";
+};
 TPP.dataPrimitiveHtml = function (book, key, value) {
+  const file = TPP.dataFileHtml(book, key, value);
+  if (file) return file;
   const image = TPP.dataImageCell(book, key, value);
   if (image) {
     return '<span class="data-image-link">' + image + '<span class="data-image-meta">' + TPP.esc(typeof value === "string" ? value : "Image") + "</span></span>";
@@ -164,8 +275,14 @@ TPP.renderData = function () {
   const panel = document.getElementById("dataPanel");
   if (!summary || !panel) return;
   const book = TPP.clone(TPP.active);
+  TPP.dataPreviewStore = {};
   summary.innerHTML = "Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.";
   panel.innerHTML = '<article class="data-card"><div class="data-node">' + TPP.dataObjectHtml(book, book, false) + "</div></article>";
+};
+TPP.registerDataPreview = function (title, body, mode) {
+  const id = "preview-" + TPP.uid();
+  TPP.dataPreviewStore[id] = { title: title || "Data Preview", body: body || "", mode: mode || "text" };
+  return id;
 };
 TPP.openDataImagePreview = function (src, title) {
   const dialog = document.getElementById("dataImageDialog");
@@ -175,6 +292,21 @@ TPP.openDataImagePreview = function (src, title) {
   image.src = src || "";
   heading.textContent = title || "Image Preview";
   if (!dialog.open) dialog.showModal();
+};
+TPP.openDataTextPreview = function (title, body, mode) {
+  const dialog = document.getElementById("dataTextDialog");
+  const heading = document.getElementById("dataTextTitle");
+  const pre = document.getElementById("dataTextBody");
+  if (!dialog || !heading || !pre || typeof dialog.showModal !== "function") return;
+  heading.textContent = title || "Data Preview";
+  pre.textContent = body || "";
+  pre.className = mode === "hex" ? "data-code data-code-hex" : "data-code";
+  if (!dialog.open) dialog.showModal();
+};
+TPP.openDataPreviewById = function (id) {
+  const entry = TPP.dataPreviewStore && TPP.dataPreviewStore[id];
+  if (!entry) return;
+  TPP.openDataTextPreview(entry.title, entry.body, entry.mode);
 };
 TPP.renderLibrary = function () {
   const q = (document.getElementById("librarySearch")?.value || "").toLowerCase();

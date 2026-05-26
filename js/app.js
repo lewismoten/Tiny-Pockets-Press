@@ -411,11 +411,26 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   const dataPanel = document.getElementById("dataPanel");
   const dataImageDialog = document.getElementById("dataImageDialog");
+  const dataTextDialog = document.getElementById("dataTextDialog");
   if (dataPanel) {
     dataPanel.addEventListener("click", function (e) {
       const chip = e.target.closest("[data-image-src]");
-      if (!chip) return;
-      TPP.openDataImagePreview(chip.dataset.imageSrc || "", chip.dataset.imageTitle || "Image Preview");
+      if (chip) {
+        TPP.openDataImagePreview(chip.dataset.imageSrc || "", chip.dataset.imageTitle || "Image Preview");
+        return;
+      }
+      const viewButton = e.target.closest("[data-data-view]");
+      if (viewButton) {
+        TPP.openDataPreviewById(viewButton.dataset.dataView || "");
+        return;
+      }
+      const hexButton = e.target.closest("[data-data-hex]");
+      if (hexButton) {
+        TPP.openDataPreviewById(hexButton.dataset.dataHex || "");
+        return;
+      }
+      const bytesLabel = e.target.closest("[data-bytes]");
+      if (bytesLabel) TPP.toast(bytesLabel.dataset.bytes || "");
     });
   }
   if (dataImageDialog) {
@@ -427,6 +442,17 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
       const closeButton = e.target.closest("[data-action='close']");
       if (closeButton && dataImageDialog.open) dataImageDialog.close();
+    });
+  }
+  if (dataTextDialog) {
+    dataTextDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === dataTextDialog && !card && dataTextDialog.open) {
+        dataTextDialog.close();
+        return;
+      }
+      const closeButton = e.target.closest("[data-action='close']");
+      if (closeButton && dataTextDialog.open) dataTextDialog.close();
     });
   }
 });
