@@ -282,6 +282,32 @@ TPP.markBookImported = function (book, stamp) {
   if (!book) return;
   book.lastImportedAt = stamp || TPP.nowIso();
 };
+TPP.migrateCoverTextSettings = function (book, base) {
+  const sharedColor = book.coverText || base.coverText;
+  const sharedStroke = "coverStroke" in book ? book.coverStroke : base.coverStroke;
+  const sharedStrokeColor = book.coverStrokeColor || base.coverStrokeColor;
+  const sharedStrokeSize = Number.isFinite(Number(book.coverStrokeSize)) ? Number(book.coverStrokeSize) : base.coverStrokeSize;
+  if (!("coverShowTitle" in book)) book.coverShowTitle = true;
+  if (!("coverTitleColor" in book)) book.coverTitleColor = sharedColor;
+  if (!("coverAuthorColor" in book)) book.coverAuthorColor = sharedColor;
+  if (!("coverSeriesColor" in book)) book.coverSeriesColor = sharedColor;
+  if (!("coverPublisherColor" in book)) book.coverPublisherColor = sharedColor;
+  if (!("coverAuthorSize" in book)) book.coverAuthorSize = Number(book.coverMetaSize) || base.coverAuthorSize;
+  if (!("coverSeriesSize" in book)) book.coverSeriesSize = Number(book.coverMetaSize) || base.coverSeriesSize;
+  if (!("coverPublisherSize" in book)) book.coverPublisherSize = Number(book.coverMetaSize) || base.coverPublisherSize;
+  if (!("coverTitleStroke" in book)) book.coverTitleStroke = sharedStroke;
+  if (!("coverAuthorStroke" in book)) book.coverAuthorStroke = sharedStroke;
+  if (!("coverSeriesStroke" in book)) book.coverSeriesStroke = sharedStroke;
+  if (!("coverPublisherStroke" in book)) book.coverPublisherStroke = sharedStroke;
+  if (!("coverTitleStrokeColor" in book)) book.coverTitleStrokeColor = sharedStrokeColor;
+  if (!("coverAuthorStrokeColor" in book)) book.coverAuthorStrokeColor = sharedStrokeColor;
+  if (!("coverSeriesStrokeColor" in book)) book.coverSeriesStrokeColor = sharedStrokeColor;
+  if (!("coverPublisherStrokeColor" in book)) book.coverPublisherStrokeColor = sharedStrokeColor;
+  if (!("coverTitleStrokeSize" in book)) book.coverTitleStrokeSize = sharedStrokeSize;
+  if (!("coverAuthorStrokeSize" in book)) book.coverAuthorStrokeSize = sharedStrokeSize;
+  if (!("coverSeriesStrokeSize" in book)) book.coverSeriesStrokeSize = sharedStrokeSize;
+  if (!("coverPublisherStrokeSize" in book)) book.coverPublisherStrokeSize = sharedStrokeSize;
+};
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
   const out = Object.assign({}, base, book || {});
@@ -292,6 +318,7 @@ TPP.norm = function (book) {
   out.signatureGuideOpacity = TPP.opacity(out.signatureGuideOpacity, 0.65);
   out.imageExportDpi = TPP.dpi(out.imageExportDpi);
   out.mediaCaptionSize = TPP.mediaCaptionSize(out.mediaCaptionSize, base.mediaCaptionSize);
+  TPP.migrateCoverTextSettings(out, base);
   TPP.hydrateBookDates(out);
   TPP.normalizeFiles(out);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;

@@ -174,19 +174,13 @@
 
       <details>
         <summary>Cover Front</summary>
-        <label><input id="coverShowAuthor" type="checkbox"> Show author</label>
-        <label><input id="coverShowSeries" type="checkbox"> Show series/number</label>
-        <label><input id="coverShowPublisher" type="checkbox"> Show publisher</label>
         <label><input id="coverOverflowImage" type="checkbox"> Allow image to bleed past page</label>
         <label><input id="coverClipImageToFrame" type="checkbox"> Clip image inside cover frame</label>
         <div class="two">
           <label>Top Color <input id="coverBg1" type="color" class="color-box"></label>
           <label>Bottom Color <input id="coverBg2" type="color" class="color-box"></label>
         </div>
-        <div class="two">
-          <label>Text <input id="coverText" type="color" class="color-box"></label>
-          <label>Border <input id="coverBorder" type="color" class="color-box"></label>
-        </div>
+        <label>Border <input id="coverBorder" type="color" class="color-box"></label>
         <label><input id="coverBorderOn" type="checkbox"> Frame on front cover</label>
         <div class="asset-control-group">
           <div id="coverImageSlot"></div>
@@ -196,22 +190,69 @@
             <label>Zoom <input id="coverImgZoom" type="range" min="10" max="500"></label>
           </div>
         </div>
-        <div class="two">
-          <label>Title Y <input id="coverTitleY" type="range" min="0" max="100"></label>
-          <label>Author Y <input id="coverAuthorY" type="range" min="0" max="100"></label>
+        <div class="cover-text-grid">
+          <section class="cover-text-group">
+            <label><input id="coverShowTitle" type="checkbox"> Show title</label>
+            <div class="two">
+              <label>Size <input id="coverTitleSize" type="number" min="4" step=".5"></label>
+              <label>Y <input id="coverTitleY" type="range" min="0" max="100"></label>
+            </div>
+            <div class="two">
+              <label>Color <input id="coverTitleColor" type="color" class="color-box"></label>
+              <label>Outline <input id="coverTitleStrokeColor" type="color" class="color-box"></label>
+            </div>
+            <div class="two">
+              <label><input id="coverTitleStroke" type="checkbox"> Text outline</label>
+              <label>Outline px <input id="coverTitleStrokeSize" type="number" min="0" step=".5"></label>
+            </div>
+          </section>
+          <section class="cover-text-group">
+            <label><input id="coverShowAuthor" type="checkbox"> Show author</label>
+            <div class="two">
+              <label>Size <input id="coverAuthorSize" type="number" min="3" step=".5"></label>
+              <label>Y <input id="coverAuthorY" type="range" min="0" max="100"></label>
+            </div>
+            <div class="two">
+              <label>Color <input id="coverAuthorColor" type="color" class="color-box"></label>
+              <label>Outline <input id="coverAuthorStrokeColor" type="color" class="color-box"></label>
+            </div>
+            <div class="two">
+              <label><input id="coverAuthorStroke" type="checkbox"> Text outline</label>
+              <label>Outline px <input id="coverAuthorStrokeSize" type="number" min="0" step=".5"></label>
+            </div>
+          </section>
         </div>
-        <div class="two">
-          <label>Series Y <input id="coverSeriesY" type="range" min="0" max="100"></label>
-          <label>Publisher Y <input id="coverPublisherY" type="range" min="0" max="100"></label>
-        </div>
-        <div class="two">
-          <label>Title Size <input id="coverTitleSize" type="number" min="4" step=".5"></label>
-          <label>Meta Size <input id="coverMetaSize" type="number" min="3" step=".5"></label>
-        </div>
-        <label><input id="coverStroke" type="checkbox"> Text outline</label>
-        <div class="two">
-          <label>Stroke <input id="coverStrokeColor" type="color" class="color-box"></label>
-          <label>Stroke px <input id="coverStrokeSize" type="number" min="0" step=".5"></label>
+        <div class="cover-text-grid">
+          <section class="cover-text-group">
+            <label><input id="coverShowSeries" type="checkbox"> Show series/number</label>
+            <div class="two">
+              <label>Size <input id="coverSeriesSize" type="number" min="3" step=".5"></label>
+              <label>Y <input id="coverSeriesY" type="range" min="0" max="100"></label>
+            </div>
+            <div class="two">
+              <label>Color <input id="coverSeriesColor" type="color" class="color-box"></label>
+              <label>Outline <input id="coverSeriesStrokeColor" type="color" class="color-box"></label>
+            </div>
+            <div class="two">
+              <label><input id="coverSeriesStroke" type="checkbox"> Text outline</label>
+              <label>Outline px <input id="coverSeriesStrokeSize" type="number" min="0" step=".5"></label>
+            </div>
+          </section>
+          <section class="cover-text-group">
+            <label><input id="coverShowPublisher" type="checkbox"> Show publisher</label>
+            <div class="two">
+              <label>Size <input id="coverPublisherSize" type="number" min="3" step=".5"></label>
+              <label>Y <input id="coverPublisherY" type="range" min="0" max="100"></label>
+            </div>
+            <div class="two">
+              <label>Color <input id="coverPublisherColor" type="color" class="color-box"></label>
+              <label>Outline <input id="coverPublisherStrokeColor" type="color" class="color-box"></label>
+            </div>
+            <div class="two">
+              <label><input id="coverPublisherStroke" type="checkbox"> Text outline</label>
+              <label>Outline px <input id="coverPublisherStrokeSize" type="number" min="0" step=".5"></label>
+            </div>
+          </section>
         </div>
       </details>
 

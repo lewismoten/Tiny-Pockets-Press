@@ -18,7 +18,7 @@ TPP.coverHTML = function (settings, side) {
   }
   const series = [settings.seriesName, settings.number].filter(Boolean).join(" ");
   return (image ? '<img class="cover-img" src="' + image + '" style="width:' + settings.coverImgZoom + '%;margin-left:' + settings.coverImgX + '%;margin-top:' + settings.coverImgY + '%">' : "") +
-    '<div class="cover-el cover-title">' + TPP.esc(settings.title) + "</div>" +
+    (settings.coverShowTitle !== false ? '<div class="cover-el cover-title">' + TPP.esc(settings.title) + "</div>" : "") +
     (settings.coverShowAuthor ? '<div class="cover-el cover-author">' + TPP.esc(settings.author) + "</div>" : "") +
     (settings.coverShowSeries ? '<div class="cover-el cover-series">' + TPP.esc(series) + "</div>" : "") +
     (settings.coverShowPublisher ? '<div class="cover-el cover-publisher">' + TPP.esc(settings.publisher) + "</div>" : "");
@@ -41,8 +41,17 @@ TPP.applyVars = function (element, settings) {
   element.style.setProperty("--cover-text", settings.coverText);
   element.style.setProperty("--cover-border", settings.coverBorder);
   element.style.setProperty("--cover-title-size", settings.coverTitleSize + "pt");
-  element.style.setProperty("--cover-meta-size", settings.coverMetaSize + "pt");
-  element.style.setProperty("--cover-stroke", TPP.stroke(settings.coverStroke, settings.coverStrokeSize, settings.coverStrokeColor));
+  element.style.setProperty("--cover-author-size", settings.coverAuthorSize + "pt");
+  element.style.setProperty("--cover-series-size", settings.coverSeriesSize + "pt");
+  element.style.setProperty("--cover-publisher-size", settings.coverPublisherSize + "pt");
+  element.style.setProperty("--cover-title-color", settings.coverTitleColor);
+  element.style.setProperty("--cover-author-color", settings.coverAuthorColor);
+  element.style.setProperty("--cover-series-color", settings.coverSeriesColor);
+  element.style.setProperty("--cover-publisher-color", settings.coverPublisherColor);
+  element.style.setProperty("--cover-title-stroke", TPP.stroke(settings.coverTitleStroke, settings.coverTitleStrokeSize, settings.coverTitleStrokeColor));
+  element.style.setProperty("--cover-author-stroke", TPP.stroke(settings.coverAuthorStroke, settings.coverAuthorStrokeSize, settings.coverAuthorStrokeColor));
+  element.style.setProperty("--cover-series-stroke", TPP.stroke(settings.coverSeriesStroke, settings.coverSeriesStrokeSize, settings.coverSeriesStrokeColor));
+  element.style.setProperty("--cover-publisher-stroke", TPP.stroke(settings.coverPublisherStroke, settings.coverPublisherStrokeSize, settings.coverPublisherStrokeColor));
   element.style.setProperty("--title-y", settings.coverTitleY + "%");
   element.style.setProperty("--author-y", settings.coverAuthorY + "%");
   element.style.setProperty("--series-y", settings.coverSeriesY + "%");
