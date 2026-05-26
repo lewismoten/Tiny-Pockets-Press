@@ -13,6 +13,7 @@ TPP.settings = function () {
     sewingStations: TPP.sewingStations(book.sewingStations),
     sewingGuideOpacity: TPP.opacity(book.sewingGuideOpacity, 0.65),
     signatureGuideOpacity: TPP.opacity(book.signatureGuideOpacity, 0.65),
+    imageExportDpi: TPP.dpi(book.imageExportDpi),
     gutterMargin: Math.max(0, Number(book.gutterMargin) || 0),
     page: { w: Math.max(0.5, Number(raw.w) || 1), h: Math.max(0.5, Number(raw.h) || 1) },
     sheet: TPP.sheets[book.sheetSize] || TPP.sheets.letter

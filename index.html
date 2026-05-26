@@ -12,6 +12,7 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script defer src="js/config.js"></script>
   <script defer src="js/state.js"></script>
   <script defer src="js/markdown-media.js"></script>
@@ -40,6 +41,7 @@
     <button id="saveBook">Save</button>
     <button id="exportInteriorPdf" class="primary">Interior PDF</button>
     <button id="exportReadablePdf" class="primary alt">eBook PDF</button>
+    <button id="exportImagesZip" class="primary alt">Page Images ZIP</button>
     <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
   </div>
 </header>
@@ -316,6 +318,7 @@
         <label><input id="showCutGuides" type="checkbox"> Cut outlines/guides</label>
         <label><input id="showFoldGuides" type="checkbox"> Sewing/fold guides</label>
         <label><input id="showPageGuides" type="checkbox"> Light page outlines</label>
+        <label>Image Export DPI <input id="imageExportDpi" type="number" min="72" max="1200" step="25"></label>
         <div class="two">
           <label>Sewing Stations <input id="sewingStations" type="number" min="2" max="5" step="1"></label>
           <label>Sewing Opacity <input id="sewingGuideOpacity" type="number" min="0" max="1" step=".05"></label>

@@ -88,3 +88,48 @@ TPP.exportReadablePdf = async function () {
   pdf.save(name);
   TPP.showProgress(100, "eBook PDF complete");
 };
+TPP.exportImagesZip = async function () {
+  TPP.sync();
+  const settings = TPP.settings();
+  const pages = TPP.buildPages();
+  if (!window.JSZip) {
+    alert("ZIP export library failed to load.");
+    return;
+  }
+  const zip = new JSZip();
+  const mount = document.createElement("div");
+  const scale = settings.imageExportDpi / 96;
+  mount.style.cssText = "position:fixed;left:-9999px;top:0;pointer-events:none;";
+  document.body.appendChild(mount);
+  try {
+    for (let i = 0; i < pages.length; i++) {
+      TPP.showProgress(5 + Math.round((i / pages.length) * 80), "Rendering page image " + (i + 1) + " of " + pages.length + "...");
+      const page = pages[i];
+      const shell = document.createElement("div");
+      shell.style.position = "relative";
+      shell.style.width = settings.page.w + "in";
+      shell.style.height = settings.page.h + "in";
+      shell.style.background = "#fff";
+      shell.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
+      mount.appendChild(shell);
+      TPP.renderQr(shell, settings);
+      await TPP.waitForImages(shell);
+      await new Promise(requestAnimationFrame);
+      const canvas = await html2canvas(shell, { scale: scale, backgroundColor: "#fff" });
+      const blob = await new Promise(function (resolve) { canvas.toBlob(resolve, "image/png"); });
+      const pageName = "page-" + String(i + 1).padStart(4, "0") + ".png";
+      zip.file(pageName, blob);
+      shell.remove();
+      await new Promise(requestAnimationFrame);
+    }
+    TPP.showProgress(90, "Building ZIP archive...");
+    const blob = await zip.generateAsync({ type: "blob" }, function (meta) {
+      TPP.showProgress(90 + Math.round(meta.percent * 0.1), "Building ZIP archive...");
+    });
+    const name = (settings.title || "tiny-book").toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-pages-" + settings.imageExportDpi + "dpi.zip";
+    TPP.downloadBlob(name, blob);
+  } finally {
+    mount.remove();
+  }
+  TPP.showProgress(100, "Page images ZIP complete");
+};

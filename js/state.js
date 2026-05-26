@@ -32,6 +32,10 @@ TPP.opacity = function (value, fallback) {
   if (!Number.isFinite(n)) return fallback;
   return Math.max(0, Math.min(1, n));
 };
+TPP.dpi = function (value) {
+  const n = Math.round(Number(value) || 0);
+  return Math.max(72, Math.min(1200, n || 300));
+};
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
   const out = Object.assign({}, base, book || {});
@@ -40,6 +44,7 @@ TPP.norm = function (book) {
   out.sewingStations = TPP.sewingStations(out.sewingStations);
   out.sewingGuideOpacity = TPP.opacity(out.sewingGuideOpacity, 0.65);
   out.signatureGuideOpacity = TPP.opacity(out.signatureGuideOpacity, 0.65);
+  out.imageExportDpi = TPP.dpi(out.imageExportDpi);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
     return Object.assign({
@@ -91,6 +96,9 @@ TPP.setActive = function (book) {
 };
 TPP.download = function (name, data) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  TPP.downloadBlob(name, blob);
+};
+TPP.downloadBlob = function (name, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
