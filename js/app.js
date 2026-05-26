@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.sync();
     TPP.buildPages();
     await TPP.captureCover();
-    alert("Saved.");
+    TPP.toast("Saved.");
   };
   document.getElementById("exportInteriorPdf").onclick = function () { TPP.exportPdfFrom("interior"); };
   document.getElementById("exportCoverPdf").onclick = function () { TPP.exportPdfFrom("cover"); };
@@ -232,6 +232,16 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 TPP.validViews = function () {
   return ["editor", "interior", "cover", "reader", "library"];
+};
+TPP.toast = function (message) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  clearTimeout(TPP.toastTimer);
+  toast.textContent = message;
+  toast.classList.add("show");
+  TPP.toastTimer = setTimeout(function () {
+    toast.classList.remove("show");
+  }, 1800);
 };
 TPP.initialView = function () {
   const hash = window.location.hash.replace(/^#/, "");
