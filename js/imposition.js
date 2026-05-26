@@ -455,7 +455,7 @@ TPP.renderInterior = function () {
       }
       const guideW = grid.rot ? settings.page.h : settings.page.w * 2;
       const guideH = grid.rot ? settings.page.w * 2 : settings.page.h;
-      if (TPP.signatureSpineSide(block.side)) {
+      if (TPP.signatureSpineSide(block.side) && block.sheet === 0) {
         TPP.signatureMark(sheet, settings, x, y, block.signature, signatures.length);
       }
       const showSpineGuides = settings.showFoldGuides && TPP.signatureSpineSide(block.side);
