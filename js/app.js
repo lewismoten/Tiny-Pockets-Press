@@ -280,9 +280,21 @@ document.addEventListener("DOMContentLoaded", async function () {
       const data = JSON.parse(reader.result);
       if (data.books) {
         const stamp = TPP.nowIso();
-        TPP.library = data.books.map(function (book) {
-          const imported = TPP.bookDescendant(TPP.norm(book), { id: TPP.uid() }, "import", stamp);
-          return imported;
+        data.books.forEach(function (rawBook) {
+          const incoming = TPP.bookImported(rawBook, stamp);
+          const existingIndex = TPP.library.findIndex(function (book) { return book.id === incoming.id; });
+          if (existingIndex < 0) {
+            TPP.library.push(incoming);
+            return;
+          }
+          const existing = TPP.library[existingIndex];
+          const action = TPP.resolveImportConflict(incoming, existing);
+          if (action === "merge") {
+            TPP.library[existingIndex] = TPP.mergeImportedBook(existing, incoming, stamp);
+          } else if (action === "overwrite") {
+            incoming.lastExportedAt = existing.lastExportedAt || incoming.lastExportedAt || "";
+            TPP.library[existingIndex] = incoming;
+          }
         });
         TPP.save();
         TPP.setActive(TPP.library[0]);
@@ -293,10 +305,26 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.loadForm();
         TPP.renderAll();
       } else {
-        const book = TPP.bookDescendant(TPP.norm(data), { id: TPP.uid() }, "import");
-        TPP.library.push(book);
-        TPP.save();
-        TPP.setActive(book);
+        const stamp = TPP.nowIso();
+        const incoming = TPP.bookImported(data, stamp);
+        const existingIndex = TPP.library.findIndex(function (book) { return book.id === incoming.id; });
+        if (existingIndex < 0) {
+          TPP.library.push(incoming);
+          TPP.save();
+          TPP.setActive(incoming);
+        } else {
+          const existing = TPP.library[existingIndex];
+          const action = TPP.resolveImportConflict(incoming, existing);
+          if (action === "cancel") return;
+          if (action === "merge") {
+            TPP.library[existingIndex] = TPP.mergeImportedBook(existing, incoming, stamp);
+          } else if (action === "overwrite") {
+            incoming.lastExportedAt = existing.lastExportedAt || incoming.lastExportedAt || "";
+            TPP.library[existingIndex] = incoming;
+          }
+          TPP.save();
+          TPP.setActive(TPP.library[existingIndex]);
+        }
       }
     };
     reader.readAsText(file);

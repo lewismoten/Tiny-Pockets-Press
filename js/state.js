@@ -90,6 +90,15 @@ TPP.bookSourceEntry = function (book, action, stamp) {
     recordedAt: when
   };
 };
+TPP.combineProvenance = function (a, b) {
+  const seen = new Set();
+  return (Array.isArray(a) ? a : []).concat(Array.isArray(b) ? b : []).filter(function (entry) {
+    const key = JSON.stringify(entry || {});
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
 TPP.bookDescendant = function (source, overrides, action, stamp) {
   const when = stamp || TPP.nowIso();
   const descendant = TPP.norm(Object.assign({}, TPP.clone(source || {}), overrides || {}));
@@ -103,6 +112,46 @@ TPP.bookDescendant = function (source, overrides, action, stamp) {
   descendant.provenance = (Array.isArray(source && source.provenance) ? TPP.clone(source.provenance) : []);
   descendant.provenance.push(TPP.bookSourceEntry(source, action, when));
   return descendant;
+};
+TPP.bookImported = function (source, stamp) {
+  const when = stamp || TPP.nowIso();
+  const imported = TPP.norm(TPP.clone(source || {}));
+  imported.lastImportedAt = when;
+  imported.provenance = TPP.combineProvenance(imported.provenance, [TPP.bookSourceEntry(source, "import", when)]);
+  return imported;
+};
+TPP.mergeImportedBook = function (existing, incoming, stamp) {
+  const when = stamp || TPP.nowIso();
+  const merged = TPP.norm(Object.assign({}, TPP.clone(existing || {}), TPP.clone(incoming || {})));
+  merged.id = existing && existing.id ? existing.id : merged.id;
+  merged.createdAt = existing && existing.createdAt ? existing.createdAt : merged.createdAt;
+  merged.updatedAt = incoming && incoming.updatedAt ? incoming.updatedAt : merged.updatedAt;
+  merged.revision = Math.max(
+    1,
+    Math.floor(Number(existing && existing.revision) || 1),
+    Math.floor(Number(incoming && incoming.revision) || 1)
+  );
+  merged.subrevision = 0;
+  merged.lastImportedAt = when;
+  merged.lastExportedAt = existing && existing.lastExportedAt ? existing.lastExportedAt : (incoming && incoming.lastExportedAt) || "";
+  merged.provenance = TPP.combineProvenance(
+    TPP.combineProvenance(existing && existing.provenance, incoming && incoming.provenance),
+    [TPP.bookSourceEntry(incoming, "import", when)]
+  );
+  return merged;
+};
+TPP.resolveImportConflict = function (incoming, existing) {
+  const title = (incoming && incoming.title) || (existing && existing.title) || "Untitled";
+  const choice = prompt(
+    'A book with id "' + ((incoming && incoming.id) || "") + '" already exists.\n\n' +
+    'Book: ' + title + '\n' +
+    'Type "merge", "overwrite", or "cancel".',
+    "merge"
+  );
+  const value = String(choice || "").trim().toLowerCase();
+  if (value === "merge" || value === "m") return "merge";
+  if (value === "overwrite" || value === "o") return "overwrite";
+  return "cancel";
 };
 TPP.markBookExported = function (book, stamp) {
   if (!book) return;
