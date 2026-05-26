@@ -397,8 +397,12 @@ TPP.interiorBlock = function (sheet, settings, left, right, x, y, rotate90, rota
     shell.style.transform = "rotate(180deg)";
     shell.style.transformOrigin = "center center";
   }
-  shell.appendChild(TPP.pageEl(left, settings, 0, 0, rotate90, false));
-  shell.appendChild(TPP.pageEl(right, settings, settings.page.w, 0, rotate90, false));
+  const leftPage = TPP.pageEl(left, settings, 0, 0, rotate90, false);
+  const rightPage = TPP.pageEl(right, settings, settings.page.w, 0, rotate90, false);
+  leftPage.classList.add("page-side-left");
+  rightPage.classList.add("page-side-right");
+  shell.appendChild(leftPage);
+  shell.appendChild(rightPage);
   sheet.appendChild(shell);
 };
 TPP.renderInterior = function () {
