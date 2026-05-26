@@ -89,6 +89,93 @@ TPP.bookText = function (book) {
     return [c.title, c.text];
   })).join(" ").toLowerCase();
 };
+TPP.dataImageValue = function (book, key, value) {
+  if (typeof value === "string" && /^data:image\//.test(value)) return value;
+  if (typeof value === "string" && book && TPP.fileAsset(book, value)) {
+    const file = TPP.fileAsset(book, value);
+    if (file && /^image\//.test(file.type || "")) return file.data;
+  }
+  if (value && typeof value === "object" && typeof value.data === "string" && /^data:image\//.test(value.data)) return value.data;
+  return "";
+};
+TPP.dataImageCell = function (book, key, value) {
+  const src = TPP.dataImageValue(book, key, value);
+  if (!src) return "";
+  return '<button type="button" class="data-image-chip" data-image-src="' + TPP.esc(src) + '" data-image-title="' + TPP.esc(String(key || "Image")) + '"><img src="' + TPP.esc(src) + '" alt="' + TPP.esc(String(key || "Image")) + '"></button>';
+};
+TPP.dataPrimitiveHtml = function (book, key, value) {
+  const image = TPP.dataImageCell(book, key, value);
+  if (image) {
+    return '<span class="data-image-link">' + image + '<span class="data-image-meta">' + TPP.esc(typeof value === "string" ? value : "Image") + "</span></span>";
+  }
+  if (typeof value === "boolean") return '<span class="data-primitive">' + (value ? "true" : "false") + "</span>";
+  if (value === null) return '<span class="data-empty">null</span>';
+  if (value === "") return '<span class="data-empty">empty</span>';
+  return '<span class="data-primitive">' + TPP.esc(String(value)) + "</span>";
+};
+TPP.dataTableColumns = function (items) {
+  const seen = new Set();
+  const columns = [];
+  (items || []).forEach(function (item) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return;
+    Object.keys(item).forEach(function (key) {
+      if (seen.has(key)) return;
+      seen.add(key);
+      columns.push(key);
+    });
+  });
+  return columns;
+};
+TPP.dataValueHtml = function (book, key, value, compact) {
+  if (Array.isArray(value)) return TPP.dataArrayHtml(book, key, value, compact);
+  if (value && typeof value === "object") return TPP.dataObjectHtml(book, value, compact);
+  return TPP.dataPrimitiveHtml(book, key, value);
+};
+TPP.dataArrayHtml = function (book, key, list, compact) {
+  if (!list.length) return '<div class="data-empty">[]</div>';
+  const allObjects = list.every(function (item) {
+    return item && typeof item === "object" && !Array.isArray(item);
+  });
+  if (!allObjects) {
+    return '<table class="data-table"><thead><tr><th>#</th><th>Value</th></tr></thead><tbody>' + list.map(function (item, index) {
+      return "<tr><td>" + (index + 1) + "</td><td>" + TPP.dataValueHtml(book, key, item, true) + "</td></tr>";
+    }).join("") + "</tbody></table>";
+  }
+  const columns = TPP.dataTableColumns(list);
+  return '<table class="data-table"><thead><tr><th>#</th>' + columns.map(function (column) {
+    return "<th>" + TPP.esc(column) + "</th>";
+  }).join("") + "</tr></thead><tbody>" + list.map(function (item, index) {
+    return "<tr><td>" + (index + 1) + "</td>" + columns.map(function (column) {
+      return "<td>" + TPP.dataValueHtml(book, column, item[column], true) + "</td>";
+    }).join("") + "</tr>";
+  }).join("") + "</tbody></table>";
+};
+TPP.dataObjectHtml = function (book, obj, compact) {
+  const entries = Object.entries(obj || {});
+  if (!entries.length) return '<div class="data-empty">{}</div>';
+  return '<div class="' + (compact ? "data-inline-object" : "data-object") + '">' + entries.map(function (entry) {
+    return '<div class="data-field"><div class="data-field-name">' + TPP.esc(entry[0]) + '</div><div class="data-field-value">' + TPP.dataValueHtml(book, entry[0], entry[1], compact) + "</div></div>";
+  }).join("") + "</div>";
+};
+TPP.renderData = function () {
+  if (!TPP.active) return;
+  TPP.sync("nosave");
+  const summary = document.getElementById("dataSummary");
+  const panel = document.getElementById("dataPanel");
+  if (!summary || !panel) return;
+  const book = TPP.clone(TPP.active);
+  summary.innerHTML = "Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.";
+  panel.innerHTML = '<article class="data-card"><div class="data-node">' + TPP.dataObjectHtml(book, book, false) + "</div></article>";
+};
+TPP.openDataImagePreview = function (src, title) {
+  const dialog = document.getElementById("dataImageDialog");
+  const image = document.getElementById("dataImagePreview");
+  const heading = document.getElementById("dataImageTitle");
+  if (!dialog || !image || !heading || typeof dialog.showModal !== "function") return;
+  image.src = src || "";
+  heading.textContent = title || "Image Preview";
+  if (!dialog.open) dialog.showModal();
+};
 TPP.renderLibrary = function () {
   const q = (document.getElementById("librarySearch")?.value || "").toLowerCase();
   const books = TPP.library.filter(function (book) {

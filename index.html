@@ -33,6 +33,7 @@
   <nav class="tabs">
     <button class="tab active" data-view="editor">Edit</button>
     <button class="tab" data-view="about">About</button>
+    <button class="tab" data-view="data">Data</button>
     <button class="tab" data-view="interior">Interior Print</button>
     <button class="tab" data-view="cover">Cover Print</button>
     <button class="tab" data-view="reader">Reader</button>
@@ -325,6 +326,12 @@
       <div id="aboutPanel" class="about-panel"></div>
     </section>
 
+    <section id="dataView" class="view">
+      <div class="workspace-header"><h2>Book Data</h2></div>
+      <div id="dataSummary" class="summary"></div>
+      <div id="dataPanel" class="data-panel"></div>
+    </section>
+
     <section id="interiorView" class="view"><div id="interiorSummary" class="summary"></div><div id="interiorPreview" class="print-preview"></div></section>
     <section id="coverView" class="view"><div id="coverSummary" class="summary"></div><div id="coverPreview" class="print-preview"></div></section>
 
@@ -375,6 +382,15 @@
       <button type="button" id="assetClearButton">No Image</button>
     </div>
     <div id="assetDialogList" class="asset-dialog-list"></div>
+    <div class="modal-actions">
+      <button type="button" data-action="close">Close</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="dataImageDialog" class="modal">
+  <form method="dialog" class="modal-card data-image-dialog-card">
+    <div class="workspace-header"><h2 id="dataImageTitle">Image Preview</h2></div>
+    <div class="data-image-stage"><img id="dataImagePreview" alt="Preview"></div>
     <div class="modal-actions">
       <button type="button" data-action="close">Close</button>
     </div>

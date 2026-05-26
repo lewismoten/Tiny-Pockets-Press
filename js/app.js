@@ -409,6 +409,26 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.assignAssetToCurrentTarget("");
     };
   }
+  const dataPanel = document.getElementById("dataPanel");
+  const dataImageDialog = document.getElementById("dataImageDialog");
+  if (dataPanel) {
+    dataPanel.addEventListener("click", function (e) {
+      const chip = e.target.closest("[data-image-src]");
+      if (!chip) return;
+      TPP.openDataImagePreview(chip.dataset.imageSrc || "", chip.dataset.imageTitle || "Image Preview");
+    });
+  }
+  if (dataImageDialog) {
+    dataImageDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === dataImageDialog && !card && dataImageDialog.open) {
+        dataImageDialog.close();
+        return;
+      }
+      const closeButton = e.target.closest("[data-action='close']");
+      if (closeButton && dataImageDialog.open) dataImageDialog.close();
+    });
+  }
 });
 
 TPP.assetDialogTarget = null;
@@ -594,7 +614,7 @@ TPP.resolveImportConflict = function (incoming, existing) {
 };
 
 TPP.validViews = function () {
-  return ["editor", "about", "interior", "cover", "reader", "library"];
+  return ["editor", "about", "data", "interior", "cover", "reader", "library"];
 };
 TPP.toast = function (message) {
   const toast = document.getElementById("toast");
@@ -713,6 +733,7 @@ TPP.switchView = function (view, fromHash) {
 TPP.renderAll = function () {
   if (TPP.view === "editor") { TPP.renderChapterList(); TPP.renderChapterEditor(); }
   if (TPP.view === "about") TPP.renderAbout();
+  if (TPP.view === "data") TPP.renderData();
   if (TPP.view === "interior") TPP.renderInterior();
   if (TPP.view === "cover") TPP.renderCover();
   if (TPP.view === "reader") TPP.renderReader();
