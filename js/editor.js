@@ -14,6 +14,7 @@ TPP.populate = function () {
 TPP.loadForm = function () {
   const book = TPP.active;
   if (book) book.signatureSize = TPP.signatureSize(book.signatureSize);
+  if (book) book.sewingStations = TPP.sewingStations(book.sewingStations);
   TPP.fields.forEach(function (id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -35,8 +36,11 @@ TPP.sync = function () {
     else book[id] = el.value;
   });
   book.signatureSize = TPP.signatureSize(book.signatureSize);
+  book.sewingStations = TPP.sewingStations(book.sewingStations);
   const signature = document.getElementById("signatureSize");
   if (signature) signature.value = book.signatureSize;
+  const sewing = document.getElementById("sewingStations");
+  if (sewing) sewing.value = book.sewingStations;
   book.chapters = TPP.readChapterFromEditor();
   TPP.save();
 };

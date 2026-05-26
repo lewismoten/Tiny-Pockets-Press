@@ -23,11 +23,16 @@ TPP.signatureSize = function (value) {
   if (!Number.isFinite(n)) return fallback;
   return Math.max(4, Math.min(64, Math.round(n / 4) * 4)) || fallback;
 };
+TPP.sewingStations = function (value) {
+  const n = Math.round(Number(value) || 0);
+  return Math.max(2, Math.min(5, n || 3));
+};
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
   const out = Object.assign({}, base, book || {});
   out.id = out.id || TPP.uid();
   out.signatureSize = TPP.signatureSize(out.signatureSize);
+  out.sewingStations = TPP.sewingStations(out.sewingStations);
   out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
     return Object.assign({

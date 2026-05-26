@@ -316,6 +316,38 @@ TPP.coverFootprint = function (sheet, settings, x, y, w, h) {
   TPP.applyVars(footprint, settings);
   sheet.appendChild(footprint);
 };
+TPP.sewingGuidePositions = function (span, count) {
+  const usableInset = Math.min(Math.max(span * 0.18, 0.12), Math.max(0.12, span * 0.32));
+  const start = usableInset;
+  const end = Math.max(start, span - usableInset);
+  if (count <= 1 || end <= start) return [span / 2];
+  return Array.from({ length: count }, function (_, index) {
+    return start + ((end - start) * index / (count - 1));
+  });
+};
+TPP.sewingGuides = function (sheet, settings, x, y, w, h, rotate90) {
+  const count = TPP.sewingStations(settings.sewingStations);
+  const long = rotate90 ? w : h;
+  const positions = TPP.sewingGuidePositions(long, count);
+  const len = Math.min(0.09, Math.max(0.045, Math.min(w, h) * 0.18));
+  const thick = Math.min(0.02, len * 0.35);
+  positions.forEach(function (pos) {
+    const guide = document.createElement("div");
+    guide.className = "sew-guide";
+    if (rotate90) {
+      guide.style.left = (x + pos - len / 2) + "in";
+      guide.style.top = (y + h / 2 - thick / 2) + "in";
+      guide.style.width = len + "in";
+      guide.style.height = thick + "in";
+    } else {
+      guide.style.left = (x + w / 2 - thick / 2) + "in";
+      guide.style.top = (y + pos - len / 2) + "in";
+      guide.style.width = thick + "in";
+      guide.style.height = len + "in";
+    }
+    sheet.appendChild(guide);
+  });
+};
 TPP.guides = function (sheet, settings, x, y, w, h, spineW, rotate90) {
   if (settings.showCutGuides) {
     const len = Math.min(0.12, w / 8, h / 8);
@@ -333,10 +365,6 @@ TPP.guides = function (sheet, settings, x, y, w, h, spineW, rotate90) {
       const wrap = TPP.coverWrap(settings);
       TPP.guide(sheet, "fold v", x + wrap + settings.page.w, y, 0, h);
       TPP.guide(sheet, "fold v", x + wrap + settings.page.w + spineW, y, 0, h);
-    } else if (rotate90) {
-      TPP.guide(sheet, "fold h", x, y + h / 2, w, 0);
-    } else {
-      TPP.guide(sheet, "fold v", x + w / 2, y, 0, h);
     }
   }
 };
@@ -426,8 +454,12 @@ TPP.renderInterior = function () {
       if (TPP.signatureSpineSide(block.side)) {
         TPP.signatureMark(sheet, settings, x, y, block.signature, signatures.length);
       }
+      const showSpineGuides = settings.showFoldGuides && TPP.signatureSpineSide(block.side);
+      if (showSpineGuides && block.sheet === 0) {
+        TPP.sewingGuides(sheet, settings, x, y, guideW, guideH, grid.rot);
+      }
       TPP.guides(sheet, Object.assign({}, settings, {
-        showFoldGuides: settings.showFoldGuides && TPP.signatureSpineSide(block.side)
+        showFoldGuides: false
       }), x, y, guideW, guideH, 0, grid.rot);
     }
     preview.appendChild(sheet);
