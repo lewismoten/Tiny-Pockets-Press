@@ -75,6 +75,7 @@ TPP.readChapterFromEditor = function () {
     chapter.isSubsection = card.querySelector(".chapter-subsection").checked;
     chapter.isMetadata = card.querySelector(".chapter-metadata").checked;
     chapter.includeInToc = card.querySelector(".chapter-toc").checked;
+    chapter.tocTitle = card.querySelector(".chapter-toc-title").value;
   }
   return copy;
 };
@@ -108,6 +109,7 @@ TPP.renderChapterEditor = function () {
     '<article class="chapter-card" data-index="' + TPP.currentChapter + '">' +
     '<div class="toolbar"><button data-main="remove">Remove</button><button data-main="read">Read From Here</button></div>' +
     '<label>Chapter Title <input class="chapter-title" value="' + TPP.esc(chapter.title) + '"></label>' +
+    '<label>TOC Name <input class="chapter-toc-title" placeholder="Optional shorter table of contents name" value="' + TPP.esc(chapter.tocTitle || "") + '"></label>' +
     '<div class="two"><label>Level <input class="chapter-level" type="number" min="0" max="6" value="' + (chapter.level || 0) + '"></label><label><input class="chapter-subsection" type="checkbox" ' + (chapter.isSubsection ? "checked" : "") + "> Sub-section</label></div>" +
     '<label><input class="chapter-metadata" type="checkbox" ' + (chapter.isMetadata ? "checked" : "") + "> Content is metadata JSON</label>" +
     '<label><input class="chapter-toc" type="checkbox" ' + (chapter.includeInToc !== false ? "checked" : "") + "> Appears in table of contents</label>" +

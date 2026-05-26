@@ -64,7 +64,8 @@ TPP.norm = function (book) {
       level: 0,
       isSubsection: false,
       isMetadata: false,
-      includeInToc: true
+      includeInToc: true,
+      tocTitle: ""
     }, chapter);
   });
   return out;

@@ -178,7 +178,7 @@ TPP.buildPages = function () {
         makePage("text", heading + '<div class="story-text"><p>Invalid metadata JSON.</p></div>');
       }
       if (chapter.includeInToc !== false) {
-        toc.push({ title: chapter.title || "Chapter " + (index + 1), chapter: index + 1, page: startPage, level: chapter.level || 0 });
+        toc.push({ title: chapter.tocTitle || chapter.title || "Chapter " + (index + 1), chapter: index + 1, page: startPage, level: chapter.level || 0 });
       }
       return;
     }
@@ -245,7 +245,7 @@ TPP.buildPages = function () {
     if (pending) makePage("text", pending);
 
     if (chapter.includeInToc !== false) {
-      toc.push({ title: chapter.title || "Chapter " + (index + 1), chapter: index + 1, page: startPage, level: chapter.level || 0 });
+      toc.push({ title: chapter.tocTitle || chapter.title || "Chapter " + (index + 1), chapter: index + 1, page: startPage, level: chapter.level || 0 });
     }
   });
 
@@ -253,7 +253,7 @@ TPP.buildPages = function () {
     const leaderClass = settings.tocLeader === "line" ? "line" : settings.tocLeader === "none" ? "none" : "";
     pages[tocIndex].html = '<div class="story-title">Contents</div><ol class="toc-list">' + toc.map(function (row) {
       const number = settings.tocNumberType === "chapter" ? row.chapter : row.page;
-      return '<li style="padding-left:' + ((row.level || 0) * 0.12) + 'in"><span class="toc-title">' + TPP.esc(row.title) + '</span><span class="leader ' + leaderClass + '"></span><span>' + number + "</span></li>";
+      return '<li style="padding-left:' + ((row.level || 0) * 0.12) + 'in"><span class="toc-main"><span class="toc-title">' + TPP.esc(row.title) + '</span><span class="leader ' + leaderClass + '"></span></span><span class="toc-page">' + number + "</span></li>";
     }).join("") + "</ol>";
   }
 
