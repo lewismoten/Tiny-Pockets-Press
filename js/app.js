@@ -1333,9 +1333,15 @@ TPP.scheduleImageExportPreview = function () {
     TPP.imageExportPreviewTimer = null;
     const run = function () {
       TPP.imageExportPreviewIdle = null;
-      window.setTimeout(function () {
-        TPP.renderImageExportPreview();
-      }, 0);
+      if (typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(function () {
+          TPP.renderImageExportPreview();
+        });
+      } else {
+        window.setTimeout(function () {
+          TPP.renderImageExportPreview();
+        }, 0);
+      }
     };
     if (typeof window.requestIdleCallback === "function") {
       TPP.imageExportPreviewIdle = window.requestIdleCallback(run, {
