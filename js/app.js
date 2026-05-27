@@ -730,16 +730,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     const syncFormatUi = function () {
       const indexedOnly = imageExportColorDepth.value === "websafe";
       Array.from(imageExportFormat.options).forEach(function (option) {
-        const gifUnavailable =
-          option.value === "gif" && typeof window.GIF !== "function";
-        option.disabled =
-          gifUnavailable ||
-          (indexedOnly && !["png", "gif"].includes(option.value));
+        option.disabled = indexedOnly && !["png", "gif"].includes(option.value);
       });
-      if (
-        (indexedOnly && !["png", "gif"].includes(imageExportFormat.value)) ||
-        (imageExportFormat.value === "gif" && typeof window.GIF !== "function")
-      )
+      if (indexedOnly && !["png", "gif"].includes(imageExportFormat.value))
         imageExportFormat.value = "png";
       const lossy =
         imageExportFormat.value === "jpeg" ||
@@ -915,8 +908,7 @@ TPP.openImageExportDialog = function () {
   input.value = dpi;
   colorDepth.value = ui.colorDepth || "color24";
   format.value =
-    (colorDepth.value === "websafe" && !["png", "gif"].includes(ui.format)) ||
-    (ui.format === "gif" && typeof window.GIF !== "function")
+    colorDepth.value === "websafe" && !["png", "gif"].includes(ui.format)
       ? "png"
       : ui.format || "png";
   quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));

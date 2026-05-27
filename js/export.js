@@ -227,38 +227,43 @@ TPP.previewDataUrl = function (canvas, format, quality) {
     format === "png" ? undefined : Math.max(0.01, Math.min(1, quality || 0.92)),
   );
 };
-TPP.gifWorkerScript =
-  "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js";
-TPP.gifQualityValue = function (quality) {
-  const pct = Math.max(1, Math.min(100, Number(quality) || 92));
-  return Math.max(1, Math.min(30, Math.round(31 - pct * 0.3)));
+TPP.gifEncoderLib = null;
+TPP.gifEncoderPromise = null;
+TPP.loadGifEncoder = function () {
+  if (TPP.gifEncoderLib) return Promise.resolve(TPP.gifEncoderLib);
+  if (!TPP.gifEncoderPromise) {
+    TPP.gifEncoderPromise = import("https://esm.sh/gifenc")
+      .then(function (lib) {
+        TPP.gifEncoderLib = lib;
+        return lib;
+      })
+      .catch(function (error) {
+        TPP.gifEncoderPromise = null;
+        throw error;
+      });
+  }
+  return TPP.gifEncoderPromise;
 };
-TPP.encodeGifBlob = function (canvas, quality) {
-  if (!canvas) return Promise.reject(new Error("Canvas required"));
-  if (typeof window.GIF !== "function")
-    return Promise.reject(new Error("GIF encoder unavailable"));
-  return new Promise(function (resolve, reject) {
-    try {
-      const gif = new window.GIF({
-        workers: 2,
-        quality: TPP.gifQualityValue(quality),
-        workerScript: TPP.gifWorkerScript,
-        width: canvas.width,
-        height: canvas.height,
-      });
-      gif.on("finished", resolve);
-      gif.on("abort", function () {
-        reject(new Error("GIF encoding aborted"));
-      });
-      gif.on("error", function (error) {
-        reject(error instanceof Error ? error : new Error(String(error)));
-      });
-      gif.addFrame(canvas, { copy: true, delay: 250 });
-      gif.render();
-    } catch (error) {
-      reject(error);
-    }
+TPP.gifPaletteSize = function (quality) {
+  const pct = Math.max(1, Math.min(100, Number(quality) || 92));
+  return Math.max(16, Math.min(256, Math.round(16 + (pct / 100) * 240)));
+};
+TPP.encodeGifBlob = async function (canvas, quality) {
+  if (!canvas) throw new Error("Canvas required");
+  const lib = await TPP.loadGifEncoder();
+  const ctx = canvas.getContext("2d");
+  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const rgba = image.data;
+  const palette = lib.quantize(rgba, TPP.gifPaletteSize(quality));
+  const index = lib.applyPalette(rgba, palette);
+  const gif = lib.GIFEncoder();
+  gif.writeFrame(index, canvas.width, canvas.height, {
+    palette: palette,
+    delay: 250,
   });
+  gif.finish();
+  const bytes = gif.bytesView ? gif.bytesView() : new Uint8Array(gif.bytes());
+  return new Blob([bytes], { type: "image/gif" });
 };
 TPP.exportBlobForCanvas = function (canvas, options) {
   if (!canvas) return Promise.resolve(null);
@@ -300,10 +305,6 @@ TPP.exportImagesZip = async function (options) {
     return;
   }
   const exportOptions = TPP.imageExportOptions(options);
-  if (exportOptions.format === "gif" && typeof window.GIF !== "function") {
-    alert("GIF export encoder failed to load.");
-    return;
-  }
   const zip = new JSZip();
   const mount = document.createElement("div");
   const targetDpi = exportOptions.dpi;
