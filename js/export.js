@@ -169,9 +169,11 @@ TPP.imageExportOptions = function (options) {
   };
 };
 TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION = 1;
-TPP.IMAGE_EXPORT_PALETTE_CATALOG = "/data/palettes.indexed.v1.json";
+TPP.IMAGE_EXPORT_PALETTE_ITEM_SCHEMA_VERSION = 1;
+TPP.IMAGE_EXPORT_PALETTE_CATALOG = "/data/palettes.catalog.v1.json";
 TPP.imageExportPaletteById = TPP.imageExportPaletteById || {};
 TPP.imageExportPaletteIdsCached = TPP.imageExportPaletteIdsCached || [];
+TPP.imageExportPaletteCatalogById = TPP.imageExportPaletteCatalogById || {};
 TPP.imageExportPaletteLoadPromise = null;
 TPP.imageExportPaletteIdsDefault = [
   "websafe",
@@ -209,6 +211,17 @@ TPP.fallbackWebsafePalette = function () {
   });
   return websafe;
 };
+TPP.hexToRgbSwatch = function (value) {
+  const hex = String(value || "").trim();
+  const match = /^#?([a-fA-F0-9]{6})$/.exec(hex);
+  if (!match) return null;
+  const full = match[1];
+  return [
+    parseInt(full.slice(0, 2), 16),
+    parseInt(full.slice(2, 4), 16),
+    parseInt(full.slice(4, 6), 16),
+  ];
+};
 TPP.imageExportPaletteIds = function () {
   if (TPP.imageExportPaletteIdsCached.length)
     return TPP.imageExportPaletteIdsCached.slice();
@@ -227,29 +240,55 @@ TPP.loadImageExportPalettes = async function () {
     !Array.isArray(payload.palettes)
   )
     throw new Error("Palette catalog schema mismatch");
-  const map = {};
+  const catalogMap = {};
   const ids = [];
   payload.palettes.forEach(function (entry) {
-    if (!entry || typeof entry.id !== "string" || !Array.isArray(entry.colors))
+    if (
+      !entry ||
+      typeof entry.id !== "string" ||
+      typeof entry.file !== "string"
+    )
       return;
-    const colors = entry.colors
-      .map(function (swatch) {
-        if (!Array.isArray(swatch) || swatch.length < 3) return null;
-        return [
-          Math.max(0, Math.min(255, Number(swatch[0]) || 0)),
-          Math.max(0, Math.min(255, Number(swatch[1]) || 0)),
-          Math.max(0, Math.min(255, Number(swatch[2]) || 0)),
-        ];
-      })
-      .filter(Boolean);
-    if (!colors.length) return;
-    map[entry.id] = colors;
-    ids.push(entry.id);
+    const id = entry.id.trim();
+    if (!id) return;
+    catalogMap[id] = {
+      id: id,
+      name: typeof entry.name === "string" ? entry.name : id,
+      file: entry.file,
+    };
+    ids.push(id);
   });
+  const uniqueIds = Array.from(new Set(ids));
+  const map = {};
+  const loadPalette = async function (id) {
+    const meta = catalogMap[id];
+    if (!meta || !meta.file) return;
+    const fileResponse = await fetch(meta.file, { cache: "no-cache" });
+    if (!fileResponse.ok)
+      throw new Error("Palette file load failed: " + id + " " + fileResponse.status);
+    const palettePayload = await fileResponse.json();
+    if (
+      !palettePayload ||
+      Number(palettePayload.schemaVersion) !==
+        TPP.IMAGE_EXPORT_PALETTE_ITEM_SCHEMA_VERSION ||
+      palettePayload.id !== id ||
+      !Array.isArray(palettePayload.colors)
+    )
+      throw new Error("Palette file schema mismatch: " + id);
+    const colors = palettePayload.colors
+      .map(TPP.hexToRgbSwatch)
+      .filter(Boolean);
+    if (!colors.length) throw new Error("Palette file has no colors: " + id);
+    map[id] = colors;
+  };
+  await Promise.all(uniqueIds.map(loadPalette));
   if (!map.websafe) map.websafe = TPP.fallbackWebsafePalette();
   if (!ids.includes("websafe")) ids.unshift("websafe");
   TPP.imageExportPaletteById = map;
-  TPP.imageExportPaletteIdsCached = ids;
+  TPP.imageExportPaletteCatalogById = catalogMap;
+  TPP.imageExportPaletteIdsCached = uniqueIds.includes("websafe")
+    ? uniqueIds
+    : ["websafe"].concat(uniqueIds);
   return map;
 };
 TPP.ensureImageExportPalettesLoaded = async function () {

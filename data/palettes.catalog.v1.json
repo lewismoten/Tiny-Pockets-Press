@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "palettes": [
+    {
+      "id": "websafe",
+      "name": "Web-Safe",
+      "file": "/data/palettes/websafe.v1.json"
+    },
+    {
+      "id": "colors4",
+      "name": "4 Colors",
+      "file": "/data/palettes/colors4.v1.json"
+    },
+    {
+      "id": "colors8",
+      "name": "8 Colors",
+      "file": "/data/palettes/colors8.v1.json"
+    },
+    {
+      "id": "colors16",
+      "name": "16 Colors",
+      "file": "/data/palettes/colors16.v1.json"
+    },
+    {
+      "id": "colors32",
+      "name": "32 Colors",
+      "file": "/data/palettes/colors32.v1.json"
+    },
+    {
+      "id": "colors64",
+      "name": "64 Colors",
+      "file": "/data/palettes/colors64.v1.json"
+    },
+    {
+      "id": "colors128",
+      "name": "128 Colors",
+      "file": "/data/palettes/colors128.v1.json"
+    },
+    {
+      "id": "colors256",
+      "name": "256 Colors",
+      "file": "/data/palettes/colors256.v1.json"
+    },
+    {
+      "id": "gray4",
+      "name": "4 Grayscale",
+      "file": "/data/palettes/gray4.v1.json"
+    },
+    {
+      "id": "gray8",
+      "name": "8 Grayscale",
+      "file": "/data/palettes/gray8.v1.json"
+    },
+    {
+      "id": "gray16",
+      "name": "16 Grayscale",
+      "file": "/data/palettes/gray16.v1.json"
+    },
+    {
+      "id": "gray32",
+      "name": "32 Grayscale",
+      "file": "/data/palettes/gray32.v1.json"
+    },
+    {
+      "id": "gray64",
+      "name": "64 Grayscale",
+      "file": "/data/palettes/gray64.v1.json"
+    },
+    {
+      "id": "gray128",
+      "name": "128 Grayscale",
+      "file": "/data/palettes/gray128.v1.json"
+    },
+    {
+      "id": "gray256",
+      "name": "256 Grayscale",
+      "file": "/data/palettes/gray256.v1.json"
+    },
+    {
+      "id": "windows16",
+      "name": "Windows 16",
+      "file": "/data/palettes/windows16.v1.json"
+    },
+    {
+      "id": "ansi16",
+      "name": "ANSI 16",
+      "file": "/data/palettes/ansi16.v1.json"
+    },
+    {
+      "id": "xterm256",
+      "name": "Extended ANSI / Xterm",
+      "file": "/data/palettes/xterm256.v1.json"
+    },
+    {
+      "id": "ega16",
+      "name": "EGA",
+      "file": "/data/palettes/ega16.v1.json"
+    },
+    {
+      "id": "atari400base",
+      "name": "Atari 400",
+      "file": "/data/palettes/atari400base.v1.json"
+    },
+    {
+      "id": "atari400",
+      "name": "Atari 400 Artifacting",
+      "file": "/data/palettes/atari400.v1.json"
+    },
+    {
+      "id": "cga0",
+      "name": "CGA 0",
+      "file": "/data/palettes/cga0.v1.json"
+    },
+    {
+      "id": "cga1",
+      "name": "CGA 1",
+      "file": "/data/palettes/cga1.v1.json"
+    }
+  ]
+}
