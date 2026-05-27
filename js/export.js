@@ -578,7 +578,7 @@ TPP.supportedMp4Codec = async function (width, height, bitrate) {
         height: height,
         bitrate: bitrate,
         framerate: 30,
-        avc: { format: "annexb" },
+        avc: { format: "avc" },
       };
       const support = await window.VideoEncoder.isConfigSupported(config);
       if (support && support.supported) return config;
@@ -591,6 +591,16 @@ TPP.mp4Bitrate = function (width, height, quality) {
     Math.max(1, Number(width) || 1) * Math.max(1, Number(height) || 1);
   const q = Math.max(1, Math.min(100, Number(quality) || 92)) / 100;
   return Math.round(Math.max(600000, pixels * 1.2 * (0.45 + q * 1.55)));
+};
+TPP.opaqueCanvas = function (canvas, background) {
+  const out = document.createElement("canvas");
+  out.width = canvas.width;
+  out.height = canvas.height;
+  const ctx = out.getContext("2d");
+  ctx.fillStyle = background || "#ffffff";
+  ctx.fillRect(0, 0, out.width, out.height);
+  ctx.drawImage(canvas, 0, 0);
+  return out;
 };
 TPP.encodeGifBlob = async function (canvas, options) {
   if (!canvas) throw new Error("Canvas required");
@@ -841,8 +851,9 @@ TPP.exportMp4 = async function (options) {
       exportOptions.threshold,
       exportOptions.palette,
     );
-    const width = firstCanvas.width;
-    const height = firstCanvas.height;
+    const firstOpaqueCanvas = TPP.opaqueCanvas(firstCanvas, "#ffffff");
+    const width = firstOpaqueCanvas.width;
+    const height = firstOpaqueCanvas.height;
     const bitrate = TPP.mp4Bitrate(width, height, exportOptions.quality);
     const config = await TPP.supportedMp4Codec(width, height, bitrate);
     if (!config) {
@@ -876,7 +887,7 @@ TPP.exportMp4 = async function (options) {
       );
       const pageCanvas =
         i === 0
-          ? firstCanvas
+          ? firstOpaqueCanvas
           : await (async function () {
               const shell = document.createElement("div");
               shell.style.position = "relative";
@@ -895,11 +906,14 @@ TPP.exportMp4 = async function (options) {
                 backgroundColor: "#fff",
               });
               shell.remove();
-              return TPP.exportCanvasForDepth(
-                canvas,
-                exportOptions.colorDepth,
-                exportOptions.threshold,
-                exportOptions.palette,
+              return TPP.opaqueCanvas(
+                TPP.exportCanvasForDepth(
+                  canvas,
+                  exportOptions.colorDepth,
+                  exportOptions.threshold,
+                  exportOptions.palette,
+                ),
+                "#ffffff",
               );
             })();
       const frame = new VideoFrame(pageCanvas, {
