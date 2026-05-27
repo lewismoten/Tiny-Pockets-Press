@@ -282,6 +282,180 @@
     "note": "Front-cover frame and background settings now live under coverFront."
   },
   {
+    "path": "backText",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.text"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backTextY",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.textY"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backTextSize",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.textSize"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backTextColor",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.textColor"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backTextAlign",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.textAlign"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backTextLastLine",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.textLastLine"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backFrameOn",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.frameOn"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backClipImageToFrame",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.clipImageToFrame"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backImgX",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.imgX"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backImgY",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.imgY"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backImgZoom",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.imgZoom"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "backImgRotate",
+    "schemaVersion": 10,
+    "movedTo": ["backCover.imgRotate"],
+    "note": "Back cover settings now live under backCover."
+  },
+  {
+    "path": "spineImgX",
+    "schemaVersion": 10,
+    "movedTo": ["spine.imgX"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineImgY",
+    "schemaVersion": 10,
+    "movedTo": ["spine.imgY"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineImgZoom",
+    "schemaVersion": 10,
+    "movedTo": ["spine.imgZoom"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineImgRotate",
+    "schemaVersion": 10,
+    "movedTo": ["spine.imgRotate"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineTitleSize",
+    "schemaVersion": 10,
+    "movedTo": ["spine.titleSize"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineTitleX",
+    "schemaVersion": 10,
+    "movedTo": ["spine.titleX"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineTitleY",
+    "schemaVersion": 10,
+    "movedTo": ["spine.titleY"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineTitleWidth",
+    "schemaVersion": 10,
+    "movedTo": ["spine.titleWidth"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineTitleAlign",
+    "schemaVersion": 10,
+    "movedTo": ["spine.titleAlign"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineAuthorSize",
+    "schemaVersion": 10,
+    "movedTo": ["spine.authorSize"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineTextColor",
+    "schemaVersion": 10,
+    "movedTo": ["spine.textColor"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineStroke",
+    "schemaVersion": 10,
+    "movedTo": ["spine.stroke"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineStrokeColor",
+    "schemaVersion": 10,
+    "movedTo": ["spine.strokeColor"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineStrokeSize",
+    "schemaVersion": 10,
+    "movedTo": ["spine.strokeSize"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineTitleRotate",
+    "schemaVersion": 10,
+    "movedTo": ["spine.titleRotate"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineAuthorOn",
+    "schemaVersion": 10,
+    "movedTo": ["spine.authorOn"],
+    "note": "Spine settings now live under spine."
+  },
+  {
+    "path": "spineAuthorRotate",
+    "schemaVersion": 10,
+    "movedTo": ["spine.authorRotate"],
+    "note": "Spine settings now live under spine."
+  },
+  {
     "path": "includeToc",
     "schemaVersion": 7,
     "movedTo": ["toc.enabled"],

@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 9;
+TPP.SCHEMA_VERSION = 10;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -374,6 +374,39 @@ TPP.COVER_FRONT_FIELDS = [
   "coverBorder",
   "coverBorderOn",
 ];
+TPP.BACK_COVER_FIELDS = [
+  "backText",
+  "backTextY",
+  "backTextSize",
+  "backTextColor",
+  "backTextAlign",
+  "backTextLastLine",
+  "backFrameOn",
+  "backClipImageToFrame",
+  "backImgX",
+  "backImgY",
+  "backImgZoom",
+  "backImgRotate",
+];
+TPP.SPINE_FIELDS = [
+  "spineImgX",
+  "spineImgY",
+  "spineImgZoom",
+  "spineImgRotate",
+  "spineTitleSize",
+  "spineTitleX",
+  "spineTitleY",
+  "spineTitleWidth",
+  "spineTitleAlign",
+  "spineAuthorSize",
+  "spineTextColor",
+  "spineStroke",
+  "spineStrokeColor",
+  "spineStrokeSize",
+  "spineTitleRotate",
+  "spineAuthorOn",
+  "spineAuthorRotate",
+];
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -647,6 +680,155 @@ TPP.syncCoverFrontFromLegacyFields = function (book) {
 TPP.compactCoverFrontInfo = function (book) {
   if (!book || !book.coverFront || typeof book.coverFront !== "object") return;
   TPP.COVER_FRONT_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.backCoverInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().backCover) || {};
+  book.backCover = Object.assign({}, fallback, book.backCover || {});
+  return book.backCover;
+};
+TPP.attachBackCoverAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  const map = {
+    backText: "text",
+    backTextY: "textY",
+    backTextSize: "textSize",
+    backTextColor: "textColor",
+    backTextAlign: "textAlign",
+    backTextLastLine: "textLastLine",
+    backFrameOn: "frameOn",
+    backClipImageToFrame: "clipImageToFrame",
+    backImgX: "imgX",
+    backImgY: "imgY",
+    backImgZoom: "imgZoom",
+    backImgRotate: "imgRotate",
+  };
+  Object.keys(map).forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.backCoverInfo(book)[map[field]];
+      },
+      set: function (value) {
+        TPP.backCoverInfo(book)[map[field]] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncBackCoverFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const back = TPP.backCoverInfo(book);
+  if ("backText" in book) back.text = book.backText;
+  if ("backTextY" in book) back.textY = book.backTextY;
+  if ("backTextSize" in book) back.textSize = book.backTextSize;
+  if ("backTextColor" in book) back.textColor = book.backTextColor;
+  if ("backTextAlign" in book) back.textAlign = book.backTextAlign;
+  if ("backTextLastLine" in book) back.textLastLine = book.backTextLastLine;
+  if ("backFrameOn" in book) back.frameOn = book.backFrameOn;
+  if ("backClipImageToFrame" in book)
+    back.clipImageToFrame = book.backClipImageToFrame;
+  if ("backImgX" in book) back.imgX = book.backImgX;
+  if ("backImgY" in book) back.imgY = book.backImgY;
+  if ("backImgZoom" in book) back.imgZoom = book.backImgZoom;
+  if ("backImgRotate" in book) back.imgRotate = book.backImgRotate;
+};
+TPP.compactBackCoverInfo = function (book) {
+  if (!book || !book.backCover || typeof book.backCover !== "object") return;
+  TPP.BACK_COVER_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.spineInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().spine) || {};
+  book.spine = Object.assign({}, fallback, book.spine || {});
+  return book.spine;
+};
+TPP.attachSpineAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  const map = {
+    spineImgX: "imgX",
+    spineImgY: "imgY",
+    spineImgZoom: "imgZoom",
+    spineImgRotate: "imgRotate",
+    spineTitleSize: "titleSize",
+    spineTitleX: "titleX",
+    spineTitleY: "titleY",
+    spineTitleWidth: "titleWidth",
+    spineTitleAlign: "titleAlign",
+    spineAuthorSize: "authorSize",
+    spineTextColor: "textColor",
+    spineStroke: "stroke",
+    spineStrokeColor: "strokeColor",
+    spineStrokeSize: "strokeSize",
+    spineTitleRotate: "titleRotate",
+    spineAuthorOn: "authorOn",
+    spineAuthorRotate: "authorRotate",
+  };
+  Object.keys(map).forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.spineInfo(book)[map[field]];
+      },
+      set: function (value) {
+        TPP.spineInfo(book)[map[field]] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncSpineFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const spine = TPP.spineInfo(book);
+  TPP.SPINE_FIELDS.forEach(function (field) {
+    if (!(field in book)) return;
+    const key = field.replace(/^spine/, "").replace(/^./, function (char) {
+      return char.toLowerCase();
+    });
+    spine[key] = book[field];
+  });
+};
+TPP.compactSpineInfo = function (book) {
+  if (!book || !book.spine || typeof book.spine !== "object") return;
+  TPP.SPINE_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
       descriptor &&
@@ -1027,6 +1209,12 @@ TPP.bookFingerprint = function (book) {
   TPP.COVER_FRONT_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.BACK_COVER_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
+  TPP.SPINE_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.TOC_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -1048,6 +1236,10 @@ TPP.hydrateBookDates = function (book) {
   TPP.attachTextAccessors(book);
   TPP.syncCoverFrontFromLegacyFields(book);
   TPP.attachCoverFrontAccessors(book);
+  TPP.syncBackCoverFromLegacyFields(book);
+  TPP.attachBackCoverAccessors(book);
+  TPP.syncSpineFromLegacyFields(book);
+  TPP.attachSpineAccessors(book);
   TPP.syncTocFromLegacyFields(book);
   TPP.attachTocAccessors(book);
   if (
@@ -1120,6 +1312,8 @@ TPP.hydrateBookDates = function (book) {
   TPP.compactPageInfo(book);
   TPP.compactTextInfo(book);
   TPP.compactCoverFrontInfo(book);
+  TPP.compactBackCoverInfo(book);
+  TPP.compactSpineInfo(book);
   TPP.compactTocInfo(book);
   TPP.compactBookMeta(book);
   book.schemaVersion = TPP.SCHEMA_VERSION;

@@ -468,6 +468,41 @@ TPP.dataSchemaKeys = function (context) {
       "border",
       "borderOn",
     ]);
+  if (context === "backCover")
+    return new Set([
+      "text",
+      "textY",
+      "textSize",
+      "textColor",
+      "textAlign",
+      "textLastLine",
+      "frameOn",
+      "clipImageToFrame",
+      "imgX",
+      "imgY",
+      "imgZoom",
+      "imgRotate",
+    ]);
+  if (context === "spine")
+    return new Set([
+      "imgX",
+      "imgY",
+      "imgZoom",
+      "imgRotate",
+      "titleSize",
+      "titleX",
+      "titleY",
+      "titleWidth",
+      "titleAlign",
+      "authorSize",
+      "textColor",
+      "stroke",
+      "strokeColor",
+      "strokeSize",
+      "titleRotate",
+      "authorOn",
+      "authorRotate",
+    ]);
   if (context === "bookInfo")
     return new Set([
       "title",
@@ -813,11 +848,15 @@ TPP.dataValueHtml = function (book, key, value, compact) {
               ? "text"
               : key === "coverFront"
                 ? "coverFront"
-                : key === "bookInfo"
-                  ? "bookInfo"
-                  : key === "toc"
-                    ? "toc"
-                    : null,
+                : key === "backCover"
+                  ? "backCover"
+                  : key === "spine"
+                    ? "spine"
+                    : key === "bookInfo"
+                      ? "bookInfo"
+                      : key === "toc"
+                        ? "toc"
+                        : null,
     );
   return TPP.dataPrimitiveHtml(book, key, value);
 };
@@ -1021,6 +1060,8 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.page;
   delete copy.text;
   delete copy.coverFront;
+  delete copy.backCover;
+  delete copy.spine;
   delete copy.bookInfo;
   delete copy.toc;
   delete copy.files;
@@ -1084,6 +1125,26 @@ TPP.dataTabs = function (book, stale) {
         book && book.coverFront ? book.coverFront : {},
         false,
         "coverFront",
+      ),
+    },
+    {
+      id: "back-cover",
+      label: "Back Cover",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.backCover ? book.backCover : {},
+        false,
+        "backCover",
+      ),
+    },
+    {
+      id: "spine",
+      label: "Spine",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.spine ? book.spine : {},
+        false,
+        "spine",
       ),
     },
     {
