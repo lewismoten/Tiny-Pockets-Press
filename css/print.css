@@ -38,5 +38,10 @@
     outline: 0 !important;
     transform: none !important;
     page-break-after: always;
+    break-after: page;
+  }
+  .sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
   }
 }
