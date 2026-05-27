@@ -1414,10 +1414,10 @@ TPP.renderImageExportPreview = async function () {
     if (TPP.imageExportPreviewToken !== token) return;
     stage.innerHTML =
       '<div class="image-export-compare">' +
-      '<img src="' +
+      '<img draggable="false" src="' +
       TPP.esc(beforeSrc) +
       '" alt="Original preview">' +
-      '<img class="image-export-compare-after" src="' +
+      '<img draggable="false" class="image-export-compare-after" src="' +
       TPP.esc(afterSrc) +
       '" alt="Exported preview">' +
       '<div class="image-export-compare-divider"></div>' +
