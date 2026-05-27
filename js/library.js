@@ -279,6 +279,82 @@ TPP.dataPathLabel = function (path) {
     return index === 0 ? String(segment) : "." + String(segment);
   }).join("");
 };
+TPP.dataPathPattern = function (path) {
+  return (path || []).map(function (segment, index) {
+    if (typeof segment === "number") return "[]";
+    return index === 0 ? String(segment) : "." + String(segment);
+  }).join("");
+};
+TPP.dataPathIndices = function (path) {
+  return (path || []).filter(function (segment) {
+    return typeof segment === "number";
+  });
+};
+TPP.dataResolvePatternPath = function (pattern, indices) {
+  const parts = String(pattern || "").split(".");
+  let cursor = 0;
+  return parts.reduce(function (path, part) {
+    if (part.endsWith("[]")) {
+      path.push(part.slice(0, -2));
+      path.push((indices || [])[cursor] ?? 0);
+      cursor += 1;
+      return path;
+    }
+    if (part === "[]") {
+      path.push((indices || [])[cursor] ?? 0);
+      cursor += 1;
+      return path;
+    }
+    path.push(part);
+    return path;
+  }, []);
+};
+TPP.dataReadPath = function (root, path) {
+  let value = root;
+  for (let i = 0; i < (path || []).length; i++) {
+    if (value == null) return undefined;
+    value = value[path[i]];
+  }
+  return value;
+};
+TPP.dataValueLabel = function (value) {
+  if (value === undefined) return "missing";
+  if (value === null) return "null";
+  if (typeof value === "string" && value === "") return "empty";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+TPP.dataLookupEntry = function (path) {
+  const pattern = TPP.dataPathPattern(path);
+  return (Array.isArray(TPP.staleKeyLookup) ? TPP.staleKeyLookup : []).find(function (entry) {
+    return entry && entry.path === pattern;
+  }) || null;
+};
+TPP.dataStaleMeta = function (book, entry) {
+  const lookup = TPP.dataLookupEntry(entry.path);
+  if (!lookup) return null;
+  const indices = TPP.dataPathIndices(entry.path);
+  const oldValue = TPP.dataReadPath(book, entry.path);
+  const moved = (Array.isArray(lookup.movedTo) ? lookup.movedTo : []).map(function (pattern) {
+    const resolvedPath = TPP.dataResolvePatternPath(pattern, indices);
+    const value = TPP.dataReadPath(book, resolvedPath);
+    const matches = JSON.stringify(value) === JSON.stringify(oldValue);
+    return {
+      pattern: pattern,
+      label: TPP.dataPathLabel(resolvedPath),
+      value: value,
+      valueLabel: TPP.dataValueLabel(value),
+      matches: matches
+    };
+  });
+  return {
+    schemaVersion: lookup.schemaVersion,
+    note: lookup.note || "",
+    moved: moved,
+    oldValue: oldValue,
+    oldValueLabel: TPP.dataValueLabel(oldValue)
+  };
+};
 TPP.collectDataStaleEntries = function (value, context, path, out) {
   const entries = out || [];
   const currentPath = Array.isArray(path) ? path : [];
@@ -295,9 +371,11 @@ TPP.collectDataStaleEntries = function (value, context, path, out) {
     if (context === "root" && key === "coverPreview" && value.coverPreviewId) return;
     const status = TPP.dataSchemaStatus(context, key);
     if (status !== "active") {
+      const entryPath = currentPath.concat(key);
       entries.push({
-        path: currentPath.concat(key),
-        label: TPP.dataPathLabel(currentPath.concat(key)),
+        path: entryPath,
+        label: TPP.dataPathLabel(entryPath),
+        pattern: TPP.dataPathPattern(entryPath),
         key: key,
         status: status
       });
@@ -322,8 +400,21 @@ TPP.dataStaleSummaryHtml = function (entries) {
       const id = TPP.registerStaleEntry(entry);
       const tone = entry.status === "deprecated" ? "deprecated" : "unknown";
       const label = entry.status === "deprecated" ? "No longer used" : "Not recognized";
+      const meta = TPP.dataStaleMeta(TPP.active, entry);
+      const details = meta
+        ? '<div class="data-stale-details">' +
+            '<div>Schema v' + TPP.esc(String(meta.schemaVersion)) + '</div>' +
+            (meta.note ? '<div>' + TPP.esc(meta.note) + '</div>' : "") +
+            '<div>Old value: ' + TPP.esc(meta.oldValueLabel) + '</div>' +
+            (meta.moved.length
+              ? meta.moved.map(function (target) {
+                  return '<div>Moved to ' + TPP.esc(target.label) + ': ' + TPP.esc(target.valueLabel) + ' (' + (target.matches ? "matches old value" : "differs from old value") + ")</div>";
+                }).join("")
+              : "") +
+          '</div>'
+        : "";
       return '<article class="data-stale-item ' + tone + '">' +
-        '<div><div class="data-stale-path">' + TPP.esc(entry.label) + '</div><div class="data-stale-status">' + TPP.esc(label) + '</div></div>' +
+        '<div><div class="data-stale-path">' + TPP.esc(entry.label) + '</div><div class="data-stale-status">' + TPP.esc(label) + '</div>' + details + '</div>' +
         '<button type="button" class="small" data-stale-remove="' + TPP.esc(id) + '">Remove</button>' +
       '</article>';
     }).join("") + "</div>";

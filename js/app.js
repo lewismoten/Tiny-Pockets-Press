@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", async function () {
   TPP.populate();
   await TPP.load();
+  await TPP.loadStaleKeyLookup();
   TPP.view = TPP.initialView();
   if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();

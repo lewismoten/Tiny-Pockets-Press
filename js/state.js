@@ -12,6 +12,7 @@ TPP.lastPages = [];
 TPP.bookFingerprints = {};
 TPP.bookDraftFingerprints = {};
 TPP.bookRevisionTimers = {};
+TPP.staleKeyLookup = [];
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -727,6 +728,16 @@ TPP.load = async function () {
   });
   const activeId = localStorage.getItem(TPP.ACTIVE);
   TPP.active = TPP.library.find(function (book) { return book.id === activeId; }) || TPP.library[0];
+};
+TPP.loadStaleKeyLookup = async function () {
+  try {
+    const response = await fetch("data/stale-key-lookup.json");
+    if (!response.ok) throw new Error("lookup");
+    const data = await response.json();
+    TPP.staleKeyLookup = Array.isArray(data) ? data : [];
+  } catch {
+    TPP.staleKeyLookup = [];
+  }
 };
 TPP.clearRevisionTimer = function (bookId) {
   if (!TPP.bookRevisionTimers[bookId]) return;
