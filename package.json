@@ -3,6 +3,7 @@
   "version": "6.1.0",
   "private": true,
   "description": "Microfiction, chapbooks, miniature bindings, and tiny print experiments.",
+  "author": "Lewis Moten",
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
     "check": "node --check js/config.js && node --check js/state.js && node --check js/markdown-media.js && node --check js/layout-engine.js && node --check js/render-page.js && node --check js/imposition.js && node --check js/library.js && node --check js/editor.js && node --check js/export.js && node --check js/app.js",

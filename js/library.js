@@ -1700,6 +1700,121 @@ TPP.renderAbout = function () {
     coverMount.appendChild(coverEl);
   }
 };
+TPP.softwareMetaCache = null;
+TPP.softwareCdnCache = null;
+TPP.loadSoftwareMeta = async function () {
+  if (TPP.softwareMetaCache) return TPP.softwareMetaCache;
+  const response = await fetch("/package.json", { cache: "no-cache" });
+  if (!response.ok)
+    throw new Error("Unable to load package metadata: " + response.status);
+  const pkg = await response.json();
+  TPP.softwareMetaCache = pkg || {};
+  return TPP.softwareMetaCache;
+};
+TPP.loadSoftwareCdns = async function () {
+  if (TPP.softwareCdnCache) return TPP.softwareCdnCache;
+  const response = await fetch("/data/software-cdns.json", {
+    cache: "no-cache",
+  });
+  if (!response.ok)
+    throw new Error("Unable to load CDN manifest: " + response.status);
+  const payload = await response.json();
+  if (
+    !payload ||
+    Number(payload.schemaVersion) !== 1 ||
+    !Array.isArray(payload.packages)
+  )
+    throw new Error("CDN manifest schema mismatch");
+  TPP.softwareCdnCache = payload;
+  return payload;
+};
+TPP.renderSoftwareAbout = async function () {
+  const summary = document.getElementById("softwareSummary");
+  const panel = document.getElementById("softwarePanel");
+  if (!summary || !panel) return;
+  summary.innerHTML = "Loading software metadata...";
+  panel.innerHTML = "";
+  try {
+    const [pkg, cdnManifest] = await Promise.all([
+      TPP.loadSoftwareMeta(),
+      TPP.loadSoftwareCdns(),
+    ]);
+    const product = pkg.name || "Tiny Pockets Press";
+    const version = pkg.version || "unknown";
+    const author =
+      typeof pkg.author === "string"
+        ? pkg.author
+        : pkg.author && pkg.author.name
+          ? pkg.author.name
+          : "Unknown";
+    summary.innerHTML =
+      "<strong>" +
+      TPP.esc(product) +
+      "</strong> v" +
+      TPP.esc(version) +
+      " by " +
+      TPP.esc(author) +
+      ".";
+    const rows = cdnManifest.packages
+      .map(function (entry) {
+        const site = entry.website
+          ? '<a href="' +
+            TPP.esc(entry.website) +
+            '" target="_blank" rel="noopener noreferrer">Website</a>'
+          : '<span class="about-note">—</span>';
+        const license = entry.licenseUrl
+          ? '<a href="' +
+            TPP.esc(entry.licenseUrl) +
+            '" target="_blank" rel="noopener noreferrer">' +
+            TPP.esc(entry.license || "License") +
+            "</a>"
+          : TPP.esc(entry.license || "Unknown");
+        return (
+          "<tr>" +
+          "<td>" +
+          TPP.esc(entry.name || entry.id || "Unknown") +
+          "</td>" +
+          "<td>" +
+          TPP.esc(entry.version || "Unknown") +
+          "</td>" +
+          "<td>" +
+          license +
+          "</td>" +
+          "<td>" +
+          site +
+          "</td>" +
+          "</tr>"
+        );
+      })
+      .join("");
+    panel.innerHTML =
+      '<article class="about-meta">' +
+      "<h3>Product</h3>" +
+      '<div class="about-meta-grid">' +
+      TPP.aboutMetaItem("Name", product) +
+      TPP.aboutMetaItem("Version", String(version)) +
+      TPP.aboutMetaItem("Author", author) +
+      "</div>" +
+      "</article>" +
+      '<article class="about-provenance">' +
+      "<h3>CDN Packages</h3>" +
+      '<div class="table-wrap">' +
+      '<table class="data-table">' +
+      "<thead><tr><th>Name</th><th>Version</th><th>License</th><th>Website</th></tr></thead>" +
+      "<tbody>" +
+      rows +
+      "</tbody>" +
+      "</table>" +
+      "</div>" +
+      "</article>";
+  } catch (error) {
+    summary.innerHTML = "Unable to load software metadata.";
+    panel.innerHTML =
+      '<p class="about-note">' +
+      TPP.esc(error.message || String(error)) +
+      "</p>";
+  }
+};
 TPP.captureCover = async function () {
   try {
     const settings = TPP.settings();

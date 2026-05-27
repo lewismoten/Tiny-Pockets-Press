@@ -741,6 +741,10 @@ input[type="checkbox"] {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
 .data-table {
   width: 100%;
   border-collapse: collapse;

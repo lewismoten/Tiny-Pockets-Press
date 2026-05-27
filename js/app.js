@@ -1760,7 +1760,16 @@ TPP.resolveImportConflict = function (incoming, existing) {
 };
 
 TPP.validViews = function () {
-  return ["editor", "about", "data", "interior", "cover", "reader", "library"];
+  return [
+    "editor",
+    "about",
+    "software",
+    "data",
+    "interior",
+    "cover",
+    "reader",
+    "library",
+  ];
 };
 TPP.toast = function (message) {
   const toast = document.getElementById("toast");
@@ -2279,6 +2288,7 @@ TPP.renderAll = function () {
     TPP.renderChapterEditor();
   }
   if (TPP.view === "about") TPP.renderAbout();
+  if (TPP.view === "software") TPP.renderSoftwareAbout();
   if (TPP.view === "data") TPP.renderData();
   if (TPP.view === "interior") TPP.renderInterior();
   if (TPP.view === "cover") TPP.renderCover();
