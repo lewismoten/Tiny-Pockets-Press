@@ -852,6 +852,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       imageExportFrameDelay.value = TPP.imageExportFrameDelaySeconds(
         TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
       );
+      TPP.writeImageExportUi({
+        frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
+      });
       TPP.updateImageExportDuration();
       refreshPlayback();
     });

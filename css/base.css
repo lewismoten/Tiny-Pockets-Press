@@ -1034,7 +1034,6 @@ input[type="checkbox"] {
   position: relative;
   width: 100%;
   aspect-ratio: var(--image-export-preview-ratio, 1 / 1.4);
-  max-height: 24rem;
   border: 1px solid var(--line);
   border-radius: 16px;
   background:
@@ -1163,9 +1162,6 @@ input[type="checkbox"] {
 @media (max-width: 900px) {
   .image-export-dialog-layout {
     grid-template-columns: 1fr;
-  }
-  .image-export-preview-stage {
-    max-height: 18rem;
   }
   .image-export-dialog-preview {
     min-height: 23rem;
