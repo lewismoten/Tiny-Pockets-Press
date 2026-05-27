@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 5;
+TPP.SCHEMA_VERSION = 6;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -104,6 +104,71 @@ TPP.defaultStaleKeyLookup = [
     movedTo: ["meta.pageCount"],
     note: "The page count field no longer uses an underscore prefix.",
   },
+  {
+    path: "title",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.title"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+  {
+    path: "author",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.author"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+  {
+    path: "pubDate",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.pubDate"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+  {
+    path: "publisher",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.publisher"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+  {
+    path: "copyright",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.copyright"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+  {
+    path: "seriesName",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.seriesName"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+  {
+    path: "number",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.number"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+  {
+    path: "volume",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.volume"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+  {
+    path: "printing",
+    schemaVersion: 6,
+    movedTo: ["bookInfo.printing"],
+    note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
+  },
+];
+TPP.BOOK_INFO_FIELDS = [
+  "title",
+  "author",
+  "pubDate",
+  "publisher",
+  "copyright",
+  "seriesName",
+  "number",
+  "volume",
+  "printing",
 ];
 
 TPP.clone = function (obj) {
@@ -111,6 +176,52 @@ TPP.clone = function (obj) {
 };
 TPP.nowIso = function () {
   return new Date().toISOString();
+};
+TPP.bookInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().bookInfo) || {};
+  book.bookInfo = Object.assign({}, fallback, book.bookInfo || {});
+  return book.bookInfo;
+};
+TPP.attachBookInfoAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  TPP.BOOK_INFO_FIELDS.forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (existing && existing.get && existing.set && existing.enumerable === false)
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.bookInfo(book)[field];
+      },
+      set: function (value) {
+        TPP.bookInfo(book)[field] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncBookInfoFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const info = TPP.bookInfo(book);
+  TPP.BOOK_INFO_FIELDS.forEach(function (field) {
+    if (field in book) info[field] = book[field];
+  });
+};
+TPP.compactBookInfo = function (book) {
+  if (!book || !book.bookInfo || typeof book.bookInfo !== "object") return;
+  TPP.BOOK_INFO_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
 };
 TPP.bookMeta = function (book) {
   if (!book || typeof book !== "object") return {};
@@ -469,6 +580,9 @@ TPP.bookFingerprint = function (book) {
   if (copy.meta && typeof copy.meta === "object") delete copy.meta.pageCount;
   delete copy.coverPreviewImageId;
   delete copy.meta;
+  TPP.BOOK_INFO_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   copy.files = (Array.isArray(copy.files) ? copy.files : []).filter(
     function (file) {
       return file && file.role !== "coverPreview";
@@ -479,6 +593,8 @@ TPP.bookFingerprint = function (book) {
 TPP.hydrateBookDates = function (book) {
   const now = TPP.nowIso();
   const fallbackMeta = (TPP.fallbackBook && TPP.fallbackBook().meta) || {};
+  TPP.syncBookInfoFromLegacyFields(book);
+  TPP.attachBookInfoAccessors(book);
   if (
     !Number.isFinite(Number(book.schemaVersion)) ||
     Number(book.schemaVersion) < 1
@@ -545,6 +661,7 @@ TPP.hydrateBookDates = function (book) {
   ].forEach(function (key) {
     delete book[key];
   });
+  TPP.compactBookInfo(book);
   TPP.compactBookMeta(book);
   book.schemaVersion = TPP.SCHEMA_VERSION;
   return book;

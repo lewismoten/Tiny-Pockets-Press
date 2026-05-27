@@ -88,5 +88,59 @@
     "schemaVersion": 5,
     "movedTo": ["meta.pageCount"],
     "note": "The page count field no longer uses an underscore prefix."
+  },
+  {
+    "path": "title",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.title"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "author",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.author"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "pubDate",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.pubDate"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "publisher",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.publisher"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "copyright",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.copyright"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "seriesName",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.seriesName"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "number",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.number"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "volume",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.volume"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "printing",
+    "schemaVersion": 6,
+    "movedTo": ["bookInfo.printing"],
+    "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
   }
 ]

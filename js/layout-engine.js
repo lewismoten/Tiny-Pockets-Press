@@ -16,6 +16,15 @@ TPP.settings = function () {
       ? { w: Number(book.customW), h: Number(book.customH) }
       : TPP.sizes[book.pageSize] || TPP.sizes.one;
   return Object.assign({}, book, {
+    title: TPP.bookInfo(book).title,
+    author: TPP.bookInfo(book).author,
+    pubDate: TPP.bookInfo(book).pubDate,
+    publisher: TPP.bookInfo(book).publisher,
+    copyright: TPP.bookInfo(book).copyright,
+    seriesName: TPP.bookInfo(book).seriesName,
+    number: TPP.bookInfo(book).number,
+    volume: TPP.bookInfo(book).volume,
+    printing: TPP.bookInfo(book).printing,
     signatureSize: TPP.signatureSize(book.signatureSize),
     sewingStations: TPP.sewingStations(book.sewingStations),
     sewingGuideOpacity: TPP.opacity(book.sewingGuideOpacity, 0.65),
