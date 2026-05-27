@@ -1,560 +1,995 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Tiny Pockets Press v6.1</title>
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/book.css">
-  <link rel="stylesheet" href="css/print.css">
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script defer src="js/config.js"></script>
-  <script defer src="js/state.js"></script>
-  <script defer src="js/markdown-media.js"></script>
-  <script defer src="js/layout-engine.js"></script>
-  <script defer src="js/render-page.js"></script>
-  <script defer src="js/imposition.js"></script>
-  <script defer src="js/library.js"></script>
-  <script defer src="js/editor.js"></script>
-  <script defer src="js/export.js"></script>
-  <script defer src="js/app.js"></script>
-</head>
-<body>
-<header class="app-header">
-  <div>
-    <h1>Tiny Pockets Press</h1>
-    <p>Microfiction, chapbooks, miniature bindings, and tiny print experiments.</p>
-  </div>
-  <nav class="tabs">
-    <button class="tab active" data-view="editor">Edit</button>
-    <button class="tab" data-view="about">About</button>
-    <button class="tab" data-view="data">Data</button>
-    <button class="tab" data-view="interior">Interior Print</button>
-    <button class="tab" data-view="cover">Cover Print</button>
-    <button class="tab" data-view="reader">Reader</button>
-    <button class="tab" data-view="library">Library</button>
-  </nav>
-  <div class="header-actions">
-    <button id="saveBook">Save</button>
-    <button id="exportInteriorPdf" class="primary">Interior PDF</button>
-    <button id="exportReadablePdf" class="primary alt">eBook</button>
-    <button id="exportImagesZip" class="primary alt">Page Images</button>
-    <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
-  </div>
-</header>
-
-<div id="progress" class="progress" hidden><div id="progressBar"></div><span id="progressText">Ready</span></div>
-
-<main class="app-shell">
-  <aside class="settings">
-    <section class="controls">
-      <div class="menu-row">
-        <button id="newBook">New</button>
-        <button id="duplicateBook">Duplicate</button>
-        <button id="deleteBook">Delete</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tiny Pockets Press v6.1</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/book.css" />
+    <link rel="stylesheet" href="css/print.css" />
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+    ></script>
+    <script defer src="js/config.js"></script>
+    <script defer src="js/state.js"></script>
+    <script defer src="js/markdown-media.js"></script>
+    <script defer src="js/layout-engine.js"></script>
+    <script defer src="js/render-page.js"></script>
+    <script defer src="js/imposition.js"></script>
+    <script defer src="js/library.js"></script>
+    <script defer src="js/editor.js"></script>
+    <script defer src="js/export.js"></script>
+    <script defer src="js/app.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Tiny Pockets Press</h1>
+        <p>
+          Microfiction, chapbooks, miniature bindings, and tiny print
+          experiments.
+        </p>
       </div>
+      <nav class="tabs">
+        <button class="tab active" data-view="editor">Edit</button>
+        <button class="tab" data-view="about">About</button>
+        <button class="tab" data-view="data">Data</button>
+        <button class="tab" data-view="interior">Interior Print</button>
+        <button class="tab" data-view="cover">Cover Print</button>
+        <button class="tab" data-view="reader">Reader</button>
+        <button class="tab" data-view="library">Library</button>
+      </nav>
+      <div class="header-actions">
+        <button id="saveBook">Save</button>
+        <button id="exportInteriorPdf" class="primary">Interior PDF</button>
+        <button id="exportReadablePdf" class="primary alt">eBook</button>
+        <button id="exportImagesZip" class="primary alt">Page Images</button>
+        <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
+      </div>
+    </header>
 
-      <details open>
-        <summary>Book</summary>
-        <label>Title <input id="title"></label>
-        <label>Author <input id="author"></label>
-        <label>Author Spine Name <input id="spineAuthor"></label>
-        <label>Publishing Date <input id="pubDate" type="date"></label>
-        <label>Publisher <input id="publisher"></label>
-        <label>Copyright <input id="copyright"></label>
-        <div class="two">
-          <label>Series <input id="seriesName"></label>
-          <label>Number <input id="number"></label>
-        </div>
-        <div class="two">
-          <label>Volume <input id="volume"></label>
-          <label>Printing
-            <select id="printing">
-              <option>First Printing</option>
-              <option>Second Printing</option>
-              <option>Third Printing</option>
-              <option>Proof Copy</option>
-              <option>Revised Edition</option>
-            </select>
-          </label>
-        </div>
-      </details>
+    <div id="progress" class="progress" hidden>
+      <div id="progressBar"></div>
+      <span id="progressText">Ready</span>
+    </div>
 
-      <details open>
-        <summary>Page</summary>
-        <div class="two">
-          <label>Page Size
-            <select id="pageSize">
-              <option value="half">0.5 × 0.5</option>
-              <option value="one">1 × 1</option>
-              <option value="grid16">2.125 × 2.75</option>
-              <option value="eighth">2.75 × 4.25</option>
-              <option value="quarter">4.25 × 5.5</option>
-              <option value="custom">Custom</option>
-            </select>
-          </label>
-          <label>Sheet
-            <select id="sheetSize">
-              <option value="letter">8.5 × 11</option>
-              <option value="legal">8.5 × 14</option>
-              <option value="a4">A4</option>
-            </select>
-          </label>
-        </div>
-        <div class="two customSize" hidden>
-          <label>Width <input id="customW" type="number" min=".5" step=".01"></label>
-          <label>Height <input id="customH" type="number" min=".5" step=".01"></label>
-        </div>
-        <div class="two">
-          <label>Margin <input id="margin" type="number" min="0" step=".01"></label>
-          <label>Gutter Margin <input id="gutterMargin" type="number" min="0" step=".01"></label>
-        </div>
-        <div class="two">
-          <label>Paper <select id="paperPreset"></select></label>
-          <label>Texture <select id="texture"></select></label>
-        </div>
-        <label>Page Background <input id="pageBg" class="color-box" type="color"></label>
-      </details>
+    <main class="app-shell">
+      <aside class="settings">
+        <section class="controls">
+          <div class="menu-row">
+            <button id="newBook">New</button>
+            <button id="duplicateBook">Duplicate</button>
+            <button id="deleteBook">Delete</button>
+          </div>
 
-      <details open>
-        <summary>Text</summary>
-        <label>Font <select id="fontFamily"></select></label>
-        <div class="two">
-          <label>Body Size <input id="bodySize" type="number" min="3" step=".5"></label>
-          <label>Caption Size <input id="captionSize" type="number" min="3" step=".5"></label>
-        </div>
-        <div class="two">
-          <label>Line Spacing <input id="lineHeight" type="number" min="1" step=".05"></label>
-          <label>Paragraph Gap <input id="paraGap" type="number" min="0" step=".1"></label>
-        </div>
-        <label><input id="justify" type="checkbox"> Justified text</label>
-        <div class="two">
-          <label>Page Text <input id="pageText" class="color-box" type="color"></label>
-        </div>
-      </details>
+          <details open>
+            <summary>Book</summary>
+            <label>Title <input id="title" /></label>
+            <label>Author <input id="author" /></label>
+            <label>Author Spine Name <input id="spineAuthor" /></label>
+            <label>Publishing Date <input id="pubDate" type="date" /></label>
+            <label>Publisher <input id="publisher" /></label>
+            <label>Copyright <input id="copyright" /></label>
+            <div class="two">
+              <label>Series <input id="seriesName" /></label>
+              <label>Number <input id="number" /></label>
+            </div>
+            <div class="two">
+              <label>Volume <input id="volume" /></label>
+              <label
+                >Printing
+                <select id="printing">
+                  <option>First Printing</option>
+                  <option>Second Printing</option>
+                  <option>Third Printing</option>
+                  <option>Proof Copy</option>
+                  <option>Revised Edition</option>
+                </select>
+              </label>
+            </div>
+          </details>
 
-      <details>
-        <summary>QR / URLs / Images</summary>
-        <label>URL Display
-          <select id="qrDisplayMode">
-            <option value="text">Leave URLs As Text</option>
-            <option value="qr">Display URLs As QR Codes</option>
-            <option value="separate">QR Codes On Separate Pages</option>
-          </select>
-        </label>
-        <label>Image URLs
-          <select id="imageUrlMode">
-            <option value="image">Display Image URLs As Images</option>
-            <option value="qr">Display Image URLs As QR Codes</option>
-          </select>
-        </label>
-        <label>QR / Image Caption Size <input id="mediaCaptionSize" type="number" min="2" step=".25"></label>
-        <div class="two">
-          <label>QR Background
-            <select id="qrLightMode">
-              <option value="page">Use Page Background</option>
-              <option value="custom">Custom</option>
-            </select>
-          </label>
-          <label>QR Background Color <input id="qrLightColor" type="color" class="color-box"></label>
-        </div>
-        <div class="two">
-          <label>QR Code
-            <select id="qrDarkMode">
-              <option value="contrast">Auto Black / White</option>
-              <option value="custom">Custom</option>
-            </select>
-          </label>
-          <label>QR Code Color <input id="qrDarkColor" type="color" class="color-box"></label>
-        </div>
-        <p class="hint">A URL followed by a line of text uses that next line as the centered caption. URLs are hidden when rendered as QR or image blocks.</p>
-      </details>
+          <details open>
+            <summary>Page</summary>
+            <div class="two">
+              <label
+                >Page Size
+                <select id="pageSize">
+                  <option value="half">0.5 × 0.5</option>
+                  <option value="one">1 × 1</option>
+                  <option value="grid16">2.125 × 2.75</option>
+                  <option value="eighth">2.75 × 4.25</option>
+                  <option value="quarter">4.25 × 5.5</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </label>
+              <label
+                >Sheet
+                <select id="sheetSize">
+                  <option value="letter">8.5 × 11</option>
+                  <option value="legal">8.5 × 14</option>
+                  <option value="a4">A4</option>
+                </select>
+              </label>
+            </div>
+            <div class="two customSize" hidden>
+              <label
+                >Width <input id="customW" type="number" min=".5" step=".01"
+              /></label>
+              <label
+                >Height <input id="customH" type="number" min=".5" step=".01"
+              /></label>
+            </div>
+            <div class="two">
+              <label
+                >Margin <input id="margin" type="number" min="0" step=".01"
+              /></label>
+              <label
+                >Gutter Margin
+                <input id="gutterMargin" type="number" min="0" step=".01"
+              /></label>
+            </div>
+            <div class="two">
+              <label
+                >Paper
+                <select id="paperPreset"></select
+              ></label>
+              <label
+                >Texture
+                <select id="texture"></select
+              ></label>
+            </div>
+            <label
+              >Page Background
+              <input id="pageBg" class="color-box" type="color"
+            /></label>
+          </details>
 
-      <details>
-        <summary>Cover Front</summary>
-        <label><input id="coverOverflowImage" type="checkbox"> Allow image to bleed past page</label>
-        <label><input id="coverClipImageToFrame" type="checkbox"> Clip image inside cover frame</label>
-        <div class="two">
-          <label>Top Color <input id="coverBg1" type="color" class="color-box"></label>
-          <label>Bottom Color <input id="coverBg2" type="color" class="color-box"></label>
+          <details open>
+            <summary>Text</summary>
+            <label
+              >Font
+              <select id="fontFamily"></select
+            ></label>
+            <div class="two">
+              <label
+                >Body Size <input id="bodySize" type="number" min="3" step=".5"
+              /></label>
+              <label
+                >Caption Size
+                <input id="captionSize" type="number" min="3" step=".5"
+              /></label>
+            </div>
+            <div class="two">
+              <label
+                >Line Spacing
+                <input id="lineHeight" type="number" min="1" step=".05"
+              /></label>
+              <label
+                >Paragraph Gap
+                <input id="paraGap" type="number" min="0" step=".1"
+              /></label>
+            </div>
+            <label><input id="justify" type="checkbox" /> Justified text</label>
+            <div class="two">
+              <label
+                >Page Text <input id="pageText" class="color-box" type="color"
+              /></label>
+            </div>
+          </details>
+
+          <details>
+            <summary>QR / URLs / Images</summary>
+            <label
+              >URL Display
+              <select id="qrDisplayMode">
+                <option value="text">Leave URLs As Text</option>
+                <option value="qr">Display URLs As QR Codes</option>
+                <option value="separate">QR Codes On Separate Pages</option>
+              </select>
+            </label>
+            <label
+              >Image URLs
+              <select id="imageUrlMode">
+                <option value="image">Display Image URLs As Images</option>
+                <option value="qr">Display Image URLs As QR Codes</option>
+              </select>
+            </label>
+            <label
+              >QR / Image Caption Size
+              <input id="mediaCaptionSize" type="number" min="2" step=".25"
+            /></label>
+            <div class="two">
+              <label
+                >QR Background
+                <select id="qrLightMode">
+                  <option value="page">Use Page Background</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </label>
+              <label
+                >QR Background Color
+                <input id="qrLightColor" type="color" class="color-box"
+              /></label>
+            </div>
+            <div class="two">
+              <label
+                >QR Code
+                <select id="qrDarkMode">
+                  <option value="contrast">Auto Black / White</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </label>
+              <label
+                >QR Code Color
+                <input id="qrDarkColor" type="color" class="color-box"
+              /></label>
+            </div>
+            <p class="hint">
+              A URL followed by a line of text uses that next line as the
+              centered caption. URLs are hidden when rendered as QR or image
+              blocks.
+            </p>
+          </details>
+
+          <details>
+            <summary>Cover Front</summary>
+            <label
+              ><input id="coverOverflowImage" type="checkbox" /> Allow image to
+              bleed past page</label
+            >
+            <label
+              ><input id="coverClipImageToFrame" type="checkbox" /> Clip image
+              inside cover frame</label
+            >
+            <div class="two">
+              <label
+                >Top Color <input id="coverBg1" type="color" class="color-box"
+              /></label>
+              <label
+                >Bottom Color
+                <input id="coverBg2" type="color" class="color-box"
+              /></label>
+            </div>
+            <label
+              >Border <input id="coverBorder" type="color" class="color-box"
+            /></label>
+            <label
+              ><input id="coverBorderOn" type="checkbox" /> Frame on front
+              cover</label
+            >
+            <div class="asset-control-group">
+              <div id="coverImageSlot"></div>
+              <div class="asset-slider-grid">
+                <label
+                  >X <input id="coverImgX" type="range" min="-100" max="100"
+                /></label>
+                <label
+                  >Y <input id="coverImgY" type="range" min="-100" max="100"
+                /></label>
+                <label
+                  >Zoom
+                  <input id="coverImgZoom" type="range" min="10" max="500"
+                /></label>
+                <label
+                  >Rotate
+                  <input
+                    id="coverImgRotate"
+                    type="range"
+                    min="-180"
+                    max="180"
+                    step="1"
+                /></label>
+              </div>
+            </div>
+            <div id="coverTextElements"></div>
+          </details>
+
+          <details>
+            <summary>Back Cover</summary>
+            <label>Text <textarea id="backText" rows="4"></textarea></label>
+            <div class="two">
+              <label
+                >Text Y <input id="backTextY" type="range" min="0" max="100"
+              /></label>
+              <label
+                >Font Size
+                <input id="backTextSize" type="number" min="3" step=".5"
+              /></label>
+            </div>
+            <div class="two">
+              <label
+                >Text Align
+                <select id="backTextAlign">
+                  <option value="center">Center</option>
+                  <option value="justify">Justify</option>
+                  <option value="left">Left</option>
+                </select>
+              </label>
+              <label
+                >Last Line
+                <select id="backTextLastLine">
+                  <option value="auto">Default</option>
+                  <option value="center">Center</option>
+                  <option value="justify">Justify</option>
+                </select>
+              </label>
+            </div>
+            <label
+              >Text Color
+              <input id="backTextColor" type="color" class="color-box"
+            /></label>
+            <label
+              ><input id="backFrameOn" type="checkbox" /> Frame on back
+              cover</label
+            >
+            <label
+              ><input id="backClipImageToFrame" type="checkbox" /> Clip back
+              image inside frame</label
+            >
+            <div class="asset-control-group">
+              <div id="backImageSlot"></div>
+              <div class="asset-slider-grid">
+                <label
+                  >X <input id="backImgX" type="range" min="-100" max="100"
+                /></label>
+                <label
+                  >Y <input id="backImgY" type="range" min="-100" max="100"
+                /></label>
+                <label
+                  >Zoom <input id="backImgZoom" type="range" min="10" max="500"
+                /></label>
+                <label
+                  >Rotate
+                  <input
+                    id="backImgRotate"
+                    type="range"
+                    min="-180"
+                    max="180"
+                    step="1"
+                /></label>
+              </div>
+            </div>
+          </details>
+
+          <details>
+            <summary>Spine</summary>
+            <div class="asset-control-group">
+              <div id="spineImageSlot"></div>
+              <div class="asset-slider-grid">
+                <label
+                  >X <input id="spineImgX" type="range" min="-100" max="100"
+                /></label>
+                <label
+                  >Y <input id="spineImgY" type="range" min="-100" max="100"
+                /></label>
+                <label
+                  >Zoom
+                  <input id="spineImgZoom" type="range" min="10" max="500"
+                /></label>
+                <label
+                  >Rotate
+                  <input
+                    id="spineImgRotate"
+                    type="range"
+                    min="-180"
+                    max="180"
+                    step="1"
+                /></label>
+              </div>
+            </div>
+            <div id="spineTextElements"></div>
+          </details>
+
+          <details>
+            <summary>Table of Contents</summary>
+            <label
+              ><input id="includeToc" type="checkbox" /> Include table of
+              contents</label
+            >
+            <label
+              >Numbering
+              <select id="tocNumberType">
+                <option value="page">Page</option>
+                <option value="chapter">Chapter</option>
+              </select>
+            </label>
+            <label
+              >Leader Style
+              <select id="tocLeader">
+                <option value="dots">Dots</option>
+                <option value="line">Line</option>
+                <option value="none">None</option>
+              </select>
+            </label>
+            <label
+              >Leader Color
+              <input id="tocLeaderColor" type="color" class="color-box"
+            /></label>
+            <label
+              >Indent Per Level (in)
+              <input id="tocIndentStep" type="number" min="0" step=".01"
+            /></label>
+          </details>
+
+          <details>
+            <summary>Numbers, TOC, Ornaments</summary>
+            <label
+              >Page Number Mode
+              <select id="pageNumMode">
+                <option value="none">None</option>
+                <option value="center">Center</option>
+                <option value="edge">Outer Edge</option>
+              </select>
+            </label>
+            <label
+              >Ornament Preset
+              <select id="pageOrnament">
+                <option value="">None</option>
+                <option value="dash">— 1 —</option>
+                <option value="floral">☙ 1 ❧</option>
+                <option value="heart">♥ 1 ♥</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <div class="two">
+              <label>Prefix / Left <input id="pageNumLeft" /></label
+              ><label>Suffix / Right <input id="pageNumRight" /></label>
+            </div>
+            <label
+              ><input id="ornamentBySide" type="checkbox" /> Use one ornament
+              based on page side</label
+            >
+            <label
+              ><input id="reverseOrnamentsBySide" type="checkbox" /> Reverse
+              odd/even ornament side</label
+            >
+            <label
+              >Chapter End Ornament
+              <select id="chapterEndOrnament">
+                <option value="">None</option>
+                <option>❦</option>
+                <option>☙ ❧</option>
+                <option>◆</option>
+                <option>***</option>
+              </select></label
+            >
+            <label
+              ><input id="chapterEndCentered" type="checkbox" /> Center chapter
+              end ornament</label
+            >
+          </details>
+
+          <details>
+            <summary>Printing</summary>
+            <label
+              >Signature Size
+              <input id="signatureSize" type="number" min="4" max="64" step="4"
+            /></label>
+            <label
+              >Spine Mode
+              <select id="spineMode">
+                <option value="auto">Automatic</option>
+                <option value="none">No Spine</option>
+                <option value="cover">Printed With Cover</option>
+                <option value="separate">Separate Spine / Cloth Strip</option>
+              </select>
+            </label>
+            <div class="two">
+              <label
+                >Paper Thickness
+                <input id="paperThickness" type="number" min=".001" step=".001"
+              /></label>
+              <label
+                >Thread/Staple Allowance
+                <input id="bindingAllowance" type="number" min="0" step=".005"
+              /></label>
+            </div>
+            <label
+              ><input id="wrapCover" type="checkbox" /> Cover wraps around
+              boards/edges with angled corners</label
+            >
+            <div class="two">
+              <label
+                >Wrap Inside (in)
+                <input id="wrapInside" type="number" min="0" step=".01"
+              /></label>
+              <label
+                >Board/Material Thickness
+                <input id="boardThickness" type="number" min="0" step=".01"
+              /></label>
+            </div>
+            <label
+              ><input id="coverPerimeterOn" type="checkbox" /> Full cover
+              perimeter outline</label
+            >
+            <label
+              ><input id="separateCover" type="checkbox" /> Print cover
+              separately on cover stock</label
+            >
+            <div class="two">
+              <label
+                >Cover Copies
+                <input id="coverCopies" type="number" min="1" step="1"
+              /></label>
+              <label
+                ><input id="coverCopiesMax" type="checkbox" /> As many as
+                fit</label
+              >
+            </div>
+            <label
+              ><input id="showCutGuides" type="checkbox" /> Cut
+              outlines/guides</label
+            >
+            <label
+              ><input id="showFoldGuides" type="checkbox" /> Sewing/fold
+              guides</label
+            >
+            <label
+              ><input id="showPageGuides" type="checkbox" /> Light page
+              outlines</label
+            >
+            <label
+              >Print Top Offset (in)
+              <input id="printTopOffset" type="number" min="0" step=".01"
+            /></label>
+            <div class="two">
+              <label
+                >Sewing Stations
+                <input
+                  id="sewingStations"
+                  type="number"
+                  min="2"
+                  max="5"
+                  step="1"
+              /></label>
+              <label
+                >Sewing Opacity
+                <input
+                  id="sewingGuideOpacity"
+                  type="number"
+                  min="0"
+                  max="1"
+                  step=".05"
+              /></label>
+            </div>
+            <label
+              ><input id="showSignatureOverlay" type="checkbox" />
+              Signature/sheet text overlay</label
+            >
+            <label
+              >Signature Marker Opacity
+              <input
+                id="signatureGuideOpacity"
+                type="number"
+                min="0"
+                max="1"
+                step=".05"
+            /></label>
+            <label
+              ><input id="duplexBackSides" type="checkbox" /> Include
+              blank/opposite-side pages for duplex printers</label
+            >
+            <div class="menu-row">
+              <button id="exportBook">Export Book</button>
+              <button id="exportStyle">Export Style</button>
+              <button id="exportLibrary">Export Library</button>
+            </div>
+            <label
+              >Import JSON
+              <input
+                id="importJson"
+                type="file"
+                accept=".json,application/json"
+            /></label>
+            <button id="printBrowser">Print Current Preview</button>
+          </details>
+        </section>
+        <section id="dataSidebar" class="data-sidebar" hidden></section>
+      </aside>
+
+      <section class="workspace">
+        <section id="editorView" class="view active">
+          <div class="workspace-header">
+            <h2>Chapter Outline</h2>
+            <button id="addChapter" class="primary">Add Chapter</button>
+          </div>
+          <div id="progress" class="progress" hidden>
+            <div id="progressBar"></div>
+            <span id="progressText">Ready</span>
+          </div>
+          <div id="chapterList" class="chapter-list"></div>
+          <div id="chapterEditor"></div>
+        </section>
+
+        <section id="aboutView" class="view">
+          <div class="workspace-header"><h2>About This Book</h2></div>
+          <div id="aboutSummary" class="summary"></div>
+          <div id="aboutPanel" class="about-panel"></div>
+        </section>
+
+        <section id="dataView" class="view">
+          <div class="workspace-header"><h2>Book Data</h2></div>
+          <div id="dataSummary" class="summary"></div>
+          <div id="dataPanel" class="data-panel"></div>
+        </section>
+
+        <section id="interiorView" class="view">
+          <div id="interiorSummary" class="summary"></div>
+          <div id="interiorPreview" class="print-preview"></div>
+        </section>
+        <section id="coverView" class="view">
+          <div id="coverSummary" class="summary"></div>
+          <div id="coverPreview" class="print-preview"></div>
+        </section>
+
+        <section id="readerView" class="view">
+          <div class="reader-toolbar">
+            <select id="readerJump"></select
+            ><select id="readerMode">
+              <option value="single">Single Page</option>
+              <option value="spread">Two-Page Spread</option>
+              <option value="duplex">Duplex Leaves</option>
+            </select>
+          </div>
+          <div class="reader-progress" aria-label="Reading progress">
+            <span id="readerProgressStart" class="reader-progress-edge"
+              >Start</span
+            >
+            <label class="reader-progress-track" for="readerScrub">
+              <span id="readerProgressLabel" class="reader-progress-label"
+                >Page 1 of 1</span
+              >
+              <input
+                id="readerScrub"
+                type="range"
+                min="0"
+                max="0"
+                value="0"
+                step="1"
+              />
+            </label>
+            <span id="readerProgressEnd" class="reader-progress-edge"
+              >Finish</span
+            >
+          </div>
+          <div class="reader-stage">
+            <button
+              id="readerStagePrev"
+              class="reader-stage-arrow"
+              type="button"
+              aria-label="Previous page"
+            >
+              ‹
+            </button>
+            <div id="readerPreview" class="reader-preview"></div>
+            <button
+              id="readerStageNext"
+              class="reader-stage-arrow"
+              type="button"
+              aria-label="Next page"
+            >
+              ›
+            </button>
+          </div>
+        </section>
+
+        <section id="libraryView" class="view">
+          <div class="workspace-header">
+            <h2>Library</h2>
+            <div class="toolbar">
+              <input
+                id="librarySearch"
+                placeholder="Search title, author, or full text"
+              /><button id="libraryImport" type="button">Import Book</button>
+            </div>
+          </div>
+          <div id="libraryGrid" class="library-grid"></div>
+        </section>
+      </section>
+    </main>
+    <dialog id="toast" class="toast" role="status" aria-live="polite"></dialog>
+    <dialog id="importConflictDialog" class="modal">
+      <form method="dialog" class="modal-card">
+        <h2>Import Conflict</h2>
+        <p id="importConflictText" class="about-note"></p>
+        <div id="importConflictBooks" class="conflict-grid"></div>
+        <div class="modal-actions">
+          <button type="button" data-action="merge">Merge</button>
+          <button type="button" data-action="overwrite">Overwrite</button>
+          <button type="button" data-action="copy" class="primary alt">
+            Create Copy
+          </button>
+          <button type="button" data-action="cancel">Cancel</button>
         </div>
-        <label>Border <input id="coverBorder" type="color" class="color-box"></label>
-        <label><input id="coverBorderOn" type="checkbox"> Frame on front cover</label>
-        <div class="asset-control-group">
-          <div id="coverImageSlot"></div>
-          <div class="asset-slider-grid">
-            <label>X <input id="coverImgX" type="range" min="-100" max="100"></label>
-            <label>Y <input id="coverImgY" type="range" min="-100" max="100"></label>
-            <label>Zoom <input id="coverImgZoom" type="range" min="10" max="500"></label>
-            <label>Rotate <input id="coverImgRotate" type="range" min="-180" max="180" step="1"></label>
+      </form>
+    </dialog>
+    <dialog id="assetDialog" class="modal">
+      <form method="dialog" class="modal-card asset-dialog-card">
+        <h2 id="assetDialogTitle">Choose Image</h2>
+        <p id="assetDialogText" class="about-note"></p>
+        <div class="asset-upload-row">
+          <button type="button" id="assetUploadButton" class="primary alt">
+            Upload New Image
+          </button>
+          <input id="assetUploadInput" type="file" accept="image/*" hidden />
+          <button type="button" id="assetClearButton">No Image</button>
+        </div>
+        <div id="assetDialogList" class="asset-dialog-list"></div>
+        <div class="modal-actions">
+          <button type="button" data-action="close">Close</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="imageExportDialog" class="modal">
+      <form method="dialog" class="modal-card image-export-dialog-card">
+        <h3>Export Page Images</h3>
+        <div class="image-export-dialog-layout">
+          <div class="image-export-dialog-controls">
+            <label
+              >Common DPI
+              <select id="imageExportDialogPreset">
+                <option value="72">72 DPI</option>
+                <option value="96">96 DPI</option>
+                <option value="150">150 DPI</option>
+                <option value="200">200 DPI</option>
+                <option value="300">300 DPI</option>
+                <option value="600">600 DPI</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label id="imageExportDialogCustomWrap" hidden
+              >Custom DPI
+              <input
+                id="imageExportDialogDpi"
+                type="number"
+                min="72"
+                max="1200"
+                step="1"
+            /></label>
+            <label
+              >Image Format
+              <select id="imageExportDialogFormat">
+                <option value="png">PNG</option>
+                <option value="gif">GIF</option>
+                <option value="jpeg">JPEG</option>
+                <option value="webp">WebP</option>
+              </select>
+            </label>
+            <label
+              >Color Depth
+              <select id="imageExportDialogColorDepth">
+                <option value="color24">24-bit Color</option>
+                <option value="gray8">8-bit Grayscale</option>
+                <option value="mono1">1-bit Black & White</option>
+                <option value="indexed">Indexed</option>
+              </select>
+            </label>
+            <div class="image-export-palette-row">
+              <label id="imageExportDialogPaletteWrap"
+                >Palette
+                <select id="imageExportDialogPalette">
+                  <option value="websafe">Web-Safe</option>
+                  <option value="colors4">4 Colors</option>
+                  <option value="colors8">8 Colors</option>
+                  <option value="colors16">16 Colors</option>
+                  <option value="colors32">32 Colors</option>
+                  <option value="colors64">64 Colors</option>
+                  <option value="colors128">128 Colors</option>
+                  <option value="colors256">256 Colors</option>
+                  <option value="gray4">4 Grayscale</option>
+                  <option value="gray8">8 Grayscale</option>
+                  <option value="gray16">16 Grayscale</option>
+                  <option value="gray32">32 Grayscale</option>
+                  <option value="gray64">64 Grayscale</option>
+                  <option value="gray128">128 Grayscale</option>
+                  <option value="gray256">256 Grayscale</option>
+                  <option value="windows16">Windows 16</option>
+                  <option value="ansi16">ANSI 16</option>
+                  <option value="xterm256">Extended ANSI / Xterm</option>
+                  <option value="ega16">EGA</option>
+                  <option value="atari400base">Atari 400</option>
+                  <option value="atari400">Atari 400 Artifacting</option>
+                  <option value="cga0">CGA 0</option>
+                  <option value="cga1">CGA 1</option>
+                </select>
+              </label>
+              <button
+                type="button"
+                id="imageExportPalettePreview"
+                class="image-export-palette-preview"
+                aria-label="Preview palette"
+              >
+                <canvas
+                  id="imageExportPalettePreviewCanvas"
+                  width="16"
+                  height="16"
+                ></canvas>
+              </button>
+            </div>
+            <label id="imageExportDialogQualityWrap"
+              >Lossy Quality
+              <input
+                id="imageExportDialogQuality"
+                type="range"
+                min="1"
+                max="100"
+                step="1"
+                value="92"
+              />
+              <span id="imageExportDialogQualityValue">92%</span>
+            </label>
+            <label id="imageExportDialogThresholdWrap"
+              >1-bit Threshold
+              <input
+                id="imageExportDialogThreshold"
+                type="range"
+                min="0"
+                max="255"
+                step="1"
+                value="128"
+              />
+              <span id="imageExportDialogThresholdValue">128</span>
+            </label>
+            <div
+              id="imageExportDialogEstimate"
+              class="image-export-estimate"
+            ></div>
+          </div>
+          <div class="image-export-dialog-preview">
+            <div class="image-export-preview-toolbar">
+              <button
+                type="button"
+                id="imageExportPreviewPrev"
+                aria-label="Previous preview page"
+              >
+                ←
+              </button>
+              <div
+                id="imageExportPreviewLabel"
+                class="image-export-preview-label"
+              >
+                Preview page 1
+              </div>
+              <button
+                type="button"
+                id="imageExportPreviewNext"
+                aria-label="Next preview page"
+              >
+                →
+              </button>
+            </div>
+            <div
+              id="imageExportPreviewStage"
+              class="image-export-preview-stage"
+            >
+              <div class="image-export-preview-empty">Preview unavailable</div>
+            </div>
+            <div class="image-export-preview-controls">
+              <label id="imageExportFrameDelayWrap"
+                >Frame Delay (sec)
+                <input
+                  id="imageExportFrameDelay"
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="0.1"
+                  value="1"
+                />
+              </label>
+              <button type="button" id="imageExportPreviewPlay">▶ Play</button>
+              <div
+                id="imageExportPreviewDuration"
+                class="image-export-preview-duration"
+              >
+                Total duration: 0 seconds
+              </div>
+            </div>
           </div>
         </div>
-        <div id="coverTextElements"></div>
-      </details>
-
-      <details>
-        <summary>Back Cover</summary>
-        <label>Text <textarea id="backText" rows="4"></textarea></label>
-        <div class="two">
-          <label>Text Y <input id="backTextY" type="range" min="0" max="100"></label>
-          <label>Font Size <input id="backTextSize" type="number" min="3" step=".5"></label>
-        </div>
-        <div class="two">
-          <label>Text Align
-            <select id="backTextAlign">
-              <option value="center">Center</option>
-              <option value="justify">Justify</option>
-              <option value="left">Left</option>
-            </select>
-          </label>
-          <label>Last Line
-            <select id="backTextLastLine">
-              <option value="auto">Default</option>
-              <option value="center">Center</option>
-              <option value="justify">Justify</option>
-            </select>
-          </label>
-        </div>
-        <label>Text Color <input id="backTextColor" type="color" class="color-box"></label>
-        <label><input id="backFrameOn" type="checkbox"> Frame on back cover</label>
-        <label><input id="backClipImageToFrame" type="checkbox"> Clip back image inside frame</label>
-        <div class="asset-control-group">
-          <div id="backImageSlot"></div>
-          <div class="asset-slider-grid">
-            <label>X <input id="backImgX" type="range" min="-100" max="100"></label>
-            <label>Y <input id="backImgY" type="range" min="-100" max="100"></label>
-            <label>Zoom <input id="backImgZoom" type="range" min="10" max="500"></label>
-            <label>Rotate <input id="backImgRotate" type="range" min="-180" max="180" step="1"></label>
-          </div>
-        </div>
-      </details>
-
-      <details>
-        <summary>Spine</summary>
-        <div class="asset-control-group">
-          <div id="spineImageSlot"></div>
-          <div class="asset-slider-grid">
-            <label>X <input id="spineImgX" type="range" min="-100" max="100"></label>
-            <label>Y <input id="spineImgY" type="range" min="-100" max="100"></label>
-            <label>Zoom <input id="spineImgZoom" type="range" min="10" max="500"></label>
-            <label>Rotate <input id="spineImgRotate" type="range" min="-180" max="180" step="1"></label>
-          </div>
-        </div>
-        <div id="spineTextElements"></div>
-      </details>
-
-      <details>
-        <summary>Table of Contents</summary>
-        <label><input id="includeToc" type="checkbox"> Include table of contents</label>
-        <label>Numbering
-          <select id="tocNumberType">
-            <option value="page">Page</option>
-            <option value="chapter">Chapter</option>
-          </select>
-        </label>
-        <label>Leader Style
-          <select id="tocLeader">
-            <option value="dots">Dots</option>
-            <option value="line">Line</option>
-            <option value="none">None</option>
-          </select>
-        </label>
-        <label>Leader Color <input id="tocLeaderColor" type="color" class="color-box"></label>
-        <label>Indent Per Level (in) <input id="tocIndentStep" type="number" min="0" step=".01"></label>
-      </details>
-
-      <details>
-        <summary>Numbers, TOC, Ornaments</summary>
-        <label>Page Number Mode
-          <select id="pageNumMode"><option value="none">None</option><option value="center">Center</option><option value="edge">Outer Edge</option></select>
-        </label>
-        <label>Ornament Preset
-          <select id="pageOrnament"><option value="">None</option><option value="dash">— 1 —</option><option value="floral">☙ 1 ❧</option><option value="heart">♥ 1 ♥</option><option value="custom">Custom</option></select>
-        </label>
-        <div class="two"><label>Prefix / Left <input id="pageNumLeft"></label><label>Suffix / Right <input id="pageNumRight"></label></div>
-        <label><input id="ornamentBySide" type="checkbox"> Use one ornament based on page side</label>
-        <label><input id="reverseOrnamentsBySide" type="checkbox"> Reverse odd/even ornament side</label>
-        <label>Chapter End Ornament <select id="chapterEndOrnament"><option value="">None</option><option>❦</option><option>☙ ❧</option><option>◆</option><option>***</option></select></label>
-        <label><input id="chapterEndCentered" type="checkbox"> Center chapter end ornament</label>
-      </details>
-
-      <details>
-        <summary>Printing</summary>
-        <label>Signature Size <input id="signatureSize" type="number" min="4" max="64" step="4"></label>
-        <label>Spine Mode
-          <select id="spineMode">
-            <option value="auto">Automatic</option>
-            <option value="none">No Spine</option>
-            <option value="cover">Printed With Cover</option>
-            <option value="separate">Separate Spine / Cloth Strip</option>
-          </select>
-        </label>
-        <div class="two">
-          <label>Paper Thickness <input id="paperThickness" type="number" min=".001" step=".001"></label>
-          <label>Thread/Staple Allowance <input id="bindingAllowance" type="number" min="0" step=".005"></label>
-        </div>
-        <label><input id="wrapCover" type="checkbox"> Cover wraps around boards/edges with angled corners</label>
-        <div class="two">
-          <label>Wrap Inside (in) <input id="wrapInside" type="number" min="0" step=".01"></label>
-          <label>Board/Material Thickness <input id="boardThickness" type="number" min="0" step=".01"></label>
-        </div>
-        <label><input id="coverPerimeterOn" type="checkbox"> Full cover perimeter outline</label>
-        <label><input id="separateCover" type="checkbox"> Print cover separately on cover stock</label>
-        <div class="two">
-          <label>Cover Copies <input id="coverCopies" type="number" min="1" step="1"></label>
-          <label><input id="coverCopiesMax" type="checkbox"> As many as fit</label>
-        </div>
-        <label><input id="showCutGuides" type="checkbox"> Cut outlines/guides</label>
-        <label><input id="showFoldGuides" type="checkbox"> Sewing/fold guides</label>
-        <label><input id="showPageGuides" type="checkbox"> Light page outlines</label>
-        <label>Print Top Offset (in) <input id="printTopOffset" type="number" min="0" step=".01"></label>
-        <div class="two">
-          <label>Sewing Stations <input id="sewingStations" type="number" min="2" max="5" step="1"></label>
-          <label>Sewing Opacity <input id="sewingGuideOpacity" type="number" min="0" max="1" step=".05"></label>
-        </div>
-        <label><input id="showSignatureOverlay" type="checkbox"> Signature/sheet text overlay</label>
-        <label>Signature Marker Opacity <input id="signatureGuideOpacity" type="number" min="0" max="1" step=".05"></label>
-        <label><input id="duplexBackSides" type="checkbox"> Include blank/opposite-side pages for duplex printers</label>
-        <div class="menu-row">
-          <button id="exportBook">Export Book</button>
-          <button id="exportStyle">Export Style</button>
-          <button id="exportLibrary">Export Library</button>
-        </div>
-        <label>Import JSON <input id="importJson" type="file" accept=".json,application/json"></label>
-        <button id="printBrowser">Print Current Preview</button>
-      </details>
-    </section>
-    <section id="dataSidebar" class="data-sidebar" hidden></section>
-  </aside>
-
-  <section class="workspace">
-    <section id="editorView" class="view active">
-      <div class="workspace-header"><h2>Chapter Outline</h2><button id="addChapter" class="primary">Add Chapter</button></div>
-      <div id="progress" class="progress" hidden><div id="progressBar"></div><span id="progressText">Ready</span></div>
-      <div id="chapterList" class="chapter-list"></div>
-      <div id="chapterEditor"></div>
-    </section>
-
-    <section id="aboutView" class="view">
-      <div class="workspace-header"><h2>About This Book</h2></div>
-      <div id="aboutSummary" class="summary"></div>
-      <div id="aboutPanel" class="about-panel"></div>
-    </section>
-
-    <section id="dataView" class="view">
-      <div class="workspace-header"><h2>Book Data</h2></div>
-      <div id="dataSummary" class="summary"></div>
-      <div id="dataPanel" class="data-panel"></div>
-    </section>
-
-    <section id="interiorView" class="view"><div id="interiorSummary" class="summary"></div><div id="interiorPreview" class="print-preview"></div></section>
-    <section id="coverView" class="view"><div id="coverSummary" class="summary"></div><div id="coverPreview" class="print-preview"></div></section>
-
-    <section id="readerView" class="view">
-      <div class="reader-toolbar"><select id="readerJump"></select><select id="readerMode"><option value="single">Single Page</option><option value="spread">Two-Page Spread</option><option value="duplex">Duplex Leaves</option></select></div>
-      <div class="reader-progress" aria-label="Reading progress">
-        <span id="readerProgressStart" class="reader-progress-edge">Start</span>
-        <label class="reader-progress-track" for="readerScrub">
-          <span id="readerProgressLabel" class="reader-progress-label">Page 1 of 1</span>
-          <input id="readerScrub" type="range" min="0" max="0" value="0" step="1">
-        </label>
-        <span id="readerProgressEnd" class="reader-progress-edge">Finish</span>
-      </div>
-      <div class="reader-stage">
-        <button id="readerStagePrev" class="reader-stage-arrow" type="button" aria-label="Previous page">‹</button>
-        <div id="readerPreview" class="reader-preview"></div>
-        <button id="readerStageNext" class="reader-stage-arrow" type="button" aria-label="Next page">›</button>
-      </div>
-    </section>
-
-    <section id="libraryView" class="view">
-      <div class="workspace-header"><h2>Library</h2><div class="toolbar"><input id="librarySearch" placeholder="Search title, author, or full text"><button id="libraryImport" type="button">Import Book</button></div></div>
-      <div id="libraryGrid" class="library-grid"></div>
-    </section>
-  </section>
-</main>
-<dialog id="toast" class="toast" role="status" aria-live="polite"></dialog>
-<dialog id="importConflictDialog" class="modal">
-  <form method="dialog" class="modal-card">
-    <h2>Import Conflict</h2>
-    <p id="importConflictText" class="about-note"></p>
-    <div id="importConflictBooks" class="conflict-grid"></div>
-    <div class="modal-actions">
-      <button type="button" data-action="merge">Merge</button>
-      <button type="button" data-action="overwrite">Overwrite</button>
-      <button type="button" data-action="copy" class="primary alt">Create Copy</button>
-      <button type="button" data-action="cancel">Cancel</button>
-    </div>
-  </form>
-</dialog>
-<dialog id="assetDialog" class="modal">
-  <form method="dialog" class="modal-card asset-dialog-card">
-    <h2 id="assetDialogTitle">Choose Image</h2>
-    <p id="assetDialogText" class="about-note"></p>
-    <div class="asset-upload-row">
-      <button type="button" id="assetUploadButton" class="primary alt">Upload New Image</button>
-      <input id="assetUploadInput" type="file" accept="image/*" hidden>
-      <button type="button" id="assetClearButton">No Image</button>
-    </div>
-    <div id="assetDialogList" class="asset-dialog-list"></div>
-    <div class="modal-actions">
-      <button type="button" data-action="close">Close</button>
-    </div>
-  </form>
-</dialog>
-<dialog id="imageExportDialog" class="modal">
-  <form method="dialog" class="modal-card image-export-dialog-card">
-    <h3>Export Page Images</h3>
-    <div class="image-export-dialog-layout">
-      <div class="image-export-dialog-controls">
-        <label>Common DPI
-          <select id="imageExportDialogPreset">
-            <option value="72">72 DPI</option>
-            <option value="96">96 DPI</option>
-            <option value="150">150 DPI</option>
-            <option value="200">200 DPI</option>
-            <option value="300">300 DPI</option>
-            <option value="600">600 DPI</option>
-            <option value="custom">Custom</option>
-          </select>
-        </label>
-        <label id="imageExportDialogCustomWrap" hidden>Custom DPI <input id="imageExportDialogDpi" type="number" min="72" max="1200" step="1"></label>
-        <label>Image Format
-          <select id="imageExportDialogFormat">
-            <option value="png">PNG</option>
-            <option value="gif">GIF</option>
-            <option value="jpeg">JPEG</option>
-            <option value="webp">WebP</option>
-          </select>
-        </label>
-        <label>Color Depth
-          <select id="imageExportDialogColorDepth">
-            <option value="color24">24-bit Color</option>
-            <option value="gray8">8-bit Grayscale</option>
-            <option value="mono1">1-bit Black & White</option>
-            <option value="indexed">Indexed</option>
-          </select>
-        </label>
-        <div class="image-export-palette-row">
-          <label id="imageExportDialogPaletteWrap">Palette
-            <select id="imageExportDialogPalette">
-              <option value="websafe">Web-Safe</option>
-              <option value="colors4">4 Colors</option>
-              <option value="colors8">8 Colors</option>
-              <option value="colors16">16 Colors</option>
-              <option value="colors32">32 Colors</option>
-              <option value="colors64">64 Colors</option>
-              <option value="colors128">128 Colors</option>
-              <option value="colors256">256 Colors</option>
-              <option value="gray4">4 Grayscale</option>
-              <option value="gray8">8 Grayscale</option>
-              <option value="gray16">16 Grayscale</option>
-              <option value="gray32">32 Grayscale</option>
-              <option value="gray64">64 Grayscale</option>
-              <option value="gray128">128 Grayscale</option>
-              <option value="gray256">256 Grayscale</option>
-              <option value="windows16">Windows 16</option>
-              <option value="ansi16">ANSI 16</option>
-              <option value="xterm256">Extended ANSI / Xterm</option>
-              <option value="ega16">EGA</option>
-              <option value="atari400base">Atari 400</option>
-              <option value="atari400">Atari 400 Artifacting</option>
-              <option value="cga0">CGA 0</option>
-              <option value="cga1">CGA 1</option>
-            </select>
-          </label>
-          <button type="button" id="imageExportPalettePreview" class="image-export-palette-preview" aria-label="Preview palette">
-            <canvas id="imageExportPalettePreviewCanvas" width="16" height="16"></canvas>
+        <div class="modal-actions">
+          <button type="button" id="imageExportDownloadBefore" disabled>
+            Before
+          </button>
+          <button type="button" id="imageExportDownloadAfter" disabled>
+            After
+          </button>
+          <button type="button" data-action="export-mp4">MP4</button>
+          <button type="button" data-action="export-animated-gif">
+            Animated GIF
+          </button>
+          <button type="button" data-action="export-images">ZIP</button>
+          <button type="button" class="button-cancel" data-action="cancel">
+            Cancel
           </button>
         </div>
-        <label id="imageExportDialogQualityWrap">Lossy Quality
-          <input id="imageExportDialogQuality" type="range" min="1" max="100" step="1" value="92">
-          <span id="imageExportDialogQualityValue">92%</span>
-        </label>
-        <label id="imageExportDialogThresholdWrap">1-bit Threshold
-          <input id="imageExportDialogThreshold" type="range" min="0" max="255" step="1" value="128">
-          <span id="imageExportDialogThresholdValue">128</span>
-        </label>
-        <div id="imageExportDialogEstimate" class="image-export-estimate"></div>
-      </div>
-      <div class="image-export-dialog-preview">
-        <div class="image-export-preview-toolbar">
-          <button type="button" id="imageExportPreviewPrev" aria-label="Previous preview page">←</button>
-          <div id="imageExportPreviewLabel" class="image-export-preview-label">Preview page 1</div>
-          <button type="button" id="imageExportPreviewNext" aria-label="Next preview page">→</button>
+      </form>
+    </dialog>
+    <dialog id="imageExportPaletteDialog" class="modal">
+      <form method="dialog" class="modal-card image-export-palette-dialog-card">
+        <div class="workspace-header">
+          <h2 id="imageExportPaletteDialogTitle">Palette Preview</h2>
         </div>
-        <div id="imageExportPreviewStage" class="image-export-preview-stage">
-          <div class="image-export-preview-empty">Preview unavailable</div>
+        <div class="image-export-palette-dialog-layout">
+          <div class="image-export-palette-dialog-stage">
+            <canvas
+              id="imageExportPaletteDialogCanvas"
+              width="640"
+              height="640"
+            ></canvas>
+          </div>
+          <div class="image-export-palette-inspector">
+            <div
+              id="imageExportPaletteSample"
+              class="image-export-palette-sample"
+            ></div>
+            <label
+              >Hex
+              <input id="imageExportPaletteHex" type="text" readonly />
+            </label>
+            <label
+              >RGB
+              <input id="imageExportPaletteRgb" type="text" readonly />
+            </label>
+            <label
+              >HSV
+              <input id="imageExportPaletteHsv" type="text" readonly />
+            </label>
+            <label
+              >LCh
+              <input id="imageExportPaletteLch" type="text" readonly />
+            </label>
+          </div>
         </div>
-        <div class="image-export-preview-controls">
-          <label id="imageExportFrameDelayWrap">Frame Delay (sec)
-            <input id="imageExportFrameDelay" type="number" min="1" max="10" step="0.1" value="1">
-          </label>
-          <button type="button" id="imageExportPreviewPlay">▶ Play</button>
-          <div id="imageExportPreviewDuration" class="image-export-preview-duration">Total duration: 0 seconds</div>
+        <div class="modal-actions">
+          <button type="button" data-action="close">Close</button>
         </div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button type="button" id="imageExportDownloadBefore" disabled>Before</button>
-      <button type="button" id="imageExportDownloadAfter" disabled>After</button>
-      <button type="button" data-action="export-mp4">MP4</button>
-      <button type="button" data-action="export-animated-gif">Animated GIF</button>
-      <button type="button" data-action="export-images">ZIP</button>
-      <button type="button" class="button-cancel" data-action="cancel">Cancel</button>
-    </div>
-  </form>
-</dialog>
-<dialog id="imageExportPaletteDialog" class="modal">
-  <form method="dialog" class="modal-card image-export-palette-dialog-card">
-    <div class="workspace-header"><h2 id="imageExportPaletteDialogTitle">Palette Preview</h2></div>
-    <div class="image-export-palette-dialog-layout">
-      <div class="image-export-palette-dialog-stage">
-        <canvas id="imageExportPaletteDialogCanvas" width="640" height="640"></canvas>
-      </div>
-      <div class="image-export-palette-inspector">
-        <div id="imageExportPaletteSample" class="image-export-palette-sample"></div>
-        <label>Hex
-          <input id="imageExportPaletteHex" type="text" readonly>
-        </label>
-        <label>RGB
-          <input id="imageExportPaletteRgb" type="text" readonly>
-        </label>
-        <label>HSV
-          <input id="imageExportPaletteHsv" type="text" readonly>
-        </label>
-        <label>LCh
-          <input id="imageExportPaletteLch" type="text" readonly>
-        </label>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button type="button" data-action="close">Close</button>
-    </div>
-  </form>
-</dialog>
-<dialog id="dataImageDialog" class="modal">
-  <form method="dialog" class="modal-card data-image-dialog-card">
-    <div class="workspace-header"><h2 id="dataImageTitle">Image Preview</h2></div>
-    <div class="data-image-stage"><img id="dataImagePreview" alt="Preview"></div>
-    <div class="modal-actions">
-      <button type="button" data-action="close">Close</button>
-    </div>
-  </form>
-</dialog>
-<dialog id="dataTextDialog" class="modal">
-  <form method="dialog" class="modal-card data-text-dialog-card">
-    <div class="workspace-header"><h2 id="dataTextTitle">Data Preview</h2></div>
-    <pre id="dataTextBody" class="data-code"></pre>
-    <div class="modal-actions">
-      <button type="button" data-action="close">Close</button>
-    </div>
-  </form>
-</dialog>
-</body>
+      </form>
+    </dialog>
+    <dialog id="dataImageDialog" class="modal">
+      <form method="dialog" class="modal-card data-image-dialog-card">
+        <div class="workspace-header">
+          <h2 id="dataImageTitle">Image Preview</h2>
+        </div>
+        <div class="data-image-stage">
+          <img id="dataImagePreview" alt="Preview" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" data-action="close">Close</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="dataTextDialog" class="modal">
+      <form method="dialog" class="modal-card data-text-dialog-card">
+        <div class="workspace-header">
+          <h2 id="dataTextTitle">Data Preview</h2>
+        </div>
+        <pre id="dataTextBody" class="data-code"></pre>
+        <div class="modal-actions">
+          <button type="button" data-action="close">Close</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
 </html>
