@@ -690,6 +690,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportPalettePreviewCanvas = document.getElementById(
     "imageExportPalettePreviewCanvas",
   );
+  const imageExportPaletteDialog = document.getElementById(
+    "imageExportPaletteDialog",
+  );
+  const imageExportPaletteDialogTitle = document.getElementById(
+    "imageExportPaletteDialogTitle",
+  );
+  const imageExportPaletteDialogCanvas = document.getElementById(
+    "imageExportPaletteDialogCanvas",
+  );
+  const imageExportPaletteShowHex = document.getElementById(
+    "imageExportPaletteShowHex",
+  );
   const imageExportThresholdWrap = document.getElementById(
     "imageExportDialogThresholdWrap",
   );
@@ -743,6 +755,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportPalette &&
     imageExportPalettePreview &&
     imageExportPalettePreviewCanvas &&
+    imageExportPaletteDialog &&
+    imageExportPaletteDialogTitle &&
+    imageExportPaletteDialogCanvas &&
+    imageExportPaletteShowHex &&
     imageExportThresholdWrap &&
     imageExportThreshold &&
     imageExportThresholdValue &&
@@ -794,62 +810,137 @@ document.addEventListener("DOMContentLoaded", async function () {
         ),
       );
     };
-    const drawPalettePreview = function (canvas, paletteName, cellSize) {
+    const paletteGrid = function (count) {
+      const total = Math.max(1, Number(count) || 1);
+      const exact = {
+        1: [1, 1],
+        2: [2, 1],
+        4: [2, 2],
+        8: [4, 2],
+        16: [4, 4],
+        32: [8, 4],
+        64: [8, 8],
+        128: [16, 8],
+        256: [16, 16],
+      };
+      if (exact[total]) return { cols: exact[total][0], rows: exact[total][1] };
+      const cols = Math.max(1, Math.ceil(Math.sqrt(total)));
+      return { cols: cols, rows: Math.max(1, Math.ceil(total / cols)) };
+    };
+    const paletteHex = function (swatch) {
+      return (
+        "#" +
+        swatch
+          .map(function (value) {
+            return Math.max(0, Math.min(255, Number(value) || 0))
+              .toString(16)
+              .padStart(2, "0");
+          })
+          .join("")
+      );
+    };
+    const paletteTextColor = function (swatch) {
+      const luminance =
+        (0.2126 * swatch[0] + 0.7152 * swatch[1] + 0.0722 * swatch[2]) / 255;
+      return luminance > 0.52 ? "#111111" : "#ffffff";
+    };
+    const drawPalettePreview = function (canvas, paletteName, options) {
       if (!canvas || !TPP.imageExportNamedPalette) return;
       const palette = TPP.imageExportNamedPalette(paletteName || "websafe");
-      const size = Math.max(1, Number(cellSize) || 1);
       const width = Number(canvas.width) || 16;
       const height = Number(canvas.height) || 16;
-      const cols = Math.max(1, Math.ceil(Math.sqrt(palette.length || 1)));
-      const rows = Math.max(1, Math.ceil((palette.length || 1) / cols));
+      const grid = paletteGrid(palette.length || 1);
+      const cols = grid.cols;
+      const rows = grid.rows;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+      const opts = Object.assign(
+        {
+          gap: 0,
+          border: false,
+          showHex: false,
+          padding: 0,
+        },
+        options || {},
+      );
+      const gap = Math.max(0, Number(opts.gap) || 0);
+      const padding = Math.max(0, Number(opts.padding) || 0);
+      const innerWidth = Math.max(1, width - padding * 2);
+      const innerHeight = Math.max(1, height - padding * 2);
+      const cellWidth = innerWidth / cols;
+      const cellHeight = innerHeight / rows;
       ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#f8f2e6";
+      ctx.fillRect(0, 0, width, height);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
       for (let i = 0; i < palette.length; i++) {
         const swatch = palette[i];
         const col = i % cols;
         const row = Math.floor(i / cols);
+        const x = padding + col * cellWidth + gap / 2;
+        const y = padding + row * cellHeight + gap / 2;
+        const w = Math.max(1, cellWidth - gap);
+        const h = Math.max(1, cellHeight - gap);
         ctx.fillStyle =
           "rgb(" + swatch[0] + ", " + swatch[1] + ", " + swatch[2] + ")";
-        ctx.fillRect(col * size, row * size, size, size);
+        ctx.fillRect(x, y, w, h);
+        if (opts.border) {
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(
+            x + 0.5,
+            y + 0.5,
+            Math.max(0, w - 1),
+            Math.max(0, h - 1),
+          );
+        }
+        if (opts.showHex && w >= 48 && h >= 18) {
+          const fontSize = Math.max(
+            10,
+            Math.min(18, Math.floor(Math.min(w / 4.8, h / 2.25))),
+          );
+          ctx.fillStyle = paletteTextColor(swatch);
+          ctx.font =
+            "700 " +
+            fontSize +
+            "px ui-monospace, SFMono-Regular, Menlo, monospace";
+          ctx.fillText(paletteHex(swatch), x + w / 2, y + h / 2);
+        }
       }
     };
     const openPalettePreview = function () {
-      const dialog = document.getElementById("dataImageDialog");
-      const image = document.getElementById("dataImagePreview");
-      const heading = document.getElementById("dataImageTitle");
       if (
-        !dialog ||
-        !image ||
-        !heading ||
-        typeof dialog.showModal !== "function"
+        !imageExportPaletteDialog ||
+        !imageExportPaletteDialogTitle ||
+        !imageExportPaletteDialogCanvas ||
+        !imageExportPaletteShowHex ||
+        typeof imageExportPaletteDialog.showModal !== "function"
       )
         return;
       const paletteName = imageExportPalette.value || "websafe";
-      const palette = TPP.imageExportNamedPalette
-        ? TPP.imageExportNamedPalette(paletteName)
-        : [];
-      const cols = Math.max(
-        4,
-        Math.min(16, Math.ceil(Math.sqrt(palette.length || 1))),
-      );
-      const rows = Math.max(1, Math.ceil((palette.length || 1) / cols));
-      const canvas = document.createElement("canvas");
-      canvas.width = cols * 18;
-      canvas.height = rows * 18;
-      drawPalettePreview(canvas, paletteName, 18);
-      image.src = canvas.toDataURL("image/png");
-      heading.textContent =
+      const palette = TPP.imageExportNamedPalette(paletteName || "websafe");
+      const grid = paletteGrid(palette.length || 1);
+      const cellSize = Math.max(28, Math.min(64, Math.floor(640 / grid.cols)));
+      imageExportPaletteDialogCanvas.width = grid.cols * cellSize + 16;
+      imageExportPaletteDialogCanvas.height = grid.rows * cellSize + 16;
+      drawPalettePreview(imageExportPaletteDialogCanvas, paletteName, {
+        gap: 6,
+        border: true,
+        showHex: !!imageExportPaletteShowHex.checked,
+        padding: 8,
+      });
+      imageExportPaletteDialogTitle.textContent =
         (imageExportPalette.selectedOptions[0]
           ? imageExportPalette.selectedOptions[0].textContent
           : "Palette") + " Preview";
-      if (!dialog.open) dialog.showModal();
+      if (!imageExportPaletteDialog.open) imageExportPaletteDialog.showModal();
     };
     const syncPalettePreview = function () {
       drawPalettePreview(
         imageExportPalettePreviewCanvas,
         imageExportPalette.value || "websafe",
-        1,
+        { gap: 0, border: false, showHex: false, padding: 0 },
       );
       imageExportPalettePreview.disabled = imageExportPalette.disabled;
       imageExportPalettePreview.classList.toggle(
@@ -960,6 +1051,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportPalette.addEventListener("change", function () {
       syncFormatUi();
       saveImageExportUi();
+      if (imageExportPaletteDialog.open) openPalettePreview();
       schedulePreview();
     });
     imageExportThreshold.addEventListener("input", function () {
@@ -984,6 +1076,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       schedulePreview();
     });
     imageExportPalettePreview.addEventListener("click", openPalettePreview);
+    imageExportPaletteShowHex.addEventListener("change", function () {
+      if (imageExportPaletteDialog.open) openPalettePreview();
+    });
     imageExportPreviewPrev.addEventListener("click", function () {
       TPP.imageExportPreviewIndex = TPP.nextImageExportPreviewIndex(-1);
       TPP.renderImageExportPreview();
@@ -1077,6 +1172,20 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     });
     imageExportDialog.addEventListener("close", stopPlayback);
+    imageExportPaletteDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (
+        e.target === imageExportPaletteDialog &&
+        !card &&
+        imageExportPaletteDialog.open
+      ) {
+        imageExportPaletteDialog.close();
+        return;
+      }
+      const closeButton = e.target.closest("[data-action='close']");
+      if (closeButton && imageExportPaletteDialog.open)
+        imageExportPaletteDialog.close();
+    });
     syncPlaybackUi();
   }
 });
