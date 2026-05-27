@@ -681,6 +681,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportEstimate = document.getElementById(
     "imageExportDialogEstimate",
   );
+  const imageExportPreviewPrev = document.getElementById(
+    "imageExportPreviewPrev",
+  );
+  const imageExportPreviewNext = document.getElementById(
+    "imageExportPreviewNext",
+  );
   if (
     imageExportDialog &&
     imageExportPreset &&
@@ -691,7 +697,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportQualityWrap &&
     imageExportQuality &&
     imageExportQualityValue &&
-    imageExportEstimate
+    imageExportEstimate &&
+    imageExportPreviewPrev &&
+    imageExportPreviewNext
   ) {
     const presetValues = ["72", "96", "150", "200", "300", "600"];
     const syncPresetUi = function () {
@@ -728,13 +736,45 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
     TPP.syncImageExportFormatUi = syncFormatUi;
     TPP.updateImageExportEstimate = updateEstimate;
+    const schedulePreview = function () {
+      clearTimeout(TPP.imageExportPreviewTimer);
+      TPP.imageExportPreviewTimer = setTimeout(function () {
+        TPP.renderImageExportPreview();
+      }, 120);
+    };
     imageExportPreset.addEventListener("change", function () {
       syncPresetUi();
       updateEstimate();
+      schedulePreview();
     });
-    imageExportFormat.addEventListener("change", syncFormatUi);
-    imageExportQuality.addEventListener("input", syncFormatUi);
-    imageExportDpi.addEventListener("input", updateEstimate);
+    imageExportFormat.addEventListener("change", function () {
+      syncFormatUi();
+      schedulePreview();
+    });
+    imageExportColorDepth.addEventListener("change", schedulePreview);
+    imageExportQuality.addEventListener("input", function () {
+      syncFormatUi();
+      schedulePreview();
+    });
+    imageExportDpi.addEventListener("input", function () {
+      updateEstimate();
+      schedulePreview();
+    });
+    imageExportPreviewPrev.addEventListener("click", function () {
+      TPP.imageExportPreviewIndex = Math.max(
+        0,
+        (TPP.imageExportPreviewIndex || 0) - 1,
+      );
+      TPP.renderImageExportPreview();
+    });
+    imageExportPreviewNext.addEventListener("click", function () {
+      const count = TPP.buildPages().length;
+      TPP.imageExportPreviewIndex = Math.min(
+        Math.max(0, count - 1),
+        (TPP.imageExportPreviewIndex || 0) + 1,
+      );
+      TPP.renderImageExportPreview();
+    });
     imageExportDialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");
       if (e.target === imageExportDialog && !card && imageExportDialog.open) {
@@ -815,7 +855,9 @@ TPP.openImageExportDialog = function () {
   customWrap.hidden = preset.value !== "custom";
   if (TPP.syncImageExportFormatUi) TPP.syncImageExportFormatUi();
   if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
+  TPP.imageExportPreviewIndex = 0;
   dialog.showModal();
+  TPP.renderImageExportPreview();
 };
 
 TPP.assetDialogTarget = null;
@@ -1184,6 +1226,89 @@ TPP.imageExportPixels = function (dpi) {
     width: Math.round(settings.page.w * targetDpi),
     height: Math.round(settings.page.h * targetDpi),
   };
+};
+TPP.imageExportPreviewIndex = 0;
+TPP.renderImageExportPreview = async function () {
+  const dialog = document.getElementById("imageExportDialog");
+  const stage = document.getElementById("imageExportPreviewStage");
+  const label = document.getElementById("imageExportPreviewLabel");
+  const format = document.getElementById("imageExportDialogFormat");
+  const colorDepth = document.getElementById("imageExportDialogColorDepth");
+  const quality = document.getElementById("imageExportDialogQuality");
+  const dpi = document.getElementById("imageExportDialogDpi");
+  if (
+    !dialog ||
+    !dialog.open ||
+    !stage ||
+    !label ||
+    !format ||
+    !colorDepth ||
+    !quality ||
+    !dpi ||
+    !TPP.renderImageExportPreviewCanvas
+  )
+    return;
+  TPP.sync("nosave");
+  const pages = TPP.buildPages();
+  if (!pages.length) {
+    stage.innerHTML =
+      '<div class="image-export-preview-empty">No pages available to preview</div>';
+    label.textContent = "No preview pages";
+    return;
+  }
+  TPP.imageExportPreviewIndex = Math.max(
+    0,
+    Math.min(TPP.imageExportPreviewIndex || 0, pages.length - 1),
+  );
+  label.textContent =
+    "Preview page " + (TPP.imageExportPreviewIndex + 1) + " of " + pages.length;
+  const token = (TPP.imageExportPreviewToken || 0) + 1;
+  TPP.imageExportPreviewToken = token;
+  stage.innerHTML =
+    '<div class="image-export-preview-empty">Rendering preview...</div>';
+  const settings = TPP.settings();
+  const exportOptions = TPP.imageExportOptions({
+    dpi: Number(dpi.value) || 300,
+    format: format.value || "png",
+    quality: Number(quality.value) || 92,
+    colorDepth: colorDepth.value || "color24",
+  });
+  const previewScale = Math.min(2, Math.max(1, exportOptions.dpi / 150));
+  try {
+    const baseCanvas = await TPP.renderImageExportPreviewCanvas(
+      pages[TPP.imageExportPreviewIndex],
+      settings,
+      previewScale,
+    );
+    if (TPP.imageExportPreviewToken !== token) return;
+    const beforeSrc = TPP.previewDataUrl(baseCanvas, "png", 1);
+    const afterCanvas = TPP.exportCanvasForDepth(
+      baseCanvas,
+      exportOptions.colorDepth,
+    );
+    const afterSrc = TPP.previewDataUrl(
+      afterCanvas,
+      exportOptions.format,
+      exportOptions.quality / 100,
+    );
+    if (TPP.imageExportPreviewToken !== token) return;
+    stage.innerHTML =
+      '<div class="image-export-compare">' +
+      '<img src="' +
+      TPP.esc(beforeSrc) +
+      '" alt="Original preview">' +
+      '<img class="image-export-compare-after" src="' +
+      TPP.esc(afterSrc) +
+      '" alt="Exported preview">' +
+      '<div class="image-export-compare-divider"></div>' +
+      '<div class="image-export-compare-label before">Before</div>' +
+      '<div class="image-export-compare-label after">After</div>' +
+      "</div>";
+  } catch (_error) {
+    if (TPP.imageExportPreviewToken !== token) return;
+    stage.innerHTML =
+      '<div class="image-export-preview-empty">Unable to render preview</div>';
+  }
 };
 TPP.readDataTab = function (validTabs) {
   const state = TPP.readSettingsUi();

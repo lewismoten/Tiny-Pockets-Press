@@ -172,6 +172,42 @@ TPP.exportCanvasForDepth = function (canvas, colorDepth) {
   ctx.putImageData(image, 0, 0);
   return out;
 };
+TPP.renderImageExportPreviewCanvas = async function (page, settings, scale) {
+  const mount = document.createElement("div");
+  mount.style.cssText =
+    "position:fixed;left:-9999px;top:0;pointer-events:none;";
+  document.body.appendChild(mount);
+  try {
+    const shell = document.createElement("div");
+    shell.style.position = "relative";
+    shell.style.width = settings.page.w + "in";
+    shell.style.height = settings.page.h + "in";
+    shell.style.background = "#fff";
+    shell.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
+    mount.appendChild(shell);
+    TPP.renderQr(shell, settings);
+    await TPP.waitForImages(shell);
+    await new Promise(requestAnimationFrame);
+    return await html2canvas(shell, {
+      scale: Math.max(1, Number(scale) || 1),
+      backgroundColor: "#fff",
+    });
+  } finally {
+    mount.remove();
+  }
+};
+TPP.previewDataUrl = function (canvas, format, quality) {
+  const mime =
+    format === "jpeg"
+      ? "image/jpeg"
+      : format === "webp"
+        ? "image/webp"
+        : "image/png";
+  return canvas.toDataURL(
+    mime,
+    format === "png" ? undefined : Math.max(0.01, Math.min(1, quality || 0.92)),
+  );
+};
 TPP.exportImagesZip = async function (options) {
   TPP.sync();
   const settings = TPP.settings();
