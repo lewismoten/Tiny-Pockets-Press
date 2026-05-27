@@ -32,10 +32,10 @@ body {
 #bookTabsBar {
   grid-row: 2;
 }
-#progress {
+#bookActionsBar {
   grid-row: 3;
 }
-#bookActionsBar {
+#progress {
   grid-row: 4;
 }
 .app-shell {
