@@ -996,6 +996,9 @@ input[type="checkbox"] {
   font-size: 0.92rem;
   font-weight: 700;
 }
+.image-export-dialog-card .is-disabled {
+  opacity: 0.55;
+}
 #imageExportDialogQualityWrap {
   display: grid;
   gap: 0.35rem;

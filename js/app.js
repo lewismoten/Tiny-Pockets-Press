@@ -703,7 +703,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       const lossy =
         imageExportFormat.value === "jpeg" ||
         imageExportFormat.value === "webp";
-      imageExportQualityWrap.hidden = !lossy;
+      const colorDepthApplies = ["png", "jpeg", "webp"].includes(
+        imageExportFormat.value,
+      );
+      imageExportQuality.disabled = !lossy;
+      imageExportQualityWrap.classList.toggle("is-disabled", !lossy);
+      imageExportColorDepth.disabled = !colorDepthApplies;
+      imageExportColorDepth.parentElement.classList.toggle(
+        "is-disabled",
+        !colorDepthApplies,
+      );
       imageExportQualityValue.textContent =
         Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) +
         "%";
@@ -717,6 +726,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         pixels.height +
         " pixels per page";
     };
+    TPP.syncImageExportFormatUi = syncFormatUi;
     TPP.updateImageExportEstimate = updateEstimate;
     imageExportPreset.addEventListener("change", function () {
       syncPresetUi();
@@ -799,11 +809,11 @@ TPP.openImageExportDialog = function () {
   colorDepth.value = ui.colorDepth || "color24";
   quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));
   qualityValue.textContent = quality.value + "%";
-  qualityWrap.hidden = !(format.value === "jpeg" || format.value === "webp");
   preset.value = ["72", "96", "150", "200", "300", "600"].includes(String(dpi))
     ? String(dpi)
     : "custom";
   customWrap.hidden = preset.value !== "custom";
+  if (TPP.syncImageExportFormatUi) TPP.syncImageExportFormatUi();
   if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
   dialog.showModal();
 };
