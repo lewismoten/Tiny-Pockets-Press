@@ -1270,8 +1270,9 @@ TPP.renderAbout = function () {
   const latest = TPP.bookLatestSource(book);
   const latestRevisionLabel = latest
     ? String(latest.sourceRevision || 1) +
-      "." +
-      String(latest.sourceSubrevision || 0)
+      (latest.sourceSubrevision
+        ? "." + String(latest.sourceSubrevision || 0)
+        : "")
     : "";
   const original = latest
     ? TPP.library.find(function (candidate) {
@@ -1281,10 +1282,7 @@ TPP.renderAbout = function () {
   const summary = document.getElementById("aboutSummary");
   const panel = document.getElementById("aboutPanel");
   if (!summary || !panel) return;
-  const revisionLabel =
-    String(TPP.bookRevision(book) || 1) +
-    "." +
-    String(TPP.bookSubrevision(book) || 0);
+  const revisionLabel = TPP.bookRevisionLabel(book);
   summary.innerHTML =
     "<strong>Revision " +
     TPP.esc(revisionLabel) +
@@ -1335,18 +1333,25 @@ TPP.renderAbout = function () {
       ),
       TPP.aboutMetaItem("Book ID", TPP.bookId(book)),
       TPP.aboutMetaItem("Revision", String(TPP.bookRevision(book))),
-      TPP.aboutMetaItem("Subrevision", String(TPP.bookSubrevision(book))),
       TPP.aboutMetaItem("Created", TPP.dateTime(TPP.bookCreatedAt(book))),
       TPP.aboutMetaItem("Last Edited", TPP.dateTime(TPP.bookUpdatedAt(book))),
-      TPP.aboutMetaItem(
-        "Last Imported",
-        TPP.dateTime(TPP.bookLastImportedAt(book)),
-      ),
-      TPP.aboutMetaItem(
-        "Last Exported",
-        TPP.dateTime(TPP.bookLastExportedAt(book)),
-      ),
-    ].join("") +
+    ]
+      .concat(
+        TPP.bookSubrevision(book)
+          ? [TPP.aboutMetaItem("Subrevision", String(TPP.bookSubrevision(book)))]
+          : [],
+      )
+      .concat(
+        TPP.bookLastImportedAt(book)
+          ? [TPP.aboutMetaItem("Last Imported", TPP.dateTime(TPP.bookLastImportedAt(book)))]
+          : [],
+      )
+      .concat(
+        TPP.bookLastExportedAt(book)
+          ? [TPP.aboutMetaItem("Last Exported", TPP.dateTime(TPP.bookLastExportedAt(book)))]
+          : [],
+      )
+      .join("") +
     "</div>" +
     "</article>" +
     '<article class="about-provenance">' +

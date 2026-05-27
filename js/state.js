@@ -108,8 +108,7 @@ TPP.nowIso = function () {
 };
 TPP.bookMeta = function (book) {
   if (!book || typeof book !== "object") return {};
-  const fallback = (TPP.fallbackBook && TPP.fallbackBook().meta) || {};
-  book.meta = Object.assign({}, fallback, book.meta || {});
+  book.meta = Object.assign({}, book.meta || {});
   return book.meta;
 };
 TPP.bookId = function (book) {
@@ -143,6 +142,20 @@ TPP.bookCoverPreviewImageId = function (book) {
 TPP.bookPageCount = function (book) {
   const count = Number(TPP.bookMeta(book)._pageCount);
   return Number.isFinite(count) && count > 0 ? count : 0;
+};
+TPP.bookRevisionLabel = function (book) {
+  const revision = TPP.bookRevision(book);
+  const subrevision = TPP.bookSubrevision(book);
+  return subrevision ? revision + "." + subrevision : String(revision);
+};
+TPP.compactBookMeta = function (book) {
+  if (!book || !book.meta || typeof book.meta !== "object") return;
+  const meta = book.meta;
+  if (!meta.subrevision) delete meta.subrevision;
+  if (!meta.lastExportedAt) delete meta.lastExportedAt;
+  if (!meta.lastImportedAt) delete meta.lastImportedAt;
+  if (!Array.isArray(meta.provenance) || !meta.provenance.length)
+    delete meta.provenance;
 };
 TPP.bookExportName = function (book) {
   if (!book) return "book.json";
@@ -522,6 +535,7 @@ TPP.hydrateBookDates = function (book) {
   ].forEach(function (key) {
     delete book[key];
   });
+  TPP.compactBookMeta(book);
   book.schemaVersion = TPP.SCHEMA_VERSION;
   return book;
 };
@@ -1380,6 +1394,7 @@ TPP.save = function (mode, bookId) {
       TPP.bookFingerprints[currentId] = current;
       TPP.bookDraftFingerprints[currentId] = current;
     }
+    TPP.compactBookMeta(book);
   });
   localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
 };
