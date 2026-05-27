@@ -12,6 +12,8 @@
     display: block;
   }
   .app-header,
+  #bookChromeBar,
+  #progress,
   .settings,
   .summary,
   .sheet-title,
