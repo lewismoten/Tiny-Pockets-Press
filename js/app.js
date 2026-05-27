@@ -1516,6 +1516,10 @@ TPP.renderImageExportPreview = async function () {
     TPP.setImageExportPreviewDownloads(null);
     stage.innerHTML =
       '<div class="image-export-preview-empty">Unable to render preview</div>';
+    if (exportOptions.format === "gif")
+      TPP.toast(
+        "GIF preview failed. Try PNG, or a lower DPI if the frame is large.",
+      );
   }
 };
 TPP.readDataTab = function (validTabs) {

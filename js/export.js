@@ -246,12 +246,14 @@ TPP.encodeGifBlob = function (canvas, quality) {
         width: canvas.width,
         height: canvas.height,
       });
-      const ctx = canvas.getContext("2d");
       gif.on("finished", resolve);
       gif.on("abort", function () {
         reject(new Error("GIF encoding aborted"));
       });
-      gif.addFrame(ctx, { copy: true, delay: 250 });
+      gif.on("error", function (error) {
+        reject(error instanceof Error ? error : new Error(String(error)));
+      });
+      gif.addFrame(canvas, { copy: true, delay: 250 });
       gif.render();
     } catch (error) {
       reject(error);
