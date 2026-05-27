@@ -251,8 +251,12 @@ TPP.gifPaletteSize = function (quality) {
 TPP.encodeGifBlob = async function (canvas, quality) {
   if (!canvas) throw new Error("Canvas required");
   const lib = await TPP.loadGifEncoder();
-  const ctx = canvas.getContext("2d");
-  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const readCanvas = document.createElement("canvas");
+  readCanvas.width = canvas.width;
+  readCanvas.height = canvas.height;
+  const readCtx = readCanvas.getContext("2d", { willReadFrequently: true });
+  readCtx.drawImage(canvas, 0, 0);
+  const image = readCtx.getImageData(0, 0, canvas.width, canvas.height);
   const rgba = image.data;
   const palette = lib.quantize(rgba, TPP.gifPaletteSize(quality));
   const index = lib.applyPalette(rgba, palette);
