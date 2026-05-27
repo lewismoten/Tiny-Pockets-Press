@@ -696,6 +696,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportPreviewNext = document.getElementById(
     "imageExportPreviewNext",
   );
+  const imageExportDownloadBefore = document.getElementById(
+    "imageExportDownloadBefore",
+  );
+  const imageExportDownloadAfter = document.getElementById(
+    "imageExportDownloadAfter",
+  );
   if (
     imageExportDialog &&
     imageExportPreset &&
@@ -711,7 +717,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportThresholdValue &&
     imageExportEstimate &&
     imageExportPreviewPrev &&
-    imageExportPreviewNext
+    imageExportPreviewNext &&
+    imageExportDownloadBefore &&
+    imageExportDownloadAfter
   ) {
     const presetValues = ["72", "96", "150", "200", "300", "600"];
     const syncPresetUi = function () {
@@ -799,6 +807,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         (TPP.imageExportPreviewIndex || 0) + 1,
       );
       TPP.renderImageExportPreview();
+    });
+    imageExportDownloadBefore.addEventListener("click", function () {
+      TPP.downloadImageExportPreview("before");
+    });
+    imageExportDownloadAfter.addEventListener("click", function () {
+      TPP.downloadImageExportPreview("after");
     });
     imageExportDialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");
@@ -1284,6 +1298,27 @@ TPP.imageExportPixels = function (dpi) {
 };
 TPP.imageExportPreviewIndex = 0;
 TPP.imageExportPreviewSplit = 50;
+TPP.imageExportPreviewAssets = null;
+TPP.setImageExportPreviewDownloads = function (assets) {
+  TPP.imageExportPreviewAssets = assets || null;
+  const beforeButton = document.getElementById("imageExportDownloadBefore");
+  const afterButton = document.getElementById("imageExportDownloadAfter");
+  if (beforeButton) beforeButton.disabled = !(assets && assets.before);
+  if (afterButton) afterButton.disabled = !(assets && assets.after);
+};
+TPP.downloadImageExportPreview = async function (which) {
+  const assets = TPP.imageExportPreviewAssets;
+  const entry =
+    which === "after" ? assets && assets.after : assets && assets.before;
+  if (!entry || !entry.src || !entry.name) return;
+  try {
+    const response = await fetch(entry.src);
+    const blob = await response.blob();
+    TPP.downloadBlob(entry.name, blob);
+  } catch (_error) {
+    TPP.toast("Unable to download preview image.");
+  }
+};
 TPP.applyImageExportPreviewSplit = function (split) {
   const compare = document.querySelector(
     "#imageExportPreviewStage .image-export-compare",
@@ -1358,6 +1393,7 @@ TPP.renderImageExportPreview = async function () {
   TPP.sync("nosave");
   const pages = TPP.buildPages();
   if (!pages.length) {
+    TPP.setImageExportPreviewDownloads(null);
     stage.innerHTML =
       '<div class="image-export-preview-empty">No pages available to preview</div>';
     label.textContent = "No preview pages";
@@ -1371,6 +1407,7 @@ TPP.renderImageExportPreview = async function () {
     "Preview page " + (TPP.imageExportPreviewIndex + 1) + " of " + pages.length;
   const token = (TPP.imageExportPreviewToken || 0) + 1;
   TPP.imageExportPreviewToken = token;
+  TPP.setImageExportPreviewDownloads(null);
   stage.innerHTML =
     '<div class="image-export-preview-empty">Rendering preview...</div>';
   const settings = TPP.settings();
@@ -1412,6 +1449,14 @@ TPP.renderImageExportPreview = async function () {
       exportOptions.quality / 100,
     );
     if (TPP.imageExportPreviewToken !== token) return;
+    const baseName = (
+      (settings.title || "tiny-book") +
+      "-page-" +
+      (TPP.imageExportPreviewIndex + 1)
+    )
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
     stage.innerHTML =
       '<div class="image-export-compare">' +
       '<img draggable="false" src="' +
@@ -1434,9 +1479,23 @@ TPP.renderImageExportPreview = async function () {
       ) +
       "</span></div>" +
       "</div>";
+    TPP.setImageExportPreviewDownloads({
+      before: {
+        src: beforeSrc,
+        name: baseName + "-before.png",
+      },
+      after: {
+        src: afterSrc,
+        name:
+          baseName +
+          "-after." +
+          (exportOptions.format === "jpeg" ? "jpg" : exportOptions.format),
+      },
+    });
     TPP.bindImageExportPreviewDrag();
   } catch (_error) {
     if (TPP.imageExportPreviewToken !== token) return;
+    TPP.setImageExportPreviewDownloads(null);
     stage.innerHTML =
       '<div class="image-export-preview-empty">Unable to render preview</div>';
   }
