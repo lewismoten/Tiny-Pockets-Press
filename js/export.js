@@ -265,7 +265,9 @@ TPP.loadImageExportPalettes = async function () {
     if (!meta || !meta.file) return;
     const fileResponse = await fetch(meta.file, { cache: "no-cache" });
     if (!fileResponse.ok)
-      throw new Error("Palette file load failed: " + id + " " + fileResponse.status);
+      throw new Error(
+        "Palette file load failed: " + id + " " + fileResponse.status,
+      );
     const palettePayload = await fileResponse.json();
     if (
       !palettePayload ||
