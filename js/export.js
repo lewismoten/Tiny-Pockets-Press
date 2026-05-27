@@ -168,6 +168,13 @@ TPP.imageExportOptions = function (options) {
               "colors64",
               "colors128",
               "colors256",
+              "gray4",
+              "gray8",
+              "gray16",
+              "gray32",
+              "gray64",
+              "gray128",
+              "gray256",
               "windows16",
               "ansi16",
               "xterm256",
@@ -225,6 +232,15 @@ TPP.imageExportSizedPalette = function (count) {
     0,
     count,
   );
+};
+TPP.imageExportGrayscalePalette = function (count) {
+  const palette = [];
+  const total = Math.max(2, Number(count) || 2);
+  for (let i = 0; i < total; i++) {
+    const gray = Math.round((255 * i) / (total - 1));
+    palette.push([gray, gray, gray]);
+  }
+  return palette;
 };
 TPP.imageExportNamedPalette = function (name) {
   const ansi16 = [
@@ -331,6 +347,17 @@ TPP.imageExportNamedPalette = function (name) {
     colors128: 128,
     colors256: 256,
   };
+  const grayCountMap = {
+    gray4: 4,
+    gray8: 8,
+    gray16: 16,
+    gray32: 32,
+    gray64: 64,
+    gray128: 128,
+    gray256: 256,
+  };
+  if (grayCountMap[name])
+    return TPP.imageExportGrayscalePalette(grayCountMap[name]);
   return TPP.imageExportSizedPalette(countMap[name] || 256);
 };
 TPP.applyIndexedPalette = function (data, palette) {
