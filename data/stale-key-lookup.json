@@ -246,6 +246,42 @@
     "note": "Typography settings now live under text."
   },
   {
+    "path": "coverOverflowImage",
+    "schemaVersion": 9,
+    "movedTo": ["coverFront.overflowImage"],
+    "note": "Front-cover frame and background settings now live under coverFront."
+  },
+  {
+    "path": "coverClipImageToFrame",
+    "schemaVersion": 9,
+    "movedTo": ["coverFront.clipImageToFrame"],
+    "note": "Front-cover frame and background settings now live under coverFront."
+  },
+  {
+    "path": "coverBg1",
+    "schemaVersion": 9,
+    "movedTo": ["coverFront.bg1"],
+    "note": "Front-cover frame and background settings now live under coverFront."
+  },
+  {
+    "path": "coverBg2",
+    "schemaVersion": 9,
+    "movedTo": ["coverFront.bg2"],
+    "note": "Front-cover frame and background settings now live under coverFront."
+  },
+  {
+    "path": "coverBorder",
+    "schemaVersion": 9,
+    "movedTo": ["coverFront.border"],
+    "note": "Front-cover frame and background settings now live under coverFront."
+  },
+  {
+    "path": "coverBorderOn",
+    "schemaVersion": 9,
+    "movedTo": ["coverFront.borderOn"],
+    "note": "Front-cover frame and background settings now live under coverFront."
+  },
+  {
     "path": "includeToc",
     "schemaVersion": 7,
     "movedTo": ["toc.enabled"],

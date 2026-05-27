@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 8;
+TPP.SCHEMA_VERSION = 9;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -261,6 +261,42 @@ TPP.defaultStaleKeyLookup = [
     note: "Typography settings now live under text.",
   },
   {
+    path: "coverOverflowImage",
+    schemaVersion: 9,
+    movedTo: ["coverFront.overflowImage"],
+    note: "Front-cover frame and background settings now live under coverFront.",
+  },
+  {
+    path: "coverClipImageToFrame",
+    schemaVersion: 9,
+    movedTo: ["coverFront.clipImageToFrame"],
+    note: "Front-cover frame and background settings now live under coverFront.",
+  },
+  {
+    path: "coverBg1",
+    schemaVersion: 9,
+    movedTo: ["coverFront.bg1"],
+    note: "Front-cover frame and background settings now live under coverFront.",
+  },
+  {
+    path: "coverBg2",
+    schemaVersion: 9,
+    movedTo: ["coverFront.bg2"],
+    note: "Front-cover frame and background settings now live under coverFront.",
+  },
+  {
+    path: "coverBorder",
+    schemaVersion: 9,
+    movedTo: ["coverFront.border"],
+    note: "Front-cover frame and background settings now live under coverFront.",
+  },
+  {
+    path: "coverBorderOn",
+    schemaVersion: 9,
+    movedTo: ["coverFront.borderOn"],
+    note: "Front-cover frame and background settings now live under coverFront.",
+  },
+  {
     path: "includeToc",
     schemaVersion: 7,
     movedTo: ["toc.enabled"],
@@ -329,6 +365,14 @@ TPP.TEXT_FIELDS = [
   "lineHeight",
   "paraGap",
   "justify",
+];
+TPP.COVER_FRONT_FIELDS = [
+  "coverOverflowImage",
+  "coverClipImageToFrame",
+  "coverBg1",
+  "coverBg2",
+  "coverBorder",
+  "coverBorderOn",
 ];
 
 TPP.clone = function (obj) {
@@ -539,6 +583,70 @@ TPP.syncTextFromLegacyFields = function (book) {
 TPP.compactTextInfo = function (book) {
   if (!book || !book.text || typeof book.text !== "object") return;
   TPP.TEXT_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.coverFrontInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().coverFront) || {};
+  book.coverFront = Object.assign({}, fallback, book.coverFront || {});
+  return book.coverFront;
+};
+TPP.attachCoverFrontAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  const map = {
+    coverOverflowImage: "overflowImage",
+    coverClipImageToFrame: "clipImageToFrame",
+    coverBg1: "bg1",
+    coverBg2: "bg2",
+    coverBorder: "border",
+    coverBorderOn: "borderOn",
+  };
+  Object.keys(map).forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.coverFrontInfo(book)[map[field]];
+      },
+      set: function (value) {
+        TPP.coverFrontInfo(book)[map[field]] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncCoverFrontFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const coverFront = TPP.coverFrontInfo(book);
+  if ("coverOverflowImage" in book)
+    coverFront.overflowImage = book.coverOverflowImage;
+  if ("coverClipImageToFrame" in book)
+    coverFront.clipImageToFrame = book.coverClipImageToFrame;
+  if ("coverBg1" in book) coverFront.bg1 = book.coverBg1;
+  if ("coverBg2" in book) coverFront.bg2 = book.coverBg2;
+  if ("coverBorder" in book) coverFront.border = book.coverBorder;
+  if ("coverBorderOn" in book) coverFront.borderOn = book.coverBorderOn;
+};
+TPP.compactCoverFrontInfo = function (book) {
+  if (!book || !book.coverFront || typeof book.coverFront !== "object") return;
+  TPP.COVER_FRONT_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
       descriptor &&
@@ -916,6 +1024,9 @@ TPP.bookFingerprint = function (book) {
   TPP.TEXT_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.COVER_FRONT_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.TOC_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -935,6 +1046,8 @@ TPP.hydrateBookDates = function (book) {
   TPP.attachPageAccessors(book);
   TPP.syncTextFromLegacyFields(book);
   TPP.attachTextAccessors(book);
+  TPP.syncCoverFrontFromLegacyFields(book);
+  TPP.attachCoverFrontAccessors(book);
   TPP.syncTocFromLegacyFields(book);
   TPP.attachTocAccessors(book);
   if (
@@ -1006,6 +1119,7 @@ TPP.hydrateBookDates = function (book) {
   TPP.compactBookInfo(book);
   TPP.compactPageInfo(book);
   TPP.compactTextInfo(book);
+  TPP.compactCoverFrontInfo(book);
   TPP.compactTocInfo(book);
   TPP.compactBookMeta(book);
   book.schemaVersion = TPP.SCHEMA_VERSION;

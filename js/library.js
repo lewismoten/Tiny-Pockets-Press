@@ -459,6 +459,15 @@ TPP.dataSchemaKeys = function (context) {
       "paraGap",
       "justify",
     ]);
+  if (context === "coverFront")
+    return new Set([
+      "overflowImage",
+      "clipImageToFrame",
+      "bg1",
+      "bg2",
+      "border",
+      "borderOn",
+    ]);
   if (context === "bookInfo")
     return new Set([
       "title",
@@ -802,11 +811,13 @@ TPP.dataValueHtml = function (book, key, value, compact) {
             ? "page"
             : key === "text"
               ? "text"
-              : key === "bookInfo"
-                ? "bookInfo"
-                : key === "toc"
-                  ? "toc"
-                  : null,
+              : key === "coverFront"
+                ? "coverFront"
+                : key === "bookInfo"
+                  ? "bookInfo"
+                  : key === "toc"
+                    ? "toc"
+                    : null,
     );
   return TPP.dataPrimitiveHtml(book, key, value);
 };
@@ -1009,6 +1020,7 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.meta;
   delete copy.page;
   delete copy.text;
+  delete copy.coverFront;
   delete copy.bookInfo;
   delete copy.toc;
   delete copy.files;
@@ -1062,6 +1074,16 @@ TPP.dataTabs = function (book, stale) {
         book && book.text ? book.text : {},
         false,
         "text",
+      ),
+    },
+    {
+      id: "cover-front",
+      label: "Cover Front",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.coverFront ? book.coverFront : {},
+        false,
+        "coverFront",
       ),
     },
     {

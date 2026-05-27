@@ -197,6 +197,14 @@ TPP.fallbackBook = function () {
   const stamp = new Date().toISOString();
   return {
     schemaVersion: TPP.SCHEMA_VERSION || 1,
+    coverFront: {
+      overflowImage: true,
+      clipImageToFrame: false,
+      bg1: "#182b4d",
+      bg2: "#0d0a14",
+      border: "#12af4f",
+      borderOn: true,
+    },
     page: {
       pageSize: "one",
       sheetSize: "letter",
@@ -260,13 +268,7 @@ TPP.fallbackBook = function () {
     coverShowAuthor: true,
     coverShowSeries: true,
     coverShowPublisher: false,
-    coverOverflowImage: true,
-    coverClipImageToFrame: false,
-    coverBg1: "#182b4d",
-    coverBg2: "#0d0a14",
     coverText: "#f4678a",
-    coverBorder: "#12af4f",
-    coverBorderOn: true,
     files: [],
     textElements: [],
     imageElements: [],
