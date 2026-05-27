@@ -2257,17 +2257,22 @@ TPP.bindSettingsUiPersistence = function () {
   });
 };
 TPP.renderSidebarMode = function () {
+  const appShell = document.querySelector(".app-shell");
   const controls = document.querySelector(".controls");
+  const settings = document.querySelector(".settings");
   const dataSidebar = document.getElementById("dataSidebar");
   const bookActionsBar = document.getElementById("bookActionsBar");
   const bookTabsBar = document.getElementById("bookTabsBar");
   const dataMode = TPP.view === "data";
   const softwareMode = TPP.view === "software";
   const libraryMode = TPP.view === "library";
+  const hideBookChrome = softwareMode || libraryMode;
+  if (appShell) appShell.classList.toggle("no-sidebar", hideBookChrome);
+  if (settings) settings.hidden = hideBookChrome;
   if (controls) controls.hidden = dataMode || softwareMode || libraryMode;
   if (dataSidebar) dataSidebar.hidden = !dataMode;
-  if (bookTabsBar) bookTabsBar.hidden = softwareMode || libraryMode;
-  if (bookActionsBar) bookActionsBar.hidden = softwareMode || libraryMode;
+  if (bookTabsBar) bookTabsBar.hidden = hideBookChrome;
+  if (bookActionsBar) bookActionsBar.hidden = hideBookChrome;
 };
 
 TPP.switchView = function (view, fromHash) {

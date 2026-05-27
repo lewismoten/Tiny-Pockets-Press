@@ -83,6 +83,9 @@ button.primary {
   grid-template-columns: minmax(360px, 480px) 1fr;
   min-height: 0;
 }
+.app-shell.no-sidebar {
+  grid-template-columns: 1fr;
+}
 .settings {
   min-height: 0;
   overflow: hidden;
