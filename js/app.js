@@ -920,7 +920,13 @@ TPP.openImageExportDialog = function () {
   if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
   TPP.imageExportPreviewIndex = 0;
   dialog.showModal();
-  TPP.renderImageExportPreview();
+  if (typeof window.requestAnimationFrame === "function") {
+    window.requestAnimationFrame(function () {
+      TPP.scheduleImageExportPreview();
+    });
+  } else {
+    TPP.scheduleImageExportPreview();
+  }
 };
 
 TPP.assetDialogTarget = null;
