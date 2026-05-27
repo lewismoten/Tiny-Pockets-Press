@@ -567,9 +567,21 @@ input[type="checkbox"] {
   color: #f7f0e7;
   padding: 0.7rem 0.85rem;
 }
+.data-raw-details details,
+.data-code-json details {
+  background: transparent;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+}
 .data-raw-details summary {
   margin: 0 0 0.6rem;
   color: #f7f0e7;
+}
+.data-raw-details details > summary,
+.data-code-json details > summary {
+  margin-bottom: 0;
 }
 .data-raw-details[open] summary {
   margin-bottom: 0.6rem;
