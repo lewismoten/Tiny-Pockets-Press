@@ -1050,6 +1050,8 @@ input[type="checkbox"] {
   position: relative;
   width: 100%;
   height: 100%;
+  cursor: ew-resize;
+  user-select: none;
 }
 .image-export-compare img {
   display: block;
@@ -1071,6 +1073,7 @@ input[type="checkbox"] {
   background: #fff;
   box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35);
   transform: translateX(-50%);
+  pointer-events: none;
 }
 .image-export-compare-label {
   position: absolute;

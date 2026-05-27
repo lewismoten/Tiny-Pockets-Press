@@ -1283,6 +1283,52 @@ TPP.imageExportPixels = function (dpi) {
   };
 };
 TPP.imageExportPreviewIndex = 0;
+TPP.imageExportPreviewSplit = 50;
+TPP.applyImageExportPreviewSplit = function (split) {
+  const compare = document.querySelector(
+    "#imageExportPreviewStage .image-export-compare",
+  );
+  if (!compare) return;
+  const normalized = Math.max(0, Math.min(100, Number(split) || 50));
+  TPP.imageExportPreviewSplit = normalized;
+  const after = compare.querySelector(".image-export-compare-after");
+  const divider = compare.querySelector(".image-export-compare-divider");
+  if (after) after.style.clipPath = "inset(0 0 0 " + normalized + "%)";
+  if (divider) divider.style.left = normalized + "%";
+};
+TPP.bindImageExportPreviewDrag = function () {
+  const compare = document.querySelector(
+    "#imageExportPreviewStage .image-export-compare",
+  );
+  if (!compare) return;
+  let dragging = false;
+  const update = function (clientX) {
+    const rect = compare.getBoundingClientRect();
+    if (!rect.width) return;
+    const split = ((clientX - rect.left) / rect.width) * 100;
+    TPP.applyImageExportPreviewSplit(split);
+  };
+  compare.onpointerdown = function (event) {
+    dragging = true;
+    compare.setPointerCapture(event.pointerId);
+    update(event.clientX);
+  };
+  compare.onpointermove = function (event) {
+    if (!dragging) return;
+    update(event.clientX);
+  };
+  compare.onpointerup = function (event) {
+    dragging = false;
+    if (compare.hasPointerCapture(event.pointerId))
+      compare.releasePointerCapture(event.pointerId);
+  };
+  compare.onpointercancel = function (event) {
+    dragging = false;
+    if (compare.hasPointerCapture(event.pointerId))
+      compare.releasePointerCapture(event.pointerId);
+  };
+  TPP.applyImageExportPreviewSplit(TPP.imageExportPreviewSplit);
+};
 TPP.renderImageExportPreview = async function () {
   const dialog = document.getElementById("imageExportDialog");
   const stage = document.getElementById("imageExportPreviewStage");
@@ -1388,6 +1434,7 @@ TPP.renderImageExportPreview = async function () {
       ) +
       "</span></div>" +
       "</div>";
+    TPP.bindImageExportPreviewDrag();
   } catch (_error) {
     if (TPP.imageExportPreviewToken !== token) return;
     stage.innerHTML =
