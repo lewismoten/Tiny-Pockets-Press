@@ -156,7 +156,10 @@ TPP.imageExportOptions = function (options) {
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
     colorDepth: colorDepth,
     threshold: Math.max(0, Math.min(255, Number(source.threshold) || 128)),
-    frameDelay: Math.max(50, Math.min(5000, Number(source.frameDelay) || 300)),
+    frameDelay: Math.max(
+      1000,
+      Math.min(10000, Number(source.frameDelay) || 1000),
+    ),
     palette:
       requestedDepth === "websafe"
         ? "websafe"

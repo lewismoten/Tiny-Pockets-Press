@@ -796,8 +796,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
     const syncPlaybackUi = function () {
       imageExportPreviewPlay.textContent = TPP.imageExportPreviewPlaying
-        ? "Pause"
-        : "Play";
+        ? "⏸ Pause"
+        : "▶ Play";
     };
     const stopPlayback = function () {
       clearTimeout(TPP.imageExportPreviewPlaybackTimer);
@@ -808,10 +808,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const schedulePlayback = function () {
       clearTimeout(TPP.imageExportPreviewPlaybackTimer);
       if (!TPP.imageExportPreviewPlaying || !imageExportDialog.open) return;
-      const delay = Math.max(
-        50,
-        Math.min(5000, Number(imageExportFrameDelay.value) || 300),
-      );
+      const delay = TPP.imageExportFrameDelayMs(imageExportFrameDelay.value);
       TPP.imageExportPreviewPlaybackTimer = setTimeout(function () {
         TPP.imageExportPreviewIndex = TPP.nextImageExportPreviewIndex(1);
         TPP.renderImageExportPreview();
@@ -848,9 +845,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       schedulePreview();
     });
     imageExportFrameDelay.addEventListener("input", function () {
-      imageExportFrameDelay.value = Math.max(
-        50,
-        Math.min(5000, Number(imageExportFrameDelay.value) || 300),
+      imageExportFrameDelay.value = TPP.imageExportFrameDelaySeconds(
+        TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
       );
       refreshPlayback();
     });
@@ -925,10 +921,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           colorDepth: colorDepth,
           palette: palette,
           threshold: threshold,
-          frameDelay: Math.max(
-            50,
-            Math.min(5000, Number(imageExportFrameDelay.value) || 300),
-          ),
+          frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
         });
         stopPlayback();
         if (imageExportDialog.open) imageExportDialog.close();
@@ -939,10 +932,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           colorDepth: colorDepth,
           palette: palette,
           threshold: threshold,
-          frameDelay: Math.max(
-            50,
-            Math.min(5000, Number(imageExportFrameDelay.value) || 300),
-          ),
+          frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
         };
         if (button.dataset.action === "export-animated-gif") {
           TPP.exportAnimatedGif(exportOptions);
@@ -1007,7 +997,7 @@ TPP.openImageExportDialog = function () {
   quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));
   palette.value =
     ui.palette || (ui.colorDepth === "websafe" ? "websafe" : "websafe");
-  frameDelay.value = Math.max(50, Math.min(5000, Number(ui.frameDelay) || 300));
+  frameDelay.value = TPP.imageExportFrameDelaySeconds(ui.frameDelay || 300);
   threshold.value = Math.max(0, Math.min(255, Number(ui.threshold) || 128));
   qualityValue.textContent = quality.value + "%";
   thresholdValue.textContent = threshold.value;
@@ -1421,6 +1411,16 @@ TPP.imageExportPreviewIndex = 0;
 TPP.imageExportPreviewSplit = 50;
 TPP.imageExportPreviewAssets = null;
 TPP.imageExportPreviewPlaying = false;
+TPP.imageExportFrameDelayMs = function (value) {
+  return Math.max(
+    1000,
+    Math.min(10000, Math.round((Number(value) || 1) * 1000)),
+  );
+};
+TPP.imageExportFrameDelaySeconds = function (value) {
+  const ms = Math.max(1000, Math.min(10000, Number(value) || 1000));
+  return (ms / 1000).toFixed(1).replace(/\.0$/, "");
+};
 TPP.nextImageExportPreviewIndex = function (step) {
   const count = TPP.buildPages().length;
   if (!count) return 0;
