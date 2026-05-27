@@ -473,6 +473,32 @@ TPP.dataObjectHtml = function (book, obj, compact, context) {
     return '<div class="data-field"><div class="data-field-name">' + TPP.dataKeyLabelHtml(context || "root", entry[0]) + '</div><div class="data-field-value">' + TPP.dataValueHtml(book, entry[0], entry[1], compact) + "</div></div>";
   }).join("") + "</div>";
 };
+TPP.dataJsonTokenHtml = function (type, text) {
+  return '<span class="json-token ' + type + '">' + TPP.esc(text) + "</span>";
+};
+TPP.dataHighlightedJson = function (value) {
+  return JSON.stringify(value, null, 2).replace(
+    /("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b/g,
+    function (match, stringToken, keyColon, literalToken) {
+      if (stringToken) {
+        if (keyColon) return TPP.dataJsonTokenHtml("key", stringToken) + TPP.esc(keyColon);
+        return TPP.dataJsonTokenHtml("string", stringToken);
+      }
+      if (literalToken === "true" || literalToken === "false") return TPP.dataJsonTokenHtml("boolean", match);
+      if (literalToken === "null") return TPP.dataJsonTokenHtml("null", match);
+      return TPP.dataJsonTokenHtml("number", match);
+    }
+  );
+};
+TPP.dataRawJsonHtml = function (book) {
+  return '<article class="data-card">' +
+    '<div class="data-raw-toolbar"><button type="button" class="primary alt" data-copy-json="1">Copy JSON</button></div>' +
+    '<details class="data-raw-details" open>' +
+      '<summary>Raw JSON</summary>' +
+      '<pre class="data-code data-code-json">' + TPP.dataHighlightedJson(book) + "</pre>" +
+    "</details>" +
+  "</article>";
+};
 TPP.dataTopLevelObject = function (book) {
   const copy = Object.assign({}, book || {});
   delete copy.files;
@@ -487,7 +513,8 @@ TPP.dataTabs = function (book, stale) {
     { id: "files", label: "Files", html: TPP.dataArrayHtml(book, "files", Array.isArray(book.files) ? book.files : [], false) },
     { id: "text-elements", label: "Text Elements", html: TPP.dataArrayHtml(book, "textElements", Array.isArray(book.textElements) ? book.textElements : [], false) },
     { id: "chapters", label: "Chapters", html: TPP.dataArrayHtml(book, "chapters", Array.isArray(book.chapters) ? book.chapters : [], false) },
-    { id: "image-elements", label: "Image Elements", html: TPP.dataArrayHtml(book, "imageElements", Array.isArray(book.imageElements) ? book.imageElements : [], false) }
+    { id: "image-elements", label: "Image Elements", html: TPP.dataArrayHtml(book, "imageElements", Array.isArray(book.imageElements) ? book.imageElements : [], false) },
+    { id: "raw-json", label: "Raw JSON", html: TPP.dataRawJsonHtml(book), bottom: true }
   ];
   if (stale.length) tabs.push({ id: "stale", label: "Stale Keys", html: TPP.dataStaleReportHtml(stale), count: stale.length });
   return tabs;
@@ -500,12 +527,18 @@ TPP.renderDataSidebar = function (tabs, activeId) {
   const sidebar = document.getElementById("dataSidebar");
   if (!sidebar) return;
   const active = tabs.find(function (tab) { return tab.id === activeId; }) || tabs[0];
+  const primaryTabs = tabs.filter(function (tab) { return !tab.bottom; });
+  const bottomTabs = tabs.filter(function (tab) { return tab.bottom; });
   sidebar.innerHTML = '<div class="data-sidebar-head"><h2>Book Data</h2><p>Inspect structured sections of the current book.</p></div>' +
-    '<nav class="data-sidebar-nav" aria-label="Data sections">' + tabs.map(function (tab) {
+    '<nav class="data-sidebar-nav" aria-label="Data sections">' + primaryTabs.map(function (tab) {
       const selected = active && tab.id === active.id;
       const label = tab.count ? tab.label + " (" + tab.count + ")" : tab.label;
       return '<button type="button" class="data-sidebar-link' + (selected ? " active" : "") + '" data-data-tab="' + TPP.esc(tab.id) + '">' + TPP.esc(label) + "</button>";
-    }).join("") + "</nav>";
+    }).join("") + "</nav>" +
+    (bottomTabs.length ? '<div class="data-sidebar-footer">' + bottomTabs.map(function (tab) {
+      const selected = active && tab.id === active.id;
+      return '<button type="button" class="data-sidebar-link data-sidebar-link-bottom' + (selected ? " active" : "") + '" data-data-tab="' + TPP.esc(tab.id) + '">' + TPP.esc(tab.label) + "</button>";
+    }).join("") + "</div>" : "");
 };
 TPP.renderData = function () {
   if (!TPP.active) return;

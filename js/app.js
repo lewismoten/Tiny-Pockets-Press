@@ -440,6 +440,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.toast(bytesLabel.dataset.bytes || "");
         return;
       }
+      const copyJson = e.target.closest("[data-copy-json]");
+      if (copyJson) {
+        navigator.clipboard.writeText(JSON.stringify(TPP.active, null, 2)).then(function () {
+          TPP.toast("JSON copied to clipboard");
+        }).catch(function () {
+          TPP.toast("Unable to copy JSON");
+        });
+        return;
+      }
       const remove = e.target.closest("[data-stale-remove]");
       if (remove) {
         TPP.removeStaleDataEntry(remove.dataset.staleRemove || "");
