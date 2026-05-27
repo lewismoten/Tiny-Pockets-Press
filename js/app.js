@@ -769,7 +769,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       syncFormatUi();
       schedulePreview();
     });
-    imageExportColorDepth.addEventListener("change", schedulePreview);
+    imageExportColorDepth.addEventListener("change", function () {
+      syncFormatUi();
+      schedulePreview();
+    });
     imageExportQuality.addEventListener("input", function () {
       syncFormatUi();
       schedulePreview();
