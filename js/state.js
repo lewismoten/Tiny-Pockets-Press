@@ -491,7 +491,10 @@ TPP.hydrateBookDates = function (book) {
   if (!Number.isFinite(Number(meta.revision)) || Number(meta.revision) < 1)
     meta.revision = 1;
   meta.revision = Math.max(1, Math.floor(Number(meta.revision) || 1));
-  if (!Number.isFinite(Number(meta.subrevision)) || Number(meta.subrevision) < 0)
+  if (
+    !Number.isFinite(Number(meta.subrevision)) ||
+    Number(meta.subrevision) < 0
+  )
     meta.subrevision = 0;
   meta.subrevision = Math.max(0, Math.floor(Number(meta.subrevision) || 0));
   if (!Array.isArray(meta.provenance)) meta.provenance = [];

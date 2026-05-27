@@ -401,7 +401,7 @@ TPP.dataPrimitiveHtml = function (book, key, value) {
       TPP.esc(iso.raw) +
       '</span><div class="data-date-meta"><div>Local: ' +
       TPP.esc(iso.local) +
-      '</div><div>Time ago: ' +
+      "</div><div>Time ago: " +
       TPP.esc(iso.relative || "—") +
       "</div></div>"
     );

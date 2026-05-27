@@ -457,6 +457,7 @@ TPP.buildPages = function () {
     page.n = index + 1;
   });
   TPP.lastPages = pages;
-  if (TPP.active && TPP.bookMeta) TPP.bookMeta(TPP.active)._pageCount = pages.length;
+  if (TPP.active && TPP.bookMeta)
+    TPP.bookMeta(TPP.active)._pageCount = pages.length;
   return pages;
 };

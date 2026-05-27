@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   document.getElementById("addChapter").onclick = function () {
     TPP.sync();
-      TPP.active.chapters.push({
+    TPP.active.chapters.push({
       id: TPP.uid(),
       title: "New Chapter",
       tocTitle: "",
@@ -872,7 +872,9 @@ TPP.deleteAsset = function (fileId) {
 TPP.importConflictStamp = function (book) {
   const date = new Date(TPP.bookUpdatedAt(book));
   if (Number.isNaN(date.getTime()))
-    return TPP.bookUpdatedAt(book) ? String(TPP.bookUpdatedAt(book)) : "Unknown";
+    return TPP.bookUpdatedAt(book)
+      ? String(TPP.bookUpdatedAt(book))
+      : "Unknown";
   return date.toLocaleString(undefined, {
     month: "short",
     day: "numeric",
