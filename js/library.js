@@ -663,12 +663,7 @@ TPP.collectDataStaleEntries = function (value, context, path, out) {
     if (Array.isArray(child)) {
       TPP.collectDataStaleEntries(child, key, currentPath.concat(key), entries);
     } else if (child && typeof child === "object") {
-      TPP.collectDataStaleEntries(
-        child,
-        null,
-        currentPath.concat(key),
-        entries,
-      );
+      TPP.collectDataStaleEntries(child, key, currentPath.concat(key), entries);
     }
   });
   return entries;

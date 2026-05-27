@@ -182,6 +182,12 @@ TPP.defaultStaleKeyLookup = [
     movedTo: ["toc.leaderColor"],
     note: "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration.",
   },
+  {
+    path: "toc.indentSubchapters",
+    schemaVersion: 7,
+    movedTo: ["toc.indentStep"],
+    note: "Subchapter indentation is now controlled entirely by toc.indentStep. A value of 0 means no indentation, so the old checkbox is no longer needed.",
+  },
 ];
 TPP.BOOK_INFO_FIELDS = [
   "title",
