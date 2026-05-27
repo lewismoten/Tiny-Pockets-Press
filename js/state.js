@@ -187,7 +187,12 @@ TPP.attachBookInfoAccessors = function (book) {
   if (!book || typeof book !== "object") return book;
   TPP.BOOK_INFO_FIELDS.forEach(function (field) {
     const existing = Object.getOwnPropertyDescriptor(book, field);
-    if (existing && existing.get && existing.set && existing.enumerable === false)
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
       return;
     Object.defineProperty(book, field, {
       configurable: true,
