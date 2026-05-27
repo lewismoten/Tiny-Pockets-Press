@@ -1047,6 +1047,16 @@ input[type="checkbox"] {
   display: grid;
   place-items: center;
 }
+.image-export-preview-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.image-export-preview-controls label {
+  margin-bottom: 0;
+  min-width: 10rem;
+}
 .image-export-preview-empty {
   color: var(--muted);
   font-weight: 700;

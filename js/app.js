@@ -708,6 +708,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportDownloadAfter = document.getElementById(
     "imageExportDownloadAfter",
   );
+  const imageExportPreviewPlay = document.getElementById(
+    "imageExportPreviewPlay",
+  );
+  const imageExportFrameDelay = document.getElementById(
+    "imageExportFrameDelay",
+  );
   const imageExportAnimatedGif = imageExportDialog
     ? imageExportDialog.querySelector("[data-action='export-animated-gif']")
     : null;
@@ -731,6 +737,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportPreviewNext &&
     imageExportDownloadBefore &&
     imageExportDownloadAfter &&
+    imageExportPreviewPlay &&
+    imageExportFrameDelay &&
     imageExportAnimatedGif
   ) {
     const presetValues = ["72", "96", "150", "200", "300", "600"];
@@ -786,6 +794,34 @@ document.addEventListener("DOMContentLoaded", async function () {
     const schedulePreview = function () {
       TPP.scheduleImageExportPreview();
     };
+    const syncPlaybackUi = function () {
+      imageExportPreviewPlay.textContent = TPP.imageExportPreviewPlaying
+        ? "Pause"
+        : "Play";
+    };
+    const stopPlayback = function () {
+      clearTimeout(TPP.imageExportPreviewPlaybackTimer);
+      TPP.imageExportPreviewPlaybackTimer = null;
+      TPP.imageExportPreviewPlaying = false;
+      syncPlaybackUi();
+    };
+    const schedulePlayback = function () {
+      clearTimeout(TPP.imageExportPreviewPlaybackTimer);
+      if (!TPP.imageExportPreviewPlaying || !imageExportDialog.open) return;
+      const delay = Math.max(
+        50,
+        Math.min(5000, Number(imageExportFrameDelay.value) || 300),
+      );
+      TPP.imageExportPreviewPlaybackTimer = setTimeout(function () {
+        TPP.imageExportPreviewIndex = TPP.nextImageExportPreviewIndex(1);
+        TPP.renderImageExportPreview();
+        schedulePlayback();
+      }, delay);
+    };
+    const refreshPlayback = function () {
+      syncPlaybackUi();
+      if (TPP.imageExportPreviewPlaying) schedulePlayback();
+    };
     imageExportPreset.addEventListener("change", function () {
       syncPresetUi();
       updateEstimate();
@@ -811,24 +847,34 @@ document.addEventListener("DOMContentLoaded", async function () {
       syncFormatUi();
       schedulePreview();
     });
+    imageExportFrameDelay.addEventListener("input", function () {
+      imageExportFrameDelay.value = Math.max(
+        50,
+        Math.min(5000, Number(imageExportFrameDelay.value) || 300),
+      );
+      refreshPlayback();
+    });
     imageExportDpi.addEventListener("input", function () {
       updateEstimate();
       schedulePreview();
     });
     imageExportPreviewPrev.addEventListener("click", function () {
-      TPP.imageExportPreviewIndex = Math.max(
-        0,
-        (TPP.imageExportPreviewIndex || 0) - 1,
-      );
+      TPP.imageExportPreviewIndex = TPP.nextImageExportPreviewIndex(-1);
       TPP.renderImageExportPreview();
+      refreshPlayback();
     });
     imageExportPreviewNext.addEventListener("click", function () {
-      const count = TPP.buildPages().length;
-      TPP.imageExportPreviewIndex = Math.min(
-        Math.max(0, count - 1),
-        (TPP.imageExportPreviewIndex || 0) + 1,
-      );
+      TPP.imageExportPreviewIndex = TPP.nextImageExportPreviewIndex(1);
       TPP.renderImageExportPreview();
+      refreshPlayback();
+    });
+    imageExportPreviewPlay.addEventListener("click", function () {
+      TPP.imageExportPreviewPlaying = !TPP.imageExportPreviewPlaying;
+      if (!TPP.imageExportPreviewPlaying) {
+        stopPlayback();
+        return;
+      }
+      refreshPlayback();
     });
     imageExportDownloadBefore.addEventListener("click", function () {
       TPP.downloadImageExportPreview("before");
@@ -839,12 +885,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportDialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");
       if (e.target === imageExportDialog && !card && imageExportDialog.open) {
+        stopPlayback();
         imageExportDialog.close();
         return;
       }
       const button = e.target.closest("[data-action]");
       if (!button) return;
       if (button.dataset.action === "cancel" && imageExportDialog.open) {
+        stopPlayback();
         imageExportDialog.close();
         return;
       }
@@ -877,7 +925,12 @@ document.addEventListener("DOMContentLoaded", async function () {
           colorDepth: colorDepth,
           palette: palette,
           threshold: threshold,
+          frameDelay: Math.max(
+            50,
+            Math.min(5000, Number(imageExportFrameDelay.value) || 300),
+          ),
         });
+        stopPlayback();
         if (imageExportDialog.open) imageExportDialog.close();
         const exportOptions = {
           dpi: dpi,
@@ -886,6 +939,10 @@ document.addEventListener("DOMContentLoaded", async function () {
           colorDepth: colorDepth,
           palette: palette,
           threshold: threshold,
+          frameDelay: Math.max(
+            50,
+            Math.min(5000, Number(imageExportFrameDelay.value) || 300),
+          ),
         };
         if (button.dataset.action === "export-animated-gif") {
           TPP.exportAnimatedGif(exportOptions);
@@ -894,6 +951,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
       }
     });
+    imageExportDialog.addEventListener("close", stopPlayback);
+    syncPlaybackUi();
   }
 });
 
@@ -909,6 +968,7 @@ TPP.openImageExportDialog = function () {
   const qualityValue = document.getElementById("imageExportDialogQualityValue");
   const palette = document.getElementById("imageExportDialogPalette");
   const paletteWrap = document.getElementById("imageExportDialogPaletteWrap");
+  const frameDelay = document.getElementById("imageExportFrameDelay");
   const threshold = document.getElementById("imageExportDialogThreshold");
   const thresholdWrap = document.getElementById(
     "imageExportDialogThresholdWrap",
@@ -928,6 +988,7 @@ TPP.openImageExportDialog = function () {
     !qualityValue ||
     !palette ||
     !paletteWrap ||
+    !frameDelay ||
     !threshold ||
     !thresholdWrap ||
     !thresholdValue ||
@@ -946,6 +1007,7 @@ TPP.openImageExportDialog = function () {
   quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));
   palette.value =
     ui.palette || (ui.colorDepth === "websafe" ? "websafe" : "websafe");
+  frameDelay.value = Math.max(50, Math.min(5000, Number(ui.frameDelay) || 300));
   threshold.value = Math.max(0, Math.min(255, Number(ui.threshold) || 128));
   qualityValue.textContent = quality.value + "%";
   thresholdValue.textContent = threshold.value;
@@ -956,6 +1018,7 @@ TPP.openImageExportDialog = function () {
   if (TPP.syncImageExportFormatUi) TPP.syncImageExportFormatUi();
   if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
   TPP.imageExportPreviewIndex = 0;
+  TPP.imageExportPreviewPlaying = false;
   dialog.showModal();
   if (typeof window.requestAnimationFrame === "function") {
     window.requestAnimationFrame(function () {
@@ -1322,6 +1385,7 @@ TPP.imageExportUi = function () {
       quality: 92,
       colorDepth: "color24",
       threshold: 128,
+      frameDelay: 300,
       palette: "websafe",
     },
     state.imageExport || {},
@@ -1336,6 +1400,7 @@ TPP.writeImageExportUi = function (patch) {
       quality: 92,
       colorDepth: "color24",
       threshold: 128,
+      frameDelay: 300,
       palette: "websafe",
     },
     state.imageExport || {},
@@ -1355,6 +1420,16 @@ TPP.imageExportPixels = function (dpi) {
 TPP.imageExportPreviewIndex = 0;
 TPP.imageExportPreviewSplit = 50;
 TPP.imageExportPreviewAssets = null;
+TPP.imageExportPreviewPlaying = false;
+TPP.nextImageExportPreviewIndex = function (step) {
+  const count = TPP.buildPages().length;
+  if (!count) return 0;
+  const delta = Number(step) || 0;
+  return (
+    ((((Number(TPP.imageExportPreviewIndex) || 0) + delta) % count) + count) %
+    count
+  );
+};
 TPP.cancelImageExportPreviewSchedule = function () {
   clearTimeout(TPP.imageExportPreviewTimer);
   TPP.imageExportPreviewTimer = null;

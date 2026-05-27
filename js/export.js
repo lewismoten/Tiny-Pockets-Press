@@ -156,6 +156,7 @@ TPP.imageExportOptions = function (options) {
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
     colorDepth: colorDepth,
     threshold: Math.max(0, Math.min(255, Number(source.threshold) || 128)),
+    frameDelay: Math.max(50, Math.min(5000, Number(source.frameDelay) || 300)),
     palette:
       requestedDepth === "websafe"
         ? "websafe"
@@ -562,7 +563,7 @@ TPP.encodeGifBlob = async function (canvas, options) {
   const gif = lib.GIFEncoder();
   gif.writeFrame(frame.index, canvas.width, canvas.height, {
     palette: frame.palette,
-    delay: 250,
+    delay: exportOptions.frameDelay,
   });
   gif.finish();
   const bytes = gif.bytesView ? gif.bytesView() : new Uint8Array(gif.bytes());
@@ -730,7 +731,7 @@ TPP.exportAnimatedGif = async function (options) {
       );
       gif.writeFrame(frame.index, exportCanvas.width, exportCanvas.height, {
         palette: frame.palette,
-        delay: 300,
+        delay: exportOptions.frameDelay,
         repeat: i === 0 ? 0 : undefined,
         transparent: frame.transparent || undefined,
         transparentIndex: frame.transparent
