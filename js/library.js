@@ -1707,6 +1707,8 @@ TPP.defaultSoftwareCdns = [
     id: "marked",
     name: "marked",
     version: "12.0.2",
+    purpose:
+      "Parses Markdown chapter text into HTML before sanitizing and rendering.",
     license: "MIT",
     licenseUrl: "https://github.com/markedjs/marked/blob/master/LICENSE.md",
     website: "https://marked.js.org/",
@@ -1715,6 +1717,8 @@ TPP.defaultSoftwareCdns = [
     id: "dompurify",
     name: "DOMPurify",
     version: "3.1.6",
+    purpose:
+      "Sanitizes generated HTML so user-authored Markdown content is safe to inject.",
     license: "Apache-2.0",
     licenseUrl: "https://github.com/cure53/DOMPurify/blob/main/LICENSE",
     website: "https://github.com/cure53/DOMPurify",
@@ -1723,6 +1727,8 @@ TPP.defaultSoftwareCdns = [
     id: "qrcodejs",
     name: "qrcodejs",
     version: "1.0.0",
+    purpose:
+      "Generates QR codes for URL/asset references in page rendering and exports.",
     license: "MIT",
     licenseUrl: "https://github.com/davidshimjs/qrcodejs/blob/master/LICENSE",
     website: "https://github.com/davidshimjs/qrcodejs",
@@ -1731,6 +1737,8 @@ TPP.defaultSoftwareCdns = [
     id: "html2canvas",
     name: "html2canvas",
     version: "1.4.1",
+    purpose:
+      "Captures rendered DOM pages into bitmap canvases for PDF/image/video export pipelines.",
     license: "MIT",
     licenseUrl: "https://github.com/niklasvh/html2canvas/blob/master/LICENSE",
     website: "https://html2canvas.hertzen.com/",
@@ -1739,6 +1747,8 @@ TPP.defaultSoftwareCdns = [
     id: "jspdf",
     name: "jsPDF",
     version: "2.5.1",
+    purpose:
+      "Builds interior, cover, and eBook PDF documents from rendered page canvases.",
     license: "MIT",
     licenseUrl: "https://github.com/parallax/jsPDF/blob/master/LICENSE",
     website: "https://github.com/parallax/jsPDF",
@@ -1747,6 +1757,7 @@ TPP.defaultSoftwareCdns = [
     id: "jszip",
     name: "JSZip",
     version: "3.10.1",
+    purpose: "Bundles exported page images into downloadable ZIP archives.",
     license: "MIT",
     licenseUrl: "https://github.com/Stuk/jszip/blob/main/LICENSE.markdown",
     website: "https://stuk.github.io/jszip/",
@@ -1817,6 +1828,7 @@ TPP.renderSoftwareAbout = async function () {
     ]);
     const product = pkg.name || "Tiny Pockets Press";
     const version = pkg.version || "unknown";
+    const description = pkg.description || "No description available.";
     const author =
       typeof pkg.author === "string"
         ? pkg.author
@@ -1854,6 +1866,9 @@ TPP.renderSoftwareAbout = async function () {
           TPP.esc(entry.version || "Unknown") +
           "</td>" +
           "<td>" +
+          TPP.esc(entry.purpose || "—") +
+          "</td>" +
+          "<td>" +
           license +
           "</td>" +
           "<td>" +
@@ -1869,6 +1884,7 @@ TPP.renderSoftwareAbout = async function () {
       '<div class="about-meta-grid">' +
       TPP.aboutMetaItem("Name", product) +
       TPP.aboutMetaItem("Version", String(version)) +
+      TPP.aboutMetaItem("Description", description) +
       TPP.aboutMetaItem("Author", author) +
       "</div>" +
       "</article>" +
@@ -1876,7 +1892,7 @@ TPP.renderSoftwareAbout = async function () {
       "<h3>CDN Packages</h3>" +
       '<div class="table-wrap">' +
       '<table class="data-table">' +
-      "<thead><tr><th>Name</th><th>Version</th><th>License</th><th>Website</th></tr></thead>" +
+      "<thead><tr><th>Name</th><th>Version</th><th>Used For</th><th>License</th><th>Website</th></tr></thead>" +
       "<tbody>" +
       rows +
       "</tbody>" +
