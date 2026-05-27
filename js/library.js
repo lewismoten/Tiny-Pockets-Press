@@ -394,6 +394,18 @@ TPP.dataPrimitiveHtml = function (book, key, value) {
     );
   if (value === null) return '<span class="data-empty">null</span>';
   if (value === "") return '<span class="data-empty">empty</span>';
+  const color = TPP.dataColorValue(value);
+  if (color) {
+    return (
+      '<span class="data-color-value">' +
+      '<span class="data-color-swatch" style="background:' +
+      TPP.esc(color) +
+      ';"></span>' +
+      '<span class="data-primitive">' +
+      TPP.esc(String(value)) +
+      "</span></span>"
+    );
+  }
   const iso = TPP.isoDateInfo(value);
   if (iso) {
     return (
@@ -407,6 +419,22 @@ TPP.dataPrimitiveHtml = function (book, key, value) {
     );
   }
   return '<span class="data-primitive">' + TPP.esc(String(value)) + "</span>";
+};
+TPP.dataColorValue = function (value) {
+  if (typeof value !== "string") return "";
+  const text = value.trim();
+  if (!text) return "";
+  if (
+    /^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(text) ||
+    /^(rgb|hsl)a?\(/i.test(text)
+  ) {
+    return text;
+  }
+  if (typeof document === "undefined") return "";
+  const probe = document.createElement("span");
+  probe.style.color = "";
+  probe.style.color = text;
+  return probe.style.color ? text : "";
 };
 TPP.dataTableColumns = function (items) {
   const seen = new Set();
