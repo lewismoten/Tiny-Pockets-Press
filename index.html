@@ -440,33 +440,38 @@
             <option value="indexed">Indexed</option>
           </select>
         </label>
-        <label id="imageExportDialogPaletteWrap">Palette
-          <select id="imageExportDialogPalette">
-            <option value="websafe">Web-Safe</option>
-            <option value="colors4">4 Colors</option>
-            <option value="colors8">8 Colors</option>
-            <option value="colors16">16 Colors</option>
-            <option value="colors32">32 Colors</option>
-            <option value="colors64">64 Colors</option>
-            <option value="colors128">128 Colors</option>
-            <option value="colors256">256 Colors</option>
-            <option value="gray4">4 Grayscale</option>
-            <option value="gray8">8 Grayscale</option>
-            <option value="gray16">16 Grayscale</option>
-            <option value="gray32">32 Grayscale</option>
-            <option value="gray64">64 Grayscale</option>
-            <option value="gray128">128 Grayscale</option>
-            <option value="gray256">256 Grayscale</option>
-            <option value="windows16">Windows 16</option>
-            <option value="ansi16">ANSI 16</option>
-            <option value="xterm256">Extended ANSI / Xterm</option>
-            <option value="ega16">EGA</option>
-            <option value="atari400base">Atari 400</option>
-            <option value="atari400">Atari 400 Artifacting</option>
-            <option value="cga0">CGA 0</option>
-            <option value="cga1">CGA 1</option>
-          </select>
-        </label>
+        <div class="image-export-palette-row">
+          <label id="imageExportDialogPaletteWrap">Palette
+            <select id="imageExportDialogPalette">
+              <option value="websafe">Web-Safe</option>
+              <option value="colors4">4 Colors</option>
+              <option value="colors8">8 Colors</option>
+              <option value="colors16">16 Colors</option>
+              <option value="colors32">32 Colors</option>
+              <option value="colors64">64 Colors</option>
+              <option value="colors128">128 Colors</option>
+              <option value="colors256">256 Colors</option>
+              <option value="gray4">4 Grayscale</option>
+              <option value="gray8">8 Grayscale</option>
+              <option value="gray16">16 Grayscale</option>
+              <option value="gray32">32 Grayscale</option>
+              <option value="gray64">64 Grayscale</option>
+              <option value="gray128">128 Grayscale</option>
+              <option value="gray256">256 Grayscale</option>
+              <option value="windows16">Windows 16</option>
+              <option value="ansi16">ANSI 16</option>
+              <option value="xterm256">Extended ANSI / Xterm</option>
+              <option value="ega16">EGA</option>
+              <option value="atari400base">Atari 400</option>
+              <option value="atari400">Atari 400 Artifacting</option>
+              <option value="cga0">CGA 0</option>
+              <option value="cga1">CGA 1</option>
+            </select>
+          </label>
+          <button type="button" id="imageExportPalettePreview" class="image-export-palette-preview" aria-label="Preview palette">
+            <canvas id="imageExportPalettePreviewCanvas" width="16" height="16"></canvas>
+          </button>
+        </div>
         <label id="imageExportDialogQualityWrap">Lossy Quality
           <input id="imageExportDialogQuality" type="range" min="1" max="100" step="1" value="92">
           <span id="imageExportDialogQualityValue">92%</span>
