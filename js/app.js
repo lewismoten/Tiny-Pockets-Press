@@ -1215,6 +1215,45 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.imageExportPaletteSelectedIndex = index;
       openPalettePreview();
     });
+    imageExportPaletteDialog.addEventListener("keydown", function (event) {
+      if (!imageExportPaletteDialog.open) return;
+      const layout = TPP.imageExportPaletteDialogLayout;
+      if (!layout || !layout.grid || !layout.palette || !layout.palette.length)
+        return;
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      const count = layout.palette.length;
+      const cols = Math.max(1, Number(layout.grid.cols) || 1);
+      const rows = Math.max(1, Number(layout.grid.rows) || 1);
+      const current = Math.max(
+        0,
+        Math.min(count - 1, Number(TPP.imageExportPaletteSelectedIndex) || 0),
+      );
+      const row = Math.floor(current / cols);
+      const col = current % cols;
+      let next = current;
+      const rowEndIndex = function (rowIndex) {
+        const start = rowIndex * cols;
+        return Math.min(count - 1, start + cols - 1);
+      };
+      if (event.key === "ArrowRight") {
+        next = (current + 1) % count;
+      } else if (event.key === "ArrowLeft") {
+        next = (current - 1 + count) % count;
+      } else if (event.key === "ArrowDown") {
+        const nextRow = (row + 1) % rows;
+        const start = nextRow * cols;
+        next = Math.min(start + col, rowEndIndex(nextRow));
+      } else if (event.key === "ArrowUp") {
+        const nextRow = (row - 1 + rows) % rows;
+        const start = nextRow * cols;
+        next = Math.min(start + col, rowEndIndex(nextRow));
+      } else {
+        return;
+      }
+      event.preventDefault();
+      TPP.imageExportPaletteSelectedIndex = next;
+      openPalettePreview();
+    });
     imageExportPreviewPrev.addEventListener("click", function () {
       TPP.imageExportPreviewIndex = TPP.nextImageExportPreviewIndex(-1);
       TPP.renderImageExportPreview();
