@@ -1338,17 +1338,32 @@ TPP.renderAbout = function () {
     ]
       .concat(
         TPP.bookSubrevision(book)
-          ? [TPP.aboutMetaItem("Subrevision", String(TPP.bookSubrevision(book)))]
+          ? [
+              TPP.aboutMetaItem(
+                "Subrevision",
+                String(TPP.bookSubrevision(book)),
+              ),
+            ]
           : [],
       )
       .concat(
         TPP.bookLastImportedAt(book)
-          ? [TPP.aboutMetaItem("Last Imported", TPP.dateTime(TPP.bookLastImportedAt(book)))]
+          ? [
+              TPP.aboutMetaItem(
+                "Last Imported",
+                TPP.dateTime(TPP.bookLastImportedAt(book)),
+              ),
+            ]
           : [],
       )
       .concat(
         TPP.bookLastExportedAt(book)
-          ? [TPP.aboutMetaItem("Last Exported", TPP.dateTime(TPP.bookLastExportedAt(book)))]
+          ? [
+              TPP.aboutMetaItem(
+                "Last Exported",
+                TPP.dateTime(TPP.bookLastExportedAt(book)),
+              ),
+            ]
           : [],
       )
       .join("") +
