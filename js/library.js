@@ -440,7 +440,6 @@ TPP.dataSchemaKeys = function (context) {
     return new Set([
       "pageSize",
       "sheetSize",
-      "signatureSize",
       "customW",
       "customH",
       "margin",
@@ -449,6 +448,7 @@ TPP.dataSchemaKeys = function (context) {
       "texture",
       "pageBg",
     ]);
+  if (context === "printing") return new Set(["signatureSize"]);
   if (context === "text")
     return new Set([
       "fontFamily",
@@ -1017,6 +1017,16 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.imageElements;
   return copy;
 };
+TPP.dataPageObject = function (book) {
+  const copy = Object.assign({}, (book && book.page) || {});
+  delete copy.signatureSize;
+  return copy;
+};
+TPP.dataPrintingObject = function (book) {
+  return {
+    signatureSize: book && book.page ? book.page.signatureSize : undefined,
+  };
+};
 TPP.dataTabs = function (book, stale) {
   const tabs = [
     {
@@ -1042,12 +1052,7 @@ TPP.dataTabs = function (book, stale) {
     {
       id: "page",
       label: "Page",
-      html: TPP.dataObjectHtml(
-        book,
-        book && book.page ? book.page : {},
-        false,
-        "page",
-      ),
+      html: TPP.dataObjectHtml(book, TPP.dataPageObject(book), false, "page"),
     },
     {
       id: "text",
@@ -1077,6 +1082,16 @@ TPP.dataTabs = function (book, stale) {
         book && book.toc ? book.toc : {},
         false,
         "toc",
+      ),
+    },
+    {
+      id: "printing",
+      label: "Printing",
+      html: TPP.dataObjectHtml(
+        book,
+        TPP.dataPrintingObject(book),
+        false,
+        "printing",
       ),
     },
     {
