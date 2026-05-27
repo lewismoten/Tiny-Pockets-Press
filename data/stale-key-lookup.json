@@ -283,177 +283,177 @@
   },
   {
     "path": "backText",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.text"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].customText", "backCover.textElementId"],
+    "note": "Back-cover text content now lives in the shared textElements collection, and backCover keeps only a reference to that text element."
   },
   {
     "path": "backTextY",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.textY"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].y", "backCover.textElementId"],
+    "note": "Back-cover text positioning now lives in the shared textElements collection, and backCover keeps only a reference to that text element."
   },
   {
     "path": "backTextSize",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.textSize"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].size", "backCover.textElementId"],
+    "note": "Back-cover text sizing now lives in the shared textElements collection, and backCover keeps only a reference to that text element."
   },
   {
     "path": "backTextColor",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.textColor"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].color", "backCover.textElementId"],
+    "note": "Back-cover text styling now lives in the shared textElements collection, and backCover keeps only a reference to that text element."
   },
   {
     "path": "backTextAlign",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.textAlign"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].align", "backCover.textElementId"],
+    "note": "Back-cover text alignment now lives in the shared textElements collection, and backCover keeps only a reference to that text element."
   },
   {
     "path": "backTextLastLine",
-    "schemaVersion": 10,
+    "schemaVersion": 11,
     "movedTo": ["backCover.textLastLine"],
-    "note": "Back cover settings now live under backCover."
+    "note": "Only the back-cover last-line behavior still lives directly under backCover."
   },
   {
     "path": "backFrameOn",
-    "schemaVersion": 10,
+    "schemaVersion": 11,
     "movedTo": ["backCover.frameOn"],
-    "note": "Back cover settings now live under backCover."
+    "note": "Only the back-cover frame toggle still lives directly under backCover."
   },
   {
     "path": "backClipImageToFrame",
-    "schemaVersion": 10,
+    "schemaVersion": 11,
     "movedTo": ["backCover.clipImageToFrame"],
-    "note": "Back cover settings now live under backCover."
+    "note": "Only the back-cover image clipping rule still lives directly under backCover."
   },
   {
     "path": "backImgX",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.imgX"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["imageElements[].x", "backCover.imageElementId"],
+    "note": "Back-cover image positioning now lives in the shared imageElements collection, and backCover keeps only a reference to that image element."
   },
   {
     "path": "backImgY",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.imgY"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["imageElements[].y", "backCover.imageElementId"],
+    "note": "Back-cover image positioning now lives in the shared imageElements collection, and backCover keeps only a reference to that image element."
   },
   {
     "path": "backImgZoom",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.imgZoom"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["imageElements[].zoom", "backCover.imageElementId"],
+    "note": "Back-cover image scaling now lives in the shared imageElements collection, and backCover keeps only a reference to that image element."
   },
   {
     "path": "backImgRotate",
-    "schemaVersion": 10,
-    "movedTo": ["backCover.imgRotate"],
-    "note": "Back cover settings now live under backCover."
+    "schemaVersion": 11,
+    "movedTo": ["imageElements[].rotate", "backCover.imageElementId"],
+    "note": "Back-cover image rotation now lives in the shared imageElements collection, and backCover keeps only a reference to that image element."
   },
   {
     "path": "spineImgX",
-    "schemaVersion": 10,
-    "movedTo": ["spine.imgX"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["imageElements[].x", "spine.imageElementId"],
+    "note": "Spine image positioning now lives in the shared imageElements collection, and spine keeps only a reference to that image element."
   },
   {
     "path": "spineImgY",
-    "schemaVersion": 10,
-    "movedTo": ["spine.imgY"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["imageElements[].y", "spine.imageElementId"],
+    "note": "Spine image positioning now lives in the shared imageElements collection, and spine keeps only a reference to that image element."
   },
   {
     "path": "spineImgZoom",
-    "schemaVersion": 10,
-    "movedTo": ["spine.imgZoom"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["imageElements[].zoom", "spine.imageElementId"],
+    "note": "Spine image scaling now lives in the shared imageElements collection, and spine keeps only a reference to that image element."
   },
   {
     "path": "spineImgRotate",
-    "schemaVersion": 10,
-    "movedTo": ["spine.imgRotate"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["imageElements[].rotate", "spine.imageElementId"],
+    "note": "Spine image rotation now lives in the shared imageElements collection, and spine keeps only a reference to that image element."
   },
   {
     "path": "spineTitleSize",
-    "schemaVersion": 10,
-    "movedTo": ["spine.titleSize"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].size", "spine.titleTextElementId"],
+    "note": "Spine title styling now lives in the shared textElements collection, and spine keeps only a reference to that title element."
   },
   {
     "path": "spineTitleX",
-    "schemaVersion": 10,
-    "movedTo": ["spine.titleX"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].x", "spine.titleTextElementId"],
+    "note": "Spine title positioning now lives in the shared textElements collection, and spine keeps only a reference to that title element."
   },
   {
     "path": "spineTitleY",
-    "schemaVersion": 10,
-    "movedTo": ["spine.titleY"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].y", "spine.titleTextElementId"],
+    "note": "Spine title positioning now lives in the shared textElements collection, and spine keeps only a reference to that title element."
   },
   {
     "path": "spineTitleWidth",
-    "schemaVersion": 10,
-    "movedTo": ["spine.titleWidth"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].width", "spine.titleTextElementId"],
+    "note": "Spine title width now lives in the shared textElements collection, and spine keeps only a reference to that title element."
   },
   {
     "path": "spineTitleAlign",
-    "schemaVersion": 10,
-    "movedTo": ["spine.titleAlign"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].align", "spine.titleTextElementId"],
+    "note": "Spine title alignment now lives in the shared textElements collection, and spine keeps only a reference to that title element."
   },
   {
     "path": "spineAuthorSize",
-    "schemaVersion": 10,
-    "movedTo": ["spine.authorSize"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].size", "spine.authorTextElementId"],
+    "note": "Spine author styling now lives in the shared textElements collection, and spine keeps only a reference to that author element."
   },
   {
     "path": "spineTextColor",
-    "schemaVersion": 10,
-    "movedTo": ["spine.textColor"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].color", "spine.titleTextElementId", "spine.authorTextElementId"],
+    "note": "Spine text color now lives on the shared text elements used for the spine title and author."
   },
   {
     "path": "spineStroke",
-    "schemaVersion": 10,
-    "movedTo": ["spine.stroke"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].outlineSize", "spine.titleTextElementId", "spine.authorTextElementId"],
+    "note": "Spine stroke on/off is now implied by the shared text elements' outline size."
   },
   {
     "path": "spineStrokeColor",
-    "schemaVersion": 10,
-    "movedTo": ["spine.strokeColor"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].outlineColor", "spine.titleTextElementId", "spine.authorTextElementId"],
+    "note": "Spine stroke color now lives on the shared text elements used for the spine title and author."
   },
   {
     "path": "spineStrokeSize",
-    "schemaVersion": 10,
-    "movedTo": ["spine.strokeSize"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].outlineSize", "spine.titleTextElementId", "spine.authorTextElementId"],
+    "note": "Spine stroke size now lives on the shared text elements used for the spine title and author."
   },
   {
     "path": "spineTitleRotate",
-    "schemaVersion": 10,
-    "movedTo": ["spine.titleRotate"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].rotate", "spine.titleTextElementId"],
+    "note": "Spine title rotation now lives in the shared textElements collection, and spine keeps only a reference to that title element."
   },
   {
     "path": "spineAuthorOn",
-    "schemaVersion": 10,
-    "movedTo": ["spine.authorOn"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].enabled", "spine.authorTextElementId"],
+    "note": "Spine author visibility now lives in the shared textElements collection, and spine keeps only a reference to that author element."
   },
   {
     "path": "spineAuthorRotate",
-    "schemaVersion": 10,
-    "movedTo": ["spine.authorRotate"],
-    "note": "Spine settings now live under spine."
+    "schemaVersion": 11,
+    "movedTo": ["textElements[].rotate", "spine.authorTextElementId"],
+    "note": "Spine author rotation now lives in the shared textElements collection, and spine keeps only a reference to that author element."
   },
   {
     "path": "includeToc",

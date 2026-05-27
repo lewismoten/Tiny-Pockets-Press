@@ -470,38 +470,17 @@ TPP.dataSchemaKeys = function (context) {
     ]);
   if (context === "backCover")
     return new Set([
-      "text",
-      "textY",
-      "textSize",
-      "textColor",
-      "textAlign",
+      "textElementId",
+      "imageElementId",
       "textLastLine",
       "frameOn",
       "clipImageToFrame",
-      "imgX",
-      "imgY",
-      "imgZoom",
-      "imgRotate",
     ]);
   if (context === "spine")
     return new Set([
-      "imgX",
-      "imgY",
-      "imgZoom",
-      "imgRotate",
-      "titleSize",
-      "titleX",
-      "titleY",
-      "titleWidth",
-      "titleAlign",
-      "authorSize",
-      "textColor",
-      "stroke",
-      "strokeColor",
-      "strokeSize",
-      "titleRotate",
-      "authorOn",
-      "authorRotate",
+      "imageElementId",
+      "titleTextElementId",
+      "authorTextElementId",
     ]);
   if (context === "bookInfo")
     return new Set([

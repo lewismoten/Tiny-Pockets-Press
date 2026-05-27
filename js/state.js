@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 10;
+TPP.SCHEMA_VERSION = 11;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -407,6 +407,18 @@ TPP.SPINE_FIELDS = [
   "spineAuthorOn",
   "spineAuthorRotate",
 ];
+TPP.BACK_COVER_SCHEMA_KEYS = new Set([
+  "textElementId",
+  "imageElementId",
+  "textLastLine",
+  "frameOn",
+  "clipImageToFrame",
+]);
+TPP.SPINE_SCHEMA_KEYS = new Set([
+  "titleTextElementId",
+  "authorTextElementId",
+  "imageElementId",
+]);
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -697,23 +709,131 @@ TPP.backCoverInfo = function (book) {
   book.backCover = Object.assign({}, fallback, book.backCover || {});
   return book.backCover;
 };
+TPP.backCoverTextElement = function (book) {
+  return TPP.findTextElement(book, "back", "custom");
+};
+TPP.backCoverImageElement = function (book) {
+  return TPP.findImageElement(book, "back", "cover");
+};
 TPP.attachBackCoverAccessors = function (book) {
   if (!book || typeof book !== "object") return book;
-  const map = {
-    backText: "text",
-    backTextY: "textY",
-    backTextSize: "textSize",
-    backTextColor: "textColor",
-    backTextAlign: "textAlign",
-    backTextLastLine: "textLastLine",
-    backFrameOn: "frameOn",
-    backClipImageToFrame: "clipImageToFrame",
-    backImgX: "imgX",
-    backImgY: "imgY",
-    backImgZoom: "imgZoom",
-    backImgRotate: "imgRotate",
+  const definitions = {
+    backText: {
+      get: function () {
+        const element = TPP.backCoverTextElement(book);
+        return String((element && element.customText) || "");
+      },
+      set: function (value) {
+        const element = TPP.backCoverTextElement(book);
+        if (element) element.customText = String(value || "");
+      },
+    },
+    backTextY: {
+      get: function () {
+        const element = TPP.backCoverTextElement(book);
+        return Number((element && element.y) || 0);
+      },
+      set: function (value) {
+        const element = TPP.backCoverTextElement(book);
+        if (element) element.y = Number(value) || 0;
+      },
+    },
+    backTextSize: {
+      get: function () {
+        const element = TPP.backCoverTextElement(book);
+        return Number((element && element.size) || 0);
+      },
+      set: function (value) {
+        const element = TPP.backCoverTextElement(book);
+        if (element) element.size = Number(value) || 0;
+      },
+    },
+    backTextColor: {
+      get: function () {
+        const element = TPP.backCoverTextElement(book);
+        return (element && element.color) || "";
+      },
+      set: function (value) {
+        const element = TPP.backCoverTextElement(book);
+        if (element) element.color = value || "";
+      },
+    },
+    backTextAlign: {
+      get: function () {
+        const element = TPP.backCoverTextElement(book);
+        return (element && element.align) || "center";
+      },
+      set: function (value) {
+        const element = TPP.backCoverTextElement(book);
+        if (element) element.align = value || "center";
+      },
+    },
+    backTextLastLine: {
+      get: function () {
+        return TPP.backCoverInfo(book).textLastLine;
+      },
+      set: function (value) {
+        TPP.backCoverInfo(book).textLastLine = value || "auto";
+      },
+    },
+    backFrameOn: {
+      get: function () {
+        return Boolean(TPP.backCoverInfo(book).frameOn);
+      },
+      set: function (value) {
+        TPP.backCoverInfo(book).frameOn = Boolean(value);
+      },
+    },
+    backClipImageToFrame: {
+      get: function () {
+        return Boolean(TPP.backCoverInfo(book).clipImageToFrame);
+      },
+      set: function (value) {
+        TPP.backCoverInfo(book).clipImageToFrame = Boolean(value);
+      },
+    },
+    backImgX: {
+      get: function () {
+        const element = TPP.backCoverImageElement(book);
+        return Number((element && element.x) || 0);
+      },
+      set: function (value) {
+        const element = TPP.backCoverImageElement(book);
+        if (element) element.x = Number(value) || 0;
+      },
+    },
+    backImgY: {
+      get: function () {
+        const element = TPP.backCoverImageElement(book);
+        return Number((element && element.y) || 0);
+      },
+      set: function (value) {
+        const element = TPP.backCoverImageElement(book);
+        if (element) element.y = Number(value) || 0;
+      },
+    },
+    backImgZoom: {
+      get: function () {
+        const element = TPP.backCoverImageElement(book);
+        return Number((element && element.zoom) || 120);
+      },
+      set: function (value) {
+        const element = TPP.backCoverImageElement(book);
+        if (element) element.zoom = Number(value) || 120;
+      },
+    },
+    backImgRotate: {
+      get: function () {
+        const element = TPP.backCoverImageElement(book);
+        return Number((element && element.rotate) || 0);
+      },
+      set: function (value) {
+        const element = TPP.backCoverImageElement(book);
+        if (element) element.rotate = Number(value) || 0;
+      },
+    },
   };
-  Object.keys(map).forEach(function (field) {
+  Object.keys(definitions).forEach(function (field) {
     const existing = Object.getOwnPropertyDescriptor(book, field);
     if (
       existing &&
@@ -725,12 +845,8 @@ TPP.attachBackCoverAccessors = function (book) {
     Object.defineProperty(book, field, {
       configurable: true,
       enumerable: false,
-      get: function () {
-        return TPP.backCoverInfo(book)[map[field]];
-      },
-      set: function (value) {
-        TPP.backCoverInfo(book)[map[field]] = value;
-      },
+      get: definitions[field].get,
+      set: definitions[field].set,
     });
   });
   return book;
@@ -738,22 +854,21 @@ TPP.attachBackCoverAccessors = function (book) {
 TPP.syncBackCoverFromLegacyFields = function (book) {
   if (!book || typeof book !== "object") return;
   const back = TPP.backCoverInfo(book);
-  if ("backText" in book) back.text = book.backText;
-  if ("backTextY" in book) back.textY = book.backTextY;
-  if ("backTextSize" in book) back.textSize = book.backTextSize;
-  if ("backTextColor" in book) back.textColor = book.backTextColor;
-  if ("backTextAlign" in book) back.textAlign = book.backTextAlign;
+  const textElement = TPP.backCoverTextElement(book);
+  const imageElement = TPP.backCoverImageElement(book);
+  if (textElement && !back.textElementId) back.textElementId = textElement.id;
+  if (imageElement && !back.imageElementId)
+    back.imageElementId = imageElement.id;
   if ("backTextLastLine" in book) back.textLastLine = book.backTextLastLine;
   if ("backFrameOn" in book) back.frameOn = book.backFrameOn;
   if ("backClipImageToFrame" in book)
     back.clipImageToFrame = book.backClipImageToFrame;
-  if ("backImgX" in book) back.imgX = book.backImgX;
-  if ("backImgY" in book) back.imgY = book.backImgY;
-  if ("backImgZoom" in book) back.imgZoom = book.backImgZoom;
-  if ("backImgRotate" in book) back.imgRotate = book.backImgRotate;
 };
 TPP.compactBackCoverInfo = function (book) {
   if (!book || !book.backCover || typeof book.backCover !== "object") return;
+  Object.keys(book.backCover).forEach(function (key) {
+    if (!TPP.BACK_COVER_SCHEMA_KEYS.has(key)) delete book.backCover[key];
+  });
   TPP.BACK_COVER_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
@@ -772,28 +887,203 @@ TPP.spineInfo = function (book) {
   book.spine = Object.assign({}, fallback, book.spine || {});
   return book.spine;
 };
+TPP.spineImageElement = function (book) {
+  return TPP.findImageElement(book, "spine", "cover");
+};
+TPP.spineTitleElement = function (book) {
+  return TPP.findTextElement(book, "spine", "title");
+};
+TPP.spineAuthorElement = function (book) {
+  return TPP.findTextElement(book, "spine", "author");
+};
 TPP.attachSpineAccessors = function (book) {
   if (!book || typeof book !== "object") return book;
-  const map = {
-    spineImgX: "imgX",
-    spineImgY: "imgY",
-    spineImgZoom: "imgZoom",
-    spineImgRotate: "imgRotate",
-    spineTitleSize: "titleSize",
-    spineTitleX: "titleX",
-    spineTitleY: "titleY",
-    spineTitleWidth: "titleWidth",
-    spineTitleAlign: "titleAlign",
-    spineAuthorSize: "authorSize",
-    spineTextColor: "textColor",
-    spineStroke: "stroke",
-    spineStrokeColor: "strokeColor",
-    spineStrokeSize: "strokeSize",
-    spineTitleRotate: "titleRotate",
-    spineAuthorOn: "authorOn",
-    spineAuthorRotate: "authorRotate",
+  const definitions = {
+    spineImgX: {
+      get: function () {
+        const element = TPP.spineImageElement(book);
+        return Number((element && element.x) || 0);
+      },
+      set: function (value) {
+        const element = TPP.spineImageElement(book);
+        if (element) element.x = Number(value) || 0;
+      },
+    },
+    spineImgY: {
+      get: function () {
+        const element = TPP.spineImageElement(book);
+        return Number((element && element.y) || 0);
+      },
+      set: function (value) {
+        const element = TPP.spineImageElement(book);
+        if (element) element.y = Number(value) || 0;
+      },
+    },
+    spineImgZoom: {
+      get: function () {
+        const element = TPP.spineImageElement(book);
+        return Number((element && element.zoom) || 100);
+      },
+      set: function (value) {
+        const element = TPP.spineImageElement(book);
+        if (element) element.zoom = Number(value) || 100;
+      },
+    },
+    spineImgRotate: {
+      get: function () {
+        const element = TPP.spineImageElement(book);
+        return Number((element && element.rotate) || 0);
+      },
+      set: function (value) {
+        const element = TPP.spineImageElement(book);
+        if (element) element.rotate = Number(value) || 0;
+      },
+    },
+    spineTitleSize: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return Number((element && element.size) || 0);
+      },
+      set: function (value) {
+        const element = TPP.spineTitleElement(book);
+        if (element) element.size = Number(value) || 0;
+      },
+    },
+    spineTitleX: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return Number((element && element.x) || 50);
+      },
+      set: function (value) {
+        const element = TPP.spineTitleElement(book);
+        if (element) element.x = Number(value) || 50;
+      },
+    },
+    spineTitleY: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return Number((element && element.y) || 0);
+      },
+      set: function (value) {
+        const element = TPP.spineTitleElement(book);
+        if (element) element.y = Number(value) || 0;
+      },
+    },
+    spineTitleWidth: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return Number((element && element.width) || 100);
+      },
+      set: function (value) {
+        const element = TPP.spineTitleElement(book);
+        if (element) {
+          element.width = Math.max(10, Math.min(100, Number(value) || 100));
+        }
+      },
+    },
+    spineTitleAlign: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return (element && element.align) || "left";
+      },
+      set: function (value) {
+        const element = TPP.spineTitleElement(book);
+        if (element) element.align = value || "left";
+      },
+    },
+    spineAuthorSize: {
+      get: function () {
+        const element = TPP.spineAuthorElement(book);
+        return Number((element && element.size) || 0);
+      },
+      set: function (value) {
+        const element = TPP.spineAuthorElement(book);
+        if (element) element.size = Number(value) || 0;
+      },
+    },
+    spineTextColor: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return (element && element.color) || "";
+      },
+      set: function (value) {
+        const title = TPP.spineTitleElement(book);
+        const author = TPP.spineAuthorElement(book);
+        if (title) title.color = value || "";
+        if (author) author.color = value || "";
+      },
+    },
+    spineStroke: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return Boolean(Number((element && element.outlineSize) || 0) > 0);
+      },
+      set: function (value) {
+        const title = TPP.spineTitleElement(book);
+        const author = TPP.spineAuthorElement(book);
+        if (!value) {
+          if (title) title.outlineSize = 0;
+          if (author) author.outlineSize = 0;
+        }
+      },
+    },
+    spineStrokeColor: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return (element && element.outlineColor) || "";
+      },
+      set: function (value) {
+        const title = TPP.spineTitleElement(book);
+        const author = TPP.spineAuthorElement(book);
+        if (title) title.outlineColor = value || "";
+        if (author) author.outlineColor = value || "";
+      },
+    },
+    spineStrokeSize: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return Math.max(0, Number((element && element.outlineSize) || 0));
+      },
+      set: function (value) {
+        const title = TPP.spineTitleElement(book);
+        const author = TPP.spineAuthorElement(book);
+        const size = Math.max(0, Number(value) || 0);
+        if (title) title.outlineSize = size;
+        if (author) author.outlineSize = size;
+      },
+    },
+    spineTitleRotate: {
+      get: function () {
+        const element = TPP.spineTitleElement(book);
+        return element ? element.rotate !== false : true;
+      },
+      set: function (value) {
+        const element = TPP.spineTitleElement(book);
+        if (element) element.rotate = value !== false;
+      },
+    },
+    spineAuthorOn: {
+      get: function () {
+        const element = TPP.spineAuthorElement(book);
+        return element ? element.enabled !== false : true;
+      },
+      set: function (value) {
+        const element = TPP.spineAuthorElement(book);
+        if (element) element.enabled = value !== false;
+      },
+    },
+    spineAuthorRotate: {
+      get: function () {
+        const element = TPP.spineAuthorElement(book);
+        return Boolean(element && element.rotate);
+      },
+      set: function (value) {
+        const element = TPP.spineAuthorElement(book);
+        if (element) element.rotate = Boolean(value);
+      },
+    },
   };
-  Object.keys(map).forEach(function (field) {
+  Object.keys(definitions).forEach(function (field) {
     const existing = Object.getOwnPropertyDescriptor(book, field);
     if (
       existing &&
@@ -805,12 +1095,8 @@ TPP.attachSpineAccessors = function (book) {
     Object.defineProperty(book, field, {
       configurable: true,
       enumerable: false,
-      get: function () {
-        return TPP.spineInfo(book)[map[field]];
-      },
-      set: function (value) {
-        TPP.spineInfo(book)[map[field]] = value;
-      },
+      get: definitions[field].get,
+      set: definitions[field].set,
     });
   });
   return book;
@@ -818,16 +1104,21 @@ TPP.attachSpineAccessors = function (book) {
 TPP.syncSpineFromLegacyFields = function (book) {
   if (!book || typeof book !== "object") return;
   const spine = TPP.spineInfo(book);
-  TPP.SPINE_FIELDS.forEach(function (field) {
-    if (!(field in book)) return;
-    const key = field.replace(/^spine/, "").replace(/^./, function (char) {
-      return char.toLowerCase();
-    });
-    spine[key] = book[field];
-  });
+  const imageElement = TPP.spineImageElement(book);
+  const titleElement = TPP.spineTitleElement(book);
+  const authorElement = TPP.spineAuthorElement(book);
+  if (imageElement && !spine.imageElementId)
+    spine.imageElementId = imageElement.id;
+  if (titleElement && !spine.titleTextElementId)
+    spine.titleTextElementId = titleElement.id;
+  if (authorElement && !spine.authorTextElementId)
+    spine.authorTextElementId = authorElement.id;
 };
 TPP.compactSpineInfo = function (book) {
   if (!book || !book.spine || typeof book.spine !== "object") return;
+  Object.keys(book.spine).forEach(function (key) {
+    if (!TPP.SPINE_SCHEMA_KEYS.has(key)) delete book.spine[key];
+  });
   TPP.SPINE_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
@@ -1468,6 +1759,8 @@ TPP.findChapterImageElement = function (book, chapter) {
 TPP.defaultImageElements = function (book, base) {
   const source = book || {};
   const fallback = base || source || {};
+  const sourceBack = source.backCover || {};
+  const sourceSpine = source.spine || {};
   return [
     {
       id: "front-cover-image",
@@ -1485,10 +1778,13 @@ TPP.defaultImageElements = function (book, base) {
       location: "back",
       part: "cover",
       fileId: source.backImageId || fallback.backImageId || "",
-      x: Number(source.backImgX) || 0,
-      y: Number(source.backImgY) || 0,
-      zoom: Number(source.backImgZoom) || Number(fallback.backImgZoom) || 120,
-      rotate: Number(source.backImgRotate) || 0,
+      x: Number(source.backImgX ?? sourceBack.imgX) || 0,
+      y: Number(source.backImgY ?? sourceBack.imgY) || 0,
+      zoom:
+        Number(source.backImgZoom ?? sourceBack.imgZoom) ||
+        Number(fallback.backImgZoom) ||
+        120,
+      rotate: Number(source.backImgRotate ?? sourceBack.imgRotate) || 0,
       placement: "cover",
     },
     {
@@ -1496,10 +1792,13 @@ TPP.defaultImageElements = function (book, base) {
       location: "spine",
       part: "cover",
       fileId: source.spineImageId || fallback.spineImageId || "",
-      x: Number(source.spineImgX) || 0,
-      y: Number(source.spineImgY) || 0,
-      zoom: Number(source.spineImgZoom) || Number(fallback.spineImgZoom) || 100,
-      rotate: Number(source.spineImgRotate) || 0,
+      x: Number(source.spineImgX ?? sourceSpine.imgX) || 0,
+      y: Number(source.spineImgY ?? sourceSpine.imgY) || 0,
+      zoom:
+        Number(source.spineImgZoom ?? sourceSpine.imgZoom) ||
+        Number(fallback.spineImgZoom) ||
+        100,
+      rotate: Number(source.spineImgRotate ?? sourceSpine.imgRotate) || 0,
       placement: "cover",
     },
   ];
@@ -1586,17 +1885,11 @@ TPP.syncLegacyImageFieldsFromElements = function (book) {
   }
   if (back) {
     book.backImageId = back.fileId || "";
-    book.backImgX = Number(back.x) || 0;
-    book.backImgY = Number(back.y) || 0;
-    book.backImgZoom = Number(back.zoom) || 120;
-    book.backImgRotate = Number(back.rotate) || 0;
+    TPP.backCoverInfo(book).imageElementId = back.id || "back-cover-image";
   }
   if (spine) {
     book.spineImageId = spine.fileId || "";
-    book.spineImgX = Number(spine.x) || 0;
-    book.spineImgY = Number(spine.y) || 0;
-    book.spineImgZoom = Number(spine.zoom) || 100;
-    book.spineImgRotate = Number(spine.rotate) || 0;
+    TPP.spineInfo(book).imageElementId = spine.id || "spine-image";
   }
   (Array.isArray(book.chapters) ? book.chapters : []).forEach(
     function (chapter) {
@@ -1645,6 +1938,9 @@ TPP.syncImageElementsFromLegacyFields = function (book) {
       rotate: Number(book.spineImgRotate) || 0,
       placement: "cover",
     });
+  if (back)
+    TPP.backCoverInfo(book).imageElementId = back.id || "back-cover-image";
+  if (spine) TPP.spineInfo(book).imageElementId = spine.id || "spine-image";
   (Array.isArray(book.chapters) ? book.chapters : []).forEach(
     function (chapter) {
       const element = TPP.findChapterImageElement(book, chapter);
@@ -1679,6 +1975,8 @@ TPP.findTextElement = function (book, location, part) {
 TPP.defaultTextElements = function (book, base) {
   const source = book || {};
   const fallback = base || source || {};
+  const sourceBack = source.backCover || {};
+  const sourceSpine = source.spine || {};
   const sharedColor = source.coverText || fallback.coverText || "#ffffff";
   const sharedStrokeColor =
     source.coverStrokeColor || fallback.coverStrokeColor || "#000000";
@@ -1687,6 +1985,7 @@ TPP.defaultTextElements = function (book, base) {
     : Number(fallback.coverStrokeSize) || 0;
   return [
     {
+      id: "front-cover-title",
       location: "front",
       part: "title",
       enabled: source.coverShowTitle !== false,
@@ -1703,6 +2002,7 @@ TPP.defaultTextElements = function (book, base) {
       customText: "",
     },
     {
+      id: "front-cover-author",
       location: "front",
       part: "author",
       enabled: Boolean(source.coverShowAuthor),
@@ -1722,6 +2022,7 @@ TPP.defaultTextElements = function (book, base) {
       customText: "",
     },
     {
+      id: "front-cover-series",
       location: "front",
       part: "series",
       enabled: Boolean(source.coverShowSeries),
@@ -1741,6 +2042,7 @@ TPP.defaultTextElements = function (book, base) {
       customText: "",
     },
     {
+      id: "front-cover-publisher",
       location: "front",
       part: "publisher",
       enabled: Boolean(source.coverShowPublisher),
@@ -1763,57 +2065,115 @@ TPP.defaultTextElements = function (book, base) {
       customText: "",
     },
     {
+      id: "back-cover-text",
       location: "back",
       part: "custom",
       enabled: true,
-      size: Number(source.backTextSize) || Number(fallback.backTextSize) || 4.5,
+      size:
+        Number(source.backTextSize ?? sourceBack.textSize) ||
+        Number(fallback.backTextSize) ||
+        4.5,
       x: 50,
-      y: Number(source.backTextY) || Number(fallback.backTextY) || 76,
+      y:
+        Number(source.backTextY ?? sourceBack.textY) ||
+        Number(fallback.backTextY) ||
+        76,
       width: 100,
-      align: source.backTextAlign || fallback.backTextAlign || "center",
-      color: source.backTextColor || fallback.backTextColor || "#ffffff",
+      align:
+        source.backTextAlign ||
+        sourceBack.textAlign ||
+        fallback.backTextAlign ||
+        "center",
+      color:
+        source.backTextColor ||
+        sourceBack.textColor ||
+        fallback.backTextColor ||
+        "#ffffff",
       outlineColor: "#000000",
       outlineSize: 0,
       rotate: false,
-      customText: source.backText || fallback.backText || "",
+      customText: source.backText || sourceBack.text || fallback.backText || "",
     },
     {
+      id: "spine-title",
       location: "spine",
       part: "title",
       enabled: true,
       size:
-        Number(source.spineTitleSize) || Number(fallback.spineTitleSize) || 5,
-      x: Number(source.spineTitleX) || Number(fallback.spineTitleX) || 50,
-      y: Number(source.spineTitleY) || Number(fallback.spineTitleY) || 4,
+        Number(source.spineTitleSize ?? sourceSpine.titleSize) ||
+        Number(fallback.spineTitleSize) ||
+        5,
+      x:
+        Number(source.spineTitleX ?? sourceSpine.titleX) ||
+        Number(fallback.spineTitleX) ||
+        50,
+      y:
+        Number(source.spineTitleY ?? sourceSpine.titleY) ||
+        Number(fallback.spineTitleY) ||
+        4,
       width:
-        Number(source.spineTitleWidth) ||
+        Number(source.spineTitleWidth ?? sourceSpine.titleWidth) ||
         Number(fallback.spineTitleWidth) ||
         100,
-      align: source.spineTitleAlign || fallback.spineTitleAlign || "left",
-      color: source.spineTextColor || fallback.spineTextColor || "#ffffff",
+      align:
+        source.spineTitleAlign ||
+        sourceSpine.titleAlign ||
+        fallback.spineTitleAlign ||
+        "left",
+      color:
+        source.spineTextColor ||
+        sourceSpine.textColor ||
+        fallback.spineTextColor ||
+        "#ffffff",
       outlineColor:
-        source.spineStrokeColor || fallback.spineStrokeColor || "#000000",
+        source.spineStrokeColor ||
+        sourceSpine.strokeColor ||
+        fallback.spineStrokeColor ||
+        "#000000",
       outlineSize:
-        Number(source.spineStrokeSize) || Number(fallback.spineStrokeSize) || 0,
-      rotate: source.spineTitleRotate !== false,
+        Number(source.spineStrokeSize ?? sourceSpine.strokeSize) ||
+        Number(fallback.spineStrokeSize) ||
+        0,
+      rotate:
+        source.spineTitleRotate !== undefined
+          ? source.spineTitleRotate !== false
+          : sourceSpine.titleRotate !== false,
       customText: "",
     },
     {
+      id: "spine-author",
       location: "spine",
       part: "author",
-      enabled: source.spineAuthorOn !== false,
+      enabled:
+        source.spineAuthorOn !== undefined
+          ? source.spineAuthorOn !== false
+          : sourceSpine.authorOn !== false,
       size:
-        Number(source.spineAuthorSize) || Number(fallback.spineAuthorSize) || 4,
+        Number(source.spineAuthorSize ?? sourceSpine.authorSize) ||
+        Number(fallback.spineAuthorSize) ||
+        4,
       x: 50,
       y: 94,
       width: 100,
       align: "center",
-      color: source.spineTextColor || fallback.spineTextColor || "#ffffff",
+      color:
+        source.spineTextColor ||
+        sourceSpine.textColor ||
+        fallback.spineTextColor ||
+        "#ffffff",
       outlineColor:
-        source.spineStrokeColor || fallback.spineStrokeColor || "#000000",
+        source.spineStrokeColor ||
+        sourceSpine.strokeColor ||
+        fallback.spineStrokeColor ||
+        "#000000",
       outlineSize:
-        Number(source.spineStrokeSize) || Number(fallback.spineStrokeSize) || 0,
-      rotate: Boolean(source.spineAuthorRotate),
+        Number(source.spineStrokeSize ?? sourceSpine.strokeSize) ||
+        Number(fallback.spineStrokeSize) ||
+        0,
+      rotate:
+        source.spineAuthorRotate !== undefined
+          ? Boolean(source.spineAuthorRotate)
+          : Boolean(sourceSpine.authorRotate),
       customText: "",
     },
   ];
@@ -1835,6 +2195,13 @@ TPP.migrateTextElements = function (book, base) {
       entry,
       byKey.get(TPP.textElementKey(entry.location, entry.part)) || {},
     );
+  });
+  book.textElements.forEach(function (entry, index) {
+    if (!entry.id) {
+      entry.id =
+        (defaults[index] && defaults[index].id) ||
+        "text-" + TPP.textElementKey(entry.location, entry.part);
+    }
   });
 };
 TPP.textElementContent = function (book, location, part) {
@@ -1911,30 +2278,13 @@ TPP.syncLegacyTextFieldsFromElements = function (book) {
     );
   }
   if (backCustom) {
-    book.backText = String(backCustom.customText || "");
-    book.backTextY = Number(backCustom.y) || 0;
-    book.backTextSize = Number(backCustom.size) || book.backTextSize;
-    book.backTextAlign = backCustom.align || book.backTextAlign;
-    book.backTextColor = backCustom.color || book.backTextColor;
+    TPP.backCoverInfo(book).textElementId = backCustom.id || "back-cover-text";
   }
   if (spineTitle) {
-    book.spineTitleSize = Number(spineTitle.size) || book.spineTitleSize;
-    book.spineTitleX = Number(spineTitle.x) || 50;
-    book.spineTitleY = Number(spineTitle.y) || 0;
-    book.spineTitleWidth = Math.max(
-      10,
-      Math.min(100, Number(spineTitle.width) || 100),
-    );
-    book.spineTitleAlign = spineTitle.align || "left";
-    book.spineTextColor = spineTitle.color || book.spineTextColor;
-    book.spineStrokeColor = spineTitle.outlineColor || book.spineStrokeColor;
-    book.spineStrokeSize = Math.max(0, Number(spineTitle.outlineSize) || 0);
-    book.spineTitleRotate = spineTitle.rotate !== false;
+    TPP.spineInfo(book).titleTextElementId = spineTitle.id || "spine-title";
   }
   if (spineAuthor) {
-    book.spineAuthorOn = spineAuthor.enabled !== false;
-    book.spineAuthorSize = Number(spineAuthor.size) || book.spineAuthorSize;
-    book.spineAuthorRotate = Boolean(spineAuthor.rotate);
+    TPP.spineInfo(book).authorTextElementId = spineAuthor.id || "spine-author";
   }
 };
 TPP.syncTextElementsFromLegacyFields = function (book) {
@@ -1945,7 +2295,14 @@ TPP.syncTextElementsFromLegacyFields = function (book) {
     backCustom.y = Number(book.backTextY) || 0;
     backCustom.align = book.backTextAlign || backCustom.align || "center";
     backCustom.color = book.backTextColor || backCustom.color || "#ffffff";
+    TPP.backCoverInfo(book).textElementId = backCustom.id || "back-cover-text";
   }
+  const spineTitle = TPP.spineTitleElement(book);
+  const spineAuthor = TPP.spineAuthorElement(book);
+  if (spineTitle)
+    TPP.spineInfo(book).titleTextElementId = spineTitle.id || "spine-title";
+  if (spineAuthor)
+    TPP.spineInfo(book).authorTextElementId = spineAuthor.id || "spine-author";
 };
 TPP.migrateCoverTextSettings = function (book, base) {
   const sharedColor = book.coverText || base.coverText;
