@@ -988,7 +988,21 @@ input[type="checkbox"] {
   max-width: min(62rem, calc(100vw - 2rem));
 }
 .image-export-dialog-card {
-  max-width: min(28rem, calc(100vw - 2rem));
+  max-width: min(64rem, calc(100vw - 2rem));
+}
+.image-export-dialog-layout {
+  display: grid;
+  grid-template-columns: minmax(18rem, 22rem) minmax(22rem, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.image-export-dialog-controls,
+.image-export-dialog-preview {
+  display: grid;
+  gap: 0.85rem;
+}
+.image-export-dialog-preview {
+  min-width: 0;
 }
 .image-export-estimate {
   margin-top: -0.25rem;
@@ -1010,7 +1024,7 @@ input[type="checkbox"] {
 }
 .image-export-preview-stage {
   position: relative;
-  min-height: 14rem;
+  min-height: 20rem;
   border: 1px solid var(--line);
   border-radius: 16px;
   background:
@@ -1083,10 +1097,27 @@ input[type="checkbox"] {
   display: grid;
   gap: 0.35rem;
 }
+#imageExportDialogThresholdWrap {
+  display: grid;
+  gap: 0.35rem;
+}
 #imageExportDialogQualityValue {
   color: var(--muted);
   font-size: 0.88rem;
   font-weight: 700;
+}
+#imageExportDialogThresholdValue {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+@media (max-width: 900px) {
+  .image-export-dialog-layout {
+    grid-template-columns: 1fr;
+  }
+  .image-export-preview-stage {
+    min-height: 16rem;
+  }
 }
 .asset-upload-row {
   display: flex;

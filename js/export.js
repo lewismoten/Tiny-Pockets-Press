@@ -143,9 +143,10 @@ TPP.imageExportOptions = function (options) {
     colorDepth: ["color24", "gray8", "mono1"].includes(source.colorDepth)
       ? source.colorDepth
       : "color24",
+    threshold: Math.max(0, Math.min(255, Number(source.threshold) || 128)),
   };
 };
-TPP.exportCanvasForDepth = function (canvas, colorDepth) {
+TPP.exportCanvasForDepth = function (canvas, colorDepth, threshold) {
   if (!canvas || colorDepth === "color24") return canvas;
   const out = document.createElement("canvas");
   out.width = canvas.width;
@@ -154,12 +155,13 @@ TPP.exportCanvasForDepth = function (canvas, colorDepth) {
   ctx.drawImage(canvas, 0, 0);
   const image = ctx.getImageData(0, 0, out.width, out.height);
   const data = image.data;
+  const monoThreshold = Math.max(0, Math.min(255, Number(threshold) || 128));
   for (let i = 0; i < data.length; i += 4) {
     const gray = Math.round(
       data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114,
     );
     if (colorDepth === "mono1") {
-      const bit = gray >= 128 ? 255 : 0;
+      const bit = gray >= monoThreshold ? 255 : 0;
       data[i] = bit;
       data[i + 1] = bit;
       data[i + 2] = bit;
@@ -257,6 +259,7 @@ TPP.exportImagesZip = async function (options) {
       const exportCanvas = TPP.exportCanvasForDepth(
         canvas,
         exportOptions.colorDepth,
+        exportOptions.threshold,
       );
       const blob = await new Promise(function (resolve) {
         exportCanvas.toBlob(
