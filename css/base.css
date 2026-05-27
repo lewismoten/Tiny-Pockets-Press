@@ -1117,6 +1117,10 @@ input[type="checkbox"] {
   display: grid;
   gap: 0.35rem;
 }
+#imageExportDialogPaletteWrap {
+  display: grid;
+  gap: 0.35rem;
+}
 #imageExportDialogThresholdWrap {
   display: grid;
   gap: 0.35rem;

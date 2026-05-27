@@ -678,6 +678,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportQualityValue = document.getElementById(
     "imageExportDialogQualityValue",
   );
+  const imageExportPaletteWrap = document.getElementById(
+    "imageExportDialogPaletteWrap",
+  );
+  const imageExportPalette = document.getElementById(
+    "imageExportDialogPalette",
+  );
   const imageExportThresholdWrap = document.getElementById(
     "imageExportDialogThresholdWrap",
   );
@@ -712,6 +718,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportQualityWrap &&
     imageExportQuality &&
     imageExportQualityValue &&
+    imageExportPaletteWrap &&
+    imageExportPalette &&
     imageExportThresholdWrap &&
     imageExportThreshold &&
     imageExportThresholdValue &&
@@ -728,7 +736,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (preset !== "custom") imageExportDpi.value = preset;
     };
     const syncFormatUi = function () {
-      const indexedOnly = imageExportColorDepth.value === "websafe";
+      const indexedOnly = imageExportColorDepth.value === "indexed";
       Array.from(imageExportFormat.options).forEach(function (option) {
         option.disabled = indexedOnly && !["png", "gif"].includes(option.value);
       });
@@ -747,6 +755,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         "is-disabled",
         !colorDepthApplies,
       );
+      imageExportPalette.disabled = !indexedOnly;
+      imageExportPaletteWrap.classList.toggle("is-disabled", !indexedOnly);
       const mono = imageExportColorDepth.value === "mono1";
       imageExportThreshold.disabled = !mono;
       imageExportThresholdWrap.classList.toggle("is-disabled", !mono);
@@ -785,6 +795,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       schedulePreview();
     });
     imageExportQuality.addEventListener("input", function () {
+      syncFormatUi();
+      schedulePreview();
+    });
+    imageExportPalette.addEventListener("change", function () {
       syncFormatUi();
       schedulePreview();
     });
@@ -837,6 +851,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           Math.min(100, Number(imageExportQuality.value) || 92),
         );
         const colorDepth = imageExportColorDepth.value || "color24";
+        const palette = imageExportPalette.value || "websafe";
         const threshold = Math.max(
           0,
           Math.min(255, Number(imageExportThreshold.value) || 128),
@@ -852,6 +867,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           format: format,
           quality: quality,
           colorDepth: colorDepth,
+          palette: palette,
           threshold: threshold,
         });
         if (imageExportDialog.open) imageExportDialog.close();
@@ -860,6 +876,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           format: format,
           quality: quality,
           colorDepth: colorDepth,
+          palette: palette,
           threshold: threshold,
         });
       }
@@ -877,6 +894,8 @@ TPP.openImageExportDialog = function () {
   const quality = document.getElementById("imageExportDialogQuality");
   const qualityWrap = document.getElementById("imageExportDialogQualityWrap");
   const qualityValue = document.getElementById("imageExportDialogQualityValue");
+  const palette = document.getElementById("imageExportDialogPalette");
+  const paletteWrap = document.getElementById("imageExportDialogPaletteWrap");
   const threshold = document.getElementById("imageExportDialogThreshold");
   const thresholdWrap = document.getElementById(
     "imageExportDialogThresholdWrap",
@@ -894,6 +913,8 @@ TPP.openImageExportDialog = function () {
     !quality ||
     !qualityWrap ||
     !qualityValue ||
+    !palette ||
+    !paletteWrap ||
     !threshold ||
     !thresholdWrap ||
     !thresholdValue ||
@@ -903,12 +924,15 @@ TPP.openImageExportDialog = function () {
   const ui = TPP.imageExportUi();
   const dpi = TPP.dpi(ui.dpi || 300);
   input.value = dpi;
-  colorDepth.value = ui.colorDepth || "color24";
+  colorDepth.value =
+    ui.colorDepth === "websafe" ? "indexed" : ui.colorDepth || "color24";
   format.value =
-    colorDepth.value === "websafe" && !["png", "gif"].includes(ui.format)
+    colorDepth.value === "indexed" && !["png", "gif"].includes(ui.format)
       ? "png"
       : ui.format || "png";
   quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));
+  palette.value =
+    ui.palette || (ui.colorDepth === "websafe" ? "websafe" : "websafe");
   threshold.value = Math.max(0, Math.min(255, Number(ui.threshold) || 128));
   qualityValue.textContent = quality.value + "%";
   thresholdValue.textContent = threshold.value;
@@ -1285,6 +1309,7 @@ TPP.imageExportUi = function () {
       quality: 92,
       colorDepth: "color24",
       threshold: 128,
+      palette: "websafe",
     },
     state.imageExport || {},
   );
@@ -1298,6 +1323,7 @@ TPP.writeImageExportUi = function (patch) {
       quality: 92,
       colorDepth: "color24",
       threshold: 128,
+      palette: "websafe",
     },
     state.imageExport || {},
     patch || {},
@@ -1430,6 +1456,7 @@ TPP.renderImageExportPreview = async function () {
   const format = document.getElementById("imageExportDialogFormat");
   const colorDepth = document.getElementById("imageExportDialogColorDepth");
   const quality = document.getElementById("imageExportDialogQuality");
+  const palette = document.getElementById("imageExportDialogPalette");
   const threshold = document.getElementById("imageExportDialogThreshold");
   const dpi = document.getElementById("imageExportDialogDpi");
   const thresholdValue = document.getElementById(
@@ -1443,6 +1470,7 @@ TPP.renderImageExportPreview = async function () {
     !format ||
     !colorDepth ||
     !quality ||
+    !palette ||
     !threshold ||
     !thresholdValue ||
     !dpi ||
@@ -1476,6 +1504,7 @@ TPP.renderImageExportPreview = async function () {
     format: format.value || "png",
     quality: Number(quality.value) || 92,
     colorDepth: colorDepth.value || "color24",
+    palette: palette.value || "websafe",
     threshold: Number(threshold.value) || 128,
   });
   thresholdValue.textContent = String(exportOptions.threshold);
@@ -1495,6 +1524,7 @@ TPP.renderImageExportPreview = async function () {
       baseCanvas,
       exportOptions.colorDepth,
       exportOptions.threshold,
+      exportOptions.palette,
     );
     const afterBlob = await TPP.exportBlobForCanvas(afterCanvas, exportOptions);
     if (TPP.imageExportPreviewToken !== token) return;

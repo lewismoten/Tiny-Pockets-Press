@@ -137,23 +137,237 @@ TPP.imageExportOptions = function (options) {
   const requestedFormat = ["png", "gif", "jpeg", "webp"].includes(source.format)
     ? source.format
     : "png";
-  const colorDepth = ["color24", "gray8", "mono1", "websafe"].includes(
-    source.colorDepth,
-  )
+  const requestedDepth = [
+    "color24",
+    "gray8",
+    "mono1",
+    "indexed",
+    "websafe",
+  ].includes(source.colorDepth)
     ? source.colorDepth
     : "color24";
+  const colorDepth = requestedDepth === "websafe" ? "indexed" : requestedDepth;
   return {
     dpi: TPP.dpi(source.dpi),
     format:
-      colorDepth === "websafe" && !["png", "gif"].includes(requestedFormat)
+      colorDepth === "indexed" && !["png", "gif"].includes(requestedFormat)
         ? "png"
         : requestedFormat,
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
     colorDepth: colorDepth,
     threshold: Math.max(0, Math.min(255, Number(source.threshold) || 128)),
+    palette:
+      requestedDepth === "websafe"
+        ? "websafe"
+        : [
+              "websafe",
+              "colors4",
+              "colors8",
+              "colors16",
+              "colors32",
+              "colors64",
+              "colors128",
+              "colors256",
+              "windows16",
+              "ansi16",
+              "xterm256",
+              "ega16",
+              "cga0",
+              "cga1",
+            ].includes(source.palette)
+          ? source.palette
+          : "websafe",
   };
 };
-TPP.exportCanvasForDepth = function (canvas, colorDepth, threshold) {
+TPP.imageExportPaletteFromLevels = function (levelsR, levelsG, levelsB) {
+  const palette = [];
+  const values = function (levels) {
+    if (levels <= 1) return [0];
+    const out = [];
+    for (let i = 0; i < levels; i++)
+      out.push(Math.round((255 * i) / (levels - 1)));
+    return out;
+  };
+  const reds = values(levelsR);
+  const greens = values(levelsG);
+  const blues = values(levelsB);
+  reds.forEach(function (r) {
+    greens.forEach(function (g) {
+      blues.forEach(function (b) {
+        palette.push([r, g, b]);
+      });
+    });
+  });
+  return palette;
+};
+TPP.imageExportSizedPalette = function (count) {
+  let dims = [1, 1, 1];
+  const product = function () {
+    return dims[0] * dims[1] * dims[2];
+  };
+  while (product() < count) {
+    let index = 0;
+    for (let i = 1; i < dims.length; i++) {
+      if (dims[i] < dims[index]) index = i;
+    }
+    dims[index] += 1;
+    if (product() > count) break;
+  }
+  while (product() > count) {
+    let index = 0;
+    for (let i = 1; i < dims.length; i++) {
+      if (dims[i] > dims[index]) index = i;
+    }
+    if (dims[index] > 1) dims[index] -= 1;
+    else break;
+  }
+  return TPP.imageExportPaletteFromLevels(dims[0], dims[1], dims[2]).slice(
+    0,
+    count,
+  );
+};
+TPP.imageExportNamedPalette = function (name) {
+  const ansi16 = [
+    [0, 0, 0],
+    [205, 0, 0],
+    [0, 205, 0],
+    [205, 205, 0],
+    [0, 0, 238],
+    [205, 0, 205],
+    [0, 205, 205],
+    [229, 229, 229],
+    [127, 127, 127],
+    [255, 0, 0],
+    [0, 255, 0],
+    [255, 255, 0],
+    [92, 92, 255],
+    [255, 0, 255],
+    [0, 255, 255],
+    [255, 255, 255],
+  ];
+  const windows16 = [
+    [0, 0, 0],
+    [128, 0, 0],
+    [0, 128, 0],
+    [128, 128, 0],
+    [0, 0, 128],
+    [128, 0, 128],
+    [0, 128, 128],
+    [192, 192, 192],
+    [128, 128, 128],
+    [255, 0, 0],
+    [0, 255, 0],
+    [255, 255, 0],
+    [0, 0, 255],
+    [255, 0, 255],
+    [0, 255, 255],
+    [255, 255, 255],
+  ];
+  const ega16 = [
+    [0, 0, 0],
+    [0, 0, 170],
+    [0, 170, 0],
+    [0, 170, 170],
+    [170, 0, 0],
+    [170, 0, 170],
+    [170, 85, 0],
+    [170, 170, 170],
+    [85, 85, 85],
+    [85, 85, 255],
+    [85, 255, 85],
+    [85, 255, 255],
+    [255, 85, 85],
+    [255, 85, 255],
+    [255, 255, 85],
+    [255, 255, 255],
+  ];
+  const websafe = [];
+  [0, 51, 102, 153, 204, 255].forEach(function (r) {
+    [0, 51, 102, 153, 204, 255].forEach(function (g) {
+      [0, 51, 102, 153, 204, 255].forEach(function (b) {
+        websafe.push([r, g, b]);
+      });
+    });
+  });
+  if (name === "websafe") return websafe;
+  if (name === "windows16") return windows16;
+  if (name === "ansi16") return ansi16;
+  if (name === "ega16") return ega16;
+  if (name === "cga0")
+    return [
+      [0, 0, 0],
+      [85, 255, 255],
+      [255, 85, 255],
+      [255, 255, 255],
+    ];
+  if (name === "cga1")
+    return [
+      [0, 0, 0],
+      [85, 255, 85],
+      [255, 85, 85],
+      [170, 85, 0],
+    ];
+  if (name === "xterm256") {
+    const palette = ansi16.slice();
+    [0, 95, 135, 175, 215, 255].forEach(function (r) {
+      [0, 95, 135, 175, 215, 255].forEach(function (g) {
+        [0, 95, 135, 175, 215, 255].forEach(function (b) {
+          palette.push([r, g, b]);
+        });
+      });
+    });
+    for (let i = 0; i < 24; i++) {
+      const gray = 8 + i * 10;
+      palette.push([gray, gray, gray]);
+    }
+    return palette.slice(0, 256);
+  }
+  const countMap = {
+    colors4: 4,
+    colors8: 8,
+    colors16: 16,
+    colors32: 32,
+    colors64: 64,
+    colors128: 128,
+    colors256: 256,
+  };
+  return TPP.imageExportSizedPalette(countMap[name] || 256);
+};
+TPP.applyIndexedPalette = function (data, palette) {
+  const cache = new Map();
+  const nearest = function (r, g, b) {
+    const key = (r << 16) | (g << 8) | b;
+    if (cache.has(key)) return cache.get(key);
+    let best = palette[0] || [0, 0, 0];
+    let bestDist = Infinity;
+    for (let i = 0; i < palette.length; i++) {
+      const swatch = palette[i];
+      const dr = r - swatch[0];
+      const dg = g - swatch[1];
+      const db = b - swatch[2];
+      const dist = dr * dr + dg * dg + db * db;
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = swatch;
+        if (dist === 0) break;
+      }
+    }
+    cache.set(key, best);
+    return best;
+  };
+  for (let i = 0; i < data.length; i += 4) {
+    const match = nearest(data[i], data[i + 1], data[i + 2]);
+    data[i] = match[0];
+    data[i + 1] = match[1];
+    data[i + 2] = match[2];
+  }
+};
+TPP.exportCanvasForDepth = function (
+  canvas,
+  colorDepth,
+  threshold,
+  paletteName,
+) {
   if (!canvas || colorDepth === "color24") return canvas;
   const out = document.createElement("canvas");
   out.width = canvas.width;
@@ -172,22 +386,14 @@ TPP.exportCanvasForDepth = function (canvas, colorDepth, threshold) {
       data[i] = bit;
       data[i + 1] = bit;
       data[i + 2] = bit;
-    } else if (colorDepth === "websafe") {
-      data[i] = Math.max(0, Math.min(255, Math.round(data[i] / 51) * 51));
-      data[i + 1] = Math.max(
-        0,
-        Math.min(255, Math.round(data[i + 1] / 51) * 51),
-      );
-      data[i + 2] = Math.max(
-        0,
-        Math.min(255, Math.round(data[i + 2] / 51) * 51),
-      );
-    } else {
+    } else if (colorDepth === "gray8") {
       data[i] = gray;
       data[i + 1] = gray;
       data[i + 2] = gray;
     }
   }
+  if (colorDepth === "indexed")
+    TPP.applyIndexedPalette(data, TPP.imageExportNamedPalette(paletteName));
   ctx.putImageData(image, 0, 0);
   return out;
 };
@@ -248,7 +454,7 @@ TPP.gifPaletteSize = function (quality) {
   const pct = Math.max(1, Math.min(100, Number(quality) || 92));
   return Math.max(16, Math.min(256, Math.round(16 + (pct / 100) * 240)));
 };
-TPP.encodeGifBlob = async function (canvas, quality) {
+TPP.encodeGifBlob = async function (canvas) {
   if (!canvas) throw new Error("Canvas required");
   const lib = await TPP.loadGifEncoder();
   const readCanvas = document.createElement("canvas");
@@ -258,7 +464,7 @@ TPP.encodeGifBlob = async function (canvas, quality) {
   readCtx.drawImage(canvas, 0, 0);
   const image = readCtx.getImageData(0, 0, canvas.width, canvas.height);
   const rgba = image.data;
-  const palette = lib.quantize(rgba, TPP.gifPaletteSize(quality));
+  const palette = lib.quantize(rgba, 256);
   const index = lib.applyPalette(rgba, palette);
   const gif = lib.GIFEncoder();
   gif.writeFrame(index, canvas.width, canvas.height, {
@@ -272,8 +478,7 @@ TPP.encodeGifBlob = async function (canvas, quality) {
 TPP.exportBlobForCanvas = function (canvas, options) {
   if (!canvas) return Promise.resolve(null);
   const exportOptions = TPP.imageExportOptions(options);
-  if (exportOptions.format === "gif")
-    return TPP.encodeGifBlob(canvas, exportOptions.quality);
+  if (exportOptions.format === "gif") return TPP.encodeGifBlob(canvas);
   const mime =
     exportOptions.format === "jpeg"
       ? "image/jpeg"
@@ -343,6 +548,7 @@ TPP.exportImagesZip = async function (options) {
         canvas,
         exportOptions.colorDepth,
         exportOptions.threshold,
+        exportOptions.palette,
       );
       const blob = await TPP.exportBlobForCanvas(exportCanvas, exportOptions);
       const pageName =
