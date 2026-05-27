@@ -730,14 +730,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     const syncFormatUi = function () {
       const indexedOnly = imageExportColorDepth.value === "websafe";
       Array.from(imageExportFormat.options).forEach(function (option) {
-        option.disabled = indexedOnly && option.value !== "png" ? true : false;
+        const gifUnavailable =
+          option.value === "gif" && typeof window.GIF !== "function";
+        option.disabled =
+          gifUnavailable ||
+          (indexedOnly && !["png", "gif"].includes(option.value));
       });
-      if (indexedOnly && imageExportFormat.value !== "png")
+      if (
+        (indexedOnly && !["png", "gif"].includes(imageExportFormat.value)) ||
+        (imageExportFormat.value === "gif" && typeof window.GIF !== "function")
+      )
         imageExportFormat.value = "png";
       const lossy =
         imageExportFormat.value === "jpeg" ||
         imageExportFormat.value === "webp";
-      const colorDepthApplies = ["png", "jpeg", "webp"].includes(
+      const colorDepthApplies = ["png", "gif", "jpeg", "webp"].includes(
         imageExportFormat.value,
       );
       imageExportQuality.disabled = !lossy;
@@ -907,7 +914,11 @@ TPP.openImageExportDialog = function () {
   const dpi = TPP.dpi(ui.dpi || 300);
   input.value = dpi;
   colorDepth.value = ui.colorDepth || "color24";
-  format.value = colorDepth.value === "websafe" ? "png" : ui.format || "png";
+  format.value =
+    (colorDepth.value === "websafe" && !["png", "gif"].includes(ui.format)) ||
+    (ui.format === "gif" && typeof window.GIF !== "function")
+      ? "png"
+      : ui.format || "png";
   quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));
   threshold.value = Math.max(0, Math.min(255, Number(ui.threshold) || 128));
   qualityValue.textContent = quality.value + "%";
@@ -1305,7 +1316,15 @@ TPP.imageExportPixels = function (dpi) {
 TPP.imageExportPreviewIndex = 0;
 TPP.imageExportPreviewSplit = 50;
 TPP.imageExportPreviewAssets = null;
+TPP.revokeImageExportPreviewAssets = function (assets) {
+  ["before", "after"].forEach(function (key) {
+    const entry = assets && assets[key];
+    if (entry && entry.src && String(entry.src).startsWith("blob:"))
+      URL.revokeObjectURL(entry.src);
+  });
+};
 TPP.setImageExportPreviewDownloads = function (assets) {
+  TPP.revokeImageExportPreviewAssets(TPP.imageExportPreviewAssets);
   TPP.imageExportPreviewAssets = assets || null;
   const beforeButton = document.getElementById("imageExportDownloadBefore");
   const afterButton = document.getElementById("imageExportDownloadAfter");
@@ -1316,11 +1335,9 @@ TPP.downloadImageExportPreview = async function (which) {
   const assets = TPP.imageExportPreviewAssets;
   const entry =
     which === "after" ? assets && assets.after : assets && assets.before;
-  if (!entry || !entry.src || !entry.name) return;
+  if (!entry || !entry.blob || !entry.name) return;
   try {
-    const response = await fetch(entry.src);
-    const blob = await response.blob();
-    TPP.downloadBlob(entry.name, blob);
+    TPP.downloadBlob(entry.name, entry.blob);
   } catch (_error) {
     TPP.toast("Unable to download preview image.");
   }
@@ -1433,28 +1450,19 @@ TPP.renderImageExportPreview = async function () {
       previewScale,
     );
     if (TPP.imageExportPreviewToken !== token) return;
-    const beforeSrc = TPP.previewDataUrl(baseCanvas, "png", 1);
+    const beforeBlob = await TPP.exportBlobForCanvas(baseCanvas, {
+      format: "png",
+      quality: 100,
+    });
     const afterCanvas = TPP.exportCanvasForDepth(
       baseCanvas,
       exportOptions.colorDepth,
       exportOptions.threshold,
     );
-    const [beforeSize, afterSize] = await Promise.all([
-      TPP.previewBlobSize ? TPP.previewBlobSize(baseCanvas, "png", 1) : 0,
-      TPP.previewBlobSize
-        ? TPP.previewBlobSize(
-            afterCanvas,
-            exportOptions.format,
-            exportOptions.quality / 100,
-          )
-        : 0,
-    ]);
-    const afterSrc = TPP.previewDataUrl(
-      afterCanvas,
-      exportOptions.format,
-      exportOptions.quality / 100,
-    );
+    const afterBlob = await TPP.exportBlobForCanvas(afterCanvas, exportOptions);
     if (TPP.imageExportPreviewToken !== token) return;
+    const beforeSrc = beforeBlob ? URL.createObjectURL(beforeBlob) : "";
+    const afterSrc = afterBlob ? URL.createObjectURL(afterBlob) : "";
     const baseName = (
       (settings.title || "tiny-book") +
       "-page-" +
@@ -1475,23 +1483,27 @@ TPP.renderImageExportPreview = async function () {
       '<div class="image-export-compare-label before">Before<span class="image-export-compare-size">' +
       TPP.esc(
         TPP.fileBytesLabel
-          ? TPP.fileBytesLabel(beforeSize)
-          : String(beforeSize),
+          ? TPP.fileBytesLabel(beforeBlob ? beforeBlob.size : 0)
+          : String(beforeBlob ? beforeBlob.size : 0),
       ) +
       "</span></div>" +
       '<div class="image-export-compare-label after">After<span class="image-export-compare-size">' +
       TPP.esc(
-        TPP.fileBytesLabel ? TPP.fileBytesLabel(afterSize) : String(afterSize),
+        TPP.fileBytesLabel
+          ? TPP.fileBytesLabel(afterBlob ? afterBlob.size : 0)
+          : String(afterBlob ? afterBlob.size : 0),
       ) +
       "</span></div>" +
       "</div>";
     TPP.setImageExportPreviewDownloads({
       before: {
         src: beforeSrc,
+        blob: beforeBlob,
         name: baseName + "-before.png",
       },
       after: {
         src: afterSrc,
+        blob: afterBlob,
         name:
           baseName +
           "-after." +

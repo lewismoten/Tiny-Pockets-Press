@@ -134,20 +134,22 @@ TPP.exportReadablePdf = async function () {
 };
 TPP.imageExportOptions = function (options) {
   const source = options || {};
+  const requestedFormat = ["png", "gif", "jpeg", "webp"].includes(source.format)
+    ? source.format
+    : "png";
+  const colorDepth = ["color24", "gray8", "mono1", "websafe"].includes(
+    source.colorDepth,
+  )
+    ? source.colorDepth
+    : "color24";
   return {
     dpi: TPP.dpi(source.dpi),
     format:
-      source.colorDepth === "websafe"
+      colorDepth === "websafe" && !["png", "gif"].includes(requestedFormat)
         ? "png"
-        : ["png", "jpeg", "webp"].includes(source.format)
-          ? source.format
-          : "png",
+        : requestedFormat,
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
-    colorDepth: ["color24", "gray8", "mono1", "websafe"].includes(
-      source.colorDepth,
-    )
-      ? source.colorDepth
-      : "color24",
+    colorDepth: colorDepth,
     threshold: Math.max(0, Math.min(255, Number(source.threshold) || 128)),
   };
 };
@@ -225,24 +227,66 @@ TPP.previewDataUrl = function (canvas, format, quality) {
     format === "png" ? undefined : Math.max(0.01, Math.min(1, quality || 0.92)),
   );
 };
-TPP.previewBlobSize = function (canvas, format, quality) {
-  if (!canvas) return Promise.resolve(0);
+TPP.gifWorkerScript =
+  "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js";
+TPP.gifQualityValue = function (quality) {
+  const pct = Math.max(1, Math.min(100, Number(quality) || 92));
+  return Math.max(1, Math.min(30, Math.round(31 - pct * 0.3)));
+};
+TPP.encodeGifBlob = function (canvas, quality) {
+  if (!canvas) return Promise.reject(new Error("Canvas required"));
+  if (typeof window.GIF !== "function")
+    return Promise.reject(new Error("GIF encoder unavailable"));
+  return new Promise(function (resolve, reject) {
+    try {
+      const gif = new window.GIF({
+        workers: 2,
+        quality: TPP.gifQualityValue(quality),
+        workerScript: TPP.gifWorkerScript,
+        width: canvas.width,
+        height: canvas.height,
+      });
+      const ctx = canvas.getContext("2d");
+      gif.on("finished", resolve);
+      gif.on("abort", function () {
+        reject(new Error("GIF encoding aborted"));
+      });
+      gif.addFrame(ctx, { copy: true, delay: 250 });
+      gif.render();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+TPP.exportBlobForCanvas = function (canvas, options) {
+  if (!canvas) return Promise.resolve(null);
+  const exportOptions = TPP.imageExportOptions(options);
+  if (exportOptions.format === "gif")
+    return TPP.encodeGifBlob(canvas, exportOptions.quality);
   const mime =
-    format === "jpeg"
+    exportOptions.format === "jpeg"
       ? "image/jpeg"
-      : format === "webp"
+      : exportOptions.format === "webp"
         ? "image/webp"
         : "image/png";
   return new Promise(function (resolve) {
     canvas.toBlob(
       function (blob) {
-        resolve(blob ? blob.size : 0);
+        resolve(blob || null);
       },
       mime,
-      format === "png"
+      exportOptions.format === "png"
         ? undefined
-        : Math.max(0.01, Math.min(1, quality || 0.92)),
+        : Math.max(0.01, Math.min(1, exportOptions.quality / 100 || 0.92)),
     );
+  });
+};
+TPP.previewBlobSize = function (canvas, format, quality) {
+  return TPP.exportBlobForCanvas(canvas, {
+    format: format,
+    quality: quality,
+  }).then(function (blob) {
+    return blob ? blob.size : 0;
   });
 };
 TPP.exportImagesZip = async function (options) {
@@ -254,19 +298,16 @@ TPP.exportImagesZip = async function (options) {
     return;
   }
   const exportOptions = TPP.imageExportOptions(options);
+  if (exportOptions.format === "gif" && typeof window.GIF !== "function") {
+    alert("GIF export encoder failed to load.");
+    return;
+  }
   const zip = new JSZip();
   const mount = document.createElement("div");
   const targetDpi = exportOptions.dpi;
   const scale = targetDpi / 96;
-  const mime =
-    exportOptions.format === "jpeg"
-      ? "image/jpeg"
-      : exportOptions.format === "webp"
-        ? "image/webp"
-        : "image/png";
   const extension =
     exportOptions.format === "jpeg" ? "jpg" : exportOptions.format;
-  const quality = exportOptions.quality / 100;
   mount.style.cssText =
     "position:fixed;left:-9999px;top:0;pointer-events:none;";
   document.body.appendChild(mount);
@@ -296,13 +337,7 @@ TPP.exportImagesZip = async function (options) {
         exportOptions.colorDepth,
         exportOptions.threshold,
       );
-      const blob = await new Promise(function (resolve) {
-        exportCanvas.toBlob(
-          resolve,
-          mime,
-          exportOptions.format === "png" ? undefined : quality,
-        );
-      });
+      const blob = await TPP.exportBlobForCanvas(exportCanvas, exportOptions);
       const pageName =
         "page-" + String(i + 1).padStart(4, "0") + "." + extension;
       zip.file(pageName, blob);
