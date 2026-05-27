@@ -437,6 +437,18 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (bytesLabel) TPP.toast(bytesLabel.dataset.bytes || "");
     });
   }
+  const dataSummary = document.getElementById("dataSummary");
+  if (dataSummary) {
+    dataSummary.addEventListener("click", function (e) {
+      const remove = e.target.closest("[data-stale-remove]");
+      if (remove) {
+        TPP.removeStaleDataEntry(remove.dataset.staleRemove || "");
+        return;
+      }
+      const removeAll = e.target.closest("[data-stale-remove-all]");
+      if (removeAll) TPP.removeAllStaleDataEntries();
+    });
+  }
   if (dataImageDialog) {
     dataImageDialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");

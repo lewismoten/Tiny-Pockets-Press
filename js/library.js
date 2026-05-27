@@ -1,5 +1,6 @@
 window.TPP = window.TPP || {};
 TPP.dataPreviewStore = {};
+TPP.dataStaleStore = {};
 
 TPP.dateTime = function (value) {
   if (!value) return "";
@@ -272,6 +273,61 @@ TPP.dataSchemaStatus = function (context, key) {
   if (!known) return "active";
   return known.has(key) ? "active" : "unknown";
 };
+TPP.dataPathLabel = function (path) {
+  return (path || []).map(function (segment, index) {
+    if (typeof segment === "number") return "[" + segment + "]";
+    return index === 0 ? String(segment) : "." + String(segment);
+  }).join("");
+};
+TPP.collectDataStaleEntries = function (value, context, path, out) {
+  const entries = out || [];
+  const currentPath = Array.isArray(path) ? path : [];
+  if (Array.isArray(value)) {
+    value.forEach(function (item, index) {
+      if (item && typeof item === "object") TPP.collectDataStaleEntries(item, context, currentPath.concat(index), entries);
+    });
+    return entries;
+  }
+  if (!value || typeof value !== "object") return entries;
+  Object.entries(value).forEach(function (entry) {
+    const key = entry[0];
+    const child = entry[1];
+    if (context === "root" && key === "coverPreview" && value.coverPreviewId) return;
+    const status = TPP.dataSchemaStatus(context, key);
+    if (status !== "active") {
+      entries.push({
+        path: currentPath.concat(key),
+        label: TPP.dataPathLabel(currentPath.concat(key)),
+        key: key,
+        status: status
+      });
+    }
+    if (Array.isArray(child)) {
+      TPP.collectDataStaleEntries(child, key, currentPath.concat(key), entries);
+    } else if (child && typeof child === "object") {
+      TPP.collectDataStaleEntries(child, null, currentPath.concat(key), entries);
+    }
+  });
+  return entries;
+};
+TPP.registerStaleEntry = function (entry) {
+  const id = "stale-" + TPP.uid();
+  TPP.dataStaleStore[id] = entry;
+  return id;
+};
+TPP.dataStaleSummaryHtml = function (entries) {
+  if (!entries.length) return '<div class="data-stale-empty">No stale keys detected.</div>';
+  return '<div class="data-stale-toolbar"><button type="button" class="primary alt" data-stale-remove-all="1">Remove All Stale Keys</button></div>' +
+    '<div class="data-stale-list">' + entries.map(function (entry) {
+      const id = TPP.registerStaleEntry(entry);
+      const tone = entry.status === "deprecated" ? "deprecated" : "unknown";
+      const label = entry.status === "deprecated" ? "No longer used" : "Not recognized";
+      return '<article class="data-stale-item ' + tone + '">' +
+        '<div><div class="data-stale-path">' + TPP.esc(entry.label) + '</div><div class="data-stale-status">' + TPP.esc(label) + '</div></div>' +
+        '<button type="button" class="small" data-stale-remove="' + TPP.esc(id) + '">Remove</button>' +
+      '</article>';
+    }).join("") + "</div>";
+};
 TPP.dataKeyLabelHtml = function (context, key) {
   const status = TPP.dataSchemaStatus(context, key);
   const display = TPP.dataDisplayKey(key);
@@ -333,7 +389,10 @@ TPP.renderData = function () {
   if (!summary || !panel) return;
   const book = TPP.clone(TPP.active);
   TPP.dataPreviewStore = {};
-  summary.innerHTML = "Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.";
+  TPP.dataStaleStore = {};
+  const stale = TPP.collectDataStaleEntries(book, "root", [], []);
+  summary.innerHTML = '<div class="data-summary-copy">Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.</div>' +
+    '<section class="data-stale-section"><h3>Stale Keys</h3>' + TPP.dataStaleSummaryHtml(stale) + "</section>";
   panel.innerHTML = '<article class="data-card"><div class="data-node">' + TPP.dataObjectHtml(book, book, false, "root") + "</div></article>";
 };
 TPP.registerDataPreview = function (title, body, mode) {
@@ -364,6 +423,47 @@ TPP.openDataPreviewById = function (id) {
   const entry = TPP.dataPreviewStore && TPP.dataPreviewStore[id];
   if (!entry) return;
   TPP.openDataTextPreview(entry.title, entry.body, entry.mode);
+};
+TPP.deleteDataPath = function (root, path) {
+  if (!root || !Array.isArray(path) || !path.length) return false;
+  let target = root;
+  for (let i = 0; i < path.length - 1; i++) {
+    target = target[path[i]];
+    if (target == null) return false;
+  }
+  const last = path[path.length - 1];
+  if (Array.isArray(target) && typeof last === "number") {
+    target.splice(last, 1);
+    return true;
+  }
+  if (target && typeof target === "object" && Object.prototype.hasOwnProperty.call(target, last)) {
+    delete target[last];
+    return true;
+  }
+  return false;
+};
+TPP.removeStaleDataEntry = function (id) {
+  const entry = TPP.dataStaleStore && TPP.dataStaleStore[id];
+  if (!entry || !TPP.active) return;
+  if (TPP.deleteDataPath(TPP.active, entry.path)) {
+    TPP.save("commit", TPP.active.id);
+    TPP.renderAll();
+    TPP.toast("Removed " + entry.label);
+  }
+};
+TPP.removeAllStaleDataEntries = function () {
+  if (!TPP.active) return;
+  const entries = Object.values(TPP.dataStaleStore || {}).sort(function (a, b) {
+    return b.path.length - a.path.length;
+  });
+  let removed = 0;
+  entries.forEach(function (entry) {
+    if (TPP.deleteDataPath(TPP.active, entry.path)) removed++;
+  });
+  if (!removed) return;
+  TPP.save("commit", TPP.active.id);
+  TPP.renderAll();
+  TPP.toast("Removed " + removed + " stale key" + (removed === 1 ? "" : "s"));
 };
 TPP.renderLibrary = function () {
   const q = (document.getElementById("librarySearch")?.value || "").toLowerCase();
