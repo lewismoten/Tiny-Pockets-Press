@@ -561,13 +561,15 @@ input[type="checkbox"] {
   flex-wrap: wrap;
 }
 .data-raw-details {
-  border: 1px solid #ead9ba;
+  border: 1px solid #403428;
   border-radius: 14px;
-  background: #fff8e8;
+  background: #221c1a;
+  color: #f7f0e7;
   padding: 0.7rem 0.85rem;
 }
 .data-raw-details summary {
   margin: 0 0 0.6rem;
+  color: #f7f0e7;
 }
 .data-raw-details[open] summary {
   margin-bottom: 0.6rem;
@@ -588,6 +590,9 @@ input[type="checkbox"] {
 }
 .json-node[open] > summary {
   margin-bottom: 0.1rem;
+}
+.json-node:not([open]) > summary {
+  margin-bottom: 0;
 }
 .json-node:not([open]) > .json-children {
   display: none;
@@ -868,6 +873,7 @@ input[type="checkbox"] {
 }
 .data-code-json {
   background: #221c1a;
+  border-color: #403428;
   white-space: pre;
   word-break: normal;
   overflow: auto;
