@@ -1333,7 +1333,9 @@ TPP.scheduleImageExportPreview = function () {
     TPP.imageExportPreviewTimer = null;
     const run = function () {
       TPP.imageExportPreviewIdle = null;
-      TPP.renderImageExportPreview();
+      window.setTimeout(function () {
+        TPP.renderImageExportPreview();
+      }, 0);
     };
     if (typeof window.requestIdleCallback === "function") {
       TPP.imageExportPreviewIdle = window.requestIdleCallback(run, {
