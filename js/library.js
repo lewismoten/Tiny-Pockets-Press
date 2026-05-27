@@ -122,6 +122,25 @@ TPP.bookText = function (book) {
     .join(" ")
     .toLowerCase();
 };
+TPP.isoDateInfo = function (value) {
+  if (typeof value !== "string") return null;
+  const text = value.trim();
+  if (
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
+      text,
+    )
+  )
+    return null;
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return null;
+  const relative = TPP.relativeDateTime(text);
+  return {
+    raw: text,
+    local: TPP.dateTime(text),
+    relative: relative.relative || "",
+    label: relative.label || "",
+  };
+};
 TPP.dataImageValue = function (book, key, value) {
   if (typeof value === "string" && /^data:image\//.test(value)) return value;
   if (typeof value === "string" && book && TPP.fileAsset(book, value)) {
@@ -375,6 +394,18 @@ TPP.dataPrimitiveHtml = function (book, key, value) {
     );
   if (value === null) return '<span class="data-empty">null</span>';
   if (value === "") return '<span class="data-empty">empty</span>';
+  const iso = TPP.isoDateInfo(value);
+  if (iso) {
+    return (
+      '<span class="data-primitive">' +
+      TPP.esc(iso.raw) +
+      '</span><div class="data-date-meta"><div>Local: ' +
+      TPP.esc(iso.local) +
+      '</div><div>Time ago: ' +
+      TPP.esc(iso.relative || "—") +
+      "</div></div>"
+    );
+  }
   return '<span class="data-primitive">' + TPP.esc(String(value)) + "</span>";
 };
 TPP.dataTableColumns = function (items) {
@@ -925,6 +956,7 @@ TPP.dataRawJsonHtml = function (book) {
 };
 TPP.dataTopLevelObject = function (book) {
   const copy = Object.assign({}, book || {});
+  delete copy.meta;
   delete copy.files;
   delete copy.textElements;
   delete copy.chapters;
@@ -941,6 +973,16 @@ TPP.dataTabs = function (book, stale) {
         TPP.dataTopLevelObject(book),
         false,
         "root",
+      ),
+    },
+    {
+      id: "meta",
+      label: "Meta",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.meta ? book.meta : {},
+        false,
+        "meta",
       ),
     },
     {

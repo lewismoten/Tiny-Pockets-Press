@@ -784,6 +784,13 @@ input[type="checkbox"] {
 .data-primitive {
   white-space: pre-wrap;
 }
+.data-date-meta {
+  display: grid;
+  gap: 0.12rem;
+  margin-top: 0.22rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
 .data-file-value,
 .data-image-link {
   display: inline-flex;
