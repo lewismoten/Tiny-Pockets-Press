@@ -1799,10 +1799,14 @@ TPP.loadSoftwareMeta = async function () {
     const title = document.title || "";
     const versionMatch = title.match(/\bv([0-9]+(?:\.[0-9]+)*)\b/i);
     const heading = document.querySelector("header h1");
+    const tagline = document.querySelector("header p");
     TPP.softwareMetaCache = {
       name: heading ? heading.textContent.trim() : "tiny-pockets-press",
       version: versionMatch ? versionMatch[1] : "unknown",
       author: "Lewis Moten",
+      description: tagline
+        ? tagline.textContent.trim()
+        : "Microfiction, chapbooks, miniature bindings, and tiny print experiments.",
     };
     return TPP.softwareMetaCache;
   }
