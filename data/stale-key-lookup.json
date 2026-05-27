@@ -144,6 +144,108 @@
     "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
   },
   {
+    "path": "pageSize",
+    "schemaVersion": 8,
+    "movedTo": ["page.pageSize"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "sheetSize",
+    "schemaVersion": 8,
+    "movedTo": ["page.sheetSize"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "signatureSize",
+    "schemaVersion": 8,
+    "movedTo": ["page.signatureSize"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "customW",
+    "schemaVersion": 8,
+    "movedTo": ["page.customW"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "customH",
+    "schemaVersion": 8,
+    "movedTo": ["page.customH"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "margin",
+    "schemaVersion": 8,
+    "movedTo": ["page.margin"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "gutterMargin",
+    "schemaVersion": 8,
+    "movedTo": ["page.gutterMargin"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "paperPreset",
+    "schemaVersion": 8,
+    "movedTo": ["page.paperPreset"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "texture",
+    "schemaVersion": 8,
+    "movedTo": ["page.texture"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "pageBg",
+    "schemaVersion": 8,
+    "movedTo": ["page.pageBg"],
+    "note": "Page layout and paper appearance settings now live under page."
+  },
+  {
+    "path": "fontFamily",
+    "schemaVersion": 8,
+    "movedTo": ["text.fontFamily"],
+    "note": "Typography settings now live under text."
+  },
+  {
+    "path": "pageText",
+    "schemaVersion": 8,
+    "movedTo": ["text.pageText"],
+    "note": "Typography settings now live under text."
+  },
+  {
+    "path": "bodySize",
+    "schemaVersion": 8,
+    "movedTo": ["text.bodySize"],
+    "note": "Typography settings now live under text."
+  },
+  {
+    "path": "captionSize",
+    "schemaVersion": 8,
+    "movedTo": ["text.captionSize"],
+    "note": "Typography settings now live under text."
+  },
+  {
+    "path": "lineHeight",
+    "schemaVersion": 8,
+    "movedTo": ["text.lineHeight"],
+    "note": "Typography settings now live under text."
+  },
+  {
+    "path": "paraGap",
+    "schemaVersion": 8,
+    "movedTo": ["text.paraGap"],
+    "note": "Typography settings now live under text."
+  },
+  {
+    "path": "justify",
+    "schemaVersion": 8,
+    "movedTo": ["text.justify"],
+    "note": "Typography settings now live under text."
+  },
+  {
     "path": "includeToc",
     "schemaVersion": 7,
     "movedTo": ["toc.enabled"],

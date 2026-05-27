@@ -436,6 +436,29 @@ TPP.dataSchemaKeys = function (context) {
       "coverPreviewImageId",
       "pageCount",
     ]);
+  if (context === "page")
+    return new Set([
+      "pageSize",
+      "sheetSize",
+      "signatureSize",
+      "customW",
+      "customH",
+      "margin",
+      "gutterMargin",
+      "paperPreset",
+      "texture",
+      "pageBg",
+    ]);
+  if (context === "text")
+    return new Set([
+      "fontFamily",
+      "pageText",
+      "bodySize",
+      "captionSize",
+      "lineHeight",
+      "paraGap",
+      "justify",
+    ]);
   if (context === "bookInfo")
     return new Set([
       "title",
@@ -775,11 +798,15 @@ TPP.dataValueHtml = function (book, key, value, compact) {
         ? "root"
         : key === "meta"
           ? "meta"
-          : key === "bookInfo"
-            ? "bookInfo"
-            : key === "toc"
-              ? "toc"
-              : null,
+          : key === "page"
+            ? "page"
+            : key === "text"
+              ? "text"
+              : key === "bookInfo"
+                ? "bookInfo"
+                : key === "toc"
+                  ? "toc"
+                  : null,
     );
   return TPP.dataPrimitiveHtml(book, key, value);
 };
@@ -980,6 +1007,8 @@ TPP.dataRawJsonHtml = function (book) {
 TPP.dataTopLevelObject = function (book) {
   const copy = Object.assign({}, book || {});
   delete copy.meta;
+  delete copy.page;
+  delete copy.text;
   delete copy.bookInfo;
   delete copy.toc;
   delete copy.files;
@@ -1008,6 +1037,26 @@ TPP.dataTabs = function (book, stale) {
         book && book.meta ? book.meta : {},
         false,
         "meta",
+      ),
+    },
+    {
+      id: "page",
+      label: "Page",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.page ? book.page : {},
+        false,
+        "page",
+      ),
+    },
+    {
+      id: "text",
+      label: "Text",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.text ? book.text : {},
+        false,
+        "text",
       ),
     },
     {

@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 7;
+TPP.SCHEMA_VERSION = 8;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -159,6 +159,108 @@ TPP.defaultStaleKeyLookup = [
     note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
   },
   {
+    path: "pageSize",
+    schemaVersion: 8,
+    movedTo: ["page.pageSize"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "sheetSize",
+    schemaVersion: 8,
+    movedTo: ["page.sheetSize"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "signatureSize",
+    schemaVersion: 8,
+    movedTo: ["page.signatureSize"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "customW",
+    schemaVersion: 8,
+    movedTo: ["page.customW"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "customH",
+    schemaVersion: 8,
+    movedTo: ["page.customH"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "margin",
+    schemaVersion: 8,
+    movedTo: ["page.margin"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "gutterMargin",
+    schemaVersion: 8,
+    movedTo: ["page.gutterMargin"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "paperPreset",
+    schemaVersion: 8,
+    movedTo: ["page.paperPreset"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "texture",
+    schemaVersion: 8,
+    movedTo: ["page.texture"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "pageBg",
+    schemaVersion: 8,
+    movedTo: ["page.pageBg"],
+    note: "Page layout and paper appearance settings now live under page.",
+  },
+  {
+    path: "fontFamily",
+    schemaVersion: 8,
+    movedTo: ["text.fontFamily"],
+    note: "Typography settings now live under text.",
+  },
+  {
+    path: "pageText",
+    schemaVersion: 8,
+    movedTo: ["text.pageText"],
+    note: "Typography settings now live under text.",
+  },
+  {
+    path: "bodySize",
+    schemaVersion: 8,
+    movedTo: ["text.bodySize"],
+    note: "Typography settings now live under text.",
+  },
+  {
+    path: "captionSize",
+    schemaVersion: 8,
+    movedTo: ["text.captionSize"],
+    note: "Typography settings now live under text.",
+  },
+  {
+    path: "lineHeight",
+    schemaVersion: 8,
+    movedTo: ["text.lineHeight"],
+    note: "Typography settings now live under text.",
+  },
+  {
+    path: "paraGap",
+    schemaVersion: 8,
+    movedTo: ["text.paraGap"],
+    note: "Typography settings now live under text.",
+  },
+  {
+    path: "justify",
+    schemaVersion: 8,
+    movedTo: ["text.justify"],
+    note: "Typography settings now live under text.",
+  },
+  {
     path: "includeToc",
     schemaVersion: 7,
     movedTo: ["toc.enabled"],
@@ -206,6 +308,27 @@ TPP.TOC_FIELDS = [
   "tocLeader",
   "tocLeaderColor",
   "tocIndentStep",
+];
+TPP.PAGE_FIELDS = [
+  "pageSize",
+  "sheetSize",
+  "signatureSize",
+  "customW",
+  "customH",
+  "margin",
+  "gutterMargin",
+  "paperPreset",
+  "texture",
+  "pageBg",
+];
+TPP.TEXT_FIELDS = [
+  "fontFamily",
+  "pageText",
+  "bodySize",
+  "captionSize",
+  "lineHeight",
+  "paraGap",
+  "justify",
 ];
 
 TPP.clone = function (obj) {
@@ -314,6 +437,108 @@ TPP.syncTocFromLegacyFields = function (book) {
 TPP.compactTocInfo = function (book) {
   if (!book || !book.toc || typeof book.toc !== "object") return;
   TPP.TOC_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.pageInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().page) || {};
+  book.page = Object.assign({}, fallback, book.page || {});
+  return book.page;
+};
+TPP.attachPageAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  TPP.PAGE_FIELDS.forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.pageInfo(book)[field];
+      },
+      set: function (value) {
+        TPP.pageInfo(book)[field] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncPageFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const page = TPP.pageInfo(book);
+  TPP.PAGE_FIELDS.forEach(function (field) {
+    if (field in book) page[field] = book[field];
+  });
+};
+TPP.compactPageInfo = function (book) {
+  if (!book || !book.page || typeof book.page !== "object") return;
+  TPP.PAGE_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.textInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().text) || {};
+  book.text = Object.assign({}, fallback, book.text || {});
+  return book.text;
+};
+TPP.attachTextAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  TPP.TEXT_FIELDS.forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.textInfo(book)[field];
+      },
+      set: function (value) {
+        TPP.textInfo(book)[field] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncTextFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const text = TPP.textInfo(book);
+  TPP.TEXT_FIELDS.forEach(function (field) {
+    if (field in book) text[field] = book[field];
+  });
+};
+TPP.compactTextInfo = function (book) {
+  if (!book || !book.text || typeof book.text !== "object") return;
+  TPP.TEXT_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
       descriptor &&
@@ -685,6 +910,12 @@ TPP.bookFingerprint = function (book) {
   TPP.BOOK_INFO_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.PAGE_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
+  TPP.TEXT_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.TOC_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -700,6 +931,10 @@ TPP.hydrateBookDates = function (book) {
   const fallbackMeta = (TPP.fallbackBook && TPP.fallbackBook().meta) || {};
   TPP.syncBookInfoFromLegacyFields(book);
   TPP.attachBookInfoAccessors(book);
+  TPP.syncPageFromLegacyFields(book);
+  TPP.attachPageAccessors(book);
+  TPP.syncTextFromLegacyFields(book);
+  TPP.attachTextAccessors(book);
   TPP.syncTocFromLegacyFields(book);
   TPP.attachTocAccessors(book);
   if (
@@ -769,6 +1004,8 @@ TPP.hydrateBookDates = function (book) {
     delete book[key];
   });
   TPP.compactBookInfo(book);
+  TPP.compactPageInfo(book);
+  TPP.compactTextInfo(book);
   TPP.compactTocInfo(book);
   TPP.compactBookMeta(book);
   book.schemaVersion = TPP.SCHEMA_VERSION;

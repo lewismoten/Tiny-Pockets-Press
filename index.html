@@ -86,7 +86,7 @@
       </details>
 
       <details open>
-        <summary>Page & Text</summary>
+        <summary>Page</summary>
         <div class="two">
           <label>Page Size
             <select id="pageSize">
@@ -115,6 +115,15 @@
           <label>Margin <input id="margin" type="number" min="0" step=".01"></label>
           <label>Gutter Margin <input id="gutterMargin" type="number" min="0" step=".01"></label>
         </div>
+        <div class="two">
+          <label>Paper <select id="paperPreset"></select></label>
+          <label>Texture <select id="texture"></select></label>
+        </div>
+        <label>Page Background <input id="pageBg" class="color-box" type="color"></label>
+      </details>
+
+      <details open>
+        <summary>Text</summary>
         <label>Font <select id="fontFamily"></select></label>
         <div class="two">
           <label>Body Size <input id="bodySize" type="number" min="3" step=".5"></label>
@@ -126,11 +135,6 @@
         </div>
         <label><input id="justify" type="checkbox"> Justified text</label>
         <div class="two">
-          <label>Paper <select id="paperPreset"></select></label>
-          <label>Texture <select id="texture"></select></label>
-        </div>
-        <div class="two">
-          <label>Page Background <input id="pageBg" class="color-box" type="color"></label>
           <label>Page Text <input id="pageText" class="color-box" type="color"></label>
         </div>
       </details>
