@@ -403,12 +403,12 @@ TPP.dataStaleSummaryHtml = function (entries) {
       const meta = TPP.dataStaleMeta(TPP.active, entry);
       const details = meta
         ? '<div class="data-stale-details">' +
-            '<div>Schema v' + TPP.esc(String(meta.schemaVersion)) + '</div>' +
-            (meta.note ? '<div>' + TPP.esc(meta.note) + '</div>' : "") +
-            '<div>Old value: ' + TPP.esc(meta.oldValueLabel) + '</div>' +
+            '<div><strong>Changed in schema:</strong> v' + TPP.esc(String(meta.schemaVersion)) + '</div>' +
+            (meta.note ? '<div><strong>Note:</strong> ' + TPP.esc(meta.note) + '</div>' : "") +
+            '<div><strong>Old value:</strong> ' + TPP.esc(meta.oldValueLabel) + '</div>' +
             (meta.moved.length
               ? meta.moved.map(function (target) {
-                  return '<div>Moved to ' + TPP.esc(target.label) + ': ' + TPP.esc(target.valueLabel) + ' (' + (target.matches ? "matches old value" : "differs from old value") + ")</div>";
+                  return '<div><strong>Moved to:</strong> ' + TPP.esc(target.label) + ' = ' + TPP.esc(target.valueLabel) + ' (' + (target.matches ? "matches old value" : "differs from old value") + ")</div>";
                 }).join("")
               : "") +
           '</div>'
