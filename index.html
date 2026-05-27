@@ -120,12 +120,6 @@
     <main class="app-shell">
       <aside class="settings">
         <section class="controls">
-          <div class="menu-row">
-            <button id="newBook">New</button>
-            <button id="duplicateBook">Duplicate</button>
-            <button id="deleteBook">Delete</button>
-          </div>
-
           <details open>
             <summary>Book</summary>
             <label>Title <input id="title" /></label>
@@ -634,18 +628,6 @@
               ><input id="duplexBackSides" type="checkbox" /> Include
               blank/opposite-side pages for duplex printers</label
             >
-            <div class="menu-row">
-              <button id="exportBook">Export Book</button>
-              <button id="exportStyle">Export Style</button>
-              <button id="exportLibrary">Export Library</button>
-            </div>
-            <label
-              >Import JSON
-              <input
-                id="importJson"
-                type="file"
-                accept=".json,application/json"
-            /></label>
             <button id="printBrowser">Print Current Preview</button>
           </details>
         </section>
@@ -663,7 +645,14 @@
         </section>
 
         <section id="aboutView" class="view">
-          <div class="workspace-header"><h2>About This Book</h2></div>
+          <div class="workspace-header">
+            <h2>About This Book</h2>
+            <div class="toolbar">
+              <button id="aboutDownloadBook" type="button">Download</button>
+              <button id="aboutDuplicateBook" type="button">Duplicate</button>
+              <button id="aboutDeleteBook" type="button">Delete</button>
+            </div>
+          </div>
           <div id="aboutSummary" class="summary"></div>
           <div id="aboutPanel" class="about-panel"></div>
         </section>
@@ -747,7 +736,11 @@
               <input
                 id="librarySearch"
                 placeholder="Search title, author, or full text"
-              /><button id="libraryImport" type="button">Import Book</button>
+              /><button id="libraryNewBook" type="button">New</button>
+              <button id="libraryUploadBook" type="button">Upload Book</button>
+              <button id="libraryDownloadLibrary" type="button">
+                Download Library
+              </button>
             </div>
           </div>
           <div id="libraryGrid" class="library-grid"></div>
@@ -766,6 +759,21 @@
           <button type="button" data-action="copy" class="primary alt">
             Create Copy
           </button>
+          <button type="button" data-action="cancel">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="libraryUploadDialog" class="modal">
+      <form method="dialog" class="modal-card">
+        <h2>Upload Book</h2>
+        <p class="hint">
+          Import a book or library JSON file into your library.
+        </p>
+        <label
+          >Choose JSON file
+          <input id="importJson" type="file" accept=".json,application/json"
+        /></label>
+        <div class="toolbar">
           <button type="button" data-action="cancel">Cancel</button>
         </div>
       </form>

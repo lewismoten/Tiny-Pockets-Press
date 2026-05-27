@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.renderAll();
   };
 
-  document.getElementById("newBook").onclick = function () {
+  const createNewBook = function () {
     const book = TPP.norm(TPP.fallbackBook());
     book.title = "Untitled Tiny Book";
     book.chapters = [
@@ -259,8 +259,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.save();
     TPP.setActive(book);
   };
+  const libraryNewBookButton = document.getElementById("libraryNewBook");
+  if (libraryNewBookButton) libraryNewBookButton.onclick = createNewBook;
 
-  document.getElementById("duplicateBook").onclick = function () {
+  const duplicateActiveBook = function () {
     TPP.sync();
     const name = prompt(
       "Title for duplicated book:",
@@ -281,8 +283,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.save();
     TPP.setActive(book);
   };
+  const aboutDuplicateBookButton =
+    document.getElementById("aboutDuplicateBook");
+  if (aboutDuplicateBookButton)
+    aboutDuplicateBookButton.onclick = duplicateActiveBook;
 
-  document.getElementById("deleteBook").onclick = function () {
+  const deleteActiveBook = function () {
     if (TPP.library.length <= 1) return alert("Keep at least one book.");
     if (confirm("Delete this book?")) {
       TPP.library = TPP.library.filter(function (book) {
@@ -292,6 +298,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.setActive(TPP.library[0]);
     }
   };
+  const aboutDeleteBookButton = document.getElementById("aboutDeleteBook");
+  if (aboutDeleteBookButton) aboutDeleteBookButton.onclick = deleteActiveBook;
 
   TPP.readerGoPrev = function () {
     const pages = TPP.buildPages();
@@ -337,12 +345,30 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("readerMode").onchange = TPP.renderReader;
 
   document.getElementById("librarySearch").oninput = TPP.renderLibrary;
-  document.getElementById("libraryImport").onclick = function () {
+  const libraryUploadDialog = document.getElementById("libraryUploadDialog");
+  const openLibraryUploadDialog = function () {
     const input = document.getElementById("importJson");
     if (!input) return;
     input.value = "";
-    input.click();
+    if (
+      libraryUploadDialog &&
+      typeof libraryUploadDialog.showModal === "function"
+    ) {
+      libraryUploadDialog.showModal();
+    }
   };
+  const libraryUploadBookButton = document.getElementById("libraryUploadBook");
+  if (libraryUploadBookButton)
+    libraryUploadBookButton.onclick = openLibraryUploadDialog;
+  if (libraryUploadDialog) {
+    libraryUploadDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === libraryUploadDialog && !card && libraryUploadDialog.open)
+        libraryUploadDialog.close("cancel");
+      const closeButton = e.target.closest("[data-action='cancel']");
+      if (closeButton) libraryUploadDialog.close("cancel");
+    });
+  }
   document.getElementById("libraryGrid").onclick = function (e) {
     const card = e.target.closest("[data-id]");
     if (!card) return;
@@ -425,7 +451,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       print();
     }, 80);
   };
-  document.getElementById("exportBook").onclick = function () {
+  const downloadActiveBook = function () {
     TPP.sync();
     TPP.markBookExported(TPP.active);
     TPP.save();
@@ -435,19 +461,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       book: TPP.active,
     });
   };
-  document.getElementById("exportStyle").onclick = function () {
-    TPP.sync();
-    const out = {
-      type: "tiny-pockets-style-v6-1",
-      schemaVersion: TPP.SCHEMA_VERSION,
-      style: {},
-    };
-    TPP.styleFields.forEach(function (field) {
-      out.style[field] = TPP.active[field];
-    });
-    TPP.download("tiny-pockets-style.json", out);
-  };
-  document.getElementById("exportLibrary").onclick = function () {
+  const aboutDownloadBookButton = document.getElementById("aboutDownloadBook");
+  if (aboutDownloadBookButton)
+    aboutDownloadBookButton.onclick = downloadActiveBook;
+  const downloadLibrary = function () {
     const stamp = TPP.nowIso();
     TPP.library.forEach(function (book) {
       TPP.markBookExported(book, stamp);
@@ -459,9 +476,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       books: TPP.library,
     });
   };
+  const libraryDownloadLibraryButton = document.getElementById(
+    "libraryDownloadLibrary",
+  );
+  if (libraryDownloadLibraryButton)
+    libraryDownloadLibraryButton.onclick = downloadLibrary;
   document.getElementById("importJson").onchange = async function (e) {
     const file = e.target.files[0];
     if (!file) return;
+    if (libraryUploadDialog && libraryUploadDialog.open)
+      libraryUploadDialog.close("selected");
     const reader = new FileReader();
     reader.onload = async function () {
       const payload = TPP.unwrapImportPayload(JSON.parse(reader.result));
