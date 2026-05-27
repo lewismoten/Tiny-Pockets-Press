@@ -1336,7 +1336,7 @@ TPP.renderImageExportPreview = async function () {
     threshold: Number(threshold.value) || 128,
   });
   thresholdValue.textContent = String(exportOptions.threshold);
-  const previewScale = Math.min(2, Math.max(1, exportOptions.dpi / 150));
+  const previewScale = Math.max(1, exportOptions.dpi / 96);
   try {
     const baseCanvas = await TPP.renderImageExportPreviewCanvas(
       pages[TPP.imageExportPreviewIndex],
@@ -1377,7 +1377,9 @@ TPP.renderImageExportPreview = async function () {
       '<div class="image-export-compare-divider"></div>' +
       '<div class="image-export-compare-label before">Before<span class="image-export-compare-size">' +
       TPP.esc(
-        TPP.fileBytesLabel ? TPP.fileBytesLabel(beforeSize) : String(beforeSize),
+        TPP.fileBytesLabel
+          ? TPP.fileBytesLabel(beforeSize)
+          : String(beforeSize),
       ) +
       "</span></div>" +
       '<div class="image-export-compare-label after">After<span class="image-export-compare-size">' +
