@@ -1003,6 +1003,8 @@ input[type="checkbox"] {
 }
 .image-export-dialog-preview {
   min-width: 0;
+  grid-template-rows: auto minmax(20rem, 20rem) auto;
+  align-content: start;
 }
 .image-export-estimate {
   margin-top: -0.25rem;
@@ -1030,6 +1032,7 @@ input[type="checkbox"] {
 .image-export-preview-stage {
   position: relative;
   min-height: 20rem;
+  height: 20rem;
   border: 1px solid var(--line);
   border-radius: 16px;
   background:
@@ -1154,6 +1157,10 @@ input[type="checkbox"] {
   }
   .image-export-preview-stage {
     min-height: 16rem;
+    height: 16rem;
+  }
+  .image-export-dialog-preview {
+    grid-template-rows: auto minmax(16rem, 16rem) auto;
   }
 }
 .asset-upload-row {
