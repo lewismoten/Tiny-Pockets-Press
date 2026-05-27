@@ -1062,8 +1062,8 @@ TPP.renderData = function () {
     }),
   );
   TPP.renderDataSidebar(tabs, activeTab);
-  summary.innerHTML =
-    '<div class="data-summary-copy">Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.</div>';
+  summary.innerHTML = "";
+  summary.hidden = true;
   panel.innerHTML = TPP.renderDataPanel(tabs, activeTab);
 };
 TPP.registerDataPreview = function (title, body, mode) {
