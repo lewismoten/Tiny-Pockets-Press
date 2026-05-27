@@ -448,6 +448,8 @@ TPP.dataSchemaKeys = function (context) {
       "volume",
       "printing",
     ]);
+  if (context === "toc")
+    return new Set(["enabled", "numberMode", "leaderStyle", "leaderColor"]);
   if (context === "chapters")
     return new Set([
       "id",
@@ -774,7 +776,9 @@ TPP.dataValueHtml = function (book, key, value, compact) {
           ? "meta"
           : key === "bookInfo"
             ? "bookInfo"
-            : null,
+            : key === "toc"
+              ? "toc"
+              : null,
     );
   return TPP.dataPrimitiveHtml(book, key, value);
 };
@@ -976,6 +980,7 @@ TPP.dataTopLevelObject = function (book) {
   const copy = Object.assign({}, book || {});
   delete copy.meta;
   delete copy.bookInfo;
+  delete copy.toc;
   delete copy.files;
   delete copy.textElements;
   delete copy.chapters;
@@ -1012,6 +1017,16 @@ TPP.dataTabs = function (book, stale) {
         book && book.bookInfo ? book.bookInfo : {},
         false,
         "bookInfo",
+      ),
+    },
+    {
+      id: "toc",
+      label: "Contents / TOC",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.toc ? book.toc : {},
+        false,
+        "toc",
       ),
     },
     {

@@ -142,5 +142,29 @@
     "schemaVersion": 6,
     "movedTo": ["bookInfo.printing"],
     "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
+  },
+  {
+    "path": "includeToc",
+    "schemaVersion": 7,
+    "movedTo": ["toc.enabled"],
+    "note": "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration."
+  },
+  {
+    "path": "tocNumberType",
+    "schemaVersion": 7,
+    "movedTo": ["toc.numberMode"],
+    "note": "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration."
+  },
+  {
+    "path": "tocLeader",
+    "schemaVersion": 7,
+    "movedTo": ["toc.leaderStyle"],
+    "note": "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration."
+  },
+  {
+    "path": "tocLeaderColor",
+    "schemaVersion": 7,
+    "movedTo": ["toc.leaderColor"],
+    "note": "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration."
   }
 ]

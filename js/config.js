@@ -196,6 +196,12 @@ TPP.fallbackBook = function () {
   const stamp = new Date().toISOString();
   return {
     schemaVersion: TPP.SCHEMA_VERSION || 1,
+    toc: {
+      enabled: true,
+      numberMode: "page",
+      leaderStyle: "dots",
+      leaderColor: "#6c625a",
+    },
     bookInfo: {
       title: "Santa’s Little OSHA Violation",
       author: "Lewis Moten",
@@ -220,7 +226,6 @@ TPP.fallbackBook = function () {
       pageCount: 0,
     },
     spineAuthor: "Moten, L.",
-    includeToc: true,
     pageSize: "one",
     sheetSize: "letter",
     signatureSize: 16,
@@ -340,9 +345,6 @@ TPP.fallbackBook = function () {
     reverseOrnamentsBySide: false,
     chapterEndOrnament: "",
     chapterEndCentered: true,
-    tocNumberType: "page",
-    tocLeader: "dots",
-    tocLeaderColor: "#6c625a",
     showCutGuides: true,
     showFoldGuides: true,
     showPageGuides: true,

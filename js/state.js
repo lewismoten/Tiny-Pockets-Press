@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 6;
+TPP.SCHEMA_VERSION = 7;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -158,6 +158,30 @@ TPP.defaultStaleKeyLookup = [
     movedTo: ["bookInfo.printing"],
     note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
   },
+  {
+    path: "includeToc",
+    schemaVersion: 7,
+    movedTo: ["toc.enabled"],
+    note: "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration.",
+  },
+  {
+    path: "tocNumberType",
+    schemaVersion: 7,
+    movedTo: ["toc.numberMode"],
+    note: "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration.",
+  },
+  {
+    path: "tocLeader",
+    schemaVersion: 7,
+    movedTo: ["toc.leaderStyle"],
+    note: "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration.",
+  },
+  {
+    path: "tocLeaderColor",
+    schemaVersion: 7,
+    movedTo: ["toc.leaderColor"],
+    note: "Table of contents settings now live under toc so they are grouped separately from the rest of the book configuration.",
+  },
 ];
 TPP.BOOK_INFO_FIELDS = [
   "title",
@@ -170,6 +194,7 @@ TPP.BOOK_INFO_FIELDS = [
   "volume",
   "printing",
 ];
+TPP.TOC_FIELDS = ["includeToc", "tocNumberType", "tocLeader", "tocLeaderColor"];
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -217,6 +242,64 @@ TPP.syncBookInfoFromLegacyFields = function (book) {
 TPP.compactBookInfo = function (book) {
   if (!book || !book.bookInfo || typeof book.bookInfo !== "object") return;
   TPP.BOOK_INFO_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.tocInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().toc) || {};
+  book.toc = Object.assign({}, fallback, book.toc || {});
+  return book.toc;
+};
+TPP.attachTocAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  const map = {
+    includeToc: "enabled",
+    tocNumberType: "numberMode",
+    tocLeader: "leaderStyle",
+    tocLeaderColor: "leaderColor",
+  };
+  Object.keys(map).forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.tocInfo(book)[map[field]];
+      },
+      set: function (value) {
+        TPP.tocInfo(book)[map[field]] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncTocFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const toc = TPP.tocInfo(book);
+  if ("includeToc" in book) toc.enabled = book.includeToc;
+  if ("tocNumberType" in book) toc.numberMode = book.tocNumberType;
+  if ("tocLeader" in book) toc.leaderStyle = book.tocLeader;
+  if ("tocLeaderColor" in book) toc.leaderColor = book.tocLeaderColor;
+};
+TPP.compactTocInfo = function (book) {
+  if (!book || !book.toc || typeof book.toc !== "object") return;
+  TPP.TOC_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
       descriptor &&
@@ -588,6 +671,9 @@ TPP.bookFingerprint = function (book) {
   TPP.BOOK_INFO_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.TOC_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   copy.files = (Array.isArray(copy.files) ? copy.files : []).filter(
     function (file) {
       return file && file.role !== "coverPreview";
@@ -600,6 +686,8 @@ TPP.hydrateBookDates = function (book) {
   const fallbackMeta = (TPP.fallbackBook && TPP.fallbackBook().meta) || {};
   TPP.syncBookInfoFromLegacyFields(book);
   TPP.attachBookInfoAccessors(book);
+  TPP.syncTocFromLegacyFields(book);
+  TPP.attachTocAccessors(book);
   if (
     !Number.isFinite(Number(book.schemaVersion)) ||
     Number(book.schemaVersion) < 1
@@ -667,6 +755,7 @@ TPP.hydrateBookDates = function (book) {
     delete book[key];
   });
   TPP.compactBookInfo(book);
+  TPP.compactTocInfo(book);
   TPP.compactBookMeta(book);
   book.schemaVersion = TPP.SCHEMA_VERSION;
   return book;
