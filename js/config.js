@@ -52,6 +52,8 @@ TPP.fields = [
   "volume",
   "printing",
   "includeToc",
+  "tocIndentSubchapters",
+  "tocIndentStep",
   "pageSize",
   "sheetSize",
   "signatureSize",
@@ -201,6 +203,8 @@ TPP.fallbackBook = function () {
       numberMode: "page",
       leaderStyle: "dots",
       leaderColor: "#6c625a",
+      indentSubchapters: true,
+      indentStep: 0.12,
     },
     bookInfo: {
       title: "Santa’s Little OSHA Violation",

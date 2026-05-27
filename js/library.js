@@ -449,7 +449,14 @@ TPP.dataSchemaKeys = function (context) {
       "printing",
     ]);
   if (context === "toc")
-    return new Set(["enabled", "numberMode", "leaderStyle", "leaderColor"]);
+    return new Set([
+      "enabled",
+      "numberMode",
+      "leaderStyle",
+      "leaderColor",
+      "indentSubchapters",
+      "indentStep",
+    ]);
   if (context === "chapters")
     return new Set([
       "id",

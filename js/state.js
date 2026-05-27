@@ -194,7 +194,14 @@ TPP.BOOK_INFO_FIELDS = [
   "volume",
   "printing",
 ];
-TPP.TOC_FIELDS = ["includeToc", "tocNumberType", "tocLeader", "tocLeaderColor"];
+TPP.TOC_FIELDS = [
+  "includeToc",
+  "tocNumberType",
+  "tocLeader",
+  "tocLeaderColor",
+  "tocIndentSubchapters",
+  "tocIndentStep",
+];
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -266,6 +273,8 @@ TPP.attachTocAccessors = function (book) {
     tocNumberType: "numberMode",
     tocLeader: "leaderStyle",
     tocLeaderColor: "leaderColor",
+    tocIndentSubchapters: "indentSubchapters",
+    tocIndentStep: "indentStep",
   };
   Object.keys(map).forEach(function (field) {
     const existing = Object.getOwnPropertyDescriptor(book, field);
@@ -296,6 +305,9 @@ TPP.syncTocFromLegacyFields = function (book) {
   if ("tocNumberType" in book) toc.numberMode = book.tocNumberType;
   if ("tocLeader" in book) toc.leaderStyle = book.tocLeader;
   if ("tocLeaderColor" in book) toc.leaderColor = book.tocLeaderColor;
+  if ("tocIndentSubchapters" in book)
+    toc.indentSubchapters = book.tocIndentSubchapters;
+  if ("tocIndentStep" in book) toc.indentStep = book.tocIndentStep;
 };
 TPP.compactTocInfo = function (book) {
   if (!book || !book.toc || typeof book.toc !== "object") return;
