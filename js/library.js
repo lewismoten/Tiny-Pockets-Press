@@ -1872,7 +1872,8 @@ TPP.renderSoftwareAbout = async function () {
       TPP.esc(version) +
       " by " +
       TPP.esc(author) +
-      ".";
+      ". " +
+      TPP.esc(description);
     const rows = cdnManifest.packages
       .map(function (entry) {
         const site = entry.website
@@ -1912,15 +1913,6 @@ TPP.renderSoftwareAbout = async function () {
       })
       .join("");
     panel.innerHTML =
-      '<article class="about-meta">' +
-      "<h3>Product</h3>" +
-      '<div class="about-meta-grid">' +
-      TPP.aboutMetaItem("Name", product) +
-      TPP.aboutMetaItem("Version", String(version)) +
-      TPP.aboutMetaItem("Description", description) +
-      TPP.aboutMetaItem("Author", author) +
-      "</div>" +
-      "</article>" +
       '<article class="about-provenance">' +
       "<h3>CDN Packages</h3>" +
       '<div class="table-wrap">' +
