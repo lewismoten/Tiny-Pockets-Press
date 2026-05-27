@@ -520,7 +520,13 @@ TPP.dataTableColumns = function (items) {
   return columns;
 };
 TPP.dataSchemaKeys = function (context) {
-  if (context === "root") return new Set(Object.keys(TPP.fallbackBook()));
+  if (context === "root") {
+    const keys = new Set(Object.keys(TPP.fallbackBook()));
+    (TPP.COVER_LEGACY_FIELDS || []).forEach(function (field) {
+      keys.delete(field);
+    });
+    return keys;
+  }
   if (context === "meta")
     return new Set([
       "id",
@@ -1146,6 +1152,9 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.coverImageId;
   delete copy.backImageId;
   delete copy.spineImageId;
+  (TPP.COVER_LEGACY_FIELDS || []).forEach(function (field) {
+    delete copy[field];
+  });
   return copy;
 };
 TPP.dataPageObject = function (book) {

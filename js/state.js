@@ -375,6 +375,44 @@ TPP.COVER_FRONT_FIELDS = [
   "coverBorder",
   "coverBorderOn",
 ];
+TPP.COVER_LEGACY_FIELDS = [
+  "coverShowTitle",
+  "coverShowAuthor",
+  "coverShowSeries",
+  "coverShowPublisher",
+  "coverText",
+  "coverImgX",
+  "coverImgY",
+  "coverImgZoom",
+  "coverImgRotate",
+  "coverTitleY",
+  "coverAuthorY",
+  "coverSeriesY",
+  "coverPublisherY",
+  "coverTitleSize",
+  "coverAuthorSize",
+  "coverSeriesSize",
+  "coverPublisherSize",
+  "coverTitleColor",
+  "coverAuthorColor",
+  "coverSeriesColor",
+  "coverPublisherColor",
+  "coverStroke",
+  "coverStrokeColor",
+  "coverStrokeSize",
+  "coverTitleStroke",
+  "coverTitleStrokeColor",
+  "coverTitleStrokeSize",
+  "coverAuthorStroke",
+  "coverAuthorStrokeColor",
+  "coverAuthorStrokeSize",
+  "coverSeriesStroke",
+  "coverSeriesStrokeColor",
+  "coverSeriesStrokeSize",
+  "coverPublisherStroke",
+  "coverPublisherStrokeColor",
+  "coverPublisherStrokeSize",
+];
 TPP.BACK_COVER_FIELDS = [
   "backImageId",
   "backText",
@@ -646,6 +684,18 @@ TPP.coverFrontInfo = function (book) {
 TPP.coverFrontImageElement = function (book) {
   return TPP.findImageElement(book, "front", "cover");
 };
+TPP.coverTitleElement = function (book) {
+  return TPP.findTextElement(book, "front", "title");
+};
+TPP.coverAuthorElement = function (book) {
+  return TPP.findTextElement(book, "front", "author");
+};
+TPP.coverSeriesElement = function (book) {
+  return TPP.findTextElement(book, "front", "series");
+};
+TPP.coverPublisherElement = function (book) {
+  return TPP.findTextElement(book, "front", "publisher");
+};
 TPP.attachCoverFrontAccessors = function (book) {
   if (!book || typeof book !== "object") return book;
   const definitions = {
@@ -707,7 +757,222 @@ TPP.attachCoverFrontAccessors = function (book) {
         TPP.coverFrontInfo(book).borderOn = value;
       },
     },
+    coverImgX: {
+      get: function () {
+        const element = TPP.coverFrontImageElement(book);
+        return Number((element && element.x) || 0);
+      },
+      set: function (value) {
+        const element = TPP.coverFrontImageElement(book);
+        if (element) element.x = Number(value) || 0;
+      },
+    },
+    coverImgY: {
+      get: function () {
+        const element = TPP.coverFrontImageElement(book);
+        return Number((element && element.y) || 0);
+      },
+      set: function (value) {
+        const element = TPP.coverFrontImageElement(book);
+        if (element) element.y = Number(value) || 0;
+      },
+    },
+    coverImgZoom: {
+      get: function () {
+        const element = TPP.coverFrontImageElement(book);
+        return Number((element && element.zoom) || 120);
+      },
+      set: function (value) {
+        const element = TPP.coverFrontImageElement(book);
+        if (element) element.zoom = Number(value) || 120;
+      },
+    },
+    coverImgRotate: {
+      get: function () {
+        const element = TPP.coverFrontImageElement(book);
+        return Number((element && element.rotate) || 0);
+      },
+      set: function (value) {
+        const element = TPP.coverFrontImageElement(book);
+        if (element) element.rotate = Number(value) || 0;
+      },
+    },
+    coverShowTitle: {
+      get: function () {
+        const element = TPP.coverTitleElement(book);
+        return element ? element.enabled !== false : true;
+      },
+      set: function (value) {
+        const element = TPP.coverTitleElement(book);
+        if (element) element.enabled = value !== false;
+      },
+    },
+    coverShowAuthor: {
+      get: function () {
+        const element = TPP.coverAuthorElement(book);
+        return Boolean(element && element.enabled !== false);
+      },
+      set: function (value) {
+        const element = TPP.coverAuthorElement(book);
+        if (element) element.enabled = value !== false;
+      },
+    },
+    coverShowSeries: {
+      get: function () {
+        const element = TPP.coverSeriesElement(book);
+        return Boolean(element && element.enabled !== false);
+      },
+      set: function (value) {
+        const element = TPP.coverSeriesElement(book);
+        if (element) element.enabled = value !== false;
+      },
+    },
+    coverShowPublisher: {
+      get: function () {
+        const element = TPP.coverPublisherElement(book);
+        return Boolean(element && element.enabled !== false);
+      },
+      set: function (value) {
+        const element = TPP.coverPublisherElement(book);
+        if (element) element.enabled = value !== false;
+      },
+    },
+    coverText: {
+      get: function () {
+        const element = TPP.coverTitleElement(book);
+        return (element && element.color) || "#ffffff";
+      },
+      set: function (value) {
+        [
+          TPP.coverTitleElement(book),
+          TPP.coverAuthorElement(book),
+          TPP.coverSeriesElement(book),
+          TPP.coverPublisherElement(book),
+        ].forEach(function (element) {
+          if (element) element.color = value || "#ffffff";
+        });
+      },
+    },
+    coverStroke: {
+      get: function () {
+        const element = TPP.coverTitleElement(book);
+        return Math.max(0, Number((element && element.outlineSize) || 0)) > 0;
+      },
+      set: function (value) {
+        if (value !== false) return;
+        [
+          TPP.coverTitleElement(book),
+          TPP.coverAuthorElement(book),
+          TPP.coverSeriesElement(book),
+          TPP.coverPublisherElement(book),
+        ].forEach(function (element) {
+          if (element) element.outlineSize = 0;
+        });
+      },
+    },
+    coverStrokeColor: {
+      get: function () {
+        const element = TPP.coverTitleElement(book);
+        return (element && element.outlineColor) || "#000000";
+      },
+      set: function (value) {
+        [
+          TPP.coverTitleElement(book),
+          TPP.coverAuthorElement(book),
+          TPP.coverSeriesElement(book),
+          TPP.coverPublisherElement(book),
+        ].forEach(function (element) {
+          if (element) element.outlineColor = value || "#000000";
+        });
+      },
+    },
+    coverStrokeSize: {
+      get: function () {
+        const element = TPP.coverTitleElement(book);
+        return Math.max(0, Number((element && element.outlineSize) || 0));
+      },
+      set: function (value) {
+        const size = Math.max(0, Number(value) || 0);
+        [
+          TPP.coverTitleElement(book),
+          TPP.coverAuthorElement(book),
+          TPP.coverSeriesElement(book),
+          TPP.coverPublisherElement(book),
+        ].forEach(function (element) {
+          if (element) element.outlineSize = size;
+        });
+      },
+    },
   };
+  [
+    ["coverTitle", TPP.coverTitleElement],
+    ["coverAuthor", TPP.coverAuthorElement],
+    ["coverSeries", TPP.coverSeriesElement],
+    ["coverPublisher", TPP.coverPublisherElement],
+  ].forEach(function (pair) {
+    const prefix = pair[0];
+    const getter = pair[1];
+    definitions[prefix + "Y"] = {
+      get: function () {
+        const element = getter(book);
+        return Number((element && element.y) || 0);
+      },
+      set: function (value) {
+        const element = getter(book);
+        if (element) element.y = Number(value) || 0;
+      },
+    };
+    definitions[prefix + "Size"] = {
+      get: function () {
+        const element = getter(book);
+        return Number((element && element.size) || 0);
+      },
+      set: function (value) {
+        const element = getter(book);
+        if (element) element.size = Number(value) || 0;
+      },
+    };
+    definitions[prefix + "Color"] = {
+      get: function () {
+        const element = getter(book);
+        return (element && element.color) || "#ffffff";
+      },
+      set: function (value) {
+        const element = getter(book);
+        if (element) element.color = value || "#ffffff";
+      },
+    };
+    definitions[prefix + "Stroke"] = {
+      get: function () {
+        const element = getter(book);
+        return Math.max(0, Number((element && element.outlineSize) || 0)) > 0;
+      },
+      set: function (value) {
+        const element = getter(book);
+        if (element && value === false) element.outlineSize = 0;
+      },
+    };
+    definitions[prefix + "StrokeColor"] = {
+      get: function () {
+        const element = getter(book);
+        return (element && element.outlineColor) || "#000000";
+      },
+      set: function (value) {
+        const element = getter(book);
+        if (element) element.outlineColor = value || "#000000";
+      },
+    };
+    definitions[prefix + "StrokeSize"] = {
+      get: function () {
+        const element = getter(book);
+        return Math.max(0, Number((element && element.outlineSize) || 0));
+      },
+      set: function (value) {
+        const element = getter(book);
+        if (element) element.outlineSize = Math.max(0, Number(value) || 0);
+      },
+    };
+  });
   Object.keys(definitions).forEach(function (field) {
     const existing = Object.getOwnPropertyDescriptor(book, field);
     if (
@@ -743,17 +1008,19 @@ TPP.syncCoverFrontFromLegacyFields = function (book) {
 };
 TPP.compactCoverFrontInfo = function (book) {
   if (!book || !book.coverFront || typeof book.coverFront !== "object") return;
-  TPP.COVER_FRONT_FIELDS.forEach(function (field) {
-    const descriptor = Object.getOwnPropertyDescriptor(book, field);
-    if (
-      descriptor &&
-      !descriptor.get &&
-      !descriptor.set &&
-      descriptor.enumerable !== false
-    ) {
-      delete book[field];
-    }
-  });
+  TPP.COVER_FRONT_FIELDS.concat(TPP.COVER_LEGACY_FIELDS).forEach(
+    function (field) {
+      const descriptor = Object.getOwnPropertyDescriptor(book, field);
+      if (
+        descriptor &&
+        !descriptor.get &&
+        !descriptor.set &&
+        descriptor.enumerable !== false
+      ) {
+        delete book[field];
+      }
+    },
+  );
 };
 TPP.backCoverInfo = function (book) {
   if (!book || typeof book !== "object") return {};
@@ -1564,6 +1831,9 @@ TPP.bookFingerprint = function (book) {
   TPP.COVER_FRONT_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.COVER_LEGACY_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.BACK_COVER_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -1942,10 +2212,6 @@ TPP.syncLegacyImageFieldsFromElements = function (book) {
   const spine = TPP.findImageElement(book, "spine", "cover");
   if (front) {
     TPP.coverFrontInfo(book).imageElementId = front.id || "front-cover-image";
-    book.coverImgX = Number(front.x) || 0;
-    book.coverImgY = Number(front.y) || 0;
-    book.coverImgZoom = Number(front.zoom) || 120;
-    book.coverImgRotate = Number(front.rotate) || 0;
   }
   if (back) {
     book.backImageId = back.fileId || "";
@@ -2286,62 +2552,7 @@ TPP.textElementContent = function (book, location, part) {
   return element && element.customText ? String(element.customText) : "";
 };
 TPP.syncLegacyTextFieldsFromElements = function (book) {
-  const coverTitle = TPP.findTextElement(book, "front", "title");
-  const coverAuthor = TPP.findTextElement(book, "front", "author");
-  const coverSeries = TPP.findTextElement(book, "front", "series");
-  const coverPublisher = TPP.findTextElement(book, "front", "publisher");
-  const backCustom = TPP.findTextElement(book, "back", "custom");
-  const spineTitle = TPP.findTextElement(book, "spine", "title");
-  const spineAuthor = TPP.findTextElement(book, "spine", "author");
-  if (coverTitle) {
-    book.coverShowTitle = coverTitle.enabled !== false;
-    book.coverTitleSize = Number(coverTitle.size) || book.coverTitleSize;
-    book.coverTitleY = Number(coverTitle.y) || 0;
-    book.coverTitleColor = coverTitle.color || book.coverTitleColor;
-    book.coverTitleStrokeColor =
-      coverTitle.outlineColor || book.coverTitleStrokeColor;
-    book.coverTitleStrokeSize = Math.max(
-      0,
-      Number(coverTitle.outlineSize) || 0,
-    );
-  }
-  if (coverAuthor) {
-    book.coverShowAuthor = coverAuthor.enabled !== false;
-    book.coverAuthorSize = Number(coverAuthor.size) || book.coverAuthorSize;
-    book.coverAuthorY = Number(coverAuthor.y) || 0;
-    book.coverAuthorColor = coverAuthor.color || book.coverAuthorColor;
-    book.coverAuthorStrokeColor =
-      coverAuthor.outlineColor || book.coverAuthorStrokeColor;
-    book.coverAuthorStrokeSize = Math.max(
-      0,
-      Number(coverAuthor.outlineSize) || 0,
-    );
-  }
-  if (coverSeries) {
-    book.coverShowSeries = coverSeries.enabled !== false;
-    book.coverSeriesSize = Number(coverSeries.size) || book.coverSeriesSize;
-    book.coverSeriesY = Number(coverSeries.y) || 0;
-    book.coverSeriesColor = coverSeries.color || book.coverSeriesColor;
-    book.coverSeriesStrokeColor =
-      coverSeries.outlineColor || book.coverSeriesStrokeColor;
-    book.coverSeriesStrokeSize = Math.max(
-      0,
-      Number(coverSeries.outlineSize) || 0,
-    );
-  }
-  if (coverPublisher) {
-    book.coverShowPublisher = coverPublisher.enabled !== false;
-    book.coverPublisherSize =
-      Number(coverPublisher.size) || book.coverPublisherSize;
-    book.coverPublisherY = Number(coverPublisher.y) || 0;
-    book.coverPublisherColor = coverPublisher.color || book.coverPublisherColor;
-    book.coverPublisherStrokeColor =
-      coverPublisher.outlineColor || book.coverPublisherStrokeColor;
-    book.coverPublisherStrokeSize = Math.max(
-      0,
-      Number(coverPublisher.outlineSize) || 0,
-    );
-  }
+  return book;
 };
 TPP.syncTextElementsFromLegacyFields = function (book) {
   const backCustom = TPP.findTextElement(book, "back", "custom");
