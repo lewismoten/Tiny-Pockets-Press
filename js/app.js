@@ -2006,6 +2006,7 @@ TPP.bindImageExportPreviewDrag = function () {
   TPP.applyImageExportPreviewSplit(TPP.imageExportPreviewSplit);
 };
 TPP.renderImageExportPreview = async function () {
+  await TPP.ensureImageExportPalettesLoaded();
   const dialog = document.getElementById("imageExportDialog");
   const stage = document.getElementById("imageExportPreviewStage");
   const label = document.getElementById("imageExportPreviewLabel");

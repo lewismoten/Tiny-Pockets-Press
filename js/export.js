@@ -163,410 +163,42 @@ TPP.imageExportOptions = function (options) {
     palette:
       requestedDepth === "websafe"
         ? "websafe"
-        : [
-              "websafe",
-              "colors4",
-              "colors8",
-              "colors16",
-              "colors32",
-              "colors64",
-              "colors128",
-              "colors256",
-              "gray4",
-              "gray8",
-              "gray16",
-              "gray32",
-              "gray64",
-              "gray128",
-              "gray256",
-              "windows16",
-              "ansi16",
-              "xterm256",
-              "ega16",
-              "atari400base",
-              "atari400",
-              "cga0",
-              "cga1",
-            ].includes(source.palette)
-          ? source.palette
+        : TPP.imageExportPaletteIds().includes(source.palette)
+          ? String(source.palette)
           : "websafe",
   };
 };
-TPP.imageExportPaletteFromLevels = function (levelsR, levelsG, levelsB) {
-  const palette = [];
-  const values = function (levels) {
-    if (levels <= 1) return [0];
-    const out = [];
-    for (let i = 0; i < levels; i++)
-      out.push(Math.round((255 * i) / (levels - 1)));
-    return out;
-  };
-  const reds = values(levelsR);
-  const greens = values(levelsG);
-  const blues = values(levelsB);
-  reds.forEach(function (r) {
-    greens.forEach(function (g) {
-      blues.forEach(function (b) {
-        palette.push([r, g, b]);
-      });
-    });
-  });
-  return palette;
-};
-TPP.imageExportSizedPalette = function (count) {
-  let dims = [1, 1, 1];
-  const product = function () {
-    return dims[0] * dims[1] * dims[2];
-  };
-  while (product() < count) {
-    let index = 0;
-    for (let i = 1; i < dims.length; i++) {
-      if (dims[i] < dims[index]) index = i;
-    }
-    dims[index] += 1;
-    if (product() > count) break;
-  }
-  while (product() > count) {
-    let index = 0;
-    for (let i = 1; i < dims.length; i++) {
-      if (dims[i] > dims[index]) index = i;
-    }
-    if (dims[index] > 1) dims[index] -= 1;
-    else break;
-  }
-  return TPP.imageExportPaletteFromLevels(dims[0], dims[1], dims[2]).slice(
-    0,
-    count,
-  );
-};
-TPP.imageExportGrayscalePalette = function (count) {
-  const palette = [];
-  const total = Math.max(2, Number(count) || 2);
-  for (let i = 0; i < total; i++) {
-    const gray = Math.round((255 * i) / (total - 1));
-    palette.push([gray, gray, gray]);
-  }
-  return palette;
-};
-TPP.imageExportNamedPalette = function (name) {
-  const ansi16 = [
-    [0, 0, 0],
-    [205, 0, 0],
-    [0, 205, 0],
-    [205, 205, 0],
-    [0, 0, 238],
-    [205, 0, 205],
-    [0, 205, 205],
-    [229, 229, 229],
-    [127, 127, 127],
-    [255, 0, 0],
-    [0, 255, 0],
-    [255, 255, 0],
-    [92, 92, 255],
-    [255, 0, 255],
-    [0, 255, 255],
-    [255, 255, 255],
-  ];
-  const windows16 = [
-    [0, 0, 0],
-    [128, 0, 0],
-    [0, 128, 0],
-    [128, 128, 0],
-    [0, 0, 128],
-    [128, 0, 128],
-    [0, 128, 128],
-    [192, 192, 192],
-    [128, 128, 128],
-    [255, 0, 0],
-    [0, 255, 0],
-    [255, 255, 0],
-    [0, 0, 255],
-    [255, 0, 255],
-    [0, 255, 255],
-    [255, 255, 255],
-  ];
-  const ega16 = [
-    [0, 0, 0],
-    [0, 0, 170],
-    [0, 170, 0],
-    [0, 170, 170],
-    [170, 0, 0],
-    [170, 0, 170],
-    [170, 85, 0],
-    [170, 170, 170],
-    [85, 85, 85],
-    [85, 85, 255],
-    [85, 255, 85],
-    [85, 255, 255],
-    [255, 85, 85],
-    [255, 85, 255],
-    [255, 255, 85],
-    [255, 255, 255],
-  ];
-  const atari400Artifact = [
-    [0, 0, 0],
-    [17, 17, 17],
-    [34, 34, 34],
-    [51, 51, 51],
-    [68, 68, 68],
-    [85, 85, 85],
-    [102, 102, 102],
-    [119, 119, 119],
-    [136, 136, 136],
-    [153, 153, 153],
-    [170, 170, 170],
-    [187, 187, 187],
-    [204, 204, 204],
-    [221, 221, 221],
-    [238, 238, 238],
-    [255, 255, 255],
-    [25, 7, 0],
-    [42, 24, 0],
-    [59, 41, 0],
-    [76, 58, 0],
-    [93, 75, 0],
-    [110, 92, 0],
-    [127, 109, 0],
-    [144, 126, 9],
-    [161, 143, 26],
-    [179, 160, 43],
-    [195, 177, 60],
-    [212, 194, 77],
-    [229, 211, 94],
-    [247, 228, 111],
-    [255, 245, 130],
-    [255, 255, 150],
-    [49, 0, 0],
-    [63, 0, 0],
-    [83, 23, 0],
-    [100, 40, 0],
-    [117, 57, 0],
-    [134, 74, 0],
-    [151, 91, 10],
-    [168, 108, 27],
-    [185, 125, 44],
-    [202, 142, 61],
-    [219, 159, 78],
-    [236, 176, 95],
-    [253, 193, 112],
-    [255, 210, 133],
-    [255, 227, 156],
-    [255, 244, 178],
-    [66, 4, 4],
-    [79, 0, 0],
-    [96, 8, 0],
-    [113, 25, 0],
-    [130, 42, 13],
-    [147, 59, 30],
-    [164, 76, 47],
-    [181, 93, 64],
-    [198, 110, 81],
-    [215, 127, 98],
-    [232, 144, 115],
-    [249, 161, 131],
-    [255, 178, 152],
-    [255, 195, 174],
-    [255, 212, 196],
-    [255, 229, 218],
-    [65, 1, 3],
-    [80, 0, 15],
-    [97, 0, 27],
-    [114, 15, 43],
-    [131, 32, 60],
-    [148, 49, 77],
-    [165, 66, 94],
-    [182, 83, 111],
-    [199, 100, 128],
-    [216, 117, 145],
-    [233, 134, 162],
-    [250, 151, 179],
-    [255, 168, 200],
-    [255, 185, 222],
-    [255, 202, 239],
-    [251, 220, 246],
-    [51, 0, 53],
-    [68, 0, 65],
-    [85, 0, 76],
-    [102, 12, 92],
-    [119, 29, 109],
-    [136, 46, 126],
-    [153, 63, 143],
-    [170, 80, 160],
-    [187, 97, 177],
-    [204, 114, 194],
-    [221, 131, 211],
-    [238, 148, 228],
-    [255, 165, 228],
-    [255, 182, 233],
-    [255, 199, 238],
-    [255, 216, 243],
-    [29, 0, 92],
-    [46, 0, 104],
-    [64, 0, 116],
-    [81, 16, 132],
-    [98, 33, 149],
-    [115, 50, 166],
-    [132, 67, 183],
-    [149, 84, 200],
-    [166, 101, 217],
-    [183, 118, 234],
-    [200, 135, 235],
-    [217, 152, 235],
-    [233, 169, 236],
-    [251, 186, 235],
-    [255, 203, 239],
-    [255, 223, 249],
-    [2, 0, 113],
-    [19, 0, 125],
-    [36, 11, 140],
-    [53, 28, 157],
-    [70, 45, 174],
-    [87, 62, 191],
-    [104, 79, 208],
-    [121, 96, 225],
-    [138, 113, 242],
-    [155, 130, 247],
-    [172, 147, 247],
-    [189, 164, 247],
-    [206, 181, 247],
-    [223, 198, 247],
-    [240, 215, 247],
-    [255, 232, 248],
-    [0, 0, 104],
-    [0, 10, 124],
-    [8, 27, 144],
-    [25, 44, 161],
-    [42, 61, 178],
-    [59, 78, 195],
-    [76, 95, 212],
-    [93, 112, 229],
-    [110, 129, 246],
-    [127, 146, 255],
-    [144, 163, 255],
-    [161, 180, 255],
-    [178, 197, 255],
-    [195, 214, 255],
-    [212, 231, 255],
-    [229, 248, 255],
-    [0, 10, 77],
-    [0, 27, 99],
-    [0, 44, 121],
-    [2, 61, 143],
-    [19, 78, 160],
-    [36, 95, 177],
-    [53, 112, 194],
-    [70, 129, 211],
-    [87, 146, 228],
-    [104, 163, 245],
-    [121, 180, 255],
-    [138, 197, 255],
-    [155, 214, 255],
-    [172, 231, 255],
-    [189, 248, 255],
-    [206, 255, 255],
-    [0, 26, 38],
-    [0, 43, 60],
-    [0, 60, 82],
-    [0, 77, 104],
-    [6, 94, 124],
-    [23, 111, 141],
-    [40, 128, 158],
-    [57, 145, 175],
-    [74, 162, 192],
-    [91, 179, 209],
-    [108, 196, 226],
-    [125, 213, 243],
-    [142, 230, 255],
-    [159, 247, 255],
-    [176, 255, 255],
-    [193, 255, 255],
-    [1, 37, 10],
-    [2, 54, 16],
-    [0, 70, 34],
-    [0, 87, 56],
-    [5, 104, 77],
-    [22, 121, 94],
-    [39, 138, 111],
-    [56, 155, 128],
-    [73, 172, 145],
-    [90, 189, 162],
-    [107, 206, 179],
-    [124, 223, 196],
-    [141, 240, 213],
-    [158, 255, 229],
-    [175, 255, 241],
-    [192, 255, 253],
-    [4, 38, 13],
-    [4, 56, 17],
-    [5, 71, 19],
-    [0, 90, 27],
-    [16, 107, 27],
-    [33, 124, 44],
-    [50, 141, 61],
-    [67, 158, 78],
-    [84, 175, 95],
-    [101, 192, 112],
-    [118, 209, 129],
-    [135, 226, 146],
-    [152, 243, 163],
-    [169, 255, 179],
-    [186, 255, 191],
-    [203, 255, 203],
-    [0, 35, 10],
-    [0, 53, 16],
-    [4, 70, 19],
-    [21, 86, 19],
-    [38, 103, 19],
-    [55, 120, 19],
-    [72, 137, 20],
-    [89, 154, 37],
-    [106, 171, 54],
-    [123, 188, 71],
-    [140, 205, 88],
-    [157, 222, 105],
-    [174, 239, 122],
-    [191, 255, 139],
-    [208, 255, 151],
-    [225, 255, 163],
-    [0, 23, 7],
-    [14, 40, 8],
-    [31, 57, 8],
-    [48, 74, 8],
-    [65, 91, 8],
-    [82, 108, 8],
-    [99, 125, 8],
-    [116, 142, 13],
-    [133, 159, 30],
-    [150, 176, 47],
-    [167, 193, 64],
-    [184, 210, 81],
-    [201, 227, 98],
-    [218, 244, 115],
-    [235, 255, 130],
-    [252, 255, 142],
-    [27, 7, 1],
-    [44, 24, 1],
-    [60, 41, 0],
-    [77, 59, 0],
-    [95, 76, 0],
-    [112, 94, 0],
-    [129, 111, 0],
-    [147, 128, 9],
-    [164, 146, 26],
-    [178, 160, 43],
-    [199, 180, 61],
-    [216, 198, 78],
-    [234, 215, 96],
-    [246, 228, 111],
-    [255, 250, 132],
-    [255, 255, 153],
-  ];
-  const atari400 = [];
-  for (let i = 0; i < atari400Artifact.length; i += 16) {
-    const row = atari400Artifact.slice(i, i + 16);
-    for (let luminance = 0; luminance < row.length; luminance += 2)
-      atari400.push(row[luminance]);
-  }
+TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION = 1;
+TPP.IMAGE_EXPORT_PALETTE_CATALOG = "/data/palettes.indexed.v1.json";
+TPP.imageExportPaletteById = TPP.imageExportPaletteById || {};
+TPP.imageExportPaletteIdsCached = TPP.imageExportPaletteIdsCached || [];
+TPP.imageExportPaletteLoadPromise = null;
+TPP.imageExportPaletteIdsDefault = [
+  "websafe",
+  "colors4",
+  "colors8",
+  "colors16",
+  "colors32",
+  "colors64",
+  "colors128",
+  "colors256",
+  "gray4",
+  "gray8",
+  "gray16",
+  "gray32",
+  "gray64",
+  "gray128",
+  "gray256",
+  "windows16",
+  "ansi16",
+  "xterm256",
+  "ega16",
+  "atari400base",
+  "atari400",
+  "cga0",
+  "cga1",
+];
+TPP.fallbackWebsafePalette = function () {
   const websafe = [];
   [0, 51, 102, 153, 204, 255].forEach(function (r) {
     [0, 51, 102, 153, 204, 255].forEach(function (g) {
@@ -575,62 +207,73 @@ TPP.imageExportNamedPalette = function (name) {
       });
     });
   });
-  if (name === "websafe") return websafe;
-  if (name === "windows16") return windows16;
-  if (name === "ansi16") return ansi16;
-  if (name === "ega16") return ega16;
-  if (name === "atari400base") return atari400;
-  if (name === "atari400") return atari400Artifact;
-  if (name === "cga0")
-    return [
-      [0, 0, 0],
-      [85, 255, 255],
-      [255, 85, 255],
-      [255, 255, 255],
-    ];
-  if (name === "cga1")
-    return [
-      [0, 0, 0],
-      [85, 255, 85],
-      [255, 85, 85],
-      [170, 85, 0],
-    ];
-  if (name === "xterm256") {
-    const palette = ansi16.slice();
-    [0, 95, 135, 175, 215, 255].forEach(function (r) {
-      [0, 95, 135, 175, 215, 255].forEach(function (g) {
-        [0, 95, 135, 175, 215, 255].forEach(function (b) {
-          palette.push([r, g, b]);
-        });
+  return websafe;
+};
+TPP.imageExportPaletteIds = function () {
+  if (TPP.imageExportPaletteIdsCached.length)
+    return TPP.imageExportPaletteIdsCached.slice();
+  return TPP.imageExportPaletteIdsDefault.slice();
+};
+TPP.loadImageExportPalettes = async function () {
+  const response = await fetch(TPP.IMAGE_EXPORT_PALETTE_CATALOG, {
+    cache: "no-cache",
+  });
+  if (!response.ok)
+    throw new Error("Palette catalog load failed: " + response.status);
+  const payload = await response.json();
+  if (
+    !payload ||
+    Number(payload.schemaVersion) !== TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION ||
+    !Array.isArray(payload.palettes)
+  )
+    throw new Error("Palette catalog schema mismatch");
+  const map = {};
+  const ids = [];
+  payload.palettes.forEach(function (entry) {
+    if (!entry || typeof entry.id !== "string" || !Array.isArray(entry.colors))
+      return;
+    const colors = entry.colors
+      .map(function (swatch) {
+        if (!Array.isArray(swatch) || swatch.length < 3) return null;
+        return [
+          Math.max(0, Math.min(255, Number(swatch[0]) || 0)),
+          Math.max(0, Math.min(255, Number(swatch[1]) || 0)),
+          Math.max(0, Math.min(255, Number(swatch[2]) || 0)),
+        ];
+      })
+      .filter(Boolean);
+    if (!colors.length) return;
+    map[entry.id] = colors;
+    ids.push(entry.id);
+  });
+  if (!map.websafe) map.websafe = TPP.fallbackWebsafePalette();
+  if (!ids.includes("websafe")) ids.unshift("websafe");
+  TPP.imageExportPaletteById = map;
+  TPP.imageExportPaletteIdsCached = ids;
+  return map;
+};
+TPP.ensureImageExportPalettesLoaded = async function () {
+  if (TPP.imageExportPaletteIdsCached.length) return;
+  if (!TPP.imageExportPaletteLoadPromise) {
+    TPP.imageExportPaletteLoadPromise = TPP.loadImageExportPalettes()
+      .catch(function (_error) {
+        TPP.imageExportPaletteById = {
+          websafe: TPP.fallbackWebsafePalette(),
+        };
+        TPP.imageExportPaletteIdsCached = ["websafe"];
+      })
+      .finally(function () {
+        TPP.imageExportPaletteLoadPromise = null;
       });
-    });
-    for (let i = 0; i < 24; i++) {
-      const gray = 8 + i * 10;
-      palette.push([gray, gray, gray]);
-    }
-    return palette.slice(0, 256);
   }
-  const countMap = {
-    colors4: 4,
-    colors8: 8,
-    colors16: 16,
-    colors32: 32,
-    colors64: 64,
-    colors128: 128,
-    colors256: 256,
-  };
-  const grayCountMap = {
-    gray4: 4,
-    gray8: 8,
-    gray16: 16,
-    gray32: 32,
-    gray64: 64,
-    gray128: 128,
-    gray256: 256,
-  };
-  if (grayCountMap[name])
-    return TPP.imageExportGrayscalePalette(grayCountMap[name]);
-  return TPP.imageExportSizedPalette(countMap[name] || 256);
+  await TPP.imageExportPaletteLoadPromise;
+};
+TPP.imageExportNamedPalette = function (name) {
+  const id = String(name || "websafe");
+  if (TPP.imageExportPaletteById[id]) return TPP.imageExportPaletteById[id];
+  if (TPP.imageExportPaletteById.websafe)
+    return TPP.imageExportPaletteById.websafe;
+  return TPP.fallbackWebsafePalette();
 };
 TPP.applyIndexedPalette = function (data, palette) {
   const cache = new Map();
@@ -924,6 +567,7 @@ TPP.previewBlobSize = function (canvas, format, quality) {
   });
 };
 TPP.exportImagesZip = async function (options) {
+  await TPP.ensureImageExportPalettesLoaded();
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();
@@ -998,6 +642,7 @@ TPP.exportImagesZip = async function (options) {
   TPP.showProgress(100, "Page images ZIP complete");
 };
 TPP.exportAnimatedGif = async function (options) {
+  await TPP.ensureImageExportPalettesLoaded();
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();
@@ -1080,6 +725,7 @@ TPP.exportAnimatedGif = async function (options) {
   TPP.showProgress(100, "Animated GIF complete");
 };
 TPP.exportMp4 = async function (options) {
+  await TPP.ensureImageExportPalettesLoaded();
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();
