@@ -423,6 +423,24 @@
       </select>
     </label>
     <label id="imageExportDialogCustomWrap" hidden>Custom DPI <input id="imageExportDialogDpi" type="number" min="72" max="1200" step="1"></label>
+    <label>Image Format
+      <select id="imageExportDialogFormat">
+        <option value="png">PNG</option>
+        <option value="jpeg">JPEG</option>
+        <option value="webp">WebP</option>
+      </select>
+    </label>
+    <label>Color Depth
+      <select id="imageExportDialogColorDepth">
+        <option value="color24">24-bit Color</option>
+        <option value="gray8">8-bit Grayscale</option>
+        <option value="mono1">1-bit Black & White</option>
+      </select>
+    </label>
+    <label id="imageExportDialogQualityWrap">Lossy Quality
+      <input id="imageExportDialogQuality" type="range" min="1" max="100" step="1" value="92">
+      <span id="imageExportDialogQualityValue">92%</span>
+    </label>
     <div id="imageExportDialogEstimate" class="image-export-estimate"></div>
     <div class="modal-actions">
       <button type="button" data-action="cancel">Cancel</button>

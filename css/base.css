@@ -996,6 +996,15 @@ input[type="checkbox"] {
   font-size: 0.92rem;
   font-weight: 700;
 }
+#imageExportDialogQualityWrap {
+  display: grid;
+  gap: 0.35rem;
+}
+#imageExportDialogQualityValue {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
 .asset-upload-row {
   display: flex;
   gap: 0.6rem;

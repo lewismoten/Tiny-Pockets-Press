@@ -665,6 +665,19 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportCustomWrap = document.getElementById(
     "imageExportDialogCustomWrap",
   );
+  const imageExportFormat = document.getElementById("imageExportDialogFormat");
+  const imageExportColorDepth = document.getElementById(
+    "imageExportDialogColorDepth",
+  );
+  const imageExportQualityWrap = document.getElementById(
+    "imageExportDialogQualityWrap",
+  );
+  const imageExportQuality = document.getElementById(
+    "imageExportDialogQuality",
+  );
+  const imageExportQualityValue = document.getElementById(
+    "imageExportDialogQualityValue",
+  );
   const imageExportEstimate = document.getElementById(
     "imageExportDialogEstimate",
   );
@@ -673,6 +686,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportPreset &&
     imageExportDpi &&
     imageExportCustomWrap &&
+    imageExportFormat &&
+    imageExportColorDepth &&
+    imageExportQualityWrap &&
+    imageExportQuality &&
+    imageExportQualityValue &&
     imageExportEstimate
   ) {
     const presetValues = ["72", "96", "150", "200", "300", "600"];
@@ -680,6 +698,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       const preset = imageExportPreset.value;
       imageExportCustomWrap.hidden = preset !== "custom";
       if (preset !== "custom") imageExportDpi.value = preset;
+    };
+    const syncFormatUi = function () {
+      const lossy =
+        imageExportFormat.value === "jpeg" ||
+        imageExportFormat.value === "webp";
+      imageExportQualityWrap.hidden = !lossy;
+      imageExportQualityValue.textContent =
+        Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) +
+        "%";
     };
     const updateEstimate = function () {
       const pixels = TPP.imageExportPixels(Number(imageExportDpi.value) || 300);
@@ -695,6 +722,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       syncPresetUi();
       updateEstimate();
     });
+    imageExportFormat.addEventListener("change", syncFormatUi);
+    imageExportQuality.addEventListener("input", syncFormatUi);
     imageExportDpi.addEventListener("input", updateEstimate);
     imageExportDialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");
@@ -710,14 +739,31 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
       if (button.dataset.action === "export-images") {
         const dpi = TPP.dpi(Number(imageExportDpi.value) || 300);
+        const format = imageExportFormat.value || "png";
+        const quality = Math.max(
+          1,
+          Math.min(100, Number(imageExportQuality.value) || 92),
+        );
+        const colorDepth = imageExportColorDepth.value || "color24";
         imageExportDpi.value = dpi;
         imageExportPreset.value = presetValues.includes(String(dpi))
           ? String(dpi)
           : "custom";
         syncPresetUi();
-        TPP.writeImageExportUi({ dpi: dpi });
+        syncFormatUi();
+        TPP.writeImageExportUi({
+          dpi: dpi,
+          format: format,
+          quality: quality,
+          colorDepth: colorDepth,
+        });
         if (imageExportDialog.open) imageExportDialog.close();
-        TPP.exportImagesZip(dpi);
+        TPP.exportImagesZip({
+          dpi: dpi,
+          format: format,
+          quality: quality,
+          colorDepth: colorDepth,
+        });
       }
     });
   }
@@ -728,16 +774,32 @@ TPP.openImageExportDialog = function () {
   const preset = document.getElementById("imageExportDialogPreset");
   const input = document.getElementById("imageExportDialogDpi");
   const customWrap = document.getElementById("imageExportDialogCustomWrap");
+  const format = document.getElementById("imageExportDialogFormat");
+  const colorDepth = document.getElementById("imageExportDialogColorDepth");
+  const quality = document.getElementById("imageExportDialogQuality");
+  const qualityWrap = document.getElementById("imageExportDialogQualityWrap");
+  const qualityValue = document.getElementById("imageExportDialogQualityValue");
   if (
     !dialog ||
     !preset ||
     !input ||
     !customWrap ||
+    !format ||
+    !colorDepth ||
+    !quality ||
+    !qualityWrap ||
+    !qualityValue ||
     typeof dialog.showModal !== "function"
   )
     return;
-  const dpi = TPP.dpi(TPP.imageExportUi().dpi || 300);
+  const ui = TPP.imageExportUi();
+  const dpi = TPP.dpi(ui.dpi || 300);
   input.value = dpi;
+  format.value = ui.format || "png";
+  colorDepth.value = ui.colorDepth || "color24";
+  quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));
+  qualityValue.textContent = quality.value + "%";
+  qualityWrap.hidden = !(format.value === "jpeg" || format.value === "webp");
   preset.value = ["72", "96", "150", "200", "300", "600"].includes(String(dpi))
     ? String(dpi)
     : "custom";
@@ -1090,12 +1152,15 @@ TPP.writeSettingsUi = function (state) {
 };
 TPP.imageExportUi = function () {
   const state = TPP.readSettingsUi();
-  return Object.assign({ dpi: 300 }, state.imageExport || {});
+  return Object.assign(
+    { dpi: 300, format: "png", quality: 92, colorDepth: "color24" },
+    state.imageExport || {},
+  );
 };
 TPP.writeImageExportUi = function (patch) {
   const state = TPP.readSettingsUi();
   const imageExport = Object.assign(
-    { dpi: 300 },
+    { dpi: 300, format: "png", quality: 92, colorDepth: "color24" },
     state.imageExport || {},
     patch || {},
   );

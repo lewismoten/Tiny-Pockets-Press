@@ -132,7 +132,47 @@ TPP.exportReadablePdf = async function () {
   pdf.save(name);
   TPP.showProgress(100, "eBook PDF complete");
 };
-TPP.exportImagesZip = async function (dpi) {
+TPP.imageExportOptions = function (options) {
+  const source = options || {};
+  return {
+    dpi: TPP.dpi(source.dpi),
+    format: ["png", "jpeg", "webp"].includes(source.format)
+      ? source.format
+      : "png",
+    quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
+    colorDepth: ["color24", "gray8", "mono1"].includes(source.colorDepth)
+      ? source.colorDepth
+      : "color24",
+  };
+};
+TPP.exportCanvasForDepth = function (canvas, colorDepth) {
+  if (!canvas || colorDepth === "color24") return canvas;
+  const out = document.createElement("canvas");
+  out.width = canvas.width;
+  out.height = canvas.height;
+  const ctx = out.getContext("2d");
+  ctx.drawImage(canvas, 0, 0);
+  const image = ctx.getImageData(0, 0, out.width, out.height);
+  const data = image.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = Math.round(
+      data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114,
+    );
+    if (colorDepth === "mono1") {
+      const bit = gray >= 128 ? 255 : 0;
+      data[i] = bit;
+      data[i + 1] = bit;
+      data[i + 2] = bit;
+    } else {
+      data[i] = gray;
+      data[i + 1] = gray;
+      data[i + 2] = gray;
+    }
+  }
+  ctx.putImageData(image, 0, 0);
+  return out;
+};
+TPP.exportImagesZip = async function (options) {
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();
@@ -140,10 +180,20 @@ TPP.exportImagesZip = async function (dpi) {
     alert("ZIP export library failed to load.");
     return;
   }
+  const exportOptions = TPP.imageExportOptions(options);
   const zip = new JSZip();
   const mount = document.createElement("div");
-  const targetDpi = TPP.dpi(dpi);
+  const targetDpi = exportOptions.dpi;
   const scale = targetDpi / 96;
+  const mime =
+    exportOptions.format === "jpeg"
+      ? "image/jpeg"
+      : exportOptions.format === "webp"
+        ? "image/webp"
+        : "image/png";
+  const extension =
+    exportOptions.format === "jpeg" ? "jpg" : exportOptions.format;
+  const quality = exportOptions.quality / 100;
   mount.style.cssText =
     "position:fixed;left:-9999px;top:0;pointer-events:none;";
   document.body.appendChild(mount);
@@ -168,10 +218,19 @@ TPP.exportImagesZip = async function (dpi) {
         scale: scale,
         backgroundColor: "#fff",
       });
+      const exportCanvas = TPP.exportCanvasForDepth(
+        canvas,
+        exportOptions.colorDepth,
+      );
       const blob = await new Promise(function (resolve) {
-        canvas.toBlob(resolve, "image/png");
+        exportCanvas.toBlob(
+          resolve,
+          mime,
+          exportOptions.format === "png" ? undefined : quality,
+        );
       });
-      const pageName = "page-" + String(i + 1).padStart(4, "0") + ".png";
+      const pageName =
+        "page-" + String(i + 1).padStart(4, "0") + "." + extension;
       zip.file(pageName, blob);
       shell.remove();
       await new Promise(requestAnimationFrame);
@@ -189,7 +248,9 @@ TPP.exportImagesZip = async function (dpi) {
         .replace(/[^a-z0-9]+/g, "-") +
       "-pages-" +
       targetDpi +
-      "dpi.zip";
+      "dpi-" +
+      exportOptions.format +
+      ".zip";
     TPP.downloadBlob(name, blob);
   } finally {
     mount.remove();
