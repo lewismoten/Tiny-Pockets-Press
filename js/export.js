@@ -489,10 +489,14 @@ TPP.gifEncoderLib = null;
 TPP.gifEncoderPromise = null;
 TPP.mp4MuxerLib = null;
 TPP.mp4MuxerPromise = null;
+TPP.GIFENC_VERSION = "1.0.3";
+TPP.MP4_MUXER_VERSION = "5.2.2";
 TPP.loadGifEncoder = function () {
   if (TPP.gifEncoderLib) return Promise.resolve(TPP.gifEncoderLib);
   if (!TPP.gifEncoderPromise) {
-    TPP.gifEncoderPromise = import("https://unpkg.com/gifenc")
+    TPP.gifEncoderPromise = import(
+      "https://unpkg.com/gifenc@" + TPP.GIFENC_VERSION + "?module"
+    )
       .then(function (lib) {
         TPP.gifEncoderLib = lib;
         return lib;
@@ -507,7 +511,9 @@ TPP.loadGifEncoder = function () {
 TPP.loadMp4Muxer = function () {
   if (TPP.mp4MuxerLib) return Promise.resolve(TPP.mp4MuxerLib);
   if (!TPP.mp4MuxerPromise) {
-    TPP.mp4MuxerPromise = import("https://unpkg.com/mp4-muxer?module")
+    TPP.mp4MuxerPromise = import(
+      "https://unpkg.com/mp4-muxer@" + TPP.MP4_MUXER_VERSION + "?module"
+    )
       .then(function (lib) {
         TPP.mp4MuxerLib = lib;
         return lib;

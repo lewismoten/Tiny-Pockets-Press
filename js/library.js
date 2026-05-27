@@ -1707,6 +1707,7 @@ TPP.defaultSoftwareCdns = [
     id: "marked",
     name: "marked",
     version: "12.0.2",
+    cdn: "cdnjs",
     purpose:
       "Parses Markdown chapter text into HTML before sanitizing and rendering.",
     license: "MIT",
@@ -1717,6 +1718,7 @@ TPP.defaultSoftwareCdns = [
     id: "dompurify",
     name: "DOMPurify",
     version: "3.1.6",
+    cdn: "cdnjs",
     purpose:
       "Sanitizes generated HTML so user-authored Markdown content is safe to inject.",
     license: "Apache-2.0",
@@ -1727,6 +1729,7 @@ TPP.defaultSoftwareCdns = [
     id: "qrcodejs",
     name: "qrcodejs",
     version: "1.0.0",
+    cdn: "cdnjs",
     purpose:
       "Generates QR codes for URL/asset references in page rendering and exports.",
     license: "MIT",
@@ -1737,6 +1740,7 @@ TPP.defaultSoftwareCdns = [
     id: "html2canvas",
     name: "html2canvas",
     version: "1.4.1",
+    cdn: "cdnjs",
     purpose:
       "Captures rendered DOM pages into bitmap canvases for PDF/image/video export pipelines.",
     license: "MIT",
@@ -1747,6 +1751,7 @@ TPP.defaultSoftwareCdns = [
     id: "jspdf",
     name: "jsPDF",
     version: "2.5.1",
+    cdn: "cdnjs",
     purpose:
       "Builds interior, cover, and eBook PDF documents from rendered page canvases.",
     license: "MIT",
@@ -1757,6 +1762,7 @@ TPP.defaultSoftwareCdns = [
     id: "jszip",
     name: "JSZip",
     version: "3.10.1",
+    cdn: "cdnjs",
     purpose: "Bundles exported page images into downloadable ZIP archives.",
     license: "MIT",
     licenseUrl: "https://github.com/Stuk/jszip/blob/main/LICENSE.markdown",
@@ -1765,7 +1771,8 @@ TPP.defaultSoftwareCdns = [
   {
     id: "gifenc",
     name: "gifenc",
-    version: "latest (unpkg CDN)",
+    version: "1.0.3",
+    cdn: "unpkg (dynamic import)",
     purpose: "Encodes GIF frames for preview and animated GIF export.",
     license: "MIT",
     licenseUrl: "https://github.com/mattdesl/gifenc/blob/master/LICENSE.md",
@@ -1774,7 +1781,8 @@ TPP.defaultSoftwareCdns = [
   {
     id: "mp4-muxer",
     name: "mp4-muxer",
-    version: "latest (unpkg CDN)",
+    version: "5.2.2",
+    cdn: "unpkg (dynamic import)",
     purpose: "Muxes encoded video chunks into an MP4 container for export.",
     license: "MIT",
     licenseUrl: "https://github.com/Vanilagy/mp4-muxer/blob/main/LICENSE",
@@ -1884,6 +1892,9 @@ TPP.renderSoftwareAbout = async function () {
           TPP.esc(entry.version || "Unknown") +
           "</td>" +
           "<td>" +
+          TPP.esc(entry.cdn || "Unknown") +
+          "</td>" +
+          "<td>" +
           TPP.esc(entry.purpose || "—") +
           "</td>" +
           "<td>" +
@@ -1910,7 +1921,7 @@ TPP.renderSoftwareAbout = async function () {
       "<h3>CDN Packages</h3>" +
       '<div class="table-wrap">' +
       '<table class="data-table">' +
-      "<thead><tr><th>Name</th><th>Version</th><th>Used For</th><th>License</th><th>Website</th></tr></thead>" +
+      "<thead><tr><th>Name</th><th>Version</th><th>CDN Source</th><th>Used For</th><th>License</th><th>Website</th></tr></thead>" +
       "<tbody>" +
       rows +
       "</tbody>" +
