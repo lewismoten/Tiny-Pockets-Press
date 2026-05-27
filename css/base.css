@@ -396,6 +396,7 @@ input[type="checkbox"] {
   display: grid;
   place-items: center;
   text-align: center;
+  cursor: pointer;
   background: #7b1f2a;
   color: white;
   background-size: cover;

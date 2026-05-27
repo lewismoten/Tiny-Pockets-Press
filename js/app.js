@@ -332,12 +332,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     input.click();
   };
   document.getElementById("libraryGrid").onclick = function (e) {
-    const button = e.target.closest("[data-act]");
     const card = e.target.closest("[data-id]");
-    if (!button || !card) return;
+    if (!card) return;
     const book = TPP.library.find(function (b) {
       return TPP.bookId(b) === card.dataset.id;
     });
+    if (!book) return;
+    const cover = e.target.closest(".library-cover");
+    if (cover) {
+      TPP.setActive(book);
+      TPP.switchView("editor");
+      return;
+    }
+    const button = e.target.closest("[data-act]");
+    if (!button) return;
     if (button.dataset.act === "edit") {
       TPP.setActive(book);
       TPP.switchView("editor");
