@@ -720,6 +720,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportAnimatedGif = imageExportDialog
     ? imageExportDialog.querySelector("[data-action='export-animated-gif']")
     : null;
+  const imageExportMp4 = imageExportDialog
+    ? imageExportDialog.querySelector("[data-action='export-mp4']")
+    : null;
   if (
     imageExportDialog &&
     imageExportPreset &&
@@ -743,7 +746,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportPreviewDuration &&
     imageExportPreviewPlay &&
     imageExportFrameDelay &&
-    imageExportAnimatedGif
+    imageExportAnimatedGif &&
+    imageExportMp4
   ) {
     const presetValues = ["72", "96", "150", "200", "300", "600"];
     const syncPresetUi = function () {
@@ -767,6 +771,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       imageExportQuality.disabled = !lossy;
       imageExportQualityWrap.classList.toggle("is-disabled", !lossy);
       imageExportAnimatedGif.disabled = imageExportFormat.value !== "gif";
+      imageExportMp4.disabled = typeof window.VideoEncoder !== "function";
       imageExportColorDepth.disabled = !colorDepthApplies;
       imageExportColorDepth.parentElement.classList.toggle(
         "is-disabled",
@@ -902,7 +907,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
       if (
         button.dataset.action === "export-images" ||
-        button.dataset.action === "export-animated-gif"
+        button.dataset.action === "export-animated-gif" ||
+        button.dataset.action === "export-mp4"
       ) {
         const dpi = TPP.dpi(Number(imageExportDpi.value) || 300);
         const format = imageExportFormat.value || "png";
@@ -944,6 +950,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         };
         if (button.dataset.action === "export-animated-gif") {
           TPP.exportAnimatedGif(exportOptions);
+        } else if (button.dataset.action === "export-mp4") {
+          TPP.exportMp4(exportOptions);
         } else {
           TPP.exportImagesZip(exportOptions);
         }

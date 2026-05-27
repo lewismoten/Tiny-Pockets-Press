@@ -535,6 +535,8 @@ TPP.previewDataUrl = function (canvas, format, quality) {
 };
 TPP.gifEncoderLib = null;
 TPP.gifEncoderPromise = null;
+TPP.mp4MuxerLib = null;
+TPP.mp4MuxerPromise = null;
 TPP.loadGifEncoder = function () {
   if (TPP.gifEncoderLib) return Promise.resolve(TPP.gifEncoderLib);
   if (!TPP.gifEncoderPromise) {
@@ -549,6 +551,46 @@ TPP.loadGifEncoder = function () {
       });
   }
   return TPP.gifEncoderPromise;
+};
+TPP.loadMp4Muxer = function () {
+  if (TPP.mp4MuxerLib) return Promise.resolve(TPP.mp4MuxerLib);
+  if (!TPP.mp4MuxerPromise) {
+    TPP.mp4MuxerPromise = import("https://unpkg.com/mp4-muxer?module")
+      .then(function (lib) {
+        TPP.mp4MuxerLib = lib;
+        return lib;
+      })
+      .catch(function (error) {
+        TPP.mp4MuxerPromise = null;
+        throw error;
+      });
+  }
+  return TPP.mp4MuxerPromise;
+};
+TPP.supportedMp4Codec = async function (width, height, bitrate) {
+  if (typeof window.VideoEncoder !== "function") return null;
+  const codecs = ["avc1.42001f", "avc1.42E01E", "avc1.640028"];
+  for (let i = 0; i < codecs.length; i++) {
+    try {
+      const config = {
+        codec: codecs[i],
+        width: width,
+        height: height,
+        bitrate: bitrate,
+        framerate: 30,
+        avc: { format: "annexb" },
+      };
+      const support = await window.VideoEncoder.isConfigSupported(config);
+      if (support && support.supported) return config;
+    } catch (_error) {}
+  }
+  return null;
+};
+TPP.mp4Bitrate = function (width, height, quality) {
+  const pixels =
+    Math.max(1, Number(width) || 1) * Math.max(1, Number(height) || 1);
+  const q = Math.max(1, Math.min(100, Number(quality) || 92)) / 100;
+  return Math.round(Math.max(600000, pixels * 1.2 * (0.45 + q * 1.55)));
 };
 TPP.encodeGifBlob = async function (canvas, options) {
   if (!canvas) throw new Error("Canvas required");
@@ -758,4 +800,128 @@ TPP.exportAnimatedGif = async function (options) {
     mount.remove();
   }
   TPP.showProgress(100, "Animated GIF complete");
+};
+TPP.exportMp4 = async function (options) {
+  TPP.sync();
+  const settings = TPP.settings();
+  const pages = TPP.buildPages();
+  if (!pages.length) {
+    alert("No pages available to export.");
+    return;
+  }
+  if (typeof window.VideoEncoder !== "function") {
+    alert("MP4 export is not supported in this browser.");
+    return;
+  }
+  const exportOptions = TPP.imageExportOptions(options);
+  const muxerLib = await TPP.loadMp4Muxer();
+  const mount = document.createElement("div");
+  const scale = exportOptions.dpi / 96;
+  mount.style.cssText =
+    "position:fixed;left:-9999px;top:0;pointer-events:none;";
+  document.body.appendChild(mount);
+  try {
+    const probeShell = document.createElement("div");
+    probeShell.style.position = "relative";
+    probeShell.style.width = settings.page.w + "in";
+    probeShell.style.height = settings.page.h + "in";
+    probeShell.style.background = "#fff";
+    probeShell.appendChild(TPP.pageEl(pages[0], settings, 0, 0, false, true));
+    mount.appendChild(probeShell);
+    TPP.renderQr(probeShell, settings);
+    await TPP.waitForImages(probeShell);
+    await new Promise(requestAnimationFrame);
+    const probeCanvas = await html2canvas(probeShell, {
+      scale: scale,
+      backgroundColor: "#fff",
+    });
+    const firstCanvas = TPP.exportCanvasForDepth(
+      probeCanvas,
+      exportOptions.colorDepth,
+      exportOptions.threshold,
+      exportOptions.palette,
+    );
+    const width = firstCanvas.width;
+    const height = firstCanvas.height;
+    const bitrate = TPP.mp4Bitrate(width, height, exportOptions.quality);
+    const config = await TPP.supportedMp4Codec(width, height, bitrate);
+    if (!config) {
+      throw new Error("No supported MP4 codec found in this browser.");
+    }
+    const target = new muxerLib.ArrayBufferTarget();
+    const muxer = new muxerLib.Muxer({
+      target: target,
+      fastStart: "in-memory",
+      video: {
+        codec: "avc",
+        width: width,
+        height: height,
+      },
+    });
+    const encoder = new window.VideoEncoder({
+      output: function (chunk, meta) {
+        muxer.addVideoChunk(chunk, meta);
+      },
+      error: function (error) {
+        throw error;
+      },
+    });
+    encoder.configure(config);
+    let timestamp = 0;
+    const duration = exportOptions.frameDelay * 1000;
+    for (let i = 0; i < pages.length; i++) {
+      TPP.showProgress(
+        5 + Math.round((i / pages.length) * 80),
+        "Rendering MP4 frame " + (i + 1) + " of " + pages.length + "...",
+      );
+      const pageCanvas =
+        i === 0
+          ? firstCanvas
+          : await (async function () {
+              const shell = document.createElement("div");
+              shell.style.position = "relative";
+              shell.style.width = settings.page.w + "in";
+              shell.style.height = settings.page.h + "in";
+              shell.style.background = "#fff";
+              shell.appendChild(
+                TPP.pageEl(pages[i], settings, 0, 0, false, true),
+              );
+              mount.appendChild(shell);
+              TPP.renderQr(shell, settings);
+              await TPP.waitForImages(shell);
+              await new Promise(requestAnimationFrame);
+              const canvas = await html2canvas(shell, {
+                scale: scale,
+                backgroundColor: "#fff",
+              });
+              shell.remove();
+              return TPP.exportCanvasForDepth(
+                canvas,
+                exportOptions.colorDepth,
+                exportOptions.threshold,
+                exportOptions.palette,
+              );
+            })();
+      const frame = new VideoFrame(pageCanvas, {
+        timestamp: timestamp,
+        duration: duration,
+      });
+      encoder.encode(frame, { keyFrame: i === 0 });
+      frame.close();
+      timestamp += duration;
+      await new Promise(requestAnimationFrame);
+    }
+    await encoder.flush();
+    encoder.close();
+    muxer.finalize();
+    const blob = new Blob([target.buffer], { type: "video/mp4" });
+    const name =
+      (settings.title || "tiny-book")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-") + "-pages.mp4";
+    TPP.downloadBlob(name, blob);
+  } finally {
+    mount.remove();
+  }
+  TPP.showProgress(100, "MP4 complete");
 };
