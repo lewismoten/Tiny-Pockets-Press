@@ -232,7 +232,7 @@ TPP.gifEncoderPromise = null;
 TPP.loadGifEncoder = function () {
   if (TPP.gifEncoderLib) return Promise.resolve(TPP.gifEncoderLib);
   if (!TPP.gifEncoderPromise) {
-    TPP.gifEncoderPromise = import("https://esm.sh/gifenc")
+    TPP.gifEncoderPromise = import("https://unpkg.com/gifenc")
       .then(function (lib) {
         TPP.gifEncoderLib = lib;
         return lib;

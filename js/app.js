@@ -1553,9 +1553,11 @@ TPP.renderImageExportPreview = async function () {
     TPP.setImageExportPreviewDownloads(null);
     stage.innerHTML =
       '<div class="image-export-preview-empty">Unable to render preview</div>';
+    console.error("Image export preview failed", _error);
     if (exportOptions.format === "gif")
       TPP.toast(
-        "GIF preview failed. Try PNG, or a lower DPI if the frame is large.",
+        "GIF preview failed: " +
+          (_error && _error.message ? _error.message : "Unknown GIF error"),
       );
   }
 };
