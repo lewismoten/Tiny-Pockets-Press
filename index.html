@@ -61,19 +61,20 @@
         <button class="tab" data-view="reader">Reader</button>
         <button class="tab" data-view="library">Library</button>
       </nav>
-      <div class="header-actions">
-        <button id="saveBook">Save</button>
-        <button id="exportInteriorPdf" class="primary">Interior PDF</button>
-        <button id="exportReadablePdf" class="primary alt">eBook</button>
-        <button id="exportImagesZip" class="primary alt">Page Images</button>
-        <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
-      </div>
     </header>
 
     <div id="progress" class="progress" hidden>
       <div id="progressBar"></div>
       <span id="progressText">Ready</span>
     </div>
+
+    <section id="bookActionsBar" class="header-actions">
+      <button id="saveBook">Save</button>
+      <button id="exportInteriorPdf" class="primary">Interior PDF</button>
+      <button id="exportReadablePdf" class="primary alt">eBook</button>
+      <button id="exportImagesZip" class="primary alt">Page Images</button>
+      <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
+    </section>
 
     <main class="app-shell">
       <aside class="settings">
