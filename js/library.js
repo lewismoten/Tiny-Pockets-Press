@@ -492,16 +492,20 @@ TPP.dataTabs = function (book, stale) {
   if (stale.length) tabs.push({ id: "stale", label: "Stale Keys", html: TPP.dataStaleReportHtml(stale), count: stale.length });
   return tabs;
 };
-TPP.renderDataTabs = function (tabs, activeId) {
+TPP.renderDataPanel = function (tabs, activeId) {
   const active = tabs.find(function (tab) { return tab.id === activeId; }) || tabs[0];
-  return '<article class="data-card">' +
-    '<div class="data-tabs" role="tablist" aria-label="Book data sections">' + tabs.map(function (tab) {
-      const selected = tab.id === active.id;
+  return '<article class="data-card"><div class="data-tab-panel" role="tabpanel">' + (active ? active.html : '<div class="data-empty">No data available.</div>') + "</div></article>";
+};
+TPP.renderDataSidebar = function (tabs, activeId) {
+  const sidebar = document.getElementById("dataSidebar");
+  if (!sidebar) return;
+  const active = tabs.find(function (tab) { return tab.id === activeId; }) || tabs[0];
+  sidebar.innerHTML = '<div class="data-sidebar-head"><h2>Book Data</h2><p>Inspect structured sections of the current book.</p></div>' +
+    '<nav class="data-sidebar-nav" aria-label="Data sections">' + tabs.map(function (tab) {
+      const selected = active && tab.id === active.id;
       const label = tab.count ? tab.label + " (" + tab.count + ")" : tab.label;
-      return '<button type="button" class="data-tab' + (selected ? " active" : "") + '" role="tab" aria-selected="' + (selected ? "true" : "false") + '" data-data-tab="' + TPP.esc(tab.id) + '">' + TPP.esc(label) + "</button>";
-    }).join("") + "</div>" +
-    '<div class="data-tab-panel" role="tabpanel">' + active.html + "</div>" +
-  "</article>";
+      return '<button type="button" class="data-sidebar-link' + (selected ? " active" : "") + '" data-data-tab="' + TPP.esc(tab.id) + '">' + TPP.esc(label) + "</button>";
+    }).join("") + "</nav>";
 };
 TPP.renderData = function () {
   if (!TPP.active) return;
@@ -515,8 +519,9 @@ TPP.renderData = function () {
   const stale = TPP.collectDataStaleEntries(book, "root", [], []);
   const tabs = TPP.dataTabs(book, stale);
   const activeTab = TPP.readDataTab(tabs.map(function (tab) { return tab.id; }));
+  TPP.renderDataSidebar(tabs, activeTab);
   summary.innerHTML = '<div class="data-summary-copy">Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.</div>';
-  panel.innerHTML = TPP.renderDataTabs(tabs, activeTab);
+  panel.innerHTML = TPP.renderDataPanel(tabs, activeTab);
 };
 TPP.registerDataPreview = function (title, body, mode) {
   const id = "preview-" + TPP.uid();

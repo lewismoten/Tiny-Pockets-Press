@@ -415,16 +415,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   }
   const dataPanel = document.getElementById("dataPanel");
+  const dataSidebar = document.getElementById("dataSidebar");
   const dataImageDialog = document.getElementById("dataImageDialog");
   const dataTextDialog = document.getElementById("dataTextDialog");
   if (dataPanel) {
     dataPanel.addEventListener("click", function (e) {
-      const tabButton = e.target.closest("[data-data-tab]");
-      if (tabButton) {
-        TPP.writeDataTab(tabButton.dataset.dataTab || "top");
-        TPP.renderData();
-        return;
-      }
       const chip = e.target.closest("[data-image-src]");
       if (chip) {
         TPP.openDataImagePreview(chip.dataset.imageSrc || "", chip.dataset.imageTitle || "Image Preview");
@@ -452,6 +447,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
       const removeAll = e.target.closest("[data-stale-remove-all]");
       if (removeAll) TPP.removeAllStaleDataEntries();
+    });
+  }
+  if (dataSidebar) {
+    dataSidebar.addEventListener("click", function (e) {
+      const tabButton = e.target.closest("[data-data-tab]");
+      if (!tabButton) return;
+      TPP.writeDataTab(tabButton.dataset.dataTab || "top");
+      TPP.renderData();
     });
   }
   if (dataImageDialog) {
@@ -749,11 +752,13 @@ TPP.saveSettingsUi = function () {
   const open = {};
   const state = TPP.readSettingsUi();
   const readerByBook = Object.assign({}, state.readerByBook || {});
+  const dataTabByBook = Object.assign({}, state.dataTabByBook || {});
   TPP.settingsDetails().forEach(function (details, index) {
     open[index] = details.open;
   });
   if (TPP.active) readerByBook[TPP.active.id] = TPP.readerUiState();
   TPP.writeSettingsUi({
+    dataTabByBook: dataTabByBook,
     readerByBook: readerByBook,
     open: open,
     scrollTop: controls ? controls.scrollTop : 0,
@@ -779,6 +784,13 @@ TPP.bindSettingsUiPersistence = function () {
     if (view !== TPP.view) TPP.switchView(view, true);
   });
 };
+TPP.renderSidebarMode = function () {
+  const controls = document.querySelector(".controls");
+  const dataSidebar = document.getElementById("dataSidebar");
+  const dataMode = TPP.view === "data";
+  if (controls) controls.hidden = dataMode;
+  if (dataSidebar) dataSidebar.hidden = !dataMode;
+};
 
 TPP.switchView = function (view, fromHash) {
   if (!TPP.validViews().includes(view)) view = "editor";
@@ -794,9 +806,11 @@ TPP.switchView = function (view, fromHash) {
     element.classList.remove("active");
   });
   document.getElementById(view + "View").classList.add("active");
+  TPP.renderSidebarMode();
   TPP.renderAll();
 };
 TPP.renderAll = function () {
+  TPP.renderSidebarMode();
   if (TPP.view === "editor") { TPP.renderChapterList(); TPP.renderChapterEditor(); }
   if (TPP.view === "about") TPP.renderAbout();
   if (TPP.view === "data") TPP.renderData();
