@@ -102,7 +102,7 @@ TPP.aboutMetaItem = function (label, value) {
   );
 };
 TPP.bookLatestSource = function (book) {
-  const chain = Array.isArray(book && book.provenance) ? book.provenance : [];
+  const chain = TPP.bookProvenance(book);
   for (let i = chain.length - 1; i >= 0; i--) {
     if (
       chain[i] &&
@@ -391,10 +391,20 @@ TPP.dataTableColumns = function (items) {
   return columns;
 };
 TPP.dataSchemaKeys = function (context) {
-  if (context === "root")
-    return new Set(
-      Object.keys(TPP.fallbackBook()).concat(["_pageCount", "coverPreview"]),
-    );
+  if (context === "root") return new Set(Object.keys(TPP.fallbackBook()));
+  if (context === "meta")
+    return new Set([
+      "id",
+      "revision",
+      "subrevision",
+      "provenance",
+      "createdAt",
+      "updatedAt",
+      "lastExportedAt",
+      "lastImportedAt",
+      "coverPreviewImageId",
+      "_pageCount",
+    ]);
   if (context === "chapters")
     return new Set([
       "id",
@@ -581,7 +591,12 @@ TPP.collectDataStaleEntries = function (value, context, path, out) {
   Object.entries(value).forEach(function (entry) {
     const key = entry[0];
     const child = entry[1];
-    if (context === "root" && key === "coverPreview" && value.coverPreviewId)
+    if (
+      context === "root" &&
+      key === "coverPreview" &&
+      value.meta &&
+      value.meta.coverPreviewImageId
+    )
       return;
     const status = TPP.dataSchemaStatus(context, key);
     if (status !== "active") {
@@ -710,7 +725,7 @@ TPP.dataValueHtml = function (book, key, value, compact) {
       book,
       value,
       compact,
-      key === "__root__" ? "root" : null,
+      key === "__root__" ? "root" : key === "meta" ? "meta" : null,
     );
   return TPP.dataPrimitiveHtml(book, key, value);
 };
@@ -771,7 +786,12 @@ TPP.dataArrayHtml = function (book, key, list, compact) {
 };
 TPP.dataObjectHtml = function (book, obj, compact, context) {
   const entries = Object.entries(obj || {}).filter(function (entry) {
-    return !(entry[0] === "coverPreview" && obj && obj.coverPreviewId);
+    return !(
+      entry[0] === "coverPreview" &&
+      obj &&
+      obj.meta &&
+      obj.meta.coverPreviewImageId
+    );
   });
   if (!entries.length) return '<div class="data-empty">{}</div>';
   return (
@@ -1127,7 +1147,7 @@ TPP.removeStaleDataEntry = function (id) {
   const entry = TPP.dataStaleStore && TPP.dataStaleStore[id];
   if (!entry || !TPP.active) return;
   if (TPP.deleteDataPath(TPP.active, entry.path)) {
-    TPP.save("commit", TPP.active.id);
+    TPP.save("commit", TPP.bookId(TPP.active));
     TPP.renderAll();
     TPP.toast("Removed " + entry.label);
   }
@@ -1142,7 +1162,7 @@ TPP.removeAllStaleDataEntries = function () {
     if (TPP.deleteDataPath(TPP.active, entry.path)) removed++;
   });
   if (!removed) return;
-  TPP.save("commit", TPP.active.id);
+  TPP.save("commit", TPP.bookId(TPP.active));
   TPP.renderAll();
   TPP.toast("Removed " + removed + " stale key" + (removed === 1 ? "" : "s"));
 };
@@ -1159,13 +1179,15 @@ TPP.renderLibrary = function () {
         w: book.customW || 1,
         h: book.customH || 1,
       };
-      const pages = book._pageCount || "—";
-      const modified = TPP.relativeDateTime(book.updatedAt);
+      const pages = TPP.bookPageCount(book) || "—";
+      const modified = TPP.relativeDateTime(TPP.bookUpdatedAt(book));
       return (
         '<article class="library-card ' +
-        (TPP.active && TPP.active.id === book.id ? "active" : "") +
+        (TPP.active && TPP.bookId(TPP.active) === TPP.bookId(book)
+          ? "active"
+          : "") +
         '" data-id="' +
-        book.id +
+        TPP.bookId(book) +
         '">' +
         '<div class="library-cover" style="' +
         (book.coverPreview
@@ -1211,14 +1233,16 @@ TPP.renderAbout = function () {
     : "";
   const original = latest
     ? TPP.library.find(function (candidate) {
-        return candidate.id === latest.sourceId;
+        return TPP.bookId(candidate) === latest.sourceId;
       })
     : null;
   const summary = document.getElementById("aboutSummary");
   const panel = document.getElementById("aboutPanel");
   if (!summary || !panel) return;
   const revisionLabel =
-    String(book.revision || 1) + "." + String(book.subrevision || 0);
+    String(TPP.bookRevision(book) || 1) +
+    "." +
+    String(TPP.bookSubrevision(book) || 0);
   summary.innerHTML =
     "<strong>Revision " +
     TPP.esc(revisionLabel) +
@@ -1242,7 +1266,7 @@ TPP.renderAbout = function () {
     "<h3>Cover</h3>" +
     '<div class="about-cover-shell"><div id="aboutCoverMount"></div></div>' +
     '<p class="about-note">ID: ' +
-    TPP.esc(book.id) +
+    TPP.esc(TPP.bookId(book)) +
     "</p>" +
     "</article>" +
     "</div>" +
@@ -1267,13 +1291,19 @@ TPP.renderAbout = function () {
         "Dimensions",
         size.w.toFixed(2) + " × " + size.h.toFixed(2) + " in",
       ),
-      TPP.aboutMetaItem("Book ID", book.id),
-      TPP.aboutMetaItem("Revision", String(book.revision || 1)),
-      TPP.aboutMetaItem("Subrevision", String(book.subrevision || 0)),
-      TPP.aboutMetaItem("Created", TPP.dateTime(book.createdAt)),
-      TPP.aboutMetaItem("Last Edited", TPP.dateTime(book.updatedAt)),
-      TPP.aboutMetaItem("Last Imported", TPP.dateTime(book.lastImportedAt)),
-      TPP.aboutMetaItem("Last Exported", TPP.dateTime(book.lastExportedAt)),
+      TPP.aboutMetaItem("Book ID", TPP.bookId(book)),
+      TPP.aboutMetaItem("Revision", String(TPP.bookRevision(book))),
+      TPP.aboutMetaItem("Subrevision", String(TPP.bookSubrevision(book))),
+      TPP.aboutMetaItem("Created", TPP.dateTime(TPP.bookCreatedAt(book))),
+      TPP.aboutMetaItem("Last Edited", TPP.dateTime(TPP.bookUpdatedAt(book))),
+      TPP.aboutMetaItem(
+        "Last Imported",
+        TPP.dateTime(TPP.bookLastImportedAt(book)),
+      ),
+      TPP.aboutMetaItem(
+        "Last Exported",
+        TPP.dateTime(TPP.bookLastExportedAt(book)),
+      ),
     ].join("") +
     "</div>" +
     "</article>" +
@@ -1344,7 +1374,7 @@ TPP.captureCover = async function () {
     document.body.appendChild(wrap);
     const canvas = await html2canvas(wrap, { scale: 4, backgroundColor: null });
     TPP.setCoverPreviewAsset(TPP.active, canvas.toDataURL("image/jpeg", 0.9));
-    TPP.active._pageCount = TPP.lastPages.length;
+    TPP.bookMeta(TPP.active)._pageCount = TPP.lastPages.length;
     wrap.remove();
     TPP.save();
   } catch (error) {

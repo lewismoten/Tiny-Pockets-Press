@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   document.getElementById("addChapter").onclick = function () {
     TPP.sync();
-    TPP.active.chapters.push({
+      TPP.active.chapters.push({
       id: TPP.uid(),
       title: "New Chapter",
       tocTitle: "",
@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (TPP.library.length <= 1) return alert("Keep at least one book.");
     if (confirm("Delete this book?")) {
       TPP.library = TPP.library.filter(function (book) {
-        return book.id !== TPP.active.id;
+        return TPP.bookId(book) !== TPP.bookId(TPP.active);
       });
       TPP.save();
       TPP.setActive(TPP.library[0]);
@@ -338,7 +338,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const card = e.target.closest("[data-id]");
     if (!button || !card) return;
     const book = TPP.library.find(function (b) {
-      return b.id === card.dataset.id;
+      return TPP.bookId(b) === card.dataset.id;
     });
     if (button.dataset.act === "edit") {
       TPP.setActive(book);
@@ -452,7 +452,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         for (const rawBook of payload.value) {
           const incoming = TPP.bookImported(rawBook, stamp);
           const existingIndex = TPP.library.findIndex(function (book) {
-            return book.id === incoming.id;
+            return TPP.bookId(book) === TPP.bookId(incoming);
           });
           if (existingIndex < 0) {
             TPP.library.push(incoming);
@@ -467,8 +467,10 @@ document.addEventListener("DOMContentLoaded", async function () {
               stamp,
             );
           } else if (action === "overwrite") {
-            incoming.lastExportedAt =
-              existing.lastExportedAt || incoming.lastExportedAt || "";
+            TPP.bookMeta(incoming).lastExportedAt =
+              TPP.bookLastExportedAt(existing) ||
+              TPP.bookLastExportedAt(incoming) ||
+              "";
             TPP.library[existingIndex] = incoming;
           } else if (action === "copy") {
             TPP.library.push(
@@ -490,7 +492,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const stamp = TPP.nowIso();
         const incoming = TPP.bookImported(payload.value, stamp);
         const existingIndex = TPP.library.findIndex(function (book) {
-          return book.id === incoming.id;
+          return TPP.bookId(book) === TPP.bookId(incoming);
         });
         if (existingIndex < 0) {
           TPP.library.push(incoming);
@@ -507,8 +509,10 @@ document.addEventListener("DOMContentLoaded", async function () {
               stamp,
             );
           } else if (action === "overwrite") {
-            incoming.lastExportedAt =
-              existing.lastExportedAt || incoming.lastExportedAt || "";
+            TPP.bookMeta(incoming).lastExportedAt =
+              TPP.bookLastExportedAt(existing) ||
+              TPP.bookLastExportedAt(incoming) ||
+              "";
             TPP.library[existingIndex] = incoming;
           } else if (action === "copy") {
             const copy = TPP.bookDescendant(
@@ -829,7 +833,7 @@ TPP.openAssetDialog = function (targetType, targetKey) {
   if (!dialog.open) dialog.showModal();
 };
 TPP.commitAssetChange = function () {
-  TPP.save("commit", TPP.active && TPP.active.id);
+  TPP.save("commit", TPP.active && TPP.bookId(TPP.active));
   TPP.loadForm();
   TPP.renderAll();
   if (
@@ -866,9 +870,9 @@ TPP.deleteAsset = function (fileId) {
 };
 
 TPP.importConflictStamp = function (book) {
-  const date = new Date(book && book.updatedAt);
+  const date = new Date(TPP.bookUpdatedAt(book));
   if (Number.isNaN(date.getTime()))
-    return book && book.updatedAt ? String(book.updatedAt) : "Unknown";
+    return TPP.bookUpdatedAt(book) ? String(TPP.bookUpdatedAt(book)) : "Unknown";
   return date.toLocaleString(undefined, {
     month: "short",
     day: "numeric",
@@ -902,12 +906,12 @@ TPP.importConflictPreview = function (book) {
     "</div>" +
     '<div class="conflict-meta">' +
     "<div><strong>ID:</strong> " +
-    TPP.esc((book && book.id) || "—") +
+    TPP.esc(TPP.bookId(book) || "—") +
     "</div>" +
     "<div><strong>Revision:</strong> " +
-    TPP.esc(String((book && book.revision) || 1)) +
+    TPP.esc(String(TPP.bookRevision(book) || 1)) +
     "." +
-    TPP.esc(String((book && book.subrevision) || 0)) +
+    TPP.esc(String(TPP.bookSubrevision(book) || 0)) +
     "</div>" +
     "<div><strong>Modified:</strong> " +
     TPP.esc(TPP.importConflictStamp(book)) +
@@ -924,7 +928,7 @@ TPP.resolveImportConflict = function (incoming, existing) {
     return Promise.resolve("cancel");
   text.textContent =
     'A book with id "' +
-    ((incoming && incoming.id) || "") +
+    (TPP.bookId(incoming) || "") +
     '" already exists. Choose how to handle this import.';
   books.innerHTML =
     '<div><div class="about-meta-label">Current Library Book</div>' +
@@ -1003,7 +1007,7 @@ TPP.readDataTab = function (validTabs) {
   const state = TPP.readSettingsUi();
   const stored =
     state && state.dataTabByBook && TPP.active
-      ? state.dataTabByBook[TPP.active.id]
+      ? state.dataTabByBook[TPP.bookId(TPP.active)]
       : "";
   const tabs = Array.isArray(validTabs) ? validTabs : [];
   if (stored && tabs.includes(stored)) return stored;
@@ -1013,7 +1017,7 @@ TPP.writeDataTab = function (tabId) {
   if (!TPP.active) return;
   const state = TPP.readSettingsUi();
   const dataTabByBook = Object.assign({}, state.dataTabByBook || {});
-  dataTabByBook[TPP.active.id] = tabId || "top";
+  dataTabByBook[TPP.bookId(TPP.active)] = tabId || "top";
   TPP.writeSettingsUi(
     Object.assign({}, state, { dataTabByBook: dataTabByBook }),
   );
@@ -1029,7 +1033,7 @@ TPP.restoreReaderUi = function (state) {
   if (!TPP.active) return;
   const mode = document.getElementById("readerMode");
   const saved =
-    state && state.readerByBook && state.readerByBook[TPP.active.id];
+    state && state.readerByBook && state.readerByBook[TPP.bookId(TPP.active)];
   if (mode && saved && ["single", "spread", "duplex"].includes(saved.mode)) {
     mode.value = saved.mode;
   }
@@ -1063,7 +1067,7 @@ TPP.saveSettingsUi = function () {
   TPP.settingsDetails().forEach(function (details, index) {
     open[index] = details.open;
   });
-  if (TPP.active) readerByBook[TPP.active.id] = TPP.readerUiState();
+  if (TPP.active) readerByBook[TPP.bookId(TPP.active)] = TPP.readerUiState();
   TPP.writeSettingsUi({
     dataTabByBook: dataTabByBook,
     readerByBook: readerByBook,

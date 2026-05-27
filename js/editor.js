@@ -310,8 +310,8 @@ TPP.sync = function (mode) {
   if (TPP.syncLegacyImageFieldsFromElements)
     TPP.syncLegacyImageFieldsFromElements(book);
   if (mode !== "nosave") {
-    TPP.save(mode || "commit", book.id);
-    if (mode === "draft") TPP.scheduleRevisionCommit(book.id);
+    TPP.save(mode || "commit", TPP.bookId(book));
+    if (mode === "draft") TPP.scheduleRevisionCommit(TPP.bookId(book));
   }
 };
 TPP.readChapterFromEditor = function () {
