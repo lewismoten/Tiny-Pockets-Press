@@ -769,10 +769,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.syncImageExportFormatUi = syncFormatUi;
     TPP.updateImageExportEstimate = updateEstimate;
     const schedulePreview = function () {
-      clearTimeout(TPP.imageExportPreviewTimer);
-      TPP.imageExportPreviewTimer = setTimeout(function () {
-        TPP.renderImageExportPreview();
-      }, 120);
+      TPP.scheduleImageExportPreview();
     };
     imageExportPreset.addEventListener("change", function () {
       syncPresetUi();
@@ -1313,6 +1310,34 @@ TPP.imageExportPixels = function (dpi) {
 TPP.imageExportPreviewIndex = 0;
 TPP.imageExportPreviewSplit = 50;
 TPP.imageExportPreviewAssets = null;
+TPP.cancelImageExportPreviewSchedule = function () {
+  clearTimeout(TPP.imageExportPreviewTimer);
+  TPP.imageExportPreviewTimer = null;
+  if (
+    TPP.imageExportPreviewIdle &&
+    typeof window.cancelIdleCallback === "function"
+  ) {
+    window.cancelIdleCallback(TPP.imageExportPreviewIdle);
+    TPP.imageExportPreviewIdle = null;
+  }
+};
+TPP.scheduleImageExportPreview = function () {
+  TPP.cancelImageExportPreviewSchedule();
+  TPP.imageExportPreviewTimer = setTimeout(function () {
+    TPP.imageExportPreviewTimer = null;
+    const run = function () {
+      TPP.imageExportPreviewIdle = null;
+      TPP.renderImageExportPreview();
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      TPP.imageExportPreviewIdle = window.requestIdleCallback(run, {
+        timeout: 400,
+      });
+      return;
+    }
+    window.requestAnimationFrame(run);
+  }, 180);
+};
 TPP.revokeImageExportPreviewAssets = function (assets) {
   ["before", "after"].forEach(function (key) {
     const entry = assets && assets[key];
