@@ -1449,6 +1449,7 @@ TPP.renderImageExportPreview = async function () {
     !TPP.renderImageExportPreviewCanvas
   )
     return;
+  await Promise.resolve();
   TPP.sync("nosave");
   const pages = TPP.buildPages();
   if (!pages.length) {
