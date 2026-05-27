@@ -170,7 +170,7 @@ TPP.imageExportOptions = function (options) {
 };
 TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION = 1;
 TPP.IMAGE_EXPORT_PALETTE_ITEM_SCHEMA_VERSION = 1;
-TPP.IMAGE_EXPORT_PALETTE_CATALOG = "/data/palettes.catalog.json";
+TPP.IMAGE_EXPORT_PALETTE_CATALOG = "data/palettes.catalog.json";
 TPP.imageExportPaletteById = TPP.imageExportPaletteById || {};
 TPP.imageExportPaletteIdsCached = TPP.imageExportPaletteIdsCached || [];
 TPP.imageExportPaletteCatalogById = TPP.imageExportPaletteCatalogById || {};

@@ -1704,7 +1704,7 @@ TPP.softwareMetaCache = null;
 TPP.softwareCdnCache = null;
 TPP.loadSoftwareMeta = async function () {
   if (TPP.softwareMetaCache) return TPP.softwareMetaCache;
-  const response = await fetch("/package.json", { cache: "no-cache" });
+  const response = await fetch("package.json", { cache: "no-cache" });
   if (!response.ok)
     throw new Error("Unable to load package metadata: " + response.status);
   const pkg = await response.json();
@@ -1713,7 +1713,7 @@ TPP.loadSoftwareMeta = async function () {
 };
 TPP.loadSoftwareCdns = async function () {
   if (TPP.softwareCdnCache) return TPP.softwareCdnCache;
-  const response = await fetch("/data/software-cdns.json", {
+  const response = await fetch("data/software-cdns.json", {
     cache: "no-cache",
   });
   if (!response.ok)
