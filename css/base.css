@@ -919,7 +919,6 @@ input[type="checkbox"] {
 }
 .modal::backdrop {
   background: rgb(25 17 13 / 0.55);
-  backdrop-filter: blur(3px);
 }
 .modal-card {
   margin: 0;
