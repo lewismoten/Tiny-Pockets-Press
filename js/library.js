@@ -1762,6 +1762,24 @@ TPP.defaultSoftwareCdns = [
     licenseUrl: "https://github.com/Stuk/jszip/blob/main/LICENSE.markdown",
     website: "https://stuk.github.io/jszip/",
   },
+  {
+    id: "gifenc",
+    name: "gifenc",
+    version: "latest (unpkg CDN)",
+    purpose: "Encodes GIF frames for preview and animated GIF export.",
+    license: "MIT",
+    licenseUrl: "https://github.com/mattdesl/gifenc/blob/master/LICENSE.md",
+    website: "https://github.com/mattdesl/gifenc",
+  },
+  {
+    id: "mp4-muxer",
+    name: "mp4-muxer",
+    version: "latest (unpkg CDN)",
+    purpose: "Muxes encoded video chunks into an MP4 container for export.",
+    license: "MIT",
+    licenseUrl: "https://github.com/Vanilagy/mp4-muxer/blob/main/LICENSE",
+    website: "https://github.com/Vanilagy/mp4-muxer",
+  },
 ];
 TPP.loadSoftwareMeta = async function () {
   if (TPP.softwareMetaCache) return TPP.softwareMetaCache;
