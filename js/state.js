@@ -411,17 +411,12 @@ TPP.SPINE_FIELDS = [
   "spineAuthorRotate",
 ];
 TPP.BACK_COVER_SCHEMA_KEYS = new Set([
-  "textElementId",
   "imageElementId",
   "textLastLine",
   "frameOn",
   "clipImageToFrame",
 ]);
-TPP.SPINE_SCHEMA_KEYS = new Set([
-  "titleTextElementId",
-  "authorTextElementId",
-  "imageElementId",
-]);
+TPP.SPINE_SCHEMA_KEYS = new Set(["imageElementId"]);
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -921,9 +916,7 @@ TPP.attachBackCoverAccessors = function (book) {
 TPP.syncBackCoverFromLegacyFields = function (book) {
   if (!book || typeof book !== "object") return;
   const back = TPP.backCoverInfo(book);
-  const textElement = TPP.backCoverTextElement(book);
   const imageElement = TPP.backCoverImageElement(book);
-  if (textElement && !back.textElementId) back.textElementId = textElement.id;
   if (imageElement && !back.imageElementId)
     back.imageElementId = imageElement.id;
   if ("backTextLastLine" in book) back.textLastLine = book.backTextLastLine;
@@ -1182,14 +1175,8 @@ TPP.syncSpineFromLegacyFields = function (book) {
   if (!book || typeof book !== "object") return;
   const spine = TPP.spineInfo(book);
   const imageElement = TPP.spineImageElement(book);
-  const titleElement = TPP.spineTitleElement(book);
-  const authorElement = TPP.spineAuthorElement(book);
   if (imageElement && !spine.imageElementId)
     spine.imageElementId = imageElement.id;
-  if (titleElement && !spine.titleTextElementId)
-    spine.titleTextElementId = titleElement.id;
-  if (authorElement && !spine.authorTextElementId)
-    spine.authorTextElementId = authorElement.id;
 };
 TPP.compactSpineInfo = function (book) {
   if (!book || !book.spine || typeof book.spine !== "object") return;
@@ -2355,15 +2342,6 @@ TPP.syncLegacyTextFieldsFromElements = function (book) {
       Number(coverPublisher.outlineSize) || 0,
     );
   }
-  if (backCustom) {
-    TPP.backCoverInfo(book).textElementId = backCustom.id || "back-cover-text";
-  }
-  if (spineTitle) {
-    TPP.spineInfo(book).titleTextElementId = spineTitle.id || "spine-title";
-  }
-  if (spineAuthor) {
-    TPP.spineInfo(book).authorTextElementId = spineAuthor.id || "spine-author";
-  }
 };
 TPP.syncTextElementsFromLegacyFields = function (book) {
   const backCustom = TPP.findTextElement(book, "back", "custom");
@@ -2373,14 +2351,7 @@ TPP.syncTextElementsFromLegacyFields = function (book) {
     backCustom.y = Number(book.backTextY) || 0;
     backCustom.align = book.backTextAlign || backCustom.align || "center";
     backCustom.color = book.backTextColor || backCustom.color || "#ffffff";
-    TPP.backCoverInfo(book).textElementId = backCustom.id || "back-cover-text";
   }
-  const spineTitle = TPP.spineTitleElement(book);
-  const spineAuthor = TPP.spineAuthorElement(book);
-  if (spineTitle)
-    TPP.spineInfo(book).titleTextElementId = spineTitle.id || "spine-title";
-  if (spineAuthor)
-    TPP.spineInfo(book).authorTextElementId = spineAuthor.id || "spine-author";
 };
 TPP.migrateCoverTextSettings = function (book, base) {
   const sharedColor = book.coverText || base.coverText;

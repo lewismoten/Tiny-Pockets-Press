@@ -569,18 +569,12 @@ TPP.dataSchemaKeys = function (context) {
     ]);
   if (context === "backCover")
     return new Set([
-      "textElementId",
       "imageElementId",
       "textLastLine",
       "frameOn",
       "clipImageToFrame",
     ]);
-  if (context === "spine")
-    return new Set([
-      "imageElementId",
-      "titleTextElementId",
-      "authorTextElementId",
-    ]);
+  if (context === "spine") return new Set(["imageElementId"]);
   if (context === "bookInfo")
     return new Set([
       "title",
@@ -630,6 +624,7 @@ TPP.dataSchemaKeys = function (context) {
     ]);
   if (context === "textElements")
     return new Set([
+      "id",
       "location",
       "part",
       "enabled",

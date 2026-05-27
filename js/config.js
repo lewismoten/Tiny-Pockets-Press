@@ -258,15 +258,12 @@ TPP.fallbackBook = function () {
       pageCount: 0,
     },
     backCover: {
-      textElementId: "back-cover-text",
       imageElementId: "back-cover-image",
       textLastLine: "auto",
       frameOn: true,
       clipImageToFrame: false,
     },
     spine: {
-      titleTextElementId: "spine-title",
-      authorTextElementId: "spine-author",
       imageElementId: "spine-image",
     },
     spineAuthor: "Moten, L.",
