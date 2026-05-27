@@ -103,6 +103,7 @@ TPP.fallbackBook = function () {
     coverBorder: "#12af4f",
     coverBorderOn: true,
     files: [],
+    textElements: [],
     imageElements: [],
     coverImageId: "",
     coverImgX: 0,
