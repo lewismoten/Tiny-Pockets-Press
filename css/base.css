@@ -48,6 +48,28 @@ body {
   background: #fff;
   border-bottom: 1px solid var(--line);
 }
+#bookChromeBar .book-toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 12px;
+  padding: 0.5rem 0.72rem;
+}
+.book-toolbar-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+.book-toolbar-label {
+  line-height: 1.1;
+}
+body.book-icons-only #bookChromeBar .book-toolbar-label {
+  display: none;
+}
+body.book-icons-only #bookChromeBar .book-toolbar-button {
+  min-width: 2.2rem;
+  justify-content: center;
+  padding-inline: 0.58rem;
+}
 #bookTabsBar,
 #bookActionsBar {
   margin: 0;

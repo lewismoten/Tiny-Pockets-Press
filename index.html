@@ -59,19 +59,56 @@
 
     <section id="bookChromeBar" class="book-chrome-bar">
       <nav id="bookTabsBar" class="tabs tabs-secondary">
-        <button class="tab active" data-view="editor">Edit</button>
-        <button class="tab" data-view="about">About</button>
-        <button class="tab" data-view="data">Data</button>
-        <button class="tab" data-view="interior">Interior Print</button>
-        <button class="tab" data-view="cover">Cover Print</button>
-        <button class="tab" data-view="reader">Reader</button>
+        <button class="tab book-toolbar-button active" data-view="editor">
+          <span class="book-toolbar-icon" aria-hidden="true">✏️</span>
+          <span class="book-toolbar-label">Edit</span>
+        </button>
+        <button class="tab book-toolbar-button" data-view="about">
+          <span class="book-toolbar-icon" aria-hidden="true">📘</span>
+          <span class="book-toolbar-label">About</span>
+        </button>
+        <button class="tab book-toolbar-button" data-view="data">
+          <span class="book-toolbar-icon" aria-hidden="true">🧩</span>
+          <span class="book-toolbar-label">Data</span>
+        </button>
+        <button class="tab book-toolbar-button" data-view="interior">
+          <span class="book-toolbar-icon" aria-hidden="true">📄</span>
+          <span class="book-toolbar-label">Interior Print</span>
+        </button>
+        <button class="tab book-toolbar-button" data-view="cover">
+          <span class="book-toolbar-icon" aria-hidden="true">🖼️</span>
+          <span class="book-toolbar-label">Cover Print</span>
+        </button>
+        <button class="tab book-toolbar-button" data-view="reader">
+          <span class="book-toolbar-icon" aria-hidden="true">📖</span>
+          <span class="book-toolbar-label">Reader</span>
+        </button>
       </nav>
       <section id="bookActionsBar" class="header-actions">
-        <button id="saveBook">Save</button>
-        <button id="exportInteriorPdf" class="primary">Interior PDF</button>
-        <button id="exportReadablePdf" class="primary alt">eBook</button>
-        <button id="exportImagesZip" class="primary alt">Page Images</button>
-        <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
+        <button id="saveBook" class="book-toolbar-button">
+          <span class="book-toolbar-icon" aria-hidden="true">💾</span>
+          <span class="book-toolbar-label">Save</span>
+        </button>
+        <button id="exportInteriorPdf" class="primary book-toolbar-button">
+          <span class="book-toolbar-icon" aria-hidden="true">📑</span>
+          <span class="book-toolbar-label">Interior PDF</span>
+        </button>
+        <button id="exportReadablePdf" class="primary alt book-toolbar-button">
+          <span class="book-toolbar-icon" aria-hidden="true">📚</span>
+          <span class="book-toolbar-label">eBook</span>
+        </button>
+        <button id="exportImagesZip" class="primary alt book-toolbar-button">
+          <span class="book-toolbar-icon" aria-hidden="true">🖼️</span>
+          <span class="book-toolbar-label">Page Images</span>
+        </button>
+        <button id="exportCoverPdf" class="primary alt book-toolbar-button">
+          <span class="book-toolbar-icon" aria-hidden="true">🧷</span>
+          <span class="book-toolbar-label">Cover PDF</span>
+        </button>
+        <button id="toggleBookButtonText" class="book-toolbar-button">
+          <span class="book-toolbar-icon" aria-hidden="true">🏷️</span>
+          <span class="book-toolbar-label">Hide Labels</span>
+        </button>
       </section>
     </section>
 

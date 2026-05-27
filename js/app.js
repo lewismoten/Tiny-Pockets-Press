@@ -14,6 +14,18 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.switchView(button.dataset.view);
     };
   });
+  const toggleBookButtonText = document.getElementById("toggleBookButtonText");
+  if (toggleBookButtonText) {
+    toggleBookButtonText.onclick = function () {
+      const state = TPP.readSettingsUi();
+      const show = state.showBookButtonText === false;
+      TPP.setBookButtonTextVisibility(show);
+      TPP.writeSettingsUi(
+        Object.assign({}, state, { showBookButtonText: show }),
+      );
+      TPP.saveSettingsUi();
+    };
+  }
 
   TPP.fields.forEach(function (id) {
     const el = document.getElementById(id);
@@ -2210,6 +2222,15 @@ TPP.restoreReaderUi = function (state) {
 TPP.settingsDetails = function () {
   return Array.from(document.querySelectorAll(".controls details"));
 };
+TPP.setBookButtonTextVisibility = function (showText) {
+  const show = showText !== false;
+  document.body.classList.toggle("book-icons-only", !show);
+  const toggle = document.getElementById("toggleBookButtonText");
+  if (!toggle) return;
+  const label = toggle.querySelector(".book-toolbar-label");
+  if (label) label.textContent = show ? "Hide Labels" : "Show Labels";
+  toggle.setAttribute("aria-pressed", show ? "false" : "true");
+};
 TPP.restoreSettingsUi = function () {
   const state = TPP.readSettingsUi();
   TPP.settingsDetails().forEach(function (details, index) {
@@ -2224,6 +2245,7 @@ TPP.restoreSettingsUi = function () {
       controls.scrollTop = Number(state.scrollTop) || 0;
     });
   }
+  TPP.setBookButtonTextVisibility(state.showBookButtonText !== false);
   TPP.restoreReaderUi(state);
 };
 TPP.saveSettingsUi = function () {
@@ -2239,6 +2261,7 @@ TPP.saveSettingsUi = function () {
   TPP.writeSettingsUi({
     dataTabByBook: dataTabByBook,
     imageExport: state.imageExport || { dpi: 300 },
+    showBookButtonText: state.showBookButtonText !== false,
     readerByBook: readerByBook,
     open: open,
     scrollTop: controls ? controls.scrollTop : 0,
