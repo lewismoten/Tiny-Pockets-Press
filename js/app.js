@@ -2270,6 +2270,7 @@ TPP.renderSidebarMode = function () {
   const controls = document.querySelector(".controls");
   const settings = document.querySelector(".settings");
   const dataSidebar = document.getElementById("dataSidebar");
+  const bookChromeBar = document.getElementById("bookChromeBar");
   const bookActionsBar = document.getElementById("bookActionsBar");
   const bookTabsBar = document.getElementById("bookTabsBar");
   const dataMode = TPP.view === "data";
@@ -2281,6 +2282,7 @@ TPP.renderSidebarMode = function () {
   if (settings) settings.hidden = hideBookChrome;
   if (controls) controls.hidden = dataMode || softwareMode || libraryMode;
   if (dataSidebar) dataSidebar.hidden = !dataMode;
+  if (bookChromeBar) bookChromeBar.hidden = hideBookChrome;
   if (bookTabsBar) bookTabsBar.hidden = hideBookChrome;
   if (bookActionsBar) bookActionsBar.hidden = hideBookChrome;
 };

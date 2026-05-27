@@ -57,27 +57,28 @@
       </nav>
     </header>
 
-    <section id="bookTabsBar" class="tabs tabs-secondary">
-      <button class="tab active" data-view="editor">Edit</button>
-      <button class="tab" data-view="about">About</button>
-      <button class="tab" data-view="data">Data</button>
-      <button class="tab" data-view="interior">Interior Print</button>
-      <button class="tab" data-view="cover">Cover Print</button>
-      <button class="tab" data-view="reader">Reader</button>
+    <section id="bookChromeBar" class="book-chrome-bar">
+      <nav id="bookTabsBar" class="tabs tabs-secondary">
+        <button class="tab active" data-view="editor">Edit</button>
+        <button class="tab" data-view="about">About</button>
+        <button class="tab" data-view="data">Data</button>
+        <button class="tab" data-view="interior">Interior Print</button>
+        <button class="tab" data-view="cover">Cover Print</button>
+        <button class="tab" data-view="reader">Reader</button>
+      </nav>
+      <section id="bookActionsBar" class="header-actions">
+        <button id="saveBook">Save</button>
+        <button id="exportInteriorPdf" class="primary">Interior PDF</button>
+        <button id="exportReadablePdf" class="primary alt">eBook</button>
+        <button id="exportImagesZip" class="primary alt">Page Images</button>
+        <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
+      </section>
     </section>
 
     <div id="progress" class="progress" hidden>
       <div id="progressBar"></div>
       <span id="progressText">Ready</span>
     </div>
-
-    <section id="bookActionsBar" class="header-actions">
-      <button id="saveBook">Save</button>
-      <button id="exportInteriorPdf" class="primary">Interior PDF</button>
-      <button id="exportReadablePdf" class="primary alt">eBook</button>
-      <button id="exportImagesZip" class="primary alt">Page Images</button>
-      <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
-    </section>
 
     <main class="app-shell">
       <aside class="settings">

@@ -16,7 +16,7 @@ body {
 }
 body {
   display: grid;
-  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   overflow: hidden;
   font-family:
     system-ui,
@@ -29,17 +29,28 @@ body {
 .app-header {
   grid-row: 1;
 }
-#bookTabsBar {
+#bookChromeBar {
   grid-row: 2;
 }
-#bookActionsBar {
+#progress {
   grid-row: 3;
 }
-#progress {
+.app-shell {
   grid-row: 4;
 }
-.app-shell {
-  grid-row: 5;
+.book-chrome-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+#bookTabsBar,
+#bookActionsBar {
+  margin: 0;
 }
 .app-header {
   display: grid;
@@ -101,8 +112,7 @@ button.primary {
 .app-shell.no-sidebar {
   grid-template-columns: 1fr;
 }
-body.book-chrome-hidden #bookTabsBar,
-body.book-chrome-hidden #bookActionsBar {
+body.book-chrome-hidden #bookChromeBar {
   display: none !important;
 }
 .settings {
