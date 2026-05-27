@@ -513,14 +513,25 @@
 <dialog id="imageExportPaletteDialog" class="modal">
   <form method="dialog" class="modal-card image-export-palette-dialog-card">
     <div class="workspace-header"><h2 id="imageExportPaletteDialogTitle">Palette Preview</h2></div>
-    <div class="image-export-palette-dialog-toolbar">
-      <label class="image-export-palette-toggle">
-        <input id="imageExportPaletteShowHex" type="checkbox">
-        <span>Show Hex Colors</span>
-      </label>
-    </div>
-    <div class="image-export-palette-dialog-stage">
-      <canvas id="imageExportPaletteDialogCanvas" width="640" height="640"></canvas>
+    <div class="image-export-palette-dialog-layout">
+      <div class="image-export-palette-dialog-stage">
+        <canvas id="imageExportPaletteDialogCanvas" width="640" height="640"></canvas>
+      </div>
+      <div class="image-export-palette-inspector">
+        <div id="imageExportPaletteSample" class="image-export-palette-sample"></div>
+        <label>Hex
+          <input id="imageExportPaletteHex" type="text" readonly>
+        </label>
+        <label>RGB
+          <input id="imageExportPaletteRgb" type="text" readonly>
+        </label>
+        <label>HSV
+          <input id="imageExportPaletteHsv" type="text" readonly>
+        </label>
+        <label>LCh
+          <input id="imageExportPaletteLch" type="text" readonly>
+        </label>
+      </div>
     </div>
     <div class="modal-actions">
       <button type="button" data-action="close">Close</button>

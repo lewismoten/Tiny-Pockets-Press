@@ -699,8 +699,20 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportPaletteDialogCanvas = document.getElementById(
     "imageExportPaletteDialogCanvas",
   );
-  const imageExportPaletteShowHex = document.getElementById(
-    "imageExportPaletteShowHex",
+  const imageExportPaletteSample = document.getElementById(
+    "imageExportPaletteSample",
+  );
+  const imageExportPaletteHex = document.getElementById(
+    "imageExportPaletteHex",
+  );
+  const imageExportPaletteRgb = document.getElementById(
+    "imageExportPaletteRgb",
+  );
+  const imageExportPaletteHsv = document.getElementById(
+    "imageExportPaletteHsv",
+  );
+  const imageExportPaletteLch = document.getElementById(
+    "imageExportPaletteLch",
   );
   const imageExportThresholdWrap = document.getElementById(
     "imageExportDialogThresholdWrap",
@@ -758,7 +770,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportPaletteDialog &&
     imageExportPaletteDialogTitle &&
     imageExportPaletteDialogCanvas &&
-    imageExportPaletteShowHex &&
+    imageExportPaletteSample &&
+    imageExportPaletteHex &&
+    imageExportPaletteRgb &&
+    imageExportPaletteHsv &&
+    imageExportPaletteLch &&
     imageExportThresholdWrap &&
     imageExportThreshold &&
     imageExportThresholdValue &&
@@ -839,30 +855,124 @@ document.addEventListener("DOMContentLoaded", async function () {
           .join("")
       );
     };
-    const paletteTextColor = function (swatch) {
-      const luminance =
-        (0.2126 * swatch[0] + 0.7152 * swatch[1] + 0.0722 * swatch[2]) / 255;
-      return luminance > 0.52 ? "#111111" : "#ffffff";
+    const paletteHsv = function (swatch) {
+      const r = swatch[0] / 255;
+      const g = swatch[1] / 255;
+      const b = swatch[2] / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const delta = max - min;
+      let h = 0;
+      if (delta) {
+        if (max === r) h = ((g - b) / delta) % 6;
+        else if (max === g) h = (b - r) / delta + 2;
+        else h = (r - g) / delta + 4;
+      }
+      h = Math.round((h * 60 + 360) % 360);
+      const s = max === 0 ? 0 : (delta / max) * 100;
+      const v = max * 100;
+      return "hsv(" + h + ", " + s.toFixed(1) + "%, " + v.toFixed(1) + "%)";
+    };
+    const paletteLch = function (swatch) {
+      const srgb = swatch.map(function (value) {
+        const channel = value / 255;
+        return channel <= 0.04045
+          ? channel / 12.92
+          : Math.pow((channel + 0.055) / 1.055, 2.4);
+      });
+      const x = srgb[0] * 0.4124564 + srgb[1] * 0.3575761 + srgb[2] * 0.1804375;
+      const y = srgb[0] * 0.2126729 + srgb[1] * 0.7151522 + srgb[2] * 0.072175;
+      const z = srgb[0] * 0.0193339 + srgb[1] * 0.119192 + srgb[2] * 0.9503041;
+      const xr = x / 0.95047;
+      const yr = y / 1;
+      const zr = z / 1.08883;
+      const f = function (value) {
+        return value > 0.008856 ? Math.cbrt(value) : (903.3 * value + 16) / 116;
+      };
+      const fx = f(xr);
+      const fy = f(yr);
+      const fz = f(zr);
+      const l = 116 * fy - 16;
+      const a = 500 * (fx - fy);
+      const b = 200 * (fy - fz);
+      const c = Math.sqrt(a * a + b * b);
+      const h = ((Math.atan2(b, a) * 180) / Math.PI + 360) % 360;
+      return (
+        "lch(" + l.toFixed(2) + "% " + c.toFixed(2) + " " + h.toFixed(2) + ")"
+      );
+    };
+    const paletteGridLayout = function (paletteName, options) {
+      const palette = TPP.imageExportNamedPalette(paletteName || "websafe");
+      const grid = paletteGrid(palette.length || 1);
+      return {
+        palette: palette,
+        grid: grid,
+        options: Object.assign(
+          {
+            gap: 0,
+            border: false,
+            padding: 0,
+          },
+          options || {},
+        ),
+      };
+    };
+    const paletteSelectionInfo = function (layout, canvas, clientX, clientY) {
+      if (!layout || !canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return null;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (clientX - rect.left) * scaleX;
+      const y = (clientY - rect.top) * scaleY;
+      const padding = layout.options.padding;
+      const gap = layout.options.gap;
+      const innerWidth = Math.max(1, canvas.width - padding * 2);
+      const innerHeight = Math.max(1, canvas.height - padding * 2);
+      const cellWidth = innerWidth / layout.grid.cols;
+      const cellHeight = innerHeight / layout.grid.rows;
+      const relX = x - padding;
+      const relY = y - padding;
+      if (relX < 0 || relY < 0 || relX > innerWidth || relY > innerHeight)
+        return null;
+      const col = Math.floor(relX / cellWidth);
+      const row = Math.floor(relY / cellHeight);
+      const cellX = col * cellWidth + gap / 2;
+      const cellY = row * cellHeight + gap / 2;
+      const cellW = Math.max(1, cellWidth - gap);
+      const cellH = Math.max(1, cellHeight - gap);
+      if (
+        relX < cellX ||
+        relY < cellY ||
+        relX > cellX + cellW ||
+        relY > cellY + cellH
+      )
+        return null;
+      const index = row * layout.grid.cols + col;
+      if (index < 0 || index >= layout.palette.length) return null;
+      return index;
+    };
+    const updatePaletteInspector = function (swatch) {
+      if (!swatch) return;
+      imageExportPaletteSample.style.background =
+        "rgb(" + swatch[0] + ", " + swatch[1] + ", " + swatch[2] + ")";
+      imageExportPaletteHex.value = paletteHex(swatch);
+      imageExportPaletteRgb.value =
+        "rgb(" + swatch[0] + ", " + swatch[1] + ", " + swatch[2] + ")";
+      imageExportPaletteHsv.value = paletteHsv(swatch);
+      imageExportPaletteLch.value = paletteLch(swatch);
     };
     const drawPalettePreview = function (canvas, paletteName, options) {
       if (!canvas || !TPP.imageExportNamedPalette) return;
-      const palette = TPP.imageExportNamedPalette(paletteName || "websafe");
+      const layout = paletteGridLayout(paletteName, options);
+      const palette = layout.palette;
       const width = Number(canvas.width) || 16;
       const height = Number(canvas.height) || 16;
-      const grid = paletteGrid(palette.length || 1);
-      const cols = grid.cols;
-      const rows = grid.rows;
+      const cols = layout.grid.cols;
+      const rows = layout.grid.rows;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      const opts = Object.assign(
-        {
-          gap: 0,
-          border: false,
-          showHex: false,
-          padding: 0,
-        },
-        options || {},
-      );
+      const opts = layout.options;
       const gap = Math.max(0, Number(opts.gap) || 0);
       const padding = Math.max(0, Number(opts.padding) || 0);
       const innerWidth = Math.max(1, width - padding * 2);
@@ -895,17 +1005,13 @@ document.addEventListener("DOMContentLoaded", async function () {
             Math.max(0, h - 1),
           );
         }
-        if (opts.showHex && w >= 48 && h >= 18) {
-          const fontSize = Math.max(
-            10,
-            Math.min(18, Math.floor(Math.min(w / 4.8, h / 2.25))),
-          );
-          ctx.fillStyle = paletteTextColor(swatch);
-          ctx.font =
-            "700 " +
-            fontSize +
-            "px ui-monospace, SFMono-Regular, Menlo, monospace";
-          ctx.fillText(paletteHex(swatch), x + w / 2, y + h / 2);
+        if (Number(opts.selectedIndex) === i) {
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x + 2, y + 2, Math.max(0, w - 4), Math.max(0, h - 4));
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x + 4, y + 4, Math.max(0, w - 8), Math.max(0, h - 8));
         }
       }
     };
@@ -914,33 +1020,54 @@ document.addEventListener("DOMContentLoaded", async function () {
         !imageExportPaletteDialog ||
         !imageExportPaletteDialogTitle ||
         !imageExportPaletteDialogCanvas ||
-        !imageExportPaletteShowHex ||
+        !imageExportPaletteSample ||
+        !imageExportPaletteHex ||
+        !imageExportPaletteRgb ||
+        !imageExportPaletteHsv ||
+        !imageExportPaletteLch ||
         typeof imageExportPaletteDialog.showModal !== "function"
       )
         return;
       const paletteName = imageExportPalette.value || "websafe";
-      const palette = TPP.imageExportNamedPalette(paletteName || "websafe");
-      const grid = paletteGrid(palette.length || 1);
+      const layout = paletteGridLayout(paletteName, {
+        gap: 6,
+        border: true,
+        padding: 8,
+        selectedIndex: Math.max(
+          0,
+          Number(TPP.imageExportPaletteSelectedIndex) || 0,
+        ),
+      });
+      const palette = layout.palette;
+      const grid = layout.grid;
+      TPP.imageExportPaletteSelectedIndex = Math.min(
+        Math.max(0, Number(TPP.imageExportPaletteSelectedIndex) || 0),
+        Math.max(0, palette.length - 1),
+      );
+      layout.options.selectedIndex = TPP.imageExportPaletteSelectedIndex;
       const cellSize = Math.max(28, Math.min(64, Math.floor(640 / grid.cols)));
       imageExportPaletteDialogCanvas.width = grid.cols * cellSize + 16;
       imageExportPaletteDialogCanvas.height = grid.rows * cellSize + 16;
-      drawPalettePreview(imageExportPaletteDialogCanvas, paletteName, {
-        gap: 6,
-        border: true,
-        showHex: !!imageExportPaletteShowHex.checked,
-        padding: 8,
-      });
+      TPP.imageExportPaletteDialogLayout = layout;
+      drawPalettePreview(
+        imageExportPaletteDialogCanvas,
+        paletteName,
+        layout.options,
+      );
       imageExportPaletteDialogTitle.textContent =
         (imageExportPalette.selectedOptions[0]
           ? imageExportPalette.selectedOptions[0].textContent
           : "Palette") + " Preview";
+      updatePaletteInspector(
+        palette[TPP.imageExportPaletteSelectedIndex] || palette[0],
+      );
       if (!imageExportPaletteDialog.open) imageExportPaletteDialog.showModal();
     };
     const syncPalettePreview = function () {
       drawPalettePreview(
         imageExportPalettePreviewCanvas,
         imageExportPalette.value || "websafe",
-        { gap: 0, border: false, showHex: false, padding: 0 },
+        { gap: 0, border: false, padding: 0 },
       );
       imageExportPalettePreview.disabled = imageExportPalette.disabled;
       imageExportPalettePreview.classList.toggle(
@@ -1076,8 +1203,17 @@ document.addEventListener("DOMContentLoaded", async function () {
       schedulePreview();
     });
     imageExportPalettePreview.addEventListener("click", openPalettePreview);
-    imageExportPaletteShowHex.addEventListener("change", function () {
-      if (imageExportPaletteDialog.open) openPalettePreview();
+    imageExportPaletteDialogCanvas.addEventListener("click", function (event) {
+      const layout = TPP.imageExportPaletteDialogLayout;
+      const index = paletteSelectionInfo(
+        layout,
+        imageExportPaletteDialogCanvas,
+        event.clientX,
+        event.clientY,
+      );
+      if (index == null) return;
+      TPP.imageExportPaletteSelectedIndex = index;
+      openPalettePreview();
     });
     imageExportPreviewPrev.addEventListener("click", function () {
       TPP.imageExportPreviewIndex = TPP.nextImageExportPreviewIndex(-1);
