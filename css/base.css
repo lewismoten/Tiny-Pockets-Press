@@ -1075,6 +1075,8 @@ input[type="checkbox"] {
 .image-export-compare-label {
   position: absolute;
   top: 0.65rem;
+  display: grid;
+  gap: 0.08rem;
   padding: 0.18rem 0.5rem;
   border-radius: 999px;
   background: rgb(37 29 29 / 0.86);
@@ -1089,6 +1091,13 @@ input[type="checkbox"] {
 }
 .image-export-compare-label.after {
   right: 0.65rem;
+}
+.image-export-compare-size {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.92;
 }
 .image-export-dialog-card .is-disabled {
   opacity: 0.55;

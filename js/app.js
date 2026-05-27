@@ -1350,6 +1350,16 @@ TPP.renderImageExportPreview = async function () {
       exportOptions.colorDepth,
       exportOptions.threshold,
     );
+    const [beforeSize, afterSize] = await Promise.all([
+      TPP.previewBlobSize ? TPP.previewBlobSize(baseCanvas, "png", 1) : 0,
+      TPP.previewBlobSize
+        ? TPP.previewBlobSize(
+            afterCanvas,
+            exportOptions.format,
+            exportOptions.quality / 100,
+          )
+        : 0,
+    ]);
     const afterSrc = TPP.previewDataUrl(
       afterCanvas,
       exportOptions.format,
@@ -1365,8 +1375,16 @@ TPP.renderImageExportPreview = async function () {
       TPP.esc(afterSrc) +
       '" alt="Exported preview">' +
       '<div class="image-export-compare-divider"></div>' +
-      '<div class="image-export-compare-label before">Before</div>' +
-      '<div class="image-export-compare-label after">After</div>' +
+      '<div class="image-export-compare-label before">Before<span class="image-export-compare-size">' +
+      TPP.esc(
+        TPP.fileBytesLabel ? TPP.fileBytesLabel(beforeSize) : String(beforeSize),
+      ) +
+      "</span></div>" +
+      '<div class="image-export-compare-label after">After<span class="image-export-compare-size">' +
+      TPP.esc(
+        TPP.fileBytesLabel ? TPP.fileBytesLabel(afterSize) : String(afterSize),
+      ) +
+      "</span></div>" +
       "</div>";
   } catch (_error) {
     if (TPP.imageExportPreviewToken !== token) return;

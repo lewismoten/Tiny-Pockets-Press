@@ -210,6 +210,26 @@ TPP.previewDataUrl = function (canvas, format, quality) {
     format === "png" ? undefined : Math.max(0.01, Math.min(1, quality || 0.92)),
   );
 };
+TPP.previewBlobSize = function (canvas, format, quality) {
+  if (!canvas) return Promise.resolve(0);
+  const mime =
+    format === "jpeg"
+      ? "image/jpeg"
+      : format === "webp"
+        ? "image/webp"
+        : "image/png";
+  return new Promise(function (resolve) {
+    canvas.toBlob(
+      function (blob) {
+        resolve(blob ? blob.size : 0);
+      },
+      mime,
+      format === "png"
+        ? undefined
+        : Math.max(0.01, Math.min(1, quality || 0.92)),
+    );
+  });
+};
 TPP.exportImagesZip = async function (options) {
   TPP.sync();
   const settings = TPP.settings();
