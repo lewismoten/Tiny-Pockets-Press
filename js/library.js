@@ -1702,8 +1702,73 @@ TPP.renderAbout = function () {
 };
 TPP.softwareMetaCache = null;
 TPP.softwareCdnCache = null;
+TPP.defaultSoftwareCdns = [
+  {
+    id: "marked",
+    name: "marked",
+    version: "12.0.2",
+    license: "MIT",
+    licenseUrl: "https://github.com/markedjs/marked/blob/master/LICENSE.md",
+    website: "https://marked.js.org/",
+  },
+  {
+    id: "dompurify",
+    name: "DOMPurify",
+    version: "3.1.6",
+    license: "Apache-2.0",
+    licenseUrl: "https://github.com/cure53/DOMPurify/blob/main/LICENSE",
+    website: "https://github.com/cure53/DOMPurify",
+  },
+  {
+    id: "qrcodejs",
+    name: "qrcodejs",
+    version: "1.0.0",
+    license: "MIT",
+    licenseUrl: "https://github.com/davidshimjs/qrcodejs/blob/master/LICENSE",
+    website: "https://github.com/davidshimjs/qrcodejs",
+  },
+  {
+    id: "html2canvas",
+    name: "html2canvas",
+    version: "1.4.1",
+    license: "MIT",
+    licenseUrl: "https://github.com/niklasvh/html2canvas/blob/master/LICENSE",
+    website: "https://html2canvas.hertzen.com/",
+  },
+  {
+    id: "jspdf",
+    name: "jsPDF",
+    version: "2.5.1",
+    license: "MIT",
+    licenseUrl: "https://github.com/parallax/jsPDF/blob/master/LICENSE",
+    website: "https://github.com/parallax/jsPDF",
+  },
+  {
+    id: "jszip",
+    name: "JSZip",
+    version: "3.10.1",
+    license: "MIT",
+    licenseUrl: "https://github.com/Stuk/jszip/blob/main/LICENSE.markdown",
+    website: "https://stuk.github.io/jszip/",
+  },
+];
 TPP.loadSoftwareMeta = async function () {
   if (TPP.softwareMetaCache) return TPP.softwareMetaCache;
+  if (
+    typeof window !== "undefined" &&
+    window.location &&
+    window.location.protocol === "file:"
+  ) {
+    const title = document.title || "";
+    const versionMatch = title.match(/\bv([0-9]+(?:\.[0-9]+)*)\b/i);
+    const heading = document.querySelector("header h1");
+    TPP.softwareMetaCache = {
+      name: heading ? heading.textContent.trim() : "tiny-pockets-press",
+      version: versionMatch ? versionMatch[1] : "unknown",
+      author: "Lewis Moten",
+    };
+    return TPP.softwareMetaCache;
+  }
   const response = await fetch("package.json", { cache: "no-cache" });
   if (!response.ok)
     throw new Error("Unable to load package metadata: " + response.status);
@@ -1713,6 +1778,17 @@ TPP.loadSoftwareMeta = async function () {
 };
 TPP.loadSoftwareCdns = async function () {
   if (TPP.softwareCdnCache) return TPP.softwareCdnCache;
+  if (
+    typeof window !== "undefined" &&
+    window.location &&
+    window.location.protocol === "file:"
+  ) {
+    TPP.softwareCdnCache = {
+      schemaVersion: 1,
+      packages: TPP.defaultSoftwareCdns.slice(),
+    };
+    return TPP.softwareCdnCache;
+  }
   const response = await fetch("data/software-cdns.json", {
     cache: "no-cache",
   });
