@@ -394,8 +394,9 @@ TPP.registerStaleEntry = function (entry) {
   return id;
 };
 TPP.dataStaleSummaryHtml = function (entries) {
-  if (!entries.length) return '<div class="data-stale-empty">No stale keys detected.</div>';
-  return '<div class="data-stale-toolbar"><button type="button" class="primary alt" data-stale-remove-all="1">Remove All Stale Keys</button></div>' +
+  if (!entries.length) return "";
+  return '<details class="data-stale-section"><summary>Stale Keys (' + entries.length + ')</summary>' +
+    '<div class="data-stale-toolbar"><button type="button" class="primary alt" data-stale-remove-all="1">Remove All Stale Keys</button></div>' +
     '<div class="data-stale-list">' + entries.map(function (entry) {
       const id = TPP.registerStaleEntry(entry);
       const tone = entry.status === "deprecated" ? "deprecated" : "unknown";
@@ -417,7 +418,7 @@ TPP.dataStaleSummaryHtml = function (entries) {
         '<div><div class="data-stale-path">' + TPP.esc(entry.label) + '</div><div class="data-stale-status">' + TPP.esc(label) + '</div>' + details + '</div>' +
         '<button type="button" class="small" data-stale-remove="' + TPP.esc(id) + '">Remove</button>' +
       '</article>';
-    }).join("") + "</div>";
+    }).join("") + "</div></details>";
 };
 TPP.dataKeyLabelHtml = function (context, key) {
   const status = TPP.dataSchemaStatus(context, key);
@@ -483,7 +484,7 @@ TPP.renderData = function () {
   TPP.dataStaleStore = {};
   const stale = TPP.collectDataStaleEntries(book, "root", [], []);
   summary.innerHTML = '<div class="data-summary-copy">Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.</div>' +
-    '<section class="data-stale-section"><h3>Stale Keys</h3>' + TPP.dataStaleSummaryHtml(stale) + "</section>";
+    TPP.dataStaleSummaryHtml(stale);
   panel.innerHTML = '<article class="data-card"><div class="data-node">' + TPP.dataObjectHtml(book, book, false, "root") + "</div></article>";
 };
 TPP.registerDataPreview = function (title, body, mode) {
