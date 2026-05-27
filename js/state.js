@@ -2728,6 +2728,14 @@ TPP.load = async function () {
     }) || TPP.library[0];
 };
 TPP.loadStaleKeyLookup = async function () {
+  if (
+    typeof window !== "undefined" &&
+    window.location &&
+    window.location.protocol === "file:"
+  ) {
+    TPP.staleKeyLookup = TPP.clone(TPP.defaultStaleKeyLookup);
+    return;
+  }
   try {
     const response = await fetch("data/stale-key-lookup.json");
     if (!response.ok) throw new Error("lookup");
