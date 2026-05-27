@@ -375,6 +375,63 @@ TPP.dataFilesTable = function (book, list) {
     "</tbody></table>"
   );
 };
+TPP.dataImageElementsTable = function (book, list) {
+  return (
+    '<table class="data-table"><thead><tr><th>#</th><th>Preview</th><th>ID</th><th>Location</th><th>Part</th><th>File ID</th><th>X</th><th>Y</th><th>Zoom</th><th>Rotate</th><th>Placement</th></tr></thead><tbody>' +
+    list
+      .map(function (item, index) {
+        const preview =
+          TPP.dataImageCell(
+            book,
+            item.fileId || item.id || "Image",
+            item.fileId,
+          ) || '<span class="data-empty">—</span>';
+        return (
+          "<tr><td>" +
+          (index + 1) +
+          "</td>" +
+          "<td>" +
+          preview +
+          "</td>" +
+          "<td>" +
+          (item.id ? TPP.esc(item.id) : '<span class="data-empty">—</span>') +
+          "</td>" +
+          "<td>" +
+          (item.location
+            ? TPP.esc(item.location)
+            : '<span class="data-empty">—</span>') +
+          "</td>" +
+          "<td>" +
+          (item.part
+            ? TPP.esc(item.part)
+            : '<span class="data-empty">—</span>') +
+          "</td>" +
+          "<td>" +
+          (item.fileId
+            ? TPP.esc(item.fileId)
+            : '<span class="data-empty">—</span>') +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "x", item.x, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "y", item.y, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "zoom", item.zoom, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "rotate", item.rotate, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "placement", item.placement, true) +
+          "</td></tr>"
+        );
+      })
+      .join("") +
+    "</tbody></table>"
+  );
+};
 TPP.dataPrimitiveHtml = function (book, key, value) {
   const file = TPP.dataFileHtml(book, key, value);
   if (file) return file;
@@ -870,6 +927,8 @@ TPP.dataValueHtml = function (book, key, value, compact) {
 TPP.dataArrayHtml = function (book, key, list, compact) {
   if (!list.length) return '<div class="data-empty">[]</div>';
   if (TPP.dataFileArray(list)) return TPP.dataFilesTable(book, list);
+  if (String(key || "") === "imageElements")
+    return TPP.dataImageElementsTable(book, list);
   const context = String(key || "");
   const allObjects = list.every(function (item) {
     return item && typeof item === "object" && !Array.isArray(item);
