@@ -199,7 +199,6 @@ TPP.TOC_FIELDS = [
   "tocNumberType",
   "tocLeader",
   "tocLeaderColor",
-  "tocIndentSubchapters",
   "tocIndentStep",
 ];
 
@@ -273,7 +272,6 @@ TPP.attachTocAccessors = function (book) {
     tocNumberType: "numberMode",
     tocLeader: "leaderStyle",
     tocLeaderColor: "leaderColor",
-    tocIndentSubchapters: "indentSubchapters",
     tocIndentStep: "indentStep",
   };
   Object.keys(map).forEach(function (field) {
@@ -305,8 +303,6 @@ TPP.syncTocFromLegacyFields = function (book) {
   if ("tocNumberType" in book) toc.numberMode = book.tocNumberType;
   if ("tocLeader" in book) toc.leaderStyle = book.tocLeader;
   if ("tocLeaderColor" in book) toc.leaderColor = book.tocLeaderColor;
-  if ("tocIndentSubchapters" in book)
-    toc.indentSubchapters = book.tocIndentSubchapters;
   if ("tocIndentStep" in book) toc.indentStep = book.tocIndentStep;
 };
 TPP.compactTocInfo = function (book) {

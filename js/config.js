@@ -52,7 +52,6 @@ TPP.fields = [
   "volume",
   "printing",
   "includeToc",
-  "tocIndentSubchapters",
   "tocIndentStep",
   "pageSize",
   "sheetSize",
@@ -203,7 +202,6 @@ TPP.fallbackBook = function () {
       numberMode: "page",
       leaderStyle: "dots",
       leaderColor: "#6c625a",
-      indentSubchapters: true,
       indentStep: 0.12,
     },
     bookInfo: {

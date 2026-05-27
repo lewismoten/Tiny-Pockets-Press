@@ -454,7 +454,6 @@ TPP.dataSchemaKeys = function (context) {
       "numberMode",
       "leaderStyle",
       "leaderColor",
-      "indentSubchapters",
       "indentStep",
     ]);
   if (context === "chapters")

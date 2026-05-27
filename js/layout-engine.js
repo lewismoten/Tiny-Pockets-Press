@@ -29,7 +29,6 @@ TPP.settings = function () {
     tocNumberType: TPP.tocInfo(book).numberMode,
     tocLeader: TPP.tocInfo(book).leaderStyle,
     tocLeaderColor: TPP.tocInfo(book).leaderColor,
-    tocIndentSubchapters: TPP.tocInfo(book).indentSubchapters,
     tocIndentStep: Math.max(0, Number(TPP.tocInfo(book).indentStep) || 0.12),
     signatureSize: TPP.signatureSize(book.signatureSize),
     sewingStations: TPP.sewingStations(book.sewingStations),
@@ -444,9 +443,7 @@ TPP.buildPages = function () {
           const number =
             settings.tocNumberType === "chapter" ? row.chapter : row.page;
           const indent =
-            settings.tocIndentSubchapters === false
-              ? 0
-              : (row.level || 0) * (Number(settings.tocIndentStep) || 0.12);
+            (row.level || 0) * Math.max(0, Number(settings.tocIndentStep) || 0);
           return (
             '<li style="padding-left:' +
             indent +
