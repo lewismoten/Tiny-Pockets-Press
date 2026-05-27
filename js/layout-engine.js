@@ -457,7 +457,12 @@ TPP.buildPages = function () {
     page.n = index + 1;
   });
   TPP.lastPages = pages;
-  if (TPP.active && TPP.bookMeta)
-    TPP.bookMeta(TPP.active).pageCount = pages.length;
+  if (TPP.active && TPP.bookMeta) {
+    const meta = TPP.bookMeta(TPP.active);
+    if (meta.pageCount !== pages.length) {
+      meta.pageCount = pages.length;
+      if (TPP.persistDerivedBookMeta) TPP.persistDerivedBookMeta(TPP.active);
+    }
+  }
   return pages;
 };

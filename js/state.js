@@ -1408,6 +1408,11 @@ TPP.save = function (mode, bookId) {
   });
   localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
 };
+TPP.persistDerivedBookMeta = function (book) {
+  if (!book) return;
+  TPP.compactBookMeta(book);
+  localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
+};
 TPP.setActive = function (book) {
   TPP.active = book;
   localStorage.setItem(TPP.ACTIVE, TPP.bookId(book));
