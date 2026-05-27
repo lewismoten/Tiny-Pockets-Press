@@ -919,6 +919,7 @@ input[type="checkbox"] {
 }
 .modal::backdrop {
   background: rgb(25 17 13 / 0.55);
+  backdrop-filter: blur(3px);
 }
 .modal-card {
   margin: 0;
@@ -1221,8 +1222,9 @@ input[type="checkbox"] {
   position: fixed;
   right: 1rem;
   bottom: 1rem;
-  z-index: 1000;
   max-width: min(24rem, calc(100vw - 2rem));
+  margin: 0;
+  border: 0;
   padding: 0.75rem 1rem;
   border-radius: 12px;
   background: #251d1d;
@@ -1235,6 +1237,9 @@ input[type="checkbox"] {
   transition:
     opacity 0.18s ease,
     transform 0.18s ease;
+}
+.toast::backdrop {
+  background: transparent;
 }
 .toast.show {
   opacity: 1;

@@ -1254,9 +1254,13 @@ TPP.toast = function (message) {
   if (!toast) return;
   clearTimeout(TPP.toastTimer);
   toast.textContent = message;
+  if (typeof toast.show === "function" && !toast.open) toast.show();
   toast.classList.add("show");
   TPP.toastTimer = setTimeout(function () {
     toast.classList.remove("show");
+    setTimeout(function () {
+      if (toast.open && typeof toast.close === "function") toast.close();
+    }, 180);
   }, 1800);
 };
 TPP.initialView = function () {
