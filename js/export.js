@@ -389,6 +389,75 @@ TPP.applyIndexedPalette = function (data, palette) {
     data[i + 2] = match[2];
   }
 };
+TPP.canvasRgba = function (canvas) {
+  const readCanvas = document.createElement("canvas");
+  readCanvas.width = canvas.width;
+  readCanvas.height = canvas.height;
+  const readCtx = readCanvas.getContext("2d", { willReadFrequently: true });
+  readCtx.drawImage(canvas, 0, 0);
+  return readCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+};
+TPP.gifPaletteForExport = function (rgba, exportOptions, lib, transparent) {
+  const reserve = transparent ? 1 : 0;
+  if (exportOptions.colorDepth === "mono1")
+    return TPP.imageExportGrayscalePalette(2);
+  if (exportOptions.colorDepth === "gray8")
+    return TPP.imageExportGrayscalePalette(256 - reserve);
+  if (exportOptions.colorDepth === "indexed")
+    return TPP.imageExportNamedPalette(exportOptions.palette).slice(
+      0,
+      Math.max(1, 256 - reserve),
+    );
+  return lib.quantize(rgba, Math.max(2, 256 - reserve));
+};
+TPP.gifFrameFromRgba = function (
+  rgba,
+  width,
+  height,
+  exportOptions,
+  lib,
+  previousRgba,
+) {
+  const transparent = Boolean(previousRgba);
+  const basePalette = TPP.gifPaletteForExport(
+    rgba,
+    exportOptions,
+    lib,
+    transparent,
+  );
+  const baseIndex = lib.applyPalette(rgba, basePalette);
+  if (!transparent) {
+    return {
+      index: baseIndex,
+      palette: basePalette,
+      transparent: false,
+      dispose: 0,
+    };
+  }
+  const index = new Uint8Array(baseIndex.length);
+  let changed = 0;
+  for (let i = 0, p = 0; i < rgba.length; i += 4, p += 1) {
+    const same =
+      rgba[i] === previousRgba[i] &&
+      rgba[i + 1] === previousRgba[i + 1] &&
+      rgba[i + 2] === previousRgba[i + 2] &&
+      rgba[i + 3] === previousRgba[i + 3];
+    if (same) {
+      index[p] = 0;
+    } else {
+      index[p] = baseIndex[p] + 1;
+      changed += 1;
+    }
+  }
+  if (!changed) index[0] = 1;
+  return {
+    index: index,
+    palette: [[0, 0, 0]].concat(basePalette),
+    transparent: true,
+    transparentIndex: 0,
+    dispose: 1,
+  };
+};
 TPP.exportCanvasForDepth = function (
   canvas,
   colorDepth,
@@ -477,25 +546,22 @@ TPP.loadGifEncoder = function () {
   }
   return TPP.gifEncoderPromise;
 };
-TPP.gifPaletteSize = function (quality) {
-  const pct = Math.max(1, Math.min(100, Number(quality) || 92));
-  return Math.max(16, Math.min(256, Math.round(16 + (pct / 100) * 240)));
-};
-TPP.encodeGifBlob = async function (canvas) {
+TPP.encodeGifBlob = async function (canvas, options) {
   if (!canvas) throw new Error("Canvas required");
   const lib = await TPP.loadGifEncoder();
-  const readCanvas = document.createElement("canvas");
-  readCanvas.width = canvas.width;
-  readCanvas.height = canvas.height;
-  const readCtx = readCanvas.getContext("2d", { willReadFrequently: true });
-  readCtx.drawImage(canvas, 0, 0);
-  const image = readCtx.getImageData(0, 0, canvas.width, canvas.height);
-  const rgba = image.data;
-  const palette = lib.quantize(rgba, 256);
-  const index = lib.applyPalette(rgba, palette);
+  const exportOptions = TPP.imageExportOptions(options);
+  const rgba = TPP.canvasRgba(canvas);
+  const frame = TPP.gifFrameFromRgba(
+    rgba,
+    canvas.width,
+    canvas.height,
+    exportOptions,
+    lib,
+    null,
+  );
   const gif = lib.GIFEncoder();
-  gif.writeFrame(index, canvas.width, canvas.height, {
-    palette: palette,
+  gif.writeFrame(frame.index, canvas.width, canvas.height, {
+    palette: frame.palette,
     delay: 250,
   });
   gif.finish();
@@ -505,7 +571,8 @@ TPP.encodeGifBlob = async function (canvas) {
 TPP.exportBlobForCanvas = function (canvas, options) {
   if (!canvas) return Promise.resolve(null);
   const exportOptions = TPP.imageExportOptions(options);
-  if (exportOptions.format === "gif") return TPP.encodeGifBlob(canvas);
+  if (exportOptions.format === "gif")
+    return TPP.encodeGifBlob(canvas, exportOptions);
   const mime =
     exportOptions.format === "jpeg"
       ? "image/jpeg"
@@ -605,4 +672,86 @@ TPP.exportImagesZip = async function (options) {
     mount.remove();
   }
   TPP.showProgress(100, "Page images ZIP complete");
+};
+TPP.exportAnimatedGif = async function (options) {
+  TPP.sync();
+  const settings = TPP.settings();
+  const pages = TPP.buildPages();
+  if (!pages.length) {
+    alert("No pages available to export.");
+    return;
+  }
+  const exportOptions = TPP.imageExportOptions(
+    Object.assign({}, options || {}, { format: "gif" }),
+  );
+  const lib = await TPP.loadGifEncoder();
+  const gif = lib.GIFEncoder();
+  const mount = document.createElement("div");
+  const scale = exportOptions.dpi / 96;
+  let previousRgba = null;
+  mount.style.cssText =
+    "position:fixed;left:-9999px;top:0;pointer-events:none;";
+  document.body.appendChild(mount);
+  try {
+    for (let i = 0; i < pages.length; i++) {
+      TPP.showProgress(
+        5 + Math.round((i / pages.length) * 80),
+        "Rendering GIF frame " + (i + 1) + " of " + pages.length + "...",
+      );
+      const page = pages[i];
+      const shell = document.createElement("div");
+      shell.style.position = "relative";
+      shell.style.width = settings.page.w + "in";
+      shell.style.height = settings.page.h + "in";
+      shell.style.background = "#fff";
+      shell.appendChild(TPP.pageEl(page, settings, 0, 0, false, true));
+      mount.appendChild(shell);
+      TPP.renderQr(shell, settings);
+      await TPP.waitForImages(shell);
+      await new Promise(requestAnimationFrame);
+      const canvas = await html2canvas(shell, {
+        scale: scale,
+        backgroundColor: "#fff",
+      });
+      const exportCanvas = TPP.exportCanvasForDepth(
+        canvas,
+        exportOptions.colorDepth,
+        exportOptions.threshold,
+        exportOptions.palette,
+      );
+      const rgba = TPP.canvasRgba(exportCanvas);
+      const frame = TPP.gifFrameFromRgba(
+        rgba,
+        exportCanvas.width,
+        exportCanvas.height,
+        exportOptions,
+        lib,
+        previousRgba,
+      );
+      gif.writeFrame(frame.index, exportCanvas.width, exportCanvas.height, {
+        palette: frame.palette,
+        delay: 300,
+        repeat: i === 0 ? 0 : undefined,
+        transparent: frame.transparent || undefined,
+        transparentIndex: frame.transparent
+          ? frame.transparentIndex
+          : undefined,
+        dispose: frame.transparent ? frame.dispose : undefined,
+      });
+      previousRgba = new Uint8ClampedArray(rgba);
+      shell.remove();
+      await new Promise(requestAnimationFrame);
+    }
+    gif.finish();
+    const bytes = gif.bytesView ? gif.bytesView() : new Uint8Array(gif.bytes());
+    const blob = new Blob([bytes], { type: "image/gif" });
+    const name =
+      (settings.title || "tiny-book")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-") + "-pages-animated.gif";
+    TPP.downloadBlob(name, blob);
+  } finally {
+    mount.remove();
+  }
+  TPP.showProgress(100, "Animated GIF complete");
 };

@@ -708,6 +708,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportDownloadAfter = document.getElementById(
     "imageExportDownloadAfter",
   );
+  const imageExportAnimatedGif = imageExportDialog
+    ? imageExportDialog.querySelector("[data-action='export-animated-gif']")
+    : null;
   if (
     imageExportDialog &&
     imageExportPreset &&
@@ -727,7 +730,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportPreviewPrev &&
     imageExportPreviewNext &&
     imageExportDownloadBefore &&
-    imageExportDownloadAfter
+    imageExportDownloadAfter &&
+    imageExportAnimatedGif
   ) {
     const presetValues = ["72", "96", "150", "200", "300", "600"];
     const syncPresetUi = function () {
@@ -750,6 +754,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       );
       imageExportQuality.disabled = !lossy;
       imageExportQualityWrap.classList.toggle("is-disabled", !lossy);
+      imageExportAnimatedGif.disabled = imageExportFormat.value !== "gif";
       imageExportColorDepth.disabled = !colorDepthApplies;
       imageExportColorDepth.parentElement.classList.toggle(
         "is-disabled",
@@ -843,7 +848,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         imageExportDialog.close();
         return;
       }
-      if (button.dataset.action === "export-images") {
+      if (
+        button.dataset.action === "export-images" ||
+        button.dataset.action === "export-animated-gif"
+      ) {
         const dpi = TPP.dpi(Number(imageExportDpi.value) || 300);
         const format = imageExportFormat.value || "png";
         const quality = Math.max(
@@ -871,14 +879,19 @@ document.addEventListener("DOMContentLoaded", async function () {
           threshold: threshold,
         });
         if (imageExportDialog.open) imageExportDialog.close();
-        TPP.exportImagesZip({
+        const exportOptions = {
           dpi: dpi,
           format: format,
           quality: quality,
           colorDepth: colorDepth,
           palette: palette,
           threshold: threshold,
-        });
+        };
+        if (button.dataset.action === "export-animated-gif") {
+          TPP.exportAnimatedGif(exportOptions);
+        } else {
+          TPP.exportImagesZip(exportOptions);
+        }
       }
     });
   }
