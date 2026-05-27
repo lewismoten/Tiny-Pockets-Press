@@ -136,11 +136,16 @@ TPP.imageExportOptions = function (options) {
   const source = options || {};
   return {
     dpi: TPP.dpi(source.dpi),
-    format: ["png", "jpeg", "webp"].includes(source.format)
-      ? source.format
-      : "png",
+    format:
+      source.colorDepth === "websafe"
+        ? "png"
+        : ["png", "jpeg", "webp"].includes(source.format)
+          ? source.format
+          : "png",
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
-    colorDepth: ["color24", "gray8", "mono1"].includes(source.colorDepth)
+    colorDepth: ["color24", "gray8", "mono1", "websafe"].includes(
+      source.colorDepth,
+    )
       ? source.colorDepth
       : "color24",
     threshold: Math.max(0, Math.min(255, Number(source.threshold) || 128)),
@@ -165,6 +170,16 @@ TPP.exportCanvasForDepth = function (canvas, colorDepth, threshold) {
       data[i] = bit;
       data[i + 1] = bit;
       data[i + 2] = bit;
+    } else if (colorDepth === "websafe") {
+      data[i] = Math.max(0, Math.min(255, Math.round(data[i] / 51) * 51));
+      data[i + 1] = Math.max(
+        0,
+        Math.min(255, Math.round(data[i + 1] / 51) * 51),
+      );
+      data[i + 2] = Math.max(
+        0,
+        Math.min(255, Math.round(data[i + 2] / 51) * 51),
+      );
     } else {
       data[i] = gray;
       data[i + 1] = gray;

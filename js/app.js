@@ -728,6 +728,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (preset !== "custom") imageExportDpi.value = preset;
     };
     const syncFormatUi = function () {
+      const indexedOnly = imageExportColorDepth.value === "websafe";
+      Array.from(imageExportFormat.options).forEach(function (option) {
+        option.disabled = indexedOnly && option.value !== "png" ? true : false;
+      });
+      if (indexedOnly && imageExportFormat.value !== "png")
+        imageExportFormat.value = "png";
       const lossy =
         imageExportFormat.value === "jpeg" ||
         imageExportFormat.value === "webp";
@@ -900,8 +906,8 @@ TPP.openImageExportDialog = function () {
   const ui = TPP.imageExportUi();
   const dpi = TPP.dpi(ui.dpi || 300);
   input.value = dpi;
-  format.value = ui.format || "png";
   colorDepth.value = ui.colorDepth || "color24";
+  format.value = colorDepth.value === "websafe" ? "png" : ui.format || "png";
   quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));
   threshold.value = Math.max(0, Math.min(255, Number(ui.threshold) || 128));
   qualityValue.textContent = quality.value + "%";
