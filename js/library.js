@@ -436,6 +436,18 @@ TPP.dataSchemaKeys = function (context) {
       "coverPreviewImageId",
       "pageCount",
     ]);
+  if (context === "bookInfo")
+    return new Set([
+      "title",
+      "author",
+      "pubDate",
+      "publisher",
+      "copyright",
+      "seriesName",
+      "number",
+      "volume",
+      "printing",
+    ]);
   if (context === "chapters")
     return new Set([
       "id",
@@ -756,7 +768,13 @@ TPP.dataValueHtml = function (book, key, value, compact) {
       book,
       value,
       compact,
-      key === "__root__" ? "root" : key === "meta" ? "meta" : null,
+      key === "__root__"
+        ? "root"
+        : key === "meta"
+          ? "meta"
+          : key === "bookInfo"
+            ? "bookInfo"
+            : null,
     );
   return TPP.dataPrimitiveHtml(book, key, value);
 };
@@ -957,6 +975,7 @@ TPP.dataRawJsonHtml = function (book) {
 TPP.dataTopLevelObject = function (book) {
   const copy = Object.assign({}, book || {});
   delete copy.meta;
+  delete copy.bookInfo;
   delete copy.files;
   delete copy.textElements;
   delete copy.chapters;
@@ -983,6 +1002,16 @@ TPP.dataTabs = function (book, stale) {
         book && book.meta ? book.meta : {},
         false,
         "meta",
+      ),
+    },
+    {
+      id: "book-info",
+      label: "Book Info",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.bookInfo ? book.bookInfo : {},
+        false,
+        "bookInfo",
       ),
     },
     {
