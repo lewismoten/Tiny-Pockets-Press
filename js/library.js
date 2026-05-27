@@ -434,7 +434,7 @@ TPP.dataSchemaKeys = function (context) {
       "lastExportedAt",
       "lastImportedAt",
       "coverPreviewImageId",
-      "_pageCount",
+      "pageCount",
     ]);
   if (context === "chapters")
     return new Set([
@@ -1421,7 +1421,7 @@ TPP.captureCover = async function () {
     document.body.appendChild(wrap);
     const canvas = await html2canvas(wrap, { scale: 4, backgroundColor: null });
     TPP.setCoverPreviewAsset(TPP.active, canvas.toDataURL("image/jpeg", 0.9));
-    TPP.bookMeta(TPP.active)._pageCount = TPP.lastPages.length;
+    TPP.bookMeta(TPP.active).pageCount = TPP.lastPages.length;
     wrap.remove();
     TPP.save();
   } catch (error) {

@@ -206,7 +206,7 @@ TPP.fallbackBook = function () {
       lastExportedAt: "",
       lastImportedAt: "",
       coverPreviewImageId: "",
-      _pageCount: 0,
+      pageCount: 0,
     },
     title: "Santa’s Little OSHA Violation",
     author: "Lewis Moten",
