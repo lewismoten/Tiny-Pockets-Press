@@ -8,7 +8,10 @@ TPP.safeMarkdown = function (text) {
     ? marked.parse(text || "", { gfm: true, breaks: true })
     : TPP.esc(text || "").replace(/\n/g, "<br>");
   return window.DOMPurify
-    ? DOMPurify.sanitize(raw, { ADD_TAGS: ["u"], ADD_ATTR: ["class", "style", "data-url", "src", "alt"] })
+    ? DOMPurify.sanitize(raw, {
+        ADD_TAGS: ["u"],
+        ADD_ATTR: ["class", "style", "data-url", "src", "alt"],
+      })
     : raw;
 };
 TPP.extractLines = function (text) {
@@ -28,7 +31,11 @@ TPP.extractLines = function (text) {
         caption = lines[i + 1].trim();
         i++;
       }
-      out.push({ type: TPP.isImageUrl(url) ? "imageUrl" : "url", url, caption });
+      out.push({
+        type: TPP.isImageUrl(url) ? "imageUrl" : "url",
+        url,
+        caption,
+      });
     } else {
       out.push({ type: "text", text: lines[i] });
     }
@@ -42,7 +49,11 @@ TPP.blocksFromText = function (text, settings) {
     if (!buffer.length) return;
     const markdown = buffer.join("\n");
     if (markdown.trim()) {
-      blocks.push({ type: "html", html: '<div class="story-text">' + TPP.safeMarkdown(markdown) + "</div>" });
+      blocks.push({
+        type: "html",
+        html:
+          '<div class="story-text">' + TPP.safeMarkdown(markdown) + "</div>",
+      });
     }
     buffer = [];
   };
@@ -55,19 +66,38 @@ TPP.blocksFromText = function (text, settings) {
     if (item.type === "imageUrl" && settings.imageUrlMode === "image") {
       blocks.push({
         type: "figure",
-        html: '<figure class="figure image-figure"><img src="' + TPP.esc(item.url) + '"><figcaption class="caption">' + TPP.esc(item.caption) + "</figcaption></figure>"
+        html:
+          '<figure class="figure image-figure"><img src="' +
+          TPP.esc(item.url) +
+          '"><figcaption class="caption">' +
+          TPP.esc(item.caption) +
+          "</figcaption></figure>",
       });
     } else if (settings.qrDisplayMode === "text") {
       blocks.push({
         type: "html",
-        html: '<div class="story-text"><p>' + TPP.esc(item.url) + "</p>" + (item.caption ? "<p>" + TPP.esc(item.caption) + "</p>" : "") + "</div>"
+        html:
+          '<div class="story-text"><p>' +
+          TPP.esc(item.url) +
+          "</p>" +
+          (item.caption ? "<p>" + TPP.esc(item.caption) + "</p>" : "") +
+          "</div>",
       });
     } else {
       blocks.push({
         type: "qr",
         url: item.url,
         caption: item.caption,
-        html: '<figure class="figure qr-figure"><span class="qr-holder" data-url="' + TPP.esc(item.url) + '"></span>' + (item.caption ? '<figcaption class="caption">' + TPP.esc(item.caption) + "</figcaption>" : "") + "</figure>"
+        html:
+          '<figure class="figure qr-figure"><span class="qr-holder" data-url="' +
+          TPP.esc(item.url) +
+          '"></span>' +
+          (item.caption
+            ? '<figcaption class="caption">' +
+              TPP.esc(item.caption) +
+              "</figcaption>"
+            : "") +
+          "</figure>",
       });
     }
   });
@@ -75,18 +105,24 @@ TPP.blocksFromText = function (text, settings) {
   return blocks;
 };
 TPP.hexRgb = function (hex) {
-  const match = String(hex || "").trim().match(/^#?([0-9a-f]{6})$/i);
+  const match = String(hex || "")
+    .trim()
+    .match(/^#?([0-9a-f]{6})$/i);
   if (!match) return { r: 255, g: 255, b: 255 };
   const value = parseInt(match[1], 16);
-  return { r: value >> 16 & 255, g: value >> 8 & 255, b: value & 255 };
+  return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 };
 };
 TPP.relativeLuminance = function (hex) {
   const rgb = TPP.hexRgb(hex);
   const channel = function (value) {
     value /= 255;
-    return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+    return value <= 0.03928
+      ? value / 12.92
+      : Math.pow((value + 0.055) / 1.055, 2.4);
   };
-  return 0.2126 * channel(rgb.r) + 0.7152 * channel(rgb.g) + 0.0722 * channel(rgb.b);
+  return (
+    0.2126 * channel(rgb.r) + 0.7152 * channel(rgb.g) + 0.0722 * channel(rgb.b)
+  );
 };
 TPP.contrastRatio = function (a, b) {
   const l1 = TPP.relativeLuminance(a);
@@ -94,12 +130,21 @@ TPP.contrastRatio = function (a, b) {
   return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 };
 TPP.autoQrDark = function (pageBg) {
-  return TPP.contrastRatio(pageBg, "#000000") >= TPP.contrastRatio(pageBg, "#ffffff") ? "#000000" : "#ffffff";
+  return TPP.contrastRatio(pageBg, "#000000") >=
+    TPP.contrastRatio(pageBg, "#ffffff")
+    ? "#000000"
+    : "#ffffff";
 };
 TPP.qrColors = function (settings) {
   settings = settings || TPP.active || {};
-  const light = settings.qrLightMode === "custom" ? (settings.qrLightColor || "#ffffff") : (settings.pageBg || "#ffffff");
-  let dark = settings.qrDarkMode === "custom" ? (settings.qrDarkColor || "#000000") : TPP.autoQrDark(light);
+  const light =
+    settings.qrLightMode === "custom"
+      ? settings.qrLightColor || "#ffffff"
+      : settings.pageBg || "#ffffff";
+  let dark =
+    settings.qrDarkMode === "custom"
+      ? settings.qrDarkColor || "#000000"
+      : TPP.autoQrDark(light);
   if (dark.toLowerCase() === light.toLowerCase()) dark = TPP.autoQrDark(light);
   return { dark: dark, light: light };
 };
@@ -115,7 +160,7 @@ TPP.renderQr = function (root, settings) {
       height: 96,
       colorDark: colors.dark,
       colorLight: colors.light,
-      correctLevel: QRCode.CorrectLevel.M
+      correctLevel: QRCode.CorrectLevel.M,
     });
     holder.dataset.done = "1";
   });

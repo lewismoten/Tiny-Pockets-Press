@@ -18,26 +18,26 @@ TPP.defaultStaleKeyLookup = [
     path: "chapters[].imageWidth",
     schemaVersion: 3,
     movedTo: ["chapters[].imageZoom"],
-    note: "Chapter image sizing was standardized on zoom so image elements and chapter settings use the same geometry terminology."
+    note: "Chapter image sizing was standardized on zoom so image elements and chapter settings use the same geometry terminology.",
   },
   {
     path: "backUseFrontImage",
     schemaVersion: 2,
     movedTo: ["backImageId"],
-    note: "The back cover now chooses an explicit shared image asset instead of inheriting the front cover image through a boolean flag."
+    note: "The back cover now chooses an explicit shared image asset instead of inheriting the front cover image through a boolean flag.",
   },
   {
     path: "coverMetaSize",
     schemaVersion: 2,
     movedTo: ["coverAuthorSize", "coverSeriesSize", "coverPublisherSize"],
-    note: "Shared cover metadata sizing was replaced by per-element size controls for author, series, and publisher."
+    note: "Shared cover metadata sizing was replaced by per-element size controls for author, series, and publisher.",
   },
   {
     path: "coverPreview",
     schemaVersion: 3,
     movedTo: ["coverPreviewId"],
-    note: "Generated cover previews now live in the shared file registry and are referenced by id instead of embedding raw image data directly on the book."
-  }
+    note: "Generated cover previews now live in the shared file registry and are referenced by id instead of embedding raw image data directly on the book.",
+  },
 ];
 
 TPP.clone = function (obj) {
@@ -63,7 +63,11 @@ TPP.hashString = function (value) {
 };
 TPP.fileAsset = function (book, id) {
   const files = Array.isArray(book && book.files) ? book.files : [];
-  return files.find(function (file) { return file && file.id === id; }) || null;
+  return (
+    files.find(function (file) {
+      return file && file.id === id;
+    }) || null
+  );
 };
 TPP.filePickerAssets = function (book) {
   const files = Array.isArray(book && book.files) ? book.files : [];
@@ -82,34 +86,51 @@ TPP.fileFieldRefs = function (book) {
     refs[fileId] = refs[fileId] || [];
     refs[fileId].push(ref);
   };
-  (Array.isArray(book && book.imageElements) ? book.imageElements : []).forEach(function (element) {
-    if (!element || !element.fileId) return;
-    let label = "Image";
-    if (element.location === "front") label = "Front Cover Image";
-    else if (element.location === "back") label = "Back Cover Image";
-    else if (element.location === "spine") label = "Spine Image";
-    else if (element.location === "chapter") {
-      const chapter = ((book && book.chapters) || []).find(function (entry) { return entry && entry.id === element.part; });
-      label = 'Chapter Image: "' + ((chapter && chapter.title) || "Untitled") + '"';
-    }
-    push(element.fileId, {
-      key: "imageElement:" + (element.id || TPP.imageElementKey(element.location, element.part)),
-      label: label,
-      imageElementId: element.id || "",
-      location: element.location || "",
-      part: element.part || ""
-    });
-  });
-  (Array.isArray(book && book.chapters) ? book.chapters : []).forEach(function (chapter, index) {
-    if (!chapter || !chapter.imageId) return;
-    if ((refs[chapter.imageId] || []).some(function (ref) { return ref.chapterId === chapter.id; })) return;
-    push(chapter.imageId, {
-      key: "chapter:" + (chapter && chapter.id ? chapter.id : index),
-      label: 'Chapter Image: "' + ((chapter && chapter.title) || ("Chapter " + (index + 1))) + '"',
-      chapterId: chapter && chapter.id ? chapter.id : "",
-      chapterIndex: index
-    });
-  });
+  (Array.isArray(book && book.imageElements) ? book.imageElements : []).forEach(
+    function (element) {
+      if (!element || !element.fileId) return;
+      let label = "Image";
+      if (element.location === "front") label = "Front Cover Image";
+      else if (element.location === "back") label = "Back Cover Image";
+      else if (element.location === "spine") label = "Spine Image";
+      else if (element.location === "chapter") {
+        const chapter = ((book && book.chapters) || []).find(function (entry) {
+          return entry && entry.id === element.part;
+        });
+        label =
+          'Chapter Image: "' + ((chapter && chapter.title) || "Untitled") + '"';
+      }
+      push(element.fileId, {
+        key:
+          "imageElement:" +
+          (element.id || TPP.imageElementKey(element.location, element.part)),
+        label: label,
+        imageElementId: element.id || "",
+        location: element.location || "",
+        part: element.part || "",
+      });
+    },
+  );
+  (Array.isArray(book && book.chapters) ? book.chapters : []).forEach(
+    function (chapter, index) {
+      if (!chapter || !chapter.imageId) return;
+      if (
+        (refs[chapter.imageId] || []).some(function (ref) {
+          return ref.chapterId === chapter.id;
+        })
+      )
+        return;
+      push(chapter.imageId, {
+        key: "chapter:" + (chapter && chapter.id ? chapter.id : index),
+        label:
+          'Chapter Image: "' +
+          ((chapter && chapter.title) || "Chapter " + (index + 1)) +
+          '"',
+        chapterId: chapter && chapter.id ? chapter.id : "",
+        chapterIndex: index,
+      });
+    },
+  );
   return refs;
 };
 TPP.fileReferences = function (book, fileId) {
@@ -121,10 +142,20 @@ TPP.upsertFileAsset = function (book, data, type, name, options) {
   if (!Array.isArray(book.files)) book.files = [];
   const assetData = String(data || "").trim();
   if (!assetData) return "";
-  const assetType = type || ((assetData.match(/^data:([^;,]+)/) || [])[1]) || "application/octet-stream";
+  const assetType =
+    type ||
+    (assetData.match(/^data:([^;,]+)/) || [])[1] ||
+    "application/octet-stream";
   const hash = TPP.hashString(assetType + ":" + assetData);
   const meta = options || {};
-  const existing = book.files.find(function (file) { return file && file.hash === hash && file.data === assetData && (file.role || "") === (meta.role || ""); });
+  const existing = book.files.find(function (file) {
+    return (
+      file &&
+      file.hash === hash &&
+      file.data === assetData &&
+      (file.role || "") === (meta.role || "")
+    );
+  });
   if (existing) return existing.id;
   const id = TPP.uid();
   book.files.push({
@@ -134,7 +165,7 @@ TPP.upsertFileAsset = function (book, data, type, name, options) {
     data: assetData,
     hash: hash,
     role: meta.role || "",
-    hiddenFromPicker: Boolean(meta.hiddenFromPicker)
+    hiddenFromPicker: Boolean(meta.hiddenFromPicker),
   });
   return id;
 };
@@ -146,8 +177,10 @@ TPP.setCoverPreviewAsset = function (book, data) {
     book.coverPreviewId = "";
     return "";
   }
-  const existing = book.coverPreviewId ? TPP.fileAsset(book, book.coverPreviewId) : null;
-  const type = ((assetData.match(/^data:([^;,]+)/) || [])[1]) || "image/jpeg";
+  const existing = book.coverPreviewId
+    ? TPP.fileAsset(book, book.coverPreviewId)
+    : null;
+  const type = (assetData.match(/^data:([^;,]+)/) || [])[1] || "image/jpeg";
   const hash = TPP.hashString(type + ":" + assetData);
   if (existing) {
     existing.type = type;
@@ -159,10 +192,16 @@ TPP.setCoverPreviewAsset = function (book, data) {
     book.coverPreview = assetData;
     return existing.id;
   }
-  const id = TPP.upsertFileAsset(book, assetData, type, "Generated Cover Preview", {
-    role: "coverPreview",
-    hiddenFromPicker: true
-  });
+  const id = TPP.upsertFileAsset(
+    book,
+    assetData,
+    type,
+    "Generated Cover Preview",
+    {
+      role: "coverPreview",
+      hiddenFromPicker: true,
+    },
+  );
   book.coverPreviewId = id;
   book.coverPreview = assetData;
   return id;
@@ -173,7 +212,9 @@ TPP.syncCoverPreviewAsset = function (book) {
     TPP.setCoverPreviewAsset(book, book.coverPreview);
     return;
   }
-  const file = book.coverPreviewId ? TPP.fileAsset(book, book.coverPreviewId) : null;
+  const file = book.coverPreviewId
+    ? TPP.fileAsset(book, book.coverPreviewId)
+    : null;
   if (file) {
     file.role = "coverPreview";
     file.hiddenFromPicker = true;
@@ -188,19 +229,23 @@ TPP.removeFileAsset = function (book, fileId) {
   if (!book || !Array.isArray(book.files) || !fileId) return false;
   if (TPP.fileReferences(book, fileId).length) return false;
   const before = book.files.length;
-  book.files = book.files.filter(function (file) { return !file || file.id !== fileId; });
+  book.files = book.files.filter(function (file) {
+    return !file || file.id !== fileId;
+  });
   return book.files.length !== before;
 };
 TPP.migrateInlineImage = function (book, sourceKey, targetKey) {
   if (!book) return;
   const data = String(book[sourceKey] || "").trim();
-  if (data && !book[targetKey]) book[targetKey] = TPP.upsertFileAsset(book, data);
+  if (data && !book[targetKey])
+    book[targetKey] = TPP.upsertFileAsset(book, data);
   delete book[sourceKey];
 };
 TPP.migrateChapterInlineImage = function (book, chapter) {
   if (!book || !chapter) return;
   const data = String(chapter.imageData || "").trim();
-  if (data && !chapter.imageId) chapter.imageId = TPP.upsertFileAsset(book, data);
+  if (data && !chapter.imageId)
+    chapter.imageId = TPP.upsertFileAsset(book, data);
   delete chapter.imageData;
 };
 TPP.normalizeFiles = function (book) {
@@ -212,12 +257,15 @@ TPP.normalizeFiles = function (book) {
     if (!file || !file.data) return list;
     const normalized = {
       id: file.id || TPP.uid(),
-      type: file.type || ((String(file.data).match(/^data:([^;,]+)/) || [])[1]) || "application/octet-stream",
+      type:
+        file.type ||
+        (String(file.data).match(/^data:([^;,]+)/) || [])[1] ||
+        "application/octet-stream",
       name: file.name || "",
       data: file.data,
       hash: file.hash || TPP.hashString((file.type || "") + ":" + file.data),
       role: file.role || "",
-      hiddenFromPicker: Boolean(file.hiddenFromPicker)
+      hiddenFromPicker: Boolean(file.hiddenFromPicker),
     };
     const key = normalized.hash + "::" + normalized.data;
     if (seen.has(key)) {
@@ -235,16 +283,28 @@ TPP.normalizeFiles = function (book) {
   ["coverImageId", "backImageId", "spineImageId"].forEach(function (key) {
     if (book[key] && idMap[book[key]]) book[key] = idMap[book[key]];
   });
-  (Array.isArray(book.imageElements) ? book.imageElements : []).forEach(function (element) {
-    if (element && element.fileId && idMap[element.fileId]) element.fileId = idMap[element.fileId];
-  });
-  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
-    if (chapter && chapter.imageId && idMap[chapter.imageId]) chapter.imageId = idMap[chapter.imageId];
-  });
+  (Array.isArray(book.imageElements) ? book.imageElements : []).forEach(
+    function (element) {
+      if (element && element.fileId && idMap[element.fileId])
+        element.fileId = idMap[element.fileId];
+    },
+  );
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(
+    function (chapter) {
+      if (chapter && chapter.imageId && idMap[chapter.imageId])
+        chapter.imageId = idMap[chapter.imageId];
+    },
+  );
 };
 TPP.esc = function (value) {
   return String(value ?? "").replace(/[&<>"']/g, function (ch) {
-    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[ch];
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    }[ch];
   });
 };
 TPP.signatureSize = function (value) {
@@ -285,20 +345,32 @@ TPP.bookFingerprint = function (book) {
   delete copy.coverPreviewId;
   delete copy.coverPreview;
   delete copy._pageCount;
-  copy.files = (Array.isArray(copy.files) ? copy.files : []).filter(function (file) {
-    return file && file.role !== "coverPreview";
-  });
+  copy.files = (Array.isArray(copy.files) ? copy.files : []).filter(
+    function (file) {
+      return file && file.role !== "coverPreview";
+    },
+  );
   return JSON.stringify(copy);
 };
 TPP.hydrateBookDates = function (book) {
   const now = TPP.nowIso();
-  if (!Number.isFinite(Number(book.schemaVersion)) || Number(book.schemaVersion) < 1) book.schemaVersion = 1;
+  if (
+    !Number.isFinite(Number(book.schemaVersion)) ||
+    Number(book.schemaVersion) < 1
+  )
+    book.schemaVersion = 1;
   book.schemaVersion = Math.max(1, Math.floor(Number(book.schemaVersion) || 1));
-  if (!Number.isFinite(Number(book.revision)) || Number(book.revision) < 1) book.revision = 1;
+  if (!Number.isFinite(Number(book.revision)) || Number(book.revision) < 1)
+    book.revision = 1;
   book.revision = Math.max(1, Math.floor(Number(book.revision) || 1));
-  if (!Number.isFinite(Number(book.subrevision)) || Number(book.subrevision) < 0) book.subrevision = 0;
+  if (
+    !Number.isFinite(Number(book.subrevision)) ||
+    Number(book.subrevision) < 0
+  )
+    book.subrevision = 0;
   book.subrevision = Math.max(0, Math.floor(Number(book.subrevision) || 0));
-  if (!Array.isArray(book.provenance) && Array.isArray(book.ancestry)) book.provenance = TPP.clone(book.ancestry);
+  if (!Array.isArray(book.provenance) && Array.isArray(book.ancestry))
+    book.provenance = TPP.clone(book.ancestry);
   if (!Array.isArray(book.provenance)) book.provenance = [];
   delete book.ancestry;
   if (!book.createdAt && book.updatedAt) book.createdAt = book.updatedAt;
@@ -311,10 +383,30 @@ TPP.hydrateBookDates = function (book) {
 };
 TPP.unwrapImportPayload = function (data) {
   if (!data || typeof data !== "object") return { kind: "book", value: data };
-  if (Array.isArray(data.books)) return { kind: "library", value: data.books, schemaVersion: Number(data.schemaVersion) || 1 };
-  if (data.book && typeof data.book === "object") return { kind: "book", value: data.book, schemaVersion: Number(data.schemaVersion) || Number(data.book.schemaVersion) || 1 };
-  if (data.style && typeof data.style === "object") return { kind: "style", value: data.style, schemaVersion: Number(data.schemaVersion) || 1 };
-  return { kind: "book", value: data, schemaVersion: Number(data.schemaVersion) || 1 };
+  if (Array.isArray(data.books))
+    return {
+      kind: "library",
+      value: data.books,
+      schemaVersion: Number(data.schemaVersion) || 1,
+    };
+  if (data.book && typeof data.book === "object")
+    return {
+      kind: "book",
+      value: data.book,
+      schemaVersion:
+        Number(data.schemaVersion) || Number(data.book.schemaVersion) || 1,
+    };
+  if (data.style && typeof data.style === "object")
+    return {
+      kind: "style",
+      value: data.style,
+      schemaVersion: Number(data.schemaVersion) || 1,
+    };
+  return {
+    kind: "book",
+    value: data,
+    schemaVersion: Number(data.schemaVersion) || 1,
+  };
 };
 TPP.bookSourceEntry = function (book, action, stamp) {
   const when = stamp || TPP.nowIso();
@@ -323,24 +415,31 @@ TPP.bookSourceEntry = function (book, action, stamp) {
     sourceId: book && book.id ? book.id : "",
     sourceTitle: book && book.title ? book.title : "",
     sourceRevision: Math.max(1, Math.floor(Number(book && book.revision) || 1)),
-    sourceSubrevision: Math.max(0, Math.floor(Number(book && book.subrevision) || 0)),
+    sourceSubrevision: Math.max(
+      0,
+      Math.floor(Number(book && book.subrevision) || 0),
+    ),
     sourceUpdatedAt: book && book.updatedAt ? book.updatedAt : when,
     sourceCreatedAt: book && book.createdAt ? book.createdAt : when,
-    recordedAt: when
+    recordedAt: when,
   };
 };
 TPP.combineProvenance = function (a, b) {
   const seen = new Set();
-  return (Array.isArray(a) ? a : []).concat(Array.isArray(b) ? b : []).filter(function (entry) {
-    const key = JSON.stringify(entry || {});
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return (Array.isArray(a) ? a : [])
+    .concat(Array.isArray(b) ? b : [])
+    .filter(function (entry) {
+      const key = JSON.stringify(entry || {});
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 };
 TPP.bookDescendant = function (source, overrides, action, stamp) {
   const when = stamp || TPP.nowIso();
-  const descendant = TPP.norm(Object.assign({}, TPP.clone(source || {}), overrides || {}));
+  const descendant = TPP.norm(
+    Object.assign({}, TPP.clone(source || {}), overrides || {}),
+  );
   descendant.id = (overrides && overrides.id) || descendant.id || TPP.uid();
   descendant.revision = 1;
   descendant.subrevision = 0;
@@ -348,7 +447,9 @@ TPP.bookDescendant = function (source, overrides, action, stamp) {
   descendant.updatedAt = when;
   descendant.lastExportedAt = "";
   descendant.lastImportedAt = action === "import" ? when : "";
-  descendant.provenance = (Array.isArray(source && source.provenance) ? TPP.clone(source.provenance) : []);
+  descendant.provenance = Array.isArray(source && source.provenance)
+    ? TPP.clone(source.provenance)
+    : [];
   descendant.provenance.push(TPP.bookSourceEntry(source, action, when));
   return descendant;
 };
@@ -356,26 +457,38 @@ TPP.bookImported = function (source, stamp) {
   const when = stamp || TPP.nowIso();
   const imported = TPP.norm(TPP.clone(source || {}));
   imported.lastImportedAt = when;
-  imported.provenance = TPP.combineProvenance(imported.provenance, [TPP.bookSourceEntry(source, "import", when)]);
+  imported.provenance = TPP.combineProvenance(imported.provenance, [
+    TPP.bookSourceEntry(source, "import", when),
+  ]);
   return imported;
 };
 TPP.mergeImportedBook = function (existing, incoming, stamp) {
   const when = stamp || TPP.nowIso();
-  const merged = TPP.norm(Object.assign({}, TPP.clone(existing || {}), TPP.clone(incoming || {})));
+  const merged = TPP.norm(
+    Object.assign({}, TPP.clone(existing || {}), TPP.clone(incoming || {})),
+  );
   merged.id = existing && existing.id ? existing.id : merged.id;
-  merged.createdAt = existing && existing.createdAt ? existing.createdAt : merged.createdAt;
-  merged.updatedAt = incoming && incoming.updatedAt ? incoming.updatedAt : merged.updatedAt;
+  merged.createdAt =
+    existing && existing.createdAt ? existing.createdAt : merged.createdAt;
+  merged.updatedAt =
+    incoming && incoming.updatedAt ? incoming.updatedAt : merged.updatedAt;
   merged.revision = Math.max(
     1,
     Math.floor(Number(existing && existing.revision) || 1),
-    Math.floor(Number(incoming && incoming.revision) || 1)
+    Math.floor(Number(incoming && incoming.revision) || 1),
   );
   merged.subrevision = 0;
   merged.lastImportedAt = when;
-  merged.lastExportedAt = existing && existing.lastExportedAt ? existing.lastExportedAt : (incoming && incoming.lastExportedAt) || "";
+  merged.lastExportedAt =
+    existing && existing.lastExportedAt
+      ? existing.lastExportedAt
+      : (incoming && incoming.lastExportedAt) || "";
   merged.provenance = TPP.combineProvenance(
-    TPP.combineProvenance(existing && existing.provenance, incoming && incoming.provenance),
-    [TPP.bookSourceEntry(incoming, "import", when)]
+    TPP.combineProvenance(
+      existing && existing.provenance,
+      incoming && incoming.provenance,
+    ),
+    [TPP.bookSourceEntry(incoming, "import", when)],
   );
   return merged;
 };
@@ -395,16 +508,25 @@ TPP.imageElementKey = function (location, part) {
 };
 TPP.findImageElement = function (book, location, part) {
   const key = TPP.imageElementKey(location, part);
-  const list = Array.isArray(book && book.imageElements) ? book.imageElements : [];
-  return list.find(function (entry) {
-    return TPP.imageElementKey(entry && entry.location, entry && entry.part) === key;
-  }) || null;
+  const list = Array.isArray(book && book.imageElements)
+    ? book.imageElements
+    : [];
+  return (
+    list.find(function (entry) {
+      return (
+        TPP.imageElementKey(entry && entry.location, entry && entry.part) ===
+        key
+      );
+    }) || null
+  );
 };
 TPP.findChapterImageElement = function (book, chapter) {
   if (!book || !chapter) return null;
   const list = Array.isArray(book.imageElements) ? book.imageElements : [];
   if (chapter.imageElementId) {
-    const byId = list.find(function (entry) { return entry && entry.id === chapter.imageElementId; });
+    const byId = list.find(function (entry) {
+      return entry && entry.id === chapter.imageElementId;
+    });
     if (byId) return byId;
   }
   return TPP.findImageElement(book, "chapter", chapter.id);
@@ -413,53 +535,108 @@ TPP.defaultImageElements = function (book, base) {
   const source = book || {};
   const fallback = base || source || {};
   return [
-    { id: "front-cover-image", location: "front", part: "cover", fileId: source.coverImageId || fallback.coverImageId || "", x: Number(source.coverImgX) || 0, y: Number(source.coverImgY) || 0, zoom: Number(source.coverImgZoom) || Number(fallback.coverImgZoom) || 120, rotate: Number(source.coverImgRotate) || 0, placement: "cover" },
-    { id: "back-cover-image", location: "back", part: "cover", fileId: source.backImageId || fallback.backImageId || "", x: Number(source.backImgX) || 0, y: Number(source.backImgY) || 0, zoom: Number(source.backImgZoom) || Number(fallback.backImgZoom) || 120, rotate: Number(source.backImgRotate) || 0, placement: "cover" },
-    { id: "spine-image", location: "spine", part: "cover", fileId: source.spineImageId || fallback.spineImageId || "", x: Number(source.spineImgX) || 0, y: Number(source.spineImgY) || 0, zoom: Number(source.spineImgZoom) || Number(fallback.spineImgZoom) || 100, rotate: Number(source.spineImgRotate) || 0, placement: "cover" }
+    {
+      id: "front-cover-image",
+      location: "front",
+      part: "cover",
+      fileId: source.coverImageId || fallback.coverImageId || "",
+      x: Number(source.coverImgX) || 0,
+      y: Number(source.coverImgY) || 0,
+      zoom: Number(source.coverImgZoom) || Number(fallback.coverImgZoom) || 120,
+      rotate: Number(source.coverImgRotate) || 0,
+      placement: "cover",
+    },
+    {
+      id: "back-cover-image",
+      location: "back",
+      part: "cover",
+      fileId: source.backImageId || fallback.backImageId || "",
+      x: Number(source.backImgX) || 0,
+      y: Number(source.backImgY) || 0,
+      zoom: Number(source.backImgZoom) || Number(fallback.backImgZoom) || 120,
+      rotate: Number(source.backImgRotate) || 0,
+      placement: "cover",
+    },
+    {
+      id: "spine-image",
+      location: "spine",
+      part: "cover",
+      fileId: source.spineImageId || fallback.spineImageId || "",
+      x: Number(source.spineImgX) || 0,
+      y: Number(source.spineImgY) || 0,
+      zoom: Number(source.spineImgZoom) || Number(fallback.spineImgZoom) || 100,
+      rotate: Number(source.spineImgRotate) || 0,
+      placement: "cover",
+    },
   ];
 };
 TPP.ensureChapterImageElements = function (book) {
   if (!book) return;
-  book.imageElements = Array.isArray(book.imageElements) ? book.imageElements : [];
-  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
-    if (!chapter) return;
-    let element = TPP.findChapterImageElement(book, chapter);
-    if (!element) {
-      element = {
-        id: TPP.uid(),
-        location: "chapter",
-        part: chapter.id,
-        fileId: chapter.imageId || "",
-        x: 0,
-        y: 0,
-        zoom: Math.min(100, Math.max(10, Number(chapter.imageZoom || chapter.imageWidth) || 70)),
-        rotate: Number(chapter.imageRotate) || 0,
-        placement: chapter.imagePlacement || "none"
-      };
-      book.imageElements.push(element);
-    }
-    if (!element.id) element.id = TPP.uid();
-    element.location = "chapter";
-    element.part = chapter.id;
-    chapter.imageElementId = element.id;
-  });
-  const chapterIds = new Set((Array.isArray(book.chapters) ? book.chapters : []).map(function (chapter) { return chapter && chapter.id; }));
+  book.imageElements = Array.isArray(book.imageElements)
+    ? book.imageElements
+    : [];
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(
+    function (chapter) {
+      if (!chapter) return;
+      let element = TPP.findChapterImageElement(book, chapter);
+      if (!element) {
+        element = {
+          id: TPP.uid(),
+          location: "chapter",
+          part: chapter.id,
+          fileId: chapter.imageId || "",
+          x: 0,
+          y: 0,
+          zoom: Math.min(
+            100,
+            Math.max(10, Number(chapter.imageZoom || chapter.imageWidth) || 70),
+          ),
+          rotate: Number(chapter.imageRotate) || 0,
+          placement: chapter.imagePlacement || "none",
+        };
+        book.imageElements.push(element);
+      }
+      if (!element.id) element.id = TPP.uid();
+      element.location = "chapter";
+      element.part = chapter.id;
+      chapter.imageElementId = element.id;
+    },
+  );
+  const chapterIds = new Set(
+    (Array.isArray(book.chapters) ? book.chapters : []).map(function (chapter) {
+      return chapter && chapter.id;
+    }),
+  );
   book.imageElements = book.imageElements.filter(function (element) {
-    return element && element.location !== "chapter" || chapterIds.has(element && element.part);
+    return (
+      (element && element.location !== "chapter") ||
+      chapterIds.has(element && element.part)
+    );
   });
 };
 TPP.migrateImageElements = function (book, base) {
   const defaults = TPP.defaultImageElements(book, base);
   const existing = Array.isArray(book.imageElements) ? book.imageElements : [];
-  const byKey = new Map(existing.map(function (entry) {
-    return [TPP.imageElementKey(entry && entry.location, entry && entry.part), entry];
-  }));
+  const byKey = new Map(
+    existing.map(function (entry) {
+      return [
+        TPP.imageElementKey(entry && entry.location, entry && entry.part),
+        entry,
+      ];
+    }),
+  );
   const chapterElements = existing.filter(function (entry) {
     return entry && entry.location === "chapter";
   });
-  book.imageElements = defaults.map(function (entry) {
-    return Object.assign({}, entry, byKey.get(TPP.imageElementKey(entry.location, entry.part)) || {});
-  }).concat(chapterElements);
+  book.imageElements = defaults
+    .map(function (entry) {
+      return Object.assign(
+        {},
+        entry,
+        byKey.get(TPP.imageElementKey(entry.location, entry.part)) || {},
+      );
+    })
+    .concat(chapterElements);
   TPP.ensureChapterImageElements(book);
 };
 TPP.syncLegacyImageFieldsFromElements = function (book) {
@@ -487,76 +664,257 @@ TPP.syncLegacyImageFieldsFromElements = function (book) {
     book.spineImgZoom = Number(spine.zoom) || 100;
     book.spineImgRotate = Number(spine.rotate) || 0;
   }
-  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
-    const element = TPP.findChapterImageElement(book, chapter);
-    if (!element) return;
-    chapter.imageElementId = element.id || "";
-    chapter.imageId = element.fileId || "";
-    chapter.imagePlacement = element.placement || "none";
-    chapter.imageZoom = Math.min(100, Math.max(10, Number(element.zoom) || 70));
-    chapter.imageWidth = chapter.imageZoom;
-    chapter.imageRotate = Number(element.rotate) || 0;
-  });
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(
+    function (chapter) {
+      const element = TPP.findChapterImageElement(book, chapter);
+      if (!element) return;
+      chapter.imageElementId = element.id || "";
+      chapter.imageId = element.fileId || "";
+      chapter.imagePlacement = element.placement || "none";
+      chapter.imageZoom = Math.min(
+        100,
+        Math.max(10, Number(element.zoom) || 70),
+      );
+      chapter.imageWidth = chapter.imageZoom;
+      chapter.imageRotate = Number(element.rotate) || 0;
+    },
+  );
 };
 TPP.syncImageElementsFromLegacyFields = function (book) {
   const front = TPP.findImageElement(book, "front", "cover");
   const back = TPP.findImageElement(book, "back", "cover");
   const spine = TPP.findImageElement(book, "spine", "cover");
-  if (front) Object.assign(front, { fileId: book.coverImageId || "", x: Number(book.coverImgX) || 0, y: Number(book.coverImgY) || 0, zoom: Number(book.coverImgZoom) || 120, rotate: Number(book.coverImgRotate) || 0, placement: "cover" });
-  if (back) Object.assign(back, { fileId: book.backImageId || "", x: Number(book.backImgX) || 0, y: Number(book.backImgY) || 0, zoom: Number(book.backImgZoom) || 120, rotate: Number(book.backImgRotate) || 0, placement: "cover" });
-  if (spine) Object.assign(spine, { fileId: book.spineImageId || "", x: Number(book.spineImgX) || 0, y: Number(book.spineImgY) || 0, zoom: Number(book.spineImgZoom) || 100, rotate: Number(book.spineImgRotate) || 0, placement: "cover" });
-  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
-    const element = TPP.findChapterImageElement(book, chapter);
-    if (!element) return;
-    element.fileId = chapter.imageId || element.fileId || "";
-    element.zoom = Math.min(100, Math.max(10, Number(chapter.imageZoom || chapter.imageWidth) || 70));
-    element.rotate = Number(chapter.imageRotate) || 0;
-    element.placement = chapter.imagePlacement || "none";
-    chapter.imageElementId = element.id || "";
-  });
+  if (front)
+    Object.assign(front, {
+      fileId: book.coverImageId || "",
+      x: Number(book.coverImgX) || 0,
+      y: Number(book.coverImgY) || 0,
+      zoom: Number(book.coverImgZoom) || 120,
+      rotate: Number(book.coverImgRotate) || 0,
+      placement: "cover",
+    });
+  if (back)
+    Object.assign(back, {
+      fileId: book.backImageId || "",
+      x: Number(book.backImgX) || 0,
+      y: Number(book.backImgY) || 0,
+      zoom: Number(book.backImgZoom) || 120,
+      rotate: Number(book.backImgRotate) || 0,
+      placement: "cover",
+    });
+  if (spine)
+    Object.assign(spine, {
+      fileId: book.spineImageId || "",
+      x: Number(book.spineImgX) || 0,
+      y: Number(book.spineImgY) || 0,
+      zoom: Number(book.spineImgZoom) || 100,
+      rotate: Number(book.spineImgRotate) || 0,
+      placement: "cover",
+    });
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(
+    function (chapter) {
+      const element = TPP.findChapterImageElement(book, chapter);
+      if (!element) return;
+      element.fileId = chapter.imageId || element.fileId || "";
+      element.zoom = Math.min(
+        100,
+        Math.max(10, Number(chapter.imageZoom || chapter.imageWidth) || 70),
+      );
+      element.rotate = Number(chapter.imageRotate) || 0;
+      element.placement = chapter.imagePlacement || "none";
+      chapter.imageElementId = element.id || "";
+    },
+  );
 };
 TPP.textElementKey = function (location, part) {
   return String(location || "") + ":" + String(part || "");
 };
 TPP.findTextElement = function (book, location, part) {
   const key = TPP.textElementKey(location, part);
-  const list = Array.isArray(book && book.textElements) ? book.textElements : [];
-  return list.find(function (entry) {
-    return TPP.textElementKey(entry && entry.location, entry && entry.part) === key;
-  }) || null;
+  const list = Array.isArray(book && book.textElements)
+    ? book.textElements
+    : [];
+  return (
+    list.find(function (entry) {
+      return (
+        TPP.textElementKey(entry && entry.location, entry && entry.part) === key
+      );
+    }) || null
+  );
 };
 TPP.defaultTextElements = function (book, base) {
   const source = book || {};
   const fallback = base || source || {};
   const sharedColor = source.coverText || fallback.coverText || "#ffffff";
-  const sharedStrokeColor = source.coverStrokeColor || fallback.coverStrokeColor || "#000000";
-  const sharedStrokeSize = Number.isFinite(Number(source.coverStrokeSize)) ? Number(source.coverStrokeSize) : (Number(fallback.coverStrokeSize) || 0);
+  const sharedStrokeColor =
+    source.coverStrokeColor || fallback.coverStrokeColor || "#000000";
+  const sharedStrokeSize = Number.isFinite(Number(source.coverStrokeSize))
+    ? Number(source.coverStrokeSize)
+    : Number(fallback.coverStrokeSize) || 0;
   return [
-    { location: "front", part: "title", enabled: source.coverShowTitle !== false, size: Number(source.coverTitleSize) || Number(fallback.coverTitleSize) || 8, x: 0, y: Number(source.coverTitleY) || Number(fallback.coverTitleY) || 12, width: 100, align: "center", color: source.coverTitleColor || sharedColor, outlineColor: source.coverTitleStrokeColor || sharedStrokeColor, outlineSize: Number(source.coverTitleStrokeSize) || sharedStrokeSize, rotate: false, customText: "" },
-    { location: "front", part: "author", enabled: Boolean(source.coverShowAuthor), size: Number(source.coverAuthorSize) || Number(source.coverMetaSize) || Number(fallback.coverAuthorSize) || 4.2, x: 0, y: Number(source.coverAuthorY) || Number(fallback.coverAuthorY) || 72, width: 100, align: "center", color: source.coverAuthorColor || sharedColor, outlineColor: source.coverAuthorStrokeColor || sharedStrokeColor, outlineSize: Number(source.coverAuthorStrokeSize) || sharedStrokeSize, rotate: false, customText: "" },
-    { location: "front", part: "series", enabled: Boolean(source.coverShowSeries), size: Number(source.coverSeriesSize) || Number(source.coverMetaSize) || Number(fallback.coverSeriesSize) || 4.2, x: 0, y: Number(source.coverSeriesY) || Number(fallback.coverSeriesY) || 6, width: 100, align: "center", color: source.coverSeriesColor || sharedColor, outlineColor: source.coverSeriesStrokeColor || sharedStrokeColor, outlineSize: Number(source.coverSeriesStrokeSize) || sharedStrokeSize, rotate: false, customText: "" },
-    { location: "front", part: "publisher", enabled: Boolean(source.coverShowPublisher), size: Number(source.coverPublisherSize) || Number(source.coverMetaSize) || Number(fallback.coverPublisherSize) || 4.2, x: 0, y: Number(source.coverPublisherY) || Number(fallback.coverPublisherY) || 84, width: 100, align: "center", color: source.coverPublisherColor || sharedColor, outlineColor: source.coverPublisherStrokeColor || sharedStrokeColor, outlineSize: Number(source.coverPublisherStrokeSize) || sharedStrokeSize, rotate: false, customText: "" },
-    { location: "back", part: "custom", enabled: true, size: Number(source.backTextSize) || Number(fallback.backTextSize) || 4.5, x: 50, y: Number(source.backTextY) || Number(fallback.backTextY) || 76, width: 100, align: source.backTextAlign || fallback.backTextAlign || "center", color: source.backTextColor || fallback.backTextColor || "#ffffff", outlineColor: "#000000", outlineSize: 0, rotate: false, customText: source.backText || fallback.backText || "" },
-    { location: "spine", part: "title", enabled: true, size: Number(source.spineTitleSize) || Number(fallback.spineTitleSize) || 5, x: Number(source.spineTitleX) || Number(fallback.spineTitleX) || 50, y: Number(source.spineTitleY) || Number(fallback.spineTitleY) || 4, width: Number(source.spineTitleWidth) || Number(fallback.spineTitleWidth) || 100, align: source.spineTitleAlign || fallback.spineTitleAlign || "left", color: source.spineTextColor || fallback.spineTextColor || "#ffffff", outlineColor: source.spineStrokeColor || fallback.spineStrokeColor || "#000000", outlineSize: Number(source.spineStrokeSize) || Number(fallback.spineStrokeSize) || 0, rotate: source.spineTitleRotate !== false, customText: "" },
-    { location: "spine", part: "author", enabled: source.spineAuthorOn !== false, size: Number(source.spineAuthorSize) || Number(fallback.spineAuthorSize) || 4, x: 50, y: 94, width: 100, align: "center", color: source.spineTextColor || fallback.spineTextColor || "#ffffff", outlineColor: source.spineStrokeColor || fallback.spineStrokeColor || "#000000", outlineSize: Number(source.spineStrokeSize) || Number(fallback.spineStrokeSize) || 0, rotate: Boolean(source.spineAuthorRotate), customText: "" }
+    {
+      location: "front",
+      part: "title",
+      enabled: source.coverShowTitle !== false,
+      size:
+        Number(source.coverTitleSize) || Number(fallback.coverTitleSize) || 8,
+      x: 0,
+      y: Number(source.coverTitleY) || Number(fallback.coverTitleY) || 12,
+      width: 100,
+      align: "center",
+      color: source.coverTitleColor || sharedColor,
+      outlineColor: source.coverTitleStrokeColor || sharedStrokeColor,
+      outlineSize: Number(source.coverTitleStrokeSize) || sharedStrokeSize,
+      rotate: false,
+      customText: "",
+    },
+    {
+      location: "front",
+      part: "author",
+      enabled: Boolean(source.coverShowAuthor),
+      size:
+        Number(source.coverAuthorSize) ||
+        Number(source.coverMetaSize) ||
+        Number(fallback.coverAuthorSize) ||
+        4.2,
+      x: 0,
+      y: Number(source.coverAuthorY) || Number(fallback.coverAuthorY) || 72,
+      width: 100,
+      align: "center",
+      color: source.coverAuthorColor || sharedColor,
+      outlineColor: source.coverAuthorStrokeColor || sharedStrokeColor,
+      outlineSize: Number(source.coverAuthorStrokeSize) || sharedStrokeSize,
+      rotate: false,
+      customText: "",
+    },
+    {
+      location: "front",
+      part: "series",
+      enabled: Boolean(source.coverShowSeries),
+      size:
+        Number(source.coverSeriesSize) ||
+        Number(source.coverMetaSize) ||
+        Number(fallback.coverSeriesSize) ||
+        4.2,
+      x: 0,
+      y: Number(source.coverSeriesY) || Number(fallback.coverSeriesY) || 6,
+      width: 100,
+      align: "center",
+      color: source.coverSeriesColor || sharedColor,
+      outlineColor: source.coverSeriesStrokeColor || sharedStrokeColor,
+      outlineSize: Number(source.coverSeriesStrokeSize) || sharedStrokeSize,
+      rotate: false,
+      customText: "",
+    },
+    {
+      location: "front",
+      part: "publisher",
+      enabled: Boolean(source.coverShowPublisher),
+      size:
+        Number(source.coverPublisherSize) ||
+        Number(source.coverMetaSize) ||
+        Number(fallback.coverPublisherSize) ||
+        4.2,
+      x: 0,
+      y:
+        Number(source.coverPublisherY) ||
+        Number(fallback.coverPublisherY) ||
+        84,
+      width: 100,
+      align: "center",
+      color: source.coverPublisherColor || sharedColor,
+      outlineColor: source.coverPublisherStrokeColor || sharedStrokeColor,
+      outlineSize: Number(source.coverPublisherStrokeSize) || sharedStrokeSize,
+      rotate: false,
+      customText: "",
+    },
+    {
+      location: "back",
+      part: "custom",
+      enabled: true,
+      size: Number(source.backTextSize) || Number(fallback.backTextSize) || 4.5,
+      x: 50,
+      y: Number(source.backTextY) || Number(fallback.backTextY) || 76,
+      width: 100,
+      align: source.backTextAlign || fallback.backTextAlign || "center",
+      color: source.backTextColor || fallback.backTextColor || "#ffffff",
+      outlineColor: "#000000",
+      outlineSize: 0,
+      rotate: false,
+      customText: source.backText || fallback.backText || "",
+    },
+    {
+      location: "spine",
+      part: "title",
+      enabled: true,
+      size:
+        Number(source.spineTitleSize) || Number(fallback.spineTitleSize) || 5,
+      x: Number(source.spineTitleX) || Number(fallback.spineTitleX) || 50,
+      y: Number(source.spineTitleY) || Number(fallback.spineTitleY) || 4,
+      width:
+        Number(source.spineTitleWidth) ||
+        Number(fallback.spineTitleWidth) ||
+        100,
+      align: source.spineTitleAlign || fallback.spineTitleAlign || "left",
+      color: source.spineTextColor || fallback.spineTextColor || "#ffffff",
+      outlineColor:
+        source.spineStrokeColor || fallback.spineStrokeColor || "#000000",
+      outlineSize:
+        Number(source.spineStrokeSize) || Number(fallback.spineStrokeSize) || 0,
+      rotate: source.spineTitleRotate !== false,
+      customText: "",
+    },
+    {
+      location: "spine",
+      part: "author",
+      enabled: source.spineAuthorOn !== false,
+      size:
+        Number(source.spineAuthorSize) || Number(fallback.spineAuthorSize) || 4,
+      x: 50,
+      y: 94,
+      width: 100,
+      align: "center",
+      color: source.spineTextColor || fallback.spineTextColor || "#ffffff",
+      outlineColor:
+        source.spineStrokeColor || fallback.spineStrokeColor || "#000000",
+      outlineSize:
+        Number(source.spineStrokeSize) || Number(fallback.spineStrokeSize) || 0,
+      rotate: Boolean(source.spineAuthorRotate),
+      customText: "",
+    },
   ];
 };
 TPP.migrateTextElements = function (book, base) {
   const defaults = TPP.defaultTextElements(book, base);
   const existing = Array.isArray(book.textElements) ? book.textElements : [];
-  const byKey = new Map(existing.map(function (entry) {
-    return [TPP.textElementKey(entry && entry.location, entry && entry.part), entry];
-  }));
+  const byKey = new Map(
+    existing.map(function (entry) {
+      return [
+        TPP.textElementKey(entry && entry.location, entry && entry.part),
+        entry,
+      ];
+    }),
+  );
   book.textElements = defaults.map(function (entry) {
-    return Object.assign({}, entry, byKey.get(TPP.textElementKey(entry.location, entry.part)) || {});
+    return Object.assign(
+      {},
+      entry,
+      byKey.get(TPP.textElementKey(entry.location, entry.part)) || {},
+    );
   });
 };
 TPP.textElementContent = function (book, location, part) {
   const element = TPP.findTextElement(book, location, part);
   if (element && element.part === "custom") return element.customText || "";
   if (part === "title") return String((book && book.title) || "");
-  if (part === "author") return location === "spine" ? String((book && (book.spineAuthor || book.author)) || "") : String((book && book.author) || "");
-  if (part === "series") return [book && book.seriesName, book && book.number].filter(Boolean).join(" ");
+  if (part === "author")
+    return location === "spine"
+      ? String((book && (book.spineAuthor || book.author)) || "")
+      : String((book && book.author) || "");
+  if (part === "series")
+    return [book && book.seriesName, book && book.number]
+      .filter(Boolean)
+      .join(" ");
   if (part === "publisher") return String((book && book.publisher) || "");
   if (part === "copyright") return String((book && book.copyright) || "");
   return element && element.customText ? String(element.customText) : "";
@@ -574,32 +932,49 @@ TPP.syncLegacyTextFieldsFromElements = function (book) {
     book.coverTitleSize = Number(coverTitle.size) || book.coverTitleSize;
     book.coverTitleY = Number(coverTitle.y) || 0;
     book.coverTitleColor = coverTitle.color || book.coverTitleColor;
-    book.coverTitleStrokeColor = coverTitle.outlineColor || book.coverTitleStrokeColor;
-    book.coverTitleStrokeSize = Math.max(0, Number(coverTitle.outlineSize) || 0);
+    book.coverTitleStrokeColor =
+      coverTitle.outlineColor || book.coverTitleStrokeColor;
+    book.coverTitleStrokeSize = Math.max(
+      0,
+      Number(coverTitle.outlineSize) || 0,
+    );
   }
   if (coverAuthor) {
     book.coverShowAuthor = coverAuthor.enabled !== false;
     book.coverAuthorSize = Number(coverAuthor.size) || book.coverAuthorSize;
     book.coverAuthorY = Number(coverAuthor.y) || 0;
     book.coverAuthorColor = coverAuthor.color || book.coverAuthorColor;
-    book.coverAuthorStrokeColor = coverAuthor.outlineColor || book.coverAuthorStrokeColor;
-    book.coverAuthorStrokeSize = Math.max(0, Number(coverAuthor.outlineSize) || 0);
+    book.coverAuthorStrokeColor =
+      coverAuthor.outlineColor || book.coverAuthorStrokeColor;
+    book.coverAuthorStrokeSize = Math.max(
+      0,
+      Number(coverAuthor.outlineSize) || 0,
+    );
   }
   if (coverSeries) {
     book.coverShowSeries = coverSeries.enabled !== false;
     book.coverSeriesSize = Number(coverSeries.size) || book.coverSeriesSize;
     book.coverSeriesY = Number(coverSeries.y) || 0;
     book.coverSeriesColor = coverSeries.color || book.coverSeriesColor;
-    book.coverSeriesStrokeColor = coverSeries.outlineColor || book.coverSeriesStrokeColor;
-    book.coverSeriesStrokeSize = Math.max(0, Number(coverSeries.outlineSize) || 0);
+    book.coverSeriesStrokeColor =
+      coverSeries.outlineColor || book.coverSeriesStrokeColor;
+    book.coverSeriesStrokeSize = Math.max(
+      0,
+      Number(coverSeries.outlineSize) || 0,
+    );
   }
   if (coverPublisher) {
     book.coverShowPublisher = coverPublisher.enabled !== false;
-    book.coverPublisherSize = Number(coverPublisher.size) || book.coverPublisherSize;
+    book.coverPublisherSize =
+      Number(coverPublisher.size) || book.coverPublisherSize;
     book.coverPublisherY = Number(coverPublisher.y) || 0;
     book.coverPublisherColor = coverPublisher.color || book.coverPublisherColor;
-    book.coverPublisherStrokeColor = coverPublisher.outlineColor || book.coverPublisherStrokeColor;
-    book.coverPublisherStrokeSize = Math.max(0, Number(coverPublisher.outlineSize) || 0);
+    book.coverPublisherStrokeColor =
+      coverPublisher.outlineColor || book.coverPublisherStrokeColor;
+    book.coverPublisherStrokeSize = Math.max(
+      0,
+      Number(coverPublisher.outlineSize) || 0,
+    );
   }
   if (backCustom) {
     book.backText = String(backCustom.customText || "");
@@ -612,7 +987,10 @@ TPP.syncLegacyTextFieldsFromElements = function (book) {
     book.spineTitleSize = Number(spineTitle.size) || book.spineTitleSize;
     book.spineTitleX = Number(spineTitle.x) || 50;
     book.spineTitleY = Number(spineTitle.y) || 0;
-    book.spineTitleWidth = Math.max(10, Math.min(100, Number(spineTitle.width) || 100));
+    book.spineTitleWidth = Math.max(
+      10,
+      Math.min(100, Number(spineTitle.width) || 100),
+    );
     book.spineTitleAlign = spineTitle.align || "left";
     book.spineTextColor = spineTitle.color || book.spineTextColor;
     book.spineStrokeColor = spineTitle.outlineColor || book.spineStrokeColor;
@@ -637,29 +1015,45 @@ TPP.syncTextElementsFromLegacyFields = function (book) {
 };
 TPP.migrateCoverTextSettings = function (book, base) {
   const sharedColor = book.coverText || base.coverText;
-  const sharedStroke = "coverStroke" in book ? book.coverStroke : base.coverStroke;
+  const sharedStroke =
+    "coverStroke" in book ? book.coverStroke : base.coverStroke;
   const sharedStrokeColor = book.coverStrokeColor || base.coverStrokeColor;
-  const sharedStrokeSize = Number.isFinite(Number(book.coverStrokeSize)) ? Number(book.coverStrokeSize) : base.coverStrokeSize;
+  const sharedStrokeSize = Number.isFinite(Number(book.coverStrokeSize))
+    ? Number(book.coverStrokeSize)
+    : base.coverStrokeSize;
   if (!("coverShowTitle" in book)) book.coverShowTitle = true;
   if (!("coverTitleColor" in book)) book.coverTitleColor = sharedColor;
   if (!("coverAuthorColor" in book)) book.coverAuthorColor = sharedColor;
   if (!("coverSeriesColor" in book)) book.coverSeriesColor = sharedColor;
   if (!("coverPublisherColor" in book)) book.coverPublisherColor = sharedColor;
-  if (!("coverAuthorSize" in book)) book.coverAuthorSize = Number(book.coverMetaSize) || base.coverAuthorSize;
-  if (!("coverSeriesSize" in book)) book.coverSeriesSize = Number(book.coverMetaSize) || base.coverSeriesSize;
-  if (!("coverPublisherSize" in book)) book.coverPublisherSize = Number(book.coverMetaSize) || base.coverPublisherSize;
+  if (!("coverAuthorSize" in book))
+    book.coverAuthorSize = Number(book.coverMetaSize) || base.coverAuthorSize;
+  if (!("coverSeriesSize" in book))
+    book.coverSeriesSize = Number(book.coverMetaSize) || base.coverSeriesSize;
+  if (!("coverPublisherSize" in book))
+    book.coverPublisherSize =
+      Number(book.coverMetaSize) || base.coverPublisherSize;
   if (!("coverTitleStroke" in book)) book.coverTitleStroke = sharedStroke;
   if (!("coverAuthorStroke" in book)) book.coverAuthorStroke = sharedStroke;
   if (!("coverSeriesStroke" in book)) book.coverSeriesStroke = sharedStroke;
-  if (!("coverPublisherStroke" in book)) book.coverPublisherStroke = sharedStroke;
-  if (!("coverTitleStrokeColor" in book)) book.coverTitleStrokeColor = sharedStrokeColor;
-  if (!("coverAuthorStrokeColor" in book)) book.coverAuthorStrokeColor = sharedStrokeColor;
-  if (!("coverSeriesStrokeColor" in book)) book.coverSeriesStrokeColor = sharedStrokeColor;
-  if (!("coverPublisherStrokeColor" in book)) book.coverPublisherStrokeColor = sharedStrokeColor;
-  if (!("coverTitleStrokeSize" in book)) book.coverTitleStrokeSize = sharedStrokeSize;
-  if (!("coverAuthorStrokeSize" in book)) book.coverAuthorStrokeSize = sharedStrokeSize;
-  if (!("coverSeriesStrokeSize" in book)) book.coverSeriesStrokeSize = sharedStrokeSize;
-  if (!("coverPublisherStrokeSize" in book)) book.coverPublisherStrokeSize = sharedStrokeSize;
+  if (!("coverPublisherStroke" in book))
+    book.coverPublisherStroke = sharedStroke;
+  if (!("coverTitleStrokeColor" in book))
+    book.coverTitleStrokeColor = sharedStrokeColor;
+  if (!("coverAuthorStrokeColor" in book))
+    book.coverAuthorStrokeColor = sharedStrokeColor;
+  if (!("coverSeriesStrokeColor" in book))
+    book.coverSeriesStrokeColor = sharedStrokeColor;
+  if (!("coverPublisherStrokeColor" in book))
+    book.coverPublisherStrokeColor = sharedStrokeColor;
+  if (!("coverTitleStrokeSize" in book))
+    book.coverTitleStrokeSize = sharedStrokeSize;
+  if (!("coverAuthorStrokeSize" in book))
+    book.coverAuthorStrokeSize = sharedStrokeSize;
+  if (!("coverSeriesStrokeSize" in book))
+    book.coverSeriesStrokeSize = sharedStrokeSize;
+  if (!("coverPublisherStrokeSize" in book))
+    book.coverPublisherStrokeSize = sharedStrokeSize;
   if (book.coverTitleStroke === false) book.coverTitleStrokeSize = 0;
   if (book.coverAuthorStroke === false) book.coverAuthorStrokeSize = 0;
   if (book.coverSeriesStroke === false) book.coverSeriesStrokeSize = 0;
@@ -680,28 +1074,40 @@ TPP.norm = function (book) {
   out.sewingGuideOpacity = TPP.opacity(out.sewingGuideOpacity, 0.65);
   out.signatureGuideOpacity = TPP.opacity(out.signatureGuideOpacity, 0.65);
   out.imageExportDpi = TPP.dpi(out.imageExportDpi);
-  out.mediaCaptionSize = TPP.mediaCaptionSize(out.mediaCaptionSize, base.mediaCaptionSize);
+  out.mediaCaptionSize = TPP.mediaCaptionSize(
+    out.mediaCaptionSize,
+    base.mediaCaptionSize,
+  );
   TPP.migrateCoverTextSettings(out, base);
-  out.chapters = Array.isArray(out.chapters) && out.chapters.length ? out.chapters : base.chapters;
+  out.chapters =
+    Array.isArray(out.chapters) && out.chapters.length
+      ? out.chapters
+      : base.chapters;
   out.chapters = out.chapters.map(function (chapter, index) {
-    const normalized = Object.assign({
-      id: TPP.uid(),
-      title: "Chapter " + (index + 1),
-      text: "",
-      imageId: "",
-      imageElementId: "",
-      imagePlacement: "none",
-      imageZoom: 70,
-      imageWidth: 70,
-      imageRotate: 0,
-      level: 0,
-      isSubsection: false,
-      isMetadata: false,
-      includeInToc: true,
-      tocTitle: ""
-    }, chapter);
+    const normalized = Object.assign(
+      {
+        id: TPP.uid(),
+        title: "Chapter " + (index + 1),
+        text: "",
+        imageId: "",
+        imageElementId: "",
+        imagePlacement: "none",
+        imageZoom: 70,
+        imageWidth: 70,
+        imageRotate: 0,
+        level: 0,
+        isSubsection: false,
+        isMetadata: false,
+        includeInToc: true,
+        tocTitle: "",
+      },
+      chapter,
+    );
     TPP.migrateChapterInlineImage(out, normalized);
-    normalized.imageZoom = Math.min(100, Math.max(10, Number(normalized.imageZoom || normalized.imageWidth) || 70));
+    normalized.imageZoom = Math.min(
+      100,
+      Math.max(10, Number(normalized.imageZoom || normalized.imageWidth) || 70),
+    );
     normalized.imageWidth = normalized.imageZoom;
     return normalized;
   });
@@ -712,13 +1118,20 @@ TPP.norm = function (book) {
   TPP.hydrateBookDates(out);
   TPP.normalizeFiles(out);
   TPP.syncCoverPreviewAsset(out);
-  const fileIds = new Set(out.files.map(function (file) { return file.id; }));
+  const fileIds = new Set(
+    out.files.map(function (file) {
+      return file.id;
+    }),
+  );
   ["coverImageId", "backImageId", "spineImageId"].forEach(function (key) {
     if (out[key] && !fileIds.has(out[key])) out[key] = "";
   });
-  (Array.isArray(out.imageElements) ? out.imageElements : []).forEach(function (element) {
-    if (element && element.fileId && !fileIds.has(element.fileId)) element.fileId = "";
-  });
+  (Array.isArray(out.imageElements) ? out.imageElements : []).forEach(
+    function (element) {
+      if (element && element.fileId && !fileIds.has(element.fileId))
+        element.fileId = "";
+    },
+  );
   out.chapters.forEach(function (chapter) {
     if (chapter.imageId && !fileIds.has(chapter.imageId)) chapter.imageId = "";
   });
@@ -753,14 +1166,20 @@ TPP.load = async function () {
     TPP.bookDraftFingerprints[book.id] = fingerprint;
   });
   const activeId = localStorage.getItem(TPP.ACTIVE);
-  TPP.active = TPP.library.find(function (book) { return book.id === activeId; }) || TPP.library[0];
+  TPP.active =
+    TPP.library.find(function (book) {
+      return book.id === activeId;
+    }) || TPP.library[0];
 };
 TPP.loadStaleKeyLookup = async function () {
   try {
     const response = await fetch("data/stale-key-lookup.json");
     if (!response.ok) throw new Error("lookup");
     const data = await response.json();
-    TPP.staleKeyLookup = Array.isArray(data) && data.length ? data : TPP.clone(TPP.defaultStaleKeyLookup);
+    TPP.staleKeyLookup =
+      Array.isArray(data) && data.length
+        ? data
+        : TPP.clone(TPP.defaultStaleKeyLookup);
   } catch {
     TPP.staleKeyLookup = TPP.clone(TPP.defaultStaleKeyLookup);
   }
@@ -773,15 +1192,24 @@ TPP.clearRevisionTimer = function (bookId) {
 TPP.scheduleRevisionCommit = function (bookId, delay) {
   if (!bookId) return;
   TPP.clearRevisionTimer(bookId);
-  TPP.bookRevisionTimers[bookId] = setTimeout(function () {
-    const book = TPP.library.find(function (entry) { return entry.id === bookId; });
-    if (!book) return;
-    TPP.save("commit", bookId);
-  }, Math.max(100, Number(delay) || 900));
+  TPP.bookRevisionTimers[bookId] = setTimeout(
+    function () {
+      const book = TPP.library.find(function (entry) {
+        return entry.id === bookId;
+      });
+      if (!book) return;
+      TPP.save("commit", bookId);
+    },
+    Math.max(100, Number(delay) || 900),
+  );
 };
 TPP.save = function (mode, bookId) {
   mode = mode || "commit";
-  const targetIds = bookId ? [bookId] : TPP.library.map(function (book) { return book.id; });
+  const targetIds = bookId
+    ? [bookId]
+    : TPP.library.map(function (book) {
+        return book.id;
+      });
   TPP.library.forEach(function (book) {
     if (!targetIds.includes(book.id)) return;
     TPP.hydrateBookDates(book);
@@ -791,7 +1219,8 @@ TPP.save = function (mode, bookId) {
     if (mode === "draft") {
       if (priorDraft !== current) {
         if (previous !== undefined && current !== previous) {
-          book.subrevision = Math.max(0, Math.floor(Number(book.subrevision) || 0)) + 1;
+          book.subrevision =
+            Math.max(0, Math.floor(Number(book.subrevision) || 0)) + 1;
           book.updatedAt = TPP.nowIso();
         } else {
           book.subrevision = 0;
@@ -817,11 +1246,14 @@ TPP.setActive = function (book) {
   TPP.active = book;
   localStorage.setItem(TPP.ACTIVE, book.id);
   TPP.loadForm();
-  if (TPP.restoreReaderUi) TPP.restoreReaderUi(TPP.readSettingsUi ? TPP.readSettingsUi() : {});
+  if (TPP.restoreReaderUi)
+    TPP.restoreReaderUi(TPP.readSettingsUi ? TPP.readSettingsUi() : {});
   TPP.renderAll();
 };
 TPP.download = function (name, data) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
   TPP.downloadBlob(name, blob);
 };
 TPP.downloadBlob = function (name, blob) {
@@ -840,12 +1272,17 @@ TPP.showProgress = function (pct, msg) {
   wrap.hidden = false;
   bar.style.width = Math.max(2, Math.min(100, pct)) + "%";
   text.textContent = msg || "Rendering…";
-  if (pct >= 100) setTimeout(function () { wrap.hidden = true; }, 800);
+  if (pct >= 100)
+    setTimeout(function () {
+      wrap.hidden = true;
+    }, 800);
 };
 TPP.file = function (event, callback) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function () { callback(reader.result, file); };
+  reader.onload = function () {
+    callback(reader.result, file);
+  };
   reader.readAsDataURL(file);
 };
