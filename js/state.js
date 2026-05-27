@@ -219,6 +219,12 @@ TPP.defaultStaleKeyLookup = [
     note: "Page layout and paper appearance settings now live under page.",
   },
   {
+    path: "imageExportDpi",
+    schemaVersion: 11,
+    movedTo: [],
+    note: "Page image export DPI is no longer stored on the book. It is now chosen at ZIP export time and remembered as a global app preference.",
+  },
+  {
     path: "fontFamily",
     schemaVersion: 8,
     movedTo: ["text.fontFamily"],
@@ -1930,6 +1936,7 @@ TPP.hydrateBookDates = function (book) {
     "coverPreviewId",
     "coverPreviewImageId",
     "_pageCount",
+    "imageExportDpi",
   ].forEach(function (key) {
     delete book[key];
   });
@@ -2623,7 +2630,6 @@ TPP.norm = function (book) {
   out.sewingStations = TPP.sewingStations(out.sewingStations);
   out.sewingGuideOpacity = TPP.opacity(out.sewingGuideOpacity, 0.65);
   out.signatureGuideOpacity = TPP.opacity(out.signatureGuideOpacity, 0.65);
-  out.imageExportDpi = TPP.dpi(out.imageExportDpi);
   out.mediaCaptionSize = TPP.mediaCaptionSize(
     out.mediaCaptionSize,
     base.mediaCaptionSize,

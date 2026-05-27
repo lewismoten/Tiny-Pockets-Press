@@ -987,6 +987,15 @@ input[type="checkbox"] {
 .asset-dialog-card {
   max-width: min(62rem, calc(100vw - 2rem));
 }
+.image-export-dialog-card {
+  max-width: min(28rem, calc(100vw - 2rem));
+}
+.image-export-estimate {
+  margin-top: -0.25rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
 .asset-upload-row {
   display: flex;
   gap: 0.6rem;

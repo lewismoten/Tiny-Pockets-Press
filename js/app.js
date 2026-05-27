@@ -395,7 +395,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.exportReadablePdf();
   };
   document.getElementById("exportImagesZip").onclick = function () {
-    TPP.exportImagesZip();
+    TPP.openImageExportDialog();
   };
   document.getElementById("exportCoverPdf").onclick = function () {
     TPP.exportPdfFrom("cover");
@@ -659,7 +659,54 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (closeButton && dataTextDialog.open) dataTextDialog.close();
     });
   }
+  const imageExportDialog = document.getElementById("imageExportDialog");
+  const imageExportDpi = document.getElementById("imageExportDialogDpi");
+  const imageExportEstimate = document.getElementById(
+    "imageExportDialogEstimate",
+  );
+  if (imageExportDialog && imageExportDpi && imageExportEstimate) {
+    const updateEstimate = function () {
+      const pixels = TPP.imageExportPixels(Number(imageExportDpi.value) || 300);
+      imageExportEstimate.textContent =
+        "Estimated size: " +
+        pixels.width +
+        " × " +
+        pixels.height +
+        " pixels per page";
+    };
+    TPP.updateImageExportEstimate = updateEstimate;
+    imageExportDpi.addEventListener("input", updateEstimate);
+    imageExportDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === imageExportDialog && !card && imageExportDialog.open) {
+        imageExportDialog.close();
+        return;
+      }
+      const button = e.target.closest("[data-action]");
+      if (!button) return;
+      if (button.dataset.action === "cancel" && imageExportDialog.open) {
+        imageExportDialog.close();
+        return;
+      }
+      if (button.dataset.action === "export-images") {
+        const dpi = TPP.dpi(Number(imageExportDpi.value) || 300);
+        imageExportDpi.value = dpi;
+        TPP.writeImageExportUi({ dpi: dpi });
+        if (imageExportDialog.open) imageExportDialog.close();
+        TPP.exportImagesZip(dpi);
+      }
+    });
+  }
 });
+
+TPP.openImageExportDialog = function () {
+  const dialog = document.getElementById("imageExportDialog");
+  const input = document.getElementById("imageExportDialogDpi");
+  if (!dialog || !input || typeof dialog.showModal !== "function") return;
+  input.value = TPP.dpi(TPP.imageExportUi().dpi || 300);
+  if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
+  dialog.showModal();
+};
 
 TPP.assetDialogTarget = null;
 TPP.assetTargetSpec = function (targetType, targetKey) {
@@ -1003,6 +1050,28 @@ TPP.readSettingsUi = function () {
 TPP.writeSettingsUi = function (state) {
   localStorage.setItem(TPP.UI, JSON.stringify(state || {}));
 };
+TPP.imageExportUi = function () {
+  const state = TPP.readSettingsUi();
+  return Object.assign({ dpi: 300 }, state.imageExport || {});
+};
+TPP.writeImageExportUi = function (patch) {
+  const state = TPP.readSettingsUi();
+  const imageExport = Object.assign(
+    { dpi: 300 },
+    state.imageExport || {},
+    patch || {},
+  );
+  TPP.writeSettingsUi(Object.assign({}, state, { imageExport: imageExport }));
+};
+TPP.imageExportPixels = function (dpi) {
+  const settings = TPP.settings();
+  const targetDpi = TPP.dpi(dpi);
+  return {
+    dpi: targetDpi,
+    width: Math.round(settings.page.w * targetDpi),
+    height: Math.round(settings.page.h * targetDpi),
+  };
+};
 TPP.readDataTab = function (validTabs) {
   const state = TPP.readSettingsUi();
   const stored =
@@ -1070,6 +1139,7 @@ TPP.saveSettingsUi = function () {
   if (TPP.active) readerByBook[TPP.bookId(TPP.active)] = TPP.readerUiState();
   TPP.writeSettingsUi({
     dataTabByBook: dataTabByBook,
+    imageExport: state.imageExport || { dpi: 300 },
     readerByBook: readerByBook,
     open: open,
     scrollTop: controls ? controls.scrollTop : 0,

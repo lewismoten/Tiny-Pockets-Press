@@ -98,7 +98,6 @@ TPP.settings = function () {
     sewingStations: TPP.sewingStations(book.sewingStations),
     sewingGuideOpacity: TPP.opacity(book.sewingGuideOpacity, 0.65),
     signatureGuideOpacity: TPP.opacity(book.signatureGuideOpacity, 0.65),
-    imageExportDpi: TPP.dpi(book.imageExportDpi),
     mediaCaptionSize: TPP.mediaCaptionSize(
       book.mediaCaptionSize,
       book.captionSize,

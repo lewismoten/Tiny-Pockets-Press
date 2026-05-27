@@ -313,7 +313,6 @@
         <label><input id="showFoldGuides" type="checkbox"> Sewing/fold guides</label>
         <label><input id="showPageGuides" type="checkbox"> Light page outlines</label>
         <label>Print Top Offset (in) <input id="printTopOffset" type="number" min="0" step=".01"></label>
-        <label>Image Export DPI <input id="imageExportDpi" type="number" min="72" max="1200" step="25"></label>
         <div class="two">
           <label>Sewing Stations <input id="sewingStations" type="number" min="2" max="5" step="1"></label>
           <label>Sewing Opacity <input id="sewingGuideOpacity" type="number" min="0" max="1" step=".05"></label>
@@ -405,6 +404,18 @@
     <div id="assetDialogList" class="asset-dialog-list"></div>
     <div class="modal-actions">
       <button type="button" data-action="close">Close</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="imageExportDialog" class="modal">
+  <form method="dialog" class="modal-card image-export-dialog-card">
+    <h3>Export Page Images ZIP</h3>
+    <p>Choose the output DPI for individual page images. This setting is remembered globally for future ZIP exports.</p>
+    <label>DPI <input id="imageExportDialogDpi" type="number" min="72" max="1200" step="25"></label>
+    <div id="imageExportDialogEstimate" class="image-export-estimate"></div>
+    <div class="modal-actions">
+      <button type="button" data-action="cancel">Cancel</button>
+      <button type="button" class="primary" data-action="export-images">Export ZIP</button>
     </div>
   </form>
 </dialog>

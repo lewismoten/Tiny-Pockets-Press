@@ -250,7 +250,6 @@ TPP.loadForm = function () {
     book.sewingGuideOpacity = TPP.opacity(book.sewingGuideOpacity, 0.65);
   if (book)
     book.signatureGuideOpacity = TPP.opacity(book.signatureGuideOpacity, 0.65);
-  if (book) book.imageExportDpi = TPP.dpi(book.imageExportDpi);
   if (book)
     book.mediaCaptionSize = TPP.mediaCaptionSize(
       book.mediaCaptionSize,
@@ -286,7 +285,6 @@ TPP.sync = function (mode) {
   book.sewingStations = TPP.sewingStations(book.sewingStations);
   book.sewingGuideOpacity = TPP.opacity(book.sewingGuideOpacity, 0.65);
   book.signatureGuideOpacity = TPP.opacity(book.signatureGuideOpacity, 0.65);
-  book.imageExportDpi = TPP.dpi(book.imageExportDpi);
   book.mediaCaptionSize = TPP.mediaCaptionSize(
     book.mediaCaptionSize,
     book.captionSize,
@@ -299,8 +297,6 @@ TPP.sync = function (mode) {
   if (sewingOpacity) sewingOpacity.value = book.sewingGuideOpacity;
   const signatureOpacity = document.getElementById("signatureGuideOpacity");
   if (signatureOpacity) signatureOpacity.value = book.signatureGuideOpacity;
-  const imageExportDpi = document.getElementById("imageExportDpi");
-  if (imageExportDpi) imageExportDpi.value = book.imageExportDpi;
   const mediaCaptionSize = document.getElementById("mediaCaptionSize");
   if (mediaCaptionSize) mediaCaptionSize.value = book.mediaCaptionSize;
   if (TPP.readTextElementControls) TPP.readTextElementControls(book);

@@ -132,7 +132,7 @@ TPP.exportReadablePdf = async function () {
   pdf.save(name);
   TPP.showProgress(100, "eBook PDF complete");
 };
-TPP.exportImagesZip = async function () {
+TPP.exportImagesZip = async function (dpi) {
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();
@@ -142,7 +142,8 @@ TPP.exportImagesZip = async function () {
   }
   const zip = new JSZip();
   const mount = document.createElement("div");
-  const scale = settings.imageExportDpi / 96;
+  const targetDpi = TPP.dpi(dpi);
+  const scale = targetDpi / 96;
   mount.style.cssText =
     "position:fixed;left:-9999px;top:0;pointer-events:none;";
   document.body.appendChild(mount);
@@ -187,7 +188,7 @@ TPP.exportImagesZip = async function () {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-") +
       "-pages-" +
-      settings.imageExportDpi +
+      targetDpi +
       "dpi.zip";
     TPP.downloadBlob(name, blob);
   } finally {
