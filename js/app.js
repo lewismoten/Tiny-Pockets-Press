@@ -1254,7 +1254,8 @@ TPP.toast = function (message) {
   if (!toast) return;
   clearTimeout(TPP.toastTimer);
   toast.textContent = message;
-  if (typeof toast.show === "function" && !toast.open) toast.show();
+  if (toast.open && typeof toast.close === "function") toast.close();
+  if (typeof toast.showModal === "function") toast.showModal();
   toast.classList.add("show");
   TPP.toastTimer = setTimeout(function () {
     toast.classList.remove("show");
