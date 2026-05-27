@@ -143,6 +143,19 @@ TPP.isoDateInfo = function (value) {
 };
 TPP.dataImageValue = function (book, key, value) {
   if (typeof value === "string" && /^data:image\//.test(value)) return value;
+  if (
+    typeof value === "string" &&
+    /imageElementId$/i.test(String(key || "")) &&
+    Array.isArray(book && book.imageElements)
+  ) {
+    const element = book.imageElements.find(function (entry) {
+      return entry && entry.id === value;
+    });
+    if (element && element.fileId) {
+      const file = TPP.fileAsset(book, element.fileId);
+      if (file && /^image\//.test(file.type || "")) return file.data;
+    }
+  }
   if (typeof value === "string" && book && TPP.fileAsset(book, value)) {
     const file = TPP.fileAsset(book, value);
     if (file && /^image\//.test(file.type || "")) return file.data;
@@ -546,6 +559,7 @@ TPP.dataSchemaKeys = function (context) {
     ]);
   if (context === "coverFront")
     return new Set([
+      "imageElementId",
       "overflowImage",
       "clipImageToFrame",
       "bg1",
@@ -1134,6 +1148,9 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.textElements;
   delete copy.chapters;
   delete copy.imageElements;
+  delete copy.coverImageId;
+  delete copy.backImageId;
+  delete copy.spineImageId;
   return copy;
 };
 TPP.dataPageObject = function (book) {

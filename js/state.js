@@ -367,6 +367,7 @@ TPP.TEXT_FIELDS = [
   "justify",
 ];
 TPP.COVER_FRONT_FIELDS = [
+  "coverImageId",
   "coverOverflowImage",
   "coverClipImageToFrame",
   "coverBg1",
@@ -375,6 +376,7 @@ TPP.COVER_FRONT_FIELDS = [
   "coverBorderOn",
 ];
 TPP.BACK_COVER_FIELDS = [
+  "backImageId",
   "backText",
   "backTextY",
   "backTextSize",
@@ -389,6 +391,7 @@ TPP.BACK_COVER_FIELDS = [
   "backImgRotate",
 ];
 TPP.SPINE_FIELDS = [
+  "spineImageId",
   "spineImgX",
   "spineImgY",
   "spineImgZoom",
@@ -645,17 +648,72 @@ TPP.coverFrontInfo = function (book) {
   book.coverFront = Object.assign({}, fallback, book.coverFront || {});
   return book.coverFront;
 };
+TPP.coverFrontImageElement = function (book) {
+  return TPP.findImageElement(book, "front", "cover");
+};
 TPP.attachCoverFrontAccessors = function (book) {
   if (!book || typeof book !== "object") return book;
-  const map = {
-    coverOverflowImage: "overflowImage",
-    coverClipImageToFrame: "clipImageToFrame",
-    coverBg1: "bg1",
-    coverBg2: "bg2",
-    coverBorder: "border",
-    coverBorderOn: "borderOn",
+  const definitions = {
+    coverImageId: {
+      get: function () {
+        const element = TPP.coverFrontImageElement(book);
+        return (element && element.fileId) || "";
+      },
+      set: function (value) {
+        const element = TPP.coverFrontImageElement(book);
+        if (element) element.fileId = value || "";
+      },
+    },
+    coverOverflowImage: {
+      get: function () {
+        return TPP.coverFrontInfo(book).overflowImage;
+      },
+      set: function (value) {
+        TPP.coverFrontInfo(book).overflowImage = value;
+      },
+    },
+    coverClipImageToFrame: {
+      get: function () {
+        return TPP.coverFrontInfo(book).clipImageToFrame;
+      },
+      set: function (value) {
+        TPP.coverFrontInfo(book).clipImageToFrame = value;
+      },
+    },
+    coverBg1: {
+      get: function () {
+        return TPP.coverFrontInfo(book).bg1;
+      },
+      set: function (value) {
+        TPP.coverFrontInfo(book).bg1 = value;
+      },
+    },
+    coverBg2: {
+      get: function () {
+        return TPP.coverFrontInfo(book).bg2;
+      },
+      set: function (value) {
+        TPP.coverFrontInfo(book).bg2 = value;
+      },
+    },
+    coverBorder: {
+      get: function () {
+        return TPP.coverFrontInfo(book).border;
+      },
+      set: function (value) {
+        TPP.coverFrontInfo(book).border = value;
+      },
+    },
+    coverBorderOn: {
+      get: function () {
+        return TPP.coverFrontInfo(book).borderOn;
+      },
+      set: function (value) {
+        TPP.coverFrontInfo(book).borderOn = value;
+      },
+    },
   };
-  Object.keys(map).forEach(function (field) {
+  Object.keys(definitions).forEach(function (field) {
     const existing = Object.getOwnPropertyDescriptor(book, field);
     if (
       existing &&
@@ -667,12 +725,8 @@ TPP.attachCoverFrontAccessors = function (book) {
     Object.defineProperty(book, field, {
       configurable: true,
       enumerable: false,
-      get: function () {
-        return TPP.coverFrontInfo(book)[map[field]];
-      },
-      set: function (value) {
-        TPP.coverFrontInfo(book)[map[field]] = value;
-      },
+      get: definitions[field].get,
+      set: definitions[field].set,
     });
   });
   return book;
@@ -680,6 +734,9 @@ TPP.attachCoverFrontAccessors = function (book) {
 TPP.syncCoverFrontFromLegacyFields = function (book) {
   if (!book || typeof book !== "object") return;
   const coverFront = TPP.coverFrontInfo(book);
+  const imageElement = TPP.coverFrontImageElement(book);
+  if (imageElement && !coverFront.imageElementId)
+    coverFront.imageElementId = imageElement.id || "front-cover-image";
   if ("coverOverflowImage" in book)
     coverFront.overflowImage = book.coverOverflowImage;
   if ("coverClipImageToFrame" in book)
@@ -718,6 +775,16 @@ TPP.backCoverImageElement = function (book) {
 TPP.attachBackCoverAccessors = function (book) {
   if (!book || typeof book !== "object") return book;
   const definitions = {
+    backImageId: {
+      get: function () {
+        const element = TPP.backCoverImageElement(book);
+        return (element && element.fileId) || "";
+      },
+      set: function (value) {
+        const element = TPP.backCoverImageElement(book);
+        if (element) element.fileId = value || "";
+      },
+    },
     backText: {
       get: function () {
         const element = TPP.backCoverTextElement(book);
@@ -899,6 +966,16 @@ TPP.spineAuthorElement = function (book) {
 TPP.attachSpineAccessors = function (book) {
   if (!book || typeof book !== "object") return book;
   const definitions = {
+    spineImageId: {
+      get: function () {
+        const element = TPP.spineImageElement(book);
+        return (element && element.fileId) || "";
+      },
+      set: function (value) {
+        const element = TPP.spineImageElement(book);
+        if (element) element.fileId = value || "";
+      },
+    },
     spineImgX: {
       get: function () {
         const element = TPP.spineImageElement(book);
@@ -1877,7 +1954,7 @@ TPP.syncLegacyImageFieldsFromElements = function (book) {
   const back = TPP.findImageElement(book, "back", "cover");
   const spine = TPP.findImageElement(book, "spine", "cover");
   if (front) {
-    book.coverImageId = front.fileId || "";
+    TPP.coverFrontInfo(book).imageElementId = front.id || "front-cover-image";
     book.coverImgX = Number(front.x) || 0;
     book.coverImgY = Number(front.y) || 0;
     book.coverImgZoom = Number(front.zoom) || 120;
@@ -1937,6 +2014,8 @@ TPP.syncImageElementsFromLegacyFields = function (book) {
       rotate: Number(book.spineImgRotate) || 0,
       placement: "cover",
     });
+  if (front)
+    TPP.coverFrontInfo(book).imageElementId = front.id || "front-cover-image";
   if (back)
     TPP.backCoverInfo(book).imageElementId = back.id || "back-cover-image";
   if (spine) TPP.spineInfo(book).imageElementId = spine.id || "spine-image";

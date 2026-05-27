@@ -198,6 +198,7 @@ TPP.fallbackBook = function () {
   return {
     schemaVersion: TPP.SCHEMA_VERSION || 1,
     coverFront: {
+      imageElementId: "front-cover-image",
       overflowImage: true,
       clipImageToFrame: false,
       bg1: "#182b4d",
