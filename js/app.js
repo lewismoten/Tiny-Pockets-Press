@@ -2260,11 +2260,13 @@ TPP.renderSidebarMode = function () {
   const controls = document.querySelector(".controls");
   const dataSidebar = document.getElementById("dataSidebar");
   const bookActionsBar = document.getElementById("bookActionsBar");
+  const bookTabsBar = document.getElementById("bookTabsBar");
   const dataMode = TPP.view === "data";
   const softwareMode = TPP.view === "software";
   const libraryMode = TPP.view === "library";
   if (controls) controls.hidden = dataMode || softwareMode || libraryMode;
   if (dataSidebar) dataSidebar.hidden = !dataMode;
+  if (bookTabsBar) bookTabsBar.hidden = softwareMode || libraryMode;
   if (bookActionsBar) bookActionsBar.hidden = softwareMode || libraryMode;
 };
 
