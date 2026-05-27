@@ -419,6 +419,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   const dataTextDialog = document.getElementById("dataTextDialog");
   if (dataPanel) {
     dataPanel.addEventListener("click", function (e) {
+      const tabButton = e.target.closest("[data-data-tab]");
+      if (tabButton) {
+        TPP.writeDataTab(tabButton.dataset.dataTab || "top");
+        TPP.renderData();
+        return;
+      }
       const chip = e.target.closest("[data-image-src]");
       if (chip) {
         TPP.openDataImagePreview(chip.dataset.imageSrc || "", chip.dataset.imageTitle || "Image Preview");
@@ -435,12 +441,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         return;
       }
       const bytesLabel = e.target.closest("[data-bytes]");
-      if (bytesLabel) TPP.toast(bytesLabel.dataset.bytes || "");
-    });
-  }
-  const dataSummary = document.getElementById("dataSummary");
-  if (dataSummary) {
-    dataSummary.addEventListener("click", function (e) {
+      if (bytesLabel) {
+        TPP.toast(bytesLabel.dataset.bytes || "");
+        return;
+      }
       const remove = e.target.closest("[data-stale-remove]");
       if (remove) {
         TPP.removeStaleDataEntry(remove.dataset.staleRemove || "");
@@ -690,6 +694,20 @@ TPP.readSettingsUi = function () {
 };
 TPP.writeSettingsUi = function (state) {
   localStorage.setItem(TPP.UI, JSON.stringify(state || {}));
+};
+TPP.readDataTab = function (validTabs) {
+  const state = TPP.readSettingsUi();
+  const stored = state && state.dataTabByBook && TPP.active ? state.dataTabByBook[TPP.active.id] : "";
+  const tabs = Array.isArray(validTabs) ? validTabs : [];
+  if (stored && tabs.includes(stored)) return stored;
+  return tabs[0] || "top";
+};
+TPP.writeDataTab = function (tabId) {
+  if (!TPP.active) return;
+  const state = TPP.readSettingsUi();
+  const dataTabByBook = Object.assign({}, state.dataTabByBook || {});
+  dataTabByBook[TPP.active.id] = tabId || "top";
+  TPP.writeSettingsUi(Object.assign({}, state, { dataTabByBook: dataTabByBook }));
 };
 TPP.readerUiState = function () {
   const mode = document.getElementById("readerMode");

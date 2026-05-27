@@ -393,9 +393,9 @@ TPP.registerStaleEntry = function (entry) {
   TPP.dataStaleStore[id] = entry;
   return id;
 };
-TPP.dataStaleSummaryHtml = function (entries) {
-  if (!entries.length) return "";
-  return '<details class="data-stale-section"><summary>Stale Keys (' + entries.length + ')</summary>' +
+TPP.dataStaleReportHtml = function (entries) {
+  if (!entries.length) return '<div class="data-stale-empty">No stale keys detected.</div>';
+  return '<section class="data-stale-section">' +
     '<div class="data-stale-toolbar"><button type="button" class="primary alt" data-stale-remove-all="1">Remove All Stale Keys</button></div>' +
     '<div class="data-stale-list">' + entries.map(function (entry) {
       const id = TPP.registerStaleEntry(entry);
@@ -418,7 +418,7 @@ TPP.dataStaleSummaryHtml = function (entries) {
         '<div><div class="data-stale-path">' + TPP.esc(entry.label) + '</div><div class="data-stale-status">' + TPP.esc(label) + '</div>' + details + '</div>' +
         '<button type="button" class="small" data-stale-remove="' + TPP.esc(id) + '">Remove</button>' +
       '</article>';
-    }).join("") + "</div></details>";
+    }).join("") + "</div></section>";
 };
 TPP.dataKeyLabelHtml = function (context, key) {
   const status = TPP.dataSchemaStatus(context, key);
@@ -473,6 +473,36 @@ TPP.dataObjectHtml = function (book, obj, compact, context) {
     return '<div class="data-field"><div class="data-field-name">' + TPP.dataKeyLabelHtml(context || "root", entry[0]) + '</div><div class="data-field-value">' + TPP.dataValueHtml(book, entry[0], entry[1], compact) + "</div></div>";
   }).join("") + "</div>";
 };
+TPP.dataTopLevelObject = function (book) {
+  const copy = Object.assign({}, book || {});
+  delete copy.files;
+  delete copy.textElements;
+  delete copy.chapters;
+  delete copy.imageElements;
+  return copy;
+};
+TPP.dataTabs = function (book, stale) {
+  const tabs = [
+    { id: "top", label: "Top-Level", html: TPP.dataObjectHtml(book, TPP.dataTopLevelObject(book), false, "root") },
+    { id: "files", label: "Files", html: TPP.dataArrayHtml(book, "files", Array.isArray(book.files) ? book.files : [], false) },
+    { id: "text-elements", label: "Text Elements", html: TPP.dataArrayHtml(book, "textElements", Array.isArray(book.textElements) ? book.textElements : [], false) },
+    { id: "chapters", label: "Chapters", html: TPP.dataArrayHtml(book, "chapters", Array.isArray(book.chapters) ? book.chapters : [], false) },
+    { id: "image-elements", label: "Image Elements", html: TPP.dataArrayHtml(book, "imageElements", Array.isArray(book.imageElements) ? book.imageElements : [], false) }
+  ];
+  if (stale.length) tabs.push({ id: "stale", label: "Stale Keys", html: TPP.dataStaleReportHtml(stale), count: stale.length });
+  return tabs;
+};
+TPP.renderDataTabs = function (tabs, activeId) {
+  const active = tabs.find(function (tab) { return tab.id === activeId; }) || tabs[0];
+  return '<article class="data-card">' +
+    '<div class="data-tabs" role="tablist" aria-label="Book data sections">' + tabs.map(function (tab) {
+      const selected = tab.id === active.id;
+      const label = tab.count ? tab.label + " (" + tab.count + ")" : tab.label;
+      return '<button type="button" class="data-tab' + (selected ? " active" : "") + '" role="tab" aria-selected="' + (selected ? "true" : "false") + '" data-data-tab="' + TPP.esc(tab.id) + '">' + TPP.esc(label) + "</button>";
+    }).join("") + "</div>" +
+    '<div class="data-tab-panel" role="tabpanel">' + active.html + "</div>" +
+  "</article>";
+};
 TPP.renderData = function () {
   if (!TPP.active) return;
   TPP.sync("nosave");
@@ -483,9 +513,10 @@ TPP.renderData = function () {
   TPP.dataPreviewStore = {};
   TPP.dataStaleStore = {};
   const stale = TPP.collectDataStaleEntries(book, "root", [], []);
-  summary.innerHTML = '<div class="data-summary-copy">Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.</div>' +
-    TPP.dataStaleSummaryHtml(stale);
-  panel.innerHTML = '<article class="data-card"><div class="data-node">' + TPP.dataObjectHtml(book, book, false, "root") + "</div></article>";
+  const tabs = TPP.dataTabs(book, stale);
+  const activeTab = TPP.readDataTab(tabs.map(function (tab) { return tab.id; }));
+  summary.innerHTML = '<div class="data-summary-copy">Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.</div>';
+  panel.innerHTML = TPP.renderDataTabs(tabs, activeTab);
 };
 TPP.registerDataPreview = function (title, body, mode) {
   const id = "preview-" + TPP.uid();
