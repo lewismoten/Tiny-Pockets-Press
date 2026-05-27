@@ -83,7 +83,6 @@
             </select>
           </label>
         </div>
-        <label><input id="includeToc" type="checkbox"> Include table of contents</label>
       </details>
 
       <details open>
@@ -247,6 +246,25 @@
       </details>
 
       <details>
+        <summary>Table of Contents</summary>
+        <label><input id="includeToc" type="checkbox"> Include table of contents</label>
+        <label>Numbering
+          <select id="tocNumberType">
+            <option value="page">Page</option>
+            <option value="chapter">Chapter</option>
+          </select>
+        </label>
+        <label>Leader Style
+          <select id="tocLeader">
+            <option value="dots">Dots</option>
+            <option value="line">Line</option>
+            <option value="none">None</option>
+          </select>
+        </label>
+        <label>Leader Color <input id="tocLeaderColor" type="color" class="color-box"></label>
+      </details>
+
+      <details>
         <summary>Numbers, TOC, Ornaments</summary>
         <label>Page Number Mode
           <select id="pageNumMode"><option value="none">None</option><option value="center">Center</option><option value="edge">Outer Edge</option></select>
@@ -259,9 +277,6 @@
         <label><input id="reverseOrnamentsBySide" type="checkbox"> Reverse odd/even ornament side</label>
         <label>Chapter End Ornament <select id="chapterEndOrnament"><option value="">None</option><option>❦</option><option>☙ ❧</option><option>◆</option><option>***</option></select></label>
         <label><input id="chapterEndCentered" type="checkbox"> Center chapter end ornament</label>
-        <label>TOC Number <select id="tocNumberType"><option value="page">Page</option><option value="chapter">Chapter</option></select></label>
-        <label>TOC Leader <select id="tocLeader"><option value="dots">Dots</option><option value="line">Line</option><option value="none">None</option></select></label>
-        <label>Leader Color <input id="tocLeaderColor" type="color" class="color-box"></label>
       </details>
 
       <details>
