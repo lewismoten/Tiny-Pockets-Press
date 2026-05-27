@@ -105,6 +105,10 @@
           <span class="book-toolbar-icon" aria-hidden="true">🧷</span>
           <span class="book-toolbar-label">Cover PDF</span>
         </button>
+        <button id="printBrowser" class="book-toolbar-button">
+          <span class="book-toolbar-icon" aria-hidden="true">🖨️</span>
+          <span class="book-toolbar-label">Print</span>
+        </button>
         <button id="toggleBookButtonText" class="book-toolbar-button">
           <span class="book-toolbar-icon" aria-hidden="true">🏷️</span>
           <span class="book-toolbar-label">Hide Labels</span>
@@ -628,7 +632,6 @@
               ><input id="duplexBackSides" type="checkbox" /> Include
               blank/opposite-side pages for duplex printers</label
             >
-            <button id="printBrowser">Print Current Preview</button>
           </details>
         </section>
         <section id="dataSidebar" class="data-sidebar" hidden></section>
@@ -737,9 +740,7 @@
                 id="librarySearch"
                 placeholder="Search title, author, or full text"
               /><button id="libraryNewBook" type="button">New</button>
-              <button id="libraryUploadBook" type="button">
-                Upload Books
-              </button>
+              <button id="libraryUploadBook" type="button">Upload Books</button>
               <button id="libraryDownloadLibrary" type="button">
                 Download Library
               </button>
