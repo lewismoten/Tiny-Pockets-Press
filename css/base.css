@@ -67,6 +67,10 @@ button {
 button.primary {
   background: #ffcc66;
 }
+.button-cancel {
+  background: #d8d0c3;
+  color: #4a403b;
+}
 .primary.alt {
   background: #bde3ff;
 }

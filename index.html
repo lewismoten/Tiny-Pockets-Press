@@ -42,8 +42,8 @@
   <div class="header-actions">
     <button id="saveBook">Save</button>
     <button id="exportInteriorPdf" class="primary">Interior PDF</button>
-    <button id="exportReadablePdf" class="primary alt">eBook PDF</button>
-    <button id="exportImagesZip" class="primary alt">Page Images ZIP</button>
+    <button id="exportReadablePdf" class="primary alt">eBook</button>
+    <button id="exportImagesZip" class="primary alt">Page Images</button>
     <button id="exportCoverPdf" class="primary alt">Cover PDF</button>
   </div>
 </header>
@@ -409,8 +409,7 @@
 </dialog>
 <dialog id="imageExportDialog" class="modal">
   <form method="dialog" class="modal-card image-export-dialog-card">
-    <h3>Export Page Images ZIP</h3>
-    <p>Choose the output DPI for individual page images. This setting is remembered globally for future ZIP exports.</p>
+    <h3>Export Page Images</h3>
     <div class="image-export-dialog-layout">
       <div class="image-export-dialog-controls">
         <label>Common DPI
@@ -495,12 +494,12 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button type="button" id="imageExportDownloadBefore" disabled>Download Before</button>
-      <button type="button" id="imageExportDownloadAfter" disabled>Download After</button>
-      <button type="button" data-action="cancel">Cancel</button>
-      <button type="button" data-action="export-mp4">Export MP4</button>
-      <button type="button" data-action="export-animated-gif">Export Animated GIF</button>
-      <button type="button" class="primary" data-action="export-images">Export ZIP</button>
+      <button type="button" id="imageExportDownloadBefore" disabled>Before</button>
+      <button type="button" id="imageExportDownloadAfter" disabled>After</button>
+      <button type="button" data-action="export-mp4">MP4</button>
+      <button type="button" data-action="export-animated-gif">Animated GIF</button>
+      <button type="button" data-action="export-images">ZIP</button>
+      <button type="button" class="button-cancel" data-action="cancel">Cancel</button>
     </div>
   </form>
 </dialog>
