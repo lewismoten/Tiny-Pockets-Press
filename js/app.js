@@ -660,11 +660,27 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
   const imageExportDialog = document.getElementById("imageExportDialog");
+  const imageExportPreset = document.getElementById("imageExportDialogPreset");
   const imageExportDpi = document.getElementById("imageExportDialogDpi");
+  const imageExportCustomWrap = document.getElementById(
+    "imageExportDialogCustomWrap",
+  );
   const imageExportEstimate = document.getElementById(
     "imageExportDialogEstimate",
   );
-  if (imageExportDialog && imageExportDpi && imageExportEstimate) {
+  if (
+    imageExportDialog &&
+    imageExportPreset &&
+    imageExportDpi &&
+    imageExportCustomWrap &&
+    imageExportEstimate
+  ) {
+    const presetValues = ["72", "96", "150", "200", "300", "600"];
+    const syncPresetUi = function () {
+      const preset = imageExportPreset.value;
+      imageExportCustomWrap.hidden = preset !== "custom";
+      if (preset !== "custom") imageExportDpi.value = preset;
+    };
     const updateEstimate = function () {
       const pixels = TPP.imageExportPixels(Number(imageExportDpi.value) || 300);
       imageExportEstimate.textContent =
@@ -675,6 +691,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         " pixels per page";
     };
     TPP.updateImageExportEstimate = updateEstimate;
+    imageExportPreset.addEventListener("change", function () {
+      syncPresetUi();
+      updateEstimate();
+    });
     imageExportDpi.addEventListener("input", updateEstimate);
     imageExportDialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");
@@ -691,6 +711,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (button.dataset.action === "export-images") {
         const dpi = TPP.dpi(Number(imageExportDpi.value) || 300);
         imageExportDpi.value = dpi;
+        imageExportPreset.value = presetValues.includes(String(dpi))
+          ? String(dpi)
+          : "custom";
+        syncPresetUi();
         TPP.writeImageExportUi({ dpi: dpi });
         if (imageExportDialog.open) imageExportDialog.close();
         TPP.exportImagesZip(dpi);
@@ -701,9 +725,23 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 TPP.openImageExportDialog = function () {
   const dialog = document.getElementById("imageExportDialog");
+  const preset = document.getElementById("imageExportDialogPreset");
   const input = document.getElementById("imageExportDialogDpi");
-  if (!dialog || !input || typeof dialog.showModal !== "function") return;
-  input.value = TPP.dpi(TPP.imageExportUi().dpi || 300);
+  const customWrap = document.getElementById("imageExportDialogCustomWrap");
+  if (
+    !dialog ||
+    !preset ||
+    !input ||
+    !customWrap ||
+    typeof dialog.showModal !== "function"
+  )
+    return;
+  const dpi = TPP.dpi(TPP.imageExportUi().dpi || 300);
+  input.value = dpi;
+  preset.value = ["72", "96", "150", "200", "300", "600"].includes(String(dpi))
+    ? String(dpi)
+    : "custom";
+  customWrap.hidden = preset.value !== "custom";
   if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
   dialog.showModal();
 };

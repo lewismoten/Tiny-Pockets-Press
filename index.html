@@ -411,7 +411,18 @@
   <form method="dialog" class="modal-card image-export-dialog-card">
     <h3>Export Page Images ZIP</h3>
     <p>Choose the output DPI for individual page images. This setting is remembered globally for future ZIP exports.</p>
-    <label>DPI <input id="imageExportDialogDpi" type="number" min="72" max="1200" step="25"></label>
+    <label>Common DPI
+      <select id="imageExportDialogPreset">
+        <option value="72">72 DPI</option>
+        <option value="96">96 DPI</option>
+        <option value="150">150 DPI</option>
+        <option value="200">200 DPI</option>
+        <option value="300">300 DPI</option>
+        <option value="600">600 DPI</option>
+        <option value="custom">Custom</option>
+      </select>
+    </label>
+    <label id="imageExportDialogCustomWrap" hidden>Custom DPI <input id="imageExportDialogDpi" type="number" min="72" max="1200" step="1"></label>
     <div id="imageExportDialogEstimate" class="image-export-estimate"></div>
     <div class="modal-actions">
       <button type="button" data-action="cancel">Cancel</button>
