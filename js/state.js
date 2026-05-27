@@ -13,6 +13,32 @@ TPP.bookFingerprints = {};
 TPP.bookDraftFingerprints = {};
 TPP.bookRevisionTimers = {};
 TPP.staleKeyLookup = [];
+TPP.defaultStaleKeyLookup = [
+  {
+    path: "chapters[].imageWidth",
+    schemaVersion: 3,
+    movedTo: ["chapters[].imageZoom"],
+    note: "Chapter image sizing was standardized on zoom so image elements and chapter settings use the same geometry terminology."
+  },
+  {
+    path: "backUseFrontImage",
+    schemaVersion: 2,
+    movedTo: ["backImageId"],
+    note: "The back cover now chooses an explicit shared image asset instead of inheriting the front cover image through a boolean flag."
+  },
+  {
+    path: "coverMetaSize",
+    schemaVersion: 2,
+    movedTo: ["coverAuthorSize", "coverSeriesSize", "coverPublisherSize"],
+    note: "Shared cover metadata sizing was replaced by per-element size controls for author, series, and publisher."
+  },
+  {
+    path: "coverPreview",
+    schemaVersion: 3,
+    movedTo: ["coverPreviewId"],
+    note: "Generated cover previews now live in the shared file registry and are referenced by id instead of embedding raw image data directly on the book."
+  }
+];
 
 TPP.clone = function (obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -734,9 +760,9 @@ TPP.loadStaleKeyLookup = async function () {
     const response = await fetch("data/stale-key-lookup.json");
     if (!response.ok) throw new Error("lookup");
     const data = await response.json();
-    TPP.staleKeyLookup = Array.isArray(data) ? data : [];
+    TPP.staleKeyLookup = Array.isArray(data) && data.length ? data : TPP.clone(TPP.defaultStaleKeyLookup);
   } catch {
-    TPP.staleKeyLookup = [];
+    TPP.staleKeyLookup = TPP.clone(TPP.defaultStaleKeyLookup);
   }
 };
 TPP.clearRevisionTimer = function (bookId) {
