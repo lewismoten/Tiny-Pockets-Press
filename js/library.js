@@ -476,26 +476,40 @@ TPP.dataObjectHtml = function (book, obj, compact, context) {
 TPP.dataJsonTokenHtml = function (type, text) {
   return '<span class="json-token ' + type + '">' + TPP.esc(text) + "</span>";
 };
-TPP.dataHighlightedJson = function (value) {
-  return JSON.stringify(value, null, 2).replace(
-    /("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b/g,
-    function (match, stringToken, keyColon, literalToken) {
-      if (stringToken) {
-        if (keyColon) return TPP.dataJsonTokenHtml("key", stringToken) + TPP.esc(keyColon);
-        return TPP.dataJsonTokenHtml("string", stringToken);
-      }
-      if (literalToken === "true" || literalToken === "false") return TPP.dataJsonTokenHtml("boolean", match);
-      if (literalToken === "null") return TPP.dataJsonTokenHtml("null", match);
-      return TPP.dataJsonTokenHtml("number", match);
-    }
-  );
+TPP.dataJsonPrimitiveHtml = function (value) {
+  if (value === null) return TPP.dataJsonTokenHtml("null", "null");
+  if (typeof value === "string") return TPP.dataJsonTokenHtml("string", JSON.stringify(value));
+  if (typeof value === "number") return TPP.dataJsonTokenHtml("number", String(value));
+  if (typeof value === "boolean") return TPP.dataJsonTokenHtml("boolean", String(value));
+  return TPP.dataJsonTokenHtml("string", JSON.stringify(String(value)));
+};
+TPP.dataJsonTreeHtml = function (value, depth, label) {
+  const level = Number(depth) || 0;
+  if (Array.isArray(value)) {
+    if (!value.length) return '<div class="json-line" style="--json-depth:' + level + '"><span class="json-indent"></span>' + (label ? TPP.dataJsonTokenHtml("key", JSON.stringify(label)) + '<span class="json-punct">: </span>' : "") + '<span class="json-punct">[]</span></div>';
+    return '<details class="json-node" style="--json-depth:' + level + '"' + (level < 1 ? " open" : "") + '>' +
+      '<summary><span class="json-indent"></span>' + (label ? TPP.dataJsonTokenHtml("key", JSON.stringify(label)) + '<span class="json-punct">: </span>' : "") + '<span class="json-punct">[</span><span class="json-meta">' + value.length + ' items</span><span class="json-punct">]</span></summary>' +
+      '<div class="json-children">' + value.map(function (entry, index) {
+        return TPP.dataJsonTreeHtml(entry, level + 1, String(index));
+      }).join("") + "</div></details>";
+  }
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value);
+    if (!entries.length) return '<div class="json-line" style="--json-depth:' + level + '"><span class="json-indent"></span>' + (label ? TPP.dataJsonTokenHtml("key", JSON.stringify(label)) + '<span class="json-punct">: </span>' : "") + '<span class="json-punct">{}</span></div>';
+    return '<details class="json-node" style="--json-depth:' + level + '"' + (level < 1 ? " open" : "") + '>' +
+      '<summary><span class="json-indent"></span>' + (label ? TPP.dataJsonTokenHtml("key", JSON.stringify(label)) + '<span class="json-punct">: </span>' : "") + '<span class="json-punct">{</span><span class="json-meta">' + entries.length + ' keys</span><span class="json-punct">}</span></summary>' +
+      '<div class="json-children">' + entries.map(function (entry) {
+        return TPP.dataJsonTreeHtml(entry[1], level + 1, entry[0]);
+      }).join("") + "</div></details>";
+  }
+  return '<div class="json-line" style="--json-depth:' + level + '"><span class="json-indent"></span>' + (label ? TPP.dataJsonTokenHtml("key", JSON.stringify(label)) + '<span class="json-punct">: </span>' : "") + TPP.dataJsonPrimitiveHtml(value) + "</div>";
 };
 TPP.dataRawJsonHtml = function (book) {
   return '<article class="data-card">' +
     '<div class="data-raw-toolbar"><button type="button" class="primary alt" data-copy-json="1">Copy JSON</button></div>' +
     '<details class="data-raw-details" open>' +
       '<summary>Raw JSON</summary>' +
-      '<pre class="data-code data-code-json">' + TPP.dataHighlightedJson(book) + "</pre>" +
+      '<div class="data-code data-code-json">' + TPP.dataJsonTreeHtml(book, 0, "") + "</div>" +
     "</details>" +
   "</article>";
 };
