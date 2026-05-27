@@ -184,8 +184,6 @@ TPP.imageExportOptions = function (options) {
               "xterm256",
               "ega16",
               "atari400base",
-              "atari400hues16",
-              "atari400hues32",
               "atari400",
               "cga0",
               "cga1",
@@ -569,14 +567,6 @@ TPP.imageExportNamedPalette = function (name) {
     for (let luminance = 0; luminance < row.length; luminance += 2)
       atari400.push(row[luminance]);
   }
-  const atari400hues16 = [];
-  const atari400hues32 = [];
-  for (let hue = 0; hue < 16; hue++) {
-    const rowStart = hue * 8;
-    atari400hues16.push(atari400[rowStart]);
-    atari400hues32.push(atari400[rowStart]);
-    atari400hues32.push(atari400[rowStart + 7]);
-  }
   const websafe = [];
   [0, 51, 102, 153, 204, 255].forEach(function (r) {
     [0, 51, 102, 153, 204, 255].forEach(function (g) {
@@ -590,8 +580,6 @@ TPP.imageExportNamedPalette = function (name) {
   if (name === "ansi16") return ansi16;
   if (name === "ega16") return ega16;
   if (name === "atari400base") return atari400;
-  if (name === "atari400hues16") return atari400hues16;
-  if (name === "atari400hues32") return atari400hues32;
   if (name === "atari400") return atari400Artifact;
   if (name === "cga0")
     return [
