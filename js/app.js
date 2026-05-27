@@ -2257,6 +2257,7 @@ TPP.bindSettingsUiPersistence = function () {
   });
 };
 TPP.renderSidebarMode = function () {
+  const body = document.body;
   const appShell = document.querySelector(".app-shell");
   const controls = document.querySelector(".controls");
   const settings = document.querySelector(".settings");
@@ -2267,6 +2268,7 @@ TPP.renderSidebarMode = function () {
   const softwareMode = TPP.view === "software";
   const libraryMode = TPP.view === "library";
   const hideBookChrome = softwareMode || libraryMode;
+  if (body) body.classList.toggle("book-chrome-hidden", hideBookChrome);
   if (appShell) appShell.classList.toggle("no-sidebar", hideBookChrome);
   if (settings) settings.hidden = hideBookChrome;
   if (controls) controls.hidden = dataMode || softwareMode || libraryMode;

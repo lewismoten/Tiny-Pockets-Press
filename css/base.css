@@ -86,6 +86,10 @@ button.primary {
 .app-shell.no-sidebar {
   grid-template-columns: 1fr;
 }
+body.book-chrome-hidden #bookTabsBar,
+body.book-chrome-hidden #bookActionsBar {
+  display: none !important;
+}
 .settings {
   min-height: 0;
   overflow: hidden;
