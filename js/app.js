@@ -708,6 +708,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageExportDownloadAfter = document.getElementById(
     "imageExportDownloadAfter",
   );
+  const imageExportPreviewDuration = document.getElementById(
+    "imageExportPreviewDuration",
+  );
   const imageExportPreviewPlay = document.getElementById(
     "imageExportPreviewPlay",
   );
@@ -737,6 +740,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageExportPreviewNext &&
     imageExportDownloadBefore &&
     imageExportDownloadAfter &&
+    imageExportPreviewDuration &&
     imageExportPreviewPlay &&
     imageExportFrameDelay &&
     imageExportAnimatedGif
@@ -848,6 +852,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       imageExportFrameDelay.value = TPP.imageExportFrameDelaySeconds(
         TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
       );
+      TPP.updateImageExportDuration();
       refreshPlayback();
     });
     imageExportDpi.addEventListener("input", function () {
@@ -1007,6 +1012,7 @@ TPP.openImageExportDialog = function () {
   customWrap.hidden = preset.value !== "custom";
   if (TPP.syncImageExportFormatUi) TPP.syncImageExportFormatUi();
   if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
+  TPP.updateImageExportDuration();
   TPP.imageExportPreviewIndex = 0;
   TPP.imageExportPreviewPlaying = false;
   dialog.showModal();
@@ -1421,6 +1427,42 @@ TPP.imageExportFrameDelaySeconds = function (value) {
   const ms = Math.max(1000, Math.min(10000, Number(value) || 1000));
   return (ms / 1000).toFixed(1).replace(/\.0$/, "");
 };
+TPP.imageExportDurationText = function (pageCount, frameDelayMs) {
+  const totalSeconds =
+    Math.max(0, Number(pageCount) || 0) *
+    (Math.max(1000, Math.min(10000, Number(frameDelayMs) || 1000)) / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds - minutes * 60;
+  const secondsLabel = Number.isInteger(seconds)
+    ? String(seconds)
+    : seconds.toFixed(1).replace(/\.0$/, "");
+  if (minutes <= 0)
+    return secondsLabel + " second" + (Number(secondsLabel) === 1 ? "" : "s");
+  return (
+    minutes +
+    " minute" +
+    (minutes === 1 ? "" : "s") +
+    " " +
+    secondsLabel +
+    " second" +
+    (Number(secondsLabel) === 1 ? "" : "s")
+  );
+};
+TPP.updateImageExportDuration = function (pageCount) {
+  const el = document.getElementById("imageExportPreviewDuration");
+  const input = document.getElementById("imageExportFrameDelay");
+  if (!el || !input) return;
+  const count =
+    Number(pageCount) ||
+    Number(TPP.imageExportPreviewPageCount) ||
+    TPP.buildPages().length;
+  el.textContent =
+    "Total duration: " +
+    TPP.imageExportDurationText(
+      count,
+      TPP.imageExportFrameDelayMs(input.value),
+    );
+};
 TPP.nextImageExportPreviewIndex = function (step) {
   const count = TPP.buildPages().length;
   if (!count) return 0;
@@ -1568,6 +1610,8 @@ TPP.renderImageExportPreview = async function () {
   await Promise.resolve();
   TPP.sync("nosave");
   const pages = TPP.buildPages();
+  TPP.imageExportPreviewPageCount = pages.length;
+  TPP.updateImageExportDuration(pages.length);
   if (!pages.length) {
     TPP.setImageExportPreviewDownloads(null);
     stage.innerHTML =
@@ -1587,6 +1631,10 @@ TPP.renderImageExportPreview = async function () {
   stage.innerHTML =
     '<div class="image-export-preview-empty">Rendering preview...</div>';
   const settings = TPP.settings();
+  stage.style.setProperty(
+    "--image-export-preview-ratio",
+    settings.page.w + " / " + settings.page.h,
+  );
   const exportOptions = TPP.imageExportOptions({
     dpi: Number(dpi.value) || 300,
     format: format.value || "png",
