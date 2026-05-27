@@ -256,18 +256,49 @@ TPP.dataTableColumns = function (items) {
   });
   return columns;
 };
+TPP.dataSchemaKeys = function (context) {
+  if (context === "root") return new Set(Object.keys(TPP.fallbackBook()).concat(["_pageCount", "coverPreview"]));
+  if (context === "chapters") return new Set(["id", "title", "text", "imageId", "imageElementId", "imagePlacement", "imageZoom", "imageWidth", "imageRotate", "level", "isSubsection", "isMetadata", "includeInToc", "tocTitle"]);
+  if (context === "files") return new Set(["id", "type", "name", "data", "hash", "role", "hiddenFromPicker"]);
+  if (context === "textElements") return new Set(["location", "part", "enabled", "size", "x", "y", "width", "align", "color", "outlineColor", "outlineSize", "rotate", "customText"]);
+  if (context === "imageElements") return new Set(["id", "location", "part", "fileId", "x", "y", "zoom", "rotate", "placement"]);
+  if (context === "provenance") return new Set(["action", "sourceId", "sourceTitle", "sourceRevision", "sourceSubrevision", "sourceUpdatedAt", "sourceCreatedAt", "recordedAt"]);
+  return null;
+};
+TPP.dataSchemaStatus = function (context, key) {
+  if (context === "root" && key === "coverPreview") return "deprecated";
+  if (context === "chapters" && key === "imageWidth") return "deprecated";
+  const known = TPP.dataSchemaKeys(context);
+  if (!known) return "active";
+  return known.has(key) ? "active" : "unknown";
+};
+TPP.dataKeyLabelHtml = function (context, key) {
+  const status = TPP.dataSchemaStatus(context, key);
+  const display = TPP.dataDisplayKey(key);
+  const classes = ["data-key-label"];
+  let title = "";
+  if (status === "deprecated") {
+    classes.push("deprecated");
+    title = "No longer used by the application";
+  } else if (status === "unknown") {
+    classes.push("unknown");
+    title = "Not recognized by the current application schema";
+  }
+  return '<span class="' + classes.join(" ") + '"' + (title ? ' title="' + TPP.esc(title) + '"' : "") + '>' + TPP.esc(display) + "</span>";
+};
 TPP.dataDisplayKey = function (key) {
   if (key === "coverPreviewId") return "coverPreviewImageId";
   return key;
 };
 TPP.dataValueHtml = function (book, key, value, compact) {
   if (Array.isArray(value)) return TPP.dataArrayHtml(book, key, value, compact);
-  if (value && typeof value === "object") return TPP.dataObjectHtml(book, value, compact);
+  if (value && typeof value === "object") return TPP.dataObjectHtml(book, value, compact, key === "__root__" ? "root" : null);
   return TPP.dataPrimitiveHtml(book, key, value);
 };
 TPP.dataArrayHtml = function (book, key, list, compact) {
   if (!list.length) return '<div class="data-empty">[]</div>';
   if (TPP.dataFileArray(list)) return TPP.dataFilesTable(book, list);
+  const context = String(key || "");
   const allObjects = list.every(function (item) {
     return item && typeof item === "object" && !Array.isArray(item);
   });
@@ -278,20 +309,20 @@ TPP.dataArrayHtml = function (book, key, list, compact) {
   }
   const columns = TPP.dataTableColumns(list);
   return '<table class="data-table"><thead><tr><th>#</th>' + columns.map(function (column) {
-    return "<th>" + TPP.esc(column) + "</th>";
+    return "<th>" + TPP.dataKeyLabelHtml(context, column) + "</th>";
   }).join("") + "</tr></thead><tbody>" + list.map(function (item, index) {
     return "<tr><td>" + (index + 1) + "</td>" + columns.map(function (column) {
       return "<td>" + TPP.dataValueHtml(book, column, item[column], true) + "</td>";
     }).join("") + "</tr>";
   }).join("") + "</tbody></table>";
 };
-TPP.dataObjectHtml = function (book, obj, compact) {
+TPP.dataObjectHtml = function (book, obj, compact, context) {
   const entries = Object.entries(obj || {}).filter(function (entry) {
     return !(entry[0] === "coverPreview" && obj && obj.coverPreviewId);
   });
   if (!entries.length) return '<div class="data-empty">{}</div>';
   return '<div class="' + (compact ? "data-inline-object" : "data-object") + '">' + entries.map(function (entry) {
-    return '<div class="data-field"><div class="data-field-name">' + TPP.esc(TPP.dataDisplayKey(entry[0])) + '</div><div class="data-field-value">' + TPP.dataValueHtml(book, entry[0], entry[1], compact) + "</div></div>";
+    return '<div class="data-field"><div class="data-field-name">' + TPP.dataKeyLabelHtml(context || "root", entry[0]) + '</div><div class="data-field-value">' + TPP.dataValueHtml(book, entry[0], entry[1], compact) + "</div></div>";
   }).join("") + "</div>";
 };
 TPP.renderData = function () {
@@ -303,7 +334,7 @@ TPP.renderData = function () {
   const book = TPP.clone(TPP.active);
   TPP.dataPreviewStore = {};
   summary.innerHTML = "Structured view of the current book JSON. Arrays render as tables, nested objects stay expanded, and image/file values can be previewed.";
-  panel.innerHTML = '<article class="data-card"><div class="data-node">' + TPP.dataObjectHtml(book, book, false) + "</div></article>";
+  panel.innerHTML = '<article class="data-card"><div class="data-node">' + TPP.dataObjectHtml(book, book, false, "root") + "</div></article>";
 };
 TPP.registerDataPreview = function (title, body, mode) {
   const id = "preview-" + TPP.uid();
