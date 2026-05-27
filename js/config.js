@@ -356,7 +356,6 @@ TPP.fallbackBook = function () {
         imageElementId: "",
         imagePlacement: "none",
         imageZoom: 70,
-        imageWidth: 70,
         imageRotate: 0,
         level: 0,
         isSubsection: false,

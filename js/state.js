@@ -1902,7 +1902,6 @@ TPP.syncLegacyImageFieldsFromElements = function (book) {
         100,
         Math.max(10, Number(element.zoom) || 70),
       );
-      chapter.imageWidth = chapter.imageZoom;
       chapter.imageRotate = Number(element.rotate) || 0;
     },
   );
@@ -2383,7 +2382,6 @@ TPP.norm = function (book) {
         imageElementId: "",
         imagePlacement: "none",
         imageZoom: 70,
-        imageWidth: 70,
         imageRotate: 0,
         level: 0,
         isSubsection: false,
@@ -2398,7 +2396,7 @@ TPP.norm = function (book) {
       100,
       Math.max(10, Number(normalized.imageZoom || normalized.imageWidth) || 70),
     );
-    normalized.imageWidth = normalized.imageZoom;
+    delete normalized.imageWidth;
     return normalized;
   });
   TPP.migrateTextElements(out, base);

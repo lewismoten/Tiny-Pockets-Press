@@ -335,7 +335,7 @@ TPP.readChapterFromEditor = function () {
         Number(card.querySelector(".chapter-image-zoom").value) || 70,
       ),
     );
-    chapter.imageWidth = chapter.imageZoom;
+    delete chapter.imageWidth;
     chapter.imageRotate =
       Number(card.querySelector(".chapter-image-rotate").value) || 0;
     chapter.level = Number(card.querySelector(".chapter-level").value) || 0;
