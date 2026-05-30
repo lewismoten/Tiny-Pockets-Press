@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 12;
+TPP.SCHEMA_VERSION = 13;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -303,6 +303,42 @@ TPP.defaultStaleKeyLookup = [
     note: "URL and QR presentation settings now live under links.",
   },
   {
+    path: "pageNumMode",
+    schemaVersion: 13,
+    movedTo: ["pageNumbers.pageNumMode"],
+    note: "Page number settings now live under pageNumbers.",
+  },
+  {
+    path: "pageOrnament",
+    schemaVersion: 13,
+    movedTo: ["pageNumbers.pageOrnament"],
+    note: "Page number settings now live under pageNumbers.",
+  },
+  {
+    path: "pageNumLeft",
+    schemaVersion: 13,
+    movedTo: ["pageNumbers.pageNumLeft"],
+    note: "Page number settings now live under pageNumbers.",
+  },
+  {
+    path: "pageNumRight",
+    schemaVersion: 13,
+    movedTo: ["pageNumbers.pageNumRight"],
+    note: "Page number settings now live under pageNumbers.",
+  },
+  {
+    path: "ornamentBySide",
+    schemaVersion: 13,
+    movedTo: ["pageNumbers.ornamentBySide"],
+    note: "Page number settings now live under pageNumbers.",
+  },
+  {
+    path: "reverseOrnamentsBySide",
+    schemaVersion: 13,
+    movedTo: ["pageNumbers.reverseOrnamentsBySide"],
+    note: "Page number settings now live under pageNumbers.",
+  },
+  {
     path: "coverOverflowImage",
     schemaVersion: 9,
     movedTo: ["coverFront.overflowImage"],
@@ -415,6 +451,14 @@ TPP.LINK_FIELDS = [
   "qrLightColor",
   "qrDarkMode",
   "qrDarkColor",
+];
+TPP.PAGE_NUMBER_FIELDS = [
+  "pageNumMode",
+  "pageOrnament",
+  "pageNumLeft",
+  "pageNumRight",
+  "ornamentBySide",
+  "reverseOrnamentsBySide",
 ];
 TPP.COVER_FRONT_FIELDS = [
   "coverImageId",
@@ -765,6 +809,58 @@ TPP.syncLinkFromLegacyFields = function (book) {
 TPP.compactLinkInfo = function (book) {
   if (!book || !book.links || typeof book.links !== "object") return;
   TPP.LINK_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.pageNumberInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().pageNumbers) || {};
+  book.pageNumbers = Object.assign({}, fallback, book.pageNumbers || {});
+  return book.pageNumbers;
+};
+TPP.attachPageNumberAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  TPP.PAGE_NUMBER_FIELDS.forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.pageNumberInfo(book)[field];
+      },
+      set: function (value) {
+        TPP.pageNumberInfo(book)[field] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncPageNumbersFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const pageNumbers = TPP.pageNumberInfo(book);
+  TPP.PAGE_NUMBER_FIELDS.forEach(function (field) {
+    if (field in book) pageNumbers[field] = book[field];
+  });
+};
+TPP.compactPageNumberInfo = function (book) {
+  if (!book || !book.pageNumbers || typeof book.pageNumbers !== "object")
+    return;
+  TPP.PAGE_NUMBER_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
       descriptor &&
@@ -1932,6 +2028,9 @@ TPP.bookFingerprint = function (book) {
   TPP.LINK_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.PAGE_NUMBER_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.COVER_FRONT_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -1965,6 +2064,8 @@ TPP.hydrateBookDates = function (book) {
   TPP.attachTextAccessors(book);
   TPP.syncLinkFromLegacyFields(book);
   TPP.attachLinkAccessors(book);
+  TPP.syncPageNumbersFromLegacyFields(book);
+  TPP.attachPageNumberAccessors(book);
   TPP.syncCoverFrontFromLegacyFields(book);
   TPP.attachCoverFrontAccessors(book);
   TPP.syncBackCoverFromLegacyFields(book);
@@ -2044,6 +2145,7 @@ TPP.hydrateBookDates = function (book) {
   TPP.compactPageInfo(book);
   TPP.compactTextInfo(book);
   TPP.compactLinkInfo(book);
+  TPP.compactPageNumberInfo(book);
   TPP.compactCoverFrontInfo(book);
   TPP.compactBackCoverInfo(book);
   TPP.compactSpineInfo(book);

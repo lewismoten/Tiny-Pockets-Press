@@ -572,6 +572,15 @@ TPP.dataSchemaKeys = function (context) {
       "qrDarkMode",
       "qrDarkColor",
     ]);
+  if (context === "pageNumbers")
+    return new Set([
+      "pageNumMode",
+      "pageOrnament",
+      "pageNumLeft",
+      "pageNumRight",
+      "ornamentBySide",
+      "reverseOrnamentsBySide",
+    ]);
   if (context === "coverFront")
     return new Set([
       "imageElementId",
@@ -936,6 +945,8 @@ TPP.dataValueHtml = function (book, key, value, compact) {
               ? "text"
               : key === "links"
                 ? "links"
+                : key === "pageNumbers"
+                  ? "pageNumbers"
               : key === "coverFront"
                 ? "coverFront"
                 : key === "backCover"
@@ -1152,6 +1163,7 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.page;
   delete copy.text;
   delete copy.links;
+  delete copy.pageNumbers;
   delete copy.coverFront;
   delete copy.backCover;
   delete copy.spine;
@@ -1224,6 +1236,16 @@ TPP.dataTabs = function (book, stale) {
         book && book.links ? book.links : {},
         false,
         "links",
+      ),
+    },
+    {
+      id: "page-numbers",
+      label: "Page Numbers",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.pageNumbers ? book.pageNumbers : {},
+        false,
+        "pageNumbers",
       ),
     },
     {

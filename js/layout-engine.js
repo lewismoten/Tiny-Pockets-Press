@@ -48,6 +48,13 @@ TPP.settings = function () {
     qrLightColor: TPP.linkInfo(book).qrLightColor,
     qrDarkMode: TPP.linkInfo(book).qrDarkMode,
     qrDarkColor: TPP.linkInfo(book).qrDarkColor,
+    pageNumMode: TPP.pageNumberInfo(book).pageNumMode,
+    pageOrnament: TPP.pageNumberInfo(book).pageOrnament,
+    pageNumLeft: TPP.pageNumberInfo(book).pageNumLeft,
+    pageNumRight: TPP.pageNumberInfo(book).pageNumRight,
+    ornamentBySide: TPP.pageNumberInfo(book).ornamentBySide,
+    reverseOrnamentsBySide:
+      TPP.pageNumberInfo(book).reverseOrnamentsBySide,
     coverOverflowImage: TPP.coverFrontInfo(book).overflowImage,
     coverClipImageToFrame: TPP.coverFrontInfo(book).clipImageToFrame,
     coverBg1: TPP.coverFrontInfo(book).bg1,
