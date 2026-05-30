@@ -2274,6 +2274,12 @@ TPP.restoreReaderUi = function (state) {
 TPP.settingsDetails = function () {
   return Array.from(document.querySelectorAll(".controls details"));
 };
+TPP.enforceSingleOpenSettingsSection = function (activeDetails) {
+  if (!activeDetails || !activeDetails.open) return;
+  TPP.settingsDetails().forEach(function (details) {
+    if (details !== activeDetails) details.open = false;
+  });
+};
 TPP.setBookButtonTextVisibility = function (showText) {
   const show = showText !== false;
   document.body.classList.toggle("book-icons-only", !show);
@@ -2285,12 +2291,15 @@ TPP.setBookButtonTextVisibility = function (showText) {
 };
 TPP.restoreSettingsUi = function () {
   const state = TPP.readSettingsUi();
+  let lastOpen = null;
   TPP.settingsDetails().forEach(function (details, index) {
     details.dataset.settingsIndex = index;
     if (state.open && Object.prototype.hasOwnProperty.call(state.open, index)) {
       details.open = Boolean(state.open[index]);
+      if (details.open) lastOpen = details;
     }
   });
+  if (lastOpen) TPP.enforceSingleOpenSettingsSection(lastOpen);
   const controls = document.querySelector(".controls");
   if (controls && Number.isFinite(Number(state.scrollTop))) {
     requestAnimationFrame(function () {
@@ -2325,7 +2334,10 @@ TPP.bindSettingsUiPersistence = function () {
   let scrollTimer = 0;
   TPP.settingsDetails().forEach(function (details, index) {
     details.dataset.settingsIndex = index;
-    details.addEventListener("toggle", TPP.saveSettingsUi);
+    details.addEventListener("toggle", function () {
+      if (details.open) TPP.enforceSingleOpenSettingsSection(details);
+      TPP.saveSettingsUi();
+    });
   });
   if (controls) {
     controls.addEventListener("scroll", function () {
