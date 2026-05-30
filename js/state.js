@@ -1520,11 +1520,11 @@ TPP.compactBookMeta = function (book) {
     delete meta.provenance;
 };
 TPP.bookExportName = function (book) {
-  if (!book) return "book.json";
+  if (!book) return "book.book";
   if (TPP.active && TPP.bookId(book) === TPP.bookId(TPP.active) && TPP.sync)
     TPP.sync("nosave");
   const title = (book.title || "").trim();
-  return (title || "book") + ".json";
+  return (title || "book") + ".book";
 };
 TPP.hashString = function (value) {
   let hash = 2166136261;

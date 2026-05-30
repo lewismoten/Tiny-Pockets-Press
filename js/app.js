@@ -498,7 +498,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.markBookExported(book, stamp);
     });
     TPP.save();
-    TPP.download("tiny-pockets-library.json", {
+    TPP.download("tiny-pockets-library.library", {
       type: "tiny-pockets-library",
       schemaVersion: TPP.SCHEMA_VERSION,
       books: TPP.library,
