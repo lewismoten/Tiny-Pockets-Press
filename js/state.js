@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 14;
+TPP.SCHEMA_VERSION = 15;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -159,6 +159,12 @@ TPP.defaultStaleKeyLookup = [
     note: "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together.",
   },
   {
+    path: "spineAuthor",
+    schemaVersion: 15,
+    movedTo: ["bookInfo.spineAuthor"],
+    note: "Alternate spine byline text now lives with the rest of the book identity fields under bookInfo.",
+  },
+  {
     path: "pageSize",
     schemaVersion: 8,
     movedTo: ["page.pageSize"],
@@ -172,9 +178,9 @@ TPP.defaultStaleKeyLookup = [
   },
   {
     path: "signatureSize",
-    schemaVersion: 8,
-    movedTo: ["page.signatureSize"],
-    note: "Page layout and paper appearance settings now live under page.",
+    schemaVersion: 15,
+    movedTo: ["printSetup.signatureSize"],
+    note: "Print production settings now live under printing.",
   },
   {
     path: "customW",
@@ -267,6 +273,12 @@ TPP.defaultStaleKeyLookup = [
     note: "Typography settings now live under text.",
   },
   {
+    path: "mediaCaptionSize",
+    schemaVersion: 15,
+    movedTo: ["text.mediaCaptionSize"],
+    note: "Media caption sizing now lives under text with the rest of the typography settings.",
+  },
+  {
     path: "qrDisplayMode",
     schemaVersion: 12,
     movedTo: ["links.qrDisplayMode"],
@@ -351,6 +363,126 @@ TPP.defaultStaleKeyLookup = [
     note: "Chapter-wide presentation settings now live under chapterSettings.",
   },
   {
+    path: "spineMode",
+    schemaVersion: 15,
+    movedTo: ["printSetup.spineMode"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "paperThickness",
+    schemaVersion: 15,
+    movedTo: ["printSetup.paperThickness"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "bindingAllowance",
+    schemaVersion: 15,
+    movedTo: ["printSetup.bindingAllowance"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "wrapCover",
+    schemaVersion: 15,
+    movedTo: ["printSetup.wrapCover"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "wrapInside",
+    schemaVersion: 15,
+    movedTo: ["printSetup.wrapInside"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "boardThickness",
+    schemaVersion: 15,
+    movedTo: ["printSetup.boardThickness"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "coverPerimeterOn",
+    schemaVersion: 15,
+    movedTo: ["printSetup.coverPerimeterOn"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "separateCover",
+    schemaVersion: 15,
+    movedTo: ["printSetup.separateCover"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "coverCopies",
+    schemaVersion: 15,
+    movedTo: ["printSetup.coverCopies"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "coverCopiesMax",
+    schemaVersion: 15,
+    movedTo: ["printSetup.coverCopiesMax"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "showCutGuides",
+    schemaVersion: 15,
+    movedTo: ["printSetup.showCutGuides"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "showFoldGuides",
+    schemaVersion: 15,
+    movedTo: ["printSetup.showFoldGuides"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "showPageGuides",
+    schemaVersion: 15,
+    movedTo: ["printSetup.showPageGuides"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "printTopOffset",
+    schemaVersion: 15,
+    movedTo: ["printSetup.printTopOffset"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "sewingStations",
+    schemaVersion: 15,
+    movedTo: ["printSetup.sewingStations"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "showSignatureOverlay",
+    schemaVersion: 15,
+    movedTo: ["printSetup.showSignatureOverlay"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "sewingGuideOpacity",
+    schemaVersion: 15,
+    movedTo: ["printSetup.sewingGuideOpacity"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "signatureGuideOpacity",
+    schemaVersion: 15,
+    movedTo: ["printSetup.signatureGuideOpacity"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "duplexBackSides",
+    schemaVersion: 15,
+    movedTo: ["printSetup.duplexBackSides"],
+    note: "Print production settings now live under printing.",
+  },
+  {
+    path: "page.signatureSize",
+    schemaVersion: 15,
+    movedTo: ["printSetup.signatureSize"],
+    note: "Signature size now lives under printing rather than page.",
+  },
+  {
     path: "coverOverflowImage",
     schemaVersion: 9,
     movedTo: ["coverFront.overflowImage"],
@@ -420,6 +552,7 @@ TPP.defaultStaleKeyLookup = [
 TPP.BOOK_INFO_FIELDS = [
   "title",
   "author",
+  "spineAuthor",
   "pubDate",
   "publisher",
   "copyright",
@@ -438,7 +571,6 @@ TPP.TOC_FIELDS = [
 TPP.PAGE_FIELDS = [
   "pageSize",
   "sheetSize",
-  "signatureSize",
   "customW",
   "customH",
   "margin",
@@ -452,6 +584,7 @@ TPP.TEXT_FIELDS = [
   "pageText",
   "bodySize",
   "captionSize",
+  "mediaCaptionSize",
   "lineHeight",
   "paraGap",
   "justify",
@@ -473,6 +606,28 @@ TPP.PAGE_NUMBER_FIELDS = [
   "reverseOrnamentsBySide",
 ];
 TPP.CHAPTER_SETTINGS_FIELDS = ["chapterEndOrnament", "chapterEndCentered"];
+TPP.PRINTING_FIELDS = [
+  "signatureSize",
+  "spineMode",
+  "paperThickness",
+  "bindingAllowance",
+  "wrapCover",
+  "wrapInside",
+  "boardThickness",
+  "coverPerimeterOn",
+  "separateCover",
+  "coverCopies",
+  "coverCopiesMax",
+  "showCutGuides",
+  "showFoldGuides",
+  "showPageGuides",
+  "printTopOffset",
+  "sewingStations",
+  "showSignatureOverlay",
+  "sewingGuideOpacity",
+  "signatureGuideOpacity",
+  "duplexBackSides",
+];
 TPP.COVER_FRONT_FIELDS = [
   "coverImageId",
   "coverOverflowImage",
@@ -730,6 +885,7 @@ TPP.compactPageInfo = function (book) {
       delete book[field];
     }
   });
+  delete book.page.signatureSize;
 };
 TPP.textInfo = function (book) {
   if (!book || typeof book !== "object") return {};
@@ -937,6 +1093,69 @@ TPP.compactChapterSettingsInfo = function (book) {
       delete book[field];
     }
   });
+};
+TPP.printingInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().printSetup) || {};
+  book.printSetup = Object.assign({}, fallback, book.printSetup || {});
+  return book.printSetup;
+};
+TPP.attachPrintingAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  TPP.PRINTING_FIELDS.forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.printingInfo(book)[field];
+      },
+      set: function (value) {
+        TPP.printingInfo(book)[field] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncPrintingFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const printing = TPP.printingInfo(book);
+  TPP.PRINTING_FIELDS.forEach(function (field) {
+    if (field in book) printing[field] = book[field];
+  });
+  if (
+    book.printing &&
+    typeof book.printing === "object" &&
+    !Array.isArray(book.printing)
+  ) {
+    TPP.PRINTING_FIELDS.forEach(function (field) {
+      if (field in book.printing) printing[field] = book.printing[field];
+    });
+  }
+  if (book.page && "signatureSize" in book.page)
+    printing.signatureSize = book.page.signatureSize;
+};
+TPP.compactPrintingInfo = function (book) {
+  if (!book || !book.printSetup || typeof book.printSetup !== "object") return;
+  TPP.PRINTING_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+  delete book.printing;
 };
 TPP.coverFrontInfo = function (book) {
   if (!book || typeof book !== "object") return {};
@@ -1900,12 +2119,21 @@ TPP.upsertFileAsset = function (book, data, type, name, options) {
   });
   return id;
 };
+TPP.setRuntimeCoverPreview = function (book, data) {
+  if (!book) return;
+  Object.defineProperty(book, "coverPreview", {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: String(data || ""),
+  });
+};
 TPP.setCoverPreviewAsset = function (book, data) {
   if (!book) return "";
   const meta = TPP.bookMeta(book);
   const assetData = String(data || "").trim();
   if (!assetData) {
-    book.coverPreview = "";
+    TPP.setRuntimeCoverPreview(book, "");
     meta.coverPreviewImageId = "";
     return "";
   }
@@ -1921,7 +2149,7 @@ TPP.setCoverPreviewAsset = function (book, data) {
     existing.hash = hash;
     existing.role = "coverPreview";
     existing.hiddenFromPicker = true;
-    book.coverPreview = assetData;
+    TPP.setRuntimeCoverPreview(book, assetData);
     return existing.id;
   }
   const id = TPP.upsertFileAsset(
@@ -1935,7 +2163,7 @@ TPP.setCoverPreviewAsset = function (book, data) {
     },
   );
   meta.coverPreviewImageId = id;
-  book.coverPreview = assetData;
+  TPP.setRuntimeCoverPreview(book, assetData);
   return id;
 };
 TPP.syncCoverPreviewAsset = function (book) {
@@ -1952,9 +2180,9 @@ TPP.syncCoverPreviewAsset = function (book) {
     file.role = "coverPreview";
     file.hiddenFromPicker = true;
     if (!file.name) file.name = "Generated Cover Preview";
-    book.coverPreview = file.data || "";
+    TPP.setRuntimeCoverPreview(book, file.data || "");
   } else {
-    book.coverPreview = "";
+    TPP.setRuntimeCoverPreview(book, "");
     meta.coverPreviewImageId = "";
   }
 };
@@ -2100,6 +2328,9 @@ TPP.bookFingerprint = function (book) {
   TPP.CHAPTER_SETTINGS_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.PRINTING_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.COVER_FRONT_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -2125,6 +2356,8 @@ TPP.bookFingerprint = function (book) {
 TPP.hydrateBookDates = function (book) {
   const now = TPP.nowIso();
   const fallbackMeta = (TPP.fallbackBook && TPP.fallbackBook().meta) || {};
+  TPP.syncPrintingFromLegacyFields(book);
+  TPP.attachPrintingAccessors(book);
   TPP.syncBookInfoFromLegacyFields(book);
   TPP.attachBookInfoAccessors(book);
   TPP.syncPageFromLegacyFields(book);
@@ -2218,6 +2451,7 @@ TPP.hydrateBookDates = function (book) {
   TPP.compactLinkInfo(book);
   TPP.compactPageNumberInfo(book);
   TPP.compactChapterSettingsInfo(book);
+  TPP.compactPrintingInfo(book);
   TPP.compactCoverFrontInfo(book);
   TPP.compactBackCoverInfo(book);
   TPP.compactSpineInfo(book);
@@ -2901,13 +3135,32 @@ TPP.migrateCoverTextSettings = function (book, base) {
 TPP.norm = function (book) {
   const base = TPP.fallbackBook();
   const out = Object.assign({}, base, book || {});
-  out.signatureSize = TPP.signatureSize(out.signatureSize);
-  out.sewingStations = TPP.sewingStations(out.sewingStations);
-  out.sewingGuideOpacity = TPP.opacity(out.sewingGuideOpacity, 0.65);
-  out.signatureGuideOpacity = TPP.opacity(out.signatureGuideOpacity, 0.65);
-  out.mediaCaptionSize = TPP.mediaCaptionSize(
-    out.mediaCaptionSize,
-    base.mediaCaptionSize,
+  out.text = Object.assign({}, base.text || {}, out.text || {});
+  out.page = Object.assign({}, base.page || {}, out.page || {});
+  out.printSetup = Object.assign(
+    {},
+    base.printSetup || {},
+    out.printSetup || out.printing || {},
+  );
+  out.printSetup.signatureSize = TPP.signatureSize(
+    out.signatureSize ??
+      (out.page && out.page.signatureSize) ??
+      out.printSetup.signatureSize,
+  );
+  out.printSetup.sewingStations = TPP.sewingStations(
+    out.sewingStations ?? out.printSetup.sewingStations,
+  );
+  out.printSetup.sewingGuideOpacity = TPP.opacity(
+    out.sewingGuideOpacity ?? out.printSetup.sewingGuideOpacity,
+    0.65,
+  );
+  out.printSetup.signatureGuideOpacity = TPP.opacity(
+    out.signatureGuideOpacity ?? out.printSetup.signatureGuideOpacity,
+    0.65,
+  );
+  out.text.mediaCaptionSize = TPP.mediaCaptionSize(
+    out.mediaCaptionSize ?? out.text.mediaCaptionSize,
+    base.text && base.text.mediaCaptionSize,
   );
   TPP.migrateCoverTextSettings(out, base);
   out.chapters =

@@ -552,13 +552,36 @@ TPP.dataSchemaKeys = function (context) {
       "texture",
       "pageBg",
     ]);
-  if (context === "printing") return new Set(["signatureSize"]);
+  if (context === "printing")
+    return new Set([
+      "signatureSize",
+      "spineMode",
+      "paperThickness",
+      "bindingAllowance",
+      "wrapCover",
+      "wrapInside",
+      "boardThickness",
+      "coverPerimeterOn",
+      "separateCover",
+      "coverCopies",
+      "coverCopiesMax",
+      "showCutGuides",
+      "showFoldGuides",
+      "showPageGuides",
+      "printTopOffset",
+      "sewingStations",
+      "showSignatureOverlay",
+      "sewingGuideOpacity",
+      "signatureGuideOpacity",
+      "duplexBackSides",
+    ]);
   if (context === "text")
     return new Set([
       "fontFamily",
       "pageText",
       "bodySize",
       "captionSize",
+      "mediaCaptionSize",
       "lineHeight",
       "paraGap",
       "justify",
@@ -605,6 +628,7 @@ TPP.dataSchemaKeys = function (context) {
     return new Set([
       "title",
       "author",
+      "spineAuthor",
       "pubDate",
       "publisher",
       "copyright",
@@ -1169,6 +1193,7 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.links;
   delete copy.pageNumbers;
   delete copy.chapterSettings;
+  delete copy.printSetup;
   delete copy.coverFront;
   delete copy.backCover;
   delete copy.spine;
@@ -1192,9 +1217,7 @@ TPP.dataPageObject = function (book) {
   return copy;
 };
 TPP.dataPrintingObject = function (book) {
-  return {
-    signatureSize: book && book.page ? book.page.signatureSize : undefined,
-  };
+  return Object.assign({}, (book && book.printSetup) || {});
 };
 TPP.dataTabs = function (book, stale) {
   const tabs = [
@@ -1318,7 +1341,7 @@ TPP.dataTabs = function (book, stale) {
       label: "Printing",
       html: TPP.dataObjectHtml(
         book,
-        TPP.dataPrintingObject(book),
+        book && book.printSetup ? book.printSetup : TPP.dataPrintingObject(book),
         false,
         "printing",
       ),
