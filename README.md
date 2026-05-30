@@ -2,6 +2,16 @@
 
 This is a syntax-corrected build of v6.
 
+## Run locally
+
+Start a localhost server with:
+
+```sh
+npm run localhost
+```
+
+By default the app will be available at `http://127.0.0.1:3000`.
+
 ## Fixes in v6.1
 
 - Rebuilt JavaScript modules to avoid invalid escaped strings and broken regex literals.
