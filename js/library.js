@@ -1193,6 +1193,7 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.links;
   delete copy.pageNumbers;
   delete copy.chapterSettings;
+  delete copy.copyrightPage;
   delete copy.printSetup;
   delete copy.coverFront;
   delete copy.backCover;
@@ -1284,6 +1285,16 @@ TPP.dataTabs = function (book, stale) {
         book && book.chapterSettings ? book.chapterSettings : {},
         false,
         "chapterSettings",
+      ),
+    },
+    {
+      id: "copyright-page",
+      label: "Copyright Page",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.copyrightPage ? book.copyrightPage : {},
+        false,
+        "copyrightPage",
       ),
     },
     {

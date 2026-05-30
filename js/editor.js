@@ -35,105 +35,95 @@ TPP.assetFieldHtml = function (label, targetType, targetKey, fileId, alt) {
     "</div>"
   );
 };
-TPP.textElementUiSpecs = {
-  cover: [
-    {
-      location: "front",
-      part: "title",
-      label: "Title",
-      minSize: 4,
-      supportsX: false,
-      supportsWidth: false,
-      supportsAlign: false,
-      supportsRotate: false,
-    },
-    {
-      location: "front",
-      part: "author",
-      label: "Author",
-      minSize: 3,
-      supportsX: false,
-      supportsWidth: false,
-      supportsAlign: false,
-      supportsRotate: false,
-    },
-    {
-      location: "front",
-      part: "series",
-      label: "Series / Number",
-      minSize: 3,
-      supportsX: false,
-      supportsWidth: false,
-      supportsAlign: false,
-      supportsRotate: false,
-    },
-    {
-      location: "front",
-      part: "publisher",
-      label: "Publisher",
-      minSize: 3,
-      supportsX: false,
-      supportsWidth: false,
-      supportsAlign: false,
-      supportsRotate: false,
-    },
-  ],
-  spine: [
-    {
-      location: "spine",
-      part: "title",
-      label: "Title",
-      minSize: 3,
-      supportsX: true,
-      supportsWidth: true,
-      supportsAlign: true,
-      supportsRotate: true,
-    },
-    {
-      location: "spine",
-      part: "author",
-      label: "Author",
-      minSize: 3,
-      supportsX: true,
-      supportsWidth: true,
-      supportsAlign: true,
-      supportsRotate: true,
-    },
-  ],
+TPP.textElementEditorConfigs = {
+  front: {
+    containerId: "coverTextElements",
+    location: "front",
+    addLabel: "Add Front Cover Text",
+    minSize: 3,
+    supportsX: false,
+    supportsWidth: false,
+    supportsAlign: false,
+    supportsRotate: false,
+    defaultAlign: "center",
+  },
+  back: {
+    containerId: "backTextElements",
+    location: "back",
+    addLabel: "Add Back Cover Text",
+    minSize: 3,
+    supportsX: true,
+    supportsWidth: true,
+    supportsAlign: true,
+    supportsRotate: false,
+    defaultAlign: "center",
+  },
+  spine: {
+    containerId: "spineTextElements",
+    location: "spine",
+    addLabel: "Add Spine Text",
+    minSize: 3,
+    supportsX: true,
+    supportsWidth: true,
+    supportsAlign: true,
+    supportsRotate: true,
+    defaultAlign: "left",
+  },
 };
-TPP.textElementGroupHtml = function (book, spec) {
-  const element = TPP.findTextElement(book, spec.location, spec.part) || {};
-  const key = TPP.textElementKey(spec.location, spec.part);
-  const align =
-    element.align || (spec.location === "front" ? "center" : "left");
+TPP.textElementFieldOptionsHtml = function (selected) {
+  return TPP.bookInfoFieldOptions()
+    .map(function (fieldKey) {
+      return (
+        '<option value="' +
+        TPP.esc(fieldKey) +
+        '"' +
+        (fieldKey === selected ? " selected" : "") +
+        ">" +
+        TPP.esc(TPP.bookInfoFieldLabel(fieldKey)) +
+        "</option>"
+      );
+    })
+    .join("");
+};
+TPP.textElementGroupHtml = function (book, spec, element) {
+  const entry = element || {};
+  const align = entry.align || spec.defaultAlign || "center";
+  const fieldKey = entry.fieldKey || entry.part || "title";
   return (
-    '<section class="cover-text-group text-element-group" data-text-key="' +
-    TPP.esc(key) +
+    '<section class="cover-text-group text-element-group" data-text-id="' +
+    TPP.esc(entry.id || "") +
     '" data-location="' +
     TPP.esc(spec.location) +
-    '" data-part="' +
-    TPP.esc(spec.part) +
     '">' +
+    '<div class="toolbar"><strong>' +
+    TPP.esc(TPP.bookInfoFieldLabel(fieldKey)) +
+    '</strong><span><button type="button" class="small" data-text-action="up">↑</button><button type="button" class="small" data-text-action="down">↓</button><button type="button" class="small" data-text-action="remove">Remove</button></span></div>' +
+    '<label>Content<select class="text-field-key">' +
+    TPP.textElementFieldOptionsHtml(fieldKey) +
+    "</select></label>" +
     '<label><input class="text-enabled" type="checkbox" ' +
-    (element.enabled !== false ? "checked" : "") +
-    "> Show " +
-    TPP.esc(spec.label.toLowerCase()) +
-    "</label>" +
+    (entry.enabled !== false ? "checked" : "") +
+    "> Show this text</label>" +
+    (fieldKey === "custom"
+      ? '<label>Custom Text<textarea class="text-custom" rows="3">' +
+        TPP.esc(entry.customText || "") +
+        "</textarea></label>"
+      : "") +
     '<div class="two">' +
     '<label>Size <input class="text-size" type="number" min="' +
     spec.minSize +
     '" step=".5" value="' +
-    TPP.esc(String(Number(element.size) || spec.minSize)) +
+    TPP.esc(String(Number(entry.size) || spec.minSize)) +
     '"></label>' +
     '<label>Y <input class="text-y" type="range" min="0" max="100" value="' +
-    TPP.esc(String(Number(element.y) || 0)) +
+    TPP.esc(String(Number(entry.y) || 0)) +
     '"></label>' +
     "</div>" +
     (spec.supportsX
       ? '<div class="two"><label>X <input class="text-x" type="range" min="0" max="100" value="' +
-        TPP.esc(String(Number(element.x) || 50)) +
+        TPP.esc(String(Number(entry.x) || 50)) +
         '"></label><label>Width <input class="text-width" type="range" min="10" max="100" value="' +
-        TPP.esc(String(Number(element.width) || 100)) +
+        TPP.esc(String(Number(entry.width) || 100)) +
         '"></label></div>'
       : "") +
     (spec.supportsAlign
@@ -150,53 +140,89 @@ TPP.textElementGroupHtml = function (book, spec) {
         ">Clip</option></select></label>" +
         (spec.supportsRotate
           ? '<label><input class="text-rotate" type="checkbox" ' +
-            (element.rotate ? "checked" : "") +
+            (entry.rotate ? "checked" : "") +
             "> Rotate 90°</label>"
           : "") +
         "</div>"
       : "") +
     '<div class="two"><label>Color <input class="text-color color-box" type="color" value="' +
-    TPP.esc(element.color || "#ffffff") +
+    TPP.esc(entry.color || "#ffffff") +
     '"></label><label>Outline <input class="text-outline-color color-box" type="color" value="' +
-    TPP.esc(element.outlineColor || "#000000") +
+    TPP.esc(entry.outlineColor || "#000000") +
     '"></label></div>' +
     '<label>Outline px <input class="text-outline-size" type="number" min="0" step=".25" value="' +
-    TPP.esc(String(Math.max(0, Number(element.outlineSize) || 0))) +
+    TPP.esc(String(Math.max(0, Number(entry.outlineSize) || 0))) +
     '"></label>' +
     "</section>"
   );
 };
+TPP.textElementListHtml = function (book, spec) {
+  const elements = TPP.textElementsForLocation(book, spec.location);
+  return (
+    elements
+      .map(function (element) {
+        return TPP.textElementGroupHtml(book, spec, element);
+      })
+      .join("") +
+    '<button type="button" class="small" data-text-action="add" data-location="' +
+    TPP.esc(spec.location) +
+    '">' +
+    TPP.esc(spec.addLabel) +
+    "</button>"
+  );
+};
+TPP.copyrightPageItemsHtml = function (book) {
+  const items = TPP.copyrightPageInfo(book).items || [];
+  return (
+    items
+      .map(function (item) {
+        const fieldKey = item.fieldKey || "copyright";
+        return (
+          '<section class="cover-text-group copyright-item-group" data-item-id="' +
+          TPP.esc(item.id || "") +
+          '"><div class="toolbar"><strong>' +
+          TPP.esc(TPP.bookInfoFieldLabel(fieldKey)) +
+          '</strong><span><button type="button" class="small" data-copyright-action="up">↑</button><button type="button" class="small" data-copyright-action="down">↓</button><button type="button" class="small" data-copyright-action="remove">Remove</button></span></div><label>Field<select class="copyright-field-key">' +
+          TPP.textElementFieldOptionsHtml(fieldKey) +
+          "</select></label>" +
+          (fieldKey === "custom"
+            ? '<label>Custom Text<textarea class="copyright-custom" rows="3">' +
+              TPP.esc(item.customText || "") +
+              "</textarea></label>"
+            : "") +
+          "</section>"
+        );
+      })
+      .join("") +
+    '<button type="button" class="small" data-copyright-action="add">Add Copyright Line</button>'
+  );
+};
 TPP.renderTextElementControls = function () {
-  const cover = document.getElementById("coverTextElements");
-  const spine = document.getElementById("spineTextElements");
-  if (cover) {
-    cover.className = "cover-text-grid";
-    cover.innerHTML = TPP.textElementUiSpecs.cover
-      .map(function (spec) {
-        return TPP.textElementGroupHtml(TPP.active, spec);
-      })
-      .join("");
-  }
-  if (spine) {
-    spine.className = "cover-text-grid";
-    spine.innerHTML = TPP.textElementUiSpecs.spine
-      .map(function (spec) {
-        return TPP.textElementGroupHtml(TPP.active, spec);
-      })
-      .join("");
+  Object.keys(TPP.textElementEditorConfigs).forEach(function (key) {
+    const spec = TPP.textElementEditorConfigs[key];
+    const node = document.getElementById(spec.containerId);
+    if (!node) return;
+    node.className = "cover-text-grid";
+    node.innerHTML = TPP.textElementListHtml(TPP.active, spec);
+  });
+  const copyright = document.getElementById("copyrightPageItems");
+  if (copyright) {
+    copyright.className = "cover-text-grid";
+    copyright.innerHTML = TPP.copyrightPageItemsHtml(TPP.active);
   }
 };
 TPP.readTextElementControls = function (book) {
   const groups = Array.from(document.querySelectorAll(".text-element-group"));
   if (!groups.length || !book) return;
   groups.forEach(function (group) {
-    const element = TPP.findTextElement(
-      book,
-      group.dataset.location,
-      group.dataset.part,
-    );
+    const element = (book.textElements || []).find(function (entry) {
+      return entry && entry.id === group.dataset.textId;
+    });
     if (!element) return;
+    element.fieldKey = group.querySelector(".text-field-key")?.value || "title";
     element.enabled = group.querySelector(".text-enabled")?.checked !== false;
+    if (group.querySelector(".text-custom"))
+      element.customText = group.querySelector(".text-custom").value || "";
     element.size =
       Number(group.querySelector(".text-size")?.value) || element.size || 4;
     element.y = Number(group.querySelector(".text-y")?.value) || 0;
@@ -219,8 +245,103 @@ TPP.readTextElementControls = function (book) {
       Number(group.querySelector(".text-outline-size")?.value) || 0,
     );
   });
+  const copyrightItems = Array.from(
+    document.querySelectorAll(".copyright-item-group"),
+  );
+  if (copyrightItems.length) {
+    TPP.copyrightPageInfo(book).items = copyrightItems.map(function (group) {
+      const existing = (TPP.copyrightPageInfo(book).items || []).find(
+        function (item) {
+          return item && item.id === group.dataset.itemId;
+        },
+      );
+      return {
+        id: (existing && existing.id) || group.dataset.itemId || TPP.uid(),
+        fieldKey:
+          group.querySelector(".copyright-field-key")?.value || "copyright",
+        customText: group.querySelector(".copyright-custom")?.value || "",
+      };
+    });
+  }
   if (TPP.syncLegacyTextFieldsFromElements)
     TPP.syncLegacyTextFieldsFromElements(book);
+};
+TPP.addTextElement = function (book, location) {
+  if (!book) return;
+  const spec = TPP.textElementEditorConfigs[location];
+  if (!spec) return;
+  book.textElements = Array.isArray(book.textElements) ? book.textElements : [];
+  const element = {
+    id: TPP.uid(),
+    location: location,
+    part: "slot-" + TPP.uid(),
+    fieldKey: "title",
+    enabled: true,
+    size: location === "front" ? 4.2 : 4,
+    x: 50,
+    y: 50,
+    width: 100,
+    align: spec.defaultAlign,
+    color: "#ffffff",
+    outlineColor: "#000000",
+    outlineSize: 0,
+    rotate: false,
+    customText: "",
+  };
+  const lastIndex = book.textElements.reduce(function (found, entry, index) {
+    return entry && entry.location === location ? index : found;
+  }, -1);
+  if (lastIndex < 0) book.textElements.push(element);
+  else book.textElements.splice(lastIndex + 1, 0, element);
+};
+TPP.moveTextElement = function (book, id, direction) {
+  const list = Array.isArray(book && book.textElements) ? book.textElements : [];
+  const index = list.findIndex(function (entry) {
+    return entry && entry.id === id;
+  });
+  if (index < 0) return;
+  const current = list[index];
+  const sameLocation = list.filter(function (entry) {
+    return entry && entry.location === current.location;
+  });
+  const localIndex = sameLocation.findIndex(function (entry) {
+    return entry && entry.id === id;
+  });
+  const nextLocal = localIndex + direction;
+  if (localIndex < 0 || nextLocal < 0 || nextLocal >= sameLocation.length) return;
+  const before = sameLocation[nextLocal];
+  const targetIndex = list.findIndex(function (entry) {
+    return entry && entry.id === before.id;
+  });
+  list.splice(index, 1);
+  list.splice(targetIndex, 0, current);
+};
+TPP.removeTextElement = function (book, id) {
+  if (!book || !Array.isArray(book.textElements)) return;
+  book.textElements = book.textElements.filter(function (entry) {
+    return entry && entry.id !== id;
+  });
+};
+TPP.addCopyrightPageItem = function (book) {
+  const info = TPP.copyrightPageInfo(book);
+  info.items = Array.isArray(info.items) ? info.items : [];
+  info.items.push({ id: TPP.uid(), fieldKey: "copyright", customText: "" });
+};
+TPP.moveCopyrightPageItem = function (book, id, direction) {
+  const items = TPP.copyrightPageInfo(book).items || [];
+  const index = items.findIndex(function (item) {
+    return item && item.id === id;
+  });
+  if (index < 0) return;
+  const next = index + direction;
+  if (next < 0 || next >= items.length) return;
+  [items[index], items[next]] = [items[next], items[index]];
+};
+TPP.removeCopyrightPageItem = function (book, id) {
+  const info = TPP.copyrightPageInfo(book);
+  info.items = (info.items || []).filter(function (item) {
+    return item && item.id !== id;
+  });
 };
 
 TPP.populate = function () {

@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 15;
+TPP.SCHEMA_VERSION = 16;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -555,11 +555,26 @@ TPP.BOOK_INFO_FIELDS = [
   "spineAuthor",
   "pubDate",
   "publisher",
+  "cityPublished",
   "copyright",
+  "isbn",
+  "isbn13",
+  "edition",
+  "phone",
+  "website",
+  "address",
+  "email",
+  "copyrightNotice",
+  "creditsDisclaimer",
   "seriesName",
   "number",
   "volume",
   "printing",
+];
+TPP.COPYRIGHT_PAGE_FIELDS = [
+  "copyrightPageEnabled",
+  "copyrightPageTitle",
+  "copyrightDateFormat",
 ];
 TPP.TOC_FIELDS = [
   "includeToc",
@@ -764,6 +779,79 @@ TPP.syncBookInfoFromLegacyFields = function (book) {
 TPP.compactBookInfo = function (book) {
   if (!book || !book.bookInfo || typeof book.bookInfo !== "object") return;
   TPP.BOOK_INFO_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.copyrightPageInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().copyrightPage) || {};
+  const current = Object.assign({}, fallback, book.copyrightPage || {});
+  current.items = Array.isArray(current.items)
+    ? current.items
+        .map(function (item) {
+          if (!item) return null;
+          return {
+            id: item.id || TPP.uid(),
+            fieldKey: item.fieldKey || item.part || "copyright",
+            customText: String(item.customText || ""),
+          };
+        })
+        .filter(Boolean)
+    : [];
+  book.copyrightPage = current;
+  return book.copyrightPage;
+};
+TPP.attachCopyrightPageAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  const map = {
+    copyrightPageEnabled: "enabled",
+    copyrightPageTitle: "title",
+    copyrightDateFormat: "dateFormat",
+  };
+  Object.keys(map).forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.copyrightPageInfo(book)[map[field]];
+      },
+      set: function (value) {
+        TPP.copyrightPageInfo(book)[map[field]] =
+          field === "copyrightPageEnabled" ? Boolean(value) : value || "";
+      },
+    });
+  });
+  return book;
+};
+TPP.syncCopyrightPageFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const info = TPP.copyrightPageInfo(book);
+  if ("copyrightPageEnabled" in book)
+    info.enabled = book.copyrightPageEnabled !== false;
+  if ("copyrightPageTitle" in book) info.title = book.copyrightPageTitle || "";
+  if ("copyrightDateFormat" in book)
+    info.dateFormat = book.copyrightDateFormat || "year";
+};
+TPP.compactCopyrightPageInfo = function (book) {
+  if (!book || !book.copyrightPage || typeof book.copyrightPage !== "object")
+    return;
+  TPP.COPYRIGHT_PAGE_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
       descriptor &&
@@ -2328,6 +2416,9 @@ TPP.bookFingerprint = function (book) {
   TPP.CHAPTER_SETTINGS_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.COPYRIGHT_PAGE_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.PRINTING_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -2370,6 +2461,8 @@ TPP.hydrateBookDates = function (book) {
   TPP.attachPageNumberAccessors(book);
   TPP.syncChapterSettingsFromLegacyFields(book);
   TPP.attachChapterSettingsAccessors(book);
+  TPP.syncCopyrightPageFromLegacyFields(book);
+  TPP.attachCopyrightPageAccessors(book);
   TPP.syncCoverFrontFromLegacyFields(book);
   TPP.attachCoverFrontAccessors(book);
   TPP.syncBackCoverFromLegacyFields(book);
@@ -2451,6 +2544,7 @@ TPP.hydrateBookDates = function (book) {
   TPP.compactLinkInfo(book);
   TPP.compactPageNumberInfo(book);
   TPP.compactChapterSettingsInfo(book);
+  TPP.compactCopyrightPageInfo(book);
   TPP.compactPrintingInfo(book);
   TPP.compactCoverFrontInfo(book);
   TPP.compactBackCoverInfo(book);
@@ -2806,6 +2900,12 @@ TPP.syncImageElementsFromLegacyFields = function (book) {
 TPP.textElementKey = function (location, part) {
   return String(location || "") + ":" + String(part || "");
 };
+TPP.textElementsForLocation = function (book, location) {
+  const list = Array.isArray(book && book.textElements) ? book.textElements : [];
+  return list.filter(function (entry) {
+    return entry && entry.location === location;
+  });
+};
 TPP.findTextElement = function (book, location, part) {
   const key = TPP.textElementKey(location, part);
   const list = Array.isArray(book && book.textElements)
@@ -2836,6 +2936,7 @@ TPP.defaultTextElements = function (book, base) {
       location: "front",
       part: "title",
       enabled: source.coverShowTitle !== false,
+      fieldKey: "title",
       size:
         Number(source.coverTitleSize) || Number(fallback.coverTitleSize) || 8,
       x: 0,
@@ -2853,6 +2954,7 @@ TPP.defaultTextElements = function (book, base) {
       location: "front",
       part: "author",
       enabled: Boolean(source.coverShowAuthor),
+      fieldKey: "author",
       size:
         Number(source.coverAuthorSize) ||
         Number(source.coverMetaSize) ||
@@ -2873,6 +2975,7 @@ TPP.defaultTextElements = function (book, base) {
       location: "front",
       part: "series",
       enabled: Boolean(source.coverShowSeries),
+      fieldKey: "series",
       size:
         Number(source.coverSeriesSize) ||
         Number(source.coverMetaSize) ||
@@ -2893,6 +2996,7 @@ TPP.defaultTextElements = function (book, base) {
       location: "front",
       part: "publisher",
       enabled: Boolean(source.coverShowPublisher),
+      fieldKey: "publisher",
       size:
         Number(source.coverPublisherSize) ||
         Number(source.coverMetaSize) ||
@@ -2915,6 +3019,7 @@ TPP.defaultTextElements = function (book, base) {
       id: "back-cover-text",
       location: "back",
       part: "custom",
+      fieldKey: "custom",
       enabled: true,
       size:
         Number(source.backTextSize ?? sourceBack.textSize) ||
@@ -2946,6 +3051,7 @@ TPP.defaultTextElements = function (book, base) {
       location: "spine",
       part: "title",
       enabled: true,
+      fieldKey: "title",
       size:
         Number(source.spineTitleSize ?? sourceSpine.titleSize) ||
         Number(fallback.spineTitleSize) ||
@@ -2995,6 +3101,7 @@ TPP.defaultTextElements = function (book, base) {
         source.spineAuthorOn !== undefined
           ? source.spineAuthorOn !== false
           : sourceSpine.authorOn !== false,
+      fieldKey: "author",
       size:
         Number(source.spineAuthorSize ?? sourceSpine.authorSize) ||
         Number(fallback.spineAuthorSize) ||
@@ -3049,23 +3156,117 @@ TPP.migrateTextElements = function (book, base) {
         (defaults[index] && defaults[index].id) ||
         "text-" + TPP.textElementKey(entry.location, entry.part);
     }
+    if (!entry.fieldKey) entry.fieldKey = entry.part || "custom";
   });
+};
+TPP.bookInfoFieldLabel = function (fieldKey) {
+  const labels = {
+    title: "Title",
+    author: "Author",
+    spineAuthor: "Author Spine Name",
+    pubDate: "Publishing Date",
+    publisher: "Publisher",
+    cityPublished: "City Published",
+    copyright: "Copyright",
+    copyrightNotice: "Copyright Notice",
+    isbn: "ISBN",
+    isbn13: "ISBN-13",
+    edition: "Edition",
+    phone: "Phone",
+    website: "Website",
+    address: "Address",
+    email: "Email",
+    creditsDisclaimer: "Credits / Disclaimer",
+    seriesName: "Series",
+    number: "Number",
+    volume: "Volume",
+    printing: "Printing",
+    series: "Series / Number",
+    custom: "Custom Text",
+  };
+  return labels[fieldKey] || fieldKey;
+};
+TPP.bookInfoFieldOptions = function () {
+  return [
+    "title",
+    "author",
+    "spineAuthor",
+    "publisher",
+    "cityPublished",
+    "pubDate",
+    "copyright",
+    "copyrightNotice",
+    "isbn",
+    "isbn13",
+    "edition",
+    "phone",
+    "website",
+    "address",
+    "email",
+    "creditsDisclaimer",
+    "series",
+    "seriesName",
+    "number",
+    "volume",
+    "printing",
+    "custom",
+  ];
+};
+TPP.formatBookDate = function (value, mode) {
+  if (!value) return "";
+  const date = new Date(value + "T12:00:00");
+  if (Number.isNaN(date.getTime())) return "";
+  if (mode === "year") return String(date.getFullYear());
+  if (mode === "year-month")
+    return date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+    });
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+TPP.bookInfoFieldValue = function (book, fieldKey, options) {
+  const info = TPP.bookInfo(book);
+  const dateFormat = (options && options.dateFormat) || "year-month-day";
+  if (fieldKey === "series")
+    return [info.seriesName, info.number].filter(Boolean).join(" ");
+  if (fieldKey === "author")
+    return options && options.location === "spine"
+      ? String(info.spineAuthor || info.author || "")
+      : String(info.author || "");
+  if (fieldKey === "pubDate")
+    return TPP.formatBookDate(
+      info.pubDate,
+      dateFormat === "month-day-year" ? "year-month-day" : dateFormat,
+    );
+  if (fieldKey === "custom") return String((options && options.customText) || "");
+  return String(info[fieldKey] || "");
 };
 TPP.textElementContent = function (book, location, part) {
   const element = TPP.findTextElement(book, location, part);
-  if (element && element.part === "custom") return element.customText || "";
-  if (part === "title") return String((book && book.title) || "");
-  if (part === "author")
-    return location === "spine"
-      ? String((book && (book.spineAuthor || book.author)) || "")
-      : String((book && book.author) || "");
-  if (part === "series")
-    return [book && book.seriesName, book && book.number]
-      .filter(Boolean)
-      .join(" ");
-  if (part === "publisher") return String((book && book.publisher) || "");
-  if (part === "copyright") return String((book && book.copyright) || "");
-  return element && element.customText ? String(element.customText) : "";
+  const fieldKey = (element && element.fieldKey) || part;
+  return TPP.bookInfoFieldValue(book, fieldKey, {
+    location: location,
+    customText: element && element.customText,
+  });
+};
+TPP.copyrightPageItemText = function (book, item, options) {
+  const entry = item || {};
+  const fieldKey = entry.fieldKey || "copyright";
+  const value = TPP.bookInfoFieldValue(book, fieldKey, {
+    dateFormat: (options && options.dateFormat) || "year",
+    customText: entry.customText || "",
+  }).trim();
+  if (!value) return "";
+  if (fieldKey === "isbn") return "ISBN " + value;
+  if (fieldKey === "isbn13") return "ISBN-13 " + value;
+  if (fieldKey === "email") return "Email: " + value;
+  if (fieldKey === "website") return value;
+  if (fieldKey === "phone") return "Phone: " + value;
+  return value;
 };
 TPP.syncLegacyTextFieldsFromElements = function (book) {
   return book;
@@ -3137,6 +3338,11 @@ TPP.norm = function (book) {
   const out = Object.assign({}, base, book || {});
   out.text = Object.assign({}, base.text || {}, out.text || {});
   out.page = Object.assign({}, base.page || {}, out.page || {});
+  out.copyrightPage = Object.assign(
+    {},
+    base.copyrightPage || {},
+    out.copyrightPage || {},
+  );
   out.printSetup = Object.assign(
     {},
     base.printSetup || {},

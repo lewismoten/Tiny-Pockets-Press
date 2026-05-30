@@ -58,14 +58,67 @@ document.addEventListener("DOMContentLoaded", async function () {
   const controls = document.querySelector(".controls");
   if (controls) {
     controls.addEventListener("input", function (e) {
-      if (!e.target.closest(".text-element-group")) return;
+      if (
+        !e.target.closest(".text-element-group") &&
+        !e.target.closest(".copyright-item-group")
+      )
+        return;
       TPP.sync("draft");
+      if (
+        e.target.classList.contains("text-field-key") ||
+        e.target.classList.contains("copyright-field-key")
+      ) {
+        TPP.renderTextElementControls();
+      }
       TPP.renderAll();
     });
     controls.addEventListener("change", function (e) {
-      if (!e.target.closest(".text-element-group")) return;
+      if (
+        !e.target.closest(".text-element-group") &&
+        !e.target.closest(".copyright-item-group")
+      )
+        return;
       TPP.sync("commit");
+      if (
+        e.target.classList.contains("text-field-key") ||
+        e.target.classList.contains("copyright-field-key")
+      ) {
+        TPP.renderTextElementControls();
+      }
       TPP.renderAll();
+    });
+    controls.addEventListener("click", function (e) {
+      const textButton = e.target.closest("[data-text-action]");
+      if (textButton) {
+        TPP.sync("nosave");
+        const action = textButton.dataset.textAction;
+        const group = textButton.closest(".text-element-group");
+        if (action === "add") TPP.addTextElement(TPP.active, textButton.dataset.location);
+        if (action === "remove" && group)
+          TPP.removeTextElement(TPP.active, group.dataset.textId);
+        if (action === "up" && group)
+          TPP.moveTextElement(TPP.active, group.dataset.textId, -1);
+        if (action === "down" && group)
+          TPP.moveTextElement(TPP.active, group.dataset.textId, 1);
+        TPP.save();
+        TPP.renderAll();
+        return;
+      }
+      const copyrightButton = e.target.closest("[data-copyright-action]");
+      if (copyrightButton) {
+        TPP.sync("nosave");
+        const action = copyrightButton.dataset.copyrightAction;
+        const group = copyrightButton.closest(".copyright-item-group");
+        if (action === "add") TPP.addCopyrightPageItem(TPP.active);
+        if (action === "remove" && group)
+          TPP.removeCopyrightPageItem(TPP.active, group.dataset.itemId);
+        if (action === "up" && group)
+          TPP.moveCopyrightPageItem(TPP.active, group.dataset.itemId, -1);
+        if (action === "down" && group)
+          TPP.moveCopyrightPageItem(TPP.active, group.dataset.itemId, 1);
+        TPP.save();
+        TPP.renderAll();
+      }
     });
   }
 
@@ -2394,6 +2447,7 @@ TPP.switchView = function (view, fromHash) {
 TPP.renderAll = function () {
   TPP.renderSidebarMode();
   if (TPP.view === "editor") {
+    if (TPP.renderTextElementControls) TPP.renderTextElementControls();
     TPP.renderChapterList();
     TPP.renderChapterEditor();
   }

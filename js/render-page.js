@@ -98,6 +98,33 @@ TPP.coverTextBox = function (settings, part, className) {
     "</div>"
   );
 };
+TPP.coverTextBoxesHtml = function (settings, location, classPrefix, options) {
+  const centerX = Number((options && options.centerX) ?? 50);
+  return TPP.textElementsForLocation(settings, location)
+    .map(function (element, index) {
+      const text = TPP.bookInfoFieldValue(
+        settings,
+        element.fieldKey || element.part,
+        {
+          location: location,
+          customText: element.customText,
+        },
+      );
+      if (element.enabled === false || !String(text || "").trim()) return "";
+      return (
+        '<div class="' +
+        TPP.esc(classPrefix || "cover-el") +
+        " " +
+        TPP.esc((classPrefix || "cover-el") + "-" + index) +
+        '" style="' +
+        TPP.textBoxStyle(element, { centerX: centerX }) +
+        '">' +
+        TPP.esc(text) +
+        "</div>"
+      );
+    })
+    .join("");
+};
 TPP.imageElementStyle = function (element, fallbackZoom) {
   const entry = element || {};
   return (
@@ -127,14 +154,6 @@ TPP.coverHTML = function (settings, side) {
   const image = TPP.coverImageSrc(settings, side);
   if (side === "back") {
     const imageElement = TPP.findImageElement(settings, "back", "cover");
-    const align = ["left", "center", "justify"].includes(settings.backTextAlign)
-      ? settings.backTextAlign
-      : "center";
-    const last = ["auto", "center", "justify"].includes(
-      settings.backTextLastLine,
-    )
-      ? settings.backTextLastLine
-      : "auto";
     return (
       (image
         ? '<img class="back-img" src="' +
@@ -143,13 +162,7 @@ TPP.coverHTML = function (settings, side) {
           TPP.imageElementStyle(imageElement, 120) +
           '">'
         : "") +
-      '<div class="back-text align-' +
-      align +
-      " last-" +
-      last +
-      '"><div class="story-text">' +
-      TPP.safeMarkdown(settings.backText || "") +
-      "</div></div>"
+      TPP.coverTextBoxesHtml(settings, "back", "cover-el", { centerX: 50 })
     );
   }
   const imageElement = TPP.findImageElement(settings, "front", "cover");
@@ -161,10 +174,7 @@ TPP.coverHTML = function (settings, side) {
         TPP.imageElementStyle(imageElement, 120) +
         '">'
       : "") +
-    TPP.coverTextBox(settings, "title", "cover-title") +
-    TPP.coverTextBox(settings, "author", "cover-author") +
-    TPP.coverTextBox(settings, "series", "cover-series") +
-    TPP.coverTextBox(settings, "publisher", "cover-publisher")
+    TPP.coverTextBoxesHtml(settings, "front", "cover-el", { centerX: 50 })
   );
 };
 TPP.applyVars = function (element, settings) {
@@ -320,24 +330,7 @@ TPP.spineEl = function (settings, x, y, height) {
   element.style.width = width + "in";
   element.style.height = height + "in";
   TPP.applyVars(element, settings);
-  const spineTitle = TPP.findTextElement(settings, "spine", "title");
-  const spineAuthor = TPP.findTextElement(settings, "spine", "author");
-  const titleText = TPP.textElementContent(settings, "spine", "title");
-  const authorText = TPP.textElementContent(settings, "spine", "author");
-  const hasAuthor =
-    spineAuthor &&
-    spineAuthor.enabled !== false &&
-    String(authorText || "").trim();
-  const authorReserve = hasAuthor
-    ? Math.max(0.12, ((Number(spineAuthor.size) || 4) / 72) * 1.6)
-    : 0;
-  const titleLength = Math.max(0.1, height - authorReserve);
-  const titleStyle = spineTitle
-    ? TPP.spineTextStyle(spineTitle, titleLength)
-    : "";
-  const authorStyle = spineAuthor
-    ? TPP.spineTextStyle(spineAuthor, titleLength)
-    : "";
+  const spineTexts = TPP.textElementsForLocation(settings, "spine");
   const spineImage = TPP.findImageElement(settings, "spine", "cover");
   element.innerHTML =
     (spineImage && spineImage.fileId
@@ -347,25 +340,28 @@ TPP.spineEl = function (settings, x, y, height) {
         TPP.imageElementStyle(spineImage, 100) +
         '">'
       : "") +
-    (spineTitle &&
-    spineTitle.enabled !== false &&
-    String(titleText || "").trim()
-      ? '<div class="spine-title' +
-        (spineTitle.rotate ? " rot" : "") +
-        '" style="' +
-        titleStyle +
-        '">' +
-        TPP.esc(titleText) +
-        "</div>"
-      : "") +
-    (hasAuthor
-      ? '<div class="spine-author' +
-        (spineAuthor.rotate ? " rot" : "") +
-        '" style="' +
-        authorStyle +
-        '">' +
-        TPP.esc(authorText) +
-        "</div>"
-      : "");
+    spineTexts
+      .map(function (entry, index) {
+        const text = TPP.bookInfoFieldValue(
+          settings,
+          entry.fieldKey || entry.part,
+          {
+            location: "spine",
+            customText: entry.customText,
+          },
+        );
+        if (entry.enabled === false || !String(text || "").trim()) return "";
+        return (
+          '<div class="spine-text spine-text-' +
+          index +
+          (entry.rotate ? " rot" : "") +
+          '" style="' +
+          TPP.spineTextStyle(entry, Math.max(0.1, height)) +
+          '">' +
+          TPP.esc(text) +
+          "</div>"
+        );
+      })
+      .join("");
   return element;
 };

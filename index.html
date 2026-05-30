@@ -131,7 +131,27 @@
             <label>Author Spine Name <input id="spineAuthor" /></label>
             <label>Publishing Date <input id="pubDate" type="date" /></label>
             <label>Publisher <input id="publisher" /></label>
+            <label>City Published <input id="cityPublished" /></label>
             <label>Copyright <input id="copyright" /></label>
+            <div class="two">
+              <label>ISBN <input id="isbn" /></label>
+              <label>ISBN-13 <input id="isbn13" /></label>
+            </div>
+            <div class="two">
+              <label>Edition <input id="edition" /></label>
+              <label>Phone <input id="phone" /></label>
+            </div>
+            <label>Website <input id="website" /></label>
+            <label>Address <textarea id="address" rows="2"></textarea></label>
+            <label>Email <input id="email" type="email" /></label>
+            <label
+              >Copyright Notice
+              <textarea id="copyrightNotice" rows="3"></textarea
+            ></label>
+            <label
+              >Credits / Disclaimer
+              <textarea id="creditsDisclaimer" rows="4"></textarea
+            ></label>
             <div class="two">
               <label>Series <input id="seriesName" /></label>
               <label>Number <input id="number" /></label>
@@ -378,6 +398,24 @@
           </details>
 
           <details>
+            <summary>Copyright Page</summary>
+            <label
+              ><input id="copyrightPageEnabled" type="checkbox" /> Include
+              copyright page</label
+            >
+            <label>Page Title <input id="copyrightPageTitle" /></label>
+            <label
+              >Published Date Format
+              <select id="copyrightDateFormat">
+                <option value="year">Year</option>
+                <option value="year-month">Year and month</option>
+                <option value="year-month-day">Year, month, and date</option>
+              </select>
+            </label>
+            <div id="copyrightPageItems"></div>
+          </details>
+
+          <details>
             <summary>Front Cover</summary>
             <label
               ><input id="coverOverflowImage" type="checkbox" /> Allow image to
@@ -432,38 +470,6 @@
 
           <details>
             <summary>Back Cover</summary>
-            <label>Text <textarea id="backText" rows="4"></textarea></label>
-            <div class="two">
-              <label
-                >Text Y <input id="backTextY" type="range" min="0" max="100"
-              /></label>
-              <label
-                >Font Size
-                <input id="backTextSize" type="number" min="3" step=".5"
-              /></label>
-            </div>
-            <div class="two">
-              <label
-                >Text Align
-                <select id="backTextAlign">
-                  <option value="center">Center</option>
-                  <option value="justify">Justify</option>
-                  <option value="left">Left</option>
-                </select>
-              </label>
-              <label
-                >Last Line
-                <select id="backTextLastLine">
-                  <option value="auto">Default</option>
-                  <option value="center">Center</option>
-                  <option value="justify">Justify</option>
-                </select>
-              </label>
-            </div>
-            <label
-              >Text Color
-              <input id="backTextColor" type="color" class="color-box"
-            /></label>
             <label
               ><input id="backFrameOn" type="checkbox" /> Frame on back
               cover</label
@@ -495,6 +501,7 @@
                 /></label>
               </div>
             </div>
+            <div id="backTextElements"></div>
           </details>
 
           <details>

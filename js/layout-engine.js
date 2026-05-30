@@ -21,11 +21,25 @@ TPP.settings = function () {
     spineAuthor: TPP.bookInfo(book).spineAuthor,
     pubDate: TPP.bookInfo(book).pubDate,
     publisher: TPP.bookInfo(book).publisher,
+    cityPublished: TPP.bookInfo(book).cityPublished,
     copyright: TPP.bookInfo(book).copyright,
+    isbn: TPP.bookInfo(book).isbn,
+    isbn13: TPP.bookInfo(book).isbn13,
+    edition: TPP.bookInfo(book).edition,
+    phone: TPP.bookInfo(book).phone,
+    website: TPP.bookInfo(book).website,
+    address: TPP.bookInfo(book).address,
+    email: TPP.bookInfo(book).email,
+    copyrightNotice: TPP.bookInfo(book).copyrightNotice,
+    creditsDisclaimer: TPP.bookInfo(book).creditsDisclaimer,
     seriesName: TPP.bookInfo(book).seriesName,
     number: TPP.bookInfo(book).number,
     volume: TPP.bookInfo(book).volume,
     printing: TPP.bookInfo(book).printing,
+    copyrightPageEnabled: TPP.copyrightPageInfo(book).enabled,
+    copyrightPageTitle: TPP.copyrightPageInfo(book).title,
+    copyrightDateFormat: TPP.copyrightPageInfo(book).dateFormat,
+    copyrightPageItems: TPP.copyrightPageInfo(book).items,
     pageSize: TPP.pageInfo(book).pageSize,
     sheetSize: TPP.pageInfo(book).sheetSize,
     signatureSize: TPP.pageInfo(book).signatureSize,
@@ -340,24 +354,30 @@ TPP.buildPages = function () {
       TPP.esc(series) +
       "</div>",
   );
-  makePage(
-    "imprint",
-    '<div class="story-title">Publication</div><div class="imprint">' +
-      [
-        settings.title,
-        settings.author,
-        settings.publisher,
-        TPP.date(settings.pubDate),
-        settings.printing,
-        settings.volume,
-        settings.number,
-        settings.copyright,
-      ]
-        .filter(Boolean)
-        .map(TPP.esc)
-        .join("<br>") +
-      "</div>",
-  );
+  if (settings.copyrightPageEnabled) {
+    const copyrightLines = (Array.isArray(settings.copyrightPageItems)
+      ? settings.copyrightPageItems
+      : []
+    )
+      .map(function (item) {
+        return TPP.copyrightPageItemText(settings, item, {
+          dateFormat: settings.copyrightDateFormat || "year",
+        });
+      })
+      .filter(Boolean)
+      .map(function (line) {
+        return "<p>" + TPP.esc(line) + "</p>";
+      })
+      .join("");
+    makePage(
+      "imprint",
+      '<div class="story-title">' +
+        TPP.esc(settings.copyrightPageTitle || "Copyright") +
+        '</div><div class="imprint">' +
+        copyrightLines +
+        "</div>",
+    );
+  }
 
   let tocIndex = -1;
   if (settings.includeToc) {
