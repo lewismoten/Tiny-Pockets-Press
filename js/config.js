@@ -242,6 +242,10 @@ TPP.fallbackBook = function () {
       ornamentBySide: false,
       reverseOrnamentsBySide: false,
     },
+    chapterSettings: {
+      chapterEndOrnament: "",
+      chapterEndCentered: true,
+    },
     toc: {
       enabled: true,
       numberMode: "page",
@@ -335,8 +339,6 @@ TPP.fallbackBook = function () {
     separateCover: true,
     coverCopies: 1,
     coverCopiesMax: true,
-    chapterEndOrnament: "",
-    chapterEndCentered: true,
     showCutGuides: true,
     showFoldGuides: true,
     showPageGuides: true,

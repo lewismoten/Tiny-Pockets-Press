@@ -581,6 +581,8 @@ TPP.dataSchemaKeys = function (context) {
       "ornamentBySide",
       "reverseOrnamentsBySide",
     ]);
+  if (context === "chapterSettings")
+    return new Set(["chapterEndOrnament", "chapterEndCentered"]);
   if (context === "coverFront")
     return new Set([
       "imageElementId",
@@ -947,6 +949,8 @@ TPP.dataValueHtml = function (book, key, value, compact) {
                 ? "links"
                 : key === "pageNumbers"
                   ? "pageNumbers"
+                  : key === "chapterSettings"
+                    ? "chapterSettings"
               : key === "coverFront"
                 ? "coverFront"
                 : key === "backCover"
@@ -1164,6 +1168,7 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.text;
   delete copy.links;
   delete copy.pageNumbers;
+  delete copy.chapterSettings;
   delete copy.coverFront;
   delete copy.backCover;
   delete copy.spine;
@@ -1246,6 +1251,16 @@ TPP.dataTabs = function (book, stale) {
         book && book.pageNumbers ? book.pageNumbers : {},
         false,
         "pageNumbers",
+      ),
+    },
+    {
+      id: "chapter-settings",
+      label: "Chapter Settings",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.chapterSettings ? book.chapterSettings : {},
+        false,
+        "chapterSettings",
       ),
     },
     {

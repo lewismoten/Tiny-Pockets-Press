@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 13;
+TPP.SCHEMA_VERSION = 14;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -339,6 +339,18 @@ TPP.defaultStaleKeyLookup = [
     note: "Page number settings now live under pageNumbers.",
   },
   {
+    path: "chapterEndOrnament",
+    schemaVersion: 14,
+    movedTo: ["chapterSettings.chapterEndOrnament"],
+    note: "Chapter-wide presentation settings now live under chapterSettings.",
+  },
+  {
+    path: "chapterEndCentered",
+    schemaVersion: 14,
+    movedTo: ["chapterSettings.chapterEndCentered"],
+    note: "Chapter-wide presentation settings now live under chapterSettings.",
+  },
+  {
     path: "coverOverflowImage",
     schemaVersion: 9,
     movedTo: ["coverFront.overflowImage"],
@@ -460,6 +472,7 @@ TPP.PAGE_NUMBER_FIELDS = [
   "ornamentBySide",
   "reverseOrnamentsBySide",
 ];
+TPP.CHAPTER_SETTINGS_FIELDS = ["chapterEndOrnament", "chapterEndCentered"];
 TPP.COVER_FRONT_FIELDS = [
   "coverImageId",
   "coverOverflowImage",
@@ -861,6 +874,59 @@ TPP.compactPageNumberInfo = function (book) {
   if (!book || !book.pageNumbers || typeof book.pageNumbers !== "object")
     return;
   TPP.PAGE_NUMBER_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.chapterSettingsInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback =
+    (TPP.fallbackBook && TPP.fallbackBook().chapterSettings) || {};
+  book.chapterSettings = Object.assign({}, fallback, book.chapterSettings || {});
+  return book.chapterSettings;
+};
+TPP.attachChapterSettingsAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  TPP.CHAPTER_SETTINGS_FIELDS.forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.chapterSettingsInfo(book)[field];
+      },
+      set: function (value) {
+        TPP.chapterSettingsInfo(book)[field] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncChapterSettingsFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const chapterSettings = TPP.chapterSettingsInfo(book);
+  TPP.CHAPTER_SETTINGS_FIELDS.forEach(function (field) {
+    if (field in book) chapterSettings[field] = book[field];
+  });
+};
+TPP.compactChapterSettingsInfo = function (book) {
+  if (!book || !book.chapterSettings || typeof book.chapterSettings !== "object")
+    return;
+  TPP.CHAPTER_SETTINGS_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
       descriptor &&
@@ -2031,6 +2097,9 @@ TPP.bookFingerprint = function (book) {
   TPP.PAGE_NUMBER_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.CHAPTER_SETTINGS_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.COVER_FRONT_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -2066,6 +2135,8 @@ TPP.hydrateBookDates = function (book) {
   TPP.attachLinkAccessors(book);
   TPP.syncPageNumbersFromLegacyFields(book);
   TPP.attachPageNumberAccessors(book);
+  TPP.syncChapterSettingsFromLegacyFields(book);
+  TPP.attachChapterSettingsAccessors(book);
   TPP.syncCoverFrontFromLegacyFields(book);
   TPP.attachCoverFrontAccessors(book);
   TPP.syncBackCoverFromLegacyFields(book);
@@ -2146,6 +2217,7 @@ TPP.hydrateBookDates = function (book) {
   TPP.compactTextInfo(book);
   TPP.compactLinkInfo(book);
   TPP.compactPageNumberInfo(book);
+  TPP.compactChapterSettingsInfo(book);
   TPP.compactCoverFrontInfo(book);
   TPP.compactBackCoverInfo(book);
   TPP.compactSpineInfo(book);
