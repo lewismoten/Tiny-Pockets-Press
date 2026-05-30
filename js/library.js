@@ -606,6 +606,8 @@ TPP.dataSchemaKeys = function (context) {
     ]);
   if (context === "chapterSettings")
     return new Set(["chapterEndOrnament", "chapterEndCentered"]);
+  if (context === "copyrightPage")
+    return new Set(["enabled", "title", "dateFormat", "items"]);
   if (context === "coverFront")
     return new Set([
       "imageElementId",
@@ -631,7 +633,17 @@ TPP.dataSchemaKeys = function (context) {
       "spineAuthor",
       "pubDate",
       "publisher",
+      "cityPublished",
       "copyright",
+      "isbn",
+      "isbn13",
+      "edition",
+      "phone",
+      "website",
+      "address",
+      "email",
+      "copyrightNotice",
+      "creditsDisclaimer",
       "seriesName",
       "number",
       "volume",
@@ -677,6 +689,7 @@ TPP.dataSchemaKeys = function (context) {
       "id",
       "location",
       "part",
+      "fieldKey",
       "enabled",
       "size",
       "x",
@@ -975,6 +988,8 @@ TPP.dataValueHtml = function (book, key, value, compact) {
                   ? "pageNumbers"
                   : key === "chapterSettings"
                     ? "chapterSettings"
+                    : key === "copyrightPage"
+                      ? "copyrightPage"
               : key === "coverFront"
                 ? "coverFront"
                 : key === "backCover"
