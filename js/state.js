@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 11;
+TPP.SCHEMA_VERSION = 12;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -267,6 +267,42 @@ TPP.defaultStaleKeyLookup = [
     note: "Typography settings now live under text.",
   },
   {
+    path: "qrDisplayMode",
+    schemaVersion: 12,
+    movedTo: ["links.qrDisplayMode"],
+    note: "URL and QR presentation settings now live under links.",
+  },
+  {
+    path: "imageUrlMode",
+    schemaVersion: 12,
+    movedTo: ["links.imageUrlMode"],
+    note: "URL and QR presentation settings now live under links.",
+  },
+  {
+    path: "qrLightMode",
+    schemaVersion: 12,
+    movedTo: ["links.qrLightMode"],
+    note: "URL and QR presentation settings now live under links.",
+  },
+  {
+    path: "qrLightColor",
+    schemaVersion: 12,
+    movedTo: ["links.qrLightColor"],
+    note: "URL and QR presentation settings now live under links.",
+  },
+  {
+    path: "qrDarkMode",
+    schemaVersion: 12,
+    movedTo: ["links.qrDarkMode"],
+    note: "URL and QR presentation settings now live under links.",
+  },
+  {
+    path: "qrDarkColor",
+    schemaVersion: 12,
+    movedTo: ["links.qrDarkColor"],
+    note: "URL and QR presentation settings now live under links.",
+  },
+  {
     path: "coverOverflowImage",
     schemaVersion: 9,
     movedTo: ["coverFront.overflowImage"],
@@ -371,6 +407,14 @@ TPP.TEXT_FIELDS = [
   "lineHeight",
   "paraGap",
   "justify",
+];
+TPP.LINK_FIELDS = [
+  "qrDisplayMode",
+  "imageUrlMode",
+  "qrLightMode",
+  "qrLightColor",
+  "qrDarkMode",
+  "qrDarkColor",
 ];
 TPP.COVER_FRONT_FIELDS = [
   "coverImageId",
@@ -670,6 +714,57 @@ TPP.syncTextFromLegacyFields = function (book) {
 TPP.compactTextInfo = function (book) {
   if (!book || !book.text || typeof book.text !== "object") return;
   TPP.TEXT_FIELDS.forEach(function (field) {
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      delete book[field];
+    }
+  });
+};
+TPP.linkInfo = function (book) {
+  if (!book || typeof book !== "object") return {};
+  const fallback = (TPP.fallbackBook && TPP.fallbackBook().links) || {};
+  book.links = Object.assign({}, fallback, book.links || {});
+  return book.links;
+};
+TPP.attachLinkAccessors = function (book) {
+  if (!book || typeof book !== "object") return book;
+  TPP.LINK_FIELDS.forEach(function (field) {
+    const existing = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      existing &&
+      existing.get &&
+      existing.set &&
+      existing.enumerable === false
+    )
+      return;
+    Object.defineProperty(book, field, {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return TPP.linkInfo(book)[field];
+      },
+      set: function (value) {
+        TPP.linkInfo(book)[field] = value;
+      },
+    });
+  });
+  return book;
+};
+TPP.syncLinkFromLegacyFields = function (book) {
+  if (!book || typeof book !== "object") return;
+  const links = TPP.linkInfo(book);
+  TPP.LINK_FIELDS.forEach(function (field) {
+    if (field in book) links[field] = book[field];
+  });
+};
+TPP.compactLinkInfo = function (book) {
+  if (!book || !book.links || typeof book.links !== "object") return;
+  TPP.LINK_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
       descriptor &&
@@ -1834,6 +1929,9 @@ TPP.bookFingerprint = function (book) {
   TPP.TEXT_FIELDS.forEach(function (field) {
     delete copy[field];
   });
+  TPP.LINK_FIELDS.forEach(function (field) {
+    delete copy[field];
+  });
   TPP.COVER_FRONT_FIELDS.forEach(function (field) {
     delete copy[field];
   });
@@ -1865,6 +1963,8 @@ TPP.hydrateBookDates = function (book) {
   TPP.attachPageAccessors(book);
   TPP.syncTextFromLegacyFields(book);
   TPP.attachTextAccessors(book);
+  TPP.syncLinkFromLegacyFields(book);
+  TPP.attachLinkAccessors(book);
   TPP.syncCoverFrontFromLegacyFields(book);
   TPP.attachCoverFrontAccessors(book);
   TPP.syncBackCoverFromLegacyFields(book);
@@ -1943,6 +2043,7 @@ TPP.hydrateBookDates = function (book) {
   TPP.compactBookInfo(book);
   TPP.compactPageInfo(book);
   TPP.compactTextInfo(book);
+  TPP.compactLinkInfo(book);
   TPP.compactCoverFrontInfo(book);
   TPP.compactBackCoverInfo(book);
   TPP.compactSpineInfo(book);

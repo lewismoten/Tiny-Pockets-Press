@@ -563,6 +563,15 @@ TPP.dataSchemaKeys = function (context) {
       "paraGap",
       "justify",
     ]);
+  if (context === "links")
+    return new Set([
+      "qrDisplayMode",
+      "imageUrlMode",
+      "qrLightMode",
+      "qrLightColor",
+      "qrDarkMode",
+      "qrDarkColor",
+    ]);
   if (context === "coverFront")
     return new Set([
       "imageElementId",
@@ -925,6 +934,8 @@ TPP.dataValueHtml = function (book, key, value, compact) {
             ? "page"
             : key === "text"
               ? "text"
+              : key === "links"
+                ? "links"
               : key === "coverFront"
                 ? "coverFront"
                 : key === "backCover"
@@ -1140,6 +1151,7 @@ TPP.dataTopLevelObject = function (book) {
   delete copy.meta;
   delete copy.page;
   delete copy.text;
+  delete copy.links;
   delete copy.coverFront;
   delete copy.backCover;
   delete copy.spine;
@@ -1202,6 +1214,16 @@ TPP.dataTabs = function (book, stale) {
         book && book.text ? book.text : {},
         false,
         "text",
+      ),
+    },
+    {
+      id: "links",
+      label: "Links",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.links ? book.links : {},
+        false,
+        "links",
       ),
     },
     {
