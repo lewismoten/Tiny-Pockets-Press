@@ -125,7 +125,7 @@
       <aside class="settings">
         <section class="controls">
           <details open>
-            <summary>Book</summary>
+            <summary>Book Info</summary>
             <label>Title <input id="title" /></label>
             <label>Author <input id="author" /></label>
             <label>Author Spine Name <input id="spineAuthor" /></label>
@@ -152,7 +152,7 @@
           </details>
 
           <details open>
-            <summary>Page</summary>
+            <summary>Layout</summary>
             <div class="two">
               <label
                 >Page Size
@@ -208,7 +208,7 @@
           </details>
 
           <details open>
-            <summary>Text</summary>
+            <summary>Typography</summary>
             <label
               >Font
               <select id="fontFamily"></select
@@ -295,7 +295,90 @@
           </details>
 
           <details>
-            <summary>Cover Front</summary>
+            <summary>Contents</summary>
+            <label
+              ><input id="includeToc" type="checkbox" /> Include table of
+              contents</label
+            >
+            <label
+              >Numbering
+              <select id="tocNumberType">
+                <option value="page">Page</option>
+                <option value="chapter">Chapter</option>
+              </select>
+            </label>
+            <label
+              >Leader Style
+              <select id="tocLeader">
+                <option value="dots">Dots</option>
+                <option value="line">Line</option>
+                <option value="none">None</option>
+              </select>
+            </label>
+            <label
+              >Leader Color
+              <input id="tocLeaderColor" type="color" class="color-box"
+            /></label>
+            <label
+              >Indent Per Level (in)
+              <input id="tocIndentStep" type="number" min="0" step=".01"
+            /></label>
+          </details>
+
+          <details>
+            <summary>Page Numbers</summary>
+            <label
+              >Page Number Mode
+              <select id="pageNumMode">
+                <option value="none">None</option>
+                <option value="center">Center</option>
+                <option value="edge">Outer Edge</option>
+              </select>
+            </label>
+            <label
+              >Ornament Preset
+              <select id="pageOrnament">
+                <option value="">None</option>
+                <option value="dash">— 1 —</option>
+                <option value="floral">☙ 1 ❧</option>
+                <option value="heart">♥ 1 ♥</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <div class="two">
+              <label>Prefix / Left <input id="pageNumLeft" /></label
+              ><label>Suffix / Right <input id="pageNumRight" /></label>
+            </div>
+            <label
+              ><input id="ornamentBySide" type="checkbox" /> Use one ornament
+              based on page side</label
+            >
+            <label
+              ><input id="reverseOrnamentsBySide" type="checkbox" /> Reverse
+              odd/even ornament side</label
+            >
+          </details>
+
+          <details>
+            <summary>Chapter Markers</summary>
+            <label
+              >Chapter End Ornament
+              <select id="chapterEndOrnament">
+                <option value="">None</option>
+                <option>❦</option>
+                <option>☙ ❧</option>
+                <option>◆</option>
+                <option>***</option>
+              </select></label
+            >
+            <label
+              ><input id="chapterEndCentered" type="checkbox" /> Center chapter
+              end ornament</label
+            >
+          </details>
+
+          <details>
+            <summary>Front Cover</summary>
             <label
               ><input id="coverOverflowImage" type="checkbox" /> Allow image to
               bleed past page</label
@@ -444,90 +527,7 @@
           </details>
 
           <details>
-            <summary>Table of Contents</summary>
-            <label
-              ><input id="includeToc" type="checkbox" /> Include table of
-              contents</label
-            >
-            <label
-              >Numbering
-              <select id="tocNumberType">
-                <option value="page">Page</option>
-                <option value="chapter">Chapter</option>
-              </select>
-            </label>
-            <label
-              >Leader Style
-              <select id="tocLeader">
-                <option value="dots">Dots</option>
-                <option value="line">Line</option>
-                <option value="none">None</option>
-              </select>
-            </label>
-            <label
-              >Leader Color
-              <input id="tocLeaderColor" type="color" class="color-box"
-            /></label>
-            <label
-              >Indent Per Level (in)
-              <input id="tocIndentStep" type="number" min="0" step=".01"
-            /></label>
-          </details>
-
-          <details>
-            <summary>Page Numbers</summary>
-            <label
-              >Page Number Mode
-              <select id="pageNumMode">
-                <option value="none">None</option>
-                <option value="center">Center</option>
-                <option value="edge">Outer Edge</option>
-              </select>
-            </label>
-            <label
-              >Ornament Preset
-              <select id="pageOrnament">
-                <option value="">None</option>
-                <option value="dash">— 1 —</option>
-                <option value="floral">☙ 1 ❧</option>
-                <option value="heart">♥ 1 ♥</option>
-                <option value="custom">Custom</option>
-              </select>
-            </label>
-            <div class="two">
-              <label>Prefix / Left <input id="pageNumLeft" /></label
-              ><label>Suffix / Right <input id="pageNumRight" /></label>
-            </div>
-            <label
-              ><input id="ornamentBySide" type="checkbox" /> Use one ornament
-              based on page side</label
-            >
-            <label
-              ><input id="reverseOrnamentsBySide" type="checkbox" /> Reverse
-              odd/even ornament side</label
-            >
-          </details>
-
-          <details>
-            <summary>Chapter Ornaments</summary>
-            <label
-              >Chapter End Ornament
-              <select id="chapterEndOrnament">
-                <option value="">None</option>
-                <option>❦</option>
-                <option>☙ ❧</option>
-                <option>◆</option>
-                <option>***</option>
-              </select></label
-            >
-            <label
-              ><input id="chapterEndCentered" type="checkbox" /> Center chapter
-              end ornament</label
-            >
-          </details>
-
-          <details>
-            <summary>Printing</summary>
+            <summary>Print Setup</summary>
             <label
               >Signature Size
               <input id="signatureSize" type="number" min="4" max="64" step="4"
