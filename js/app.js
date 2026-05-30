@@ -135,9 +135,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.sync("nosave");
         const group = bookInfoButton.closest(".book-info-entry");
         if (group) TPP.removeBookInfoEntry(TPP.active, group.dataset.entryId);
-        if (TPP.renderBookInfoControls) TPP.renderBookInfoControls();
         TPP.save();
-        TPP.renderAll();
+        TPP.loadForm();
+        renderCurrentViewPreservingSidebar();
         return;
       }
       const copyrightButton = e.target.closest("[data-copyright-action]");
@@ -165,9 +165,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (!value) return;
       TPP.sync("nosave");
       TPP.addBookInfoEntry(TPP.active, value);
-      if (TPP.renderBookInfoControls) TPP.renderBookInfoControls();
       TPP.save();
-      TPP.renderAll();
+      TPP.loadForm();
+      renderCurrentViewPreservingSidebar();
     };
   }
 
