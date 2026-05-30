@@ -126,48 +126,17 @@
         <section class="controls">
           <details open>
             <summary>Book Info</summary>
-            <label>Title <input id="title" /></label>
-            <label>Author <input id="author" /></label>
-            <label>Author Spine Name <input id="spineAuthor" /></label>
-            <label>Publishing Date <input id="pubDate" type="date" /></label>
-            <label>Publisher <input id="publisher" /></label>
-            <label>City Published <input id="cityPublished" /></label>
-            <label>Copyright <input id="copyright" /></label>
+            <div id="bookInfoFields"></div>
             <div class="two">
-              <label>ISBN <input id="isbn" /></label>
-              <label>ISBN-13 <input id="isbn13" /></label>
-            </div>
-            <div class="two">
-              <label>Edition <input id="edition" /></label>
-              <label>Phone <input id="phone" /></label>
-            </div>
-            <label>Website <input id="website" /></label>
-            <label>Address <textarea id="address" rows="2"></textarea></label>
-            <label>Email <input id="email" type="email" /></label>
-            <label
-              >Copyright Notice
-              <textarea id="copyrightNotice" rows="3"></textarea
-            ></label>
-            <label
-              >Credits / Disclaimer
-              <textarea id="creditsDisclaimer" rows="4"></textarea
-            ></label>
-            <div class="two">
-              <label>Series <input id="seriesName" /></label>
-              <label>Number <input id="number" /></label>
-            </div>
-            <div class="two">
-              <label>Volume <input id="volume" /></label>
               <label
-                >Printing
-                <select id="printing">
-                  <option>First Printing</option>
-                  <option>Second Printing</option>
-                  <option>Third Printing</option>
-                  <option>Proof Copy</option>
-                  <option>Revised Edition</option>
-                </select>
+                >Add Field
+                <select id="bookInfoAddField"></select>
               </label>
+              <label style="align-self: end"
+                ><button type="button" id="bookInfoAddButton" class="small">
+                  Add
+                </button></label
+              >
             </div>
           </details>
 

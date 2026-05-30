@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 16;
+TPP.SCHEMA_VERSION = 17;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -571,6 +571,13 @@ TPP.BOOK_INFO_FIELDS = [
   "volume",
   "printing",
 ];
+TPP.BOOK_INFO_DEFAULT_FIELDS = [
+  "title",
+  "author",
+  "publisher",
+  "pubDate",
+  "copyright",
+];
 TPP.COPYRIGHT_PAGE_FIELDS = [
   "copyrightPageEnabled",
   "copyrightPageTitle",
@@ -739,11 +746,164 @@ TPP.clone = function (obj) {
 TPP.nowIso = function () {
   return new Date().toISOString();
 };
+TPP.bookInfoEntryId = function (key, suffix) {
+  return "book-info-" + String(key || "entry") + (suffix ? "-" + suffix : "");
+};
+TPP.bookInfoDefaults = function () {
+  return [
+    {
+      id: TPP.bookInfoEntryId("title"),
+      key: "title",
+      value: "",
+      customLabel: "",
+    },
+    {
+      id: TPP.bookInfoEntryId("author"),
+      key: "author",
+      value: "",
+      customLabel: "",
+    },
+    {
+      id: TPP.bookInfoEntryId("publisher"),
+      key: "publisher",
+      value: "",
+      customLabel: "",
+    },
+    {
+      id: TPP.bookInfoEntryId("pubDate"),
+      key: "pubDate",
+      value: "",
+      customLabel: "",
+    },
+    {
+      id: TPP.bookInfoEntryId("copyright"),
+      key: "copyright",
+      value: "",
+      customLabel: "",
+    },
+  ];
+};
+TPP.bookInfoFieldSpec = function (key) {
+  const specs = {
+    title: { input: "text" },
+    author: { input: "text" },
+    spineAuthor: { input: "text" },
+    pubDate: { input: "date" },
+    publisher: { input: "text" },
+    cityPublished: { input: "text" },
+    copyright: { input: "text" },
+    isbn: { input: "text" },
+    isbn13: { input: "text" },
+    edition: { input: "text" },
+    phone: { input: "text" },
+    website: { input: "text" },
+    address: { input: "textarea", rows: 2 },
+    email: { input: "email" },
+    copyrightNotice: { input: "textarea", rows: 3 },
+    creditsDisclaimer: { input: "textarea", rows: 4 },
+    seriesName: { input: "text" },
+    number: { input: "text" },
+    volume: { input: "text" },
+    printing: {
+      input: "select",
+      options: [
+        "First Printing",
+        "Second Printing",
+        "Third Printing",
+        "Proof Copy",
+        "Revised Edition",
+      ],
+    },
+    custom: { input: "textarea", rows: 3 },
+  };
+  return specs[key] || { input: "text" };
+};
+TPP.normalizeBookInfoEntries = function (book) {
+  const source = book && book.bookInfo;
+  let entries = [];
+  if (Array.isArray(source)) {
+    entries = source
+      .map(function (entry, index) {
+        if (!entry || typeof entry !== "object") return null;
+        const key = TPP.BOOK_INFO_FIELDS.includes(entry.key)
+          ? entry.key
+          : entry.key === "custom"
+            ? "custom"
+            : "";
+        if (!key) return null;
+        return {
+          id: entry.id || TPP.bookInfoEntryId(key, index + 1),
+          key: key,
+          value: String(entry.value || ""),
+          customLabel: String(entry.customLabel || ""),
+        };
+      })
+      .filter(Boolean);
+  } else {
+    const objectSource = source && typeof source === "object" ? source : {};
+    entries = TPP.BOOK_INFO_FIELDS.filter(function (key) {
+      return (
+        TPP.BOOK_INFO_DEFAULT_FIELDS.includes(key) ||
+        String(objectSource[key] || "").trim()
+      );
+    }).map(function (key, index) {
+      return {
+        id: TPP.bookInfoEntryId(key, index + 1),
+        key: key,
+        value: String(objectSource[key] || ""),
+        customLabel: "",
+      };
+    });
+  }
+  const defaults = TPP.bookInfoDefaults();
+  const byKey = new Map();
+  entries.forEach(function (entry) {
+    if (entry.key === "custom") return;
+    if (!byKey.has(entry.key)) byKey.set(entry.key, entry);
+  });
+  const normalized = defaults.map(function (entry) {
+    const existing = byKey.get(entry.key);
+    return existing
+      ? Object.assign({}, entry, existing, { id: existing.id || entry.id })
+      : Object.assign({}, entry);
+  });
+  TPP.BOOK_INFO_FIELDS.forEach(function (key) {
+    if (TPP.BOOK_INFO_DEFAULT_FIELDS.includes(key) || !byKey.has(key)) return;
+    normalized.push(byKey.get(key));
+  });
+  entries.forEach(function (entry) {
+    if (entry.key === "custom") normalized.push(entry);
+  });
+  return normalized;
+};
 TPP.bookInfo = function (book) {
-  if (!book || typeof book !== "object") return {};
-  const fallback = (TPP.fallbackBook && TPP.fallbackBook().bookInfo) || {};
-  book.bookInfo = Object.assign({}, fallback, book.bookInfo || {});
+  if (!book || typeof book !== "object") return [];
+  book.bookInfo = TPP.normalizeBookInfoEntries(book);
   return book.bookInfo;
+};
+TPP.bookInfoEntry = function (book, key) {
+  return (
+    TPP.bookInfo(book).find(function (entry) {
+      return entry && entry.key === key;
+    }) || null
+  );
+};
+TPP.bookInfoValue = function (book, key) {
+  const entry = TPP.bookInfoEntry(book, key);
+  return entry ? String(entry.value || "") : "";
+};
+TPP.setBookInfoValue = function (book, key, value) {
+  if (!book) return;
+  const entry = TPP.bookInfoEntry(book, key);
+  if (entry) entry.value = String(value || "");
+  else {
+    TPP.bookInfo(book).push({
+      id: TPP.bookInfoEntryId(key, TPP.uid()),
+      key: key,
+      value: String(value || ""),
+      customLabel: "",
+    });
+  }
 };
 TPP.attachBookInfoAccessors = function (book) {
   if (!book || typeof book !== "object") return book;
@@ -760,10 +920,10 @@ TPP.attachBookInfoAccessors = function (book) {
       configurable: true,
       enumerable: false,
       get: function () {
-        return TPP.bookInfo(book)[field];
+        return TPP.bookInfoValue(book, field);
       },
       set: function (value) {
-        TPP.bookInfo(book)[field] = value;
+        TPP.setBookInfoValue(book, field, value);
       },
     });
   });
@@ -771,13 +931,20 @@ TPP.attachBookInfoAccessors = function (book) {
 };
 TPP.syncBookInfoFromLegacyFields = function (book) {
   if (!book || typeof book !== "object") return;
-  const info = TPP.bookInfo(book);
   TPP.BOOK_INFO_FIELDS.forEach(function (field) {
-    if (field in book) info[field] = book[field];
+    const descriptor = Object.getOwnPropertyDescriptor(book, field);
+    if (
+      descriptor &&
+      !descriptor.get &&
+      !descriptor.set &&
+      descriptor.enumerable !== false
+    ) {
+      TPP.setBookInfoValue(book, field, book[field]);
+    }
   });
 };
 TPP.compactBookInfo = function (book) {
-  if (!book || !book.bookInfo || typeof book.bookInfo !== "object") return;
+  if (!book || !Array.isArray(book.bookInfo)) return;
   TPP.BOOK_INFO_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
     if (
@@ -3159,7 +3326,14 @@ TPP.migrateTextElements = function (book, base) {
     if (!entry.fieldKey) entry.fieldKey = entry.part || "custom";
   });
 };
-TPP.bookInfoFieldLabel = function (fieldKey) {
+TPP.bookInfoFieldLabel = function (fieldKey, book) {
+  if (String(fieldKey || "").startsWith("custom:")) {
+    const id = String(fieldKey).slice("custom:".length);
+    const entry = TPP.bookInfo(book).find(function (item) {
+      return item && item.id === id;
+    });
+    return (entry && entry.customLabel) || "Custom Field";
+  }
   const labels = {
     title: "Title",
     author: "Author",
@@ -3186,31 +3360,24 @@ TPP.bookInfoFieldLabel = function (fieldKey) {
   };
   return labels[fieldKey] || fieldKey;
 };
-TPP.bookInfoFieldOptions = function () {
-  return [
-    "title",
-    "author",
-    "spineAuthor",
-    "publisher",
-    "cityPublished",
-    "pubDate",
-    "copyright",
-    "copyrightNotice",
-    "isbn",
-    "isbn13",
-    "edition",
-    "phone",
-    "website",
-    "address",
-    "email",
-    "creditsDisclaimer",
-    "series",
-    "seriesName",
-    "number",
-    "volume",
-    "printing",
-    "custom",
-  ];
+TPP.bookInfoFieldRef = function (entry) {
+  if (!entry) return "";
+  return entry.key === "custom" ? "custom:" + entry.id : entry.key;
+};
+TPP.bookInfoFieldOptions = function (book, options) {
+  const includeInlineCustom = options && options.includeInlineCustom;
+  const list = TPP.bookInfo(book).map(function (entry) {
+    return {
+      value: TPP.bookInfoFieldRef(entry),
+      label: TPP.bookInfoFieldLabel(TPP.bookInfoFieldRef(entry), book),
+    };
+  });
+  if (includeInlineCustom) {
+    list.push({ value: "custom", label: "Custom Text" });
+  }
+  if (TPP.bookInfoValue(book, "seriesName") || TPP.bookInfoValue(book, "number"))
+    list.push({ value: "series", label: "Series / Number" });
+  return list;
 };
 TPP.formatBookDate = function (value, mode) {
   if (!value) return "";
@@ -3229,21 +3396,34 @@ TPP.formatBookDate = function (value, mode) {
   });
 };
 TPP.bookInfoFieldValue = function (book, fieldKey, options) {
-  const info = TPP.bookInfo(book);
   const dateFormat = (options && options.dateFormat) || "year-month-day";
+  if (String(fieldKey || "").startsWith("custom:")) {
+    const id = String(fieldKey).slice("custom:".length);
+    const entry = TPP.bookInfo(book).find(function (item) {
+      return item && item.id === id;
+    });
+    return String((entry && entry.value) || "");
+  }
   if (fieldKey === "series")
-    return [info.seriesName, info.number].filter(Boolean).join(" ");
+    return [TPP.bookInfoValue(book, "seriesName"), TPP.bookInfoValue(book, "number")]
+      .filter(Boolean)
+      .join(" ");
   if (fieldKey === "author")
     return options && options.location === "spine"
-      ? String(info.spineAuthor || info.author || "")
-      : String(info.author || "");
+      ? String(
+          TPP.bookInfoValue(book, "spineAuthor") ||
+            TPP.bookInfoValue(book, "author") ||
+            "",
+        )
+      : String(TPP.bookInfoValue(book, "author") || "");
   if (fieldKey === "pubDate")
     return TPP.formatBookDate(
-      info.pubDate,
+      TPP.bookInfoValue(book, "pubDate"),
       dateFormat === "month-day-year" ? "year-month-day" : dateFormat,
     );
-  if (fieldKey === "custom") return String((options && options.customText) || "");
-  return String(info[fieldKey] || "");
+  if (fieldKey === "custom")
+    return String((options && options.customText) || "");
+  return String(TPP.bookInfoValue(book, fieldKey) || "");
 };
 TPP.textElementContent = function (book, location, part) {
   const element = TPP.findTextElement(book, location, part);

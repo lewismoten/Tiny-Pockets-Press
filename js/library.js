@@ -628,26 +628,10 @@ TPP.dataSchemaKeys = function (context) {
   if (context === "spine") return new Set(["imageElementId"]);
   if (context === "bookInfo")
     return new Set([
-      "title",
-      "author",
-      "spineAuthor",
-      "pubDate",
-      "publisher",
-      "cityPublished",
-      "copyright",
-      "isbn",
-      "isbn13",
-      "edition",
-      "phone",
-      "website",
-      "address",
-      "email",
-      "copyrightNotice",
-      "creditsDisclaimer",
-      "seriesName",
-      "number",
-      "volume",
-      "printing",
+      "id",
+      "key",
+      "value",
+      "customLabel",
     ]);
   if (context === "toc")
     return new Set([
@@ -1345,11 +1329,11 @@ TPP.dataTabs = function (book, stale) {
     {
       id: "book-info",
       label: "Book Info",
-      html: TPP.dataObjectHtml(
+      html: TPP.dataArrayHtml(
         book,
-        book && book.bookInfo ? book.bookInfo : {},
-        false,
         "bookInfo",
+        Array.isArray(book.bookInfo) ? book.bookInfo : [],
+        false,
       ),
     },
     {

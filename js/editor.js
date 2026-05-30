@@ -1,5 +1,153 @@
 window.TPP = window.TPP || {};
 
+TPP.bookInfoAddableOptions = function (book) {
+  const used = new Set(
+    TPP.bookInfo(book)
+      .filter(function (entry) {
+        return entry && entry.key !== "custom";
+      })
+      .map(function (entry) {
+        return entry.key;
+      }),
+  );
+  return TPP.BOOK_INFO_FIELDS.filter(function (key) {
+    return !used.has(key) && !TPP.BOOK_INFO_DEFAULT_FIELDS.includes(key);
+  })
+    .map(function (key) {
+      return { value: key, label: TPP.bookInfoFieldLabel(key, book) };
+    })
+    .concat([{ value: "__custom_book_info__", label: "Custom Field" }]);
+};
+TPP.bookInfoFieldInputHtml = function (entry) {
+  const spec = TPP.bookInfoFieldSpec(entry.key);
+  const value = String(entry.value || "");
+  if (spec.input === "textarea") {
+    return (
+      '<textarea class="book-info-value" rows="' +
+      TPP.esc(String(spec.rows || 3)) +
+      '">' +
+      TPP.esc(value) +
+      "</textarea>"
+    );
+  }
+  if (spec.input === "select") {
+    return (
+      '<select class="book-info-value">' +
+      (spec.options || [])
+        .map(function (option) {
+          return (
+            '<option' +
+            (option === value ? " selected" : "") +
+            ">" +
+            TPP.esc(option) +
+            "</option>"
+          );
+        })
+        .join("") +
+      "</select>"
+    );
+  }
+  return (
+    '<input class="book-info-value" type="' +
+    TPP.esc(spec.input || "text") +
+    '" value="' +
+    TPP.esc(value) +
+    '">'
+  );
+};
+TPP.bookInfoEntryEditorHtml = function (entry) {
+  const removable = !TPP.BOOK_INFO_DEFAULT_FIELDS.includes(entry.key);
+  return (
+    '<tr class="book-info-entry" data-entry-id="' +
+    TPP.esc(entry.id || "") +
+    '" data-entry-key="' +
+    TPP.esc(entry.key || "") +
+    '">' +
+    '<td class="book-info-field-cell">' +
+    (entry.key === "custom"
+      ? '<input class="book-info-custom-label" value="' +
+        TPP.esc(entry.customLabel || "") +
+        '" placeholder="Custom field">'
+      : '<span class="book-info-field-label">' +
+        TPP.esc(TPP.bookInfoFieldLabel(TPP.bookInfoFieldRef(entry), TPP.active)) +
+        "</span>") +
+    "</td>" +
+    '<td class="book-info-value-cell">' +
+    TPP.bookInfoFieldInputHtml(entry) +
+    "</td>" +
+    '<td class="book-info-action-cell">' +
+    (removable
+      ? '<button type="button" class="small book-info-trash" data-book-info-action="remove" aria-label="Remove field" title="Remove field">🗑</button>'
+      : "") +
+    "</td>" +
+    "</tr>"
+  );
+};
+TPP.renderBookInfoControls = function () {
+  const container = document.getElementById("bookInfoFields");
+  const select = document.getElementById("bookInfoAddField");
+  if (container) {
+    container.className = "book-info-table-wrap";
+    container.innerHTML =
+      '<table class="data-table book-info-table"><colgroup><col class="book-info-col-field"><col class="book-info-col-value"><col class="book-info-col-action"></colgroup><thead><tr><th>Field</th><th>Value</th><th></th></tr></thead><tbody>' +
+      TPP.bookInfo(TPP.active)
+        .map(TPP.bookInfoEntryEditorHtml)
+        .join("") +
+      "</tbody></table>";
+  }
+  if (select) {
+    select.innerHTML = TPP.bookInfoAddableOptions(TPP.active)
+      .map(function (option) {
+        return (
+          '<option value="' +
+          TPP.esc(option.value) +
+          '">' +
+          TPP.esc(option.label) +
+          "</option>"
+        );
+      })
+      .join("");
+  }
+};
+TPP.readBookInfoControls = function (book) {
+  if (!book) return;
+  const rows = Array.from(document.querySelectorAll(".book-info-entry"));
+  if (!rows.length) return;
+  const existing = TPP.bookInfo(book);
+  book.bookInfo = rows
+    .map(function (row) {
+      const entry = existing.find(function (item) {
+        return item && item.id === row.dataset.entryId;
+      });
+      if (!entry) return null;
+      return {
+        id: entry.id,
+        key: entry.key,
+        value: row.querySelector(".book-info-value")?.value || "",
+        customLabel:
+          row.querySelector(".book-info-custom-label")?.value || "",
+      };
+    })
+    .filter(Boolean);
+};
+TPP.addBookInfoEntry = function (book, key) {
+  if (!book || !key) return;
+  if (key === "__custom_book_info__") key = "custom";
+  if (key !== "custom" && TPP.bookInfoEntry(book, key)) return;
+  TPP.bookInfo(book).push({
+    id: TPP.bookInfoEntryId(key, TPP.uid()),
+    key: key,
+    value: "",
+    customLabel: key === "custom" ? "Custom Field" : "",
+  });
+};
+TPP.removeBookInfoEntry = function (book, id) {
+  if (!book) return;
+  book.bookInfo = TPP.bookInfo(book).filter(function (entry) {
+    return entry && entry.id !== id;
+  });
+};
+
 TPP.assetName = function (book, fileId) {
   const file = TPP.fileAsset(book, fileId);
   if (!file) return "No image selected";
@@ -71,15 +219,29 @@ TPP.textElementEditorConfigs = {
   },
 };
 TPP.textElementFieldOptionsHtml = function (selected) {
-  return TPP.bookInfoFieldOptions()
-    .map(function (fieldKey) {
+  const options = TPP.bookInfoFieldOptions(TPP.active, {
+    includeInlineCustom: true,
+  });
+  if (
+    selected &&
+    !options.some(function (option) {
+      return option.value === selected;
+    })
+  ) {
+    options.unshift({
+      value: selected,
+      label: TPP.bookInfoFieldLabel(selected, TPP.active) + " (Missing)",
+    });
+  }
+  return options
+    .map(function (option) {
       return (
         '<option value="' +
-        TPP.esc(fieldKey) +
+        TPP.esc(option.value) +
         '"' +
-        (fieldKey === selected ? " selected" : "") +
+        (option.value === selected ? " selected" : "") +
         ">" +
-        TPP.esc(TPP.bookInfoFieldLabel(fieldKey)) +
+        TPP.esc(option.label) +
         "</option>"
       );
     })
@@ -96,7 +258,7 @@ TPP.textElementGroupHtml = function (book, spec, element) {
     TPP.esc(spec.location) +
     '">' +
     '<div class="toolbar"><strong>' +
-    TPP.esc(TPP.bookInfoFieldLabel(fieldKey)) +
+    TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
     '</strong><span><button type="button" class="small" data-text-action="up">↑</button><button type="button" class="small" data-text-action="down">↓</button><button type="button" class="small" data-text-action="remove">Remove</button></span></div>' +
     '<label>Content<select class="text-field-key">' +
     TPP.textElementFieldOptionsHtml(fieldKey) +
@@ -181,7 +343,7 @@ TPP.copyrightPageItemsHtml = function (book) {
           '<section class="cover-text-group copyright-item-group" data-item-id="' +
           TPP.esc(item.id || "") +
           '"><div class="toolbar"><strong>' +
-          TPP.esc(TPP.bookInfoFieldLabel(fieldKey)) +
+          TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
           '</strong><span><button type="button" class="small" data-copyright-action="up">↑</button><button type="button" class="small" data-copyright-action="down">↓</button><button type="button" class="small" data-copyright-action="remove">Remove</button></span></div><label>Field<select class="copyright-field-key">' +
           TPP.textElementFieldOptionsHtml(fieldKey) +
           "</select></label>" +
@@ -198,6 +360,7 @@ TPP.copyrightPageItemsHtml = function (book) {
   );
 };
 TPP.renderTextElementControls = function () {
+  if (TPP.renderBookInfoControls) TPP.renderBookInfoControls();
   Object.keys(TPP.textElementEditorConfigs).forEach(function (key) {
     const spec = TPP.textElementEditorConfigs[key];
     const node = document.getElementById(spec.containerId);
@@ -384,6 +547,7 @@ TPP.loadForm = function () {
   });
   document.querySelector(".customSize").hidden =
     document.getElementById("pageSize").value !== "custom";
+  if (TPP.renderBookInfoControls) TPP.renderBookInfoControls();
   if (TPP.renderTextElementControls) TPP.renderTextElementControls();
   TPP.renderChapterList();
   TPP.renderChapterEditor();
@@ -400,6 +564,7 @@ TPP.sync = function (mode) {
       book[id] = Number(el.value);
     else book[id] = el.value;
   });
+  if (TPP.readBookInfoControls) TPP.readBookInfoControls(book);
   if (TPP.syncTextElementsFromLegacyFields)
     TPP.syncTextElementsFromLegacyFields(book);
   book.signatureSize = TPP.signatureSize(book.signatureSize);

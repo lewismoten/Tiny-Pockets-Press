@@ -832,6 +832,65 @@ input[type="checkbox"] {
   text-transform: uppercase;
   color: #67594b;
 }
+.book-info-table-wrap {
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+}
+.book-info-table {
+  table-layout: fixed;
+  font-size: 0.82rem;
+}
+.book-info-table col.book-info-col-field {
+  width: 28%;
+}
+.book-info-table col.book-info-col-value {
+  width: auto;
+}
+.book-info-table col.book-info-col-action {
+  width: 2.4rem;
+}
+.book-info-table th,
+.book-info-table td {
+  vertical-align: middle;
+  padding: 0.3rem 0.4rem;
+}
+.book-info-table td:nth-child(1) {
+  font-weight: 700;
+}
+.book-info-table td:nth-child(3) {
+  text-align: center;
+}
+.book-info-table input,
+.book-info-table select,
+.book-info-table textarea {
+  margin: 0;
+  padding: 0.3rem 0.45rem;
+  border-radius: 8px;
+}
+.book-info-value-cell {
+  min-width: 10rem;
+}
+.book-info-field-cell {
+  padding-right: 0.25rem;
+}
+.book-info-field-label {
+  display: inline-block;
+  line-height: 1.15;
+}
+.book-info-action-cell {
+  width: 2.4rem;
+  padding-inline: 0.1rem;
+}
+.book-info-trash {
+  min-width: 1.9rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.book-info-table thead th:last-child {
+  color: transparent;
+}
 .data-inline-object {
   display: grid;
   gap: 0.45rem;

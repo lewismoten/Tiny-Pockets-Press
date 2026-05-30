@@ -27,6 +27,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   }
 
+  const renderCurrentViewPreservingSidebar = function () {
+    if (TPP.view === "about") TPP.renderAbout();
+    else if (TPP.view === "software") TPP.renderSoftwareAbout();
+    else if (TPP.view === "data") TPP.renderData();
+    else if (TPP.view === "interior") TPP.renderInterior();
+    else if (TPP.view === "cover") TPP.renderCover();
+    else if (TPP.view === "reader") TPP.renderReader();
+    else if (TPP.view === "library") TPP.renderLibrary();
+  };
+
   TPP.fields.forEach(function (id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -58,13 +68,21 @@ document.addEventListener("DOMContentLoaded", async function () {
   const controls = document.querySelector(".controls");
   if (controls) {
     controls.addEventListener("input", function (e) {
+      const bookInfoEntry = e.target.closest(".book-info-entry");
       if (
+        !bookInfoEntry &&
         !e.target.closest(".text-element-group") &&
         !e.target.closest(".copyright-item-group")
       )
         return;
       TPP.sync("draft");
+      if (bookInfoEntry) {
+        renderCurrentViewPreservingSidebar();
+        return;
+      }
       if (
+        e.target.classList.contains("book-info-custom-label") ||
+        e.target.classList.contains("book-info-value") ||
         e.target.classList.contains("text-field-key") ||
         e.target.classList.contains("copyright-field-key")
       ) {
@@ -73,13 +91,21 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.renderAll();
     });
     controls.addEventListener("change", function (e) {
+      const bookInfoEntry = e.target.closest(".book-info-entry");
       if (
+        !bookInfoEntry &&
         !e.target.closest(".text-element-group") &&
         !e.target.closest(".copyright-item-group")
       )
         return;
       TPP.sync("commit");
+      if (bookInfoEntry) {
+        renderCurrentViewPreservingSidebar();
+        return;
+      }
       if (
+        e.target.classList.contains("book-info-custom-label") ||
+        e.target.classList.contains("book-info-value") ||
         e.target.classList.contains("text-field-key") ||
         e.target.classList.contains("copyright-field-key")
       ) {
@@ -104,6 +130,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.renderAll();
         return;
       }
+      const bookInfoButton = e.target.closest("[data-book-info-action]");
+      if (bookInfoButton) {
+        TPP.sync("nosave");
+        const group = bookInfoButton.closest(".book-info-entry");
+        if (group) TPP.removeBookInfoEntry(TPP.active, group.dataset.entryId);
+        if (TPP.renderBookInfoControls) TPP.renderBookInfoControls();
+        TPP.save();
+        TPP.renderAll();
+        return;
+      }
       const copyrightButton = e.target.closest("[data-copyright-action]");
       if (copyrightButton) {
         TPP.sync("nosave");
@@ -120,6 +156,19 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.renderAll();
       }
     });
+  }
+  const bookInfoAddButton = document.getElementById("bookInfoAddButton");
+  if (bookInfoAddButton) {
+    bookInfoAddButton.onclick = function () {
+      const select = document.getElementById("bookInfoAddField");
+      const value = select && select.value;
+      if (!value) return;
+      TPP.sync("nosave");
+      TPP.addBookInfoEntry(TPP.active, value);
+      if (TPP.renderBookInfoControls) TPP.renderBookInfoControls();
+      TPP.save();
+      TPP.renderAll();
+    };
   }
 
   ["coverImageSlot", "backImageSlot", "spineImageSlot"].forEach(function (id) {
