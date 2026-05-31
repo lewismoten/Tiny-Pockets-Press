@@ -419,7 +419,8 @@ TPP.renderTextElementControls = function () {
     const spec = TPP.textElementEditorConfigs[key];
     const node = document.getElementById(spec.containerId);
     if (!node) return;
-    node.className = "cover-text-grid";
+    node.className =
+      spec.location === "front" ? "front-cover-text-layout" : "cover-text-grid";
     node.innerHTML = TPP.textElementListHtml(TPP.active, spec);
   });
   const copyright = document.getElementById("copyrightPageItems");

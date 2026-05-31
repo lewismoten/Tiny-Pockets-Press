@@ -895,6 +895,12 @@ input[type="checkbox"] {
   table-layout: fixed;
   font-size: 0.82rem;
 }
+.front-cover-text-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+}
 .front-cover-text-table th,
 .front-cover-text-table td {
   padding: 0.3rem 0.35rem;
@@ -944,6 +950,11 @@ input[type="checkbox"] {
 .front-cover-text-actions .small {
   padding: 0.18rem 0.3rem;
   border-radius: 8px;
+}
+.front-cover-text-layout #openFrontCoverFieldPicker {
+  justify-self: start;
+  border-radius: 10px;
+  padding: 0.42rem 0.7rem;
 }
 .front-cover-field-dialog-list {
   display: grid;
