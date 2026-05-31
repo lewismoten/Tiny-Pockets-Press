@@ -3313,20 +3313,24 @@ TPP.migrateTextElements = function (book, base) {
   const defaults = TPP.defaultTextElements(book, base);
   const existing = Array.isArray(book.textElements) ? book.textElements : [];
   const byKey = new Map(
-    existing.map(function (entry) {
+    defaults.map(function (entry) {
       return [
         TPP.textElementKey(entry && entry.location, entry && entry.part),
         entry,
       ];
     }),
   );
-  book.textElements = defaults.map(function (entry) {
-    return Object.assign(
-      {},
-      entry,
-      byKey.get(TPP.textElementKey(entry.location, entry.part)) || {},
-    );
-  });
+  book.textElements = existing.length
+    ? existing.map(function (entry) {
+        const fallback =
+          byKey.get(
+            TPP.textElementKey(entry && entry.location, entry && entry.part),
+          ) || {};
+        return Object.assign({}, fallback, entry || {});
+      })
+    : defaults.map(function (entry) {
+        return Object.assign({}, entry);
+      });
   book.textElements.forEach(function (entry, index) {
     if (!entry.id) {
       entry.id =

@@ -302,6 +302,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         dragState.location === "front"
       ) {
         e.preventDefault();
+        TPP.sync("nosave");
         TPP.removeTextElement(TPP.active, dragState.itemId);
         TPP.save();
         setFrontCoverTrashVisibility(false);

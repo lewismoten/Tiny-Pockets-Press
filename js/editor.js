@@ -504,28 +504,131 @@ TPP.readTextElementControls = function (book) {
   if (TPP.syncLegacyTextFieldsFromElements)
     TPP.syncLegacyTextFieldsFromElements(book);
 };
+TPP.coverPageDimensions = function (book) {
+  const page = (book && book.page) || {};
+  return {
+    w: Math.max(1, Number(page.w || book?.w || 6) || 6),
+    h: Math.max(1, Number(page.h || book?.h || 9) || 9),
+  };
+};
+TPP.frontCoverTextBounds = function (book, element) {
+  const entry = element || {};
+  const dims = TPP.coverPageDimensions(book);
+  const widthPercent = Math.max(10, Math.min(100, Number(entry.width) || 100));
+  const sizePt = Math.max(3, Number(entry.size) || 4.2);
+  const outlineSize = Math.max(0, Number(entry.outlineSize) || 0);
+  const widthIn = dims.w * (widthPercent / 100);
+  const rawText = TPP.bookInfoFieldValue(book, entry.fieldKey || entry.part, {
+    location: "front",
+    customText: entry.customText,
+  });
+  const text = String(rawText || "").trim();
+  const approxCharsPerLine = Math.max(
+    6,
+    Math.floor((widthIn * 72) / Math.max(1, sizePt * 0.58)),
+  );
+  const lines = Math.max(
+    1,
+    text
+      ? text.split(/\n+/).reduce(function (count, line) {
+          return (
+            count + Math.max(1, Math.ceil(line.length / approxCharsPerLine))
+          );
+        }, 0)
+      : 1,
+  );
+  const lineHeightPt = sizePt * 1.22 + outlineSize * 2;
+  const heightPercent = Math.max(
+    2.25,
+    (lines * lineHeightPt * 100) / (dims.h * 72),
+  );
+  const top = Math.max(0, Math.min(100, Number(entry.y) || 0));
+  return {
+    top: top,
+    bottom: Math.min(100, top + heightPercent),
+    height: Math.min(100, heightPercent),
+  };
+};
+TPP.frontCoverPlacementScore = function (
+  candidateTop,
+  candidateHeight,
+  bounds,
+) {
+  const top = Math.max(0, candidateTop);
+  const bottom = Math.min(100, top + candidateHeight);
+  return bounds.reduce(function (score, bound) {
+    const overlap = Math.max(
+      0,
+      Math.min(bottom, bound.bottom) - Math.max(top, bound.top),
+    );
+    return score + overlap;
+  }, 0);
+};
+TPP.bestFrontCoverTextY = function (book, elements, prototype, preferredY) {
+  const candidateBounds = TPP.frontCoverTextBounds(book, prototype);
+  const height = Math.min(100, candidateBounds.height);
+  const maxTop = Math.max(0, 100 - height);
+  const bounds = elements.map(function (entry) {
+    return TPP.frontCoverTextBounds(book, entry);
+  });
+  const normalizedPreferred = Math.max(0, Math.min(maxTop, preferredY || 0));
+  let bestY = normalizedPreferred;
+  let bestScore = Infinity;
+  for (let y = 0; y <= maxTop; y += 0.5) {
+    const overlap = TPP.frontCoverPlacementScore(y, height, bounds);
+    const distance = Math.abs(y - normalizedPreferred) * 0.08;
+    const score = overlap * 100 + distance;
+    if (score < bestScore) {
+      bestScore = score;
+      bestY = y;
+      if (overlap <= 0 && y >= normalizedPreferred) return y;
+    }
+  }
+  return bestY;
+};
 TPP.addTextElement = function (book, location, fieldKey) {
   if (!book) return;
   const spec = TPP.textElementEditorConfigs[location];
   if (!spec) return;
   book.textElements = Array.isArray(book.textElements) ? book.textElements : [];
+  const existing = TPP.textElementsForLocation(book, location);
+  const lastElement = existing.length ? existing[existing.length - 1] : null;
   const element = {
     id: TPP.uid(),
     location: location,
     part: "slot-" + TPP.uid(),
     fieldKey: fieldKey || "title",
     enabled: true,
-    size: location === "front" ? 4.2 : 4,
-    x: 50,
-    y: 50,
-    width: 100,
-    align: spec.defaultAlign,
-    color: "#ffffff",
-    outlineColor: "#000000",
-    outlineSize: 0,
-    rotate: false,
+    size:
+      Number(lastElement && lastElement.size) ||
+      (location === "front" ? 4.2 : 4),
+    x: Number(lastElement && lastElement.x) || 50,
+    y: Number(lastElement && lastElement.y) || 50,
+    width: Math.max(10, Number(lastElement && lastElement.width) || 100),
+    align: (lastElement && lastElement.align) || spec.defaultAlign,
+    color: (lastElement && lastElement.color) || "#ffffff",
+    outlineColor: (lastElement && lastElement.outlineColor) || "#000000",
+    outlineSize: Math.max(
+      0,
+      Number(lastElement && lastElement.outlineSize) || 0,
+    ),
+    rotate: Boolean(lastElement && lastElement.rotate),
     customText: "",
   };
+  if (location === "front") {
+    const dims = TPP.coverPageDimensions(book);
+    const previousBounds = lastElement
+      ? TPP.frontCoverTextBounds(book, lastElement)
+      : null;
+    const gap = Math.max(
+      1.25,
+      (Math.max(3, Number(element.size) || 4.2) * 1.15 * 100) / (dims.h * 72),
+    );
+    const preferredY = previousBounds
+      ? Math.min(100, previousBounds.bottom + gap)
+      : 12;
+    element.y = TPP.bestFrontCoverTextY(book, existing, element, preferredY);
+  }
   const lastIndex = book.textElements.reduce(function (found, entry, index) {
     return entry && entry.location === location ? index : found;
   }, -1);
