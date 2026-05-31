@@ -21,7 +21,66 @@ document.addEventListener("DOMContentLoaded", async function () {
         systems: [],
       };
     }
+    TPP.normalizeClassificationCatalog(TPP.classificationCatalog);
     return TPP.classificationCatalog;
+  };
+  TPP.classificationShortLabelSeed = function (node) {
+    const explicit = String((node && node.shortLabel) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    if (explicit) return explicit.slice(0, 3);
+    const label = String((node && node.label) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    if (label.length >= 3) return label.slice(0, 3);
+    const code = String((node && node.code) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    return (label + code + "XXX").slice(0, 3);
+  };
+  TPP.uniqueClassificationShortLabel = function (node, used) {
+    const seed = TPP.classificationShortLabelSeed(node);
+    const code = String((node && node.code) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    const candidates = [
+      seed,
+      (seed.slice(0, 2) + code.slice(-1)).padEnd(3, "X").slice(0, 3),
+      (seed.slice(0, 1) + code.slice(-2)).padEnd(3, "X").slice(0, 3),
+      (seed.slice(0, 1) + code.slice(0, 2)).padEnd(3, "X").slice(0, 3),
+    ];
+    for (const candidate of candidates) {
+      if (candidate && !used.has(candidate)) return candidate;
+    }
+    const prefix = seed.slice(0, 1) || "X";
+    for (let i = 0; i < 1296; i += 1) {
+      const suffix = i.toString(36).toUpperCase().padStart(2, "0");
+      const candidate = (prefix + suffix).slice(0, 3);
+      if (!used.has(candidate)) return candidate;
+    }
+    return ("X" + Date.now().toString(36).toUpperCase()).slice(0, 3);
+  };
+  TPP.normalizeClassificationCatalog = function (catalog) {
+    const used = new Set();
+    const index = {};
+    const walk = function (nodes, path) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node, position) {
+        if (!node) return;
+        const nextPath = path.concat(position);
+        const shortLabel = TPP.uniqueClassificationShortLabel(node, used);
+        used.add(shortLabel);
+        node.shortLabel = shortLabel;
+        index[shortLabel] = nextPath.slice();
+        walk(node.children, nextPath);
+      });
+    };
+    (Array.isArray(catalog && catalog.systems) ? catalog.systems : []).forEach(
+      function (system) {
+        walk(system && system.categories, []);
+      },
+    );
+    TPP.classificationShortLabelIndex = index;
+    return catalog;
   };
   TPP.classificationSystem = function () {
     const catalog = TPP.classificationCatalog || { systems: [] };
@@ -60,6 +119,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     return crumbs;
   };
+  TPP.classificationPathForShortLabel = function (shortLabel) {
+    const key = String(shortLabel || "")
+      .trim()
+      .toUpperCase();
+    return TPP.classificationShortLabelIndex &&
+      TPP.classificationShortLabelIndex[key]
+      ? TPP.classificationShortLabelIndex[key].slice()
+      : [];
+  };
   TPP.classificationShortLabel = function (node) {
     const explicit = String((node && node.shortLabel) || "").trim();
     if (explicit) return explicit;
@@ -96,18 +164,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       };
     const system = TPP.classificationSystem();
     const found = [];
-    const walk = function (nodes, parents) {
-      (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
-        if (!node || found.length) return;
-        const nextParents = parents.concat(node);
-        if (node.code === text) {
-          found.push(nextParents);
-          return;
-        }
-        walk(node.children, nextParents);
-      });
-    };
-    walk(system && system.categories, []);
+    const sourcePath = TPP.classificationPathForCode(text).length
+      ? TPP.classificationPathForCode(text)
+      : TPP.classificationPathForShortLabel(text);
+    if (sourcePath.length) {
+      found.push(
+        TPP.classificationBreadcrumbNodes(sourcePath).map(function (crumb) {
+          return crumb.node;
+        }),
+      );
+    }
     if (found.length) {
       const nodes = found[0];
       const shortPath = nodes
@@ -202,24 +268,16 @@ document.addEventListener("DOMContentLoaded", async function () {
               const hasChildren =
                 Array.isArray(node.children) && node.children.length;
               return (
-                '<div class="classification-option"><div><strong>' +
+                '<div class="classification-option is-openable" data-classification-open="' +
+                TPP.esc(JSON.stringify(nextPath)) +
+                '"' +
+                "><div><strong>" +
                 TPP.esc(node.code || "") +
                 '</strong> <span class="classification-short-label">' +
                 TPP.esc(TPP.classificationShortLabel(node)) +
                 "</span> " +
                 TPP.esc(node.label || "") +
-                '</div><div class="toolbar">' +
-                (hasChildren
-                  ? '<button type="button" data-classification-open="' +
-                    TPP.esc(JSON.stringify(nextPath)) +
-                    '">Open</button>'
-                  : "") +
-                (node.code
-                  ? '<button type="button" class="primary alt" data-classification-select="' +
-                    TPP.esc(node.code) +
-                    '">Use</button>'
-                  : "") +
-                "</div></div>"
+                '</div><div class="toolbar"></div></div>'
               );
             })
             .join("")

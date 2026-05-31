@@ -1538,6 +1538,13 @@ input[type="checkbox"] {
   border-radius: 16px;
   background: #fff;
 }
+.classification-option.is-openable {
+  cursor: pointer;
+}
+.classification-option.is-openable:hover {
+  border-color: #d1a84c;
+  background: #fffaf0;
+}
 .classification-short-label {
   display: inline-flex;
   align-items: center;
