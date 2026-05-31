@@ -27,10 +27,26 @@
               "shortLabel": "DSN",
               "label": "Design",
               "children": [
-                { "code": "121", "shortLabel": "GRF", "label": "Graphic Design" },
-                { "code": "122", "shortLabel": "IND", "label": "Industrial Design" },
-                { "code": "123", "shortLabel": "INT", "label": "Interior Design" },
-                { "code": "124", "shortLabel": "FAS", "label": "Fashion & Textile Design" }
+                {
+                  "code": "121",
+                  "shortLabel": "GRF",
+                  "label": "Graphic Design"
+                },
+                {
+                  "code": "122",
+                  "shortLabel": "IND",
+                  "label": "Industrial Design"
+                },
+                {
+                  "code": "123",
+                  "shortLabel": "INT",
+                  "label": "Interior Design"
+                },
+                {
+                  "code": "124",
+                  "shortLabel": "FAS",
+                  "label": "Fashion & Textile Design"
+                }
               ]
             },
             {
@@ -41,7 +57,11 @@
                 { "code": "131", "shortLabel": "MUS", "label": "Music" },
                 { "code": "132", "shortLabel": "DAN", "label": "Dance" },
                 { "code": "133", "shortLabel": "THR", "label": "Theater" },
-                { "code": "134", "shortLabel": "FIL", "label": "Film & Screen Arts" }
+                {
+                  "code": "134",
+                  "shortLabel": "FIL",
+                  "label": "Film & Screen Arts"
+                }
               ]
             },
             {
@@ -68,9 +88,21 @@
               "label": "Personal Life Stories",
               "children": [
                 { "code": "211", "shortLabel": "MEM", "label": "Memoir" },
-                { "code": "212", "shortLabel": "AUT", "label": "Autobiography" },
-                { "code": "213", "shortLabel": "JRL", "label": "Journals & Letters" },
-                { "code": "214", "shortLabel": "ESS", "label": "Personal Essays" }
+                {
+                  "code": "212",
+                  "shortLabel": "AUT",
+                  "label": "Autobiography"
+                },
+                {
+                  "code": "213",
+                  "shortLabel": "JRL",
+                  "label": "Journals & Letters"
+                },
+                {
+                  "code": "214",
+                  "shortLabel": "ESS",
+                  "label": "Personal Essays"
+                }
               ]
             },
             {
@@ -78,10 +110,26 @@
               "shortLabel": "COL",
               "label": "Collected Lives",
               "children": [
-                { "code": "221", "shortLabel": "ARW", "label": "Artists & Writers" },
-                { "code": "222", "shortLabel": "LDA", "label": "Leaders & Activists" },
-                { "code": "223", "shortLabel": "SCI", "label": "Scientists & Inventors" },
-                { "code": "224", "shortLabel": "ENT", "label": "Entertainers & Athletes" }
+                {
+                  "code": "221",
+                  "shortLabel": "ARW",
+                  "label": "Artists & Writers"
+                },
+                {
+                  "code": "222",
+                  "shortLabel": "LDA",
+                  "label": "Leaders & Activists"
+                },
+                {
+                  "code": "223",
+                  "shortLabel": "SCI",
+                  "label": "Scientists & Inventors"
+                },
+                {
+                  "code": "224",
+                  "shortLabel": "ENT",
+                  "label": "Entertainers & Athletes"
+                }
               ]
             },
             {
@@ -90,9 +138,21 @@
               "label": "Family & Community Histories",
               "children": [
                 { "code": "231", "shortLabel": "GEN", "label": "Genealogy" },
-                { "code": "232", "shortLabel": "ORL", "label": "Oral Histories" },
-                { "code": "233", "shortLabel": "COM", "label": "Community Memory" },
-                { "code": "234", "shortLabel": "TRB", "label": "Tribal & Indigenous Life Stories" }
+                {
+                  "code": "232",
+                  "shortLabel": "ORL",
+                  "label": "Oral Histories"
+                },
+                {
+                  "code": "233",
+                  "shortLabel": "COM",
+                  "label": "Community Memory"
+                },
+                {
+                  "code": "234",
+                  "shortLabel": "TRB",
+                  "label": "Tribal & Indigenous Life Stories"
+                }
               ]
             },
             {
@@ -100,10 +160,26 @@
               "shortLabel": "REF",
               "label": "Reference Lives",
               "children": [
-                { "code": "241", "shortLabel": "COL", "label": "Collected Biography" },
-                { "code": "242", "shortLabel": "TIM", "label": "Timelines & Profiles" },
-                { "code": "243", "shortLabel": "LET", "label": "Letters & Correspondence" },
-                { "code": "244", "shortLabel": "ARC", "label": "Archival Sourcebooks" }
+                {
+                  "code": "241",
+                  "shortLabel": "COL",
+                  "label": "Collected Biography"
+                },
+                {
+                  "code": "242",
+                  "shortLabel": "TIM",
+                  "label": "Timelines & Profiles"
+                },
+                {
+                  "code": "243",
+                  "shortLabel": "LET",
+                  "label": "Letters & Correspondence"
+                },
+                {
+                  "code": "244",
+                  "shortLabel": "ARC",
+                  "label": "Archival Sourcebooks"
+                }
               ]
             }
           ]
@@ -119,7 +195,11 @@
               "label": "Management",
               "children": [
                 { "code": "311", "shortLabel": "LDR", "label": "Leadership" },
-                { "code": "312", "shortLabel": "CUL", "label": "Teams & Culture" },
+                {
+                  "code": "312",
+                  "shortLabel": "CUL",
+                  "label": "Teams & Culture"
+                },
                 { "code": "313", "shortLabel": "OPS", "label": "Operations" },
                 { "code": "314", "shortLabel": "STR", "label": "Strategy" }
               ]
@@ -130,9 +210,21 @@
               "label": "Entrepreneurship",
               "children": [
                 { "code": "321", "shortLabel": "STU", "label": "Startups" },
-                { "code": "322", "shortLabel": "SML", "label": "Small Business" },
-                { "code": "323", "shortLabel": "FRL", "label": "Freelance Practice" },
-                { "code": "324", "shortLabel": "SAL", "label": "Sales & Marketing" }
+                {
+                  "code": "322",
+                  "shortLabel": "SML",
+                  "label": "Small Business"
+                },
+                {
+                  "code": "323",
+                  "shortLabel": "FRL",
+                  "label": "Freelance Practice"
+                },
+                {
+                  "code": "324",
+                  "shortLabel": "SAL",
+                  "label": "Sales & Marketing"
+                }
               ]
             },
             {
@@ -141,7 +233,11 @@
               "label": "Economics & Finance",
               "children": [
                 { "code": "331", "shortLabel": "ECO", "label": "Economics" },
-                { "code": "332", "shortLabel": "PFN", "label": "Personal Finance" },
+                {
+                  "code": "332",
+                  "shortLabel": "PFN",
+                  "label": "Personal Finance"
+                },
                 { "code": "333", "shortLabel": "INV", "label": "Investing" },
                 { "code": "334", "shortLabel": "ACC", "label": "Accounting" }
               ]
@@ -154,7 +250,11 @@
                 { "code": "341", "shortLabel": "CAR", "label": "Careers" },
                 { "code": "342", "shortLabel": "PRD", "label": "Productivity" },
                 { "code": "343", "shortLabel": "REM", "label": "Remote Work" },
-                { "code": "344", "shortLabel": "LAB", "label": "Labor & Professions" }
+                {
+                  "code": "344",
+                  "shortLabel": "LAB",
+                  "label": "Labor & Professions"
+                }
               ]
             }
           ]
@@ -169,10 +269,26 @@
               "shortLabel": "PRG",
               "label": "Programming",
               "children": [
-                { "code": "411", "shortLabel": "SWE", "label": "Software Engineering" },
-                { "code": "412", "shortLabel": "WEB", "label": "Web Development" },
-                { "code": "413", "shortLabel": "DAT", "label": "Data & Scripting" },
-                { "code": "414", "shortLabel": "LAN", "label": "Languages & Paradigms" }
+                {
+                  "code": "411",
+                  "shortLabel": "SWE",
+                  "label": "Software Engineering"
+                },
+                {
+                  "code": "412",
+                  "shortLabel": "WEB",
+                  "label": "Web Development"
+                },
+                {
+                  "code": "413",
+                  "shortLabel": "DAT",
+                  "label": "Data & Scripting"
+                },
+                {
+                  "code": "414",
+                  "shortLabel": "LAN",
+                  "label": "Languages & Paradigms"
+                }
               ]
             },
             {
@@ -180,10 +296,18 @@
               "shortLabel": "SYS",
               "label": "Systems",
               "children": [
-                { "code": "421", "shortLabel": "OPS", "label": "Operating Systems" },
+                {
+                  "code": "421",
+                  "shortLabel": "OPS",
+                  "label": "Operating Systems"
+                },
                 { "code": "422", "shortLabel": "NET", "label": "Networking" },
                 { "code": "423", "shortLabel": "SEC", "label": "Security" },
-                { "code": "424", "shortLabel": "CLD", "label": "Cloud & Infrastructure" }
+                {
+                  "code": "424",
+                  "shortLabel": "CLD",
+                  "label": "Cloud & Infrastructure"
+                }
               ]
             },
             {
@@ -191,10 +315,26 @@
               "shortLabel": "APL",
               "label": "Applied Computing",
               "children": [
-                { "code": "431", "shortLabel": "AIF", "label": "Artificial Intelligence" },
-                { "code": "432", "shortLabel": "HCI", "label": "Human-Computer Interaction" },
-                { "code": "433", "shortLabel": "GAM", "label": "Game Development" },
-                { "code": "434", "shortLabel": "ROB", "label": "Robotics & Embedded Systems" }
+                {
+                  "code": "431",
+                  "shortLabel": "AIF",
+                  "label": "Artificial Intelligence"
+                },
+                {
+                  "code": "432",
+                  "shortLabel": "HCI",
+                  "label": "Human-Computer Interaction"
+                },
+                {
+                  "code": "433",
+                  "shortLabel": "GAM",
+                  "label": "Game Development"
+                },
+                {
+                  "code": "434",
+                  "shortLabel": "ROB",
+                  "label": "Robotics & Embedded Systems"
+                }
               ]
             },
             {
@@ -202,10 +342,22 @@
               "shortLabel": "DIG",
               "label": "Digital Culture",
               "children": [
-                { "code": "441", "shortLabel": "INT", "label": "Internet Culture" },
+                {
+                  "code": "441",
+                  "shortLabel": "INT",
+                  "label": "Internet Culture"
+                },
                 { "code": "442", "shortLabel": "SOC", "label": "Social Media" },
-                { "code": "443", "shortLabel": "DES", "label": "Digital Design" },
-                { "code": "444", "shortLabel": "ETH", "label": "Technology Ethics" }
+                {
+                  "code": "443",
+                  "shortLabel": "DES",
+                  "label": "Digital Design"
+                },
+                {
+                  "code": "444",
+                  "shortLabel": "ETH",
+                  "label": "Technology Ethics"
+                }
               ]
             }
           ]
@@ -220,9 +372,21 @@
               "shortLabel": "HST",
               "label": "History",
               "children": [
-                { "code": "511", "shortLabel": "ANC", "label": "Ancient & Medieval" },
-                { "code": "512", "shortLabel": "MOD", "label": "Modern History" },
-                { "code": "513", "shortLabel": "LOC", "label": "Local & Regional History" },
+                {
+                  "code": "511",
+                  "shortLabel": "ANC",
+                  "label": "Ancient & Medieval"
+                },
+                {
+                  "code": "512",
+                  "shortLabel": "MOD",
+                  "label": "Modern History"
+                },
+                {
+                  "code": "513",
+                  "shortLabel": "LOC",
+                  "label": "Local & Regional History"
+                },
                 { "code": "514", "shortLabel": "WRL", "label": "World History" }
               ]
             },
@@ -231,10 +395,22 @@
               "shortLabel": "SOC",
               "label": "Social Studies",
               "children": [
-                { "code": "521", "shortLabel": "POL", "label": "Politics & Government" },
+                {
+                  "code": "521",
+                  "shortLabel": "POL",
+                  "label": "Politics & Government"
+                },
                 { "code": "522", "shortLabel": "SOC", "label": "Sociology" },
-                { "code": "523", "shortLabel": "CUL", "label": "Cultural Studies" },
-                { "code": "524", "shortLabel": "EDU", "label": "Education & Institutions" }
+                {
+                  "code": "523",
+                  "shortLabel": "CUL",
+                  "label": "Cultural Studies"
+                },
+                {
+                  "code": "524",
+                  "shortLabel": "EDU",
+                  "label": "Education & Institutions"
+                }
               ]
             },
             {
@@ -242,10 +418,26 @@
               "shortLabel": "LAW",
               "label": "Law & Civic Life",
               "children": [
-                { "code": "531", "shortLabel": "CON", "label": "Constitutional & Public Law" },
-                { "code": "532", "shortLabel": "JUS", "label": "Justice & Rights" },
-                { "code": "533", "shortLabel": "POL", "label": "Public Policy" },
-                { "code": "534", "shortLabel": "CIV", "label": "Civic Practice" }
+                {
+                  "code": "531",
+                  "shortLabel": "CON",
+                  "label": "Constitutional & Public Law"
+                },
+                {
+                  "code": "532",
+                  "shortLabel": "JUS",
+                  "label": "Justice & Rights"
+                },
+                {
+                  "code": "533",
+                  "shortLabel": "POL",
+                  "label": "Public Policy"
+                },
+                {
+                  "code": "534",
+                  "shortLabel": "CIV",
+                  "label": "Civic Practice"
+                }
               ]
             },
             {
@@ -254,9 +446,21 @@
               "label": "Geography & Place",
               "children": [
                 { "code": "541", "shortLabel": "MAP", "label": "Cartography" },
-                { "code": "542", "shortLabel": "REG", "label": "Regional Studies" },
-                { "code": "543", "shortLabel": "URB", "label": "Urban Studies" },
-                { "code": "544", "shortLabel": "RUR", "label": "Rural & Environmental Regions" }
+                {
+                  "code": "542",
+                  "shortLabel": "REG",
+                  "label": "Regional Studies"
+                },
+                {
+                  "code": "543",
+                  "shortLabel": "URB",
+                  "label": "Urban Studies"
+                },
+                {
+                  "code": "544",
+                  "shortLabel": "RUR",
+                  "label": "Rural & Environmental Regions"
+                }
               ]
             }
           ]
@@ -272,8 +476,16 @@
               "label": "Language Study",
               "children": [
                 { "code": "611", "shortLabel": "LIN", "label": "Linguistics" },
-                { "code": "612", "shortLabel": "GRM", "label": "Grammar & Usage" },
-                { "code": "613", "shortLabel": "LRN", "label": "Language Learning" },
+                {
+                  "code": "612",
+                  "shortLabel": "GRM",
+                  "label": "Grammar & Usage"
+                },
+                {
+                  "code": "613",
+                  "shortLabel": "LRN",
+                  "label": "Language Learning"
+                },
                 { "code": "614", "shortLabel": "TRN", "label": "Translation" }
               ]
             },
@@ -283,9 +495,17 @@
               "label": "Literary Study",
               "children": [
                 { "code": "621", "shortLabel": "CRT", "label": "Criticism" },
-                { "code": "622", "shortLabel": "POE", "label": "Poetics & Craft" },
+                {
+                  "code": "622",
+                  "shortLabel": "POE",
+                  "label": "Poetics & Craft"
+                },
                 { "code": "623", "shortLabel": "ANT", "label": "Anthologies" },
-                { "code": "624", "shortLabel": "TRD", "label": "Traditions & Movements" }
+                {
+                  "code": "624",
+                  "shortLabel": "TRD",
+                  "label": "Traditions & Movements"
+                }
               ]
             },
             {
@@ -296,7 +516,11 @@
                 { "code": "631", "shortLabel": "POE", "label": "Poetry" },
                 { "code": "632", "shortLabel": "DRM", "label": "Drama" },
                 { "code": "633", "shortLabel": "ESS", "label": "Essays" },
-                { "code": "634", "shortLabel": "FOL", "label": "Folklore & Myth" }
+                {
+                  "code": "634",
+                  "shortLabel": "FOL",
+                  "label": "Folklore & Myth"
+                }
               ]
             },
             {
@@ -304,10 +528,22 @@
               "shortLabel": "WRI",
               "label": "Writing Practice",
               "children": [
-                { "code": "641", "shortLabel": "CRW", "label": "Creative Writing" },
-                { "code": "642", "shortLabel": "NFW", "label": "Nonfiction Writing" },
+                {
+                  "code": "641",
+                  "shortLabel": "CRW",
+                  "label": "Creative Writing"
+                },
+                {
+                  "code": "642",
+                  "shortLabel": "NFW",
+                  "label": "Nonfiction Writing"
+                },
                 { "code": "643", "shortLabel": "EDT", "label": "Editing" },
-                { "code": "644", "shortLabel": "PUB", "label": "Publishing & Small Press" }
+                {
+                  "code": "644",
+                  "shortLabel": "PUB",
+                  "label": "Publishing & Small Press"
+                }
               ]
             }
           ]
@@ -335,8 +571,16 @@
               "children": [
                 { "code": "721", "shortLabel": "PHS", "label": "Physics" },
                 { "code": "722", "shortLabel": "CHM", "label": "Chemistry" },
-                { "code": "723", "shortLabel": "GEO", "label": "Geology & Earth Science" },
-                { "code": "724", "shortLabel": "AST", "label": "Astronomy & Space" }
+                {
+                  "code": "723",
+                  "shortLabel": "GEO",
+                  "label": "Geology & Earth Science"
+                },
+                {
+                  "code": "724",
+                  "shortLabel": "AST",
+                  "label": "Astronomy & Space"
+                }
               ]
             },
             {
@@ -347,7 +591,11 @@
                 { "code": "731", "shortLabel": "MAT", "label": "Mathematics" },
                 { "code": "732", "shortLabel": "STA", "label": "Statistics" },
                 { "code": "733", "shortLabel": "LOG", "label": "Logic" },
-                { "code": "734", "shortLabel": "MOD", "label": "Models & Systems Thinking" }
+                {
+                  "code": "734",
+                  "shortLabel": "MOD",
+                  "label": "Models & Systems Thinking"
+                }
               ]
             },
             {
@@ -355,10 +603,18 @@
               "shortLabel": "NAT",
               "label": "Nature Writing",
               "children": [
-                { "code": "741", "shortLabel": "OBS", "label": "Field Observation" },
+                {
+                  "code": "741",
+                  "shortLabel": "OBS",
+                  "label": "Field Observation"
+                },
                 { "code": "742", "shortLabel": "ENV", "label": "Environment" },
                 { "code": "743", "shortLabel": "CLM", "label": "Climate" },
-                { "code": "744", "shortLabel": "NTR", "label": "Natural History" }
+                {
+                  "code": "744",
+                  "shortLabel": "NTR",
+                  "label": "Natural History"
+                }
               ]
             }
           ]
@@ -373,9 +629,21 @@
               "shortLabel": "GEN",
               "label": "General Fiction",
               "children": [
-                { "code": "811", "shortLabel": "LIT", "label": "Literary Fiction" },
-                { "code": "812", "shortLabel": "CON", "label": "Contemporary Fiction" },
-                { "code": "813", "shortLabel": "HIS", "label": "Historical Fiction" },
+                {
+                  "code": "811",
+                  "shortLabel": "LIT",
+                  "label": "Literary Fiction"
+                },
+                {
+                  "code": "812",
+                  "shortLabel": "CON",
+                  "label": "Contemporary Fiction"
+                },
+                {
+                  "code": "813",
+                  "shortLabel": "HIS",
+                  "label": "Historical Fiction"
+                },
                 { "code": "814", "shortLabel": "SLC", "label": "Slice of Life" }
               ]
             },
@@ -384,10 +652,18 @@
               "shortLabel": "SPC",
               "label": "Speculative Fiction",
               "children": [
-                { "code": "821", "shortLabel": "SCF", "label": "Science Fiction" },
+                {
+                  "code": "821",
+                  "shortLabel": "SCF",
+                  "label": "Science Fiction"
+                },
                 { "code": "822", "shortLabel": "FAN", "label": "Fantasy" },
                 { "code": "823", "shortLabel": "HOR", "label": "Horror" },
-                { "code": "824", "shortLabel": "MAG", "label": "Magical Realism" }
+                {
+                  "code": "824",
+                  "shortLabel": "MAG",
+                  "label": "Magical Realism"
+                }
               ]
             },
             {
@@ -397,7 +673,11 @@
               "children": [
                 { "code": "831", "shortLabel": "MYS", "label": "Mystery" },
                 { "code": "832", "shortLabel": "ROM", "label": "Romance" },
-                { "code": "833", "shortLabel": "THR", "label": "Adventure & Thriller" },
+                {
+                  "code": "833",
+                  "shortLabel": "THR",
+                  "label": "Adventure & Thriller"
+                },
                 { "code": "834", "shortLabel": "CRI", "label": "Crime & Noir" }
               ]
             },
@@ -406,10 +686,22 @@
               "shortLabel": "FOR",
               "label": "Short Forms",
               "children": [
-                { "code": "841", "shortLabel": "SHT", "label": "Short Stories" },
+                {
+                  "code": "841",
+                  "shortLabel": "SHT",
+                  "label": "Short Stories"
+                },
                 { "code": "842", "shortLabel": "NVT", "label": "Novellas" },
-                { "code": "843", "shortLabel": "FLS", "label": "Flash Fiction" },
-                { "code": "844", "shortLabel": "FBL", "label": "Fables & Fairy Tales" }
+                {
+                  "code": "843",
+                  "shortLabel": "FLS",
+                  "label": "Flash Fiction"
+                },
+                {
+                  "code": "844",
+                  "shortLabel": "FBL",
+                  "label": "Fables & Fairy Tales"
+                }
               ]
             }
           ]
@@ -424,10 +716,26 @@
               "shortLabel": "REF",
               "label": "Reference",
               "children": [
-                { "code": "911", "shortLabel": "ENC", "label": "Encyclopedias & Guides" },
-                { "code": "912", "shortLabel": "DIC", "label": "Dictionaries & Glossaries" },
-                { "code": "913", "shortLabel": "IDX", "label": "Indexes & Catalogs" },
-                { "code": "914", "shortLabel": "MAN", "label": "Manuals & Handbooks" }
+                {
+                  "code": "911",
+                  "shortLabel": "ENC",
+                  "label": "Encyclopedias & Guides"
+                },
+                {
+                  "code": "912",
+                  "shortLabel": "DIC",
+                  "label": "Dictionaries & Glossaries"
+                },
+                {
+                  "code": "913",
+                  "shortLabel": "IDX",
+                  "label": "Indexes & Catalogs"
+                },
+                {
+                  "code": "914",
+                  "shortLabel": "MAN",
+                  "label": "Manuals & Handbooks"
+                }
               ]
             },
             {
@@ -446,10 +754,22 @@
               "shortLabel": "TRV",
               "label": "Travel & Place",
               "children": [
-                { "code": "931", "shortLabel": "TRW", "label": "Travel Writing" },
-                { "code": "932", "shortLabel": "RGN", "label": "Regional Guides" },
+                {
+                  "code": "931",
+                  "shortLabel": "TRW",
+                  "label": "Travel Writing"
+                },
+                {
+                  "code": "932",
+                  "shortLabel": "RGN",
+                  "label": "Regional Guides"
+                },
                 { "code": "933", "shortLabel": "MAP", "label": "Maps & Atlas" },
-                { "code": "934", "shortLabel": "CUL", "label": "Cultural Guidebooks" }
+                {
+                  "code": "934",
+                  "shortLabel": "CUL",
+                  "label": "Cultural Guidebooks"
+                }
               ]
             },
             {
@@ -457,10 +777,26 @@
               "shortLabel": "WEL",
               "label": "Wellbeing & Daily Life",
               "children": [
-                { "code": "941", "shortLabel": "HLT", "label": "Health & Wellness" },
-                { "code": "942", "shortLabel": "MIN", "label": "Mindfulness & Reflection" },
-                { "code": "943", "shortLabel": "REL", "label": "Relationships & Family Life" },
-                { "code": "944", "shortLabel": "LIF", "label": "Lifestyle & Habit Building" }
+                {
+                  "code": "941",
+                  "shortLabel": "HLT",
+                  "label": "Health & Wellness"
+                },
+                {
+                  "code": "942",
+                  "shortLabel": "MIN",
+                  "label": "Mindfulness & Reflection"
+                },
+                {
+                  "code": "943",
+                  "shortLabel": "REL",
+                  "label": "Relationships & Family Life"
+                },
+                {
+                  "code": "944",
+                  "shortLabel": "LIF",
+                  "label": "Lifestyle & Habit Building"
+                }
               ]
             }
           ]
