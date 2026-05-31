@@ -680,6 +680,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       const value = TPP.normalizeHexColor(colorPickerHex.value);
       if (value) TPP.updateColorDialogPreview(value);
     });
+    colorPickerHex.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        const value = TPP.normalizeHexColor(colorPickerHex.value);
+        if (value) TPP.updateColorDialogPreview(value);
+        TPP.closeColorDialog();
+      }
+    });
   }
   const bindColorPointerField = function (element, onUpdate) {
     if (!element) return;
@@ -727,6 +735,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       const swatch = e.target.closest("[data-dialog-color]");
       if (swatch) {
         TPP.updateColorDialogPreview(swatch.dataset.dialogColor || "#000000");
+      }
+    });
+    colorPickerPopover.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        TPP.closeColorDialog();
       }
     });
   }
