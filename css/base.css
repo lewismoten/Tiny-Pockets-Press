@@ -240,24 +240,82 @@ input[type="checkbox"] {
   min-width: 1rem;
   border-radius: 4px;
 }
-.color-picker-dialog-card {
-  max-width: 30rem;
+.color-picker-popover {
+  position: fixed;
+  z-index: 120;
+  width: min(22rem, calc(100vw - 1.5rem));
 }
-.color-picker-dialog-layout {
+.color-picker-popover-card {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid #d9cfbf;
+  border-radius: 16px;
+  background: #fffdf8;
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.18);
 }
-.color-picker-preview-wrap {
+.color-picker-popover-top {
   display: grid;
-  gap: 0.7rem;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: end;
 }
 .color-picker-preview {
-  height: 4.25rem;
+  height: 3.25rem;
   border: 1px solid #cfc6bc;
-  border-radius: 14px;
+  border-radius: 12px;
   background:
     linear-gradient(rgb(255 255 255 / 0.18), rgb(255 255 255 / 0.02)),
     var(--picker-color, #000000);
+}
+.color-picker-surface {
+  position: relative;
+  height: 11rem;
+  border: 1px solid #cfc6bc;
+  border-radius: 14px;
+  background:
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, var(--picker-hue, hsl(0 100% 50%)));
+  cursor: crosshair;
+}
+.color-picker-surface-marker {
+  position: absolute;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.color-picker-hue {
+  position: relative;
+  height: 1rem;
+  border: 1px solid #cfc6bc;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #ff0000 0%,
+    #ffff00 16.666%,
+    #00ff00 33.333%,
+    #00ffff 50%,
+    #0000ff 66.666%,
+    #ff00ff 83.333%,
+    #ff0000 100%
+  );
+  cursor: ew-resize;
+}
+.color-picker-hue-marker {
+  position: absolute;
+  top: 50%;
+  width: 0.8rem;
+  height: 1.3rem;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35);
+  background: var(--picker-hue, hsl(0 100% 50%));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 .color-picker-section {
   display: grid;

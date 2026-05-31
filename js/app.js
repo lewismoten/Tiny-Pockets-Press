@@ -44,28 +44,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     else if (TPP.view === "library") TPP.renderLibrary();
     if (TPP.renderColorPalettes) TPP.renderColorPalettes();
   };
-  TPP.COLOR_PICKER_SWATCHES = [
-    "#000000",
-    "#ffffff",
-    "#231f20",
-    "#6b6460",
-    "#7b1f2a",
-    "#b22222",
-    "#cf6a57",
-    "#d1a84c",
-    "#ffcc66",
-    "#f3efe8",
-    "#e6ddd2",
-    "#cfc6bc",
-    "#7a9e7e",
-    "#4f7c82",
-    "#3d5a80",
-    "#2a9d8f",
-    "#457b9d",
-    "#8d99ae",
-    "#7d4f50",
-    "#6d597a",
-  ];
   TPP.normalizeHexColor = function (value) {
     const text = String(value || "").trim();
     const match = text.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -119,12 +97,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       });
     return found;
   };
-  TPP.ensureColorPaletteId = function (input) {
-    if (!input) return "";
-    if (!input.dataset.colorPaletteId)
-      input.dataset.colorPaletteId = "color-" + TPP.uid();
-    return input.dataset.colorPaletteId;
-  };
   TPP.colorPaletteAnchor = function (input) {
     if (!input) return null;
     if (
@@ -176,6 +148,76 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
   TPP.colorDialogValue = "#000000";
   TPP.colorDialogTargetId = "";
+  TPP.colorDialogAnchorId = "";
+  TPP.colorPickerState = { h: 0, s: 0, v: 0 };
+  TPP.clamp01 = function (value) {
+    return Math.max(0, Math.min(1, Number(value) || 0));
+  };
+  TPP.clampHue = function (value) {
+    const raw = Number(value) || 0;
+    return ((raw % 360) + 360) % 360;
+  };
+  TPP.hsvToRgb = function (h, s, v) {
+    const hue = TPP.clampHue(h);
+    const sat = TPP.clamp01(s);
+    const val = TPP.clamp01(v);
+    const c = val * sat;
+    const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+    const m = val - c;
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    if (hue < 60) [r, g, b] = [c, x, 0];
+    else if (hue < 120) [r, g, b] = [x, c, 0];
+    else if (hue < 180) [r, g, b] = [0, c, x];
+    else if (hue < 240) [r, g, b] = [0, x, c];
+    else if (hue < 300) [r, g, b] = [x, 0, c];
+    else [r, g, b] = [c, 0, x];
+    return {
+      r: Math.round((r + m) * 255),
+      g: Math.round((g + m) * 255),
+      b: Math.round((b + m) * 255),
+    };
+  };
+  TPP.rgbToHex = function (rgb) {
+    return (
+      "#" +
+      [rgb.r, rgb.g, rgb.b]
+        .map(function (value) {
+          return Math.max(0, Math.min(255, Number(value) || 0))
+            .toString(16)
+            .padStart(2, "0");
+        })
+        .join("")
+    );
+  };
+  TPP.hexToHsv = function (hex) {
+    const normalized = TPP.normalizeHexColor(hex) || "#000000";
+    const r = parseInt(normalized.slice(1, 3), 16) / 255;
+    const g = parseInt(normalized.slice(3, 5), 16) / 255;
+    const b = parseInt(normalized.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    let h = 0;
+    if (delta) {
+      if (max === r) h = 60 * (((g - b) / delta) % 6);
+      else if (max === g) h = 60 * ((b - r) / delta + 2);
+      else h = 60 * ((r - g) / delta + 4);
+    }
+    if (h < 0) h += 360;
+    const s = max === 0 ? 0 : delta / max;
+    return { h: h, s: s, v: max };
+  };
+  TPP.colorFromPickerState = function () {
+    return TPP.rgbToHex(
+      TPP.hsvToRgb(
+        TPP.colorPickerState.h,
+        TPP.colorPickerState.s,
+        TPP.colorPickerState.v,
+      ),
+    );
+  };
   TPP.renderColorDialogSwatches = function (colors, selected, container) {
     if (!container) return;
     container.innerHTML = colors.length
@@ -198,23 +240,67 @@ document.addEventListener("DOMContentLoaded", async function () {
           .join("")
       : '<div class="color-dialog-empty">No colors used yet.</div>';
   };
-  TPP.updateColorDialogPreview = function (value) {
+  TPP.positionColorPopover = function () {
+    const popover = document.getElementById("colorPickerPopover");
+    const anchor = document.querySelector(
+      '[data-color-input-id="' + TPP.colorDialogAnchorId + '"]',
+    );
+    if (!popover || !anchor) return;
+    const trigger =
+      anchor.parentElement &&
+      anchor.parentElement.querySelector(".color-picker-trigger");
+    const rect = (trigger || anchor).getBoundingClientRect();
+    popover.hidden = false;
+    const popRect = popover.getBoundingClientRect();
+    const width = popRect.width || 320;
+    const height = popRect.height || 420;
+    const gap = 8;
+    let left = rect.left;
+    let top = rect.bottom + gap;
+    if (left + width > window.innerWidth - 12)
+      left = Math.max(12, window.innerWidth - width - 12);
+    if (top + height > window.innerHeight - 12)
+      top = Math.max(12, rect.top - height - gap);
+    popover.style.left = Math.round(left) + "px";
+    popover.style.top = Math.round(top) + "px";
+  };
+  TPP.updateColorDialogPreview = function (value, skipApply) {
     const color = TPP.normalizeHexColor(value) || TPP.colorDialogValue;
     const preview = document.getElementById("colorPickerPreview");
     const hex = document.getElementById("colorPickerHex");
+    const surface = document.getElementById("colorPickerSurface");
+    const surfaceMarker = document.getElementById("colorPickerSurfaceMarker");
+    const hue = document.getElementById("colorPickerHue");
+    const hueMarker = document.getElementById("colorPickerHueMarker");
+    TPP.colorPickerState = TPP.hexToHsv(color);
     if (preview) preview.style.setProperty("--picker-color", color);
     if (hex && document.activeElement !== hex) hex.value = color;
+    if (surface) {
+      surface.style.setProperty(
+        "--picker-hue",
+        "hsl(" + Math.round(TPP.colorPickerState.h) + " 100% 50%)",
+      );
+    }
+    if (surfaceMarker) {
+      surfaceMarker.style.left = TPP.colorPickerState.s * 100 + "%";
+      surfaceMarker.style.top = (1 - TPP.colorPickerState.v) * 100 + "%";
+    }
+    if (hueMarker) {
+      hueMarker.style.left = (TPP.colorPickerState.h / 360) * 100 + "%";
+    }
+    if (hue) {
+      hue.style.setProperty(
+        "--picker-hue",
+        "hsl(" + Math.round(TPP.colorPickerState.h) + " 100% 50%)",
+      );
+    }
     TPP.colorDialogValue = color;
     TPP.renderColorDialogSwatches(
       TPP.collectUsedColors(TPP.active),
       color,
       document.getElementById("colorPickerUsedColors"),
     );
-    TPP.renderColorDialogSwatches(
-      TPP.COLOR_PICKER_SWATCHES,
-      color,
-      document.getElementById("colorPickerPresetColors"),
-    );
+    if (!skipApply) TPP.applyColorDialogValue();
   };
   TPP.applyColorDialogValue = function () {
     const target = document.querySelector(
@@ -225,15 +311,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     target.dispatchEvent(new Event("input", { bubbles: true }));
     target.dispatchEvent(new Event("change", { bubbles: true }));
   };
+  TPP.closeColorDialog = function () {
+    const popover = document.getElementById("colorPickerPopover");
+    if (!popover) return;
+    popover.hidden = true;
+    TPP.colorDialogAnchorId = "";
+  };
   TPP.openColorDialog = function (input) {
-    const dialog = document.getElementById("colorPickerDialog");
-    if (!dialog || typeof dialog.showModal !== "function" || !input) return;
+    const popover = document.getElementById("colorPickerPopover");
+    if (!popover || !input) return;
     if (!input.dataset.colorInputId)
       input.dataset.colorInputId = "color-input-" + TPP.uid();
     TPP.colorDialogTargetId = input.dataset.colorInputId;
+    TPP.colorDialogAnchorId = input.dataset.colorInputId;
     TPP.colorDialogValue = TPP.normalizeHexColor(input.value) || "#000000";
-    TPP.updateColorDialogPreview(TPP.colorDialogValue);
-    if (!dialog.open) dialog.showModal();
+    popover.hidden = false;
+    TPP.updateColorDialogPreview(TPP.colorDialogValue, true);
+    TPP.positionColorPopover();
   };
   TPP.renderFrontCoverFieldDialog = function () {
     const list = document.getElementById("frontCoverFieldDialogList");
@@ -564,40 +658,74 @@ document.addEventListener("DOMContentLoaded", async function () {
       renderCurrentViewPreservingSidebar();
     });
   }
-  const colorPickerDialog = document.getElementById("colorPickerDialog");
+  const colorPickerPopover = document.getElementById("colorPickerPopover");
   const colorPickerHex = document.getElementById("colorPickerHex");
-  const colorPickerApply = document.getElementById("colorPickerApply");
+  const colorPickerSurface = document.getElementById("colorPickerSurface");
+  const colorPickerHue = document.getElementById("colorPickerHue");
   if (colorPickerHex) {
     colorPickerHex.addEventListener("input", function () {
       const value = TPP.normalizeHexColor(colorPickerHex.value);
       if (value) TPP.updateColorDialogPreview(value);
     });
   }
-  if (colorPickerApply) {
-    colorPickerApply.addEventListener("click", function () {
-      TPP.applyColorDialogValue();
-      if (colorPickerDialog && colorPickerDialog.open) colorPickerDialog.close();
+  const bindColorPointerField = function (element, onUpdate) {
+    if (!element) return;
+    let dragging = false;
+    const update = function (event) {
+      const rect = element.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      onUpdate(TPP.clamp01(x), TPP.clamp01(y));
+    };
+    element.addEventListener("pointerdown", function (event) {
+      dragging = true;
+      if (element.setPointerCapture) element.setPointerCapture(event.pointerId);
+      update(event);
+      event.preventDefault();
     });
-  }
-  if (colorPickerDialog) {
-    colorPickerDialog.addEventListener("click", function (e) {
-      const card = e.target.closest(".modal-card");
-      if (e.target === colorPickerDialog && !card && colorPickerDialog.open) {
-        colorPickerDialog.close("cancel");
-        return;
-      }
-      const closeButton = e.target.closest("[data-action='cancel']");
-      if (closeButton && colorPickerDialog.open) {
-        colorPickerDialog.close("cancel");
-        return;
-      }
+    element.addEventListener("pointermove", function (event) {
+      if (!dragging) return;
+      update(event);
+      event.preventDefault();
+    });
+    element.addEventListener("pointerup", function (event) {
+      dragging = false;
+      if (element.hasPointerCapture && element.hasPointerCapture(event.pointerId))
+        element.releasePointerCapture(event.pointerId);
+    });
+    element.addEventListener("pointercancel", function (event) {
+      dragging = false;
+      if (element.hasPointerCapture && element.hasPointerCapture(event.pointerId))
+        element.releasePointerCapture(event.pointerId);
+    });
+  };
+  bindColorPointerField(colorPickerSurface, function (x, y) {
+    TPP.colorPickerState.s = x;
+    TPP.colorPickerState.v = 1 - y;
+    TPP.updateColorDialogPreview(TPP.colorFromPickerState());
+  });
+  bindColorPointerField(colorPickerHue, function (x) {
+    TPP.colorPickerState.h = x * 360;
+    TPP.updateColorDialogPreview(TPP.colorFromPickerState());
+  });
+  if (colorPickerPopover) {
+    colorPickerPopover.addEventListener("click", function (e) {
       const swatch = e.target.closest("[data-dialog-color]");
       if (swatch) {
         TPP.updateColorDialogPreview(swatch.dataset.dialogColor || "#000000");
-        return;
       }
     });
   }
+  document.addEventListener("mousedown", function (e) {
+    const popover = document.getElementById("colorPickerPopover");
+    if (!popover || popover.hidden) return;
+    const trigger = e.target.closest(".color-picker-trigger");
+    if (trigger) return;
+    if (!e.target.closest("#colorPickerPopover")) TPP.closeColorDialog();
+  });
+  window.addEventListener("resize", TPP.positionColorPopover);
+  window.addEventListener("scroll", TPP.positionColorPopover, true);
   if (TPP.renderColorPalettes) TPP.renderColorPalettes();
   const bookInfoAddButton = document.getElementById("bookInfoAddButton");
   if (bookInfoAddButton) {
