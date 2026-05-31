@@ -891,6 +891,89 @@ input[type="checkbox"] {
 .book-info-table thead th:last-child {
   color: transparent;
 }
+.front-cover-text-table {
+  table-layout: fixed;
+  font-size: 0.82rem;
+}
+.front-cover-text-table th,
+.front-cover-text-table td {
+  padding: 0.3rem 0.35rem;
+  vertical-align: middle;
+}
+.front-cover-text-table td:nth-child(1) {
+  width: 22%;
+  font-weight: 700;
+}
+.front-cover-text-table td:nth-child(2) {
+  width: 8%;
+  text-align: center;
+}
+.front-cover-text-table td:nth-child(3) {
+  width: 11%;
+}
+.front-cover-text-table td:nth-child(4) {
+  width: 19%;
+}
+.front-cover-text-table td:nth-child(5),
+.front-cover-text-table td:nth-child(6) {
+  width: 10%;
+}
+.front-cover-text-table td:nth-child(7) {
+  width: 8%;
+}
+.front-cover-text-table td:nth-child(8) {
+  width: 12%;
+}
+.front-cover-text-table input {
+  margin: 0;
+  padding: 0.25rem 0.35rem;
+}
+.front-cover-text-table input[type="checkbox"] {
+  width: auto;
+  margin-inline: auto;
+}
+.front-cover-text-table .color-box {
+  width: 2.2rem !important;
+  height: 1.9rem !important;
+}
+.front-cover-text-actions {
+  display: flex;
+  gap: 0.2rem;
+  justify-content: center;
+}
+.front-cover-text-actions .small {
+  padding: 0.18rem 0.3rem;
+  border-radius: 8px;
+}
+.front-cover-field-dialog-list {
+  display: grid;
+  gap: 0.5rem;
+  max-height: min(60vh, 28rem);
+  overflow: auto;
+}
+.front-cover-field-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+.front-cover-field-option strong {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+.front-cover-field-option p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.front-cover-field-empty {
+  color: var(--muted);
+  font-style: italic;
+}
 .data-inline-object {
   display: grid;
   gap: 0.45rem;

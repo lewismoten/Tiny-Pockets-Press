@@ -187,7 +187,6 @@ TPP.textElementEditorConfigs = {
   front: {
     containerId: "coverTextElements",
     location: "front",
-    addLabel: "Add Front Cover Text",
     minSize: 3,
     supportsX: false,
     supportsWidth: false,
@@ -218,6 +217,16 @@ TPP.textElementEditorConfigs = {
     defaultAlign: "left",
   },
 };
+TPP.frontCoverFieldPickerOptions = function (book) {
+  const used = new Set(
+    TPP.textElementsForLocation(book, "front").map(function (entry) {
+      return (entry && entry.fieldKey) || "";
+    }),
+  );
+  return TPP.bookInfoFieldOptions(book).filter(function (option) {
+    return option && option.value && !used.has(option.value);
+  });
+};
 TPP.textElementFieldOptionsHtml = function (selected) {
   const options = TPP.bookInfoFieldOptions(TPP.active, {
     includeInlineCustom: true,
@@ -246,6 +255,50 @@ TPP.textElementFieldOptionsHtml = function (selected) {
       );
     })
     .join("");
+};
+TPP.frontCoverTextRowHtml = function (book, element) {
+  const entry = element || {};
+  const fieldKey = entry.fieldKey || entry.part || "title";
+  return (
+    '<tr class="text-element-group front-cover-text-row" data-text-id="' +
+    TPP.esc(entry.id || "") +
+    '" data-location="front">' +
+    "<td>" +
+    TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
+    "</td>" +
+    '<td><input class="text-enabled" type="checkbox" ' +
+    (entry.enabled !== false ? "checked" : "") +
+    "></td>" +
+    '<td><input class="text-size" type="number" min="3" step=".5" value="' +
+    TPP.esc(String(Number(entry.size) || 4.2)) +
+    '"></td>' +
+    '<td><input class="text-y" type="range" min="0" max="100" value="' +
+    TPP.esc(String(Number(entry.y) || 0)) +
+    '"></td>' +
+    '<td><input class="text-color color-box" type="color" value="' +
+    TPP.esc(entry.color || "#ffffff") +
+    '"></td>' +
+    '<td><input class="text-outline-color color-box" type="color" value="' +
+    TPP.esc(entry.outlineColor || "#000000") +
+    '"></td>' +
+    '<td><input class="text-outline-size" type="number" min="0" step=".25" value="' +
+    TPP.esc(String(Math.max(0, Number(entry.outlineSize) || 0))) +
+    '"></td>' +
+    '<td class="front-cover-text-actions"><button type="button" class="small" data-text-action="up" aria-label="Move up" title="Move up">↑</button><button type="button" class="small" data-text-action="down" aria-label="Move down" title="Move down">↓</button><button type="button" class="small book-info-trash" data-text-action="remove" aria-label="Remove field" title="Remove field">🗑</button></td>' +
+    "</tr>"
+  );
+};
+TPP.frontCoverTextListHtml = function (book, spec) {
+  return (
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><thead><tr><th>Field</th><th>Show</th><th>Size</th><th>Y</th><th>Color</th><th>Outline</th><th>Px</th><th></th></tr></thead><tbody>' +
+    TPP.textElementsForLocation(book, spec.location)
+      .map(function (element) {
+        return TPP.frontCoverTextRowHtml(book, element);
+      })
+      .join("") +
+    "</tbody></table></div>" +
+    '<button type="button" class="small" id="openFrontCoverFieldPicker">Add Front Cover Text</button>'
+  );
 };
 TPP.textElementGroupHtml = function (book, spec, element) {
   const entry = element || {};
@@ -319,6 +372,7 @@ TPP.textElementGroupHtml = function (book, spec, element) {
   );
 };
 TPP.textElementListHtml = function (book, spec) {
+  if (spec.location === "front") return TPP.frontCoverTextListHtml(book, spec);
   const elements = TPP.textElementsForLocation(book, spec.location);
   return (
     elements
@@ -382,7 +436,9 @@ TPP.readTextElementControls = function (book) {
       return entry && entry.id === group.dataset.textId;
     });
     if (!element) return;
-    element.fieldKey = group.querySelector(".text-field-key")?.value || "title";
+    if (group.querySelector(".text-field-key")) {
+      element.fieldKey = group.querySelector(".text-field-key").value || "title";
+    }
     element.enabled = group.querySelector(".text-enabled")?.checked !== false;
     if (group.querySelector(".text-custom"))
       element.customText = group.querySelector(".text-custom").value || "";
@@ -429,7 +485,7 @@ TPP.readTextElementControls = function (book) {
   if (TPP.syncLegacyTextFieldsFromElements)
     TPP.syncLegacyTextFieldsFromElements(book);
 };
-TPP.addTextElement = function (book, location) {
+TPP.addTextElement = function (book, location, fieldKey) {
   if (!book) return;
   const spec = TPP.textElementEditorConfigs[location];
   if (!spec) return;
@@ -438,7 +494,7 @@ TPP.addTextElement = function (book, location) {
     id: TPP.uid(),
     location: location,
     part: "slot-" + TPP.uid(),
-    fieldKey: "title",
+    fieldKey: fieldKey || "title",
     enabled: true,
     size: location === "front" ? 4.2 : 4,
     x: 50,

@@ -36,6 +36,35 @@ document.addEventListener("DOMContentLoaded", async function () {
     else if (TPP.view === "reader") TPP.renderReader();
     else if (TPP.view === "library") TPP.renderLibrary();
   };
+  TPP.renderFrontCoverFieldDialog = function () {
+    const list = document.getElementById("frontCoverFieldDialogList");
+    if (!list) return;
+    const options = TPP.frontCoverFieldPickerOptions(TPP.active);
+    list.innerHTML = options.length
+      ? options
+          .map(function (option) {
+            const preview = TPP.bookInfoFieldValue(TPP.active, option.value, {
+              location: "front",
+            });
+            return (
+              '<button type="button" class="front-cover-field-option" data-front-cover-field="' +
+              TPP.esc(option.value) +
+              '"><span><strong>' +
+              TPP.esc(option.label) +
+              '</strong><p>' +
+              TPP.esc(preview || "Empty value") +
+              "</p></span><span>Add</span></button>"
+            );
+          })
+          .join("")
+      : '<div class="front-cover-field-empty">All current Book Info fields are already on the front cover.</div>';
+  };
+  TPP.openFrontCoverFieldDialog = function () {
+    const dialog = document.getElementById("frontCoverFieldDialog");
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    TPP.renderFrontCoverFieldDialog();
+    if (!dialog.open) dialog.showModal();
+  };
 
   TPP.fields.forEach(function (id) {
     const el = document.getElementById(id);
@@ -119,7 +148,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.sync("nosave");
         const action = textButton.dataset.textAction;
         const group = textButton.closest(".text-element-group");
-        if (action === "add") TPP.addTextElement(TPP.active, textButton.dataset.location);
+        if (action === "add")
+          TPP.addTextElement(TPP.active, textButton.dataset.location);
         if (action === "remove" && group)
           TPP.removeTextElement(TPP.active, group.dataset.textId);
         if (action === "up" && group)
@@ -128,6 +158,12 @@ document.addEventListener("DOMContentLoaded", async function () {
           TPP.moveTextElement(TPP.active, group.dataset.textId, 1);
         TPP.save();
         TPP.renderAll();
+        return;
+      }
+      const openFrontCoverPicker = e.target.closest("#openFrontCoverFieldPicker");
+      if (openFrontCoverPicker) {
+        TPP.sync("nosave");
+        TPP.openFrontCoverFieldDialog();
         return;
       }
       const bookInfoButton = e.target.closest("[data-book-info-action]");
@@ -155,6 +191,29 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.save();
         TPP.renderAll();
       }
+    });
+  }
+  const frontCoverFieldDialog = document.getElementById("frontCoverFieldDialog");
+  if (frontCoverFieldDialog) {
+    frontCoverFieldDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === frontCoverFieldDialog && !card && frontCoverFieldDialog.open) {
+        frontCoverFieldDialog.close("cancel");
+        return;
+      }
+      const closeButton = e.target.closest("[data-action='cancel']");
+      if (closeButton && frontCoverFieldDialog.open) {
+        frontCoverFieldDialog.close("cancel");
+        return;
+      }
+      const option = e.target.closest("[data-front-cover-field]");
+      if (!option) return;
+      TPP.sync("nosave");
+      TPP.addTextElement(TPP.active, "front", option.dataset.frontCoverField);
+      TPP.save();
+      if (frontCoverFieldDialog.open) frontCoverFieldDialog.close("selected");
+      TPP.loadForm();
+      renderCurrentViewPreservingSidebar();
     });
   }
   const bookInfoAddButton = document.getElementById("bookInfoAddButton");
