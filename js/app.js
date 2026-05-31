@@ -680,14 +680,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       const value = TPP.normalizeHexColor(colorPickerHex.value);
       if (value) TPP.updateColorDialogPreview(value);
     });
-    colorPickerHex.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        const value = TPP.normalizeHexColor(colorPickerHex.value);
-        if (value) TPP.updateColorDialogPreview(value);
-        TPP.closeColorDialog();
-      }
-    });
   }
   const bindColorPointerField = function (element, onUpdate) {
     if (!element) return;
@@ -737,13 +729,23 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.updateColorDialogPreview(swatch.dataset.dialogColor || "#000000");
       }
     });
-    colorPickerPopover.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        TPP.closeColorDialog();
-      }
-    });
   }
+  document.addEventListener("keydown", function (event) {
+    const popover = document.getElementById("colorPickerPopover");
+    if (!popover || popover.hidden) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      TPP.closeColorDialog();
+      return;
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const hex = document.getElementById("colorPickerHex");
+      const value = TPP.normalizeHexColor(hex && hex.value);
+      if (value) TPP.updateColorDialogPreview(value);
+      TPP.closeColorDialog();
+    }
+  });
   document.addEventListener("mousedown", function (e) {
     const popover = document.getElementById("colorPickerPopover");
     if (!popover || popover.hidden) return;
