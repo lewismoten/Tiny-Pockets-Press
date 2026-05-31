@@ -5,10 +5,248 @@ document.addEventListener("DOMContentLoaded", async function () {
   dragPreview.innerHTML =
     '<span class="drag-preview-handle">⋮⋮</span><span class="drag-preview-label"></span>';
   document.body.appendChild(dragPreview);
+  TPP.classificationCatalog = null;
+  TPP.classificationDialogTargetEntryId = "";
+  TPP.classificationDialogPath = [];
+  TPP.classificationDialogSystemId = "";
+  TPP.loadClassificationSystems = async function () {
+    if (TPP.classificationCatalog) return TPP.classificationCatalog;
+    try {
+      const response = await fetch("data/classification-systems.json");
+      if (!response.ok) throw new Error("classification");
+      TPP.classificationCatalog = await response.json();
+    } catch (_error) {
+      TPP.classificationCatalog = {
+        defaultSystemId: "",
+        systems: [],
+      };
+    }
+    return TPP.classificationCatalog;
+  };
+  TPP.classificationSystem = function () {
+    const catalog = TPP.classificationCatalog || { systems: [] };
+    const systems = Array.isArray(catalog.systems) ? catalog.systems : [];
+    return (
+      systems.find(function (system) {
+        return system && system.id === catalog.defaultSystemId;
+      }) ||
+      systems[0] ||
+      null
+    );
+  };
+  TPP.classificationNodeChildren = function (path) {
+    const system = TPP.classificationSystem();
+    let nodes = Array.isArray(system && system.categories)
+      ? system.categories
+      : [];
+    (Array.isArray(path) ? path : []).forEach(function (index) {
+      const node = nodes[index];
+      nodes = Array.isArray(node && node.children) ? node.children : [];
+    });
+    return nodes;
+  };
+  TPP.classificationNodeAtPath = function (path) {
+    const fullPath = Array.isArray(path) ? path : [];
+    if (!fullPath.length) return null;
+    const parent = TPP.classificationNodeChildren(fullPath.slice(0, -1));
+    return parent[fullPath[fullPath.length - 1]] || null;
+  };
+  TPP.classificationBreadcrumbNodes = function (path) {
+    const crumbs = [];
+    (Array.isArray(path) ? path : []).forEach(function (_unused, index) {
+      const crumbPath = path.slice(0, index + 1);
+      const node = TPP.classificationNodeAtPath(crumbPath);
+      if (node) crumbs.push({ path: crumbPath, node: node });
+    });
+    return crumbs;
+  };
+  TPP.classificationPathForCode = function (code) {
+    const target = String(code || "").trim();
+    if (!target) return [];
+    const system = TPP.classificationSystem();
+    let found = [];
+    const walk = function (nodes, path) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node, index) {
+        if (!node || found.length) return;
+        const nextPath = path.concat(index);
+        if (node.code === target) {
+          found = nextPath;
+          return;
+        }
+        walk(node.children, nextPath);
+      });
+    };
+    walk(system && system.categories, []);
+    return found;
+  };
+  TPP.classificationSummary = function (value) {
+    const text = String(value || "").trim();
+    if (!text)
+      return {
+        title: "Choose classification",
+        meta: "No classification selected",
+      };
+    const system = TPP.classificationSystem();
+    const found = [];
+    const walk = function (nodes, parents) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
+        if (!node || found.length) return;
+        const nextParents = parents.concat(node);
+        if (node.code === text) {
+          found.push(nextParents);
+          return;
+        }
+        walk(node.children, nextParents);
+      });
+    };
+    walk(system && system.categories, []);
+    if (found.length) {
+      const nodes = found[0];
+      return {
+        title: text,
+        meta:
+          (system && system.name ? system.name + ": " : "") +
+          nodes
+            .map(function (node) {
+              return node.label;
+            })
+            .join(" > "),
+      };
+    }
+    return {
+      title: text,
+      meta:
+        (system && system.name ? system.name + ": " : "") +
+        "Custom or unknown shelfmark",
+    };
+  };
+  TPP.renderClassificationDialog = function () {
+    const system = TPP.classificationSystem();
+    const title = document.getElementById("classificationDialogTitle");
+    const description = document.getElementById(
+      "classificationDialogDescription",
+    );
+    const breadcrumbs = document.getElementById("classificationBreadcrumbs");
+    const selection = document.getElementById("classificationSelection");
+    const list = document.getElementById("classificationDialogList");
+    if (title) title.textContent = (system && system.name) || "Classification";
+    if (description)
+      description.textContent =
+        (system && system.description) ||
+        "Choose a shelfmark by drilling into categories.";
+    if (breadcrumbs) {
+      const crumbs = TPP.classificationBreadcrumbNodes(
+        TPP.classificationDialogPath,
+      );
+      breadcrumbs.innerHTML =
+        '<button type="button" class="classification-crumb' +
+        (crumbs.length ? "" : " is-active") +
+        '" data-classification-crumb="">Top</button>' +
+        crumbs
+          .map(function (crumb) {
+            return (
+              '<span class="classification-crumb-sep">/</span><button type="button" class="classification-crumb is-active" data-classification-crumb="' +
+              TPP.esc(JSON.stringify(crumb.path)) +
+              '">' +
+              TPP.esc(crumb.node.label) +
+              "</button>"
+            );
+          })
+          .join("");
+    }
+    const selectedNode = TPP.classificationNodeAtPath(
+      TPP.classificationDialogPath,
+    );
+    if (selection) {
+      if (selectedNode && selectedNode.code) {
+        selection.hidden = false;
+        selection.innerHTML =
+          "<div><strong>" +
+          TPP.esc(selectedNode.code) +
+          '</strong><div class="small">' +
+          TPP.esc(
+            TPP.classificationBreadcrumbNodes(TPP.classificationDialogPath)
+              .map(function (crumb) {
+                return crumb.node.label;
+              })
+              .join(" > "),
+          ) +
+          '</div></div><div class="toolbar"><button type="button" class="primary" data-classification-select="' +
+          TPP.esc(selectedNode.code) +
+          '">Use This Shelfmark</button><button type="button" data-classification-clear="1">Clear</button></div>';
+      } else {
+        selection.hidden = true;
+        selection.innerHTML = "";
+      }
+    }
+    if (list) {
+      const children = TPP.classificationNodeChildren(
+        TPP.classificationDialogPath,
+      );
+      list.innerHTML = children.length
+        ? children
+            .map(function (node, index) {
+              const nextPath = TPP.classificationDialogPath.concat(index);
+              const hasChildren =
+                Array.isArray(node.children) && node.children.length;
+              return (
+                '<div class="classification-option"><div><strong>' +
+                TPP.esc(node.code || "") +
+                "</strong> " +
+                TPP.esc(node.label || "") +
+                '</div><div class="toolbar">' +
+                (hasChildren
+                  ? '<button type="button" data-classification-open="' +
+                    TPP.esc(JSON.stringify(nextPath)) +
+                    '">Open</button>'
+                  : "") +
+                (node.code
+                  ? '<button type="button" class="primary alt" data-classification-select="' +
+                    TPP.esc(node.code) +
+                    '">Use</button>'
+                  : "") +
+                "</div></div>"
+              );
+            })
+            .join("")
+        : '<div class="front-cover-field-empty">No deeper categories here.</div>';
+    }
+  };
+  TPP.openClassificationDialog = async function (entryId) {
+    const dialog = document.getElementById("classificationDialog");
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    await TPP.loadClassificationSystems();
+    TPP.classificationDialogTargetEntryId = entryId || "";
+    const row = document.querySelector(
+      '.book-info-entry[data-entry-id="' +
+        TPP.classificationDialogTargetEntryId +
+        '"]',
+    );
+    const currentValue = row && row.querySelector(".book-info-value");
+    TPP.classificationDialogPath = TPP.classificationPathForCode(
+      currentValue && currentValue.value,
+    );
+    TPP.renderClassificationDialog();
+    if (!dialog.open) dialog.showModal();
+  };
+  TPP.applyClassificationValue = function (value) {
+    const row = document.querySelector(
+      '.book-info-entry[data-entry-id="' +
+        TPP.classificationDialogTargetEntryId +
+        '"]',
+    );
+    const input = row && row.querySelector(".book-info-value");
+    if (!input) return;
+    input.value = value || "";
+    TPP.sync("commit");
+    TPP.loadForm();
+    TPP.renderAll();
+  };
 
   TPP.populate();
   await TPP.load();
   await TPP.loadStaleKeyLookup();
+  await TPP.loadClassificationSystems();
   TPP.view = TPP.initialView();
   if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();
@@ -483,6 +721,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.renderAll();
     });
     controls.addEventListener("click", function (e) {
+      const classificationButton = e.target.closest(
+        "[data-book-info-classification]",
+      );
+      if (classificationButton) {
+        TPP.sync("nosave");
+        TPP.openClassificationDialog(
+          classificationButton.dataset.bookInfoClassification,
+        );
+        return;
+      }
       const colorTrigger = e.target.closest(".color-picker-trigger");
       if (colorTrigger) {
         e.preventDefault();
@@ -669,6 +917,55 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (frontCoverFieldDialog.open) frontCoverFieldDialog.close("selected");
       TPP.loadForm();
       renderCurrentViewPreservingSidebar();
+    });
+  }
+  const classificationDialog = document.getElementById("classificationDialog");
+  if (classificationDialog) {
+    classificationDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (
+        e.target === classificationDialog &&
+        !card &&
+        classificationDialog.open
+      ) {
+        classificationDialog.close("cancel");
+        return;
+      }
+      const closeButton = e.target.closest(
+        "[data-action='cancel-classification']",
+      );
+      if (closeButton && classificationDialog.open) {
+        classificationDialog.close("cancel");
+        return;
+      }
+      const crumb = e.target.closest("[data-classification-crumb]");
+      if (crumb) {
+        const raw = crumb.dataset.classificationCrumb || "";
+        TPP.classificationDialogPath = raw ? JSON.parse(raw) : [];
+        TPP.renderClassificationDialog();
+        return;
+      }
+      const openButton = e.target.closest("[data-classification-open]");
+      if (openButton) {
+        TPP.classificationDialogPath = JSON.parse(
+          openButton.dataset.classificationOpen || "[]",
+        );
+        TPP.renderClassificationDialog();
+        return;
+      }
+      const selectButton = e.target.closest("[data-classification-select]");
+      if (selectButton) {
+        TPP.applyClassificationValue(
+          selectButton.dataset.classificationSelect || "",
+        );
+        if (classificationDialog.open) classificationDialog.close("selected");
+        return;
+      }
+      const clearButton = e.target.closest("[data-classification-clear]");
+      if (clearButton) {
+        TPP.applyClassificationValue("");
+        if (classificationDialog.open) classificationDialog.close("cleared");
+      }
     });
   }
   const colorPickerPopover = document.getElementById("colorPickerPopover");

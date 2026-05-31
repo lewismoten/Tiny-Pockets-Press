@@ -798,6 +798,36 @@
         </div>
       </form>
     </dialog>
+    <dialog id="classificationDialog" class="modal">
+      <form method="dialog" class="modal-card classification-dialog-card">
+        <div class="classification-dialog-header">
+          <div>
+            <h2 id="classificationDialogTitle">Classification</h2>
+            <p id="classificationDialogDescription" class="about-note"></p>
+          </div>
+          <button
+            type="button"
+            class="button-cancel"
+            data-action="cancel-classification"
+          >
+            Close
+          </button>
+        </div>
+        <div
+          id="classificationBreadcrumbs"
+          class="classification-breadcrumbs"
+        ></div>
+        <div
+          id="classificationSelection"
+          class="classification-selection"
+          hidden
+        ></div>
+        <div
+          id="classificationDialogList"
+          class="classification-dialog-list"
+        ></div>
+      </form>
+    </dialog>
     <div id="colorPickerPopover" class="color-picker-popover" hidden>
       <div class="color-picker-popover-card">
         <div class="color-picker-popover-top">

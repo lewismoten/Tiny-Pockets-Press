@@ -1,0 +1,274 @@
+{
+  "defaultSystemId": "tiny-shelf-v1",
+  "systems": [
+    {
+      "id": "tiny-shelf-v1",
+      "name": "Tiny Shelf Classification",
+      "description": "A lightweight, original shelfmark system for small personal libraries, studios, and community collections. It groups nonfiction and fiction into broad practical areas and supports deeper subject browsing without relying on proprietary or discontinued standards.",
+      "categories": [
+        {
+          "code": "100",
+          "label": "Art",
+          "children": [
+            {
+              "code": "110",
+              "label": "Visual Arts",
+              "children": [
+                { "code": "111", "label": "Drawing" },
+                { "code": "112", "label": "Painting" },
+                { "code": "113", "label": "Printmaking" },
+                { "code": "114", "label": "Sculpture" }
+              ]
+            },
+            {
+              "code": "120",
+              "label": "Design",
+              "children": [
+                { "code": "121", "label": "Graphic Design" },
+                { "code": "122", "label": "Industrial Design" },
+                { "code": "123", "label": "Interior Design" }
+              ]
+            },
+            {
+              "code": "130",
+              "label": "Performing Arts",
+              "children": [
+                { "code": "131", "label": "Music" },
+                { "code": "132", "label": "Dance" },
+                { "code": "133", "label": "Theater" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "200",
+          "label": "Biography & Memoir",
+          "children": [
+            {
+              "code": "210",
+              "label": "Personal Life Stories",
+              "children": [
+                { "code": "211", "label": "Memoir" },
+                { "code": "212", "label": "Autobiography" },
+                { "code": "213", "label": "Journals & Letters" }
+              ]
+            },
+            {
+              "code": "220",
+              "label": "Collected Lives",
+              "children": [
+                { "code": "221", "label": "Artists & Writers" },
+                { "code": "222", "label": "Leaders & Activists" },
+                { "code": "223", "label": "Scientists & Inventors" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "300",
+          "label": "Business & Work",
+          "children": [
+            {
+              "code": "310",
+              "label": "Management",
+              "children": [
+                { "code": "311", "label": "Leadership" },
+                { "code": "312", "label": "Teams & Culture" },
+                { "code": "313", "label": "Operations" }
+              ]
+            },
+            {
+              "code": "320",
+              "label": "Entrepreneurship",
+              "children": [
+                { "code": "321", "label": "Startups" },
+                { "code": "322", "label": "Small Business" },
+                { "code": "323", "label": "Freelance Practice" }
+              ]
+            },
+            {
+              "code": "330",
+              "label": "Economics & Finance",
+              "children": [
+                { "code": "331", "label": "Economics" },
+                { "code": "332", "label": "Personal Finance" },
+                { "code": "333", "label": "Investing" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "400",
+          "label": "Computers & Technology",
+          "children": [
+            {
+              "code": "410",
+              "label": "Programming",
+              "children": [
+                { "code": "411", "label": "Software Engineering" },
+                { "code": "412", "label": "Web Development" },
+                { "code": "413", "label": "Data & Scripting" }
+              ]
+            },
+            {
+              "code": "420",
+              "label": "Systems",
+              "children": [
+                { "code": "421", "label": "Operating Systems" },
+                { "code": "422", "label": "Networking" },
+                { "code": "423", "label": "Security" }
+              ]
+            },
+            {
+              "code": "430",
+              "label": "Applied Computing",
+              "children": [
+                { "code": "431", "label": "Artificial Intelligence" },
+                { "code": "432", "label": "Human-Computer Interaction" },
+                { "code": "433", "label": "Game Development" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "500",
+          "label": "History & Society",
+          "children": [
+            {
+              "code": "510",
+              "label": "History",
+              "children": [
+                { "code": "511", "label": "Ancient & Medieval" },
+                { "code": "512", "label": "Modern History" },
+                { "code": "513", "label": "Local & Regional History" }
+              ]
+            },
+            {
+              "code": "520",
+              "label": "Social Studies",
+              "children": [
+                { "code": "521", "label": "Politics & Government" },
+                { "code": "522", "label": "Sociology" },
+                { "code": "523", "label": "Cultural Studies" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "600",
+          "label": "Language & Literature",
+          "children": [
+            {
+              "code": "610",
+              "label": "Language Study",
+              "children": [
+                { "code": "611", "label": "Linguistics" },
+                { "code": "612", "label": "Grammar & Usage" },
+                { "code": "613", "label": "Language Learning" }
+              ]
+            },
+            {
+              "code": "620",
+              "label": "Literary Study",
+              "children": [
+                { "code": "621", "label": "Criticism" },
+                { "code": "622", "label": "Poetics & Craft" },
+                { "code": "623", "label": "Anthologies" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "700",
+          "label": "Science & Nature",
+          "children": [
+            {
+              "code": "710",
+              "label": "Life Sciences",
+              "children": [
+                { "code": "711", "label": "Biology" },
+                { "code": "712", "label": "Ecology" },
+                { "code": "713", "label": "Animals & Plants" }
+              ]
+            },
+            {
+              "code": "720",
+              "label": "Physical Sciences",
+              "children": [
+                { "code": "721", "label": "Physics" },
+                { "code": "722", "label": "Chemistry" },
+                { "code": "723", "label": "Earth & Space" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "800",
+          "label": "Fiction",
+          "children": [
+            {
+              "code": "810",
+              "label": "General Fiction",
+              "children": [
+                { "code": "811", "label": "Literary Fiction" },
+                { "code": "812", "label": "Contemporary Fiction" },
+                { "code": "813", "label": "Historical Fiction" }
+              ]
+            },
+            {
+              "code": "820",
+              "label": "Speculative Fiction",
+              "children": [
+                { "code": "821", "label": "Science Fiction" },
+                { "code": "822", "label": "Fantasy" },
+                { "code": "823", "label": "Horror" }
+              ]
+            },
+            {
+              "code": "830",
+              "label": "Genre Fiction",
+              "children": [
+                { "code": "831", "label": "Mystery" },
+                { "code": "832", "label": "Romance" },
+                { "code": "833", "label": "Adventure & Thriller" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "900",
+          "label": "Reference & Practical",
+          "children": [
+            {
+              "code": "910",
+              "label": "Reference",
+              "children": [
+                { "code": "911", "label": "Encyclopedias & Guides" },
+                { "code": "912", "label": "Dictionaries & Glossaries" },
+                { "code": "913", "label": "Indexes & Catalogs" }
+              ]
+            },
+            {
+              "code": "920",
+              "label": "Home & Making",
+              "children": [
+                { "code": "921", "label": "Cooking" },
+                { "code": "922", "label": "Crafts" },
+                { "code": "923", "label": "Gardening" }
+              ]
+            },
+            {
+              "code": "930",
+              "label": "Travel & Place",
+              "children": [
+                { "code": "931", "label": "Travel Writing" },
+                { "code": "932", "label": "Regional Guides" },
+                { "code": "933", "label": "Maps & Atlas" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

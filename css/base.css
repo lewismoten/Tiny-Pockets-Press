@@ -1047,6 +1047,29 @@ input[type="checkbox"] {
 .book-info-table thead th:last-child {
   color: transparent;
 }
+.book-info-classification-picker {
+  width: 100%;
+}
+.book-info-classification-button {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #cfc6bc;
+  background: #fff;
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+  display: grid;
+  gap: 0.16rem;
+}
+.book-info-classification-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.book-info-classification-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.15;
+}
 .drag-handle {
   display: inline-flex;
   flex: 0 0 auto;
@@ -1462,6 +1485,58 @@ input[type="checkbox"] {
   gap: 0.6rem;
   justify-content: flex-end;
   flex-wrap: wrap;
+}
+.classification-dialog-card {
+  max-width: min(48rem, calc(100vw - 2rem));
+}
+.classification-dialog-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.classification-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+.classification-crumb {
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: #efe6d8;
+  font-size: 0.78rem;
+}
+.classification-crumb.is-active {
+  background: #ffecb8;
+}
+.classification-crumb-sep {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.classification-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #ead9ba;
+  border-radius: 16px;
+  background: #fff8e8;
+}
+.classification-dialog-list {
+  display: grid;
+  gap: 0.55rem;
+}
+.classification-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
 }
 .conflict-grid {
   display: grid;
