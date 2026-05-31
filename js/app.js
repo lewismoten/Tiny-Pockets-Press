@@ -704,12 +704,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     element.addEventListener("pointerup", function (event) {
       dragging = false;
-      if (element.hasPointerCapture && element.hasPointerCapture(event.pointerId))
+      if (
+        element.hasPointerCapture &&
+        element.hasPointerCapture(event.pointerId)
+      )
         element.releasePointerCapture(event.pointerId);
     });
     element.addEventListener("pointercancel", function (event) {
       dragging = false;
-      if (element.hasPointerCapture && element.hasPointerCapture(event.pointerId))
+      if (
+        element.hasPointerCapture &&
+        element.hasPointerCapture(event.pointerId)
+      )
         element.releasePointerCapture(event.pointerId);
     });
   };
