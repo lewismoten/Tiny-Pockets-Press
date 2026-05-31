@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       .forEach(function (input) {
         pushColor(input.value);
       });
-    return found;
+    return TPP.sortColorsByHsv(found);
   };
   TPP.colorPaletteAnchor = function (input) {
     if (!input) return null;
@@ -208,6 +208,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (h < 0) h += 360;
     const s = max === 0 ? 0 : delta / max;
     return { h: h, s: s, v: max };
+  };
+  TPP.sortColorsByHsv = function (colors) {
+    return (Array.isArray(colors) ? colors.slice() : []).sort(function (a, b) {
+      const left = TPP.hexToHsv(a);
+      const right = TPP.hexToHsv(b);
+      const hueDiff = left.h - right.h;
+      if (Math.abs(hueDiff) > 0.0001) return hueDiff;
+      const satDiff = left.s - right.s;
+      if (Math.abs(satDiff) > 0.0001) return satDiff;
+      const valueDiff = left.v - right.v;
+      if (Math.abs(valueDiff) > 0.0001) return valueDiff;
+      return String(a).localeCompare(String(b));
+    });
   };
   TPP.colorFromPickerState = function () {
     return TPP.rgbToHex(
