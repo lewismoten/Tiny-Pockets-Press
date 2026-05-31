@@ -272,29 +272,26 @@ TPP.frontCoverTextRowHtml = function (book, element) {
     '<td><input class="text-y" type="range" min="0" max="100" value="' +
     TPP.esc(String(Number(entry.y) || 0)) +
     '"></td>' +
-    '<td><input class="text-color color-box" type="color" value="' +
+    '<td><input class="text-color color-box" type="color" tabindex="-1" aria-label="Text color" value="' +
     TPP.esc(entry.color || "#ffffff") +
     '"></td>' +
-    '<td><input class="text-outline-color color-box" type="color" value="' +
+    '<td><div class="front-cover-text-outline-cell"><input class="text-outline-color color-box" type="color" tabindex="-1" aria-label="Outline color" value="' +
     TPP.esc(entry.outlineColor || "#000000") +
-    '"></td>' +
-    '<td><input class="text-outline-size" type="number" min="0" step=".25" value="' +
+    '"><input class="text-outline-size" type="number" min="0" step=".25" value="' +
     TPP.esc(String(Math.max(0, Number(entry.outlineSize) || 0))) +
-    '"></td>' +
-    '<td class="front-cover-text-actions"><button type="button" class="small book-info-trash" data-text-action="remove" aria-label="Remove field" title="Remove field">🗑</button></td>' +
+    '"></div></td>' +
     "</tr>"
   );
 };
 TPP.frontCoverTextListHtml = function (book, spec) {
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><thead><tr><th>Field</th><th>Size</th><th>Y</th><th>Color</th><th>Outline</th><th>Px</th><th></th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><thead><tr><th>Field</th><th>Size</th><th>Y</th><th>Color</th><th>Outline</th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, spec.location)
       .map(function (element) {
         return TPP.frontCoverTextRowHtml(book, element);
       })
       .join("") +
-    "</tbody></table></div>" +
-    '<button type="button" class="small" id="openFrontCoverFieldPicker">Add Front Cover Text</button>'
+    '</tbody></table></div><div class="front-cover-text-actions-bar"><button type="button" class="small" id="openFrontCoverFieldPicker">Add Front Cover Text</button><div id="frontCoverTrashDrop" class="front-cover-trash-drop" aria-hidden="true"><span class="front-cover-trash-icon">🗑</span><span>Drop here to remove</span></div></div>'
   );
 };
 TPP.textElementGroupHtml = function (book, spec, element) {
