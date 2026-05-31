@@ -1538,6 +1538,20 @@ input[type="checkbox"] {
   border-radius: 16px;
   background: #fff;
 }
+.classification-short-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2rem;
+  margin-inline: 0.3rem 0.35rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 999px;
+  background: #efe6d8;
+  color: #5f5349;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
 .conflict-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

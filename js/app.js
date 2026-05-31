@@ -60,6 +60,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     return crumbs;
   };
+  TPP.classificationShortLabel = function (node) {
+    const explicit = String((node && node.shortLabel) || "").trim();
+    if (explicit) return explicit;
+    return String((node && node.label) || "")
+      .replace(/[^A-Za-z0-9]/g, "")
+      .slice(0, 3)
+      .toUpperCase();
+  };
   TPP.classificationPathForCode = function (code) {
     const target = String(code || "").trim();
     if (!target) return [];
@@ -102,15 +110,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     walk(system && system.categories, []);
     if (found.length) {
       const nodes = found[0];
+      const shortPath = nodes
+        .map(function (node) {
+          return TPP.classificationShortLabel(node);
+        })
+        .join("/");
+      const fullPath = nodes
+        .map(function (node) {
+          return node.label;
+        })
+        .join(" > ");
       return {
-        title: text,
-        meta:
-          (system && system.name ? system.name + ": " : "") +
-          nodes
-            .map(function (node) {
-              return node.label;
-            })
-            .join(" > "),
+        title: text + (shortPath ? " · " + shortPath : ""),
+        meta: (system && system.name ? system.name + ": " : "") + fullPath,
       };
     }
     return {
@@ -192,7 +204,9 @@ document.addEventListener("DOMContentLoaded", async function () {
               return (
                 '<div class="classification-option"><div><strong>' +
                 TPP.esc(node.code || "") +
-                "</strong> " +
+                '</strong> <span class="classification-short-label">' +
+                TPP.esc(TPP.classificationShortLabel(node)) +
+                "</span> " +
                 TPP.esc(node.label || "") +
                 '</div><div class="toolbar">' +
                 (hasChildren
