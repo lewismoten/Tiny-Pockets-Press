@@ -44,6 +44,28 @@ document.addEventListener("DOMContentLoaded", async function () {
     else if (TPP.view === "library") TPP.renderLibrary();
     if (TPP.renderColorPalettes) TPP.renderColorPalettes();
   };
+  TPP.COLOR_PICKER_SWATCHES = [
+    "#000000",
+    "#ffffff",
+    "#231f20",
+    "#6b6460",
+    "#7b1f2a",
+    "#b22222",
+    "#cf6a57",
+    "#d1a84c",
+    "#ffcc66",
+    "#f3efe8",
+    "#e6ddd2",
+    "#cfc6bc",
+    "#7a9e7e",
+    "#4f7c82",
+    "#3d5a80",
+    "#2a9d8f",
+    "#457b9d",
+    "#8d99ae",
+    "#7d4f50",
+    "#6d597a",
+  ];
   TPP.normalizeHexColor = function (value) {
     const text = String(value || "").trim();
     const match = text.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -103,58 +125,115 @@ document.addEventListener("DOMContentLoaded", async function () {
       input.dataset.colorPaletteId = "color-" + TPP.uid();
     return input.dataset.colorPaletteId;
   };
-  TPP.colorPaletteHost = function (input) {
+  TPP.colorPaletteAnchor = function (input) {
     if (!input) return null;
-    if (input.closest(".front-cover-text-outline-cell"))
-      return input.closest("td") || input.parentElement;
-    return input.parentElement;
+    if (
+      input.parentElement &&
+      input.parentElement.classList.contains("color-picker-shell")
+    )
+      return input.parentElement;
+    const wrapper = document.createElement("span");
+    wrapper.className = "color-picker-shell";
+    input.insertAdjacentElement("beforebegin", wrapper);
+    wrapper.appendChild(input);
+    return wrapper;
   };
-  TPP.renderColorPalettes = function () {
+  TPP.renderColorPickerTriggers = function () {
     const controlsRoot = document.querySelector(".controls");
     if (!controlsRoot) return;
-    const colors = TPP.collectUsedColors(TPP.active);
     controlsRoot
       .querySelectorAll('input[type="color"]')
       .forEach(function (input) {
-        const host = TPP.colorPaletteHost(input);
-        if (!host) return;
-        const paletteId = TPP.ensureColorPaletteId(input);
-        const current = TPP.normalizeHexColor(input.value);
-        const paletteColors = current && !colors.includes(current)
-          ? [current].concat(colors)
-          : colors.slice();
-        let palette = host.querySelector(
-          '.color-palette[data-for="' + paletteId + '"]',
-        );
-        if (!palette) {
-          palette = document.createElement("div");
-          palette.className = "color-palette";
-          palette.dataset.for = paletteId;
-          host.appendChild(palette);
+        const anchor = TPP.colorPaletteAnchor(input);
+        if (!anchor) return;
+        input.classList.add("color-input-native");
+        input.tabIndex = -1;
+        if (!input.dataset.colorInputId)
+          input.dataset.colorInputId = "color-input-" + TPP.uid();
+        let trigger = anchor.querySelector(".color-picker-trigger");
+        if (!trigger) {
+          trigger = document.createElement("button");
+          trigger.type = "button";
+          trigger.className = "color-picker-trigger";
+          anchor.appendChild(trigger);
         }
-        palette.innerHTML =
-          '<div class="color-palette-label">Used colors</div><div class="color-palette-swatches">' +
-          paletteColors
-            .map(function (color) {
-              return (
-                '<button type="button" class="color-palette-swatch' +
-                (color === current ? " is-active" : "") +
-                '" data-color-swatch="' +
-                color +
-                '" data-color-target="' +
-                paletteId +
-                '" title="' +
-                color +
-                '" aria-label="Use color ' +
-                color +
-                '" style="--swatch:' +
-                color +
-                '"></button>'
-              );
-            })
-            .join("") +
-          "</div>";
+        trigger.dataset.colorTarget = input.dataset.colorInputId;
+        trigger.setAttribute(
+          "aria-label",
+          (input.getAttribute("aria-label") || "Choose color") +
+            " " +
+            (TPP.normalizeHexColor(input.value) || ""),
+        );
+        trigger.title = TPP.normalizeHexColor(input.value) || "Choose color";
+        trigger.style.setProperty(
+          "--picker-color",
+          TPP.normalizeHexColor(input.value) || "#000000",
+        );
       });
+  };
+  TPP.renderColorPalettes = function () {
+    TPP.renderColorPickerTriggers();
+  };
+  TPP.colorDialogValue = "#000000";
+  TPP.colorDialogTargetId = "";
+  TPP.renderColorDialogSwatches = function (colors, selected, container) {
+    if (!container) return;
+    container.innerHTML = colors.length
+      ? colors
+          .map(function (color) {
+            return (
+              '<button type="button" class="color-dialog-swatch' +
+              (color === selected ? " is-active" : "") +
+              '" data-dialog-color="' +
+              color +
+              '" title="' +
+              color +
+              '" aria-label="Use color ' +
+              color +
+              '" style="--swatch:' +
+              color +
+              '"></button>'
+            );
+          })
+          .join("")
+      : '<div class="color-dialog-empty">No colors used yet.</div>';
+  };
+  TPP.updateColorDialogPreview = function (value) {
+    const color = TPP.normalizeHexColor(value) || TPP.colorDialogValue;
+    const preview = document.getElementById("colorPickerPreview");
+    const hex = document.getElementById("colorPickerHex");
+    if (preview) preview.style.setProperty("--picker-color", color);
+    if (hex && document.activeElement !== hex) hex.value = color;
+    TPP.colorDialogValue = color;
+    TPP.renderColorDialogSwatches(
+      TPP.collectUsedColors(TPP.active),
+      color,
+      document.getElementById("colorPickerUsedColors"),
+    );
+    TPP.renderColorDialogSwatches(
+      TPP.COLOR_PICKER_SWATCHES,
+      color,
+      document.getElementById("colorPickerPresetColors"),
+    );
+  };
+  TPP.applyColorDialogValue = function () {
+    const target = document.querySelector(
+      '[data-color-input-id="' + TPP.colorDialogTargetId + '"]',
+    );
+    if (!target) return;
+    target.value = TPP.colorDialogValue;
+    target.dispatchEvent(new Event("input", { bubbles: true }));
+    target.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+  TPP.openColorDialog = function (input) {
+    const dialog = document.getElementById("colorPickerDialog");
+    if (!dialog || typeof dialog.showModal !== "function" || !input) return;
+    if (!input.dataset.colorInputId)
+      input.dataset.colorInputId = "color-input-" + TPP.uid();
+    TPP.colorDialogTargetId = input.dataset.colorInputId;
+    TPP.colorDialogValue = TPP.normalizeHexColor(input.value) || "#000000";
+    TPP.updateColorDialogPreview(TPP.colorDialogValue);
+    if (!dialog.open) dialog.showModal();
   };
   TPP.renderFrontCoverFieldDialog = function () {
     const list = document.getElementById("frontCoverFieldDialogList");
@@ -297,16 +376,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.renderAll();
     });
     controls.addEventListener("click", function (e) {
-      const colorSwatch = e.target.closest("[data-color-swatch]");
-      if (colorSwatch) {
+      const colorTrigger = e.target.closest(".color-picker-trigger");
+      if (colorTrigger) {
+        e.preventDefault();
+        e.stopPropagation();
         const input = controls.querySelector(
-          '[data-color-palette-id="' + colorSwatch.dataset.colorTarget + '"]',
+          '[data-color-input-id="' + colorTrigger.dataset.colorTarget + '"]',
         );
-        if (input) {
-          input.value = colorSwatch.dataset.colorSwatch || input.value;
-          input.dispatchEvent(new Event("input", { bubbles: true }));
-          input.dispatchEvent(new Event("change", { bubbles: true }));
-        }
+        if (input) TPP.openColorDialog(input);
         return;
       }
       const textButton = e.target.closest("[data-text-action]");
@@ -354,6 +431,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     });
     controls.addEventListener("mousedown", function (e) {
+      const colorTrigger = e.target.closest(".color-picker-trigger");
+      if (colorTrigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       const handle = e.target.closest("[data-drag-handle]");
       if (!handle) {
         dragHandleArmedId = "";
@@ -481,6 +564,41 @@ document.addEventListener("DOMContentLoaded", async function () {
       renderCurrentViewPreservingSidebar();
     });
   }
+  const colorPickerDialog = document.getElementById("colorPickerDialog");
+  const colorPickerHex = document.getElementById("colorPickerHex");
+  const colorPickerApply = document.getElementById("colorPickerApply");
+  if (colorPickerHex) {
+    colorPickerHex.addEventListener("input", function () {
+      const value = TPP.normalizeHexColor(colorPickerHex.value);
+      if (value) TPP.updateColorDialogPreview(value);
+    });
+  }
+  if (colorPickerApply) {
+    colorPickerApply.addEventListener("click", function () {
+      TPP.applyColorDialogValue();
+      if (colorPickerDialog && colorPickerDialog.open) colorPickerDialog.close();
+    });
+  }
+  if (colorPickerDialog) {
+    colorPickerDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === colorPickerDialog && !card && colorPickerDialog.open) {
+        colorPickerDialog.close("cancel");
+        return;
+      }
+      const closeButton = e.target.closest("[data-action='cancel']");
+      if (closeButton && colorPickerDialog.open) {
+        colorPickerDialog.close("cancel");
+        return;
+      }
+      const swatch = e.target.closest("[data-dialog-color]");
+      if (swatch) {
+        TPP.updateColorDialogPreview(swatch.dataset.dialogColor || "#000000");
+        return;
+      }
+    });
+  }
+  if (TPP.renderColorPalettes) TPP.renderColorPalettes();
   const bookInfoAddButton = document.getElementById("bookInfoAddButton");
   if (bookInfoAddButton) {
     bookInfoAddButton.onclick = function () {

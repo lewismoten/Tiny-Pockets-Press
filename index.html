@@ -798,6 +798,47 @@
         </div>
       </form>
     </dialog>
+    <dialog id="colorPickerDialog" class="modal">
+      <form method="dialog" class="modal-card color-picker-dialog-card">
+        <h2>Choose Color</h2>
+        <div class="color-picker-dialog-layout">
+          <div class="color-picker-preview-wrap">
+            <div id="colorPickerPreview" class="color-picker-preview"></div>
+            <label
+              >Hex Color
+              <input
+                id="colorPickerHex"
+                type="text"
+                inputmode="text"
+                spellcheck="false"
+                placeholder="#000000"
+            /></label>
+          </div>
+          <div class="color-picker-section">
+            <h3>Used Colors</h3>
+            <div
+              id="colorPickerUsedColors"
+              class="color-picker-swatch-grid"
+            ></div>
+          </div>
+          <div class="color-picker-section">
+            <h3>Palette</h3>
+            <div
+              id="colorPickerPresetColors"
+              class="color-picker-swatch-grid"
+            ></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="button-cancel" data-action="cancel">
+            Cancel
+          </button>
+          <button type="button" id="colorPickerApply" class="primary">
+            Apply
+          </button>
+        </div>
+      </form>
+    </dialog>
     <dialog id="imageExportDialog" class="modal">
       <form method="dialog" class="modal-card image-export-dialog-card">
         <h3>Export Page Images</h3>
