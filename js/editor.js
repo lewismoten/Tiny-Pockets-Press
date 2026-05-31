@@ -260,10 +260,10 @@ TPP.frontCoverTextRowHtml = function (book, element) {
   const entry = element || {};
   const fieldKey = entry.fieldKey || entry.part || "title";
   return (
-    '<tr class="text-element-group front-cover-text-row" data-text-id="' +
+    '<tr class="text-element-group front-cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
     TPP.esc(entry.id || "") +
     '" data-location="front">' +
-    "<td>" +
+    '<td><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span>' +
     TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
     "</td>" +
     '<td><input class="text-size" type="number" min="3" step=".5" value="' +
@@ -281,7 +281,7 @@ TPP.frontCoverTextRowHtml = function (book, element) {
     '<td><input class="text-outline-size" type="number" min="0" step=".25" value="' +
     TPP.esc(String(Math.max(0, Number(entry.outlineSize) || 0))) +
     '"></td>' +
-    '<td class="front-cover-text-actions"><button type="button" class="small" data-text-action="up" aria-label="Move up" title="Move up">↑</button><button type="button" class="small" data-text-action="down" aria-label="Move down" title="Move down">↓</button><button type="button" class="small book-info-trash" data-text-action="remove" aria-label="Remove field" title="Remove field">🗑</button></td>' +
+    '<td class="front-cover-text-actions"><button type="button" class="small book-info-trash" data-text-action="remove" aria-label="Remove field" title="Remove field">🗑</button></td>' +
     "</tr>"
   );
 };
@@ -302,14 +302,14 @@ TPP.textElementGroupHtml = function (book, spec, element) {
   const align = entry.align || spec.defaultAlign || "center";
   const fieldKey = entry.fieldKey || entry.part || "title";
   return (
-    '<section class="cover-text-group text-element-group" data-text-id="' +
+    '<section class="cover-text-group text-element-group" draggable="true" data-drag-kind="text-element" data-text-id="' +
     TPP.esc(entry.id || "") +
     '" data-location="' +
     TPP.esc(spec.location) +
     '">' +
-    '<div class="toolbar"><strong>' +
+    '<div class="toolbar"><strong><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span>' +
     TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
-    '</strong><span><button type="button" class="small" data-text-action="up">↑</button><button type="button" class="small" data-text-action="down">↓</button><button type="button" class="small" data-text-action="remove">Remove</button></span></div>' +
+    '</strong><span><button type="button" class="small" data-text-action="remove">Remove</button></span></div>' +
     '<label>Content<select class="text-field-key">' +
     TPP.textElementFieldOptionsHtml(fieldKey) +
     "</select></label>" +
@@ -388,11 +388,11 @@ TPP.copyrightPageItemsHtml = function (book) {
       .map(function (item) {
         const fieldKey = item.fieldKey || "copyright";
         return (
-          '<section class="cover-text-group copyright-item-group" data-item-id="' +
+          '<section class="cover-text-group copyright-item-group" draggable="true" data-drag-kind="copyright-item" data-item-id="' +
           TPP.esc(item.id || "") +
-          '"><div class="toolbar"><strong>' +
+          '"><div class="toolbar"><strong><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span>' +
           TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
-          '</strong><span><button type="button" class="small" data-copyright-action="up">↑</button><button type="button" class="small" data-copyright-action="down">↓</button><button type="button" class="small" data-copyright-action="remove">Remove</button></span></div><label>Field<select class="copyright-field-key">' +
+          '</strong><span><button type="button" class="small" data-copyright-action="remove">Remove</button></span></div><label>Field<select class="copyright-field-key">' +
           TPP.textElementFieldOptionsHtml(fieldKey) +
           "</select></label>" +
           (fieldKey === "custom"
@@ -459,6 +459,29 @@ TPP.readTextElementControls = function (book) {
       Number(group.querySelector(".text-outline-size")?.value) || 0,
     );
   });
+  const orderedTextIds = groups
+    .map(function (group) {
+      return group.dataset.textId || "";
+    })
+    .filter(Boolean);
+  if (orderedTextIds.length && Array.isArray(book.textElements)) {
+    const byId = new Map(
+      book.textElements.map(function (entry) {
+        return [entry && entry.id, entry];
+      }),
+    );
+    const ordered = orderedTextIds
+      .map(function (id) {
+        return byId.get(id) || null;
+      })
+      .filter(Boolean);
+    const seen = new Set(ordered.map(function (entry) { return entry.id; }));
+    book.textElements = ordered.concat(
+      book.textElements.filter(function (entry) {
+        return entry && !seen.has(entry.id);
+      }),
+    );
+  }
   const copyrightItems = Array.from(
     document.querySelectorAll(".copyright-item-group"),
   );

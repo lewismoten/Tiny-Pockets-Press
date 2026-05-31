@@ -1,4 +1,17 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  const transparentDragImage = document.createElement("img");
+  transparentDragImage.alt = "";
+  transparentDragImage.setAttribute("aria-hidden", "true");
+  transparentDragImage.src =
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+  transparentDragImage.style.position = "fixed";
+  transparentDragImage.style.left = "-9999px";
+  transparentDragImage.style.top = "-9999px";
+  transparentDragImage.style.width = "1px";
+  transparentDragImage.style.height = "1px";
+  transparentDragImage.style.pointerEvents = "none";
+  document.body.appendChild(transparentDragImage);
+
   TPP.populate();
   await TPP.load();
   await TPP.loadStaleKeyLookup();
@@ -96,6 +109,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
   const controls = document.querySelector(".controls");
   if (controls) {
+    let dragState = null;
+    let dragHandleArmedId = "";
     controls.addEventListener("input", function (e) {
       const bookInfoEntry = e.target.closest(".book-info-entry");
       if (
@@ -152,10 +167,6 @@ document.addEventListener("DOMContentLoaded", async function () {
           TPP.addTextElement(TPP.active, textButton.dataset.location);
         if (action === "remove" && group)
           TPP.removeTextElement(TPP.active, group.dataset.textId);
-        if (action === "up" && group)
-          TPP.moveTextElement(TPP.active, group.dataset.textId, -1);
-        if (action === "down" && group)
-          TPP.moveTextElement(TPP.active, group.dataset.textId, 1);
         TPP.save();
         TPP.renderAll();
         return;
@@ -184,13 +195,73 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (action === "add") TPP.addCopyrightPageItem(TPP.active);
         if (action === "remove" && group)
           TPP.removeCopyrightPageItem(TPP.active, group.dataset.itemId);
-        if (action === "up" && group)
-          TPP.moveCopyrightPageItem(TPP.active, group.dataset.itemId, -1);
-        if (action === "down" && group)
-          TPP.moveCopyrightPageItem(TPP.active, group.dataset.itemId, 1);
         TPP.save();
         TPP.renderAll();
+        return;
       }
+    });
+    controls.addEventListener("mousedown", function (e) {
+      const handle = e.target.closest("[data-drag-handle]");
+      if (!handle) {
+        dragHandleArmedId = "";
+        return;
+      }
+      const item = handle.closest("[data-drag-kind]");
+      dragHandleArmedId =
+        (item && (item.dataset.textId || item.dataset.itemId)) || "";
+    });
+    controls.addEventListener("dragstart", function (e) {
+      const item = e.target.closest("[data-drag-kind]");
+      const itemId = item && (item.dataset.textId || item.dataset.itemId || "");
+      if (!item || !itemId || itemId !== dragHandleArmedId) {
+        e.preventDefault();
+        return;
+      }
+      dragState = {
+        kind: item.dataset.dragKind,
+        location: item.dataset.location || "",
+        itemId: item.dataset.textId || item.dataset.itemId || "",
+      };
+      item.classList.add("is-dragging");
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", dragState.itemId);
+        e.dataTransfer.setDragImage(transparentDragImage, 0, 0);
+      }
+    });
+    controls.addEventListener("dragover", function (e) {
+      if (!dragState) return;
+      const target = e.target.closest("[data-drag-kind]");
+      if (!target || target.classList.contains("is-dragging")) return;
+      const sameKind = target.dataset.dragKind === dragState.kind;
+      const sameLocation =
+        dragState.kind !== "text-element" ||
+        (target.dataset.location || "") === dragState.location;
+      if (!sameKind || !sameLocation) return;
+      e.preventDefault();
+      const rect = target.getBoundingClientRect();
+      const before = e.clientY < rect.top + rect.height / 2;
+      const parent = target.parentNode;
+      if (!parent) return;
+      const dragging = controls.querySelector(".is-dragging");
+      if (!dragging || dragging === target) return;
+      parent.insertBefore(dragging, before ? target : target.nextSibling);
+    });
+    controls.addEventListener("drop", function (e) {
+      if (!dragState) return;
+      const dragging = controls.querySelector(".is-dragging");
+      if (!dragging) return;
+      e.preventDefault();
+      dragging.classList.remove("is-dragging");
+      TPP.sync("commit");
+      TPP.renderAll();
+      dragState = null;
+    });
+    controls.addEventListener("dragend", function () {
+      const dragging = controls.querySelector(".is-dragging");
+      if (dragging) dragging.classList.remove("is-dragging");
+      dragState = null;
+      dragHandleArmedId = "";
     });
   }
   const frontCoverFieldDialog = document.getElementById("frontCoverFieldDialog");

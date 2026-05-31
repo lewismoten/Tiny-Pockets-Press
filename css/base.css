@@ -891,6 +891,21 @@ input[type="checkbox"] {
 .book-info-table thead th:last-child {
   color: transparent;
 }
+.drag-handle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  margin-right: 0.35rem;
+  color: var(--muted);
+  cursor: grab;
+  user-select: none;
+}
+.is-dragging {
+  background: #fff8e8;
+  box-shadow: inset 0 0 0 1px #ead9ba;
+}
 .front-cover-text-table {
   table-layout: fixed;
   font-size: 0.82rem;
@@ -909,6 +924,9 @@ input[type="checkbox"] {
 .front-cover-text-table td:nth-child(1) {
   width: 26%;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .front-cover-text-table td:nth-child(2) {
   width: 12%;
@@ -946,6 +964,17 @@ input[type="checkbox"] {
 .front-cover-text-actions .small {
   padding: 0.18rem 0.3rem;
   border-radius: 8px;
+}
+.cover-text-group .toolbar strong {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.front-cover-text-table td:nth-child(1) .drag-handle {
+  vertical-align: middle;
 }
 .front-cover-text-layout #openFrontCoverFieldPicker {
   justify-self: start;
