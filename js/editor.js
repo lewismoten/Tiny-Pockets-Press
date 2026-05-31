@@ -266,9 +266,6 @@ TPP.frontCoverTextRowHtml = function (book, element) {
     "<td>" +
     TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
     "</td>" +
-    '<td><input class="text-enabled" type="checkbox" ' +
-    (entry.enabled !== false ? "checked" : "") +
-    "></td>" +
     '<td><input class="text-size" type="number" min="3" step=".5" value="' +
     TPP.esc(String(Number(entry.size) || 4.2)) +
     '"></td>' +
@@ -290,7 +287,7 @@ TPP.frontCoverTextRowHtml = function (book, element) {
 };
 TPP.frontCoverTextListHtml = function (book, spec) {
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><thead><tr><th>Field</th><th>Show</th><th>Size</th><th>Y</th><th>Color</th><th>Outline</th><th>Px</th><th></th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><thead><tr><th>Field</th><th>Size</th><th>Y</th><th>Color</th><th>Outline</th><th>Px</th><th></th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, spec.location)
       .map(function (element) {
         return TPP.frontCoverTextRowHtml(book, element);
@@ -316,9 +313,6 @@ TPP.textElementGroupHtml = function (book, spec, element) {
     '<label>Content<select class="text-field-key">' +
     TPP.textElementFieldOptionsHtml(fieldKey) +
     "</select></label>" +
-    '<label><input class="text-enabled" type="checkbox" ' +
-    (entry.enabled !== false ? "checked" : "") +
-    "> Show this text</label>" +
     (fieldKey === "custom"
       ? '<label>Custom Text<textarea class="text-custom" rows="3">' +
         TPP.esc(entry.customText || "") +
@@ -440,7 +434,7 @@ TPP.readTextElementControls = function (book) {
     if (group.querySelector(".text-field-key")) {
       element.fieldKey = group.querySelector(".text-field-key").value || "title";
     }
-    element.enabled = group.querySelector(".text-enabled")?.checked !== false;
+    element.enabled = true;
     if (group.querySelector(".text-custom"))
       element.customText = group.querySelector(".text-custom").value || "";
     element.size =

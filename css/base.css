@@ -907,27 +907,23 @@ input[type="checkbox"] {
   vertical-align: middle;
 }
 .front-cover-text-table td:nth-child(1) {
-  width: 22%;
+  width: 26%;
   font-weight: 700;
 }
 .front-cover-text-table td:nth-child(2) {
-  width: 8%;
-  text-align: center;
+  width: 12%;
 }
 .front-cover-text-table td:nth-child(3) {
-  width: 11%;
+  width: 22%;
 }
 .front-cover-text-table td:nth-child(4) {
-  width: 19%;
+  width: 12%;
 }
 .front-cover-text-table td:nth-child(5),
 .front-cover-text-table td:nth-child(6) {
   width: 10%;
 }
 .front-cover-text-table td:nth-child(7) {
-  width: 8%;
-}
-.front-cover-text-table td:nth-child(8) {
   width: 12%;
 }
 .front-cover-text-table input {
