@@ -36,7 +36,7 @@ TPP.bookInfoFieldInputHtml = function (entry) {
       (spec.options || [])
         .map(function (option) {
           return (
-            '<option' +
+            "<option" +
             (option === value ? " selected" : "") +
             ">" +
             TPP.esc(option) +
@@ -69,7 +69,9 @@ TPP.bookInfoEntryEditorHtml = function (entry) {
         TPP.esc(entry.customLabel || "") +
         '" placeholder="Custom field">'
       : '<span class="book-info-field-label">' +
-        TPP.esc(TPP.bookInfoFieldLabel(TPP.bookInfoFieldRef(entry), TPP.active)) +
+        TPP.esc(
+          TPP.bookInfoFieldLabel(TPP.bookInfoFieldRef(entry), TPP.active),
+        ) +
         "</span>") +
     "</td>" +
     '<td class="book-info-value-cell">' +
@@ -90,9 +92,7 @@ TPP.renderBookInfoControls = function () {
     container.className = "book-info-table-wrap";
     container.innerHTML =
       '<table class="data-table book-info-table"><colgroup><col class="book-info-col-field"><col class="book-info-col-value"><col class="book-info-col-action"></colgroup><thead><tr><th>Field</th><th>Value</th><th></th></tr></thead><tbody>' +
-      TPP.bookInfo(TPP.active)
-        .map(TPP.bookInfoEntryEditorHtml)
-        .join("") +
+      TPP.bookInfo(TPP.active).map(TPP.bookInfoEntryEditorHtml).join("") +
       "</tbody></table>";
   }
   if (select) {
@@ -124,8 +124,7 @@ TPP.readBookInfoControls = function (book) {
         id: entry.id,
         key: entry.key,
         value: row.querySelector(".book-info-value")?.value || "",
-        customLabel:
-          row.querySelector(".book-info-custom-label")?.value || "",
+        customLabel: row.querySelector(".book-info-custom-label")?.value || "",
       };
     })
     .filter(Boolean);
@@ -429,7 +428,8 @@ TPP.readTextElementControls = function (book) {
     });
     if (!element) return;
     if (group.querySelector(".text-field-key")) {
-      element.fieldKey = group.querySelector(".text-field-key").value || "title";
+      element.fieldKey =
+        group.querySelector(".text-field-key").value || "title";
     }
     element.enabled = true;
     if (group.querySelector(".text-custom"))
@@ -472,7 +472,11 @@ TPP.readTextElementControls = function (book) {
         return byId.get(id) || null;
       })
       .filter(Boolean);
-    const seen = new Set(ordered.map(function (entry) { return entry.id; }));
+    const seen = new Set(
+      ordered.map(function (entry) {
+        return entry.id;
+      }),
+    );
     book.textElements = ordered.concat(
       book.textElements.filter(function (entry) {
         return entry && !seen.has(entry.id);
@@ -529,7 +533,9 @@ TPP.addTextElement = function (book, location, fieldKey) {
   else book.textElements.splice(lastIndex + 1, 0, element);
 };
 TPP.moveTextElement = function (book, id, direction) {
-  const list = Array.isArray(book && book.textElements) ? book.textElements : [];
+  const list = Array.isArray(book && book.textElements)
+    ? book.textElements
+    : [];
   const index = list.findIndex(function (entry) {
     return entry && entry.id === id;
   });
@@ -542,7 +548,8 @@ TPP.moveTextElement = function (book, id, direction) {
     return entry && entry.id === id;
   });
   const nextLocal = localIndex + direction;
-  if (localIndex < 0 || nextLocal < 0 || nextLocal >= sameLocation.length) return;
+  if (localIndex < 0 || nextLocal < 0 || nextLocal >= sameLocation.length)
+    return;
   const before = sameLocation[nextLocal];
   const targetIndex = list.findIndex(function (entry) {
     return entry && entry.id === before.id;

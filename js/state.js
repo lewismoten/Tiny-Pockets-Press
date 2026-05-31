@@ -1300,7 +1300,11 @@ TPP.chapterSettingsInfo = function (book) {
   if (!book || typeof book !== "object") return {};
   const fallback =
     (TPP.fallbackBook && TPP.fallbackBook().chapterSettings) || {};
-  book.chapterSettings = Object.assign({}, fallback, book.chapterSettings || {});
+  book.chapterSettings = Object.assign(
+    {},
+    fallback,
+    book.chapterSettings || {},
+  );
   return book.chapterSettings;
 };
 TPP.attachChapterSettingsAccessors = function (book) {
@@ -1335,7 +1339,11 @@ TPP.syncChapterSettingsFromLegacyFields = function (book) {
   });
 };
 TPP.compactChapterSettingsInfo = function (book) {
-  if (!book || !book.chapterSettings || typeof book.chapterSettings !== "object")
+  if (
+    !book ||
+    !book.chapterSettings ||
+    typeof book.chapterSettings !== "object"
+  )
     return;
   TPP.CHAPTER_SETTINGS_FIELDS.forEach(function (field) {
     const descriptor = Object.getOwnPropertyDescriptor(book, field);
@@ -3068,7 +3076,9 @@ TPP.textElementKey = function (location, part) {
   return String(location || "") + ":" + String(part || "");
 };
 TPP.textElementsForLocation = function (book, location) {
-  const list = Array.isArray(book && book.textElements) ? book.textElements : [];
+  const list = Array.isArray(book && book.textElements)
+    ? book.textElements
+    : [];
   return list.filter(function (entry) {
     return entry && entry.location === location;
   });
@@ -3375,7 +3385,10 @@ TPP.bookInfoFieldOptions = function (book, options) {
   if (includeInlineCustom) {
     list.push({ value: "custom", label: "Custom Text" });
   }
-  if (TPP.bookInfoValue(book, "seriesName") || TPP.bookInfoValue(book, "number"))
+  if (
+    TPP.bookInfoValue(book, "seriesName") ||
+    TPP.bookInfoValue(book, "number")
+  )
     list.push({ value: "series", label: "Series / Number" });
   return list;
 };
@@ -3405,7 +3418,10 @@ TPP.bookInfoFieldValue = function (book, fieldKey, options) {
     return String((entry && entry.value) || "");
   }
   if (fieldKey === "series")
-    return [TPP.bookInfoValue(book, "seriesName"), TPP.bookInfoValue(book, "number")]
+    return [
+      TPP.bookInfoValue(book, "seriesName"),
+      TPP.bookInfoValue(book, "number"),
+    ]
       .filter(Boolean)
       .join(" ");
   if (fieldKey === "author")

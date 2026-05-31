@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async function () {
               TPP.esc(option.value) +
               '"><span><strong>' +
               TPP.esc(option.label) +
-              '</strong><p>' +
+              "</strong><p>" +
               TPP.esc(preview || "Empty value") +
               "</p></span><span>Add</span></button>"
             );
@@ -127,12 +127,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const bookInfoEntry = e.target.closest(".book-info-entry");
       const textElementEntry = e.target.closest(".text-element-group");
       const copyrightItem = e.target.closest(".copyright-item-group");
-      if (
-        !bookInfoEntry &&
-        !textElementEntry &&
-        !copyrightItem
-      )
-        return;
+      if (!bookInfoEntry && !textElementEntry && !copyrightItem) return;
       TPP.sync("draft");
       if (bookInfoEntry) {
         renderCurrentViewPreservingSidebar();
@@ -162,12 +157,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const bookInfoEntry = e.target.closest(".book-info-entry");
       const textElementEntry = e.target.closest(".text-element-group");
       const copyrightItem = e.target.closest(".copyright-item-group");
-      if (
-        !bookInfoEntry &&
-        !textElementEntry &&
-        !copyrightItem
-      )
-        return;
+      if (!bookInfoEntry && !textElementEntry && !copyrightItem) return;
       TPP.sync("commit");
       if (bookInfoEntry) {
         renderCurrentViewPreservingSidebar();
@@ -207,7 +197,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.renderAll();
         return;
       }
-      const openFrontCoverPicker = e.target.closest("#openFrontCoverFieldPicker");
+      const openFrontCoverPicker = e.target.closest(
+        "#openFrontCoverFieldPicker",
+      );
       if (openFrontCoverPicker) {
         TPP.sync("nosave");
         TPP.openFrontCoverFieldDialog();
@@ -334,11 +326,17 @@ document.addEventListener("DOMContentLoaded", async function () {
       dragHandleArmedId = "";
     });
   }
-  const frontCoverFieldDialog = document.getElementById("frontCoverFieldDialog");
+  const frontCoverFieldDialog = document.getElementById(
+    "frontCoverFieldDialog",
+  );
   if (frontCoverFieldDialog) {
     frontCoverFieldDialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");
-      if (e.target === frontCoverFieldDialog && !card && frontCoverFieldDialog.open) {
+      if (
+        e.target === frontCoverFieldDialog &&
+        !card &&
+        frontCoverFieldDialog.open
+      ) {
         frontCoverFieldDialog.close("cancel");
         return;
       }

@@ -72,12 +72,9 @@ TPP.settings = function () {
     pageNumLeft: TPP.pageNumberInfo(book).pageNumLeft,
     pageNumRight: TPP.pageNumberInfo(book).pageNumRight,
     ornamentBySide: TPP.pageNumberInfo(book).ornamentBySide,
-    reverseOrnamentsBySide:
-      TPP.pageNumberInfo(book).reverseOrnamentsBySide,
-    chapterEndOrnament:
-      TPP.chapterSettingsInfo(book).chapterEndOrnament,
-    chapterEndCentered:
-      TPP.chapterSettingsInfo(book).chapterEndCentered,
+    reverseOrnamentsBySide: TPP.pageNumberInfo(book).reverseOrnamentsBySide,
+    chapterEndOrnament: TPP.chapterSettingsInfo(book).chapterEndOrnament,
+    chapterEndCentered: TPP.chapterSettingsInfo(book).chapterEndCentered,
     coverOverflowImage: TPP.coverFrontInfo(book).overflowImage,
     coverClipImageToFrame: TPP.coverFrontInfo(book).clipImageToFrame,
     coverBg1: TPP.coverFrontInfo(book).bg1,
@@ -355,9 +352,10 @@ TPP.buildPages = function () {
       "</div>",
   );
   if (settings.copyrightPageEnabled) {
-    const copyrightLines = (Array.isArray(settings.copyrightPageItems)
-      ? settings.copyrightPageItems
-      : []
+    const copyrightLines = (
+      Array.isArray(settings.copyrightPageItems)
+        ? settings.copyrightPageItems
+        : []
     )
       .map(function (item) {
         return TPP.copyrightPageItemText(settings, item, {

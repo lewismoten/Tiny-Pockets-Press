@@ -627,12 +627,7 @@ TPP.dataSchemaKeys = function (context) {
     ]);
   if (context === "spine") return new Set(["imageElementId"]);
   if (context === "bookInfo")
-    return new Set([
-      "id",
-      "key",
-      "value",
-      "customLabel",
-    ]);
+    return new Set(["id", "key", "value", "customLabel"]);
   if (context === "toc")
     return new Set([
       "enabled",
@@ -974,17 +969,17 @@ TPP.dataValueHtml = function (book, key, value, compact) {
                     ? "chapterSettings"
                     : key === "copyrightPage"
                       ? "copyrightPage"
-              : key === "coverFront"
-                ? "coverFront"
-                : key === "backCover"
-                  ? "backCover"
-                  : key === "spine"
-                    ? "spine"
-                    : key === "bookInfo"
-                      ? "bookInfo"
-                      : key === "toc"
-                        ? "toc"
-                        : null,
+                      : key === "coverFront"
+                        ? "coverFront"
+                        : key === "backCover"
+                          ? "backCover"
+                          : key === "spine"
+                            ? "spine"
+                            : key === "bookInfo"
+                              ? "bookInfo"
+                              : key === "toc"
+                                ? "toc"
+                                : null,
     );
   return TPP.dataPrimitiveHtml(book, key, value);
 };
@@ -1351,7 +1346,9 @@ TPP.dataTabs = function (book, stale) {
       label: "Printing",
       html: TPP.dataObjectHtml(
         book,
-        book && book.printSetup ? book.printSetup : TPP.dataPrintingObject(book),
+        book && book.printSetup
+          ? book.printSetup
+          : TPP.dataPrintingObject(book),
         false,
         "printing",
       ),
