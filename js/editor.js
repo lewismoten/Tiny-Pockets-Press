@@ -730,6 +730,7 @@ TPP.loadForm = function () {
     document.getElementById("pageSize").value !== "custom";
   if (TPP.renderBookInfoControls) TPP.renderBookInfoControls();
   if (TPP.renderTextElementControls) TPP.renderTextElementControls();
+  if (TPP.renderColorPalettes) TPP.renderColorPalettes();
   TPP.renderChapterList();
   TPP.renderChapterEditor();
   if (TPP.refreshAssetSlots) TPP.refreshAssetSlots();

@@ -42,6 +42,119 @@ document.addEventListener("DOMContentLoaded", async function () {
     else if (TPP.view === "cover") TPP.renderCover();
     else if (TPP.view === "reader") TPP.renderReader();
     else if (TPP.view === "library") TPP.renderLibrary();
+    if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+  };
+  TPP.normalizeHexColor = function (value) {
+    const text = String(value || "").trim();
+    const match = text.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (!match) return "";
+    const hex = match[1].toLowerCase();
+    if (hex.length === 3) {
+      return (
+        "#" +
+        hex
+          .split("")
+          .map(function (part) {
+            return part + part;
+          })
+          .join("")
+      );
+    }
+    return "#" + hex;
+  };
+  TPP.collectUsedColors = function (book) {
+    const found = [];
+    const seenColors = new Set();
+    const seenObjects = new Set();
+    const pushColor = function (value) {
+      const normalized = TPP.normalizeHexColor(value);
+      if (!normalized || seenColors.has(normalized)) return;
+      seenColors.add(normalized);
+      found.push(normalized);
+    };
+    const visit = function (value) {
+      if (!value) return;
+      if (typeof value === "string") {
+        pushColor(value);
+        return;
+      }
+      if (typeof value !== "object") return;
+      if (seenObjects.has(value)) return;
+      seenObjects.add(value);
+      if (Array.isArray(value)) {
+        value.forEach(visit);
+        return;
+      }
+      Object.keys(value).forEach(function (key) {
+        visit(value[key]);
+      });
+    };
+    visit(book);
+    document
+      .querySelectorAll('.controls input[type="color"]')
+      .forEach(function (input) {
+        pushColor(input.value);
+      });
+    return found;
+  };
+  TPP.ensureColorPaletteId = function (input) {
+    if (!input) return "";
+    if (!input.dataset.colorPaletteId)
+      input.dataset.colorPaletteId = "color-" + TPP.uid();
+    return input.dataset.colorPaletteId;
+  };
+  TPP.colorPaletteHost = function (input) {
+    if (!input) return null;
+    if (input.closest(".front-cover-text-outline-cell"))
+      return input.closest("td") || input.parentElement;
+    return input.parentElement;
+  };
+  TPP.renderColorPalettes = function () {
+    const controlsRoot = document.querySelector(".controls");
+    if (!controlsRoot) return;
+    const colors = TPP.collectUsedColors(TPP.active);
+    controlsRoot
+      .querySelectorAll('input[type="color"]')
+      .forEach(function (input) {
+        const host = TPP.colorPaletteHost(input);
+        if (!host) return;
+        const paletteId = TPP.ensureColorPaletteId(input);
+        const current = TPP.normalizeHexColor(input.value);
+        const paletteColors = current && !colors.includes(current)
+          ? [current].concat(colors)
+          : colors.slice();
+        let palette = host.querySelector(
+          '.color-palette[data-for="' + paletteId + '"]',
+        );
+        if (!palette) {
+          palette = document.createElement("div");
+          palette.className = "color-palette";
+          palette.dataset.for = paletteId;
+          host.appendChild(palette);
+        }
+        palette.innerHTML =
+          '<div class="color-palette-label">Used colors</div><div class="color-palette-swatches">' +
+          paletteColors
+            .map(function (color) {
+              return (
+                '<button type="button" class="color-palette-swatch' +
+                (color === current ? " is-active" : "") +
+                '" data-color-swatch="' +
+                color +
+                '" data-color-target="' +
+                paletteId +
+                '" title="' +
+                color +
+                '" aria-label="Use color ' +
+                color +
+                '" style="--swatch:' +
+                color +
+                '"></button>'
+              );
+            })
+            .join("") +
+          "</div>";
+      });
   };
   TPP.renderFrontCoverFieldDialog = function () {
     const list = document.getElementById("frontCoverFieldDialogList");
@@ -184,6 +297,18 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.renderAll();
     });
     controls.addEventListener("click", function (e) {
+      const colorSwatch = e.target.closest("[data-color-swatch]");
+      if (colorSwatch) {
+        const input = controls.querySelector(
+          '[data-color-palette-id="' + colorSwatch.dataset.colorTarget + '"]',
+        );
+        if (input) {
+          input.value = colorSwatch.dataset.colorSwatch || input.value;
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        return;
+      }
       const textButton = e.target.closest("[data-text-action]");
       if (textButton) {
         TPP.sync("nosave");
@@ -2706,6 +2831,7 @@ TPP.renderAll = function () {
   if (TPP.view === "cover") TPP.renderCover();
   if (TPP.view === "reader") TPP.renderReader();
   if (TPP.view === "library") TPP.renderLibrary();
+  if (TPP.renderColorPalettes) TPP.renderColorPalettes();
 };
 TPP.readerDuplexSheets = function (pages, signatureSize) {
   return TPP.signaturePlan(pages, signatureSize).flatMap(function (signature) {
