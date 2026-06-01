@@ -4487,9 +4487,9 @@
   ],
   "defaultRecommendedFormat": "code-short-author",
   "license": {
-    "name": "CC BY 4.0",
-    "url": "https://creativecommons.org/licenses/by/4.0/",
-    "summary": "You may use, adapt, and redistribute Tiny Shelf Classification with attribution."
+    "name": "CC0 1.0",
+    "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "summary": "Tiny Shelf Classification is dedicated to the public domain. Attribution is appreciated but not required."
   },
   "profiles": [
     {
