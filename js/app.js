@@ -3296,11 +3296,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         (dragState.location === "front" || dragState.location === "back")
       ) {
         e.preventDefault();
+        const dragging = controls.querySelector(".is-dragging");
+        if (dragging) dragging.classList.remove("is-dragging");
         TPP.sync("nosave");
         TPP.removeTextElement(TPP.active, dragState.itemId);
         TPP.save();
         setTextTrashVisibility(dragState.location, false);
-        TPP.renderAll();
+        if (TPP.renderTextElementControls) TPP.renderTextElementControls();
+        renderCurrentViewPreservingSidebar();
         dragState = null;
         return;
       }
