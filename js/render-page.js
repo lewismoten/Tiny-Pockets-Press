@@ -266,6 +266,8 @@ TPP.pageEl = function (page, settings, x, y, rotate, staticMode, size) {
   element.style.top = staticMode ? "0" : y + "in";
   element.style.width = width + "in";
   element.style.height = height + "in";
+  element.dataset.pageType = String(page.type || "");
+  if (page.role) element.dataset.pageRole = String(page.role);
   TPP.applyVars(element, settings);
   if (rotate && !staticMode) {
     element.style.transformOrigin = "top left";

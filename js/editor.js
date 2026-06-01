@@ -599,42 +599,69 @@ TPP.renderTextElementControls = function () {
     copyright.innerHTML = TPP.copyrightPageItemsHtml(TPP.active);
   }
 };
+TPP.readSingleTextElementGroup = function (book, group) {
+  if (!book || !group) return;
+  const element = (book.textElements || []).find(function (entry) {
+    return entry && entry.id === group.dataset.textId;
+  });
+  if (!element) return;
+  if (group.querySelector(".text-field-key")) {
+    element.fieldKey = group.querySelector(".text-field-key").value || "title";
+  }
+  element.enabled = true;
+  if (group.querySelector(".text-custom")) {
+    element.customText = group.querySelector(".text-custom").value || "";
+  }
+  element.size =
+    Number(group.querySelector(".text-size")?.value) || element.size || 4;
+  element.y = Number(group.querySelector(".text-y")?.value) || 0;
+  if (group.querySelector(".text-x")) {
+    element.x = Number(group.querySelector(".text-x").value) || 50;
+  }
+  if (group.querySelector(".text-width")) {
+    element.width = Math.max(
+      10,
+      Math.min(100, Number(group.querySelector(".text-width").value) || 100),
+    );
+  }
+  if (group.querySelector(".text-align")) {
+    element.align = group.querySelector(".text-align").value || "left";
+  }
+  if (group.querySelector(".text-rotate")) {
+    element.rotate = group.querySelector(".text-rotate").checked;
+  }
+  element.color = group.querySelector(".text-color")?.value || element.color;
+  element.outlineColor =
+    group.querySelector(".text-outline-color")?.value || element.outlineColor;
+  element.outlineSize = Math.max(
+    0,
+    Number(group.querySelector(".text-outline-size")?.value) || 0,
+  );
+};
+TPP.readSingleCopyrightItemGroup = function (book, group) {
+  if (!book || !group) return;
+  const info = TPP.copyrightPageInfo(book);
+  info.items = Array.isArray(info.items) ? info.items : [];
+  const existing = info.items.find(function (item) {
+    return item && item.id === group.dataset.itemId;
+  });
+  const next = {
+    id: (existing && existing.id) || group.dataset.itemId || TPP.uid(),
+    fieldKey: group.querySelector(".copyright-field-key")?.value || "copyright",
+    customText: group.querySelector(".copyright-custom")?.value || "",
+  };
+  if (!existing) {
+    info.items.push(next);
+    return;
+  }
+  existing.fieldKey = next.fieldKey;
+  existing.customText = next.customText;
+};
 TPP.readTextElementControls = function (book) {
   const groups = Array.from(document.querySelectorAll(".text-element-group"));
   if (!groups.length || !book) return;
   groups.forEach(function (group) {
-    const element = (book.textElements || []).find(function (entry) {
-      return entry && entry.id === group.dataset.textId;
-    });
-    if (!element) return;
-    if (group.querySelector(".text-field-key")) {
-      element.fieldKey =
-        group.querySelector(".text-field-key").value || "title";
-    }
-    element.enabled = true;
-    if (group.querySelector(".text-custom"))
-      element.customText = group.querySelector(".text-custom").value || "";
-    element.size =
-      Number(group.querySelector(".text-size")?.value) || element.size || 4;
-    element.y = Number(group.querySelector(".text-y")?.value) || 0;
-    if (group.querySelector(".text-x"))
-      element.x = Number(group.querySelector(".text-x").value) || 50;
-    if (group.querySelector(".text-width"))
-      element.width = Math.max(
-        10,
-        Math.min(100, Number(group.querySelector(".text-width").value) || 100),
-      );
-    if (group.querySelector(".text-align"))
-      element.align = group.querySelector(".text-align").value || "left";
-    if (group.querySelector(".text-rotate"))
-      element.rotate = group.querySelector(".text-rotate").checked;
-    element.color = group.querySelector(".text-color")?.value || element.color;
-    element.outlineColor =
-      group.querySelector(".text-outline-color")?.value || element.outlineColor;
-    element.outlineSize = Math.max(
-      0,
-      Number(group.querySelector(".text-outline-size")?.value) || 0,
-    );
+    TPP.readSingleTextElementGroup(book, group);
   });
   const orderedTextIds = groups
     .map(function (group) {
@@ -667,18 +694,9 @@ TPP.readTextElementControls = function (book) {
     document.querySelectorAll(".copyright-item-group"),
   );
   if (copyrightItems.length) {
-    TPP.copyrightPageInfo(book).items = copyrightItems.map(function (group) {
-      const existing = (TPP.copyrightPageInfo(book).items || []).find(
-        function (item) {
-          return item && item.id === group.dataset.itemId;
-        },
-      );
-      return {
-        id: (existing && existing.id) || group.dataset.itemId || TPP.uid(),
-        fieldKey:
-          group.querySelector(".copyright-field-key")?.value || "copyright",
-        customText: group.querySelector(".copyright-custom")?.value || "",
-      };
+    TPP.copyrightPageInfo(book).items = [];
+    copyrightItems.forEach(function (group) {
+      TPP.readSingleCopyrightItemGroup(book, group);
     });
   }
   if (TPP.syncLegacyTextFieldsFromElements)

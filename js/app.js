@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     query: "",
     activeIndex: -1,
   };
+  TPP.readerVisiblePageRoles = [];
   TPP.defaultClassificationFormatId = function () {
     const system = TPP.classificationSystem();
     const configuredDefault = String(
@@ -2135,6 +2136,212 @@ document.addEventListener("DOMContentLoaded", async function () {
     else if (TPP.view === "library") TPP.renderLibrary();
     if (TPP.renderColorPalettes) TPP.renderColorPalettes();
   };
+  TPP.patchCoverPreviewSurface = function (location) {
+    const side = location === "back" ? "back" : "front";
+    const preview = document.getElementById("coverPreview");
+    if (!preview || !TPP.active || TPP.view !== "cover") return false;
+    const selector = side === "back" ? ".page.back" : ".page.cover";
+    const pageNodes = Array.from(preview.querySelectorAll(selector));
+    if (!pageNodes.length || !TPP.coverHTML) return false;
+    pageNodes.forEach(function (pageNode) {
+      const inner = pageNode.querySelector(".page-inner");
+      if (inner) inner.innerHTML = TPP.coverHTML(TPP.active, side);
+    });
+    return pageNodes.some(function (pageNode) {
+      return !!pageNode.querySelector(".page-inner");
+    });
+  };
+  TPP.patchReaderPreviewSurface = function (location) {
+    const role = location === "back" ? "back" : "front";
+    const preview = document.getElementById("readerPreview");
+    if (
+      !preview ||
+      !TPP.active ||
+      TPP.view !== "reader" ||
+      !Array.isArray(TPP.readerVisiblePageRoles) ||
+      !TPP.readerVisiblePageRoles.includes(role) ||
+      !TPP.coverHTML
+    ) {
+      return false;
+    }
+    const selector =
+      role === "back"
+        ? '.page[data-page-role="back"]'
+        : '.page[data-page-role="front"]';
+    const pageNodes = Array.from(preview.querySelectorAll(selector));
+    if (!pageNodes.length) return false;
+    pageNodes.forEach(function (pageNode) {
+      const inner = pageNode.querySelector(".page-inner");
+      if (inner) inner.innerHTML = TPP.coverHTML(TPP.active, location);
+    });
+    return true;
+  };
+  TPP.patchVisibleCoverTextPreview = function (location) {
+    if (location !== "front" && location !== "back") return false;
+    if (TPP.view === "cover") return TPP.patchCoverPreviewSurface(location);
+    if (TPP.view === "reader") return TPP.patchReaderPreviewSurface(location);
+    return false;
+  };
+  TPP.coverImageFieldSpec = function (fieldId) {
+    const field = String(fieldId || "").trim();
+    const match = field.match(/^(cover|back|spine)Img(X|Y|Zoom|Rotate)$/);
+    if (!match) return null;
+    const locationMap = { cover: "front", back: "back", spine: "spine" };
+    const propertyMap = { X: "x", Y: "y", Zoom: "zoom", Rotate: "rotate" };
+    return {
+      location: locationMap[match[1]] || "",
+      property: propertyMap[match[2]] || "",
+    };
+  };
+  TPP.applyCoverImageFieldDraft = function (fieldId, element) {
+    const spec = TPP.coverImageFieldSpec(fieldId);
+    const book = TPP.active;
+    if (!spec || !book || !element) return false;
+    const imageElement = TPP.findImageElement(book, spec.location, "cover");
+    if (!imageElement) return false;
+    if (element.type === "checkbox") {
+      book[fieldId] = element.checked;
+    } else if (element.type === "number" || element.type === "range") {
+      book[fieldId] = Number(element.value);
+    } else {
+      book[fieldId] = element.value;
+    }
+    imageElement[spec.property] =
+      spec.property === "zoom" ||
+      spec.property === "x" ||
+      spec.property === "y" ||
+      spec.property === "rotate"
+        ? Number(book[fieldId]) || 0
+        : book[fieldId];
+    if (TPP.syncLegacyImageFieldsFromElements) {
+      TPP.syncLegacyImageFieldsFromElements(book);
+    }
+    return true;
+  };
+  let scheduledEditorRenderFrame = 0;
+  let scheduledEditorRenderTimer = 0;
+  let scheduledEditorRenderMode = "";
+  const editorRenderModeRank = function (mode) {
+    if (mode === "full") return 4;
+    if (mode === "preserve") return 3;
+    if (mode === "cover" || mode === "reader") return 2;
+    return 0;
+  };
+  const flushScheduledEditorRender = function () {
+    scheduledEditorRenderFrame = 0;
+    scheduledEditorRenderTimer = 0;
+    const mode = scheduledEditorRenderMode;
+    scheduledEditorRenderMode = "";
+    if (mode === "full") {
+      TPP.renderAll();
+      return;
+    }
+    if (mode === "cover") {
+      TPP.renderCover();
+      if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+      return;
+    }
+    if (mode === "reader") {
+      TPP.renderReader();
+      if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+      return;
+    }
+    if (mode === "preserve") {
+      renderCurrentViewPreservingSidebar();
+    }
+  };
+  const editorRenderActionForTarget = function (target) {
+    const textElementEntry = target && target.closest(".text-element-group");
+    if (textElementEntry) {
+      const location = String(textElementEntry.dataset.location || "").trim();
+      if (location === "front" || location === "back") {
+        if (TPP.view === "cover") return "cover";
+        if (TPP.view === "reader") {
+          const role = location === "front" ? "front" : "back";
+          return Array.isArray(TPP.readerVisiblePageRoles) &&
+            TPP.readerVisiblePageRoles.includes(role)
+            ? "reader"
+            : "none";
+        }
+        return "none";
+      }
+    }
+    return "preserve";
+  };
+  const scheduleEditorRender = function (mode, options) {
+    const targetMode =
+      mode === "full"
+        ? "full"
+        : mode === "cover"
+          ? "cover"
+          : mode === "reader"
+            ? "reader"
+            : mode === "none"
+              ? "none"
+              : "preserve";
+    const useDebounce = !!(options && options.debounce);
+    const debounceMs =
+      options && Number.isFinite(options.delay) ? Number(options.delay) : 48;
+    if (!scheduledEditorRenderMode) {
+      scheduledEditorRenderMode = targetMode;
+    } else if (targetMode === "none") {
+      // Keep the existing scheduled mode.
+    } else if (
+      scheduledEditorRenderMode !== targetMode &&
+      editorRenderModeRank(targetMode) ===
+        editorRenderModeRank(scheduledEditorRenderMode) &&
+      editorRenderModeRank(targetMode) > 0
+    ) {
+      scheduledEditorRenderMode = "preserve";
+    } else if (
+      editorRenderModeRank(targetMode) >
+      editorRenderModeRank(scheduledEditorRenderMode)
+    ) {
+      scheduledEditorRenderMode = targetMode;
+    }
+    if (scheduledEditorRenderMode === "none") return;
+    if (useDebounce) {
+      if (scheduledEditorRenderFrame) {
+        if (typeof window.cancelAnimationFrame === "function") {
+          window.cancelAnimationFrame(scheduledEditorRenderFrame);
+        } else {
+          window.clearTimeout(scheduledEditorRenderFrame);
+        }
+        scheduledEditorRenderFrame = 0;
+      }
+      if (scheduledEditorRenderTimer) {
+        window.clearTimeout(scheduledEditorRenderTimer);
+      }
+      scheduledEditorRenderTimer = window.setTimeout(function () {
+        if (typeof window.requestAnimationFrame === "function") {
+          scheduledEditorRenderFrame = window.requestAnimationFrame(
+            flushScheduledEditorRender,
+          );
+          return;
+        }
+        scheduledEditorRenderFrame = window.setTimeout(
+          flushScheduledEditorRender,
+          16,
+        );
+      }, debounceMs);
+      return;
+    }
+    if (scheduledEditorRenderTimer) {
+      window.clearTimeout(scheduledEditorRenderTimer);
+      scheduledEditorRenderTimer = 0;
+    }
+    if (scheduledEditorRenderFrame) return;
+    if (typeof window.requestAnimationFrame === "function") {
+      scheduledEditorRenderFrame = window.requestAnimationFrame(
+        flushScheduledEditorRender,
+      );
+      return;
+    }
+    scheduledEditorRenderFrame = window.setTimeout(
+      flushScheduledEditorRender,
+      16,
+    );
+  };
   TPP.normalizeHexColor = function (value) {
     const text = String(value || "").trim();
     const match = text.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -2481,6 +2688,27 @@ document.addEventListener("DOMContentLoaded", async function () {
     const el = document.getElementById(id);
     if (!el) return;
     el.oninput = function () {
+      if (
+        TPP.applyCoverImageFieldDraft &&
+        TPP.applyCoverImageFieldDraft(id, el)
+      ) {
+        if (TPP.scheduleDraftSave) {
+          TPP.scheduleDraftSave(TPP.bookId(TPP.active), 180);
+        } else {
+          TPP.save("draft", TPP.bookId(TPP.active));
+          TPP.scheduleRevisionCommit(TPP.bookId(TPP.active));
+        }
+        const imageSpec = TPP.coverImageFieldSpec(id);
+        if (imageSpec && TPP.patchVisibleCoverTextPreview(imageSpec.location)) {
+          if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+          return;
+        }
+        scheduleEditorRender(
+          imageSpec && imageSpec.location === "spine" ? "preserve" : "none",
+          { debounce: true, delay: 64 },
+        );
+        return;
+      }
       if (id === "paperPreset") {
         const p = TPP.papers[document.getElementById("paperPreset").value];
         document.getElementById("pageBg").value = p[1];
@@ -2493,6 +2721,21 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.renderAll();
     };
     el.onchange = function () {
+      if (
+        TPP.applyCoverImageFieldDraft &&
+        TPP.applyCoverImageFieldDraft(id, el)
+      ) {
+        TPP.save("commit", TPP.bookId(TPP.active));
+        const imageSpec = TPP.coverImageFieldSpec(id);
+        if (imageSpec && TPP.patchVisibleCoverTextPreview(imageSpec.location)) {
+          if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+          return;
+        }
+        scheduleEditorRender(
+          imageSpec && imageSpec.location === "spine" ? "preserve" : "none",
+        );
+        return;
+      }
       if (id === "paperPreset") {
         const p = TPP.papers[document.getElementById("paperPreset").value];
         document.getElementById("pageBg").value = p[1];
@@ -2540,9 +2783,35 @@ document.addEventListener("DOMContentLoaded", async function () {
       const textElementEntry = e.target.closest(".text-element-group");
       const copyrightItem = e.target.closest(".copyright-item-group");
       if (!bookInfoEntry && !textElementEntry && !copyrightItem) return;
-      TPP.sync("draft");
+      const draftRenderOptions = { debounce: true, delay: 64 };
+      const renderAction = editorRenderActionForTarget(e.target);
+      const textLocation = textElementEntry
+        ? String(textElementEntry.dataset.location || "").trim()
+        : "";
+      if (textElementEntry && TPP.readSingleTextElementGroup) {
+        TPP.readSingleTextElementGroup(TPP.active, textElementEntry);
+        if (TPP.syncLegacyTextFieldsFromElements) {
+          TPP.syncLegacyTextFieldsFromElements(TPP.active);
+        }
+        if (TPP.scheduleDraftSave) {
+          TPP.scheduleDraftSave(TPP.bookId(TPP.active), 180);
+        } else {
+          TPP.save("draft", TPP.bookId(TPP.active));
+          TPP.scheduleRevisionCommit(TPP.bookId(TPP.active));
+        }
+      } else if (copyrightItem && TPP.readSingleCopyrightItemGroup) {
+        TPP.readSingleCopyrightItemGroup(TPP.active, copyrightItem);
+        if (TPP.scheduleDraftSave) {
+          TPP.scheduleDraftSave(TPP.bookId(TPP.active), 180);
+        } else {
+          TPP.save("draft", TPP.bookId(TPP.active));
+          TPP.scheduleRevisionCommit(TPP.bookId(TPP.active));
+        }
+      } else {
+        TPP.sync("draft");
+      }
       if (bookInfoEntry) {
-        renderCurrentViewPreservingSidebar();
+        scheduleEditorRender("preserve", draftRenderOptions);
         return;
       }
       if (textElementEntry || copyrightItem) {
@@ -2552,7 +2821,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         ) {
           TPP.renderTextElementControls();
         }
-        renderCurrentViewPreservingSidebar();
+        if (TPP.patchVisibleCoverTextPreview(textLocation)) {
+          if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+          return;
+        }
+        scheduleEditorRender(renderAction, draftRenderOptions);
         return;
       }
       if (
@@ -2563,16 +2836,31 @@ document.addEventListener("DOMContentLoaded", async function () {
       ) {
         TPP.renderTextElementControls();
       }
-      TPP.renderAll();
+      scheduleEditorRender("full", draftRenderOptions);
     });
     controls.addEventListener("change", function (e) {
       const bookInfoEntry = e.target.closest(".book-info-entry");
       const textElementEntry = e.target.closest(".text-element-group");
       const copyrightItem = e.target.closest(".copyright-item-group");
       if (!bookInfoEntry && !textElementEntry && !copyrightItem) return;
-      TPP.sync("commit");
+      const renderAction = editorRenderActionForTarget(e.target);
+      const textLocation = textElementEntry
+        ? String(textElementEntry.dataset.location || "").trim()
+        : "";
+      if (textElementEntry && TPP.readSingleTextElementGroup) {
+        TPP.readSingleTextElementGroup(TPP.active, textElementEntry);
+        if (TPP.syncLegacyTextFieldsFromElements) {
+          TPP.syncLegacyTextFieldsFromElements(TPP.active);
+        }
+        TPP.save("commit", TPP.bookId(TPP.active));
+      } else if (copyrightItem && TPP.readSingleCopyrightItemGroup) {
+        TPP.readSingleCopyrightItemGroup(TPP.active, copyrightItem);
+        TPP.save("commit", TPP.bookId(TPP.active));
+      } else {
+        TPP.sync("commit");
+      }
       if (bookInfoEntry) {
-        renderCurrentViewPreservingSidebar();
+        scheduleEditorRender("preserve");
         return;
       }
       if (textElementEntry || copyrightItem) {
@@ -2582,7 +2870,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         ) {
           TPP.renderTextElementControls();
         }
-        renderCurrentViewPreservingSidebar();
+        if (TPP.patchVisibleCoverTextPreview(textLocation)) {
+          if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+          return;
+        }
+        scheduleEditorRender(renderAction);
         return;
       }
       if (
@@ -2593,7 +2885,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       ) {
         TPP.renderTextElementControls();
       }
-      TPP.renderAll();
+      scheduleEditorRender("full");
     });
     controls.addEventListener("click", function (e) {
       const bookInfoPickerButton = e.target.closest("[data-book-info-picker]");
@@ -5862,6 +6154,14 @@ TPP.renderReaderDuplex = function (pages, settings, sheetIndex) {
       back: TPP.readerPageOrBlank(pages, sheet.back.pages[0]),
     },
   ];
+  TPP.readerVisiblePageRoles = layout
+    .flatMap(function (leaf) {
+      return [leaf.front, leaf.back];
+    })
+    .map(function (page) {
+      return String((page && page.role) || "").trim();
+    })
+    .filter(Boolean);
   const readerWidth = settings.page.w * 2.45;
   const readerHeight = settings.page.h * 2.2;
   const scale = Math.min(
@@ -5939,6 +6239,11 @@ TPP.renderReader = function () {
         ? [pages[TPP.readerIndex]]
         : [pages[TPP.readerIndex], pages[TPP.readerIndex + 1] || null]
       : [pages[TPP.readerIndex]];
+  TPP.readerVisiblePageRoles = shown
+    .map(function (page) {
+      return String((page && page.role) || "").trim();
+    })
+    .filter(Boolean);
   const spread = document.createElement("div");
   spread.className = "spread";
   const readerWidth = frontCover

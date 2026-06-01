@@ -12,6 +12,7 @@ TPP.lastPages = [];
 TPP.bookFingerprints = {};
 TPP.bookDraftFingerprints = {};
 TPP.bookRevisionTimers = {};
+TPP.bookDraftSaveTimers = {};
 TPP.staleKeyLookup = [];
 TPP.defaultStaleKeyLookup = [
   {
@@ -3856,6 +3857,23 @@ TPP.clearRevisionTimer = function (bookId) {
   clearTimeout(TPP.bookRevisionTimers[bookId]);
   delete TPP.bookRevisionTimers[bookId];
 };
+TPP.clearDraftSaveTimer = function (bookId) {
+  if (!TPP.bookDraftSaveTimers[bookId]) return;
+  clearTimeout(TPP.bookDraftSaveTimers[bookId]);
+  delete TPP.bookDraftSaveTimers[bookId];
+};
+TPP.scheduleDraftSave = function (bookId, delay) {
+  if (!bookId) return;
+  TPP.clearDraftSaveTimer(bookId);
+  TPP.bookDraftSaveTimers[bookId] = setTimeout(
+    function () {
+      delete TPP.bookDraftSaveTimers[bookId];
+      TPP.save("draft", bookId);
+      TPP.scheduleRevisionCommit(bookId);
+    },
+    Math.max(80, Number(delay) || 180),
+  );
+};
 TPP.scheduleRevisionCommit = function (bookId, delay) {
   if (!bookId) return;
   TPP.clearRevisionTimer(bookId);
@@ -3909,6 +3927,11 @@ TPP.save = function (mode, bookId) {
     }
     TPP.compactBookMeta(book);
   });
+  if (mode !== "draft") {
+    targetIds.forEach(function (id) {
+      TPP.clearDraftSaveTimer(id);
+    });
+  }
   localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
 };
 TPP.persistDerivedBookMeta = function (book) {
