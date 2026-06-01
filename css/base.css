@@ -1244,13 +1244,11 @@ input[type="checkbox"] {
 .back-cover-text-table col.back-cover-col-size {
   width: 3.8rem;
 }
-.back-cover-text-table col.back-cover-col-x,
-.back-cover-text-table col.back-cover-col-y,
-.back-cover-text-table col.back-cover-col-width {
-  width: 6.25rem;
+.back-cover-text-table col.back-cover-col-position {
+  width: 8.8rem;
 }
 .back-cover-text-table col.back-cover-col-align {
-  width: 4.2rem;
+  width: 3.4rem;
 }
 .back-cover-text-table col.back-cover-col-color {
   width: 3.1rem;
@@ -1427,6 +1425,44 @@ input[type="checkbox"] {
 .back-cover-text-custom {
   width: 100%;
   resize: vertical;
+}
+.back-cover-slider-stack {
+  display: grid;
+  gap: 0.14rem;
+}
+.back-cover-slider-stack label {
+  display: grid;
+  grid-template-columns: 0.9rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+}
+.back-cover-slider-stack span {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7a6755;
+}
+.back-cover-slider-stack input[type="range"] {
+  width: 100%;
+  margin: 0;
+}
+.text-align-cycle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid #cfc6bc;
+  border-radius: 8px;
+  background: #fff;
+}
+.text-align-cycle img {
+  width: 1rem;
+  height: 1rem;
+  display: block;
 }
 .front-cover-text-layout #openFrontCoverFieldPicker {
   justify-self: start;

@@ -2586,6 +2586,27 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (input) TPP.openColorDialog(input);
         return;
       }
+      const alignCycle = e.target.closest("[data-text-align-cycle]");
+      if (alignCycle) {
+        e.preventDefault();
+        const hiddenInput = alignCycle
+          .closest(".text-element-group")
+          ?.querySelector(".text-align");
+        if (!hiddenInput || !TPP.nextTextAlignMode || !TPP.textAlignMeta) {
+          return;
+        }
+        const nextMode = TPP.nextTextAlignMode(hiddenInput.value || "");
+        const meta = TPP.textAlignMeta(nextMode);
+        hiddenInput.value = nextMode;
+        alignCycle.dataset.textAlignCycle = nextMode;
+        alignCycle.setAttribute("aria-label", meta.label);
+        alignCycle.setAttribute("title", meta.label);
+        const image = alignCycle.querySelector("img");
+        if (image) image.setAttribute("src", meta.icon);
+        TPP.sync("commit");
+        renderCurrentViewPreservingSidebar();
+        return;
+      }
       const textButton = e.target.closest("[data-text-action]");
       if (textButton) {
         TPP.sync("nosave");

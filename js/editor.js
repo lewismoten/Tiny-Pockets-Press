@@ -271,6 +271,50 @@ TPP.textElementEditorConfigs = {
     defaultAlign: "left",
   },
 };
+TPP.textAlignModes = ["left", "center", "justify", "right", "clip"];
+TPP.textAlignMeta = function (mode) {
+  const normalized = String(mode || "center")
+    .trim()
+    .toLowerCase();
+  const lookup = {
+    left: { label: "Align left", icon: "assets/align-left.svg" },
+    center: { label: "Align center", icon: "assets/align-center.svg" },
+    justify: { label: "Align justify", icon: "assets/align-justify.svg" },
+    right: { label: "Align right", icon: "assets/align-right.svg" },
+    clip: { label: "Clip text", icon: "assets/align-clip.svg" },
+  };
+  return lookup[normalized] || lookup.center;
+};
+TPP.nextTextAlignMode = function (mode) {
+  const current = String(mode || "center")
+    .trim()
+    .toLowerCase();
+  const list = TPP.textAlignModes;
+  const index = list.indexOf(current);
+  return list[(index + 1 + list.length) % list.length];
+};
+TPP.textAlignCycleButtonHtml = function (mode) {
+  const current = String(mode || "center")
+    .trim()
+    .toLowerCase();
+  const meta = TPP.textAlignMeta(current);
+  return (
+    '<input class="text-align" type="hidden" value="' +
+    TPP.esc(current) +
+    '">' +
+    '<button type="button" class="text-align-cycle" data-text-align-cycle="' +
+    TPP.esc(current) +
+    '" aria-label="' +
+    TPP.esc(meta.label) +
+    '" title="' +
+    TPP.esc(meta.label) +
+    '">' +
+    '<img src="' +
+    TPP.esc(meta.icon) +
+    '" alt="" aria-hidden="true">' +
+    "</button>"
+  );
+};
 TPP.frontCoverFieldPickerOptions = function (book) {
   const used = new Set(
     TPP.textElementsForLocation(book, "front").map(function (entry) {
@@ -368,26 +412,16 @@ TPP.backCoverTextRowHtml = function (book, element) {
     '<td><input class="text-size" type="number" min="3" step=".5" value="' +
     TPP.esc(String(Number(entry.size) || 4)) +
     '"></td>' +
-    '<td><input class="text-x" type="range" min="0" max="100" value="' +
+    '<td><div class="back-cover-slider-stack"><label><span>X</span><input class="text-x" type="range" min="0" max="100" value="' +
     TPP.esc(String(Number(entry.x) || 50)) +
-    '"></td>' +
-    '<td><input class="text-y" type="range" min="0" max="100" value="' +
+    '"></label><label><span>Y</span><input class="text-y" type="range" min="0" max="100" value="' +
     TPP.esc(String(Number(entry.y) || 0)) +
-    '"></td>' +
-    '<td><input class="text-width" type="range" min="10" max="100" value="' +
+    '"></label><label><span>W</span><input class="text-width" type="range" min="10" max="100" value="' +
     TPP.esc(String(Number(entry.width) || 100)) +
-    '"></td>' +
-    '<td><select class="text-align"><option value="left"' +
-    (align === "left" ? " selected" : "") +
-    '>L</option><option value="center"' +
-    (align === "center" ? " selected" : "") +
-    '>C</option><option value="justify"' +
-    (align === "justify" ? " selected" : "") +
-    '>J</option><option value="right"' +
-    (align === "right" ? " selected" : "") +
-    '>R</option><option value="clip"' +
-    (align === "clip" ? " selected" : "") +
-    ">Clip</option></select></td>" +
+    '"></label></div></td>' +
+    "<td>" +
+    TPP.textAlignCycleButtonHtml(align) +
+    "</td>" +
     '<td><input class="text-color color-box" type="color" tabindex="-1" aria-label="Text color" value="' +
     TPP.esc(entry.color || "#ffffff") +
     '"></td>' +
@@ -401,7 +435,7 @@ TPP.backCoverTextRowHtml = function (book, element) {
 };
 TPP.backCoverTextListHtml = function (book, spec) {
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-x"><col class="back-cover-col-y"><col class="back-cover-col-width"><col class="back-cover-col-align"><col class="back-cover-col-color"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>X</th><th>Y</th><th>W</th><th>Aln</th><th>Clr</th><th>Outl</th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-position"><col class="back-cover-col-align"><col class="back-cover-col-color"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Aln</th><th>Clr</th><th>Outl</th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, spec.location)
       .map(function (element) {
         return TPP.backCoverTextRowHtml(book, element);
