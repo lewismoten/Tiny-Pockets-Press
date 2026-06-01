@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.classificationCatalog = null;
   TPP.classificationExtensionsCatalog = null;
   TPP.classificationSearchIndex = [];
+  TPP.classificationReverseSeeAlsoIndex = {};
   TPP.classificationDialogSearchQuery = "";
   TPP.classificationDialogSearchActiveIndex = -1;
   TPP.classificationDialogTargetEntryId = "";
@@ -36,6 +37,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     TPP.normalizeClassificationCatalog(TPP.classificationCatalog);
     TPP.buildClassificationSearchIndex();
+    TPP.buildClassificationReverseSeeAlsoIndex();
     return TPP.classificationCatalog;
   };
   TPP.loadClassificationExtensions = async function () {
@@ -57,6 +59,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.classificationExtensionsCatalog,
     );
     TPP.buildClassificationSearchIndex();
+    TPP.buildClassificationReverseSeeAlsoIndex();
     return TPP.classificationExtensionsCatalog;
   };
   TPP.defaultClassificationFormats = function () {
@@ -585,6 +588,52 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.classificationSearchIndex = entries;
     return entries;
   };
+  TPP.buildClassificationReverseSeeAlsoIndex = function () {
+    const reverse = {};
+    const addReverse = function (fromRef, toRef) {
+      const source = String(fromRef || "").trim();
+      const target = String(toRef || "").trim();
+      if (!source || !target) return;
+      if (!reverse[target]) reverse[target] = [];
+      if (!reverse[target].includes(source)) reverse[target].push(source);
+    };
+    const walkBase = function (nodes) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
+        if (!node || !node.code) return;
+        const sourceRef = String(node.code);
+        (Array.isArray(node.seeAlso) ? node.seeAlso : []).forEach(
+          function (ref) {
+            addReverse(sourceRef, ref);
+          },
+        );
+        walkBase(node.children);
+      });
+    };
+    const walkExtension = function (parentCode, nodes) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
+        if (!node || !node.extension) return;
+        const sourceRef = String(parentCode) + "." + String(node.extension);
+        (Array.isArray(node.seeAlso) ? node.seeAlso : []).forEach(
+          function (ref) {
+            addReverse(sourceRef, ref);
+          },
+        );
+        walkExtension(parentCode, node.children);
+      });
+    };
+    const system = TPP.classificationSystem();
+    const extensionSystem = TPP.classificationExtensionsSystem();
+    walkBase(system && system.categories);
+    (Array.isArray(extensionSystem && extensionSystem.extensions)
+      ? extensionSystem.extensions
+      : []
+    ).forEach(function (group) {
+      if (!group || !group.parentCode) return;
+      walkExtension(group.parentCode, group.children);
+    });
+    TPP.classificationReverseSeeAlsoIndex = reverse;
+    return reverse;
+  };
   TPP.searchClassificationIndex = function (query, limit) {
     const text = String(query || "")
       .trim()
@@ -756,12 +805,19 @@ document.addEventListener("DOMContentLoaded", async function () {
       hidden: TPP.classificationPathIsHidden(basePath),
     };
   };
-  TPP.renderClassificationSeeAlso = function (node) {
+  TPP.renderClassificationSeeAlso = function (node, currentReference) {
+    const currentRef = String(currentReference || "").trim();
+    const reverseRefs =
+      (currentRef && TPP.classificationReverseSeeAlsoIndex[currentRef]) || [];
     const refs = (Array.isArray(node && node.seeAlso) ? node.seeAlso : [])
+      .concat(reverseRefs)
       .map(function (value) {
         return String(value || "").trim();
       })
       .filter(Boolean)
+      .filter(function (value, index, values) {
+        return values.indexOf(value) === index;
+      })
       .map(TPP.classificationReferenceDetails)
       .filter(TPP.classificationEntryIsVisible)
       .filter(Boolean);
@@ -1191,8 +1247,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         const currentScopeNote = String(
           (currentReferenceNode && currentReferenceNode.scopeNote) || "",
         );
-        const seeAlsoMarkup =
-          TPP.renderClassificationSeeAlso(currentReferenceNode);
+        const currentReference =
+          selectedExtensionNode && TPP.classificationDialogSelection.extension
+            ? selectedNode.code +
+              "." +
+              TPP.classificationDialogSelection.extension
+            : selectedNode.code;
+        const seeAlsoMarkup = TPP.renderClassificationSeeAlso(
+          currentReferenceNode,
+          currentReference,
+        );
         selection.hidden = false;
         selection.innerHTML =
           '<div class="classification-selection-main"><strong>' +
@@ -1344,6 +1408,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   await TPP.loadStaleKeyLookup();
   await TPP.loadClassificationSystems();
   await TPP.loadClassificationExtensions();
+  TPP.buildClassificationReverseSeeAlsoIndex();
   TPP.view = TPP.initialView();
   if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();
