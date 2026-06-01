@@ -1486,6 +1486,13 @@ input[type="checkbox"] {
 .back-cover-text-field-top select {
   min-width: 0;
 }
+.back-cover-text-field-label {
+  min-width: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .back-cover-text-custom {
   width: 100%;
   resize: vertical;

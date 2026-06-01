@@ -427,9 +427,9 @@ TPP.backCoverTextRowHtml = function (book, element) {
     '<tr class="text-element-group back-cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
     TPP.esc(entry.id || "") +
     '" data-location="back">' +
-    '<td><div class="back-cover-text-field-cell"><div class="back-cover-text-field-top"><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span><select class="text-field-key">' +
-    TPP.textElementFieldOptionsHtml(fieldKey) +
-    "</select></div>" +
+    '<td><div class="back-cover-text-field-cell"><div class="back-cover-text-field-top"><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span><span class="back-cover-text-field-label">' +
+    TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
+    "</span></div>" +
     (fieldKey === "custom"
       ? '<textarea class="text-custom back-cover-text-custom" rows="2" placeholder="Custom text">' +
         TPP.esc(entry.customText || "") +
