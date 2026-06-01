@@ -1120,6 +1120,9 @@ input[type="checkbox"] {
   background: #fffdf8;
   box-shadow: 0 14px 30px rgb(0 0 0 / 0.12);
 }
+.classification-dialog-search-results[hidden] {
+  display: none;
+}
 .classification-dialog-search-result {
   display: grid;
   grid-template-columns: 8.5rem minmax(0, 1fr);
