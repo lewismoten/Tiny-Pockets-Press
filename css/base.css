@@ -1073,12 +1073,19 @@ input[type="checkbox"] {
 .classification-search-wrap {
   position: relative;
 }
-.classification-dialog-meta {
-  display: grid;
-  gap: 0.35rem;
+.classification-dialog-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   margin-top: 0.8rem;
   padding-top: 0.7rem;
   border-top: 1px solid #e4d8c5;
+}
+.classification-dialog-meta {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
   font-size: 0.75rem;
   color: var(--muted);
 }
@@ -1094,12 +1101,22 @@ input[type="checkbox"] {
 .classification-profile-select {
   display: grid;
   gap: 0.35rem;
-  margin-top: 0.2rem;
+  flex: 0 0 13rem;
+  min-width: 11rem;
   font-size: 0.78rem;
   font-weight: 700;
 }
 .classification-profile-select select {
   width: 100%;
+}
+@media (max-width: 700px) {
+  .classification-dialog-footer {
+    flex-direction: column;
+  }
+  .classification-profile-select {
+    width: 100%;
+    min-width: 0;
+  }
 }
 .classification-search-label input {
   width: 100%;
