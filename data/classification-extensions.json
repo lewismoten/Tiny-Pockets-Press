@@ -410,9 +410,10 @@
           "label": "Civil Rights Movement",
           "keywords": ["civil rights movement", "segregation", "voting rights"],
           "includes": ["civil rights movement", "segregation", "voting rights"],
-          "seeAlso": ["282", "284.1"],
+          "seeAlso": ["282"],
           "scopeNote": "Use for works chiefly about the Civil Rights Movement as a historical period or movement within modern history.",
-          "sort": 3
+          "sort": 3,
+          "seeAlsoExtensions": ["284.1"]
         }
       ]
     },
@@ -652,7 +653,6 @@
           "shortLabel": "SPO",
           "label": "Space Opera",
           "keywords": ["space opera", "science fiction"],
-          "seeAlso": ["121.2"],
           "children": [
             {
               "extension": "11",
@@ -700,14 +700,14 @@
             "fiction"
           ],
           "scopeNote": "Use for general works on space opera within science fiction. Class more specific works in the refinements below when appropriate.",
-          "sort": 1
+          "sort": 1,
+          "seeAlsoExtensions": ["121.2"]
         },
         {
           "extension": "2",
           "shortLabel": "CYB",
           "label": "Cyberpunk",
           "keywords": ["cyberpunk", "science fiction"],
-          "seeAlso": ["121.3"],
           "children": [
             {
               "extension": "21",
@@ -747,7 +747,8 @@
           "allowAssign": true,
           "includes": ["cyberpunk", "science fiction", "science", "fiction"],
           "scopeNote": "Use for general works on cyberpunk within science fiction. Class more specific works in the refinements below when appropriate.",
-          "sort": 2
+          "sort": 2,
+          "seeAlsoExtensions": ["121.3"]
         },
         {
           "extension": "3",
@@ -1342,7 +1343,7 @@
             "design"
           ],
           "scopeNote": "Use for works chiefly about community development within urban design, especially when the emphasis is neighborhood planning, placemaking, or the built environment.",
-          "seeAlso": ["284.1"]
+          "seeAlsoExtensions": ["284.1"]
         }
       ]
     },
@@ -1698,7 +1699,7 @@
             "domesticated"
           ],
           "scopeNote": "Use for works chiefly about canines within domesticated animals when the emphasis is zoological, breed, or scientific rather than everyday pet ownership.",
-          "seeAlso": ["690.1"]
+          "seeAlsoExtensions": ["690.1"]
         },
         {
           "extension": "4",
@@ -1722,7 +1723,7 @@
             "domesticated"
           ],
           "scopeNote": "Use for works chiefly about felines within domesticated animals when the emphasis is zoological, breed, or scientific rather than everyday pet ownership.",
-          "seeAlso": ["690.2"]
+          "seeAlsoExtensions": ["690.2"]
         }
       ]
     },
@@ -2400,7 +2401,7 @@
             "recreation"
           ],
           "scopeNote": "Use for works chiefly about esports, streaming, spectatorship, fandom, and the social culture around play within games.",
-          "seeAlso": ["660.2"]
+          "seeAlsoExtensions": ["660.2"]
         },
         {
           "extension": "5",
@@ -2417,8 +2418,8 @@
             "collaborative puzzles"
           ],
           "scopeNote": "Use for works chiefly about tabletop, card, and other analog game design, puzzle design, and interactive rule systems within games.",
-          "seeAlso": ["660.2"],
-          "sort": 5
+          "sort": 5,
+          "seeAlsoExtensions": ["660.2"]
         }
       ]
     },
@@ -2488,9 +2489,9 @@
             "retro computing",
             "computer collecting"
           ],
-          "seeAlso": ["534.4"],
           "scopeNote": "Use for hobby-oriented works on collecting, restoring, or building vintage computers when the emphasis is enthusiast practice rather than engineering.",
-          "sort": 5
+          "sort": 5,
+          "seeAlsoExtensions": ["534.4"]
         },
         {
           "extension": "6",

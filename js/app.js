@@ -486,6 +486,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         node.replacedBy = String(node.replacedBy || "");
         node.sort = Number(node.sort || node.code || position);
         node.seeAlso = Array.isArray(node.seeAlso) ? node.seeAlso : [];
+        node.seeAlsoExtensions = Array.isArray(node.seeAlsoExtensions)
+          ? node.seeAlsoExtensions
+          : [];
         node.keywords = Array.isArray(node.keywords) ? node.keywords : [];
         node.includes = Array.isArray(node.includes) ? node.includes : [];
         node.scopeNote = String(node.scopeNote || "");
@@ -621,6 +624,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         normalized.sort = Number(normalized.sort || extensionValue || position);
         normalized.seeAlso = Array.isArray(normalized.seeAlso)
           ? normalized.seeAlso
+          : [];
+        normalized.seeAlsoExtensions = Array.isArray(
+          normalized.seeAlsoExtensions,
+        )
+          ? normalized.seeAlsoExtensions
           : [];
         normalized.keywords = Array.isArray(normalized.keywords)
           ? normalized.keywords
@@ -1038,11 +1046,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
         if (!node || !node.code) return;
         const sourceRef = String(node.code);
-        (Array.isArray(node.seeAlso) ? node.seeAlso : []).forEach(
-          function (ref) {
+        (Array.isArray(node.seeAlso) ? node.seeAlso : [])
+          .concat(
+            Array.isArray(node.seeAlsoExtensions) ? node.seeAlsoExtensions : [],
+          )
+          .forEach(function (ref) {
             addReverse(sourceRef, ref);
-          },
-        );
+          });
         walkBase(node.children);
       });
     };
@@ -1050,11 +1060,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
         if (!node || !node.extension) return;
         const sourceRef = String(parentCode) + "." + String(node.extension);
-        (Array.isArray(node.seeAlso) ? node.seeAlso : []).forEach(
-          function (ref) {
+        (Array.isArray(node.seeAlso) ? node.seeAlso : [])
+          .concat(
+            Array.isArray(node.seeAlsoExtensions) ? node.seeAlsoExtensions : [],
+          )
+          .forEach(function (ref) {
             addReverse(sourceRef, ref);
-          },
-        );
+          });
         walkExtension(parentCode, node.children);
       });
     };
@@ -1247,6 +1259,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const reverseRefs =
       (currentRef && TPP.classificationReverseSeeAlsoIndex[currentRef]) || [];
     const refs = (Array.isArray(node && node.seeAlso) ? node.seeAlso : [])
+      .concat(
+        Array.isArray(node && node.seeAlsoExtensions)
+          ? node.seeAlsoExtensions
+          : [],
+      )
       .concat(reverseRefs)
       .map(function (value) {
         return String(value || "").trim();

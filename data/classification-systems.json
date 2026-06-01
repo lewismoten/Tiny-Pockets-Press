@@ -230,7 +230,8 @@
                 "curation packets"
               ],
               "scopeNote": "Use for exhibit files, interpretive plans, and other documents created to present special collections to users.",
-              "seeAlso": ["390", "390.3"]
+              "seeAlso": ["390"],
+              "seeAlsoExtensions": ["390.3"]
             }
           ],
           "keywords": [
@@ -437,7 +438,8 @@
                 "outreach records"
               ],
               "scopeNote": "Use for public-facing program files and materials produced by the institution for outreach, events, and community engagement.",
-              "seeAlso": ["284.5", "634"]
+              "seeAlso": ["634"],
+              "seeAlsoExtensions": ["284.5"]
             }
           ],
           "keywords": [
@@ -581,9 +583,10 @@
               "label": "Magical Realism",
               "keywords": ["magical", "realism", "fiction", "speculative"],
               "sort": 124,
-              "seeAlso": ["340.1", "184"],
+              "seeAlso": ["184"],
               "includes": ["magical", "realism", "fiction", "speculative"],
-              "scopeNote": "Use for works chiefly about magical realism within speculative fiction."
+              "scopeNote": "Use for works chiefly about magical realism within speculative fiction.",
+              "seeAlsoExtensions": ["340.1"]
             }
           ],
           "keywords": ["speculative", "fiction"],
@@ -1802,7 +1805,7 @@
                 "graphic storytelling"
               ],
               "sort": 273,
-              "seeAlso": ["340", "634", "621", "371"],
+              "seeAlso": ["233", "234", "272", "282", "292"],
               "includes": [
                 "cultural",
                 "studies",
@@ -1822,8 +1825,7 @@
                 "culinary history",
                 "comics culture"
               ],
-              "scopeNote": "Use for cultural studies topics, including race and ethnicity, gender, LGBTQ+ studies, disability culture, migration and diaspora, Indigenous studies, community identity, foodways, everyday media culture, and comics or graphic storytelling as cultural forms.",
-              "seeAlso": ["233", "234", "272", "282", "292"]
+              "scopeNote": "Use for cultural studies topics, including race and ethnicity, gender, LGBTQ+ studies, disability culture, migration and diaspora, Indigenous studies, community identity, foodways, everyday media culture, and comics or graphic storytelling as cultural forms."
             },
             {
               "code": "274",
@@ -2248,7 +2250,7 @@
             "fraternal orders"
           ],
           "sort": 310,
-          "seeAlso": ["340", "170", "340.5"],
+          "seeAlso": ["340", "170"],
           "includes": [
             "religion",
             "spirituality",
@@ -2261,7 +2263,8 @@
             "masonic traditions",
             "fraternal orders"
           ],
-          "scopeNote": "Use for works chiefly about religion within religion, spirituality & philosophy. Use here for religious traditions broadly, including general works on the Bible, scripture, and sacred texts, and see related classes for esoteric or symbolic societies such as Freemasonry."
+          "scopeNote": "Use for works chiefly about religion within religion, spirituality & philosophy. Use here for religious traditions broadly, including general works on the Bible, scripture, and sacred texts, and see related classes for esoteric or symbolic societies such as Freemasonry.",
+          "seeAlsoExtensions": ["340.5"]
         },
         {
           "code": "320",
@@ -2492,9 +2495,9 @@
               "label": "Music",
               "keywords": ["music", "art", "performing", "arts"],
               "sort": 381,
-              "seeAlso": ["660.1", "680.1"],
               "includes": ["music", "art", "performing", "arts"],
-              "scopeNote": "Use for works chiefly about music within performing arts."
+              "scopeNote": "Use for works chiefly about music within performing arts.",
+              "seeAlsoExtensions": ["660.1", "680.1"]
             },
             {
               "code": "382",
@@ -2802,9 +2805,10 @@
               "label": "Ecology",
               "keywords": ["ecology", "science", "nature", "life", "sciences"],
               "sort": 462,
-              "seeAlso": ["492", "497.3"],
+              "seeAlso": ["492"],
               "includes": ["ecology", "science", "nature", "life", "sciences"],
-              "scopeNote": "Use for works chiefly about ecology within life sciences."
+              "scopeNote": "Use for works chiefly about ecology within life sciences.",
+              "seeAlsoExtensions": ["497.3"]
             },
             {
               "code": "463",
@@ -3396,7 +3400,7 @@
                 "computing"
               ],
               "sort": 531,
-              "seeAlso": ["544", "330.4"],
+              "seeAlso": ["544"],
               "includes": [
                 "artificial",
                 "intelligence",
@@ -3405,7 +3409,8 @@
                 "applied",
                 "computing"
               ],
-              "scopeNote": "Use for works chiefly about artificial intelligence within applied computing."
+              "scopeNote": "Use for works chiefly about artificial intelligence within applied computing.",
+              "seeAlsoExtensions": ["330.4"]
             },
             {
               "code": "532",

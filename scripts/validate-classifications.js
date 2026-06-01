@@ -376,12 +376,18 @@ function collectExtensionData(extensionSystem) {
 
 function validateNodeReferences(nodes, kind, unresolved) {
   for (const entry of nodes) {
-    const refs = normalizeList(entry.node && entry.node.seeAlso);
-    for (const ref of refs) {
+    const refs = normalizeList(entry.node && entry.node.seeAlso).map((ref) => ({
+      ref,
+      type: "seeAlso",
+    }));
+    const extensionRefs = normalizeList(
+      entry.node && entry.node.seeAlsoExtensions,
+    ).map((ref) => ({ ref, type: "seeAlsoExtensions" }));
+    for (const { ref, type } of refs.concat(extensionRefs)) {
       if (!allReferenceTargets.has(ref)) {
         unresolved.push({
           kind,
-          type: "seeAlso",
+          type,
           source: entry.labelPath,
           ref,
         });
