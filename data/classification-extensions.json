@@ -8,6 +8,465 @@
       "description": "Optional extension trees that refine a base Tiny Shelf code without colliding with the main three-digit classification. Extensions are scoped to a parent code and can branch up to four levels deep.",
       "extensions": [
         {
+          "parentCode": "151",
+          "label": "Religion",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "ABR",
+              "label": "Abrahamic Traditions",
+              "sort": 1000,
+              "keywords": [
+                "abrahamic",
+                "traditions",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "DHR",
+              "label": "Dharmic Traditions",
+              "sort": 2000,
+              "keywords": [
+                "dharmic",
+                "traditions",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "IN3",
+              "label": "Indigenous & Folk Religions",
+              "sort": 3000,
+              "keywords": [
+                "indigenous",
+                "folk",
+                "religions",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "CMP",
+              "label": "Comparative Religion",
+              "sort": 4000,
+              "keywords": [
+                "comparative",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "152",
+          "label": "Spiritual Practice",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "MDT",
+              "label": "Meditation",
+              "sort": 1000,
+              "keywords": [
+                "meditation",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "spiritual",
+                "practice"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "CNT",
+              "label": "Contemplation & Prayer",
+              "sort": 2000,
+              "keywords": [
+                "contemplation",
+                "prayer",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "spiritual",
+                "practice"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "RIT",
+              "label": "Ritual & Ceremony",
+              "sort": 3000,
+              "keywords": [
+                "ritual",
+                "ceremony",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "spiritual",
+                "practice"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "MYS",
+              "label": "Mysticism & Esoteric Practice",
+              "sort": 4000,
+              "keywords": [
+                "mysticism",
+                "esoteric",
+                "practice",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "spiritual"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "153",
+          "label": "Philosophy",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "MET",
+              "label": "Metaphysics",
+              "sort": 1000,
+              "keywords": [
+                "metaphysics",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "ETH",
+              "label": "Ethics",
+              "sort": 2000,
+              "keywords": ["ethics", "religion", "spirituality", "philosophy"]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "POL",
+              "label": "Political Philosophy",
+              "sort": 3000,
+              "keywords": [
+                "political",
+                "philosophy",
+                "religion",
+                "spirituality"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "AEP",
+              "label": "Aesthetics & Epistemology",
+              "sort": 4000,
+              "keywords": [
+                "aesthetics",
+                "epistemology",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "154",
+          "label": "Myth & Thought",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "MYT",
+              "label": "Mythology",
+              "sort": 1000,
+              "keywords": [
+                "mythology",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "myth",
+                "thought"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "SYM",
+              "label": "Symbolism",
+              "sort": 2000,
+              "keywords": [
+                "symbolism",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "myth",
+                "thought"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "COS",
+              "label": "Cosmology",
+              "sort": 3000,
+              "keywords": [
+                "cosmology",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "myth",
+                "thought"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "LIF",
+              "label": "Meaning & Life Questions",
+              "sort": 4000,
+              "keywords": [
+                "meaning",
+                "life",
+                "questions",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "myth",
+                "thought"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "161",
+          "label": "Architecture",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "HOU",
+              "label": "Housing & Domestic Architecture",
+              "sort": 1000,
+              "keywords": [
+                "housing",
+                "domestic",
+                "architecture",
+                "preservation"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "PUB",
+              "label": "Public & Civic Architecture",
+              "sort": 2000,
+              "keywords": ["public", "civic", "architecture", "preservation"]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "SAC",
+              "label": "Sacred Architecture",
+              "sort": 3000,
+              "keywords": ["sacred", "architecture", "preservation"]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "LAN",
+              "label": "Landscape Architecture",
+              "sort": 4000,
+              "keywords": ["landscape", "architecture", "preservation"]
+            }
+          ]
+        },
+        {
+          "parentCode": "162",
+          "label": "Historic Preservation",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "BLC",
+              "label": "Building Conservation",
+              "sort": 1000,
+              "keywords": [
+                "building",
+                "conservation",
+                "architecture",
+                "preservation",
+                "historic"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "RST",
+              "label": "Restoration Practice",
+              "sort": 2000,
+              "keywords": [
+                "restoration",
+                "practice",
+                "architecture",
+                "preservation",
+                "historic"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "HRG",
+              "label": "Heritage & Registry",
+              "sort": 3000,
+              "keywords": [
+                "heritage",
+                "registry",
+                "architecture",
+                "preservation",
+                "historic"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "ADA",
+              "label": "Adaptive Reuse",
+              "sort": 4000,
+              "keywords": [
+                "adaptive",
+                "reuse",
+                "architecture",
+                "preservation",
+                "historic"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "163",
+          "label": "Urban Design",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "PLN",
+              "label": "Planning & Zoning",
+              "sort": 1000,
+              "keywords": [
+                "planning",
+                "zoning",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "STR",
+              "label": "Streetscape & Public Space",
+              "sort": 2000,
+              "keywords": [
+                "streetscape",
+                "public",
+                "space",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "TRN",
+              "label": "Transit & Mobility",
+              "sort": 3000,
+              "keywords": [
+                "transit",
+                "mobility",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "COM",
+              "label": "Community Development",
+              "sort": 4000,
+              "keywords": [
+                "community",
+                "development",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "164",
+          "label": "Building Craft",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "MAT",
+              "label": "Materials & Methods",
+              "sort": 1000,
+              "keywords": [
+                "materials",
+                "methods",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "WRK",
+              "label": "Wood, Stone & Masonry",
+              "sort": 2000,
+              "keywords": [
+                "wood",
+                "stone",
+                "masonry",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "ENV",
+              "label": "Environmental Building",
+              "sort": 3000,
+              "keywords": [
+                "environmental",
+                "building",
+                "architecture",
+                "preservation",
+                "craft"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "DOC",
+              "label": "Documentation & Survey",
+              "sort": 4000,
+              "keywords": [
+                "documentation",
+                "survey",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ]
+            }
+          ]
+        },
+        {
           "parentCode": "513",
           "label": "Local & Regional History",
           "children": [
@@ -85,6 +544,256 @@
                   "label": "Scandinavia",
                   "keywords": ["scandinavia", "nordic"]
                 }
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "751",
+          "label": "Wildlife",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "BRD",
+              "label": "Birds",
+              "sort": 1000,
+              "keywords": ["birds", "science", "nature", "animals", "wildlife"]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "MML",
+              "label": "Mammals",
+              "sort": 2000,
+              "keywords": [
+                "mammals",
+                "science",
+                "nature",
+                "animals",
+                "wildlife"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "MRN",
+              "label": "Marine Life",
+              "sort": 3000,
+              "keywords": [
+                "marine",
+                "life",
+                "science",
+                "nature",
+                "animals",
+                "wildlife"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "INS",
+              "label": "Insects & Invertebrates",
+              "sort": 4000,
+              "keywords": [
+                "insects",
+                "invertebrates",
+                "science",
+                "nature",
+                "animals",
+                "wildlife"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "752",
+          "label": "Animal Behavior",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "OB1",
+              "label": "Observation & Tracking",
+              "sort": 1000,
+              "keywords": [
+                "observation",
+                "tracking",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "animal",
+                "behavior"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "ET2",
+              "label": "Ethology",
+              "sort": 2000,
+              "keywords": [
+                "ethology",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "animal",
+                "behavior"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "ECO",
+              "label": "Ecology of Animals",
+              "sort": 3000,
+              "keywords": [
+                "ecology",
+                "of",
+                "animals",
+                "science",
+                "nature",
+                "wildlife",
+                "animal",
+                "behavior"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "CON",
+              "label": "Conservation Biology",
+              "sort": 4000,
+              "keywords": [
+                "conservation",
+                "biology",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "animal",
+                "behavior"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "753",
+          "label": "Domesticated Animals",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "EQN",
+              "label": "Equine",
+              "sort": 1000,
+              "keywords": [
+                "equine",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "domesticated"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "FAR",
+              "label": "Farm Animals",
+              "sort": 2000,
+              "keywords": [
+                "farm",
+                "animals",
+                "science",
+                "nature",
+                "wildlife",
+                "domesticated"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "CAN",
+              "label": "Canines",
+              "sort": 3000,
+              "keywords": [
+                "canines",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "domesticated"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "FLN",
+              "label": "Felines",
+              "sort": 4000,
+              "keywords": [
+                "felines",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "domesticated"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "754",
+          "label": "Nature Companions",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "PET",
+              "label": "Pet Care",
+              "sort": 1000,
+              "keywords": [
+                "pet",
+                "care",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "companions"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "AQL",
+              "label": "Aquariums & Terrariums",
+              "sort": 2000,
+              "keywords": [
+                "aquariums",
+                "terrariums",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "companions"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "BR3",
+              "label": "Birdkeeping",
+              "sort": 3000,
+              "keywords": [
+                "birdkeeping",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "companions"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "RSC",
+              "label": "Rescue & Rehabilitation",
+              "sort": 4000,
+              "keywords": [
+                "rescue",
+                "rehabilitation",
+                "science",
+                "nature",
+                "animals",
+                "wildlife",
+                "companions"
               ]
             }
           ]
@@ -248,6 +957,188 @@
                   "label": "Culture & Criticism",
                   "keywords": ["game studies", "criticism", "culture"]
                 }
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "PUZ",
+              "label": "Puzzles & Logic Games",
+              "sort": 3000,
+              "keywords": ["puzzles", "logic", "games", "hobbies", "recreation"]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "VI4",
+              "label": "Video Games & Play Culture",
+              "sort": 4000,
+              "keywords": [
+                "video",
+                "games",
+                "play",
+                "culture",
+                "hobbies",
+                "recreation"
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "952",
+          "label": "Hobbies",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "COL",
+              "label": "Collecting",
+              "sort": 1000,
+              "keywords": ["collecting", "games", "hobbies", "recreation"]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "MOD",
+              "label": "Models & Miniatures",
+              "sort": 2000,
+              "keywords": [
+                "models",
+                "miniatures",
+                "games",
+                "hobbies",
+                "recreation"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "HND",
+              "label": "Handcraft Hobbies",
+              "sort": 3000,
+              "keywords": ["handcraft", "hobbies", "games", "recreation"]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "OUT",
+              "label": "Outdoor Hobbies",
+              "sort": 4000,
+              "keywords": ["outdoor", "hobbies", "games", "recreation"]
+            }
+          ]
+        },
+        {
+          "parentCode": "953",
+          "label": "Recreation",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "SPT",
+              "label": "Sports & Athletics",
+              "sort": 1000,
+              "keywords": [
+                "sports",
+                "athletics",
+                "games",
+                "hobbies",
+                "recreation"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "FIT",
+              "label": "Fitness & Movement",
+              "sort": 2000,
+              "keywords": [
+                "fitness",
+                "movement",
+                "games",
+                "hobbies",
+                "recreation"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "TRL",
+              "label": "Trails, Camping & Hiking",
+              "sort": 3000,
+              "keywords": [
+                "trails",
+                "camping",
+                "hiking",
+                "games",
+                "hobbies",
+                "recreation"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "WTR",
+              "label": "Water & Winter Recreation",
+              "sort": 4000,
+              "keywords": ["water", "winter", "recreation", "games", "hobbies"]
+            }
+          ]
+        },
+        {
+          "parentCode": "954",
+          "label": "Pets & Animal Care",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "DOG",
+              "label": "Dogs",
+              "sort": 1000,
+              "keywords": [
+                "dogs",
+                "games",
+                "hobbies",
+                "recreation",
+                "pets",
+                "animal",
+                "care"
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "CAT",
+              "label": "Cats",
+              "sort": 2000,
+              "keywords": [
+                "cats",
+                "games",
+                "hobbies",
+                "recreation",
+                "pets",
+                "animal",
+                "care"
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "SM3",
+              "label": "Small Animals",
+              "sort": 3000,
+              "keywords": [
+                "small",
+                "animals",
+                "games",
+                "hobbies",
+                "recreation",
+                "pets",
+                "animal",
+                "care"
+              ]
+            },
+            {
+              "extension": "4000",
+              "shortLabel": "T44",
+              "label": "Training & Behavior",
+              "sort": 4000,
+              "keywords": [
+                "training",
+                "behavior",
+                "games",
+                "hobbies",
+                "recreation",
+                "pets",
+                "animal",
+                "care"
               ]
             }
           ]
