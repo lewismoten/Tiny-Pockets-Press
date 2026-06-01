@@ -3773,7 +3773,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     libraryDownloadLibraryButton.onclick = downloadLibrary;
 });
 
-TPP.openImageExportDialog = function () {
+TPP.openImageExportDialog = async function () {
   if (
     typeof TPP.ensureControlModule === "function" &&
     !document.getElementById("imageExportDialog")
@@ -3848,6 +3848,10 @@ TPP.openImageExportDialog = function () {
   thresholdValue.textContent = threshold.value;
   preset.value = dpiPreset;
   customWrap.hidden = preset.value !== "custom";
+  await TPP.ensureImageExportPaletteForOptionsLoaded({
+    colorDepth: colorDepth.value || "color24",
+    palette: palette.value || "websafe",
+  });
   if (TPP.syncImageExportFormatUi) TPP.syncImageExportFormatUi();
   if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
   TPP.updateImageExportDuration();
@@ -4312,7 +4316,6 @@ TPP.bindImageExportPreviewDrag = function () {
   TPP.applyImageExportPreviewSplit(TPP.imageExportPreviewSplit);
 };
 TPP.renderImageExportPreview = async function () {
-  await TPP.ensureImageExportPalettesLoaded();
   const dialog = document.getElementById("imageExportDialog");
   const stage = document.getElementById("imageExportPreviewStage");
   const label = document.getElementById("imageExportPreviewLabel");
@@ -4376,6 +4379,7 @@ TPP.renderImageExportPreview = async function () {
     palette: palette.value || "websafe",
     threshold: Number(threshold.value) || 128,
   });
+  await TPP.ensureImageExportPaletteForOptionsLoaded(exportOptions);
   thresholdValue.textContent = String(exportOptions.threshold);
   const previewScale = Math.max(1, exportOptions.dpi / 96);
   try {

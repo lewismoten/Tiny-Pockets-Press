@@ -174,7 +174,8 @@ TPP.IMAGE_EXPORT_PALETTE_CATALOG = "data/palettes.catalog.json";
 TPP.imageExportPaletteById = TPP.imageExportPaletteById || {};
 TPP.imageExportPaletteIdsCached = TPP.imageExportPaletteIdsCached || [];
 TPP.imageExportPaletteCatalogById = TPP.imageExportPaletteCatalogById || {};
-TPP.imageExportPaletteLoadPromise = null;
+TPP.imageExportPaletteCatalogLoadPromise = null;
+TPP.imageExportPaletteLoadPromises = TPP.imageExportPaletteLoadPromises || {};
 TPP.imageExportPaletteIdsDefault = [
   "websafe",
   "colors4",
@@ -227,7 +228,7 @@ TPP.imageExportPaletteIds = function () {
     return TPP.imageExportPaletteIdsCached.slice();
   return TPP.imageExportPaletteIdsDefault.slice();
 };
-TPP.loadImageExportPalettes = async function () {
+TPP.loadImageExportPaletteCatalog = async function () {
   const response = await fetch(TPP.IMAGE_EXPORT_PALETTE_CATALOG, {
     cache: "no-cache",
   });
@@ -259,55 +260,89 @@ TPP.loadImageExportPalettes = async function () {
     ids.push(id);
   });
   const uniqueIds = Array.from(new Set(ids));
-  const map = {};
-  const loadPalette = async function (id) {
-    const meta = catalogMap[id];
-    if (!meta || !meta.file) return;
-    const fileResponse = await fetch(meta.file, { cache: "no-cache" });
-    if (!fileResponse.ok)
-      throw new Error(
-        "Palette file load failed: " + id + " " + fileResponse.status,
-      );
-    const palettePayload = await fileResponse.json();
-    if (
-      !palettePayload ||
-      Number(palettePayload.schemaVersion) !==
-        TPP.IMAGE_EXPORT_PALETTE_ITEM_SCHEMA_VERSION ||
-      palettePayload.id !== id ||
-      !Array.isArray(palettePayload.colors)
-    )
-      throw new Error("Palette file schema mismatch: " + id);
-    const colors = palettePayload.colors
-      .map(TPP.hexToRgbSwatch)
-      .filter(Boolean);
-    if (!colors.length) throw new Error("Palette file has no colors: " + id);
-    map[id] = colors;
-  };
-  await Promise.all(uniqueIds.map(loadPalette));
-  if (!map.websafe) map.websafe = TPP.fallbackWebsafePalette();
-  if (!ids.includes("websafe")) ids.unshift("websafe");
-  TPP.imageExportPaletteById = map;
   TPP.imageExportPaletteCatalogById = catalogMap;
   TPP.imageExportPaletteIdsCached = uniqueIds.includes("websafe")
     ? uniqueIds
     : ["websafe"].concat(uniqueIds);
-  return map;
+  return catalogMap;
 };
-TPP.ensureImageExportPalettesLoaded = async function () {
+TPP.ensureImageExportPaletteCatalogLoaded = async function () {
   if (TPP.imageExportPaletteIdsCached.length) return;
-  if (!TPP.imageExportPaletteLoadPromise) {
-    TPP.imageExportPaletteLoadPromise = TPP.loadImageExportPalettes()
-      .catch(function (_error) {
-        TPP.imageExportPaletteById = {
-          websafe: TPP.fallbackWebsafePalette(),
-        };
-        TPP.imageExportPaletteIdsCached = ["websafe"];
-      })
-      .finally(function () {
-        TPP.imageExportPaletteLoadPromise = null;
-      });
+  if (!TPP.imageExportPaletteCatalogLoadPromise) {
+    TPP.imageExportPaletteCatalogLoadPromise =
+      TPP.loadImageExportPaletteCatalog()
+        .catch(function (_error) {
+          TPP.imageExportPaletteById = {
+            websafe: TPP.fallbackWebsafePalette(),
+          };
+          TPP.imageExportPaletteCatalogById = {};
+          TPP.imageExportPaletteIdsCached = ["websafe"];
+        })
+        .finally(function () {
+          TPP.imageExportPaletteCatalogLoadPromise = null;
+        });
   }
-  await TPP.imageExportPaletteLoadPromise;
+  await TPP.imageExportPaletteCatalogLoadPromise;
+};
+TPP.loadImageExportPaletteById = async function (id) {
+  const paletteId = String(id || "websafe").trim() || "websafe";
+  if (TPP.imageExportPaletteById[paletteId])
+    return TPP.imageExportPaletteById[paletteId];
+  await TPP.ensureImageExportPaletteCatalogLoaded();
+  const meta = TPP.imageExportPaletteCatalogById[paletteId];
+  if (!meta || !meta.file) {
+    if (paletteId === "websafe") {
+      TPP.imageExportPaletteById.websafe = TPP.fallbackWebsafePalette();
+      return TPP.imageExportPaletteById.websafe;
+    }
+    return TPP.loadImageExportPaletteById("websafe");
+  }
+  const fileResponse = await fetch(meta.file, { cache: "no-cache" });
+  if (!fileResponse.ok)
+    throw new Error(
+      "Palette file load failed: " + paletteId + " " + fileResponse.status,
+    );
+  const palettePayload = await fileResponse.json();
+  if (
+    !palettePayload ||
+    Number(palettePayload.schemaVersion) !==
+      TPP.IMAGE_EXPORT_PALETTE_ITEM_SCHEMA_VERSION ||
+    palettePayload.id !== paletteId ||
+    !Array.isArray(palettePayload.colors)
+  ) {
+    throw new Error("Palette file schema mismatch: " + paletteId);
+  }
+  const colors = palettePayload.colors.map(TPP.hexToRgbSwatch).filter(Boolean);
+  if (!colors.length)
+    throw new Error("Palette file has no colors: " + paletteId);
+  TPP.imageExportPaletteById[paletteId] = colors;
+  return colors;
+};
+TPP.ensureImageExportPaletteLoaded = async function (id) {
+  const paletteId = String(id || "websafe").trim() || "websafe";
+  if (TPP.imageExportPaletteById[paletteId]) return;
+  if (!TPP.imageExportPaletteLoadPromises[paletteId]) {
+    TPP.imageExportPaletteLoadPromises[paletteId] =
+      TPP.loadImageExportPaletteById(paletteId)
+        .catch(function () {
+          if (!TPP.imageExportPaletteById.websafe) {
+            TPP.imageExportPaletteById.websafe = TPP.fallbackWebsafePalette();
+          }
+          if (paletteId !== "websafe") {
+            TPP.imageExportPaletteById[paletteId] =
+              TPP.imageExportPaletteById.websafe;
+          }
+        })
+        .finally(function () {
+          delete TPP.imageExportPaletteLoadPromises[paletteId];
+        });
+  }
+  await TPP.imageExportPaletteLoadPromises[paletteId];
+};
+TPP.ensureImageExportPaletteForOptionsLoaded = async function (options) {
+  const exportOptions = TPP.imageExportOptions(options);
+  if (exportOptions.colorDepth !== "indexed") return;
+  await TPP.ensureImageExportPaletteLoaded(exportOptions.palette || "websafe");
 };
 TPP.imageExportNamedPalette = function (name) {
   const id = String(name || "websafe");
@@ -614,7 +649,7 @@ TPP.previewBlobSize = function (canvas, format, quality) {
   });
 };
 TPP.exportImagesZip = async function (options) {
-  await TPP.ensureImageExportPalettesLoaded();
+  await TPP.ensureImageExportPaletteForOptionsLoaded(options);
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();
@@ -689,7 +724,9 @@ TPP.exportImagesZip = async function (options) {
   TPP.showProgress(100, "Page images ZIP complete");
 };
 TPP.exportAnimatedGif = async function (options) {
-  await TPP.ensureImageExportPalettesLoaded();
+  await TPP.ensureImageExportPaletteForOptionsLoaded(
+    Object.assign({}, options || {}, { format: "gif" }),
+  );
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();
@@ -772,7 +809,7 @@ TPP.exportAnimatedGif = async function (options) {
   TPP.showProgress(100, "Animated GIF complete");
 };
 TPP.exportMp4 = async function (options) {
-  await TPP.ensureImageExportPalettesLoaded();
+  await TPP.ensureImageExportPaletteForOptionsLoaded(options);
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();

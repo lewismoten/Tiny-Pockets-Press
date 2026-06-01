@@ -362,8 +362,9 @@ export async function init(TPP) {
       }
     }
   };
-  const openPalettePreview = function () {
+  const openPalettePreview = async function () {
     if (typeof imageExportPaletteDialog.showModal !== "function") return;
+    await ensureSelectedPalette();
     const paletteName = imageExportPalette.value || "websafe";
     const layout = paletteGridLayout(paletteName, {
       gap: 6,
@@ -449,6 +450,16 @@ export async function init(TPP) {
     );
     syncPalettePreview();
   };
+  const ensureSelectedPalette = async function () {
+    if (imageExportColorDepth.value !== "indexed") return;
+    await TPP.ensureImageExportPaletteLoaded(
+      imageExportPalette.value || "websafe",
+    );
+  };
+  const refreshFormatUi = async function () {
+    await ensureSelectedPalette();
+    syncFormatUi();
+  };
   const updateEstimate = function () {
     const pixels = TPP.imageExportPixels(Number(imageExportDpi.value) || 300);
     imageExportEstimate.textContent =
@@ -494,13 +505,13 @@ export async function init(TPP) {
     updateEstimate();
     schedulePreview();
   });
-  imageExportFormat.addEventListener("change", function () {
-    syncFormatUi();
+  imageExportFormat.addEventListener("change", async function () {
+    await refreshFormatUi();
     saveImageExportUi();
     schedulePreview();
   });
-  imageExportColorDepth.addEventListener("change", function () {
-    syncFormatUi();
+  imageExportColorDepth.addEventListener("change", async function () {
+    await refreshFormatUi();
     saveImageExportUi();
     schedulePreview();
   });
@@ -509,8 +520,8 @@ export async function init(TPP) {
     saveImageExportUi();
     schedulePreview();
   });
-  imageExportPalette.addEventListener("change", function () {
-    syncFormatUi();
+  imageExportPalette.addEventListener("change", async function () {
+    await refreshFormatUi();
     saveImageExportUi();
     if (imageExportPaletteDialog.open) openPalettePreview();
     schedulePreview();
@@ -536,7 +547,9 @@ export async function init(TPP) {
     updateEstimate();
     schedulePreview();
   });
-  imageExportPalettePreview.addEventListener("click", openPalettePreview);
+  imageExportPalettePreview.addEventListener("click", function () {
+    openPalettePreview();
+  });
   imageExportPaletteDialogCanvas.addEventListener("click", function (event) {
     const layout = TPP.imageExportPaletteDialogLayout;
     const index = paletteSelectionInfo(
