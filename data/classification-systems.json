@@ -73,12 +73,30 @@
                   "code": "121",
                   "shortLabel": "GRD",
                   "label": "Graphic Design",
-                  "keywords": ["graphic", "design", "art"],
+                  "keywords": [
+                    "graphic",
+                    "design",
+                    "art",
+                    "comics",
+                    "comic art",
+                    "graphic novels",
+                    "sequential art",
+                    "illustration",
+                    "lettering"
+                  ],
                   "status": "active",
                   "sort": 121,
-                  "seeAlso": ["443", "644"],
-                  "includes": ["graphic", "design", "art"],
-                  "scopeNote": "Use for works chiefly about graphic design within design."
+                  "seeAlso": ["443", "644", "840"],
+                  "includes": [
+                    "graphic",
+                    "design",
+                    "art",
+                    "comics",
+                    "graphic novels",
+                    "sequential art",
+                    "illustration"
+                  ],
+                  "scopeNote": "Use for works chiefly about graphic design, comics form, sequential art, illustration, lettering, and the visual craft of graphic storytelling. Class literary works themselves with fiction or short forms as appropriate."
                 },
                 {
                   "code": "122",
@@ -360,11 +378,37 @@
               "code": "163",
               "shortLabel": "URD",
               "label": "Urban Design",
-              "keywords": ["urban", "design", "architecture", "preservation"],
+              "keywords": [
+                "urban",
+                "design",
+                "architecture",
+                "preservation",
+                "transportation",
+                "transport",
+                "vehicles",
+                "roads",
+                "rail",
+                "aviation",
+                "transit",
+                "mobility",
+                "infrastructure"
+              ],
               "status": "active",
               "sort": 163,
-              "includes": ["urban", "design", "architecture", "preservation"],
-              "scopeNote": "Use for works chiefly about urban design within architecture & preservation."
+              "includes": [
+                "urban",
+                "design",
+                "architecture",
+                "preservation",
+                "transportation systems",
+                "roads",
+                "railways",
+                "aviation networks",
+                "mobility",
+                "infrastructure"
+              ],
+              "scopeNote": "Use for works on urban design, transportation systems, roads, rail, transit, mobility, and the planning of the built public realm. Use here for transportation as infrastructure or civic design rather than vehicle repair.",
+              "seeAlso": ["512", "164"]
             },
             {
               "code": "164",
@@ -906,11 +950,29 @@
                   "code": "313",
                   "shortLabel": "OPE",
                   "label": "Operations",
-                  "keywords": ["operations", "business", "work", "management"],
+                  "keywords": [
+                    "operations",
+                    "business",
+                    "work",
+                    "management",
+                    "logistics",
+                    "transport operations",
+                    "supply chain",
+                    "distribution"
+                  ],
                   "status": "active",
                   "sort": 313,
-                  "includes": ["operations", "business", "work", "management"],
-                  "scopeNote": "Use for works chiefly about operations within management."
+                  "includes": [
+                    "operations",
+                    "business",
+                    "work",
+                    "management",
+                    "logistics",
+                    "transport operations",
+                    "distribution systems"
+                  ],
+                  "scopeNote": "Use for operations, logistics, supply chains, and the management side of moving goods and services.",
+                  "seeAlso": []
                 },
                 {
                   "code": "314",
@@ -1629,11 +1691,32 @@
                   "code": "512",
                   "shortLabel": "MOH",
                   "label": "Modern History",
-                  "keywords": ["modern", "history", "society"],
+                  "keywords": [
+                    "modern",
+                    "history",
+                    "society",
+                    "war",
+                    "military",
+                    "battle",
+                    "armed conflict",
+                    "civil war",
+                    "veterans",
+                    "transportation history"
+                  ],
                   "status": "active",
                   "sort": 512,
-                  "includes": ["modern", "history", "society"],
-                  "scopeNote": "Use for works chiefly about modern history within history."
+                  "includes": [
+                    "modern",
+                    "history",
+                    "society",
+                    "war history",
+                    "military campaigns",
+                    "civil war",
+                    "veterans",
+                    "transportation history"
+                  ],
+                  "scopeNote": "Use for modern historical works, including wars, military conflict, veterans, and major transportation history when treated historically rather than technically.",
+                  "seeAlso": ["521", "163"]
                 },
                 {
                   "code": "513",
@@ -1649,11 +1732,26 @@
                   "code": "514",
                   "shortLabel": "WOH",
                   "label": "World History",
-                  "keywords": ["world", "history", "society"],
+                  "keywords": [
+                    "world",
+                    "history",
+                    "society",
+                    "world war",
+                    "global conflict",
+                    "military history"
+                  ],
                   "status": "active",
                   "sort": 514,
-                  "includes": ["world", "history", "society"],
-                  "scopeNote": "Use for works chiefly about world history within history."
+                  "includes": [
+                    "world",
+                    "history",
+                    "society",
+                    "world war",
+                    "global conflict",
+                    "military history"
+                  ],
+                  "scopeNote": "Use for broad world-historical treatments, including global wars and international conflict.",
+                  "seeAlso": []
                 }
               ],
               "keywords": ["history", "society"],
@@ -1678,7 +1776,11 @@
                     "history",
                     "society",
                     "social",
-                    "studies"
+                    "studies",
+                    "military policy",
+                    "defense",
+                    "statecraft",
+                    "war and government"
                   ],
                   "status": "active",
                   "sort": 521,
@@ -1688,9 +1790,13 @@
                     "history",
                     "society",
                     "social",
-                    "studies"
+                    "studies",
+                    "military policy",
+                    "defense policy",
+                    "statecraft"
                   ],
-                  "scopeNote": "Use for works chiefly about politics & government within social studies."
+                  "scopeNote": "Use for politics and government, including defense policy, statecraft, diplomacy, and war as a matter of governance.",
+                  "seeAlso": ["512", "533"]
                 },
                 {
                   "code": "522",
@@ -1723,19 +1829,28 @@
                     "studies",
                     "history",
                     "society",
-                    "social"
+                    "social",
+                    "food culture",
+                    "foodways",
+                    "culinary history",
+                    "comics culture",
+                    "graphic storytelling"
                   ],
                   "status": "active",
                   "sort": 523,
-                  "seeAlso": ["154", "934"],
+                  "seeAlso": ["154", "934", "921", "121"],
                   "includes": [
                     "cultural",
                     "studies",
                     "history",
                     "society",
-                    "social"
+                    "social",
+                    "food culture",
+                    "foodways",
+                    "culinary history",
+                    "comics culture"
                   ],
-                  "scopeNote": "Use for works chiefly about cultural studies within social studies."
+                  "scopeNote": "Use for cultural studies topics, including foodways, culinary history, everyday media culture, and comics or graphic storytelling as cultural forms."
                 },
                 {
                   "code": "524",
@@ -1811,7 +1926,13 @@
                     "society",
                     "law",
                     "civic",
-                    "life"
+                    "life",
+                    "true crime",
+                    "criminal justice",
+                    "crime victims",
+                    "criminal cases",
+                    "investigations",
+                    "civil liberties"
                   ],
                   "status": "active",
                   "sort": 532,
@@ -1822,9 +1943,14 @@
                     "society",
                     "law",
                     "civic",
-                    "life"
+                    "life",
+                    "true crime",
+                    "criminal cases",
+                    "investigations",
+                    "rights discourse"
                   ],
-                  "scopeNote": "Use for works chiefly about justice & rights within law & civic life."
+                  "scopeNote": "Use for justice, rights, civil liberties, and nonfiction works on crime, criminal cases, and true crime when the emphasis is legal, social, or documentary rather than fictional.",
+                  "seeAlso": ["834", "512"]
                 },
                 {
                   "code": "533",
@@ -1837,7 +1963,12 @@
                     "society",
                     "law",
                     "civic",
-                    "life"
+                    "life",
+                    "public health",
+                    "health policy",
+                    "disability policy",
+                    "aging policy",
+                    "care policy"
                   ],
                   "status": "active",
                   "sort": 533,
@@ -1848,9 +1979,14 @@
                     "society",
                     "law",
                     "civic",
-                    "life"
+                    "life",
+                    "public health policy",
+                    "disability policy",
+                    "aging policy",
+                    "care policy"
                   ],
-                  "scopeNote": "Use for works chiefly about public policy within law & civic life."
+                  "scopeNote": "Use for public policy, including public health, disability policy, aging policy, and systems of care when the emphasis is civic or governmental.",
+                  "seeAlso": ["941"]
                 },
                 {
                   "code": "534",
@@ -1970,7 +2106,12 @@
                     "history",
                     "society",
                     "geography",
-                    "place"
+                    "place",
+                    "agriculture",
+                    "farming",
+                    "farmland",
+                    "homesteading",
+                    "rural life"
                   ],
                   "status": "active",
                   "sort": 544,
@@ -1981,9 +2122,15 @@
                     "history",
                     "society",
                     "geography",
-                    "place"
+                    "place",
+                    "agriculture",
+                    "farming",
+                    "homesteading",
+                    "rural life",
+                    "farmland"
                   ],
-                  "scopeNote": "Use for works chiefly about rural & environmental regions within geography & place."
+                  "scopeNote": "Use for rural and environmental regions, including agriculture, farming landscapes, and homesteading when the emphasis is place, region, or land use.",
+                  "seeAlso": ["923", "753"]
                 }
               ],
               "keywords": ["geography", "place", "history", "society"],
@@ -2255,7 +2402,10 @@
                     "language",
                     "literature",
                     "forms",
-                    "genres"
+                    "genres",
+                    "humor",
+                    "humorous essays",
+                    "satire"
                   ],
                   "status": "active",
                   "sort": 633,
@@ -2264,9 +2414,12 @@
                     "language",
                     "literature",
                     "forms",
-                    "genres"
+                    "genres",
+                    "humor writing",
+                    "satirical essays"
                   ],
-                  "scopeNote": "Use for works chiefly about essays within forms & genres."
+                  "scopeNote": "Use for essays, including humorous essays and satirical prose when the primary form is essayistic rather than fictional.",
+                  "seeAlso": ["810"]
                 },
                 {
                   "code": "634",
@@ -2960,12 +3113,26 @@
                   "scopeNote": "Use for works chiefly about slice of life within general fiction."
                 }
               ],
-              "keywords": ["general", "fiction"],
+              "keywords": [
+                "general",
+                "fiction",
+                "humor fiction",
+                "satire",
+                "graphic novels",
+                "comic fiction"
+              ],
               "status": "active",
               "sort": 810,
               "allowAssign": true,
-              "includes": ["general", "fiction"],
-              "scopeNote": "Use for general works on general fiction. Class more specific works in the narrower categories below when needed."
+              "includes": [
+                "general",
+                "fiction",
+                "humor fiction",
+                "satire",
+                "graphic novels"
+              ],
+              "scopeNote": "Use for general fiction, including humor, satire, and graphic novels when they are shelved primarily as literary works rather than visual-art studies.",
+              "seeAlso": ["121", "840"]
             },
             {
               "code": "820",
@@ -3135,12 +3302,30 @@
                   "scopeNote": "Use for works chiefly about fables & fairy tales within short forms."
                 }
               ],
-              "keywords": ["short", "forms", "fiction"],
+              "keywords": [
+                "short",
+                "forms",
+                "fiction",
+                "comics",
+                "graphic novels",
+                "comic strips",
+                "sequential narrative",
+                "humor collections"
+              ],
               "status": "active",
               "sort": 840,
               "allowAssign": true,
-              "includes": ["short", "forms", "fiction"],
-              "scopeNote": "Use for general works on short forms. Class more specific works in the narrower categories below when needed."
+              "includes": [
+                "short",
+                "forms",
+                "fiction",
+                "comics collections",
+                "graphic novels",
+                "comic strips",
+                "short humor"
+              ],
+              "scopeNote": "Use for short-form literature and collections, including comics, graphic novels, comic strips, flash work, and other brief or episodic narrative forms when they are shelved by literary format.",
+              "seeAlso": ["121", "810"]
             }
           ],
           "keywords": ["fiction"],
@@ -3252,7 +3437,15 @@
                     "reference",
                     "practical",
                     "home",
-                    "making"
+                    "making",
+                    "food",
+                    "baking",
+                    "nutrition",
+                    "food history",
+                    "food culture",
+                    "canning",
+                    "preserving",
+                    "fermentation"
                   ],
                   "status": "active",
                   "sort": 921,
@@ -3261,9 +3454,17 @@
                     "reference",
                     "practical",
                     "home",
-                    "making"
+                    "making",
+                    "baking",
+                    "nutrition",
+                    "food history",
+                    "food culture",
+                    "canning",
+                    "preserving",
+                    "fermentation"
                   ],
-                  "scopeNote": "Use for works chiefly about cooking within home & making."
+                  "scopeNote": "Use for cooking and food practice, including baking, nutrition, food history, food culture, canning, preserving, and fermentation when the book is chiefly practical or culinary.",
+                  "seeAlso": ["523", "923"]
                 },
                 {
                   "code": "922",
@@ -3296,7 +3497,13 @@
                     "reference",
                     "practical",
                     "home",
-                    "making"
+                    "making",
+                    "agriculture",
+                    "farming",
+                    "homesteading",
+                    "kitchen garden",
+                    "livestock",
+                    "orchards"
                   ],
                   "status": "active",
                   "sort": 923,
@@ -3305,9 +3512,15 @@
                     "reference",
                     "practical",
                     "home",
-                    "making"
+                    "making",
+                    "agriculture",
+                    "farming",
+                    "homesteading",
+                    "livestock support",
+                    "orchards"
                   ],
-                  "scopeNote": "Use for works chiefly about gardening within home & making."
+                  "scopeNote": "Use for gardening, small-scale agriculture, homesteading, kitchen gardens, orchards, and related practical growing work. Use here when the emphasis is hands-on cultivation rather than regional land use.",
+                  "seeAlso": ["544", "753", "921"]
                 },
                 {
                   "code": "924",
@@ -3319,7 +3532,12 @@
                     "reference",
                     "practical",
                     "home",
-                    "making"
+                    "making",
+                    "vehicles",
+                    "car repair",
+                    "boat repair",
+                    "machine repair",
+                    "home workshop"
                   ],
                   "status": "active",
                   "sort": 924,
@@ -3329,9 +3547,14 @@
                     "reference",
                     "practical",
                     "home",
-                    "making"
+                    "making",
+                    "vehicle repair",
+                    "boat repair",
+                    "machine maintenance",
+                    "workshop practice"
                   ],
-                  "scopeNote": "Use for works chiefly about diy & repair within home & making."
+                  "scopeNote": "Use for practical repair and making, including vehicle or machine maintenance when the emphasis is hands-on fixing rather than design history or transport systems.",
+                  "seeAlso": ["163"]
                 }
               ],
               "keywords": ["home", "making", "reference", "practical"],
@@ -3464,7 +3687,19 @@
                     "practical",
                     "wellbeing",
                     "daily",
-                    "life"
+                    "life",
+                    "medicine",
+                    "medical",
+                    "caregiving",
+                    "caregiver",
+                    "elder care",
+                    "aging",
+                    "disability",
+                    "disabled",
+                    "first aid",
+                    "public health",
+                    "nursing",
+                    "medical guides"
                   ],
                   "status": "active",
                   "sort": 941,
@@ -3475,9 +3710,17 @@
                     "practical",
                     "wellbeing",
                     "daily",
-                    "life"
+                    "life",
+                    "medical guides",
+                    "caregiving",
+                    "elder care",
+                    "disability",
+                    "aging",
+                    "first aid",
+                    "public health"
                   ],
-                  "scopeNote": "Use for works chiefly about health & wellness within wellbeing & daily life."
+                  "scopeNote": "Use for health, wellness, medicine, first aid, caregiving, elder care, disability, aging, nursing, and public-health guides when the emphasis is practical support, personal use, or general medical reference.",
+                  "seeAlso": ["533", "943"]
                 },
                 {
                   "code": "942",
@@ -3516,7 +3759,12 @@
                     "reference",
                     "practical",
                     "wellbeing",
-                    "daily"
+                    "daily",
+                    "caregiving",
+                    "family caregiving",
+                    "elder care at home",
+                    "disability support",
+                    "care relationships"
                   ],
                   "status": "active",
                   "sort": 943,
@@ -3527,9 +3775,13 @@
                     "reference",
                     "practical",
                     "wellbeing",
-                    "daily"
+                    "daily",
+                    "family caregiving",
+                    "care relationships",
+                    "support at home"
                   ],
-                  "scopeNote": "Use for works chiefly about relationships & family life within wellbeing & daily life."
+                  "scopeNote": "Use for relationships and family life, including family caregiving, care relationships, and home support when the primary emphasis is interpersonal or domestic rather than medical.",
+                  "seeAlso": ["941"]
                 },
                 {
                   "code": "944",
@@ -3616,11 +3868,31 @@
               "code": "953",
               "shortLabel": "REC",
               "label": "Recreation",
-              "keywords": ["recreation", "games", "hobbies"],
+              "keywords": [
+                "recreation",
+                "games",
+                "hobbies",
+                "sports",
+                "fitness",
+                "outdoor recreation",
+                "camping",
+                "hiking",
+                "athletics"
+              ],
               "status": "active",
               "sort": 953,
-              "includes": ["recreation", "games", "hobbies"],
-              "scopeNote": "Use for works chiefly about recreation within games, hobbies & recreation."
+              "includes": [
+                "recreation",
+                "games",
+                "hobbies",
+                "sports",
+                "fitness",
+                "camping",
+                "hiking",
+                "outdoor recreation"
+              ],
+              "scopeNote": "Use for recreation, including sports, athletics, fitness, camping, hiking, and outdoor recreation when the emphasis is leisure, training, or participation.",
+              "seeAlso": ["941"]
             },
             {
               "code": "954",
@@ -3635,11 +3907,15 @@
                 "care",
                 "games",
                 "hobbies",
-                "recreation"
+                "recreation",
+                "pet health",
+                "pet care",
+                "animal training",
+                "companion animals"
               ],
               "status": "active",
               "sort": 954,
-              "seeAlso": ["753", "752"],
+              "seeAlso": ["753", "752", "941"],
               "includes": [
                 "pets",
                 "animal",
@@ -3648,9 +3924,13 @@
                 "companions",
                 "training",
                 "games",
-                "hobbies"
+                "hobbies",
+                "pet health",
+                "pet care",
+                "companion animals",
+                "animal training"
               ],
-              "scopeNote": "Use for works chiefly about pets & animal care within games, hobbies & recreation."
+              "scopeNote": "Use for pets, companion animals, animal care, training, and behavior. Use here for practical pet ownership and care rather than zoological or wildlife study."
             }
           ],
           "keywords": ["games", "hobbies", "recreation", "leisure"],
