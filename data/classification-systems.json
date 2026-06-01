@@ -40,11 +40,33 @@
                   "code": "113",
                   "shortLabel": "PRI",
                   "label": "Printmaking",
-                  "keywords": ["printmaking", "art", "visual", "arts"],
+                  "keywords": [
+                    "printmaking",
+                    "art",
+                    "visual",
+                    "arts",
+                    "screen printing",
+                    "linocut",
+                    "etching",
+                    "relief printing",
+                    "woodcut",
+                    "letterpress"
+                  ],
                   "status": "active",
                   "sort": 113,
-                  "includes": ["printmaking", "art", "visual", "arts"],
-                  "scopeNote": "Use for works chiefly about printmaking within visual arts."
+                  "includes": [
+                    "printmaking",
+                    "art",
+                    "visual",
+                    "arts",
+                    "screen printing",
+                    "linocut",
+                    "etching",
+                    "relief printing",
+                    "woodcut",
+                    "letterpress"
+                  ],
+                  "scopeNote": "Use for works chiefly about printmaking within visual arts, including screen printing, linocut, etching, relief printing, woodcut, and letterpress as artistic processes."
                 },
                 {
                   "code": "114",
@@ -166,11 +188,33 @@
                   "code": "133",
                   "shortLabel": "THE",
                   "label": "Theater",
-                  "keywords": ["theater", "art", "performing", "arts"],
+                  "keywords": [
+                    "theater",
+                    "art",
+                    "performing",
+                    "arts",
+                    "magic tricks",
+                    "illusion",
+                    "stage magic",
+                    "clowning",
+                    "balloon sculpting",
+                    "balloon art",
+                    "variety arts"
+                  ],
                   "status": "active",
                   "sort": 133,
-                  "includes": ["theater", "art", "performing", "arts"],
-                  "scopeNote": "Use for works chiefly about theater within performing arts."
+                  "includes": [
+                    "theater",
+                    "art",
+                    "performing",
+                    "arts",
+                    "magic tricks",
+                    "stage magic",
+                    "clowning",
+                    "balloon sculpting",
+                    "variety arts"
+                  ],
+                  "scopeNote": "Use for works chiefly about theater within performing arts, including stage magic, illusion performance, clowning, balloon sculpting, and other live variety arts when treated as performance practice."
                 },
                 {
                   "code": "134",
@@ -260,12 +304,26 @@
               "code": "151",
               "shortLabel": "REL",
               "label": "Religion",
-              "keywords": ["religion", "spirituality", "philosophy"],
+              "keywords": [
+                "religion",
+                "spirituality",
+                "philosophy",
+                "freemasonry",
+                "masonic",
+                "fraternal orders"
+              ],
               "status": "active",
               "sort": 151,
-              "seeAlso": ["154", "620"],
-              "includes": ["religion", "spirituality", "philosophy"],
-              "scopeNote": "Use for works chiefly about religion within religion, spirituality & philosophy."
+              "seeAlso": ["154", "620", "154.5"],
+              "includes": [
+                "religion",
+                "spirituality",
+                "philosophy",
+                "freemasonry",
+                "masonic traditions",
+                "fraternal orders"
+              ],
+              "scopeNote": "Use for works chiefly about religion within religion, spirituality & philosophy. Use here for religious traditions broadly, and see related classes for esoteric or symbolic societies such as Freemasonry."
             },
             {
               "code": "152",
@@ -317,7 +375,10 @@
                 "dream symbolism",
                 "religion",
                 "spirituality",
-                "philosophy"
+                "philosophy",
+                "esoterica",
+                "symbolic societies",
+                "freemasonry"
               ],
               "status": "active",
               "sort": 154,
@@ -329,9 +390,12 @@
                 "dream symbolism",
                 "religion",
                 "spirituality",
-                "philosophy"
+                "philosophy",
+                "esoteric symbolism",
+                "freemasonry"
               ],
-              "scopeNote": "Use for works chiefly about myth & thought within religion, spirituality & philosophy. Use here for symbolic or interpretive works about dreams, dream imagery, and dream meaning rather than personal dream records."
+              "scopeNote": "Use for works chiefly about myth & thought within religion, spirituality & philosophy. Use here for symbolic or interpretive works about dreams, esoteric traditions, symbolic societies, and systems of meaning rather than devotional or strictly historical treatment.",
+              "seeAlso": ["151"]
             }
           ],
           "keywords": ["religion", "spirituality", "philosophy", "belief"],
@@ -1552,7 +1616,14 @@
                     "computers",
                     "technology",
                     "applied",
-                    "computing"
+                    "computing",
+                    "electronics",
+                    "electrical engineering",
+                    "circuits",
+                    "microcontrollers",
+                    "hardware",
+                    "control systems",
+                    "makers"
                   ],
                   "status": "active",
                   "sort": 434,
@@ -1563,9 +1634,17 @@
                     "computers",
                     "technology",
                     "applied",
-                    "computing"
+                    "computing",
+                    "electronics",
+                    "electrical engineering",
+                    "circuits",
+                    "microcontrollers",
+                    "hardware",
+                    "control systems",
+                    "makers"
                   ],
-                  "scopeNote": "Use for works chiefly about robotics & embedded systems within applied computing."
+                  "scopeNote": "Use for works chiefly about robotics, embedded systems, electronics, circuits, electrical engineering, microcontrollers, and hardware control within applied computing.",
+                  "seeAlso": ["722", "924"]
                 }
               ],
               "keywords": ["applied", "computing", "computers", "technology"],
@@ -1720,7 +1799,10 @@
                     "armed conflict",
                     "civil war",
                     "veterans",
-                    "transportation history"
+                    "transportation history",
+                    "american revolution",
+                    "revolutionary war",
+                    "civil rights movement"
                   ],
                   "status": "active",
                   "sort": 512,
@@ -1732,10 +1814,13 @@
                     "military campaigns",
                     "civil war",
                     "veterans",
-                    "transportation history"
+                    "transportation history",
+                    "american revolution",
+                    "revolutionary war",
+                    "civil rights movement"
                   ],
-                  "scopeNote": "Use for modern historical works, including wars, military conflict, veterans, and major transportation history when treated historically rather than technically.",
-                  "seeAlso": ["521", "163"]
+                  "scopeNote": "Use for modern historical works, including wars, military conflict, veterans, the American Revolution, the Civil War, the Civil Rights Movement, and major transportation history when treated historically rather than technically.",
+                  "seeAlso": ["521", "163", "532", "534"]
                 },
                 {
                   "code": "513",
@@ -1799,7 +1884,12 @@
                     "military policy",
                     "defense",
                     "statecraft",
-                    "war and government"
+                    "war and government",
+                    "elections",
+                    "legislatures",
+                    "committees",
+                    "government proceedings",
+                    "parliamentary procedure"
                   ],
                   "status": "active",
                   "sort": 521,
@@ -1812,10 +1902,15 @@
                     "studies",
                     "military policy",
                     "defense policy",
-                    "statecraft"
+                    "statecraft",
+                    "elections",
+                    "legislatures",
+                    "committees",
+                    "government proceedings",
+                    "parliamentary procedure"
                   ],
-                  "scopeNote": "Use for politics and government, including defense policy, statecraft, diplomacy, and war as a matter of governance.",
-                  "seeAlso": ["512", "533"]
+                  "scopeNote": "Use for politics and government, including defense policy, statecraft, diplomacy, elections, legislatures, committees, and understanding government proceedings as matters of governance.",
+                  "seeAlso": ["512", "533", "534"]
                 },
                 {
                   "code": "522",
@@ -1951,7 +2046,10 @@
                     "crime victims",
                     "criminal cases",
                     "investigations",
-                    "civil liberties"
+                    "civil liberties",
+                    "civil rights",
+                    "foia",
+                    "freedom of information"
                   ],
                   "status": "active",
                   "sort": 532,
@@ -1966,10 +2064,14 @@
                     "true crime",
                     "criminal cases",
                     "investigations",
-                    "rights discourse"
+                    "rights discourse",
+                    "civil rights",
+                    "civil liberties",
+                    "foia",
+                    "freedom of information"
                   ],
-                  "scopeNote": "Use for justice, rights, civil liberties, and nonfiction works on crime, criminal cases, and true crime when the emphasis is legal, social, or documentary rather than fictional.",
-                  "seeAlso": ["834", "512"]
+                  "scopeNote": "Use for justice, rights, civil liberties, civil rights, FOIA, and nonfiction works on crime or criminal cases when the emphasis is legal, social, documentary, or access-to-information related.",
+                  "seeAlso": ["834", "512", "534"]
                 },
                 {
                   "code": "533",
@@ -2017,7 +2119,13 @@
                     "history",
                     "society",
                     "law",
-                    "life"
+                    "life",
+                    "community organizing",
+                    "civic organizing",
+                    "nonprofits",
+                    "chamber of commerce",
+                    "festival planning",
+                    "public meetings"
                   ],
                   "status": "active",
                   "sort": 534,
@@ -2027,9 +2135,16 @@
                     "history",
                     "society",
                     "law",
-                    "life"
+                    "life",
+                    "community organizing",
+                    "civic organizing",
+                    "nonprofits",
+                    "chamber of commerce",
+                    "festival planning",
+                    "public meetings"
                   ],
-                  "scopeNote": "Use for works chiefly about civic practice within law & civic life."
+                  "scopeNote": "Use for civic practice, including community building, nonprofit work, chambers of commerce, festival organizing, public meetings, and hands-on participation in local institutions.",
+                  "seeAlso": ["521", "533"]
                 }
               ],
               "keywords": ["law", "civic", "life", "history", "society"],
@@ -3556,7 +3671,13 @@
                     "car repair",
                     "boat repair",
                     "machine repair",
-                    "home workshop"
+                    "home workshop",
+                    "electric cars",
+                    "evs",
+                    "car restoration",
+                    "automotive restoration",
+                    "vintage cars",
+                    "antique cars"
                   ],
                   "status": "active",
                   "sort": 924,
@@ -3570,10 +3691,16 @@
                     "vehicle repair",
                     "boat repair",
                     "machine maintenance",
-                    "workshop practice"
+                    "workshop practice",
+                    "electric cars",
+                    "evs",
+                    "car restoration",
+                    "automotive restoration",
+                    "vintage cars",
+                    "antique cars"
                   ],
-                  "scopeNote": "Use for practical repair and making, including vehicle or machine maintenance when the emphasis is hands-on fixing rather than design history or transport systems.",
-                  "seeAlso": ["163"]
+                  "scopeNote": "Use for practical repair and making, including vehicle or machine maintenance, electric vehicles, automotive restoration, and workshop rebuilding when the emphasis is hands-on fixing rather than design history or transport systems.",
+                  "seeAlso": ["163", "434"]
                 }
               ],
               "keywords": ["home", "making", "reference", "practical"],
@@ -3718,7 +3845,11 @@
                     "first aid",
                     "public health",
                     "nursing",
-                    "medical guides"
+                    "medical guides",
+                    "mental health",
+                    "therapy",
+                    "counseling",
+                    "psychology for everyday life"
                   ],
                   "status": "active",
                   "sort": 941,
@@ -3736,10 +3867,14 @@
                     "disability",
                     "aging",
                     "first aid",
-                    "public health"
+                    "public health",
+                    "mental health",
+                    "therapy",
+                    "counseling",
+                    "emotional wellbeing"
                   ],
-                  "scopeNote": "Use for health, wellness, medicine, first aid, caregiving, elder care, disability, aging, nursing, and public-health guides when the emphasis is practical support, personal use, or general medical reference.",
-                  "seeAlso": ["533", "943"]
+                  "scopeNote": "Use for health, wellness, medicine, first aid, caregiving, elder care, disability, aging, nursing, public-health guides, and mental health when the emphasis is practical support, personal use, or general medical reference.",
+                  "seeAlso": ["533", "943", "942"]
                 },
                 {
                   "code": "942",
@@ -3754,7 +3889,10 @@
                     "practical",
                     "wellbeing",
                     "daily",
-                    "life"
+                    "life",
+                    "emotional wellbeing",
+                    "self reflection",
+                    "inner life"
                   ],
                   "status": "active",
                   "sort": 942,
@@ -3767,9 +3905,13 @@
                     "practical",
                     "wellbeing",
                     "daily",
-                    "life"
+                    "life",
+                    "emotional wellbeing",
+                    "self reflection",
+                    "inner life"
                   ],
-                  "scopeNote": "Use for works chiefly about mindfulness & reflection within wellbeing & daily life. Use here for reflective practices around dreams when the emphasis is self-observation, prompts, or contemplative wellbeing rather than keeping a personal dream record."
+                  "scopeNote": "Use for works chiefly about mindfulness & reflection within wellbeing & daily life. Use here for reflective practices, self-observation, journaling prompts, and contemplative wellbeing rather than clinical or medical treatment.",
+                  "seeAlso": ["941"]
                 },
                 {
                   "code": "943",

@@ -374,6 +374,25 @@
                 "thought"
               ],
               "scopeNote": "Use for works chiefly about meaning & life questions within myth & thought."
+            },
+            {
+              "extension": "5",
+              "shortLabel": "FRE",
+              "label": "Freemasonry & Symbolic Societies",
+              "keywords": [
+                "freemasonry",
+                "masonic",
+                "fraternal orders",
+                "symbolic societies"
+              ],
+              "includes": [
+                "freemasonry",
+                "masonic symbolism",
+                "fraternal orders",
+                "symbolic societies"
+              ],
+              "seeAlso": ["151"],
+              "scopeNote": "Use for works chiefly about Freemasonry, Masonic symbolism, fraternal orders, and related symbolic societies within myth & thought."
             }
           ]
         },
@@ -1699,6 +1718,23 @@
               "keywords": ["outdoor", "hobbies", "games", "recreation"],
               "includes": ["outdoor", "hobbies", "games", "recreation"],
               "scopeNote": "Use for works chiefly about outdoor hobbies within hobbies."
+            },
+            {
+              "extension": "5",
+              "shortLabel": "VCO",
+              "label": "Vintage Computing",
+              "keywords": [
+                "vintage computers",
+                "retro computing",
+                "computer collecting"
+              ],
+              "includes": [
+                "vintage computers",
+                "retro computing",
+                "computer collecting"
+              ],
+              "seeAlso": ["434.4"],
+              "scopeNote": "Use for hobby-oriented works on collecting, restoring, or building vintage computers when the emphasis is enthusiast practice rather than engineering."
             }
           ]
         },
@@ -1889,6 +1925,310 @@
                 "care"
               ],
               "scopeNote": "Use for works chiefly about training & behavior within pets & animal care."
+            }
+          ]
+        },
+        {
+          "parentCode": "133",
+          "label": "Theater",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "MAG",
+              "label": "Magic & Illusion",
+              "keywords": [
+                "magic tricks",
+                "illusion",
+                "stage magic",
+                "sleight of hand"
+              ],
+              "includes": [
+                "magic tricks",
+                "illusion",
+                "stage magic",
+                "sleight of hand"
+              ],
+              "scopeNote": "Use for works chiefly about magic tricks, illusion performance, sleight of hand, and stage magic within theater."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "CLO",
+              "label": "Clowning",
+              "keywords": ["clowning", "clowns", "physical comedy"],
+              "includes": ["clowning", "clowns", "physical comedy"],
+              "scopeNote": "Use for works chiefly about clowning, clown performance, and physical comedy within theater."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "BAL",
+              "label": "Balloon Sculpting",
+              "keywords": [
+                "balloon sculpting",
+                "balloon art",
+                "twisting balloons"
+              ],
+              "includes": [
+                "balloon sculpting",
+                "balloon art",
+                "twisting balloons"
+              ],
+              "scopeNote": "Use for works chiefly about balloon sculpting and balloon art as live performance or entertainment craft within theater."
+            }
+          ]
+        },
+        {
+          "parentCode": "434",
+          "label": "Robotics & Embedded Systems",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "ELC",
+              "label": "Electronics & Circuits",
+              "keywords": [
+                "electronics",
+                "circuits",
+                "soldering",
+                "microcontrollers"
+              ],
+              "includes": [
+                "electronics",
+                "circuits",
+                "soldering",
+                "microcontrollers"
+              ],
+              "scopeNote": "Use for works chiefly about electronics, circuits, soldering, and component-level hardware within robotics & embedded systems."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "ROB",
+              "label": "Robotics",
+              "keywords": ["robotics", "robots", "automation"],
+              "includes": ["robotics", "robots", "automation"],
+              "scopeNote": "Use for works chiefly about robotics and robotic systems within robotics & embedded systems."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "ELE",
+              "label": "Electrical Engineering",
+              "keywords": [
+                "electrical engineering",
+                "power systems",
+                "control systems"
+              ],
+              "includes": [
+                "electrical engineering",
+                "power systems",
+                "control systems"
+              ],
+              "scopeNote": "Use for works chiefly about electrical engineering and control systems within robotics & embedded systems."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "VCO",
+              "label": "Vintage Computing Hardware",
+              "keywords": [
+                "vintage computers",
+                "retro computing",
+                "building computers",
+                "computer restoration"
+              ],
+              "includes": [
+                "vintage computers",
+                "retro computing",
+                "building computers",
+                "computer restoration"
+              ],
+              "scopeNote": "Use for works chiefly about building, restoring, or maintaining vintage computers and retro computing hardware within robotics & embedded systems."
+            }
+          ]
+        },
+        {
+          "parentCode": "512",
+          "label": "Modern History",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "AMR",
+              "label": "American Revolution",
+              "keywords": [
+                "american revolution",
+                "revolutionary war",
+                "founding era"
+              ],
+              "includes": [
+                "american revolution",
+                "revolutionary war",
+                "founding era"
+              ],
+              "scopeNote": "Use for works chiefly about the American Revolution within modern history."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "CIW",
+              "label": "Civil War",
+              "keywords": ["civil war", "union", "confederacy"],
+              "includes": ["civil war", "union", "confederacy"],
+              "scopeNote": "Use for works chiefly about the Civil War within modern history."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "CRM",
+              "label": "Civil Rights Movement",
+              "keywords": [
+                "civil rights movement",
+                "segregation",
+                "voting rights"
+              ],
+              "includes": [
+                "civil rights movement",
+                "segregation",
+                "voting rights"
+              ],
+              "seeAlso": ["532.1", "534.1"],
+              "scopeNote": "Use for works chiefly about the Civil Rights Movement as a historical period or movement within modern history."
+            }
+          ]
+        },
+        {
+          "parentCode": "534",
+          "label": "Civic Practice",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "COM",
+              "label": "Community Building & Organizing",
+              "keywords": [
+                "community building",
+                "community organizing",
+                "grassroots"
+              ],
+              "includes": [
+                "community building",
+                "community organizing",
+                "grassroots"
+              ],
+              "scopeNote": "Use for works chiefly about building communities, grassroots organizing, and neighborhood civic participation within civic practice."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "GOV",
+              "label": "Government Proceedings & Public Meetings",
+              "keywords": [
+                "government proceedings",
+                "public meetings",
+                "meeting procedure"
+              ],
+              "includes": [
+                "government proceedings",
+                "public meetings",
+                "meeting procedure"
+              ],
+              "scopeNote": "Use for works chiefly about understanding government proceedings, public meetings, and how civic bodies conduct business within civic practice."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "ELE",
+              "label": "Elections & Committees",
+              "keywords": ["elections", "committees", "campaigns", "ballots"],
+              "includes": ["elections", "committees", "campaigns", "ballots"],
+              "scopeNote": "Use for works chiefly about elections, committees, and civic decision-making within civic practice."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "NPO",
+              "label": "Nonprofits & Chambers",
+              "keywords": ["nonprofits", "chamber of commerce", "associations"],
+              "includes": ["nonprofits", "chamber of commerce", "associations"],
+              "scopeNote": "Use for works chiefly about nonprofit organizations, chambers of commerce, and civic associations within civic practice."
+            },
+            {
+              "extension": "5",
+              "shortLabel": "FES",
+              "label": "Festivals & Civic Events",
+              "keywords": [
+                "festival organizing",
+                "community events",
+                "parades"
+              ],
+              "includes": [
+                "festival organizing",
+                "community events",
+                "parades"
+              ],
+              "scopeNote": "Use for works chiefly about organizing festivals, parades, and civic events within civic practice."
+            },
+            {
+              "extension": "6",
+              "shortLabel": "FOIA",
+              "label": "FOIA & Public Records",
+              "keywords": ["foia", "freedom of information", "public records"],
+              "includes": ["foia", "freedom of information", "public records"],
+              "seeAlso": ["532"],
+              "scopeNote": "Use for works chiefly about FOIA, access to public records, and information rights in civic practice."
+            }
+          ]
+        },
+        {
+          "parentCode": "941",
+          "label": "Health & Wellness",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "MHE",
+              "label": "Mental Health",
+              "keywords": [
+                "mental health",
+                "anxiety",
+                "depression",
+                "therapy",
+                "counseling"
+              ],
+              "includes": [
+                "mental health",
+                "anxiety",
+                "depression",
+                "therapy",
+                "counseling"
+              ],
+              "scopeNote": "Use for works chiefly about mental health, therapy, counseling, and emotional wellbeing within health & wellness."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "CAR",
+              "label": "Caregiving & Support",
+              "keywords": ["caregiving", "caregiver support", "home care"],
+              "includes": ["caregiving", "caregiver support", "home care"],
+              "scopeNote": "Use for works chiefly about caregiving, caregiver support, and practical care within health & wellness."
+            }
+          ]
+        },
+        {
+          "parentCode": "924",
+          "label": "DIY & Repair",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "EVC",
+              "label": "Electric Cars & EV Systems",
+              "keywords": ["electric cars", "evs", "battery systems"],
+              "includes": ["electric cars", "evs", "battery systems"],
+              "scopeNote": "Use for works chiefly about electric cars, EV systems, and hands-on electric vehicle maintenance within DIY & repair."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "ACR",
+              "label": "Antique Car Restoration",
+              "keywords": [
+                "antique car restoration",
+                "vintage car restoration",
+                "classic cars"
+              ],
+              "includes": [
+                "antique car restoration",
+                "vintage car restoration",
+                "classic cars"
+              ],
+              "scopeNote": "Use for works chiefly about antique, vintage, and classic car restoration within DIY & repair."
             }
           ]
         }
