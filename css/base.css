@@ -1645,6 +1645,10 @@ input[type="checkbox"] {
   border-radius: 16px;
   background: #fff8e8;
 }
+.book-info-picker-selection {
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 0.8rem;
+}
 .classification-selection-main {
   min-width: 0;
 }

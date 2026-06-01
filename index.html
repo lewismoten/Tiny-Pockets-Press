@@ -855,6 +855,48 @@
         </div>
       </form>
     </dialog>
+    <dialog id="bookInfoPickerDialog" class="modal">
+      <form method="dialog" class="modal-card classification-dialog-card">
+        <div class="classification-dialog-header">
+          <div>
+            <h2 id="bookInfoPickerDialogTitle">Choose Value</h2>
+            <p class="about-note">
+              Pick a common language or region code. Data loads only when this
+              dialog opens.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="button-cancel"
+            data-action="cancel-book-info-picker"
+          >
+            Close
+          </button>
+        </div>
+        <div
+          id="bookInfoPickerSelection"
+          class="classification-selection book-info-picker-selection"
+        ></div>
+        <div class="classification-search-wrap book-info-picker-search-wrap">
+          <label class="classification-search-label"
+            >Search
+            <input
+              id="bookInfoPickerSearch"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              placeholder="Search by code or name"
+            />
+          </label>
+          <div
+            id="bookInfoPickerResults"
+            class="classification-dialog-search-results"
+            hidden
+          ></div>
+        </div>
+        <div id="bookInfoPickerList" class="classification-dialog-list"></div>
+      </form>
+    </dialog>
     <div id="colorPickerPopover" class="color-picker-popover" hidden>
       <div class="color-picker-popover-card">
         <div class="color-picker-popover-top">

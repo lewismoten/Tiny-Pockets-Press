@@ -144,6 +144,12 @@
     "note": "Core book identity and publication fields now live under bookInfo so authored bibliographic data is grouped together."
   },
   {
+    "path": "languageCountry",
+    "schemaVersion": 18,
+    "movedTo": ["bookInfo.language", "bookInfo.region"],
+    "note": "Language and region are now stored as separate bookInfo fields so they can be chosen independently and reused in locale-aware shelfmarks."
+  },
+  {
     "path": "pageSize",
     "schemaVersion": 8,
     "movedTo": ["page.pageSize"],

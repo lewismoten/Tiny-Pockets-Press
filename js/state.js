@@ -1,5 +1,5 @@
 window.TPP = window.TPP || {};
-TPP.SCHEMA_VERSION = 17;
+TPP.SCHEMA_VERSION = 18;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI = "tinyPocketsPressUiV61";
@@ -163,6 +163,12 @@ TPP.defaultStaleKeyLookup = [
     schemaVersion: 15,
     movedTo: ["bookInfo.spineAuthor"],
     note: "Alternate spine byline text now lives with the rest of the book identity fields under bookInfo.",
+  },
+  {
+    path: "languageCountry",
+    schemaVersion: 18,
+    movedTo: ["bookInfo.language", "bookInfo.region"],
+    note: "Language and region are now stored as separate bookInfo fields so they can be chosen independently and reused in locale-aware shelfmarks.",
   },
   {
     path: "pageSize",
@@ -555,7 +561,8 @@ TPP.BOOK_INFO_FIELDS = [
   "spineAuthor",
   "pubDate",
   "publisher",
-  "languageCountry",
+  "language",
+  "region",
   "classification",
   "cityPublished",
   "copyright",
@@ -577,6 +584,8 @@ TPP.BOOK_INFO_DEFAULT_FIELDS = [
   "title",
   "author",
   "publisher",
+  "language",
+  "region",
   "pubDate",
   "copyright",
 ];
@@ -748,6 +757,51 @@ TPP.clone = function (obj) {
 TPP.nowIso = function () {
   return new Date().toISOString();
 };
+TPP.parseLocaleParts = function (value) {
+  const raw = String(value || "").trim();
+  if (!raw) return { language: "", region: "" };
+  try {
+    if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
+      const locale = new Intl.Locale(raw);
+      return {
+        language: String(locale.language || "")
+          .trim()
+          .toLowerCase(),
+        region: String(locale.region || "")
+          .trim()
+          .toUpperCase(),
+      };
+    }
+  } catch (_error) {}
+  const match = raw.match(
+    /^([A-Za-z]{2,3})(?:[-_]([A-Za-z]{4}))?(?:[-_]([A-Za-z]{2}|\d{3}))?$/,
+  );
+  return {
+    language: String(match && match[1] ? match[1] : "")
+      .trim()
+      .toLowerCase(),
+    region: String(match && match[3] ? match[3] : "")
+      .trim()
+      .toUpperCase(),
+  };
+};
+TPP.defaultBookInfoLocaleValues = function () {
+  const source =
+    typeof navigator !== "undefined" &&
+    navigator &&
+    ((Array.isArray(navigator.languages) && navigator.languages[0]) ||
+      navigator.language)
+      ? (Array.isArray(navigator.languages) && navigator.languages[0]) ||
+        navigator.language
+      : "";
+  return TPP.parseLocaleParts(source);
+};
+TPP.defaultBookInfoValueForKey = function (key) {
+  const locale = TPP.defaultBookInfoLocaleValues();
+  if (key === "language") return locale.language || "";
+  if (key === "region") return locale.region || "";
+  return "";
+};
 TPP.bookInfoEntryId = function (key, suffix) {
   return "book-info-" + String(key || "entry") + (suffix ? "-" + suffix : "");
 };
@@ -772,6 +826,18 @@ TPP.bookInfoDefaults = function () {
       customLabel: "",
     },
     {
+      id: TPP.bookInfoEntryId("language"),
+      key: "language",
+      value: TPP.defaultBookInfoValueForKey("language"),
+      customLabel: "",
+    },
+    {
+      id: TPP.bookInfoEntryId("region"),
+      key: "region",
+      value: TPP.defaultBookInfoValueForKey("region"),
+      customLabel: "",
+    },
+    {
       id: TPP.bookInfoEntryId("pubDate"),
       key: "pubDate",
       value: "",
@@ -792,7 +858,8 @@ TPP.bookInfoFieldSpec = function (key) {
     spineAuthor: { input: "text" },
     pubDate: { input: "date" },
     publisher: { input: "text" },
-    languageCountry: { input: "text" },
+    language: { input: "picker", picker: "language" },
+    region: { input: "picker", picker: "region" },
     classification: { input: "classification" },
     cityPublished: { input: "text" },
     copyright: { input: "text" },
@@ -831,6 +898,7 @@ TPP.normalizeBookInfoEntries = function (book) {
     typeof book.meta.classificationResolutions === "object"
       ? book.meta.classificationResolutions
       : {};
+  let legacyLocale = { language: "", region: "" };
   const normalizeClassificationValue = function (rawValue, metaText) {
     const value = String(rawValue || "");
     const extraMeta = String(metaText || "");
@@ -856,6 +924,14 @@ TPP.normalizeBookInfoEntries = function (book) {
     entries = source
       .map(function (entry, index) {
         if (!entry || typeof entry !== "object") return null;
+        if (entry.key === "languageCountry") {
+          const parsedLocale = TPP.parseLocaleParts(entry.value);
+          legacyLocale = {
+            language: legacyLocale.language || parsedLocale.language || "",
+            region: legacyLocale.region || parsedLocale.region || "",
+          };
+          return null;
+        }
         const key = TPP.BOOK_INFO_FIELDS.includes(entry.key)
           ? entry.key
           : entry.key === "custom"
@@ -903,6 +979,7 @@ TPP.normalizeBookInfoEntries = function (book) {
       .filter(Boolean);
   } else {
     const objectSource = source && typeof source === "object" ? source : {};
+    legacyLocale = TPP.parseLocaleParts(objectSource.languageCountry || "");
     entries = TPP.BOOK_INFO_FIELDS.filter(function (key) {
       return (
         TPP.BOOK_INFO_DEFAULT_FIELDS.includes(key) ||
@@ -925,9 +1002,18 @@ TPP.normalizeBookInfoEntries = function (book) {
   });
   const normalized = defaults.map(function (entry) {
     const existing = byKey.get(entry.key);
-    return existing
-      ? Object.assign({}, entry, existing, { id: existing.id || entry.id })
-      : Object.assign({}, entry);
+    if (existing) {
+      return Object.assign({}, entry, existing, {
+        id: existing.id || entry.id,
+      });
+    }
+    if (entry.key === "language" && legacyLocale.language) {
+      return Object.assign({}, entry, { value: legacyLocale.language });
+    }
+    if (entry.key === "region" && legacyLocale.region) {
+      return Object.assign({}, entry, { value: legacyLocale.region });
+    }
+    return Object.assign({}, entry);
   });
   TPP.BOOK_INFO_FIELDS.forEach(function (key) {
     if (TPP.BOOK_INFO_DEFAULT_FIELDS.includes(key) || !byKey.has(key)) return;
@@ -3434,7 +3520,8 @@ TPP.bookInfoFieldLabel = function (fieldKey, book) {
     spineAuthor: "Author Spine Name",
     pubDate: "Publishing Date",
     publisher: "Publisher",
-    languageCountry: "Language / Region",
+    language: "Language",
+    region: "Region",
     classification: "Classification",
     cityPublished: "City Published",
     copyright: "Copyright",

@@ -21,6 +21,34 @@ TPP.bookInfoAddableOptions = function (book) {
 TPP.bookInfoFieldInputHtml = function (entry) {
   const spec = TPP.bookInfoFieldSpec(entry.key);
   const value = String(entry.value || "");
+  if (spec.input === "picker") {
+    const pickerKind = String(spec.picker || entry.key || "").trim();
+    const summary =
+      TPP.bookInfoPickerSummary &&
+      TPP.bookInfoPickerSummary(pickerKind, value, entry)
+        ? TPP.bookInfoPickerSummary(pickerKind, value, entry)
+        : {
+            title:
+              pickerKind === "region" ? "Choose region" : "Choose language",
+            meta: "No selection",
+          };
+    return (
+      '<div class="book-info-classification-picker">' +
+      '<input class="book-info-value" type="hidden" value="' +
+      TPP.esc(value) +
+      '">' +
+      '<button type="button" class="book-info-classification-button" data-book-info-picker="' +
+      TPP.esc(entry.id || "") +
+      '" data-book-info-picker-kind="' +
+      TPP.esc(pickerKind) +
+      '">' +
+      '<span class="book-info-classification-title">' +
+      TPP.esc(summary.title || "Choose option") +
+      '</span><span class="book-info-classification-meta">' +
+      TPP.esc(summary.meta || "No selection") +
+      "</span></button></div>"
+    );
+  }
   if (spec.input === "classification") {
     const summary = TPP.classificationSummary
       ? TPP.classificationSummary(value, {
@@ -161,7 +189,9 @@ TPP.addBookInfoEntry = function (book, key) {
   TPP.bookInfo(book).push({
     id: TPP.bookInfoEntryId(key, TPP.uid()),
     key: key,
-    value: "",
+    value:
+      (TPP.defaultBookInfoValueForKey && TPP.defaultBookInfoValueForKey(key)) ||
+      "",
     customLabel: key === "custom" ? "Custom Field" : "",
   });
 };

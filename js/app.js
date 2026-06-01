@@ -20,6 +20,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     extension: "",
   };
   TPP.classificationExtensionsDataPath = "data/classification-extensions.json";
+  TPP.bookInfoPickerCatalogs = {
+    language: null,
+    region: null,
+  };
+  TPP.bookInfoPickerDataPaths = {
+    language: "data/languages.json",
+    region: "data/regions.json",
+  };
+  TPP.bookInfoPickerState = {
+    kind: "",
+    entryId: "",
+    query: "",
+    activeIndex: -1,
+  };
   TPP.defaultClassificationFormatId = function () {
     const system = TPP.classificationSystem();
     const configuredDefault = String(
@@ -41,6 +55,117 @@ document.addEventListener("DOMContentLoaded", async function () {
       return preferred.id;
     }
     return formats[0] && formats[0].id ? formats[0].id : "code-short-extension";
+  };
+  TPP.bookInfoPickerKindLabel = function (kind) {
+    return kind === "region" ? "Region" : "Language";
+  };
+  TPP.normalizeBookInfoPickerValue = function (kind, value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    return kind === "region" ? raw.toUpperCase() : raw.toLowerCase();
+  };
+  TPP.bookInfoPickerDisplayName = function (kind, value) {
+    const normalized = TPP.normalizeBookInfoPickerValue(kind, value);
+    if (!normalized) return "";
+    const catalog = TPP.bookInfoPickerCatalogs[kind];
+    const option =
+      Array.isArray(catalog) &&
+      catalog.find(function (entry) {
+        return entry && entry.value === normalized;
+      });
+    if (option && option.label) return option.label;
+    try {
+      if (
+        typeof Intl !== "undefined" &&
+        typeof Intl.DisplayNames === "function"
+      ) {
+        const locale =
+          (typeof navigator !== "undefined" &&
+            navigator &&
+            ((Array.isArray(navigator.languages) && navigator.languages[0]) ||
+              navigator.language)) ||
+          "en";
+        const displayNames = new Intl.DisplayNames([locale], {
+          type: kind === "region" ? "region" : "language",
+        });
+        return displayNames.of(normalized) || normalized;
+      }
+    } catch (_error) {}
+    return normalized;
+  };
+  TPP.bookInfoPickerSummary = function (kind, value) {
+    const normalized = TPP.normalizeBookInfoPickerValue(kind, value);
+    if (!normalized) {
+      return {
+        title: "Choose " + TPP.bookInfoPickerKindLabel(kind).toLowerCase(),
+        meta:
+          "No " + TPP.bookInfoPickerKindLabel(kind).toLowerCase() + " selected",
+      };
+    }
+    return {
+      title: TPP.bookInfoPickerDisplayName(kind, normalized) || normalized,
+      meta: normalized,
+    };
+  };
+  TPP.bookInfoPickerCatalogForKind = async function (kind) {
+    const targetKind = kind === "region" ? "region" : "language";
+    if (Array.isArray(TPP.bookInfoPickerCatalogs[targetKind])) {
+      return TPP.bookInfoPickerCatalogs[targetKind];
+    }
+    const path = TPP.bookInfoPickerDataPaths[targetKind];
+    try {
+      const response = await fetch(path);
+      if (!response.ok) throw new Error("book-info-picker");
+      const data = await response.json();
+      const entries =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? Object.entries(data)
+          : [];
+      TPP.bookInfoPickerCatalogs[targetKind] = entries
+        .map(function (entry) {
+          return {
+            value: TPP.normalizeBookInfoPickerValue(targetKind, entry[0]),
+            label: String(entry[1] || "").trim(),
+          };
+        })
+        .filter(function (entry) {
+          return entry.value && entry.label;
+        });
+    } catch (_error) {
+      TPP.bookInfoPickerCatalogs[targetKind] = [];
+    }
+    return TPP.bookInfoPickerCatalogs[targetKind];
+  };
+  TPP.bookInfoPickerResults = function (kind, query, currentValue) {
+    const normalizedCurrent = TPP.normalizeBookInfoPickerValue(
+      kind,
+      currentValue,
+    );
+    const items = Array.isArray(TPP.bookInfoPickerCatalogs[kind])
+      ? TPP.bookInfoPickerCatalogs[kind].slice()
+      : [];
+    if (
+      normalizedCurrent &&
+      !items.find(function (entry) {
+        return entry && entry.value === normalizedCurrent;
+      })
+    ) {
+      items.unshift({
+        value: normalizedCurrent,
+        label: TPP.bookInfoPickerDisplayName(kind, normalizedCurrent),
+      });
+    }
+    const text = String(query || "")
+      .trim()
+      .toLowerCase();
+    if (!text) return items.slice(0, 24);
+    return items
+      .filter(function (entry) {
+        const value = String((entry && entry.value) || "").toLowerCase();
+        const label = String((entry && entry.label) || "").toLowerCase();
+        return value.includes(text) || label.includes(text);
+      })
+      .slice(0, 24);
   };
   TPP.defaultClassificationExtensionsCatalog = function () {
     return {
@@ -1313,7 +1438,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     return /^\d{4}/.test(pubDate) ? pubDate.slice(0, 4) : "";
   };
   TPP.classificationLanguageCountry = function (book) {
-    return String(TPP.bookInfoValue(book, "languageCountry") || "").trim();
+    const language = TPP.normalizeBookInfoPickerValue(
+      "language",
+      TPP.bookInfoValue(book, "language"),
+    );
+    const region = TPP.normalizeBookInfoPickerValue(
+      "region",
+      TPP.bookInfoValue(book, "region"),
+    );
+    if (language && region) return language + "-" + region;
+    return language || region;
   };
   TPP.cachedClassificationResolution = function (book, entryId, value) {
     if (!book || !entryId || !TPP.bookInfoEntryById) return null;
@@ -1483,6 +1617,132 @@ document.addEventListener("DOMContentLoaded", async function () {
       title: TPP.classificationFallbackDisplayString(book, data) || data.code,
       meta: "Open classification picker for full path",
     };
+  };
+  TPP.renderBookInfoPickerResults = function (results, activeIndex) {
+    const list = document.getElementById("bookInfoPickerResults");
+    if (!list) return;
+    if (!results.length) {
+      list.hidden = true;
+      list.innerHTML = "";
+      return;
+    }
+    list.hidden = false;
+    list.innerHTML = results
+      .map(function (entry, index) {
+        return (
+          '<button type="button" class="classification-dialog-search-result' +
+          (index === activeIndex ? " is-active" : "") +
+          '" data-book-info-picker-select="' +
+          TPP.esc(entry.value) +
+          '">' +
+          '<span class="classification-dialog-search-result-code">' +
+          TPP.esc(entry.value) +
+          '</span><span class="classification-dialog-search-result-main">' +
+          '<span class="classification-dialog-search-result-label">' +
+          TPP.esc(entry.label) +
+          "</span></span></button>"
+        );
+      })
+      .join("");
+  };
+  TPP.closeBookInfoPickerResults = function () {
+    const list = document.getElementById("bookInfoPickerResults");
+    if (!list) return;
+    list.hidden = true;
+    list.innerHTML = "";
+    TPP.bookInfoPickerState.activeIndex = -1;
+  };
+  TPP.renderBookInfoPickerDialog = function () {
+    const kind = TPP.bookInfoPickerState.kind;
+    const title = document.getElementById("bookInfoPickerDialogTitle");
+    const selection = document.getElementById("bookInfoPickerSelection");
+    const searchInput = document.getElementById("bookInfoPickerSearch");
+    const list = document.getElementById("bookInfoPickerList");
+    const row = document.querySelector(
+      '.book-info-entry[data-entry-id="' +
+        TPP.bookInfoPickerState.entryId +
+        '"]',
+    );
+    const currentValue = TPP.normalizeBookInfoPickerValue(
+      kind,
+      row && row.querySelector(".book-info-value")
+        ? row.querySelector(".book-info-value").value
+        : "",
+    );
+    const summary = TPP.bookInfoPickerSummary(kind, currentValue);
+    const results = TPP.bookInfoPickerResults(
+      kind,
+      TPP.bookInfoPickerState.query,
+      currentValue,
+    );
+    if (title) {
+      title.textContent = "Choose " + TPP.bookInfoPickerKindLabel(kind);
+    }
+    if (selection) {
+      selection.innerHTML =
+        "<strong>" +
+        TPP.esc(summary.title) +
+        '</strong><div class="small">' +
+        TPP.esc(summary.meta) +
+        "</div>";
+    }
+    if (searchInput) searchInput.value = TPP.bookInfoPickerState.query || "";
+    if (list) {
+      list.innerHTML = results.length
+        ? results
+            .map(function (entry) {
+              return (
+                '<div class="classification-option"><div><strong>' +
+                TPP.esc(entry.value) +
+                '</strong> <span class="classification-short-label">' +
+                TPP.esc(entry.label) +
+                '</span></div><div class="toolbar"><button type="button" data-book-info-picker-use="' +
+                TPP.esc(entry.value) +
+                '">Use</button></div></div>'
+              );
+            })
+            .join("")
+        : '<div class="front-cover-field-empty">No matches found.</div>';
+    }
+    TPP.renderBookInfoPickerResults(
+      results,
+      TPP.bookInfoPickerState.activeIndex,
+    );
+  };
+  TPP.openBookInfoPickerDialog = async function (kind, entryId) {
+    const dialog = document.getElementById("bookInfoPickerDialog");
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    const targetKind = kind === "region" ? "region" : "language";
+    await TPP.bookInfoPickerCatalogForKind(targetKind);
+    TPP.bookInfoPickerState.kind = targetKind;
+    TPP.bookInfoPickerState.entryId = String(entryId || "");
+    TPP.bookInfoPickerState.query = "";
+    TPP.bookInfoPickerState.activeIndex = -1;
+    TPP.renderBookInfoPickerDialog();
+    if (!dialog.open) dialog.showModal();
+    const searchInput = document.getElementById("bookInfoPickerSearch");
+    if (searchInput) {
+      window.setTimeout(function () {
+        searchInput.focus();
+        searchInput.select();
+      }, 0);
+    }
+  };
+  TPP.applyBookInfoPickerValue = function (value) {
+    const row = document.querySelector(
+      '.book-info-entry[data-entry-id="' +
+        TPP.bookInfoPickerState.entryId +
+        '"]',
+    );
+    const input = row && row.querySelector(".book-info-value");
+    if (!input) return;
+    input.value = TPP.normalizeBookInfoPickerValue(
+      TPP.bookInfoPickerState.kind,
+      value,
+    );
+    TPP.sync("commit");
+    TPP.loadForm();
+    TPP.renderAll();
   };
   TPP.renderClassificationDialog = function () {
     const system = TPP.classificationSystem();
@@ -2297,6 +2557,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.renderAll();
     });
     controls.addEventListener("click", function (e) {
+      const bookInfoPickerButton = e.target.closest("[data-book-info-picker]");
+      if (bookInfoPickerButton) {
+        TPP.sync("nosave");
+        TPP.openBookInfoPickerDialog(
+          bookInfoPickerButton.dataset.bookInfoPickerKind,
+          bookInfoPickerButton.dataset.bookInfoPicker,
+        );
+        return;
+      }
       const classificationButton = e.target.closest(
         "[data-book-info-classification]",
       );
@@ -2495,6 +2764,34 @@ document.addEventListener("DOMContentLoaded", async function () {
       renderCurrentViewPreservingSidebar();
     });
   }
+  const bookInfoPickerDialog = document.getElementById("bookInfoPickerDialog");
+  if (bookInfoPickerDialog) {
+    bookInfoPickerDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (
+        e.target === bookInfoPickerDialog &&
+        !card &&
+        bookInfoPickerDialog.open
+      ) {
+        bookInfoPickerDialog.close("cancel");
+        return;
+      }
+      const closeButton = e.target.closest(
+        "[data-action='cancel-book-info-picker']",
+      );
+      if (closeButton && bookInfoPickerDialog.open) {
+        bookInfoPickerDialog.close("cancel");
+        return;
+      }
+      const selectButton = e.target.closest("[data-book-info-picker-use]");
+      if (selectButton) {
+        TPP.applyBookInfoPickerValue(
+          selectButton.dataset.bookInfoPickerUse || "",
+        );
+        if (bookInfoPickerDialog.open) bookInfoPickerDialog.close("selected");
+      }
+    });
+  }
   const classificationDialog = document.getElementById("classificationDialog");
   if (classificationDialog) {
     classificationDialog.addEventListener("click", function (e) {
@@ -2624,6 +2921,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
   document.addEventListener("input", function (e) {
+    const bookInfoPickerSearch = e.target.closest("#bookInfoPickerSearch");
+    if (bookInfoPickerSearch) {
+      TPP.bookInfoPickerState.query = bookInfoPickerSearch.value || "";
+      const results = TPP.bookInfoPickerResults(
+        TPP.bookInfoPickerState.kind,
+        TPP.bookInfoPickerState.query,
+        document.querySelector(
+          '.book-info-entry[data-entry-id="' +
+            TPP.bookInfoPickerState.entryId +
+            '"] .book-info-value',
+        )?.value || "",
+      );
+      TPP.bookInfoPickerState.activeIndex = results.length ? 0 : -1;
+      TPP.renderBookInfoPickerResults(results, 0);
+      return;
+    }
     const profileSelect = e.target.closest("#classificationDialogProfile");
     if (profileSelect) {
       TPP.setClassificationProfile(profileSelect.value || "home");
@@ -2641,6 +2954,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.renderClassificationSearchResults(results, 0);
   });
   document.addEventListener("focusin", function (e) {
+    const bookInfoPickerSearch = e.target.closest("#bookInfoPickerSearch");
+    if (bookInfoPickerSearch) {
+      const results = TPP.bookInfoPickerResults(
+        TPP.bookInfoPickerState.kind,
+        bookInfoPickerSearch.value,
+        document.querySelector(
+          '.book-info-entry[data-entry-id="' +
+            TPP.bookInfoPickerState.entryId +
+            '"] .book-info-value',
+        )?.value || "",
+      );
+      if (!results.length) return;
+      TPP.bookInfoPickerState.activeIndex = 0;
+      TPP.renderBookInfoPickerResults(results, 0);
+      return;
+    }
     const searchInput = e.target.closest("#classificationDialogSearch");
     if (!searchInput) return;
     const results = TPP.searchClassificationIndex(searchInput.value, 8);
@@ -2649,6 +2978,40 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.renderClassificationSearchResults(results, 0);
   });
   document.addEventListener("click", function (e) {
+    const bookInfoPickerSearch = e.target.closest("#bookInfoPickerSearch");
+    if (bookInfoPickerSearch) {
+      const results = TPP.bookInfoPickerResults(
+        TPP.bookInfoPickerState.kind,
+        bookInfoPickerSearch.value,
+        document.querySelector(
+          '.book-info-entry[data-entry-id="' +
+            TPP.bookInfoPickerState.entryId +
+            '"] .book-info-value',
+        )?.value || "",
+      );
+      if (results.length) {
+        const activeIndex = Number(TPP.bookInfoPickerState.activeIndex);
+        TPP.renderBookInfoPickerResults(
+          results,
+          activeIndex >= 0 ? activeIndex : 0,
+        );
+      }
+      return;
+    }
+    const bookInfoPickerResult = e.target.closest(
+      "[data-book-info-picker-select]",
+    );
+    if (bookInfoPickerResult) {
+      TPP.applyBookInfoPickerValue(
+        bookInfoPickerResult.dataset.bookInfoPickerSelect || "",
+      );
+      const dialog = document.getElementById("bookInfoPickerDialog");
+      if (dialog && dialog.open) dialog.close("selected");
+      return;
+    }
+    if (!e.target.closest(".book-info-picker-search-wrap")) {
+      TPP.closeBookInfoPickerResults();
+    }
     const searchInput = e.target.closest("#classificationDialogSearch");
     if (searchInput) {
       const results = TPP.searchClassificationIndex(searchInput.value, 8);
@@ -2673,6 +3036,53 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
   document.addEventListener("keydown", function (e) {
+    const bookInfoPickerSearch = e.target.closest("#bookInfoPickerSearch");
+    if (bookInfoPickerSearch) {
+      const results = TPP.bookInfoPickerResults(
+        TPP.bookInfoPickerState.kind,
+        bookInfoPickerSearch.value,
+        document.querySelector(
+          '.book-info-entry[data-entry-id="' +
+            TPP.bookInfoPickerState.entryId +
+            '"] .book-info-value',
+        )?.value || "",
+      );
+      if (!results.length) {
+        if (e.key === "Escape") TPP.closeBookInfoPickerResults();
+        return;
+      }
+      const currentIndex = Number(TPP.bookInfoPickerState.activeIndex || 0);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const nextIndex = Math.min(currentIndex + 1, results.length - 1);
+        TPP.bookInfoPickerState.activeIndex = nextIndex;
+        TPP.renderBookInfoPickerResults(results, nextIndex);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const nextIndex = Math.max(currentIndex - 1, 0);
+        TPP.bookInfoPickerState.activeIndex = nextIndex;
+        TPP.renderBookInfoPickerResults(results, nextIndex);
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const nextIndex = Math.min(
+          Math.max(currentIndex, 0),
+          results.length - 1,
+        );
+        TPP.applyBookInfoPickerValue(results[nextIndex].value);
+        const dialog = document.getElementById("bookInfoPickerDialog");
+        if (dialog && dialog.open) dialog.close("selected");
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        TPP.closeBookInfoPickerResults();
+      }
+      return;
+    }
     const searchInput = e.target.closest("#classificationDialogSearch");
     if (!searchInput) return;
     const results = TPP.searchClassificationIndex(searchInput.value, 8);
@@ -2707,6 +3117,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
   document.addEventListener("focusout", function (e) {
+    const pickerWrap = e.target.closest(".book-info-picker-search-wrap");
+    if (pickerWrap) {
+      window.setTimeout(function () {
+        if (!pickerWrap.contains(document.activeElement)) {
+          TPP.closeBookInfoPickerResults();
+        }
+      }, 0);
+      return;
+    }
     const wrap = e.target.closest(".classification-search-wrap");
     if (!wrap) return;
     window.setTimeout(function () {
