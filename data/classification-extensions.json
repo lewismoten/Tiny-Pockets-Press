@@ -19,6 +19,11 @@
               "keywords": [
                 "abrahamic",
                 "traditions",
+                "bible",
+                "scripture",
+                "christianity",
+                "judaism",
+                "islam",
                 "religion",
                 "spirituality",
                 "philosophy"
@@ -26,11 +31,16 @@
               "includes": [
                 "abrahamic",
                 "traditions",
+                "bible",
+                "scripture",
+                "christianity",
+                "judaism",
+                "islam",
                 "religion",
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about abrahamic traditions within religion.",
+              "scopeNote": "Use for works chiefly about abrahamic traditions within religion, including the Bible, scriptural traditions, Christianity, Judaism, and Islam.",
               "seeAlso": []
             },
             {
@@ -2781,6 +2791,83 @@
               "keywords": ["cataloging", "directory entries", "rolodex cards"],
               "includes": ["cataloging", "directory entries", "rolodex cards"],
               "scopeNote": "Use for works chiefly about cataloging, directory structures, and reference listing systems within indexes & catalogs.",
+              "seeAlso": []
+            },
+            {
+              "extension": "4",
+              "shortLabel": "SER",
+              "label": "Serials & Periodicals",
+              "keywords": [
+                "serials",
+                "periodicals",
+                "magazines",
+                "newspapers",
+                "journals"
+              ],
+              "children": [
+                {
+                  "extension": "41",
+                  "shortLabel": "NEW",
+                  "label": "Newspapers",
+                  "keywords": ["newspapers", "newsprint", "press"],
+                  "includes": [
+                    "newspapers",
+                    "newsprint",
+                    "press",
+                    "serials",
+                    "periodicals"
+                  ],
+                  "scopeNote": "Use for works chiefly about newspapers within serials & periodicals.",
+                  "seeAlso": []
+                },
+                {
+                  "extension": "42",
+                  "shortLabel": "MAG",
+                  "label": "Magazines",
+                  "keywords": [
+                    "magazines",
+                    "magazine culture",
+                    "monthly magazines"
+                  ],
+                  "includes": [
+                    "magazines",
+                    "magazine culture",
+                    "periodicals",
+                    "serials"
+                  ],
+                  "scopeNote": "Use for works chiefly about magazines within serials & periodicals.",
+                  "seeAlso": []
+                },
+                {
+                  "extension": "43",
+                  "shortLabel": "JOU",
+                  "label": "Journals & Reviews",
+                  "keywords": [
+                    "journals",
+                    "reviews",
+                    "literary reviews",
+                    "academic journals"
+                  ],
+                  "includes": [
+                    "journals",
+                    "reviews",
+                    "literary reviews",
+                    "academic journals",
+                    "serials"
+                  ],
+                  "scopeNote": "Use for works chiefly about journals, reviews, and recurring review publications within serials & periodicals.",
+                  "seeAlso": ["213"]
+                }
+              ],
+              "allowAssign": true,
+              "includes": [
+                "serials",
+                "periodicals",
+                "magazines",
+                "newspapers",
+                "journals"
+              ],
+              "scopeNote": "Use for general works on serial publications, including newspapers, magazines, journals, and other recurring periodicals within indexes & catalogs.",
               "seeAlso": []
             }
           ],
