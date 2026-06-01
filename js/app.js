@@ -2802,6 +2802,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     );
     if (!target) return;
     target.value = TPP.colorDialogValue;
+    if (TPP.syncTextOutlineColorControl) {
+      TPP.syncTextOutlineColorControl(target);
+    }
     target.dispatchEvent(new Event("input", { bubbles: true }));
     target.dispatchEvent(new Event("change", { bubbles: true }));
   };
@@ -2828,6 +2831,29 @@ document.addEventListener("DOMContentLoaded", async function () {
     popover.hidden = false;
     TPP.updateColorDialogPreview(TPP.colorDialogValue, true);
     TPP.positionColorPopover();
+  };
+  TPP.syncTextOutlineColorControl = function (input) {
+    if (!input) return;
+    const wrapper = input.closest(".front-cover-text-outline-cell");
+    if (!wrapper) return;
+    const fillInput = wrapper.querySelector(".text-color");
+    const outlineInput = wrapper.querySelector(".text-outline-color");
+    const fillColor = TPP.normalizeHexColor(fillInput && fillInput.value);
+    const outlineColor = TPP.normalizeHexColor(
+      outlineInput && outlineInput.value,
+    );
+    if (fillColor) wrapper.style.setProperty("--text-fill-color", fillColor);
+    if (outlineColor)
+      wrapper.style.setProperty("--text-outline-color", outlineColor);
+    const fillButton = wrapper.querySelector(
+      ".front-cover-text-outline-hit-fill",
+    );
+    const outlineButton = wrapper.querySelector(
+      ".front-cover-text-outline-hit-outline",
+    );
+    if (fillButton && fillColor) fillButton.setAttribute("title", fillColor);
+    if (outlineButton && outlineColor)
+      outlineButton.setAttribute("title", outlineColor);
   };
   TPP.renderFrontCoverFieldDialog = function (location) {
     const list = document.getElementById("frontCoverFieldDialogList");
@@ -3007,6 +3033,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         ? String(textElementEntry.dataset.location || "").trim()
         : "";
       if (textElementEntry && TPP.readSingleTextElementGroup) {
+        if (
+          (e.target.classList.contains("text-color") ||
+            e.target.classList.contains("text-outline-color")) &&
+          TPP.syncTextOutlineColorControl
+        ) {
+          TPP.syncTextOutlineColorControl(e.target);
+        }
         TPP.readSingleTextElementGroup(TPP.active, textElementEntry);
         if (TPP.syncLegacyTextFieldsFromElements) {
           TPP.syncLegacyTextFieldsFromElements(TPP.active);
@@ -3072,6 +3105,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         ? String(textElementEntry.dataset.location || "").trim()
         : "";
       if (textElementEntry && TPP.readSingleTextElementGroup) {
+        if (
+          (e.target.classList.contains("text-color") ||
+            e.target.classList.contains("text-outline-color")) &&
+          TPP.syncTextOutlineColorControl
+        ) {
+          TPP.syncTextOutlineColorControl(e.target);
+        }
         TPP.readSingleTextElementGroup(TPP.active, textElementEntry);
         if (TPP.syncLegacyTextFieldsFromElements) {
           TPP.syncLegacyTextFieldsFromElements(TPP.active);
