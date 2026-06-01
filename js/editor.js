@@ -1116,9 +1116,9 @@ TPP.renderChapterEditor = function () {
     '>Own Page</option></select></label><label>Image Zoom %<input class="chapter-image-zoom" type="number" min="10" max="100" value="' +
     (chapter.imageZoom || chapter.imageWidth || 70) +
     '"></label></div>' +
-    '<label>Image Rotate <input class="chapter-image-rotate" type="range" min="-180" max="180" step="1" value="' +
+    '<label class="rotation-range-label">Image Rotate <span class="rotation-range-control"><input class="chapter-image-rotate" type="range" min="-180" max="180" step="1" value="' +
     (Number(chapter.imageRotate) || 0) +
-    '"></label>' +
+    '"><button type="button" class="rotation-step-cycle" aria-label="Rotation step 1 degrees" title="Rotation step 1 degrees"><span aria-hidden="true">⟳</span><span>1°</span></button></span></label>' +
     TPP.assetFieldHtml(
       "Chapter Image",
       "chapter",

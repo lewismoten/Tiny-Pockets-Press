@@ -423,15 +423,26 @@
                   >Zoom
                   <input id="coverImgZoom" type="range" min="10" max="500"
                 /></label>
-                <label
+                <label class="rotation-range-label"
                   >Rotate
-                  <input
-                    id="coverImgRotate"
-                    type="range"
-                    min="-180"
-                    max="180"
-                    step="1"
-                /></label>
+                  <span class="rotation-range-control"
+                    ><input
+                      id="coverImgRotate"
+                      type="range"
+                      min="-180"
+                      max="180"
+                      step="1"
+                    /><button
+                      type="button"
+                      class="rotation-step-cycle"
+                      data-rotation-step-cycle="coverImgRotate"
+                      aria-label="Rotation step 1 degrees"
+                      title="Rotation step 1 degrees"
+                    >
+                      <span aria-hidden="true">⟳</span><span>1°</span>
+                    </button></span
+                  ></label
+                >
               </div>
             </div>
             <div id="coverTextElements"></div>
@@ -459,15 +470,26 @@
                 <label
                   >Zoom <input id="backImgZoom" type="range" min="10" max="500"
                 /></label>
-                <label
+                <label class="rotation-range-label"
                   >Rotate
-                  <input
-                    id="backImgRotate"
-                    type="range"
-                    min="-180"
-                    max="180"
-                    step="1"
-                /></label>
+                  <span class="rotation-range-control"
+                    ><input
+                      id="backImgRotate"
+                      type="range"
+                      min="-180"
+                      max="180"
+                      step="1"
+                    /><button
+                      type="button"
+                      class="rotation-step-cycle"
+                      data-rotation-step-cycle="backImgRotate"
+                      aria-label="Rotation step 1 degrees"
+                      title="Rotation step 1 degrees"
+                    >
+                      <span aria-hidden="true">⟳</span><span>1°</span>
+                    </button></span
+                  ></label
+                >
               </div>
             </div>
             <div id="backTextElements"></div>
@@ -488,15 +510,26 @@
                   >Zoom
                   <input id="spineImgZoom" type="range" min="10" max="500"
                 /></label>
-                <label
+                <label class="rotation-range-label"
                   >Rotate
-                  <input
-                    id="spineImgRotate"
-                    type="range"
-                    min="-180"
-                    max="180"
-                    step="1"
-                /></label>
+                  <span class="rotation-range-control"
+                    ><input
+                      id="spineImgRotate"
+                      type="range"
+                      min="-180"
+                      max="180"
+                      step="1"
+                    /><button
+                      type="button"
+                      class="rotation-step-cycle"
+                      data-rotation-step-cycle="spineImgRotate"
+                      aria-label="Rotation step 1 degrees"
+                      title="Rotation step 1 degrees"
+                    >
+                      <span aria-hidden="true">⟳</span><span>1°</span>
+                    </button></span
+                  ></label
+                >
               </div>
             </div>
             <div id="spineTextElements"></div>

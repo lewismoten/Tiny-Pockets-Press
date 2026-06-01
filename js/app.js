@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     activeIndex: -1,
   };
   TPP.readerVisiblePageRoles = [];
+  TPP.rotationSnapSteps = [1, 5, 15, 45, 90];
   TPP.rangeValueText = function (input) {
     if (!input) return "";
     const numericValue = Number(input.value);
@@ -54,6 +55,12 @@ document.addEventListener("DOMContentLoaded", async function () {
           .replace(/\.0+$/, "")
           .replace(/(\.\d*?)0+$/, "$1")
       : String(input.value || "");
+    if (
+      input.classList.contains("chapter-image-rotate") ||
+      /ImgRotate$/.test(input.id || "")
+    ) {
+      return valueText + "°";
+    }
     const label = String(
       input.dataset.rangeLabel ||
         input.getAttribute("aria-label") ||
@@ -97,6 +104,56 @@ document.addEventListener("DOMContentLoaded", async function () {
         const text = TPP.rangeValueText(input);
         input.title = text;
         input.setAttribute("aria-valuetext", text);
+      });
+  };
+  TPP.rotationStepForInput = function (input) {
+    const step = Number(input && input.step);
+    return TPP.rotationSnapSteps.includes(step) ? step : 1;
+  };
+  TPP.rotationStepButtonInput = function (button) {
+    if (!button) return null;
+    const targetId = String(button.dataset.rotationStepCycle || "").trim();
+    if (targetId) return document.getElementById(targetId);
+    return button.parentElement?.querySelector('input[type="range"]') || null;
+  };
+  TPP.updateRotationStepButton = function (button, input) {
+    if (!button || !input) return;
+    const step = TPP.rotationStepForInput(input);
+    const label = button.querySelector("span:last-child");
+    if (label) label.textContent = step + "°";
+    const title = "Rotation step " + step + " degrees";
+    button.setAttribute("aria-label", title);
+    button.setAttribute("title", title);
+  };
+  TPP.snapRotationInput = function (input) {
+    if (!input) return;
+    const step = TPP.rotationStepForInput(input);
+    const min = Number(input.min);
+    const max = Number(input.max);
+    const value = Number(input.value) || 0;
+    let snapped = Math.round(value / step) * step;
+    if (Number.isFinite(min)) snapped = Math.max(min, snapped);
+    if (Number.isFinite(max)) snapped = Math.min(max, snapped);
+    input.value = String(snapped);
+  };
+  TPP.cycleRotationStep = function (button) {
+    const input = TPP.rotationStepButtonInput(button);
+    if (!input) return;
+    const current = TPP.rotationStepForInput(input);
+    const list = TPP.rotationSnapSteps;
+    const next = list[(list.indexOf(current) + 1 + list.length) % list.length];
+    input.step = String(next);
+    TPP.snapRotationInput(input);
+    TPP.updateRotationStepButton(button, input);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+  TPP.refreshRotationStepButtons = function (root) {
+    (root || document)
+      .querySelectorAll(".rotation-step-cycle")
+      .forEach(function (button) {
+        const input = TPP.rotationStepButtonInput(button);
+        if (input) TPP.updateRotationStepButton(button, input);
       });
   };
   TPP.defaultClassificationFormatId = function () {
@@ -2200,6 +2257,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     else if (TPP.view === "library") TPP.renderLibrary();
     if (TPP.renderColorPalettes) TPP.renderColorPalettes();
     if (TPP.refreshRangeInputTitles) TPP.refreshRangeInputTitles(document);
+    if (TPP.refreshRotationStepButtons)
+      TPP.refreshRotationStepButtons(document);
   };
   TPP.patchCoverPreviewSurface = function (location) {
     const side = location === "back" ? "back" : "front";
@@ -2988,6 +3047,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.openClassificationDialog(
           classificationButton.dataset.bookInfoClassification,
         );
+        return;
+      }
+      const rotationStepButton = e.target.closest(".rotation-step-cycle");
+      if (rotationStepButton && TPP.cycleRotationStep) {
+        e.preventDefault();
+        TPP.cycleRotationStep(rotationStepButton);
         return;
       }
       const colorTrigger = e.target.closest(".color-picker-trigger");

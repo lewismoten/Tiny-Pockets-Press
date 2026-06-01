@@ -488,6 +488,37 @@ input[type="checkbox"] {
 .asset-slider-grid label {
   margin-bottom: 0;
 }
+.rotation-range-label {
+  display: grid;
+  gap: 0.22rem;
+}
+.rotation-range-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem;
+}
+.rotation-step-cycle {
+  display: inline-grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.08rem;
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  padding: 0.18rem 0.18rem;
+  border: 1px solid #cfc6bc;
+  border-radius: 10px;
+  background: #fff;
+  color: #5f5044;
+  font-size: 0.68rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+  text-align: center;
+}
+.rotation-step-cycle span[aria-hidden="true"] {
+  font-size: 0.86rem;
+}
 .cover-text-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
