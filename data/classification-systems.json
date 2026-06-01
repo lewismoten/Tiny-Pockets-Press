@@ -274,6 +274,8 @@
               "keywords": [
                 "spiritual",
                 "practice",
+                "dreamwork",
+                "dream practice",
                 "religion",
                 "spirituality",
                 "philosophy"
@@ -284,11 +286,13 @@
               "includes": [
                 "spiritual",
                 "practice",
+                "dreamwork",
+                "dream practice",
                 "religion",
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about spiritual practice within religion, spirituality & philosophy."
+              "scopeNote": "Use for works chiefly about spiritual practice within religion, spirituality & philosophy. Use here for dreamwork, contemplative dream practices, and spiritually oriented work with dreams."
             },
             {
               "code": "153",
@@ -308,6 +312,9 @@
               "keywords": [
                 "myth",
                 "thought",
+                "dreams",
+                "dream interpretation",
+                "dream symbolism",
                 "religion",
                 "spirituality",
                 "philosophy"
@@ -317,11 +324,14 @@
               "includes": [
                 "myth",
                 "thought",
+                "dreams",
+                "dream interpretation",
+                "dream symbolism",
                 "religion",
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about myth & thought within religion, spirituality & philosophy."
+              "scopeNote": "Use for works chiefly about myth & thought within religion, spirituality & philosophy. Use here for symbolic or interpretive works about dreams, dream imagery, and dream meaning rather than personal dream records."
             }
           ],
           "keywords": ["religion", "spirituality", "philosophy", "belief"],
@@ -491,6 +501,11 @@
                   "keywords": [
                     "journals",
                     "letters",
+                    "dream journal",
+                    "dream journals",
+                    "dream diary",
+                    "dream diaries",
+                    "sleep journal",
                     "biography",
                     "memoir",
                     "personal",
@@ -502,13 +517,17 @@
                   "includes": [
                     "journals",
                     "letters",
+                    "dream journal",
+                    "dream diary",
+                    "sleep journal",
                     "biography",
                     "memoir",
                     "personal",
                     "life",
                     "stories"
                   ],
-                  "scopeNote": "Use for works chiefly about journals & letters within personal life stories."
+                  "scopeNote": "Use for journals, letters, diaries, and personal records within personal life stories. Use here for dream journals and dream diaries when the book primarily records what the writer dreamed rather than interpreting dreams.",
+                  "seeAlso": ["152", "154", "942"]
                 },
                 {
                   "code": "214",
@@ -3729,6 +3748,8 @@
                   "keywords": [
                     "mindfulness",
                     "reflection",
+                    "dream reflection",
+                    "dream journaling prompts",
                     "reference",
                     "practical",
                     "wellbeing",
@@ -3740,13 +3761,15 @@
                   "includes": [
                     "mindfulness",
                     "reflection",
+                    "dream reflection",
+                    "dream journaling prompts",
                     "reference",
                     "practical",
                     "wellbeing",
                     "daily",
                     "life"
                   ],
-                  "scopeNote": "Use for works chiefly about mindfulness & reflection within wellbeing & daily life."
+                  "scopeNote": "Use for works chiefly about mindfulness & reflection within wellbeing & daily life. Use here for reflective practices around dreams when the emphasis is self-observation, prompts, or contemplative wellbeing rather than keeping a personal dream record."
                 },
                 {
                   "code": "943",
