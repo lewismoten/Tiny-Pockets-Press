@@ -85,6 +85,29 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (!definitionId) return;
       sharedTreeMap[definitionId] = TPP.cloneClassificationJson(definition);
     });
+    const rebaseSharedChildren = function (nodes, fromPrefix, toPrefix) {
+      const sourcePrefix = String(fromPrefix || "").trim();
+      const targetPrefix = String(toPrefix || "").trim();
+      return (Array.isArray(nodes) ? nodes : []).map(function (node) {
+        const rebasedNode = TPP.cloneClassificationJson(node) || {};
+        const extensionValue = String(rebasedNode.extension || "").trim();
+        if (
+          sourcePrefix &&
+          targetPrefix &&
+          extensionValue &&
+          extensionValue.startsWith(sourcePrefix) &&
+          sourcePrefix !== targetPrefix
+        ) {
+          rebasedNode.extension = targetPrefix + "." + extensionValue;
+        }
+        rebasedNode.children = rebaseSharedChildren(
+          rebasedNode.children,
+          sourcePrefix,
+          targetPrefix,
+        );
+        return rebasedNode;
+      });
+    };
     const expandNodes = function (nodes, stack) {
       return (Array.isArray(nodes) ? nodes : []).map(function (node) {
         const expandedNode = TPP.cloneClassificationJson(node) || {};
@@ -98,8 +121,15 @@ document.addEventListener("DOMContentLoaded", async function () {
           !stack.includes(sharedChildrenRef) &&
           sharedTreeMap[sharedChildrenRef]
         ) {
-          const definitionChildren = TPP.cloneClassificationJson(
-            sharedTreeMap[sharedChildrenRef].children,
+          const sharedDefinition = sharedTreeMap[sharedChildrenRef];
+          const sharedRootExtension = String(
+            (sharedDefinition && sharedDefinition.rootExtension) || "",
+          ).trim();
+          const attachExtension = String(expandedNode.extension || "").trim();
+          const definitionChildren = rebaseSharedChildren(
+            TPP.cloneClassificationJson(sharedDefinition.children),
+            sharedRootExtension,
+            attachExtension,
           );
           sharedChildren = expandNodes(
             definitionChildren,
@@ -459,7 +489,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         normalized.status = String(normalized.status || "active");
         normalized.replacedBy = String(normalized.replacedBy || "");
         const extensionValue = String(normalized.extension || "").replace(
-          /[^0-9A-Za-z]/g,
+          /[^0-9A-Za-z.]/g,
           "",
         );
         normalized.extension = extensionValue;
@@ -517,6 +547,9 @@ document.addEventListener("DOMContentLoaded", async function () {
               : {};
           normalizedDefinition.id = String(
             normalizedDefinition.id || "",
+          ).trim();
+          normalizedDefinition.rootExtension = String(
+            normalizedDefinition.rootExtension || "",
           ).trim();
           normalizedDefinition.children = Array.isArray(
             normalizedDefinition.children,

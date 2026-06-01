@@ -8,6 +8,7 @@
     {
       "id": "geo-united-states-regions",
       "label": "United States Regions",
+      "rootExtension": "1",
       "children": [
         {
           "extension": "11",

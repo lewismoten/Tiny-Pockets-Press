@@ -562,7 +562,9 @@
           "keywords": ["maker spaces", "memory lab", "digital archives"],
           "includes": ["maker spaces", "memory lab", "digital archives"],
           "scopeNote": "Use for works chiefly about maker spaces, memory labs, and public creation or digitization programs within education & institutions.",
-          "sort": 4
+          "sort": 4,
+
+          "sharedChildrenRef": "geo-europe-regions"
         }
       ]
     },

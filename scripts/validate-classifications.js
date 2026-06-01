@@ -141,6 +141,30 @@ function expandExtensionSharedTrees(catalog) {
     definitionMap.set(definitionId, cloneJson(definition));
   }
 
+  function rebaseSharedChildren(nodes, fromPrefix, toPrefix) {
+    const sourcePrefix = String(fromPrefix || "").trim();
+    const targetPrefix = String(toPrefix || "").trim();
+    return (Array.isArray(nodes) ? nodes : []).map((node) => {
+      const rebasedNode = cloneJson(node) || {};
+      const extensionValue = String(rebasedNode.extension || "").trim();
+      if (
+        sourcePrefix &&
+        targetPrefix &&
+        extensionValue &&
+        extensionValue.startsWith(sourcePrefix) &&
+        sourcePrefix !== targetPrefix
+      ) {
+        rebasedNode.extension = targetPrefix + "." + extensionValue;
+      }
+      rebasedNode.children = rebaseSharedChildren(
+        rebasedNode.children,
+        sourcePrefix,
+        targetPrefix,
+      );
+      return rebasedNode;
+    });
+  }
+
   function expandNodes(nodes, stack) {
     return (Array.isArray(nodes) ? nodes : []).map((node) => {
       const expandedNode = cloneJson(node) || {};
@@ -159,8 +183,17 @@ function expandExtensionSharedTrees(catalog) {
             `Unknown shared extension tree reference ${sharedChildrenRef}.`,
           );
         } else {
+          const sharedDefinition = definitionMap.get(sharedChildrenRef);
+          const sharedRootExtension = String(
+            (sharedDefinition && sharedDefinition.rootExtension) || "",
+          ).trim();
+          const attachExtension = String(expandedNode.extension || "").trim();
           sharedChildren = expandNodes(
-            cloneJson(definitionMap.get(sharedChildrenRef).children),
+            rebaseSharedChildren(
+              cloneJson(sharedDefinition.children),
+              sharedRootExtension,
+              attachExtension,
+            ),
             stack.concat(sharedChildrenRef),
           );
         }
