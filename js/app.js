@@ -165,13 +165,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
     catalog.id = String(catalog.id || "tiny-shelf");
     catalog.version = String(catalog.version || "1.0.0");
-    catalog.defaultRecommendedFormat = String(
-      catalog.defaultRecommendedFormat || "code-short-author",
-    );
-    catalog.formats =
+    catalog.formats = (
       Array.isArray(catalog.formats) && catalog.formats.length
         ? catalog.formats
-        : TPP.defaultClassificationFormats();
+        : TPP.defaultClassificationFormats()
+    ).map(function (format) {
+      const normalized = format && typeof format === "object" ? format : {};
+      normalized.id = String(normalized.id || "");
+      normalized.label = String(normalized.label || normalized.id);
+      normalized.template = String(normalized.template || "{code}");
+      normalized.example = String(normalized.example || "");
+      normalized.priority = String(normalized.priority || "");
+      return normalized;
+    });
     catalog.license =
       catalog.license && typeof catalog.license === "object"
         ? catalog.license

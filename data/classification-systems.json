@@ -4457,35 +4457,46 @@
     {
       "id": "code",
       "label": "Code only",
-      "template": "{code}"
+      "template": "{code}",
+      "example": "524",
+      "priority": "low"
     },
     {
       "id": "code-short",
       "label": "Code + short label",
-      "template": "{code}-{shortLabel}"
+      "template": "{code}-{shortLabel}",
+      "example": "524-CLC",
+      "priority": "medium"
     },
     {
       "id": "short-extension",
       "label": "Short label + extension",
-      "template": "{shortLabel}{extensionPart}"
+      "template": "{shortLabel}{extensionPart}",
+      "example": "CLC.3",
+      "priority": "low"
     },
     {
       "id": "code-short-extension",
       "label": "Code + short + extension",
-      "template": "{code}-{shortLabel}{extensionPart}"
+      "template": "{code}-{shortLabel}{extensionPart}",
+      "example": "524-CLC.3",
+      "priority": "highest"
     },
     {
       "id": "code-short-author",
       "label": "Code + short + author",
-      "template": "{code}-{shortLabel} {authorMark}"
+      "template": "{code}-{shortLabel} {authorMark}",
+      "example": "524-CLC MOT",
+      "priority": "high"
     },
     {
       "id": "full-shelfmark",
       "label": "Full shelfmark",
-      "template": "{code}-{shortLabel}{extensionPart} {authorMark} {year} {languageCountry}"
+      "template": "{code}-{shortLabel}{extensionPart} {authorMark} {year} {languageCountry}",
+      "example": "524-CLC.3 MOT 2026 en-US",
+      "priority": "medium"
     }
   ],
-  "defaultRecommendedFormat": "code-short-author",
   "license": {
     "name": "CC0 1.0",
     "url": "https://creativecommons.org/publicdomain/zero/1.0/",

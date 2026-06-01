@@ -233,6 +233,7 @@ validateNodeReferences(ext.nodes, "extension", unresolved);
 
 const problems = [];
 const profileIds = new Map();
+const allowedFormatPriorities = new Set(["highest", "high", "medium", "low"]);
 
 if (!String(system.id || "").trim()) {
   problems.push("Classification system is missing an id.");
@@ -258,6 +259,36 @@ if (!system.license || !String(system.license.name || "").trim()) {
 
 if (!Array.isArray(system.rules) || !system.rules.length) {
   problems.push("Classification system is missing classification rules.");
+}
+
+if (!Array.isArray(system.formats) || !system.formats.length) {
+  problems.push("Classification system is missing classification formats.");
+} else {
+  const highestFormats = [];
+  for (const format of system.formats) {
+    const formatId = String((format && format.id) || "").trim();
+    const priority = String((format && format.priority) || "").trim();
+    if (!formatId) {
+      problems.push("Classification format is missing an id.");
+      continue;
+    }
+    if (!priority) {
+      problems.push(`Classification format ${formatId} is missing a priority.`);
+      continue;
+    }
+    if (!allowedFormatPriorities.has(priority)) {
+      problems.push(
+        `Classification format ${formatId} has invalid priority ${priority}.`,
+      );
+      continue;
+    }
+    if (priority === "highest") highestFormats.push(formatId);
+  }
+  if (highestFormats.length !== 1) {
+    problems.push(
+      `Classification formats must define exactly one highest priority format; found ${highestFormats.length}${highestFormats.length ? ` (${highestFormats.join(", ")})` : ""}.`,
+    );
+  }
 }
 
 if (!Array.isArray(system.profiles) || !system.profiles.length) {
