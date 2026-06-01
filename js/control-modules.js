@@ -17,7 +17,10 @@ TPP.ensureControlModule = async function (id) {
   if (state.api) return state.api;
   if (state.promise) return state.promise;
   state.promise = (async function () {
-    const manifestUrl = new URL(basePath + "module.json", window.location.href);
+    const manifestUrl = new URL(
+      basePath + moduleId + ".json",
+      window.location.href,
+    );
     const manifestResponse = await fetch(manifestUrl.href);
     if (!manifestResponse.ok) {
       throw new Error(

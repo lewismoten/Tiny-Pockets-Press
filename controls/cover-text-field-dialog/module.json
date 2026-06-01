@@ -1,7 +1,0 @@
-{
-  "id": "cover-text-field-dialog",
-  "rootIds": ["frontCoverFieldDialog"],
-  "html": "template.html",
-  "css": "styles.css",
-  "js": "module.js"
-}

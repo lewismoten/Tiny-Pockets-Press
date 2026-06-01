@@ -1,0 +1,7 @@
+{
+  "id": "cover-text-field-dialog",
+  "rootIds": ["frontCoverFieldDialog"],
+  "html": "cover-text-field-dialog.html",
+  "css": "cover-text-field-dialog.css",
+  "js": "cover-text-field-dialog.js"
+}

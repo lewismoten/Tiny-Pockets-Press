@@ -1,7 +1,0 @@
-{
-  "id": "import-conflict-dialog",
-  "rootIds": ["importConflictDialog"],
-  "html": "template.html",
-  "css": "styles.css",
-  "js": "module.js"
-}

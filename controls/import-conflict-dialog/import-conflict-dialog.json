@@ -1,0 +1,7 @@
+{
+  "id": "import-conflict-dialog",
+  "rootIds": ["importConflictDialog"],
+  "html": "import-conflict-dialog.html",
+  "css": "import-conflict-dialog.css",
+  "js": "import-conflict-dialog.js"
+}

@@ -1,0 +1,7 @@
+{
+  "id": "custom-text-dialog",
+  "rootIds": ["customTextDialog"],
+  "html": "custom-text-dialog.html",
+  "css": "custom-text-dialog.css",
+  "js": "custom-text-dialog.js"
+}

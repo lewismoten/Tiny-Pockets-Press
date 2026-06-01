@@ -1,0 +1,7 @@
+{
+  "id": "book-info-picker-dialog",
+  "rootIds": ["bookInfoPickerDialog"],
+  "html": "book-info-picker-dialog.html",
+  "css": "book-info-picker-dialog.css",
+  "js": "book-info-picker-dialog.js"
+}

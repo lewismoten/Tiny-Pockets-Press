@@ -1,7 +1,0 @@
-{
-  "id": "custom-text-dialog",
-  "rootIds": ["customTextDialog"],
-  "html": "template.html",
-  "css": "styles.css",
-  "js": "module.js"
-}
