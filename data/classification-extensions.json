@@ -4,11 +4,11 @@
     {
       "id": "tiny-shelf-v1",
       "name": "Tiny Shelf Extensions",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "description": "Optional extension trees that refine a base Tiny Shelf code without colliding with the main three-digit classification. Extensions are scoped to a parent code and can branch up to four levels deep.",
       "extensions": [
         {
-          "parentCode": "151",
+          "parentCode": "110",
           "label": "Religion",
           "children": [
             {
@@ -95,10 +95,11 @@
               ],
               "scopeNote": "Use for works chiefly about comparative religion within religion."
             }
-          ]
+          ],
+          "legacyParentCode": "151"
         },
         {
-          "parentCode": "152",
+          "parentCode": "120",
           "label": "Spiritual Practice",
           "children": [
             {
@@ -199,10 +200,11 @@
               ],
               "scopeNote": "Use for works chiefly about mysticism & esoteric practice within spiritual practice."
             }
-          ]
+          ],
+          "legacyParentCode": "152"
         },
         {
-          "parentCode": "153",
+          "parentCode": "130",
           "label": "Philosophy",
           "children": [
             {
@@ -273,10 +275,11 @@
               ],
               "scopeNote": "Use for works chiefly about aesthetics & epistemology within philosophy."
             }
-          ]
+          ],
+          "legacyParentCode": "153"
         },
         {
-          "parentCode": "154",
+          "parentCode": "140",
           "label": "Myth & Thought",
           "children": [
             {
@@ -391,353 +394,62 @@
                 "fraternal orders",
                 "symbolic societies"
               ],
-              "seeAlso": ["151"],
+              "seeAlso": ["110"],
               "scopeNote": "Use for works chiefly about Freemasonry, Masonic symbolism, fraternal orders, and related symbolic societies within myth & thought."
             }
-          ]
-        },
-        {
-          "parentCode": "161",
-          "label": "Architecture",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "HDA",
-              "label": "Housing & Domestic Architecture",
-              "sort": 1000,
-              "keywords": [
-                "housing",
-                "domestic",
-                "architecture",
-                "preservation"
-              ],
-              "includes": [
-                "housing",
-                "domestic",
-                "architecture",
-                "preservation"
-              ],
-              "scopeNote": "Use for works chiefly about housing & domestic architecture within architecture."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "PCA",
-              "label": "Public & Civic Architecture",
-              "sort": 2000,
-              "keywords": ["public", "civic", "architecture", "preservation"],
-              "includes": ["public", "civic", "architecture", "preservation"],
-              "scopeNote": "Use for works chiefly about public & civic architecture within architecture."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "SAA",
-              "label": "Sacred Architecture",
-              "sort": 3000,
-              "keywords": ["sacred", "architecture", "preservation"],
-              "includes": ["sacred", "architecture", "preservation"],
-              "scopeNote": "Use for works chiefly about sacred architecture within architecture."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "LAA",
-              "label": "Landscape Architecture",
-              "sort": 4000,
-              "keywords": ["landscape", "architecture", "preservation"],
-              "includes": ["landscape", "architecture", "preservation"],
-              "scopeNote": "Use for works chiefly about landscape architecture within architecture."
-            }
-          ]
+          ],
+          "legacyParentCode": "154"
         },
         {
           "parentCode": "162",
-          "label": "Historic Preservation",
+          "label": "Modern History",
           "children": [
             {
               "extension": "1",
-              "shortLabel": "BUC",
-              "label": "Building Conservation",
-              "sort": 1000,
+              "shortLabel": "AMR",
+              "label": "American Revolution",
               "keywords": [
-                "building",
-                "conservation",
-                "architecture",
-                "preservation",
-                "historic"
+                "american revolution",
+                "revolutionary war",
+                "founding era"
               ],
               "includes": [
-                "building",
-                "conservation",
-                "architecture",
-                "preservation",
-                "historic"
+                "american revolution",
+                "revolutionary war",
+                "founding era"
               ],
-              "scopeNote": "Use for works chiefly about building conservation within historic preservation."
+              "scopeNote": "Use for works chiefly about the American Revolution within modern history."
             },
             {
               "extension": "2",
-              "shortLabel": "REP",
-              "label": "Restoration Practice",
-              "sort": 2000,
-              "keywords": [
-                "restoration",
-                "practice",
-                "architecture",
-                "preservation",
-                "historic"
-              ],
-              "includes": [
-                "restoration",
-                "practice",
-                "architecture",
-                "preservation",
-                "historic"
-              ],
-              "scopeNote": "Use for works chiefly about restoration practice within historic preservation."
+              "shortLabel": "CIW",
+              "label": "Civil War",
+              "keywords": ["civil war", "union", "confederacy"],
+              "includes": ["civil war", "union", "confederacy"],
+              "scopeNote": "Use for works chiefly about the Civil War within modern history."
             },
             {
               "extension": "3",
-              "shortLabel": "HER",
-              "label": "Heritage & Registry",
-              "sort": 3000,
+              "shortLabel": "CRM",
+              "label": "Civil Rights Movement",
               "keywords": [
-                "heritage",
-                "registry",
-                "architecture",
-                "preservation",
-                "historic"
+                "civil rights movement",
+                "segregation",
+                "voting rights"
               ],
               "includes": [
-                "heritage",
-                "registry",
-                "architecture",
-                "preservation",
-                "historic"
+                "civil rights movement",
+                "segregation",
+                "voting rights"
               ],
-              "scopeNote": "Use for works chiefly about heritage & registry within historic preservation."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "ADR",
-              "label": "Adaptive Reuse",
-              "sort": 4000,
-              "keywords": [
-                "adaptive",
-                "reuse",
-                "architecture",
-                "preservation",
-                "historic"
-              ],
-              "includes": [
-                "adaptive",
-                "reuse",
-                "architecture",
-                "preservation",
-                "historic"
-              ],
-              "scopeNote": "Use for works chiefly about adaptive reuse within historic preservation."
+              "seeAlso": ["182.1", "184.1"],
+              "scopeNote": "Use for works chiefly about the Civil Rights Movement as a historical period or movement within modern history."
             }
-          ]
+          ],
+          "legacyParentCode": "512"
         },
         {
           "parentCode": "163",
-          "label": "Urban Design",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "PLZ",
-              "label": "Planning & Zoning",
-              "sort": 1000,
-              "keywords": [
-                "planning",
-                "zoning",
-                "architecture",
-                "preservation",
-                "urban",
-                "design"
-              ],
-              "includes": [
-                "planning",
-                "zoning",
-                "architecture",
-                "preservation",
-                "urban",
-                "design"
-              ],
-              "scopeNote": "Use for works chiefly about planning & zoning within urban design."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "SPS",
-              "label": "Streetscape & Public Space",
-              "sort": 2000,
-              "keywords": [
-                "streetscape",
-                "public",
-                "space",
-                "architecture",
-                "preservation",
-                "urban",
-                "design"
-              ],
-              "includes": [
-                "streetscape",
-                "public",
-                "space",
-                "architecture",
-                "preservation",
-                "urban",
-                "design"
-              ],
-              "scopeNote": "Use for works chiefly about streetscape & public space within urban design."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "TRM",
-              "label": "Transit & Mobility",
-              "sort": 3000,
-              "keywords": [
-                "transit",
-                "mobility",
-                "architecture",
-                "preservation",
-                "urban",
-                "design"
-              ],
-              "includes": [
-                "transit",
-                "mobility",
-                "architecture",
-                "preservation",
-                "urban",
-                "design"
-              ],
-              "scopeNote": "Use for works chiefly about transit & mobility within urban design."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "COD",
-              "label": "Community Development",
-              "sort": 4000,
-              "keywords": [
-                "community",
-                "development",
-                "architecture",
-                "preservation",
-                "urban",
-                "design"
-              ],
-              "includes": [
-                "community",
-                "development",
-                "architecture",
-                "preservation",
-                "urban",
-                "design"
-              ],
-              "scopeNote": "Use for works chiefly about community development within urban design."
-            }
-          ]
-        },
-        {
-          "parentCode": "164",
-          "label": "Building Craft",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "MAM",
-              "label": "Materials & Methods",
-              "sort": 1000,
-              "keywords": [
-                "materials",
-                "methods",
-                "architecture",
-                "preservation",
-                "building",
-                "craft"
-              ],
-              "includes": [
-                "materials",
-                "methods",
-                "architecture",
-                "preservation",
-                "building",
-                "craft"
-              ],
-              "scopeNote": "Use for works chiefly about materials & methods within building craft."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "WSM",
-              "label": "Wood, Stone & Masonry",
-              "sort": 2000,
-              "keywords": [
-                "wood",
-                "stone",
-                "masonry",
-                "architecture",
-                "preservation",
-                "building",
-                "craft"
-              ],
-              "includes": [
-                "wood",
-                "stone",
-                "masonry",
-                "architecture",
-                "preservation",
-                "building",
-                "craft"
-              ],
-              "scopeNote": "Use for works chiefly about wood, stone & masonry within building craft."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "ENB",
-              "label": "Environmental Building",
-              "sort": 3000,
-              "keywords": [
-                "environmental",
-                "building",
-                "architecture",
-                "preservation",
-                "craft"
-              ],
-              "includes": [
-                "environmental",
-                "building",
-                "architecture",
-                "preservation",
-                "craft"
-              ],
-              "scopeNote": "Use for works chiefly about environmental building within building craft."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "DOS",
-              "label": "Documentation & Survey",
-              "sort": 4000,
-              "keywords": [
-                "documentation",
-                "survey",
-                "architecture",
-                "preservation",
-                "building",
-                "craft"
-              ],
-              "includes": [
-                "documentation",
-                "survey",
-                "architecture",
-                "preservation",
-                "building",
-                "craft"
-              ],
-              "scopeNote": "Use for works chiefly about documentation & survey within building craft."
-            }
-          ]
-        },
-        {
-          "parentCode": "513",
           "label": "Local & Regional History",
           "children": [
             {
@@ -925,10 +637,790 @@
               ],
               "scopeNote": "Use for general works on europe within local & regional history. Class more specific works in the refinements below when appropriate."
             }
-          ]
+          ],
+          "legacyParentCode": "513"
         },
         {
-          "parentCode": "751",
+          "parentCode": "174",
+          "label": "Education & Institutions",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "LIB",
+              "label": "Libraries & Information Access",
+              "keywords": [
+                "libraries",
+                "public access to information",
+                "library services"
+              ],
+              "includes": [
+                "libraries",
+                "public access to information",
+                "library services"
+              ],
+              "scopeNote": "Use for works chiefly about libraries, library services, and public access to information within education & institutions."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "LGP",
+              "label": "Library Governance & Policy",
+              "keywords": [
+                "library governance",
+                "library policy",
+                "intellectual freedom",
+                "book challenges"
+              ],
+              "includes": [
+                "library governance",
+                "library policy",
+                "intellectual freedom",
+                "book challenges"
+              ],
+              "seeAlso": ["182"],
+              "scopeNote": "Use for works chiefly about library governance, library policy, intellectual freedom, and book challenges within education & institutions."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "DIL",
+              "label": "Digital Literacy & Inclusion",
+              "keywords": [
+                "digital literacy",
+                "inclusive design",
+                "web accessibility"
+              ],
+              "includes": [
+                "digital literacy",
+                "inclusive design",
+                "web accessibility"
+              ],
+              "scopeNote": "Use for works chiefly about digital literacy, accessibility, and inclusive participation in information systems within education & institutions."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "MML",
+              "label": "Maker Spaces & Memory Labs",
+              "keywords": ["maker spaces", "memory lab", "digital archives"],
+              "includes": ["maker spaces", "memory lab", "digital archives"],
+              "scopeNote": "Use for works chiefly about maker spaces, memory labs, and public creation or digitization programs within education & institutions."
+            }
+          ],
+          "legacyParentCode": "524"
+        },
+        {
+          "parentCode": "184",
+          "label": "Civic Practice",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "COM",
+              "label": "Community Building & Organizing",
+              "keywords": [
+                "community building",
+                "community organizing",
+                "grassroots"
+              ],
+              "includes": [
+                "community building",
+                "community organizing",
+                "grassroots"
+              ],
+              "scopeNote": "Use for works chiefly about building communities, grassroots organizing, and neighborhood civic participation within civic practice."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "GOV",
+              "label": "Government Proceedings & Public Meetings",
+              "keywords": [
+                "government proceedings",
+                "public meetings",
+                "meeting procedure"
+              ],
+              "includes": [
+                "government proceedings",
+                "public meetings",
+                "meeting procedure"
+              ],
+              "scopeNote": "Use for works chiefly about understanding government proceedings, public meetings, and how civic bodies conduct business within civic practice."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "ELE",
+              "label": "Elections & Committees",
+              "keywords": ["elections", "committees", "campaigns", "ballots"],
+              "includes": ["elections", "committees", "campaigns", "ballots"],
+              "scopeNote": "Use for works chiefly about elections, committees, and civic decision-making within civic practice."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "NPO",
+              "label": "Nonprofits & Chambers",
+              "keywords": ["nonprofits", "chamber of commerce", "associations"],
+              "includes": ["nonprofits", "chamber of commerce", "associations"],
+              "scopeNote": "Use for works chiefly about nonprofit organizations, chambers of commerce, and civic associations within civic practice."
+            },
+            {
+              "extension": "5",
+              "shortLabel": "FES",
+              "label": "Festivals & Civic Events",
+              "keywords": [
+                "festival organizing",
+                "community events",
+                "parades"
+              ],
+              "includes": [
+                "festival organizing",
+                "community events",
+                "parades"
+              ],
+              "scopeNote": "Use for works chiefly about organizing festivals, parades, and civic events within civic practice."
+            },
+            {
+              "extension": "6",
+              "shortLabel": "FOIA",
+              "label": "FOIA & Public Records",
+              "keywords": ["foia", "freedom of information", "public records"],
+              "includes": ["foia", "freedom of information", "public records"],
+              "seeAlso": ["182"],
+              "scopeNote": "Use for works chiefly about FOIA, access to public records, and information rights in civic practice."
+            }
+          ],
+          "legacyParentCode": "534"
+        },
+        {
+          "parentCode": "321",
+          "label": "Science Fiction",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "SPO",
+              "label": "Space Opera",
+              "keywords": ["space opera", "science fiction"],
+              "seeAlso": ["321.2"],
+              "children": [
+                {
+                  "extension": "11",
+                  "shortLabel": "INE",
+                  "label": "Interstellar Empires",
+                  "keywords": ["empires", "galactic politics"],
+                  "includes": [
+                    "interstellar",
+                    "empires",
+                    "galactic politics",
+                    "science",
+                    "fiction",
+                    "space",
+                    "opera"
+                  ],
+                  "scopeNote": "Use for works chiefly about interstellar empires within space opera."
+                },
+                {
+                  "extension": "12",
+                  "shortLabel": "MIC",
+                  "label": "Mission Crews",
+                  "keywords": ["mission", "crew", "starship"],
+                  "includes": [
+                    "mission",
+                    "crews",
+                    "crew",
+                    "starship",
+                    "science",
+                    "fiction",
+                    "space",
+                    "opera"
+                  ],
+                  "scopeNote": "Use for works chiefly about mission crews within space opera."
+                }
+              ],
+              "allowAssign": true,
+              "includes": [
+                "space",
+                "opera",
+                "space opera",
+                "science fiction",
+                "science",
+                "fiction"
+              ],
+              "scopeNote": "Use for general works on space opera within science fiction. Class more specific works in the refinements below when appropriate."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "CYB",
+              "label": "Cyberpunk",
+              "keywords": ["cyberpunk", "science fiction"],
+              "seeAlso": ["321.3"],
+              "children": [
+                {
+                  "extension": "21",
+                  "shortLabel": "NEN",
+                  "label": "Neon Noir",
+                  "keywords": ["noir", "urban future"],
+                  "includes": [
+                    "neon",
+                    "noir",
+                    "urban future",
+                    "science",
+                    "fiction",
+                    "cyberpunk"
+                  ],
+                  "scopeNote": "Use for works chiefly about neon noir within cyberpunk."
+                },
+                {
+                  "extension": "22",
+                  "shortLabel": "NES",
+                  "label": "Networked Selves",
+                  "keywords": ["virtual", "network", "identity"],
+                  "includes": [
+                    "networked",
+                    "selves",
+                    "virtual",
+                    "network",
+                    "identity",
+                    "science",
+                    "fiction",
+                    "cyberpunk"
+                  ],
+                  "scopeNote": "Use for works chiefly about networked selves within cyberpunk."
+                }
+              ],
+              "allowAssign": true,
+              "includes": [
+                "cyberpunk",
+                "science fiction",
+                "science",
+                "fiction"
+              ],
+              "scopeNote": "Use for general works on cyberpunk within science fiction. Class more specific works in the refinements below when appropriate."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "DYF",
+              "label": "Dystopian Futures",
+              "keywords": ["dystopian", "future"],
+              "status": "deprecated",
+              "replacedBy": "321.31",
+              "children": [
+                {
+                  "extension": "31",
+                  "shortLabel": "CCF",
+                  "label": "Climate Collapse Futures",
+                  "keywords": ["climate", "collapse", "future"],
+                  "includes": [
+                    "climate",
+                    "collapse",
+                    "futures",
+                    "future",
+                    "science",
+                    "fiction",
+                    "dystopian"
+                  ],
+                  "scopeNote": "Use for works chiefly about climate collapse futures within dystopian futures."
+                },
+                {
+                  "extension": "32",
+                  "shortLabel": "AUR",
+                  "label": "Authoritarian Regimes",
+                  "keywords": ["authoritarian", "regime", "state"],
+                  "includes": [
+                    "authoritarian",
+                    "regimes",
+                    "regime",
+                    "state",
+                    "science",
+                    "fiction",
+                    "dystopian",
+                    "futures"
+                  ],
+                  "scopeNote": "Use for works chiefly about authoritarian regimes within dystopian futures."
+                }
+              ],
+              "allowAssign": true,
+              "includes": [
+                "dystopian",
+                "futures",
+                "future",
+                "science",
+                "fiction"
+              ],
+              "scopeNote": "Use for general works on dystopian futures within science fiction. Class more specific works in the refinements below when appropriate.",
+              "historyNote": "Deprecated to direct catalogers to the more precise replacement 321.31."
+            }
+          ],
+          "legacyParentCode": "821"
+        },
+        {
+          "parentCode": "383",
+          "label": "Theater",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "MAG",
+              "label": "Magic & Illusion",
+              "keywords": [
+                "magic tricks",
+                "illusion",
+                "stage magic",
+                "sleight of hand"
+              ],
+              "includes": [
+                "magic tricks",
+                "illusion",
+                "stage magic",
+                "sleight of hand"
+              ],
+              "scopeNote": "Use for works chiefly about magic tricks, illusion performance, sleight of hand, and stage magic within theater."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "CLO",
+              "label": "Clowning",
+              "keywords": ["clowning", "clowns", "physical comedy"],
+              "includes": ["clowning", "clowns", "physical comedy"],
+              "scopeNote": "Use for works chiefly about clowning, clown performance, and physical comedy within theater."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "BAL",
+              "label": "Balloon Sculpting",
+              "keywords": [
+                "balloon sculpting",
+                "balloon art",
+                "twisting balloons"
+              ],
+              "includes": [
+                "balloon sculpting",
+                "balloon art",
+                "twisting balloons"
+              ],
+              "scopeNote": "Use for works chiefly about balloon sculpting and balloon art as live performance or entertainment craft within theater."
+            }
+          ],
+          "legacyParentCode": "133"
+        },
+        {
+          "parentCode": "390",
+          "label": "Media Arts",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "POD",
+              "label": "Podcasts & Audio Storytelling",
+              "keywords": [
+                "podcasts",
+                "audio storytelling",
+                "audio diaries",
+                "telephone storytelling"
+              ],
+              "includes": [
+                "podcasts",
+                "audio storytelling",
+                "audio diaries",
+                "telephone storytelling"
+              ],
+              "scopeNote": "Use for works chiefly about podcasts, audio diaries, telephone storytelling, and spoken-word audio media within media arts."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "AUD",
+              "label": "Experimental Audio & Restoration",
+              "keywords": [
+                "experimental audio",
+                "audio restoration",
+                "audacity",
+                "sound collage"
+              ],
+              "includes": [
+                "experimental audio",
+                "audio restoration",
+                "audacity",
+                "sound collage"
+              ],
+              "scopeNote": "Use for works chiefly about experimental audio, sound collage, restoration, and creative audio practice within media arts."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "EXH",
+              "label": "Interactive & Public Exhibits",
+              "keywords": [
+                "interactive exhibits",
+                "public exhibits",
+                "accessibility in exhibits",
+                "offline audio exhibits"
+              ],
+              "includes": [
+                "interactive exhibits",
+                "public exhibits",
+                "accessibility in exhibits",
+                "offline audio exhibits"
+              ],
+              "scopeNote": "Use for works chiefly about interactive exhibits, public media installations, accessibility in exhibits, and offline audio exhibits within media arts."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "AIM",
+              "label": "AI Media Tools",
+              "keywords": [
+                "ai transcription",
+                "ai moderation",
+                "ai-assisted music",
+                "surreal ai voices"
+              ],
+              "includes": [
+                "ai transcription",
+                "ai moderation",
+                "ai-assisted music",
+                "surreal ai voices"
+              ],
+              "scopeNote": "Use for works chiefly about AI-assisted media tools, transcription, moderation, synthetic voice, and creative AI media practice within media arts."
+            }
+          ],
+          "legacyParentCode": "140"
+        },
+        {
+          "parentCode": "410",
+          "label": "Architecture",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "HDA",
+              "label": "Housing & Domestic Architecture",
+              "sort": 1000,
+              "keywords": [
+                "housing",
+                "domestic",
+                "architecture",
+                "preservation"
+              ],
+              "includes": [
+                "housing",
+                "domestic",
+                "architecture",
+                "preservation"
+              ],
+              "scopeNote": "Use for works chiefly about housing & domestic architecture within architecture."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "PCA",
+              "label": "Public & Civic Architecture",
+              "sort": 2000,
+              "keywords": ["public", "civic", "architecture", "preservation"],
+              "includes": ["public", "civic", "architecture", "preservation"],
+              "scopeNote": "Use for works chiefly about public & civic architecture within architecture."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "SAA",
+              "label": "Sacred Architecture",
+              "sort": 3000,
+              "keywords": ["sacred", "architecture", "preservation"],
+              "includes": ["sacred", "architecture", "preservation"],
+              "scopeNote": "Use for works chiefly about sacred architecture within architecture."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "LAA",
+              "label": "Landscape Architecture",
+              "sort": 4000,
+              "keywords": ["landscape", "architecture", "preservation"],
+              "includes": ["landscape", "architecture", "preservation"],
+              "scopeNote": "Use for works chiefly about landscape architecture within architecture."
+            }
+          ],
+          "legacyParentCode": "161"
+        },
+        {
+          "parentCode": "420",
+          "label": "Historic Preservation",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "BUC",
+              "label": "Building Conservation",
+              "sort": 1000,
+              "keywords": [
+                "building",
+                "conservation",
+                "architecture",
+                "preservation",
+                "historic"
+              ],
+              "includes": [
+                "building",
+                "conservation",
+                "architecture",
+                "preservation",
+                "historic"
+              ],
+              "scopeNote": "Use for works chiefly about building conservation within historic preservation."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "REP",
+              "label": "Restoration Practice",
+              "sort": 2000,
+              "keywords": [
+                "restoration",
+                "practice",
+                "architecture",
+                "preservation",
+                "historic"
+              ],
+              "includes": [
+                "restoration",
+                "practice",
+                "architecture",
+                "preservation",
+                "historic"
+              ],
+              "scopeNote": "Use for works chiefly about restoration practice within historic preservation."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "HER",
+              "label": "Heritage & Registry",
+              "sort": 3000,
+              "keywords": [
+                "heritage",
+                "registry",
+                "architecture",
+                "preservation",
+                "historic"
+              ],
+              "includes": [
+                "heritage",
+                "registry",
+                "architecture",
+                "preservation",
+                "historic"
+              ],
+              "scopeNote": "Use for works chiefly about heritage & registry within historic preservation."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "ADR",
+              "label": "Adaptive Reuse",
+              "sort": 4000,
+              "keywords": [
+                "adaptive",
+                "reuse",
+                "architecture",
+                "preservation",
+                "historic"
+              ],
+              "includes": [
+                "adaptive",
+                "reuse",
+                "architecture",
+                "preservation",
+                "historic"
+              ],
+              "scopeNote": "Use for works chiefly about adaptive reuse within historic preservation."
+            }
+          ],
+          "legacyParentCode": "162"
+        },
+        {
+          "parentCode": "430",
+          "label": "Urban Design",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "PLZ",
+              "label": "Planning & Zoning",
+              "sort": 1000,
+              "keywords": [
+                "planning",
+                "zoning",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ],
+              "includes": [
+                "planning",
+                "zoning",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ],
+              "scopeNote": "Use for works chiefly about planning & zoning within urban design."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "SPS",
+              "label": "Streetscape & Public Space",
+              "sort": 2000,
+              "keywords": [
+                "streetscape",
+                "public",
+                "space",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ],
+              "includes": [
+                "streetscape",
+                "public",
+                "space",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ],
+              "scopeNote": "Use for works chiefly about streetscape & public space within urban design."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "TRM",
+              "label": "Transit & Mobility",
+              "sort": 3000,
+              "keywords": [
+                "transit",
+                "mobility",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ],
+              "includes": [
+                "transit",
+                "mobility",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ],
+              "scopeNote": "Use for works chiefly about transit & mobility within urban design."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "COD",
+              "label": "Community Development",
+              "sort": 4000,
+              "keywords": [
+                "community",
+                "development",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ],
+              "includes": [
+                "community",
+                "development",
+                "architecture",
+                "preservation",
+                "urban",
+                "design"
+              ],
+              "scopeNote": "Use for works chiefly about community development within urban design."
+            }
+          ],
+          "legacyParentCode": "163"
+        },
+        {
+          "parentCode": "440",
+          "label": "Building Craft",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "MAM",
+              "label": "Materials & Methods",
+              "sort": 1000,
+              "keywords": [
+                "materials",
+                "methods",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ],
+              "includes": [
+                "materials",
+                "methods",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ],
+              "scopeNote": "Use for works chiefly about materials & methods within building craft."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "WSM",
+              "label": "Wood, Stone & Masonry",
+              "sort": 2000,
+              "keywords": [
+                "wood",
+                "stone",
+                "masonry",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ],
+              "includes": [
+                "wood",
+                "stone",
+                "masonry",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ],
+              "scopeNote": "Use for works chiefly about wood, stone & masonry within building craft."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "ENB",
+              "label": "Environmental Building",
+              "sort": 3000,
+              "keywords": [
+                "environmental",
+                "building",
+                "architecture",
+                "preservation",
+                "craft"
+              ],
+              "includes": [
+                "environmental",
+                "building",
+                "architecture",
+                "preservation",
+                "craft"
+              ],
+              "scopeNote": "Use for works chiefly about environmental building within building craft."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "DOS",
+              "label": "Documentation & Survey",
+              "sort": 4000,
+              "keywords": [
+                "documentation",
+                "survey",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ],
+              "includes": [
+                "documentation",
+                "survey",
+                "architecture",
+                "preservation",
+                "building",
+                "craft"
+              ],
+              "scopeNote": "Use for works chiefly about documentation & survey within building craft."
+            }
+          ],
+          "legacyParentCode": "164"
+        },
+        {
+          "parentCode": "501",
           "label": "Wildlife",
           "children": [
             {
@@ -1007,10 +1499,11 @@
               ],
               "scopeNote": "Use for works chiefly about insects & invertebrates within wildlife."
             }
-          ]
+          ],
+          "legacyParentCode": "751"
         },
         {
-          "parentCode": "752",
+          "parentCode": "502",
           "label": "Animal Behavior",
           "children": [
             {
@@ -1119,10 +1612,11 @@
               ],
               "scopeNote": "Use for works chiefly about conservation biology within animal behavior."
             }
-          ]
+          ],
+          "legacyParentCode": "752"
         },
         {
-          "parentCode": "753",
+          "parentCode": "503",
           "label": "Domesticated Animals",
           "children": [
             {
@@ -1217,10 +1711,11 @@
               ],
               "scopeNote": "Use for works chiefly about felines within domesticated animals."
             }
-          ]
+          ],
+          "legacyParentCode": "753"
         },
         {
-          "parentCode": "754",
+          "parentCode": "504",
           "label": "Nature Companions",
           "children": [
             {
@@ -1321,170 +1816,249 @@
               ],
               "scopeNote": "Use for works chiefly about rescue & rehabilitation within nature companions."
             }
-          ]
+          ],
+          "legacyParentCode": "754"
         },
         {
-          "parentCode": "821",
-          "label": "Science Fiction",
+          "parentCode": "522",
+          "label": "Networking",
           "children": [
             {
               "extension": "1",
-              "shortLabel": "SPO",
-              "label": "Space Opera",
-              "keywords": ["space opera", "science fiction"],
-              "seeAlso": ["821.2"],
-              "children": [
-                {
-                  "extension": "11",
-                  "shortLabel": "INE",
-                  "label": "Interstellar Empires",
-                  "keywords": ["empires", "galactic politics"],
-                  "includes": [
-                    "interstellar",
-                    "empires",
-                    "galactic politics",
-                    "science",
-                    "fiction",
-                    "space",
-                    "opera"
-                  ],
-                  "scopeNote": "Use for works chiefly about interstellar empires within space opera."
-                },
-                {
-                  "extension": "12",
-                  "shortLabel": "MIC",
-                  "label": "Mission Crews",
-                  "keywords": ["mission", "crew", "starship"],
-                  "includes": [
-                    "mission",
-                    "crews",
-                    "crew",
-                    "starship",
-                    "science",
-                    "fiction",
-                    "space",
-                    "opera"
-                  ],
-                  "scopeNote": "Use for works chiefly about mission crews within space opera."
-                }
-              ],
-              "allowAssign": true,
-              "includes": [
-                "space",
-                "opera",
-                "space opera",
-                "science fiction",
-                "science",
-                "fiction"
-              ],
-              "scopeNote": "Use for general works on space opera within science fiction. Class more specific works in the refinements below when appropriate."
+              "shortLabel": "VOIP",
+              "label": "VoIP & PBX Systems",
+              "keywords": ["voip", "pbx", "asterisk", "grandstream ata"],
+              "includes": ["voip", "pbx", "asterisk", "grandstream ata"],
+              "scopeNote": "Use for works chiefly about VoIP, PBX systems, SIP devices, and telephone-over-network infrastructure within networking."
             },
             {
               "extension": "2",
-              "shortLabel": "CYB",
-              "label": "Cyberpunk",
-              "keywords": ["cyberpunk", "science fiction"],
-              "seeAlso": ["821.3"],
-              "children": [
-                {
-                  "extension": "21",
-                  "shortLabel": "NEN",
-                  "label": "Neon Noir",
-                  "keywords": ["noir", "urban future"],
-                  "includes": [
-                    "neon",
-                    "noir",
-                    "urban future",
-                    "science",
-                    "fiction",
-                    "cyberpunk"
-                  ],
-                  "scopeNote": "Use for works chiefly about neon noir within cyberpunk."
-                },
-                {
-                  "extension": "22",
-                  "shortLabel": "NES",
-                  "label": "Networked Selves",
-                  "keywords": ["virtual", "network", "identity"],
-                  "includes": [
-                    "networked",
-                    "selves",
-                    "virtual",
-                    "network",
-                    "identity",
-                    "science",
-                    "fiction",
-                    "cyberpunk"
-                  ],
-                  "scopeNote": "Use for works chiefly about networked selves within cyberpunk."
-                }
+              "shortLabel": "LEG",
+              "label": "Legacy Telephony",
+              "keywords": [
+                "rotary phones",
+                "candlestick phones",
+                "magneto telephones",
+                "switchboards",
+                "payphones"
               ],
-              "allowAssign": true,
               "includes": [
-                "cyberpunk",
-                "science fiction",
-                "science",
-                "fiction"
+                "rotary phones",
+                "candlestick phones",
+                "magneto telephones",
+                "switchboards",
+                "payphones"
               ],
-              "scopeNote": "Use for general works on cyberpunk within science fiction. Class more specific works in the refinements below when appropriate."
+              "scopeNote": "Use for works chiefly about legacy telephony equipment, historic phone systems, and analog communication infrastructure within networking."
             },
             {
               "extension": "3",
-              "shortLabel": "DYF",
-              "label": "Dystopian Futures",
-              "keywords": ["dystopian", "future"],
-              "status": "deprecated",
-              "replacedBy": "821.31",
-              "children": [
-                {
-                  "extension": "31",
-                  "shortLabel": "CCF",
-                  "label": "Climate Collapse Futures",
-                  "keywords": ["climate", "collapse", "future"],
-                  "includes": [
-                    "climate",
-                    "collapse",
-                    "futures",
-                    "future",
-                    "science",
-                    "fiction",
-                    "dystopian"
-                  ],
-                  "scopeNote": "Use for works chiefly about climate collapse futures within dystopian futures."
-                },
-                {
-                  "extension": "32",
-                  "shortLabel": "AUR",
-                  "label": "Authoritarian Regimes",
-                  "keywords": ["authoritarian", "regime", "state"],
-                  "includes": [
-                    "authoritarian",
-                    "regimes",
-                    "regime",
-                    "state",
-                    "science",
-                    "fiction",
-                    "dystopian",
-                    "futures"
-                  ],
-                  "scopeNote": "Use for works chiefly about authoritarian regimes within dystopian futures."
-                }
+              "shortLabel": "TTY",
+              "label": "TTY & Signaling",
+              "keywords": [
+                "tty devices",
+                "baudot",
+                "ring detection",
+                "minimodem",
+                "telephone audio",
+                "morse code"
               ],
-              "allowAssign": true,
               "includes": [
-                "dystopian",
-                "futures",
-                "future",
-                "science",
-                "fiction"
+                "tty devices",
+                "baudot",
+                "ring detection",
+                "minimodem",
+                "telephone audio",
+                "morse code"
               ],
-              "scopeNote": "Use for general works on dystopian futures within science fiction. Class more specific works in the refinements below when appropriate.",
-              "historyNote": "Deprecated to direct catalogers to the more precise replacement 821.31."
+              "scopeNote": "Use for works chiefly about TTY devices, signaling, Baudot, modem-like telephony interfaces, and communications encoding within networking."
             }
-          ]
+          ],
+          "legacyParentCode": "422"
         },
         {
-          "parentCode": "922",
+          "parentCode": "524",
+          "label": "Cloud & Infrastructure",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "HOM",
+              "label": "Self-Hosting & Homelabs",
+              "keywords": ["self-hosting", "homelab", "unraid", "linux"],
+              "includes": ["self-hosting", "homelab", "unraid", "linux"],
+              "scopeNote": "Use for works chiefly about self-hosting, homelabs, home servers, and personal infrastructure administration within cloud & infrastructure."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "CON",
+              "label": "Containers & Virtualization",
+              "keywords": ["docker", "kubernetes", "proxmox", "virtualization"],
+              "includes": ["docker", "kubernetes", "proxmox", "virtualization"],
+              "scopeNote": "Use for works chiefly about containers, orchestration, virtualization, and platform infrastructure within cloud & infrastructure."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "NAS",
+              "label": "Storage & Backup Systems",
+              "keywords": [
+                "nas",
+                "smb",
+                "cloud storage",
+                "local storage",
+                "json import export"
+              ],
+              "includes": [
+                "nas",
+                "smb",
+                "cloud storage",
+                "local storage",
+                "backup systems"
+              ],
+              "scopeNote": "Use for works chiefly about storage, NAS systems, backup, synchronization, and data portability within cloud & infrastructure."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "AUT",
+              "label": "Home Automation & Local AI",
+              "keywords": [
+                "home assistant",
+                "ollama",
+                "open webui",
+                "raspberry pi",
+                "build servers"
+              ],
+              "includes": [
+                "home assistant",
+                "ollama",
+                "open webui",
+                "raspberry pi",
+                "build servers"
+              ],
+              "scopeNote": "Use for works chiefly about home automation infrastructure, local AI systems, Raspberry Pi deployments, and small build infrastructure within cloud & infrastructure."
+            }
+          ],
+          "legacyParentCode": "424"
+        },
+        {
+          "parentCode": "534",
+          "label": "Robotics & Embedded Systems",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "ELC",
+              "label": "Electronics & Circuits",
+              "keywords": [
+                "electronics",
+                "circuits",
+                "soldering",
+                "microcontrollers"
+              ],
+              "includes": [
+                "electronics",
+                "circuits",
+                "soldering",
+                "microcontrollers"
+              ],
+              "scopeNote": "Use for works chiefly about electronics, circuits, soldering, and component-level hardware within robotics & embedded systems."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "ROB",
+              "label": "Robotics",
+              "keywords": ["robotics", "robots", "automation"],
+              "includes": ["robotics", "robots", "automation"],
+              "scopeNote": "Use for works chiefly about robotics and robotic systems within robotics & embedded systems."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "ELE",
+              "label": "Electrical Engineering",
+              "keywords": [
+                "electrical engineering",
+                "power systems",
+                "control systems"
+              ],
+              "includes": [
+                "electrical engineering",
+                "power systems",
+                "control systems"
+              ],
+              "scopeNote": "Use for works chiefly about electrical engineering and control systems within robotics & embedded systems."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "VCO",
+              "label": "Vintage Computing Hardware",
+              "keywords": [
+                "vintage computers",
+                "retro computing",
+                "building computers",
+                "computer restoration"
+              ],
+              "includes": [
+                "vintage computers",
+                "retro computing",
+                "building computers",
+                "computer restoration"
+              ],
+              "scopeNote": "Use for works chiefly about building, restoring, or maintaining vintage computers and retro computing hardware within robotics & embedded systems."
+            }
+          ],
+          "legacyParentCode": "434"
+        },
+        {
+          "parentCode": "613",
+          "label": "Indexes & Catalogs",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "CLS",
+              "label": "Classification & Shelfmarks",
+              "keywords": [
+                "classification systems",
+                "shelfmarks",
+                "dewey decimal classification",
+                "open classification systems"
+              ],
+              "includes": [
+                "classification systems",
+                "shelfmarks",
+                "dewey decimal classification",
+                "open classification systems"
+              ],
+              "scopeNote": "Use for works chiefly about classification systems, shelfmarks, and the arrangement of knowledge within indexes & catalogs."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "MET",
+              "label": "Metadata & Tagging",
+              "keywords": [
+                "metadata",
+                "tagging systems",
+                "title writing",
+                "tags"
+              ],
+              "includes": [
+                "metadata",
+                "tagging systems",
+                "title writing",
+                "tags"
+              ],
+              "scopeNote": "Use for works chiefly about metadata, tagging, descriptive structure, and lightweight information labeling within indexes & catalogs."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "CAT",
+              "label": "Cataloging & Directories",
+              "keywords": ["cataloging", "directory entries", "rolodex cards"],
+              "includes": ["cataloging", "directory entries", "rolodex cards"],
+              "scopeNote": "Use for works chiefly about cataloging, directory structures, and reference listing systems within indexes & catalogs."
+            }
+          ],
+          "legacyParentCode": "913"
+        },
+        {
+          "parentCode": "622",
           "label": "Crafts",
           "children": [
             {
@@ -1519,7 +2093,7 @@
               "shortLabel": "PAC",
               "label": "Paper Crafts",
               "keywords": ["paper", "book arts", "craft"],
-              "seeAlso": ["124", "644"],
+              "seeAlso": ["374", "294"],
               "children": [
                 {
                   "extension": "21",
@@ -1542,10 +2116,77 @@
               "includes": ["paper", "crafts", "book arts", "craft"],
               "scopeNote": "Use for general works on paper crafts within crafts. Class more specific works in the refinements below when appropriate."
             }
-          ]
+          ],
+          "legacyParentCode": "922"
         },
         {
-          "parentCode": "951",
+          "parentCode": "624",
+          "label": "DIY & Repair",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "EVC",
+              "label": "Electric Cars & EV Systems",
+              "keywords": ["electric cars", "evs", "battery systems"],
+              "includes": ["electric cars", "evs", "battery systems"],
+              "scopeNote": "Use for works chiefly about electric cars, EV systems, and hands-on electric vehicle maintenance within DIY & repair."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "ACR",
+              "label": "Antique Car Restoration",
+              "keywords": [
+                "antique car restoration",
+                "vintage car restoration",
+                "classic cars"
+              ],
+              "includes": [
+                "antique car restoration",
+                "vintage car restoration",
+                "classic cars"
+              ],
+              "scopeNote": "Use for works chiefly about antique, vintage, and classic car restoration within DIY & repair."
+            }
+          ],
+          "legacyParentCode": "924"
+        },
+        {
+          "parentCode": "641",
+          "label": "Health & Wellness",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "MHE",
+              "label": "Mental Health",
+              "keywords": [
+                "mental health",
+                "anxiety",
+                "depression",
+                "therapy",
+                "counseling"
+              ],
+              "includes": [
+                "mental health",
+                "anxiety",
+                "depression",
+                "therapy",
+                "counseling"
+              ],
+              "scopeNote": "Use for works chiefly about mental health, therapy, counseling, and emotional wellbeing within health & wellness."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "CAR",
+              "label": "Caregiving & Support",
+              "keywords": ["caregiving", "caregiver support", "home care"],
+              "includes": ["caregiving", "caregiver support", "home care"],
+              "scopeNote": "Use for works chiefly about caregiving, caregiver support, and practical care within health & wellness."
+            }
+          ],
+          "legacyParentCode": "941"
+        },
+        {
+          "parentCode": "660",
           "label": "Games",
           "children": [
             {
@@ -1681,10 +2322,11 @@
               ],
               "scopeNote": "Use for works chiefly about tabletop or card game design, puzzle design, and interactive rule systems within games."
             }
-          ]
+          ],
+          "legacyParentCode": "951"
         },
         {
-          "parentCode": "952",
+          "parentCode": "670",
           "label": "Hobbies",
           "children": [
             {
@@ -1749,7 +2391,7 @@
                 "retro computing",
                 "computer collecting"
               ],
-              "seeAlso": ["434.4"],
+              "seeAlso": ["534.4"],
               "scopeNote": "Use for hobby-oriented works on collecting, restoring, or building vintage computers when the emphasis is enthusiast practice rather than engineering."
             },
             {
@@ -1776,10 +2418,11 @@
               ],
               "scopeNote": "Use for works chiefly about typewriters, office artifacts, and related mechanical hobby objects within hobbies."
             }
-          ]
+          ],
+          "legacyParentCode": "952"
         },
         {
-          "parentCode": "953",
+          "parentCode": "680",
           "label": "Recreation",
           "children": [
             {
@@ -1856,10 +2499,11 @@
               "includes": ["water", "winter", "recreation", "games", "hobbies"],
               "scopeNote": "Use for works chiefly about water & winter recreation within recreation."
             }
-          ]
+          ],
+          "legacyParentCode": "953"
         },
         {
-          "parentCode": "954",
+          "parentCode": "690",
           "label": "Pets & Animal Care",
           "children": [
             {
@@ -1966,622 +2610,8 @@
               ],
               "scopeNote": "Use for works chiefly about training & behavior within pets & animal care."
             }
-          ]
-        },
-        {
-          "parentCode": "133",
-          "label": "Theater",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "MAG",
-              "label": "Magic & Illusion",
-              "keywords": [
-                "magic tricks",
-                "illusion",
-                "stage magic",
-                "sleight of hand"
-              ],
-              "includes": [
-                "magic tricks",
-                "illusion",
-                "stage magic",
-                "sleight of hand"
-              ],
-              "scopeNote": "Use for works chiefly about magic tricks, illusion performance, sleight of hand, and stage magic within theater."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "CLO",
-              "label": "Clowning",
-              "keywords": ["clowning", "clowns", "physical comedy"],
-              "includes": ["clowning", "clowns", "physical comedy"],
-              "scopeNote": "Use for works chiefly about clowning, clown performance, and physical comedy within theater."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "BAL",
-              "label": "Balloon Sculpting",
-              "keywords": [
-                "balloon sculpting",
-                "balloon art",
-                "twisting balloons"
-              ],
-              "includes": [
-                "balloon sculpting",
-                "balloon art",
-                "twisting balloons"
-              ],
-              "scopeNote": "Use for works chiefly about balloon sculpting and balloon art as live performance or entertainment craft within theater."
-            }
-          ]
-        },
-        {
-          "parentCode": "434",
-          "label": "Robotics & Embedded Systems",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "ELC",
-              "label": "Electronics & Circuits",
-              "keywords": [
-                "electronics",
-                "circuits",
-                "soldering",
-                "microcontrollers"
-              ],
-              "includes": [
-                "electronics",
-                "circuits",
-                "soldering",
-                "microcontrollers"
-              ],
-              "scopeNote": "Use for works chiefly about electronics, circuits, soldering, and component-level hardware within robotics & embedded systems."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "ROB",
-              "label": "Robotics",
-              "keywords": ["robotics", "robots", "automation"],
-              "includes": ["robotics", "robots", "automation"],
-              "scopeNote": "Use for works chiefly about robotics and robotic systems within robotics & embedded systems."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "ELE",
-              "label": "Electrical Engineering",
-              "keywords": [
-                "electrical engineering",
-                "power systems",
-                "control systems"
-              ],
-              "includes": [
-                "electrical engineering",
-                "power systems",
-                "control systems"
-              ],
-              "scopeNote": "Use for works chiefly about electrical engineering and control systems within robotics & embedded systems."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "VCO",
-              "label": "Vintage Computing Hardware",
-              "keywords": [
-                "vintage computers",
-                "retro computing",
-                "building computers",
-                "computer restoration"
-              ],
-              "includes": [
-                "vintage computers",
-                "retro computing",
-                "building computers",
-                "computer restoration"
-              ],
-              "scopeNote": "Use for works chiefly about building, restoring, or maintaining vintage computers and retro computing hardware within robotics & embedded systems."
-            }
-          ]
-        },
-        {
-          "parentCode": "512",
-          "label": "Modern History",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "AMR",
-              "label": "American Revolution",
-              "keywords": [
-                "american revolution",
-                "revolutionary war",
-                "founding era"
-              ],
-              "includes": [
-                "american revolution",
-                "revolutionary war",
-                "founding era"
-              ],
-              "scopeNote": "Use for works chiefly about the American Revolution within modern history."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "CIW",
-              "label": "Civil War",
-              "keywords": ["civil war", "union", "confederacy"],
-              "includes": ["civil war", "union", "confederacy"],
-              "scopeNote": "Use for works chiefly about the Civil War within modern history."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "CRM",
-              "label": "Civil Rights Movement",
-              "keywords": [
-                "civil rights movement",
-                "segregation",
-                "voting rights"
-              ],
-              "includes": [
-                "civil rights movement",
-                "segregation",
-                "voting rights"
-              ],
-              "seeAlso": ["532.1", "534.1"],
-              "scopeNote": "Use for works chiefly about the Civil Rights Movement as a historical period or movement within modern history."
-            }
-          ]
-        },
-        {
-          "parentCode": "534",
-          "label": "Civic Practice",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "COM",
-              "label": "Community Building & Organizing",
-              "keywords": [
-                "community building",
-                "community organizing",
-                "grassroots"
-              ],
-              "includes": [
-                "community building",
-                "community organizing",
-                "grassroots"
-              ],
-              "scopeNote": "Use for works chiefly about building communities, grassroots organizing, and neighborhood civic participation within civic practice."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "GOV",
-              "label": "Government Proceedings & Public Meetings",
-              "keywords": [
-                "government proceedings",
-                "public meetings",
-                "meeting procedure"
-              ],
-              "includes": [
-                "government proceedings",
-                "public meetings",
-                "meeting procedure"
-              ],
-              "scopeNote": "Use for works chiefly about understanding government proceedings, public meetings, and how civic bodies conduct business within civic practice."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "ELE",
-              "label": "Elections & Committees",
-              "keywords": ["elections", "committees", "campaigns", "ballots"],
-              "includes": ["elections", "committees", "campaigns", "ballots"],
-              "scopeNote": "Use for works chiefly about elections, committees, and civic decision-making within civic practice."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "NPO",
-              "label": "Nonprofits & Chambers",
-              "keywords": ["nonprofits", "chamber of commerce", "associations"],
-              "includes": ["nonprofits", "chamber of commerce", "associations"],
-              "scopeNote": "Use for works chiefly about nonprofit organizations, chambers of commerce, and civic associations within civic practice."
-            },
-            {
-              "extension": "5",
-              "shortLabel": "FES",
-              "label": "Festivals & Civic Events",
-              "keywords": [
-                "festival organizing",
-                "community events",
-                "parades"
-              ],
-              "includes": [
-                "festival organizing",
-                "community events",
-                "parades"
-              ],
-              "scopeNote": "Use for works chiefly about organizing festivals, parades, and civic events within civic practice."
-            },
-            {
-              "extension": "6",
-              "shortLabel": "FOIA",
-              "label": "FOIA & Public Records",
-              "keywords": ["foia", "freedom of information", "public records"],
-              "includes": ["foia", "freedom of information", "public records"],
-              "seeAlso": ["532"],
-              "scopeNote": "Use for works chiefly about FOIA, access to public records, and information rights in civic practice."
-            }
-          ]
-        },
-        {
-          "parentCode": "941",
-          "label": "Health & Wellness",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "MHE",
-              "label": "Mental Health",
-              "keywords": [
-                "mental health",
-                "anxiety",
-                "depression",
-                "therapy",
-                "counseling"
-              ],
-              "includes": [
-                "mental health",
-                "anxiety",
-                "depression",
-                "therapy",
-                "counseling"
-              ],
-              "scopeNote": "Use for works chiefly about mental health, therapy, counseling, and emotional wellbeing within health & wellness."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "CAR",
-              "label": "Caregiving & Support",
-              "keywords": ["caregiving", "caregiver support", "home care"],
-              "includes": ["caregiving", "caregiver support", "home care"],
-              "scopeNote": "Use for works chiefly about caregiving, caregiver support, and practical care within health & wellness."
-            }
-          ]
-        },
-        {
-          "parentCode": "924",
-          "label": "DIY & Repair",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "EVC",
-              "label": "Electric Cars & EV Systems",
-              "keywords": ["electric cars", "evs", "battery systems"],
-              "includes": ["electric cars", "evs", "battery systems"],
-              "scopeNote": "Use for works chiefly about electric cars, EV systems, and hands-on electric vehicle maintenance within DIY & repair."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "ACR",
-              "label": "Antique Car Restoration",
-              "keywords": [
-                "antique car restoration",
-                "vintage car restoration",
-                "classic cars"
-              ],
-              "includes": [
-                "antique car restoration",
-                "vintage car restoration",
-                "classic cars"
-              ],
-              "scopeNote": "Use for works chiefly about antique, vintage, and classic car restoration within DIY & repair."
-            }
-          ]
-        },
-        {
-          "parentCode": "140",
-          "label": "Media Arts",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "POD",
-              "label": "Podcasts & Audio Storytelling",
-              "keywords": [
-                "podcasts",
-                "audio storytelling",
-                "audio diaries",
-                "telephone storytelling"
-              ],
-              "includes": [
-                "podcasts",
-                "audio storytelling",
-                "audio diaries",
-                "telephone storytelling"
-              ],
-              "scopeNote": "Use for works chiefly about podcasts, audio diaries, telephone storytelling, and spoken-word audio media within media arts."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "AUD",
-              "label": "Experimental Audio & Restoration",
-              "keywords": [
-                "experimental audio",
-                "audio restoration",
-                "audacity",
-                "sound collage"
-              ],
-              "includes": [
-                "experimental audio",
-                "audio restoration",
-                "audacity",
-                "sound collage"
-              ],
-              "scopeNote": "Use for works chiefly about experimental audio, sound collage, restoration, and creative audio practice within media arts."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "EXH",
-              "label": "Interactive & Public Exhibits",
-              "keywords": [
-                "interactive exhibits",
-                "public exhibits",
-                "accessibility in exhibits",
-                "offline audio exhibits"
-              ],
-              "includes": [
-                "interactive exhibits",
-                "public exhibits",
-                "accessibility in exhibits",
-                "offline audio exhibits"
-              ],
-              "scopeNote": "Use for works chiefly about interactive exhibits, public media installations, accessibility in exhibits, and offline audio exhibits within media arts."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "AIM",
-              "label": "AI Media Tools",
-              "keywords": [
-                "ai transcription",
-                "ai moderation",
-                "ai-assisted music",
-                "surreal ai voices"
-              ],
-              "includes": [
-                "ai transcription",
-                "ai moderation",
-                "ai-assisted music",
-                "surreal ai voices"
-              ],
-              "scopeNote": "Use for works chiefly about AI-assisted media tools, transcription, moderation, synthetic voice, and creative AI media practice within media arts."
-            }
-          ]
-        },
-        {
-          "parentCode": "422",
-          "label": "Networking",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "VOIP",
-              "label": "VoIP & PBX Systems",
-              "keywords": ["voip", "pbx", "asterisk", "grandstream ata"],
-              "includes": ["voip", "pbx", "asterisk", "grandstream ata"],
-              "scopeNote": "Use for works chiefly about VoIP, PBX systems, SIP devices, and telephone-over-network infrastructure within networking."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "LEG",
-              "label": "Legacy Telephony",
-              "keywords": [
-                "rotary phones",
-                "candlestick phones",
-                "magneto telephones",
-                "switchboards",
-                "payphones"
-              ],
-              "includes": [
-                "rotary phones",
-                "candlestick phones",
-                "magneto telephones",
-                "switchboards",
-                "payphones"
-              ],
-              "scopeNote": "Use for works chiefly about legacy telephony equipment, historic phone systems, and analog communication infrastructure within networking."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "TTY",
-              "label": "TTY & Signaling",
-              "keywords": [
-                "tty devices",
-                "baudot",
-                "ring detection",
-                "minimodem",
-                "telephone audio",
-                "morse code"
-              ],
-              "includes": [
-                "tty devices",
-                "baudot",
-                "ring detection",
-                "minimodem",
-                "telephone audio",
-                "morse code"
-              ],
-              "scopeNote": "Use for works chiefly about TTY devices, signaling, Baudot, modem-like telephony interfaces, and communications encoding within networking."
-            }
-          ]
-        },
-        {
-          "parentCode": "424",
-          "label": "Cloud & Infrastructure",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "HOM",
-              "label": "Self-Hosting & Homelabs",
-              "keywords": ["self-hosting", "homelab", "unraid", "linux"],
-              "includes": ["self-hosting", "homelab", "unraid", "linux"],
-              "scopeNote": "Use for works chiefly about self-hosting, homelabs, home servers, and personal infrastructure administration within cloud & infrastructure."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "CON",
-              "label": "Containers & Virtualization",
-              "keywords": ["docker", "kubernetes", "proxmox", "virtualization"],
-              "includes": ["docker", "kubernetes", "proxmox", "virtualization"],
-              "scopeNote": "Use for works chiefly about containers, orchestration, virtualization, and platform infrastructure within cloud & infrastructure."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "NAS",
-              "label": "Storage & Backup Systems",
-              "keywords": [
-                "nas",
-                "smb",
-                "cloud storage",
-                "local storage",
-                "json import export"
-              ],
-              "includes": [
-                "nas",
-                "smb",
-                "cloud storage",
-                "local storage",
-                "backup systems"
-              ],
-              "scopeNote": "Use for works chiefly about storage, NAS systems, backup, synchronization, and data portability within cloud & infrastructure."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "AUT",
-              "label": "Home Automation & Local AI",
-              "keywords": [
-                "home assistant",
-                "ollama",
-                "open webui",
-                "raspberry pi",
-                "build servers"
-              ],
-              "includes": [
-                "home assistant",
-                "ollama",
-                "open webui",
-                "raspberry pi",
-                "build servers"
-              ],
-              "scopeNote": "Use for works chiefly about home automation infrastructure, local AI systems, Raspberry Pi deployments, and small build infrastructure within cloud & infrastructure."
-            }
-          ]
-        },
-        {
-          "parentCode": "524",
-          "label": "Education & Institutions",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "LIB",
-              "label": "Libraries & Information Access",
-              "keywords": [
-                "libraries",
-                "public access to information",
-                "library services"
-              ],
-              "includes": [
-                "libraries",
-                "public access to information",
-                "library services"
-              ],
-              "scopeNote": "Use for works chiefly about libraries, library services, and public access to information within education & institutions."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "LGP",
-              "label": "Library Governance & Policy",
-              "keywords": [
-                "library governance",
-                "library policy",
-                "intellectual freedom",
-                "book challenges"
-              ],
-              "includes": [
-                "library governance",
-                "library policy",
-                "intellectual freedom",
-                "book challenges"
-              ],
-              "seeAlso": ["532"],
-              "scopeNote": "Use for works chiefly about library governance, library policy, intellectual freedom, and book challenges within education & institutions."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "DIL",
-              "label": "Digital Literacy & Inclusion",
-              "keywords": [
-                "digital literacy",
-                "inclusive design",
-                "web accessibility"
-              ],
-              "includes": [
-                "digital literacy",
-                "inclusive design",
-                "web accessibility"
-              ],
-              "scopeNote": "Use for works chiefly about digital literacy, accessibility, and inclusive participation in information systems within education & institutions."
-            },
-            {
-              "extension": "4",
-              "shortLabel": "MML",
-              "label": "Maker Spaces & Memory Labs",
-              "keywords": ["maker spaces", "memory lab", "digital archives"],
-              "includes": ["maker spaces", "memory lab", "digital archives"],
-              "scopeNote": "Use for works chiefly about maker spaces, memory labs, and public creation or digitization programs within education & institutions."
-            }
-          ]
-        },
-        {
-          "parentCode": "913",
-          "label": "Indexes & Catalogs",
-          "children": [
-            {
-              "extension": "1",
-              "shortLabel": "CLS",
-              "label": "Classification & Shelfmarks",
-              "keywords": [
-                "classification systems",
-                "shelfmarks",
-                "dewey decimal classification",
-                "open classification systems"
-              ],
-              "includes": [
-                "classification systems",
-                "shelfmarks",
-                "dewey decimal classification",
-                "open classification systems"
-              ],
-              "scopeNote": "Use for works chiefly about classification systems, shelfmarks, and the arrangement of knowledge within indexes & catalogs."
-            },
-            {
-              "extension": "2",
-              "shortLabel": "MET",
-              "label": "Metadata & Tagging",
-              "keywords": [
-                "metadata",
-                "tagging systems",
-                "title writing",
-                "tags"
-              ],
-              "includes": [
-                "metadata",
-                "tagging systems",
-                "title writing",
-                "tags"
-              ],
-              "scopeNote": "Use for works chiefly about metadata, tagging, descriptive structure, and lightweight information labeling within indexes & catalogs."
-            },
-            {
-              "extension": "3",
-              "shortLabel": "CAT",
-              "label": "Cataloging & Directories",
-              "keywords": ["cataloging", "directory entries", "rolodex cards"],
-              "includes": ["cataloging", "directory entries", "rolodex cards"],
-              "scopeNote": "Use for works chiefly about cataloging, directory structures, and reference listing systems within indexes & catalogs."
-            }
-          ]
+          ],
+          "legacyParentCode": "954"
         }
       ],
       "defaultRecommendedFormat": "code-short-author"

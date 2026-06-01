@@ -131,11 +131,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.normalizeClassificationCatalog = function (catalog) {
     const used = new Set();
     const index = {};
+    const codeIndex = {};
     const walk = function (nodes, path) {
       (Array.isArray(nodes) ? nodes : []).forEach(function (node, position) {
         if (!node) return;
         const nextPath = path.concat(position);
         node.status = String(node.status || "active");
+        node.legacyCode = String(node.legacyCode || "");
         node.replacedBy = String(node.replacedBy || "");
         node.sort = Number(node.sort || node.code || position);
         node.seeAlso = Array.isArray(node.seeAlso) ? node.seeAlso : [];
@@ -151,6 +153,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         used.add(shortLabel);
         node.shortLabel = shortLabel;
         index[shortLabel] = nextPath.slice();
+        if (node.code) codeIndex[String(node.code)] = nextPath.slice();
+        if (node.legacyCode)
+          codeIndex[String(node.legacyCode)] = nextPath.slice();
         walk(node.children, nextPath);
       });
     };
@@ -168,6 +173,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       },
     );
     TPP.classificationShortLabelIndex = index;
+    TPP.classificationCodeIndex = codeIndex;
     return catalog;
   };
   TPP.classificationExtensionShortLabelSeed = function (node) {
@@ -268,6 +274,9 @@ document.addEventListener("DOMContentLoaded", async function () {
           normalizedGroup.parentCode = String(
             normalizedGroup.parentCode || "",
           ).trim();
+          normalizedGroup.legacyParentCode = String(
+            normalizedGroup.legacyParentCode || "",
+          ).trim();
           normalizedGroup.children = normalizeTree(
             normalizedGroup.children,
             new Set(),
@@ -299,7 +308,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       : [];
     return (
       groups.find(function (group) {
-        return group && group.parentCode === String(parentCode || "");
+        const target = String(parentCode || "");
+        return (
+          group &&
+          (group.parentCode === target || group.legacyParentCode === target)
+        );
       }) || null
     );
   };
@@ -383,6 +396,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     return [
       entry.fullCode,
       entry.code,
+      entry.legacyCode,
       entry.extension && entry.code ? entry.code + "." + entry.extension : "",
       entry.shortLabel,
       entry.label,
@@ -448,6 +462,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         entries.push({
           kind: "base",
           code: String(node.code || ""),
+          legacyCode: String(node.legacyCode || ""),
           extension: "",
           fullCode: String(node.code || ""),
           baseShortLabel: TPP.classificationShortLabel(node),
@@ -469,6 +484,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         entries.push({
           kind: "extension",
           code: String(parentCode || ""),
+          legacyCode: String(
+            (
+              TPP.classificationNodeAtPath(
+                TPP.classificationPathForCode(parentCode),
+              ) || {}
+            ).legacyCode || "",
+          ),
           extension: String(node.extension || ""),
           fullCode:
             String(parentCode || "") + "." + String(node.extension || ""),
@@ -671,6 +693,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.classificationPathForCode = function (code) {
     const target = String(code || "").trim();
     if (!target) return [];
+    if (TPP.classificationCodeIndex && TPP.classificationCodeIndex[target]) {
+      return TPP.classificationCodeIndex[target].slice();
+    }
     const system = TPP.classificationSystem();
     let found = [];
     const walk = function (nodes, path) {
