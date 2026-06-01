@@ -138,6 +138,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         const nextPath = path.concat(position);
         node.status = String(node.status || "active");
         node.legacyCode = String(node.legacyCode || "");
+        node.legacyCodes = Array.isArray(node.legacyCodes)
+          ? node.legacyCodes
+              .map(function (value) {
+                return String(value || "").trim();
+              })
+              .filter(Boolean)
+          : [];
+        if (node.legacyCode && !node.legacyCodes.includes(node.legacyCode)) {
+          node.legacyCodes.unshift(node.legacyCode);
+        }
         node.replacedBy = String(node.replacedBy || "");
         node.sort = Number(node.sort || node.code || position);
         node.seeAlso = Array.isArray(node.seeAlso) ? node.seeAlso : [];
@@ -156,6 +166,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (node.code) codeIndex[String(node.code)] = nextPath.slice();
         if (node.legacyCode)
           codeIndex[String(node.legacyCode)] = nextPath.slice();
+        node.legacyCodes.forEach(function (legacyCode) {
+          codeIndex[String(legacyCode)] = nextPath.slice();
+        });
         walk(node.children, nextPath);
       });
     };
@@ -277,6 +290,25 @@ document.addEventListener("DOMContentLoaded", async function () {
           normalizedGroup.legacyParentCode = String(
             normalizedGroup.legacyParentCode || "",
           ).trim();
+          normalizedGroup.legacyParentCodes = Array.isArray(
+            normalizedGroup.legacyParentCodes,
+          )
+            ? normalizedGroup.legacyParentCodes
+                .map(function (value) {
+                  return String(value || "").trim();
+                })
+                .filter(Boolean)
+            : [];
+          if (
+            normalizedGroup.legacyParentCode &&
+            !normalizedGroup.legacyParentCodes.includes(
+              normalizedGroup.legacyParentCode,
+            )
+          ) {
+            normalizedGroup.legacyParentCodes.unshift(
+              normalizedGroup.legacyParentCode,
+            );
+          }
           normalizedGroup.children = normalizeTree(
             normalizedGroup.children,
             new Set(),
@@ -311,7 +343,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         const target = String(parentCode || "");
         return (
           group &&
-          (group.parentCode === target || group.legacyParentCode === target)
+          (group.parentCode === target ||
+            group.legacyParentCode === target ||
+            (Array.isArray(group.legacyParentCodes) &&
+              group.legacyParentCodes.includes(target)))
         );
       }) || null
     );
@@ -397,6 +432,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       entry.fullCode,
       entry.code,
       entry.legacyCode,
+      ...(entry.legacyCodes || []),
       entry.extension && entry.code ? entry.code + "." + entry.extension : "",
       entry.shortLabel,
       entry.label,
@@ -463,6 +499,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           kind: "base",
           code: String(node.code || ""),
           legacyCode: String(node.legacyCode || ""),
+          legacyCodes: Array.isArray(node.legacyCodes) ? node.legacyCodes : [],
           extension: "",
           fullCode: String(node.code || ""),
           baseShortLabel: TPP.classificationShortLabel(node),
@@ -481,25 +518,21 @@ document.addEventListener("DOMContentLoaded", async function () {
       (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
         if (!node) return;
         const nextLabels = pathLabels.concat(node.label || "");
+        const baseNode =
+          TPP.classificationNodeAtPath(
+            TPP.classificationPathForCode(parentCode),
+          ) || {};
         entries.push({
           kind: "extension",
           code: String(parentCode || ""),
-          legacyCode: String(
-            (
-              TPP.classificationNodeAtPath(
-                TPP.classificationPathForCode(parentCode),
-              ) || {}
-            ).legacyCode || "",
-          ),
+          legacyCode: String(baseNode.legacyCode || ""),
+          legacyCodes: Array.isArray(baseNode.legacyCodes)
+            ? baseNode.legacyCodes
+            : [],
           extension: String(node.extension || ""),
           fullCode:
             String(parentCode || "") + "." + String(node.extension || ""),
-          baseShortLabel:
-            TPP.classificationShortLabel(
-              TPP.classificationNodeAtPath(
-                TPP.classificationPathForCode(parentCode),
-              ) || {},
-            ) || "",
+          baseShortLabel: TPP.classificationShortLabel(baseNode) || "",
           shortLabel: TPP.classificationShortLabel(node),
           label: String(node.label || ""),
           pathLabel: basePath.concat(nextLabels).join(" > "),

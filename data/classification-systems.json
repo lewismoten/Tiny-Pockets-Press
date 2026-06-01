@@ -8,710 +8,814 @@
       "categories": [
         {
           "code": "100",
-          "shortLabel": "RSP",
-          "label": "Religion, Spirituality & Philosophy",
+          "shortLabel": "FIC",
+          "label": "Fiction",
           "children": [
             {
               "code": "110",
-              "shortLabel": "REL",
-              "label": "Religion",
+              "shortLabel": "GEF",
+              "label": "General Fiction",
+              "children": [
+                {
+                  "code": "111",
+                  "shortLabel": "LIF",
+                  "label": "Literary Fiction",
+                  "keywords": ["literary", "fiction", "general"],
+                  "status": "active",
+                  "sort": 111,
+                  "includes": ["literary", "fiction", "general"],
+                  "scopeNote": "Use for works chiefly about literary fiction within general fiction.",
+                  "legacyCode": "311",
+                  "legacyCodes": ["311", "811"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "112",
+                  "shortLabel": "COF",
+                  "label": "Contemporary Fiction",
+                  "keywords": ["contemporary", "fiction", "general"],
+                  "status": "active",
+                  "sort": 112,
+                  "includes": ["contemporary", "fiction", "general"],
+                  "scopeNote": "Use for works chiefly about contemporary fiction within general fiction.",
+                  "legacyCode": "312",
+                  "legacyCodes": ["312", "812"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "113",
+                  "shortLabel": "HIF",
+                  "label": "Historical Fiction",
+                  "keywords": ["historical", "fiction", "general"],
+                  "status": "active",
+                  "sort": 113,
+                  "includes": ["historical", "fiction", "general"],
+                  "scopeNote": "Use for works chiefly about historical fiction within general fiction.",
+                  "legacyCode": "313",
+                  "legacyCodes": ["313", "813"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "114",
+                  "shortLabel": "SOL",
+                  "label": "Slice of Life",
+                  "keywords": ["slice", "of", "life", "fiction", "general"],
+                  "status": "active",
+                  "sort": 114,
+                  "includes": ["slice", "of", "life", "fiction", "general"],
+                  "scopeNote": "Use for works chiefly about slice of life within general fiction.",
+                  "legacyCode": "314",
+                  "legacyCodes": ["314", "814"],
+                  "seeAlso": []
+                }
+              ],
               "keywords": [
-                "religion",
-                "spirituality",
-                "philosophy",
-                "freemasonry",
-                "masonic",
-                "fraternal orders"
+                "general",
+                "fiction",
+                "humor fiction",
+                "satire",
+                "graphic novels",
+                "comic fiction"
               ],
               "status": "active",
-              "sort": 151,
-              "seeAlso": ["140", "270", "140.5"],
+              "sort": 110,
+              "allowAssign": true,
               "includes": [
-                "religion",
-                "spirituality",
-                "philosophy",
-                "freemasonry",
-                "masonic traditions",
-                "fraternal orders"
+                "general",
+                "fiction",
+                "humor fiction",
+                "satire",
+                "graphic novels"
               ],
-              "scopeNote": "Use for works chiefly about religion within religion, spirituality & philosophy. Use here for religious traditions broadly, and see related classes for esoteric or symbolic societies such as Freemasonry.",
-              "legacyCode": "151"
+              "scopeNote": "Use for general fiction, including humor, satire, and graphic novels when they are shelved primarily as literary works rather than visual-art studies.",
+              "seeAlso": ["371", "140"],
+              "legacyCode": "310",
+              "legacyCodes": ["310", "810"]
             },
             {
               "code": "120",
-              "shortLabel": "SPP",
-              "label": "Spiritual Practice",
-              "keywords": [
-                "spiritual",
-                "practice",
-                "dreamwork",
-                "dream practice",
-                "religion",
-                "spirituality",
-                "philosophy"
+              "shortLabel": "SPF",
+              "label": "Speculative Fiction",
+              "children": [
+                {
+                  "code": "121",
+                  "shortLabel": "SCF",
+                  "label": "Science Fiction",
+                  "keywords": ["science", "fiction", "speculative"],
+                  "status": "active",
+                  "sort": 121,
+                  "seeAlso": ["531", "533"],
+                  "includes": ["science", "fiction", "speculative"],
+                  "scopeNote": "Use for works chiefly about science fiction within speculative fiction.",
+                  "legacyCode": "321",
+                  "legacyCodes": ["321", "821"]
+                },
+                {
+                  "code": "122",
+                  "shortLabel": "FAN",
+                  "label": "Fantasy",
+                  "keywords": ["fantasy", "fiction", "speculative"],
+                  "status": "active",
+                  "sort": 122,
+                  "includes": ["fantasy", "fiction", "speculative"],
+                  "scopeNote": "Use for works chiefly about fantasy within speculative fiction.",
+                  "legacyCode": "322",
+                  "legacyCodes": ["322", "822"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "123",
+                  "shortLabel": "HOR",
+                  "label": "Horror",
+                  "keywords": ["horror", "fiction", "speculative"],
+                  "status": "active",
+                  "sort": 123,
+                  "includes": ["horror", "fiction", "speculative"],
+                  "scopeNote": "Use for works chiefly about horror within speculative fiction.",
+                  "legacyCode": "323",
+                  "legacyCodes": ["323", "823"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "124",
+                  "shortLabel": "MAR",
+                  "label": "Magical Realism",
+                  "keywords": ["magical", "realism", "fiction", "speculative"],
+                  "status": "active",
+                  "sort": 124,
+                  "seeAlso": ["340.1", "184"],
+                  "includes": ["magical", "realism", "fiction", "speculative"],
+                  "scopeNote": "Use for works chiefly about magical realism within speculative fiction.",
+                  "legacyCode": "324",
+                  "legacyCodes": ["324", "824"]
+                }
               ],
+              "keywords": ["speculative", "fiction"],
               "status": "active",
-              "sort": 152,
-              "seeAlso": ["642", "130"],
-              "includes": [
-                "spiritual",
-                "practice",
-                "dreamwork",
-                "dream practice",
-                "religion",
-                "spirituality",
-                "philosophy"
-              ],
-              "scopeNote": "Use for works chiefly about spiritual practice within religion, spirituality & philosophy. Use here for dreamwork, contemplative dream practices, and spiritually oriented work with dreams.",
-              "legacyCode": "152"
+              "sort": 120,
+              "allowAssign": true,
+              "includes": ["speculative", "fiction"],
+              "scopeNote": "Use for general works on speculative fiction. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "320",
+              "legacyCodes": ["320", "820"],
+              "seeAlso": []
             },
             {
               "code": "130",
-              "shortLabel": "PHI",
-              "label": "Philosophy",
-              "keywords": ["philosophy", "religion", "spirituality"],
+              "shortLabel": "GEFI",
+              "label": "Genre Fiction",
+              "children": [
+                {
+                  "code": "131",
+                  "shortLabel": "MYS",
+                  "label": "Mystery",
+                  "keywords": ["mystery", "fiction", "genre"],
+                  "status": "active",
+                  "sort": 131,
+                  "includes": ["mystery", "fiction", "genre"],
+                  "scopeNote": "Use for works chiefly about mystery within genre fiction.",
+                  "legacyCode": "331",
+                  "legacyCodes": ["331", "831"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "132",
+                  "shortLabel": "ROM",
+                  "label": "Romance",
+                  "keywords": ["romance", "fiction", "genre"],
+                  "status": "active",
+                  "sort": 132,
+                  "includes": ["romance", "fiction", "genre"],
+                  "scopeNote": "Use for works chiefly about romance within genre fiction.",
+                  "legacyCode": "332",
+                  "legacyCodes": ["332", "832"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "133",
+                  "shortLabel": "ADT",
+                  "label": "Adventure & Thriller",
+                  "keywords": ["adventure", "thriller", "fiction", "genre"],
+                  "status": "active",
+                  "sort": 133,
+                  "includes": ["adventure", "thriller", "fiction", "genre"],
+                  "scopeNote": "Use for works chiefly about adventure & thriller within genre fiction.",
+                  "legacyCode": "333",
+                  "legacyCodes": ["333", "833"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "134",
+                  "shortLabel": "CRN",
+                  "label": "Crime & Noir",
+                  "keywords": ["crime", "noir", "fiction", "genre"],
+                  "status": "active",
+                  "sort": 134,
+                  "includes": ["crime", "noir", "fiction", "genre"],
+                  "scopeNote": "Use for works chiefly about crime & noir within genre fiction.",
+                  "legacyCode": "334",
+                  "legacyCodes": ["334", "834"],
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["genre", "fiction"],
               "status": "active",
-              "sort": 153,
-              "seeAlso": ["171", "272"],
-              "includes": ["philosophy", "religion", "spirituality"],
-              "scopeNote": "Use for works chiefly about philosophy within religion, spirituality & philosophy.",
-              "legacyCode": "153"
+              "sort": 130,
+              "allowAssign": true,
+              "includes": ["genre", "fiction"],
+              "scopeNote": "Use for general works on genre fiction. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "330",
+              "legacyCodes": ["330", "830"],
+              "seeAlso": []
             },
             {
               "code": "140",
-              "shortLabel": "MYT",
-              "label": "Myth & Thought",
+              "shortLabel": "SHF",
+              "label": "Short Forms",
+              "children": [
+                {
+                  "code": "141",
+                  "shortLabel": "SHS",
+                  "label": "Short Stories",
+                  "keywords": ["short", "stories", "fiction", "forms"],
+                  "status": "active",
+                  "sort": 141,
+                  "includes": ["short", "stories", "fiction", "forms"],
+                  "scopeNote": "Use for works chiefly about short stories within short forms.",
+                  "legacyCode": "341",
+                  "legacyCodes": ["341", "841"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "142",
+                  "shortLabel": "NOV",
+                  "label": "Novellas",
+                  "keywords": ["novellas", "fiction", "short", "forms"],
+                  "status": "active",
+                  "sort": 142,
+                  "includes": ["novellas", "fiction", "short", "forms"],
+                  "scopeNote": "Use for works chiefly about novellas within short forms.",
+                  "legacyCode": "342",
+                  "legacyCodes": ["342", "842"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "143",
+                  "shortLabel": "FLF",
+                  "label": "Flash Fiction",
+                  "keywords": ["flash", "fiction", "short", "forms"],
+                  "status": "active",
+                  "sort": 143,
+                  "includes": ["flash", "fiction", "short", "forms"],
+                  "scopeNote": "Use for works chiefly about flash fiction within short forms.",
+                  "legacyCode": "343",
+                  "legacyCodes": ["343", "843"],
+                  "seeAlso": []
+                },
+                {
+                  "code": "144",
+                  "shortLabel": "FFT",
+                  "label": "Fables & Fairy Tales",
+                  "keywords": [
+                    "fables",
+                    "fairy",
+                    "tales",
+                    "fiction",
+                    "short",
+                    "forms"
+                  ],
+                  "status": "active",
+                  "sort": 144,
+                  "includes": [
+                    "fables",
+                    "fairy",
+                    "tales",
+                    "fiction",
+                    "short",
+                    "forms"
+                  ],
+                  "scopeNote": "Use for works chiefly about fables & fairy tales within short forms.",
+                  "legacyCode": "344",
+                  "legacyCodes": ["344", "844"],
+                  "seeAlso": []
+                }
+              ],
               "keywords": [
-                "myth",
-                "thought",
-                "dreams",
-                "dream interpretation",
-                "dream symbolism",
-                "religion",
-                "spirituality",
-                "philosophy",
-                "esoterica",
-                "symbolic societies",
-                "freemasonry"
+                "short",
+                "forms",
+                "fiction",
+                "comics",
+                "graphic novels",
+                "comic strips",
+                "sequential narrative",
+                "humor collections"
               ],
               "status": "active",
-              "sort": 154,
+              "sort": 140,
+              "allowAssign": true,
               "includes": [
-                "myth",
-                "thought",
-                "dreams",
-                "dream interpretation",
-                "dream symbolism",
-                "religion",
-                "spirituality",
-                "philosophy",
-                "esoteric symbolism",
-                "freemasonry"
+                "short",
+                "forms",
+                "fiction",
+                "comics collections",
+                "graphic novels",
+                "comic strips",
+                "short humor"
               ],
-              "scopeNote": "Use for works chiefly about myth & thought within religion, spirituality & philosophy. Use here for symbolic or interpretive works about dreams, esoteric traditions, symbolic societies, and systems of meaning rather than devotional or strictly historical treatment.",
-              "seeAlso": ["110"],
-              "legacyCode": "154"
+              "scopeNote": "Use for short-form literature and collections, including comics, graphic novels, comic strips, flash work, and other brief or episodic narrative forms when they are shelved by literary format.",
+              "seeAlso": ["371", "110"],
+              "legacyCode": "340",
+              "legacyCodes": ["340", "840"]
             }
           ],
-          "keywords": ["religion", "spirituality", "philosophy", "belief"],
+          "keywords": ["fiction"],
           "status": "active",
-          "sort": 150,
+          "sort": 100,
           "allowAssign": true,
-          "includes": ["religion", "spirituality", "philosophy", "belief"],
-          "scopeNote": "Use for general works on religion, spirituality & philosophy. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "150"
+          "includes": ["fiction"],
+          "scopeNote": "Use for general works on fiction. Class more specific works in the narrower categories below when needed.",
+          "legacyCode": "300",
+          "legacyCodes": ["300", "800"],
+          "seeAlso": []
         },
         {
           "code": "150",
-          "shortLabel": "HIS",
-          "label": "History & Society",
+          "shortLabel": "LAL",
+          "label": "Language & Literature",
           "children": [
             {
               "code": "160",
-              "shortLabel": "HIST",
-              "label": "History",
+              "shortLabel": "LAS",
+              "label": "Language Study",
               "children": [
                 {
                   "code": "161",
-                  "shortLabel": "ANM",
-                  "label": "Ancient & Medieval",
-                  "keywords": ["ancient", "medieval", "history", "society"],
+                  "shortLabel": "LIN",
+                  "label": "Linguistics",
+                  "keywords": [
+                    "linguistics",
+                    "language",
+                    "literature",
+                    "study"
+                  ],
                   "status": "active",
-                  "sort": 511,
-                  "includes": ["ancient", "medieval", "history", "society"],
-                  "scopeNote": "Use for works chiefly about ancient & medieval within history.",
-                  "legacyCode": "511"
+                  "sort": 161,
+                  "includes": [
+                    "linguistics",
+                    "language",
+                    "literature",
+                    "study"
+                  ],
+                  "scopeNote": "Use for works chiefly about linguistics within language study.",
+                  "legacyCode": "261",
+                  "legacyCodes": ["261", "611"],
+                  "seeAlso": []
                 },
                 {
                   "code": "162",
-                  "shortLabel": "MOH",
-                  "label": "Modern History",
+                  "shortLabel": "GRU",
+                  "label": "Grammar & Usage",
                   "keywords": [
-                    "modern",
-                    "history",
-                    "society",
-                    "war",
-                    "military",
-                    "battle",
-                    "armed conflict",
-                    "civil war",
-                    "veterans",
-                    "transportation history",
-                    "american revolution",
-                    "revolutionary war",
-                    "civil rights movement"
+                    "grammar",
+                    "usage",
+                    "language",
+                    "literature",
+                    "study"
                   ],
                   "status": "active",
-                  "sort": 512,
+                  "sort": 162,
                   "includes": [
-                    "modern",
-                    "history",
-                    "society",
-                    "war history",
-                    "military campaigns",
-                    "civil war",
-                    "veterans",
-                    "transportation history",
-                    "american revolution",
-                    "revolutionary war",
-                    "civil rights movement"
+                    "grammar",
+                    "usage",
+                    "language",
+                    "literature",
+                    "study"
                   ],
-                  "scopeNote": "Use for modern historical works, including wars, military conflict, veterans, the American Revolution, the Civil War, the Civil Rights Movement, and major transportation history when treated historically rather than technically.",
-                  "seeAlso": ["171", "430", "182", "184"],
-                  "legacyCode": "512"
+                  "scopeNote": "Use for works chiefly about grammar & usage within language study.",
+                  "legacyCode": "262",
+                  "legacyCodes": ["262", "612"],
+                  "seeAlso": []
                 },
                 {
                   "code": "163",
-                  "shortLabel": "LRH",
-                  "label": "Local & Regional History",
-                  "keywords": ["local", "regional", "history", "society"],
+                  "shortLabel": "LALE",
+                  "label": "Language Learning",
+                  "keywords": ["language", "learning", "literature", "study"],
                   "status": "active",
-                  "sort": 513,
-                  "includes": ["local", "regional", "history", "society"],
-                  "scopeNote": "Use for works chiefly about local & regional history within history.",
-                  "legacyCode": "513"
+                  "sort": 163,
+                  "includes": ["language", "learning", "literature", "study"],
+                  "scopeNote": "Use for works chiefly about language learning within language study.",
+                  "legacyCode": "263",
+                  "legacyCodes": ["263", "613"],
+                  "seeAlso": []
                 },
                 {
                   "code": "164",
-                  "shortLabel": "WOH",
-                  "label": "World History",
+                  "shortLabel": "TRA",
+                  "label": "Translation",
                   "keywords": [
-                    "world",
-                    "history",
-                    "society",
-                    "world war",
-                    "global conflict",
-                    "military history"
+                    "translation",
+                    "language",
+                    "literature",
+                    "study"
                   ],
                   "status": "active",
-                  "sort": 514,
+                  "sort": 164,
+                  "seeAlso": ["192", "631"],
                   "includes": [
-                    "world",
-                    "history",
-                    "society",
-                    "world war",
-                    "global conflict",
-                    "military history"
+                    "translation",
+                    "language",
+                    "literature",
+                    "study"
                   ],
-                  "scopeNote": "Use for broad world-historical treatments, including global wars and international conflict.",
-                  "legacyCode": "514"
+                  "scopeNote": "Use for works chiefly about translation within language study.",
+                  "legacyCode": "264",
+                  "legacyCodes": ["264", "614"]
                 }
               ],
-              "keywords": ["history", "society"],
+              "keywords": ["language", "study", "literature"],
               "status": "active",
-              "sort": 510,
+              "sort": 160,
               "allowAssign": true,
-              "includes": ["history", "society"],
-              "scopeNote": "Use for general works on history. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "510"
+              "includes": ["language", "study", "literature"],
+              "scopeNote": "Use for general works on language study. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "260",
+              "legacyCodes": ["260", "610"],
+              "seeAlso": []
             },
             {
               "code": "170",
-              "shortLabel": "SOS",
-              "label": "Social Studies",
+              "shortLabel": "LIS",
+              "label": "Literary Study",
               "children": [
                 {
                   "code": "171",
-                  "shortLabel": "POG",
-                  "label": "Politics & Government",
+                  "shortLabel": "CRI",
+                  "label": "Criticism",
                   "keywords": [
-                    "politics",
-                    "government",
-                    "history",
-                    "society",
-                    "social",
-                    "studies",
-                    "military policy",
-                    "defense",
-                    "statecraft",
-                    "war and government",
-                    "elections",
-                    "legislatures",
-                    "committees",
-                    "government proceedings",
-                    "parliamentary procedure"
+                    "criticism",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
                   ],
                   "status": "active",
-                  "sort": 521,
+                  "sort": 171,
                   "includes": [
-                    "politics",
-                    "government",
-                    "history",
-                    "society",
-                    "social",
-                    "studies",
-                    "military policy",
-                    "defense policy",
-                    "statecraft",
-                    "elections",
-                    "legislatures",
-                    "committees",
-                    "government proceedings",
-                    "parliamentary procedure"
+                    "criticism",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
                   ],
-                  "scopeNote": "Use for politics and government, including defense policy, statecraft, diplomacy, elections, legislatures, committees, and understanding government proceedings as matters of governance.",
-                  "seeAlso": ["162", "183", "184"],
-                  "legacyCode": "521"
+                  "scopeNote": "Use for works chiefly about criticism within literary study.",
+                  "legacyCode": "271",
+                  "legacyCodes": ["271", "621"],
+                  "seeAlso": []
                 },
                 {
                   "code": "172",
-                  "shortLabel": "SOC",
-                  "label": "Sociology",
+                  "shortLabel": "POC",
+                  "label": "Poetics & Craft",
                   "keywords": [
-                    "sociology",
-                    "history",
-                    "society",
-                    "social",
-                    "studies"
+                    "poetics",
+                    "craft",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
                   ],
                   "status": "active",
-                  "sort": 522,
+                  "sort": 172,
                   "includes": [
-                    "sociology",
-                    "history",
-                    "society",
-                    "social",
-                    "studies"
+                    "poetics",
+                    "craft",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
                   ],
-                  "scopeNote": "Use for works chiefly about sociology within social studies.",
-                  "legacyCode": "522"
+                  "scopeNote": "Use for works chiefly about poetics & craft within literary study.",
+                  "legacyCode": "272",
+                  "legacyCodes": ["272", "622"],
+                  "seeAlso": []
                 },
                 {
                   "code": "173",
-                  "shortLabel": "CUS",
-                  "label": "Cultural Studies",
+                  "shortLabel": "ANT",
+                  "label": "Anthologies",
                   "keywords": [
-                    "cultural",
-                    "studies",
-                    "history",
-                    "society",
-                    "social",
-                    "food culture",
-                    "foodways",
-                    "culinary history",
-                    "comics culture",
-                    "graphic storytelling"
+                    "anthologies",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
                   ],
                   "status": "active",
-                  "sort": 523,
-                  "seeAlso": ["140", "634", "621", "371"],
+                  "sort": 173,
                   "includes": [
-                    "cultural",
-                    "studies",
-                    "history",
-                    "society",
-                    "social",
-                    "food culture",
-                    "foodways",
-                    "culinary history",
-                    "comics culture"
+                    "anthologies",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
                   ],
-                  "scopeNote": "Use for cultural studies topics, including foodways, culinary history, everyday media culture, and comics or graphic storytelling as cultural forms.",
-                  "legacyCode": "523"
+                  "scopeNote": "Use for works chiefly about anthologies within literary study.",
+                  "legacyCode": "273",
+                  "legacyCodes": ["273", "623"],
+                  "seeAlso": []
                 },
                 {
                   "code": "174",
-                  "shortLabel": "EDI",
-                  "label": "Education & Institutions",
+                  "shortLabel": "TRM",
+                  "label": "Traditions & Movements",
                   "keywords": [
-                    "education",
-                    "institutions",
-                    "history",
-                    "society",
-                    "social",
-                    "studies",
-                    "libraries",
-                    "library governance",
-                    "library policy",
-                    "digital literacy",
-                    "maker spaces",
-                    "memory lab",
-                    "public access to information",
-                    "school-business partnerships",
-                    "internships",
-                    "workforce development"
+                    "traditions",
+                    "movements",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
                   ],
                   "status": "active",
-                  "sort": 524,
+                  "sort": 174,
                   "includes": [
-                    "education",
-                    "institutions",
-                    "history",
-                    "society",
-                    "social",
-                    "studies",
-                    "libraries",
-                    "library governance",
-                    "library policy",
-                    "digital literacy",
-                    "maker spaces",
-                    "memory lab",
-                    "public access to information",
-                    "workforce development"
+                    "traditions",
+                    "movements",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
                   ],
-                  "scopeNote": "Use for works chiefly about education & institutions within social studies, including libraries, library governance, digital literacy, maker spaces, memory labs, and civic educational institutions.",
-                  "seeAlso": ["613", "182"],
-                  "legacyCode": "524"
+                  "scopeNote": "Use for works chiefly about traditions & movements within literary study.",
+                  "legacyCode": "274",
+                  "legacyCodes": ["274", "624"],
+                  "seeAlso": []
                 }
               ],
-              "keywords": ["social", "studies", "history", "society"],
+              "keywords": ["literary", "study", "language", "literature"],
               "status": "active",
-              "sort": 520,
+              "sort": 170,
               "allowAssign": true,
-              "includes": ["social", "studies", "history", "society"],
-              "scopeNote": "Use for general works on social studies. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "520"
+              "includes": ["literary", "study", "language", "literature"],
+              "scopeNote": "Use for general works on literary study. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "270",
+              "legacyCodes": ["270", "620"],
+              "seeAlso": []
             },
             {
               "code": "180",
-              "shortLabel": "LCL",
-              "label": "Law & Civic Life",
+              "shortLabel": "FOG",
+              "label": "Forms & Genres",
               "children": [
                 {
                   "code": "181",
-                  "shortLabel": "CPL",
-                  "label": "Constitutional & Public Law",
+                  "shortLabel": "POE",
+                  "label": "Poetry",
                   "keywords": [
-                    "constitutional",
-                    "public",
-                    "law",
-                    "history",
-                    "society",
-                    "civic",
-                    "life"
+                    "poetry",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
                   ],
                   "status": "active",
-                  "sort": 531,
+                  "sort": 181,
                   "includes": [
-                    "constitutional",
-                    "public",
-                    "law",
-                    "history",
-                    "society",
-                    "civic",
-                    "life"
+                    "poetry",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
                   ],
-                  "scopeNote": "Use for works chiefly about constitutional & public law within law & civic life.",
-                  "legacyCode": "531"
+                  "scopeNote": "Use for works chiefly about poetry within forms & genres.",
+                  "legacyCode": "281",
+                  "legacyCodes": ["281", "631"],
+                  "seeAlso": []
                 },
                 {
                   "code": "182",
-                  "shortLabel": "JUR",
-                  "label": "Justice & Rights",
+                  "shortLabel": "DRAM",
+                  "label": "Drama",
                   "keywords": [
-                    "justice",
-                    "rights",
-                    "history",
-                    "society",
-                    "law",
-                    "civic",
-                    "life",
-                    "true crime",
-                    "criminal justice",
-                    "crime victims",
-                    "criminal cases",
-                    "investigations",
-                    "civil liberties",
-                    "civil rights",
-                    "foia",
-                    "freedom of information",
-                    "book challenges",
-                    "censorship",
-                    "book bans",
-                    "intellectual freedom law",
-                    "first amendment",
-                    "fourteenth amendment"
+                    "drama",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
                   ],
                   "status": "active",
-                  "sort": 532,
+                  "sort": 182,
                   "includes": [
-                    "justice",
-                    "rights",
-                    "history",
-                    "society",
-                    "law",
-                    "civic",
-                    "life",
-                    "true crime",
-                    "criminal cases",
-                    "investigations",
-                    "rights discourse",
-                    "civil rights",
-                    "civil liberties",
-                    "foia",
-                    "freedom of information",
-                    "book challenges",
-                    "censorship",
-                    "book bans",
-                    "intellectual freedom law",
-                    "first amendment"
+                    "drama",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
                   ],
-                  "scopeNote": "Use for justice, rights, civil liberties, civil rights, FOIA, and nonfiction works on crime or criminal cases when the emphasis is legal, social, documentary, or access-to-information related.",
-                  "seeAlso": ["334", "162", "184", "174"],
-                  "legacyCode": "532"
+                  "scopeNote": "Use for works chiefly about drama within forms & genres.",
+                  "legacyCode": "282",
+                  "legacyCodes": ["282", "632"],
+                  "seeAlso": []
                 },
                 {
                   "code": "183",
-                  "shortLabel": "PUP",
-                  "label": "Public Policy",
+                  "shortLabel": "ESS",
+                  "label": "Essays",
                   "keywords": [
-                    "public",
-                    "policy",
-                    "history",
-                    "society",
-                    "law",
-                    "civic",
-                    "life",
-                    "public health",
-                    "health policy",
-                    "disability policy",
-                    "aging policy",
-                    "care policy",
-                    "county budgets",
-                    "audit transparency",
-                    "finance committee oversight",
-                    "housing data",
-                    "demographic analysis",
-                    "public data literacy"
+                    "essays",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres",
+                    "humor",
+                    "humorous essays",
+                    "satire"
                   ],
                   "status": "active",
-                  "sort": 533,
+                  "sort": 183,
                   "includes": [
-                    "public",
-                    "policy",
-                    "history",
-                    "society",
-                    "law",
-                    "civic",
-                    "life",
-                    "public health policy",
-                    "disability policy",
-                    "aging policy",
-                    "care policy",
-                    "county budgets",
-                    "audit transparency",
-                    "finance committee oversight",
-                    "housing data",
-                    "demographic analysis",
-                    "public data literacy"
+                    "essays",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres",
+                    "humor writing",
+                    "satirical essays"
                   ],
-                  "scopeNote": "Use for public policy, including public health, disability policy, aging policy, systems of care, budgets, audits, and evidence used in civic decision-making when the emphasis is civic or governmental.",
-                  "seeAlso": ["641"],
-                  "legacyCode": "533"
+                  "scopeNote": "Use for essays, including humorous essays and satirical prose when the primary form is essayistic rather than fictional.",
+                  "seeAlso": ["110"],
+                  "legacyCode": "283",
+                  "legacyCodes": ["283", "633"]
                 },
                 {
                   "code": "184",
-                  "shortLabel": "CIP",
-                  "label": "Civic Practice",
+                  "shortLabel": "FOM",
+                  "label": "Folklore & Myth",
                   "keywords": [
-                    "civic",
-                    "practice",
-                    "history",
-                    "society",
-                    "law",
-                    "life",
-                    "community organizing",
-                    "civic organizing",
-                    "nonprofits",
-                    "chamber of commerce",
-                    "festival planning",
-                    "public meetings",
-                    "nonprofit boards",
-                    "policy committees",
-                    "strategic planning",
-                    "fundraising",
-                    "public speaking",
-                    "leadership development",
-                    "toastmasters"
+                    "folklore",
+                    "myth",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
                   ],
                   "status": "active",
-                  "sort": 534,
+                  "sort": 184,
                   "includes": [
-                    "civic",
-                    "practice",
-                    "history",
-                    "society",
-                    "law",
-                    "life",
-                    "community organizing",
-                    "civic organizing",
-                    "nonprofits",
-                    "chamber of commerce",
-                    "festival planning",
-                    "public meetings",
-                    "nonprofit boards",
-                    "policy committees",
-                    "strategic planning",
-                    "fundraising",
-                    "public speaking",
-                    "leadership development"
+                    "folklore",
+                    "myth",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
                   ],
-                  "scopeNote": "Use for civic practice, including community building, nonprofit work, chambers of commerce, festival organizing, public meetings, and hands-on participation in local institutions.",
-                  "seeAlso": ["171", "183", "174"],
-                  "legacyCode": "534"
+                  "scopeNote": "Use for works chiefly about folklore & myth within forms & genres.",
+                  "legacyCode": "284",
+                  "legacyCodes": ["284", "634"],
+                  "seeAlso": []
                 }
               ],
-              "keywords": ["law", "civic", "life", "history", "society"],
+              "keywords": ["forms", "genres", "language", "literature"],
               "status": "active",
-              "sort": 530,
+              "sort": 180,
               "allowAssign": true,
-              "includes": ["law", "civic", "life", "history", "society"],
-              "scopeNote": "Use for general works on law & civic life. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "530"
+              "includes": ["forms", "genres", "language", "literature"],
+              "scopeNote": "Use for general works on forms & genres. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "280",
+              "legacyCodes": ["280", "630"],
+              "seeAlso": []
             },
             {
               "code": "190",
-              "shortLabel": "GEP",
-              "label": "Geography & Place",
+              "shortLabel": "WRP",
+              "label": "Writing Practice",
               "children": [
                 {
                   "code": "191",
-                  "shortLabel": "CART",
-                  "label": "Cartography",
+                  "shortLabel": "CRW",
+                  "label": "Creative Writing",
                   "keywords": [
-                    "cartography",
-                    "history",
-                    "society",
-                    "geography",
-                    "place"
+                    "creative",
+                    "writing",
+                    "language",
+                    "literature",
+                    "practice"
                   ],
                   "status": "active",
-                  "sort": 541,
+                  "sort": 191,
                   "includes": [
-                    "cartography",
-                    "history",
-                    "society",
-                    "geography",
-                    "place"
+                    "creative",
+                    "writing",
+                    "language",
+                    "literature",
+                    "practice"
                   ],
-                  "scopeNote": "Use for works chiefly about cartography within geography & place.",
-                  "legacyCode": "541"
+                  "scopeNote": "Use for works chiefly about creative writing within writing practice.",
+                  "legacyCode": "291",
+                  "legacyCodes": ["291", "641"],
+                  "seeAlso": []
                 },
                 {
                   "code": "192",
-                  "shortLabel": "REST",
-                  "label": "Regional Studies",
+                  "shortLabel": "NOW",
+                  "label": "Nonfiction Writing",
                   "keywords": [
-                    "regional",
-                    "studies",
-                    "history",
-                    "society",
-                    "geography",
-                    "place"
+                    "nonfiction",
+                    "writing",
+                    "language",
+                    "literature",
+                    "practice"
                   ],
                   "status": "active",
-                  "sort": 542,
+                  "sort": 192,
                   "includes": [
-                    "regional",
-                    "studies",
-                    "history",
-                    "society",
-                    "geography",
-                    "place"
+                    "nonfiction",
+                    "writing",
+                    "language",
+                    "literature",
+                    "practice"
                   ],
-                  "scopeNote": "Use for works chiefly about regional studies within geography & place.",
-                  "legacyCode": "542"
+                  "scopeNote": "Use for works chiefly about nonfiction writing within writing practice.",
+                  "legacyCode": "292",
+                  "legacyCodes": ["292", "642"],
+                  "seeAlso": []
                 },
                 {
                   "code": "193",
-                  "shortLabel": "URS",
-                  "label": "Urban Studies",
+                  "shortLabel": "EDIT",
+                  "label": "Editing",
                   "keywords": [
-                    "urban",
-                    "studies",
-                    "history",
-                    "society",
-                    "geography",
-                    "place"
+                    "editing",
+                    "language",
+                    "literature",
+                    "writing",
+                    "practice"
                   ],
                   "status": "active",
-                  "sort": 543,
+                  "sort": 193,
                   "includes": [
-                    "urban",
-                    "studies",
-                    "history",
-                    "society",
-                    "geography",
-                    "place"
+                    "editing",
+                    "language",
+                    "literature",
+                    "writing",
+                    "practice"
                   ],
-                  "scopeNote": "Use for works chiefly about urban studies within geography & place.",
-                  "legacyCode": "543"
+                  "scopeNote": "Use for works chiefly about editing within writing practice.",
+                  "legacyCode": "293",
+                  "legacyCodes": ["293", "643"],
+                  "seeAlso": []
                 },
                 {
                   "code": "194",
-                  "shortLabel": "RER",
-                  "label": "Rural & Environmental Regions",
+                  "shortLabel": "PSP",
+                  "label": "Publishing & Small Press",
                   "keywords": [
-                    "rural",
-                    "environmental",
-                    "regions",
-                    "history",
-                    "society",
-                    "geography",
-                    "place",
-                    "agriculture",
-                    "farming",
-                    "farmland",
-                    "homesteading",
-                    "rural life"
+                    "publishing",
+                    "small",
+                    "press",
+                    "language",
+                    "literature",
+                    "writing",
+                    "practice"
                   ],
                   "status": "active",
-                  "sort": 544,
+                  "sort": 194,
                   "includes": [
-                    "rural",
-                    "environmental",
-                    "regions",
-                    "history",
-                    "society",
-                    "geography",
-                    "place",
-                    "agriculture",
-                    "farming",
-                    "homesteading",
-                    "rural life",
-                    "farmland"
+                    "publishing",
+                    "small",
+                    "press",
+                    "language",
+                    "literature",
+                    "writing",
+                    "practice"
                   ],
-                  "scopeNote": "Use for rural and environmental regions, including agriculture, farming landscapes, and homesteading when the emphasis is place, region, or land use.",
-                  "seeAlso": ["623", "503"],
-                  "legacyCode": "544"
+                  "scopeNote": "Use for works chiefly about publishing & small press within writing practice.",
+                  "legacyCode": "294",
+                  "legacyCodes": ["294", "644"],
+                  "seeAlso": []
                 }
               ],
-              "keywords": ["geography", "place", "history", "society"],
+              "keywords": ["writing", "practice", "language", "literature"],
               "status": "active",
-              "sort": 540,
+              "sort": 190,
               "allowAssign": true,
-              "includes": ["geography", "place", "history", "society"],
-              "scopeNote": "Use for general works on geography & place. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "540"
+              "includes": ["writing", "practice", "language", "literature"],
+              "scopeNote": "Use for general works on writing practice. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "290",
+              "legacyCodes": ["290", "640"],
+              "seeAlso": []
             }
           ],
-          "keywords": ["history", "society"],
+          "keywords": ["language", "literature"],
           "status": "active",
-          "sort": 500,
+          "sort": 150,
           "allowAssign": true,
-          "includes": ["history", "society"],
-          "scopeNote": "Use for general works on history & society. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "500"
+          "includes": ["language", "literature"],
+          "scopeNote": "Use for general works on language & literature. Class more specific works in the narrower categories below when needed.",
+          "legacyCode": "250",
+          "legacyCodes": ["250", "600"],
+          "seeAlso": []
         },
         {
           "code": "200",
@@ -743,7 +847,10 @@
                     "life",
                     "stories"
                   ],
-                  "scopeNote": "Use for works chiefly about memoir within personal life stories."
+                  "scopeNote": "Use for works chiefly about memoir within personal life stories.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "212",
@@ -767,7 +874,10 @@
                     "life",
                     "stories"
                   ],
-                  "scopeNote": "Use for works chiefly about autobiography within personal life stories."
+                  "scopeNote": "Use for works chiefly about autobiography within personal life stories.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "213",
@@ -802,7 +912,9 @@
                     "stories"
                   ],
                   "scopeNote": "Use for journals, letters, diaries, and personal records within personal life stories. Use here for dream journals and dream diaries when the book primarily records what the writer dreamed rather than interpreting dreams.",
-                  "seeAlso": ["120", "140", "642"]
+                  "seeAlso": ["320", "340", "642"],
+                  "legacyCodes": [],
+                  "legacyCode": ""
                 },
                 {
                   "code": "214",
@@ -826,7 +938,10 @@
                     "life",
                     "stories"
                   ],
-                  "scopeNote": "Use for works chiefly about personal essays within personal life stories."
+                  "scopeNote": "Use for works chiefly about personal essays within personal life stories.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 }
               ],
               "keywords": [
@@ -846,7 +961,10 @@
                 "biography",
                 "memoir"
               ],
-              "scopeNote": "Use for general works on personal life stories. Class more specific works in the narrower categories below when needed."
+              "scopeNote": "Use for general works on personal life stories. Class more specific works in the narrower categories below when needed.",
+              "legacyCodes": [],
+              "legacyCode": "",
+              "seeAlso": []
             },
             {
               "code": "220",
@@ -875,7 +993,10 @@
                     "collected",
                     "lives"
                   ],
-                  "scopeNote": "Use for works chiefly about artists & writers within collected lives."
+                  "scopeNote": "Use for works chiefly about artists & writers within collected lives.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "222",
@@ -899,7 +1020,10 @@
                     "collected",
                     "lives"
                   ],
-                  "scopeNote": "Use for works chiefly about leaders & activists within collected lives."
+                  "scopeNote": "Use for works chiefly about leaders & activists within collected lives.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "223",
@@ -923,7 +1047,10 @@
                     "collected",
                     "lives"
                   ],
-                  "scopeNote": "Use for works chiefly about scientists & inventors within collected lives."
+                  "scopeNote": "Use for works chiefly about scientists & inventors within collected lives.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "224",
@@ -947,7 +1074,10 @@
                     "collected",
                     "lives"
                   ],
-                  "scopeNote": "Use for works chiefly about entertainers & athletes within collected lives."
+                  "scopeNote": "Use for works chiefly about entertainers & athletes within collected lives.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 }
               ],
               "keywords": ["collected", "lives", "biography", "memoir"],
@@ -955,7 +1085,10 @@
               "sort": 220,
               "allowAssign": true,
               "includes": ["collected", "lives", "biography", "memoir"],
-              "scopeNote": "Use for general works on collected lives. Class more specific works in the narrower categories below when needed."
+              "scopeNote": "Use for general works on collected lives. Class more specific works in the narrower categories below when needed.",
+              "legacyCodes": [],
+              "legacyCode": "",
+              "seeAlso": []
             },
             {
               "code": "230",
@@ -984,7 +1117,10 @@
                     "community",
                     "histories"
                   ],
-                  "scopeNote": "Use for works chiefly about genealogy within family & community histories."
+                  "scopeNote": "Use for works chiefly about genealogy within family & community histories.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "232",
@@ -1008,7 +1144,10 @@
                     "family",
                     "community"
                   ],
-                  "scopeNote": "Use for works chiefly about oral histories within family & community histories."
+                  "scopeNote": "Use for works chiefly about oral histories within family & community histories.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "233",
@@ -1032,7 +1171,10 @@
                     "family",
                     "histories"
                   ],
-                  "scopeNote": "Use for works chiefly about community memory within family & community histories."
+                  "scopeNote": "Use for works chiefly about community memory within family & community histories.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "234",
@@ -1061,7 +1203,10 @@
                     "family",
                     "community"
                   ],
-                  "scopeNote": "Use for works chiefly about tribal & indigenous life stories within family & community histories."
+                  "scopeNote": "Use for works chiefly about tribal & indigenous life stories within family & community histories.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 }
               ],
               "keywords": [
@@ -1081,7 +1226,10 @@
                 "biography",
                 "memoir"
               ],
-              "scopeNote": "Use for general works on family & community histories. Class more specific works in the narrower categories below when needed."
+              "scopeNote": "Use for general works on family & community histories. Class more specific works in the narrower categories below when needed.",
+              "legacyCodes": [],
+              "legacyCode": "",
+              "seeAlso": []
             },
             {
               "code": "240",
@@ -1108,7 +1256,10 @@
                     "reference",
                     "lives"
                   ],
-                  "scopeNote": "Use for works chiefly about collected biography within reference lives."
+                  "scopeNote": "Use for works chiefly about collected biography within reference lives.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "242",
@@ -1132,7 +1283,10 @@
                     "reference",
                     "lives"
                   ],
-                  "scopeNote": "Use for works chiefly about timelines & profiles within reference lives."
+                  "scopeNote": "Use for works chiefly about timelines & profiles within reference lives.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "243",
@@ -1156,7 +1310,10 @@
                     "reference",
                     "lives"
                   ],
-                  "scopeNote": "Use for works chiefly about letters & correspondence within reference lives."
+                  "scopeNote": "Use for works chiefly about letters & correspondence within reference lives.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 },
                 {
                   "code": "244",
@@ -1180,7 +1337,10 @@
                     "reference",
                     "lives"
                   ],
-                  "scopeNote": "Use for works chiefly about archival sourcebooks within reference lives."
+                  "scopeNote": "Use for works chiefly about archival sourcebooks within reference lives.",
+                  "legacyCodes": [],
+                  "legacyCode": "",
+                  "seeAlso": []
                 }
               ],
               "keywords": ["reference", "lives", "biography", "memoir"],
@@ -1188,7 +1348,10 @@
               "sort": 240,
               "allowAssign": true,
               "includes": ["reference", "lives", "biography", "memoir"],
-              "scopeNote": "Use for general works on reference lives. Class more specific works in the narrower categories below when needed."
+              "scopeNote": "Use for general works on reference lives. Class more specific works in the narrower categories below when needed.",
+              "legacyCodes": [],
+              "legacyCode": "",
+              "seeAlso": []
             }
           ],
           "keywords": ["biography", "memoir"],
@@ -1196,740 +1359,757 @@
           "sort": 200,
           "allowAssign": true,
           "includes": ["biography", "memoir"],
-          "scopeNote": "Use for general works on biography & memoir. Class more specific works in the narrower categories below when needed."
+          "scopeNote": "Use for general works on biography & memoir. Class more specific works in the narrower categories below when needed.",
+          "legacyCodes": [],
+          "legacyCode": "",
+          "seeAlso": []
         },
         {
           "code": "250",
-          "shortLabel": "LAL",
-          "label": "Language & Literature",
+          "shortLabel": "HIS",
+          "label": "History & Society",
           "children": [
             {
               "code": "260",
-              "shortLabel": "LAS",
-              "label": "Language Study",
+              "shortLabel": "HIST",
+              "label": "History",
               "children": [
                 {
                   "code": "261",
-                  "shortLabel": "LIN",
-                  "label": "Linguistics",
-                  "keywords": [
-                    "linguistics",
-                    "language",
-                    "literature",
-                    "study"
-                  ],
+                  "shortLabel": "ANM",
+                  "label": "Ancient & Medieval",
+                  "keywords": ["ancient", "medieval", "history", "society"],
                   "status": "active",
-                  "sort": 611,
-                  "includes": [
-                    "linguistics",
-                    "language",
-                    "literature",
-                    "study"
-                  ],
-                  "scopeNote": "Use for works chiefly about linguistics within language study.",
-                  "legacyCode": "611"
+                  "sort": 261,
+                  "includes": ["ancient", "medieval", "history", "society"],
+                  "scopeNote": "Use for works chiefly about ancient & medieval within history.",
+                  "legacyCode": "161",
+                  "legacyCodes": ["161", "511"],
+                  "seeAlso": []
                 },
                 {
                   "code": "262",
-                  "shortLabel": "GRU",
-                  "label": "Grammar & Usage",
+                  "shortLabel": "MOH",
+                  "label": "Modern History",
                   "keywords": [
-                    "grammar",
-                    "usage",
-                    "language",
-                    "literature",
-                    "study"
+                    "modern",
+                    "history",
+                    "society",
+                    "war",
+                    "military",
+                    "battle",
+                    "armed conflict",
+                    "civil war",
+                    "veterans",
+                    "transportation history",
+                    "american revolution",
+                    "revolutionary war",
+                    "civil rights movement"
                   ],
                   "status": "active",
-                  "sort": 612,
+                  "sort": 262,
                   "includes": [
-                    "grammar",
-                    "usage",
-                    "language",
-                    "literature",
-                    "study"
+                    "modern",
+                    "history",
+                    "society",
+                    "war history",
+                    "military campaigns",
+                    "civil war",
+                    "veterans",
+                    "transportation history",
+                    "american revolution",
+                    "revolutionary war",
+                    "civil rights movement"
                   ],
-                  "scopeNote": "Use for works chiefly about grammar & usage within language study.",
-                  "legacyCode": "612"
+                  "scopeNote": "Use for modern historical works, including wars, military conflict, veterans, the American Revolution, the Civil War, the Civil Rights Movement, and major transportation history when treated historically rather than technically.",
+                  "seeAlso": ["271", "430", "282", "284"],
+                  "legacyCode": "162",
+                  "legacyCodes": ["162", "512"]
                 },
                 {
                   "code": "263",
-                  "shortLabel": "LALE",
-                  "label": "Language Learning",
-                  "keywords": ["language", "learning", "literature", "study"],
+                  "shortLabel": "LRH",
+                  "label": "Local & Regional History",
+                  "keywords": ["local", "regional", "history", "society"],
                   "status": "active",
-                  "sort": 613,
-                  "includes": ["language", "learning", "literature", "study"],
-                  "scopeNote": "Use for works chiefly about language learning within language study.",
-                  "legacyCode": "613"
+                  "sort": 263,
+                  "includes": ["local", "regional", "history", "society"],
+                  "scopeNote": "Use for works chiefly about local & regional history within history.",
+                  "legacyCode": "163",
+                  "legacyCodes": ["163", "513"],
+                  "seeAlso": []
                 },
                 {
                   "code": "264",
-                  "shortLabel": "TRA",
-                  "label": "Translation",
+                  "shortLabel": "WOH",
+                  "label": "World History",
                   "keywords": [
-                    "translation",
-                    "language",
-                    "literature",
-                    "study"
+                    "world",
+                    "history",
+                    "society",
+                    "world war",
+                    "global conflict",
+                    "military history"
                   ],
                   "status": "active",
-                  "sort": 614,
-                  "seeAlso": ["292", "631"],
+                  "sort": 264,
                   "includes": [
-                    "translation",
-                    "language",
-                    "literature",
-                    "study"
+                    "world",
+                    "history",
+                    "society",
+                    "world war",
+                    "global conflict",
+                    "military history"
                   ],
-                  "scopeNote": "Use for works chiefly about translation within language study.",
-                  "legacyCode": "614"
+                  "scopeNote": "Use for broad world-historical treatments, including global wars and international conflict.",
+                  "legacyCode": "164",
+                  "legacyCodes": ["164", "514"],
+                  "seeAlso": []
                 }
               ],
-              "keywords": ["language", "study", "literature"],
+              "keywords": ["history", "society"],
               "status": "active",
-              "sort": 610,
+              "sort": 260,
               "allowAssign": true,
-              "includes": ["language", "study", "literature"],
-              "scopeNote": "Use for general works on language study. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "610"
+              "includes": ["history", "society"],
+              "scopeNote": "Use for general works on history. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "160",
+              "legacyCodes": ["160", "510"],
+              "seeAlso": []
             },
             {
               "code": "270",
-              "shortLabel": "LIS",
-              "label": "Literary Study",
+              "shortLabel": "SOS",
+              "label": "Social Studies",
               "children": [
                 {
                   "code": "271",
-                  "shortLabel": "CRI",
-                  "label": "Criticism",
+                  "shortLabel": "POG",
+                  "label": "Politics & Government",
                   "keywords": [
-                    "criticism",
-                    "language",
-                    "literature",
-                    "literary",
-                    "study"
+                    "politics",
+                    "government",
+                    "history",
+                    "society",
+                    "social",
+                    "studies",
+                    "military policy",
+                    "defense",
+                    "statecraft",
+                    "war and government",
+                    "elections",
+                    "legislatures",
+                    "committees",
+                    "government proceedings",
+                    "parliamentary procedure"
                   ],
                   "status": "active",
-                  "sort": 621,
+                  "sort": 271,
                   "includes": [
-                    "criticism",
-                    "language",
-                    "literature",
-                    "literary",
-                    "study"
+                    "politics",
+                    "government",
+                    "history",
+                    "society",
+                    "social",
+                    "studies",
+                    "military policy",
+                    "defense policy",
+                    "statecraft",
+                    "elections",
+                    "legislatures",
+                    "committees",
+                    "government proceedings",
+                    "parliamentary procedure"
                   ],
-                  "scopeNote": "Use for works chiefly about criticism within literary study.",
-                  "legacyCode": "621"
+                  "scopeNote": "Use for politics and government, including defense policy, statecraft, diplomacy, elections, legislatures, committees, and understanding government proceedings as matters of governance.",
+                  "seeAlso": ["262", "283", "284"],
+                  "legacyCode": "171",
+                  "legacyCodes": ["171", "521"]
                 },
                 {
                   "code": "272",
-                  "shortLabel": "POC",
-                  "label": "Poetics & Craft",
+                  "shortLabel": "SOC",
+                  "label": "Sociology",
                   "keywords": [
-                    "poetics",
-                    "craft",
-                    "language",
-                    "literature",
-                    "literary",
-                    "study"
+                    "sociology",
+                    "history",
+                    "society",
+                    "social",
+                    "studies"
                   ],
                   "status": "active",
-                  "sort": 622,
+                  "sort": 272,
                   "includes": [
-                    "poetics",
-                    "craft",
-                    "language",
-                    "literature",
-                    "literary",
-                    "study"
+                    "sociology",
+                    "history",
+                    "society",
+                    "social",
+                    "studies"
                   ],
-                  "scopeNote": "Use for works chiefly about poetics & craft within literary study.",
-                  "legacyCode": "622"
+                  "scopeNote": "Use for works chiefly about sociology within social studies.",
+                  "legacyCode": "172",
+                  "legacyCodes": ["172", "522"],
+                  "seeAlso": []
                 },
                 {
                   "code": "273",
-                  "shortLabel": "ANT",
-                  "label": "Anthologies",
+                  "shortLabel": "CUS",
+                  "label": "Cultural Studies",
                   "keywords": [
-                    "anthologies",
-                    "language",
-                    "literature",
-                    "literary",
-                    "study"
+                    "cultural",
+                    "studies",
+                    "history",
+                    "society",
+                    "social",
+                    "food culture",
+                    "foodways",
+                    "culinary history",
+                    "comics culture",
+                    "graphic storytelling"
                   ],
                   "status": "active",
-                  "sort": 623,
+                  "sort": 273,
+                  "seeAlso": ["340", "634", "621", "371"],
                   "includes": [
-                    "anthologies",
-                    "language",
-                    "literature",
-                    "literary",
-                    "study"
+                    "cultural",
+                    "studies",
+                    "history",
+                    "society",
+                    "social",
+                    "food culture",
+                    "foodways",
+                    "culinary history",
+                    "comics culture"
                   ],
-                  "scopeNote": "Use for works chiefly about anthologies within literary study.",
-                  "legacyCode": "623"
+                  "scopeNote": "Use for cultural studies topics, including foodways, culinary history, everyday media culture, and comics or graphic storytelling as cultural forms.",
+                  "legacyCode": "173",
+                  "legacyCodes": ["173", "523"]
                 },
                 {
                   "code": "274",
-                  "shortLabel": "TRM",
-                  "label": "Traditions & Movements",
+                  "shortLabel": "EDI",
+                  "label": "Education & Institutions",
                   "keywords": [
-                    "traditions",
-                    "movements",
-                    "language",
-                    "literature",
-                    "literary",
-                    "study"
+                    "education",
+                    "institutions",
+                    "history",
+                    "society",
+                    "social",
+                    "studies",
+                    "libraries",
+                    "library governance",
+                    "library policy",
+                    "digital literacy",
+                    "maker spaces",
+                    "memory lab",
+                    "public access to information",
+                    "school-business partnerships",
+                    "internships",
+                    "workforce development"
                   ],
                   "status": "active",
-                  "sort": 624,
+                  "sort": 274,
                   "includes": [
-                    "traditions",
-                    "movements",
-                    "language",
-                    "literature",
-                    "literary",
-                    "study"
+                    "education",
+                    "institutions",
+                    "history",
+                    "society",
+                    "social",
+                    "studies",
+                    "libraries",
+                    "library governance",
+                    "library policy",
+                    "digital literacy",
+                    "maker spaces",
+                    "memory lab",
+                    "public access to information",
+                    "workforce development"
                   ],
-                  "scopeNote": "Use for works chiefly about traditions & movements within literary study.",
-                  "legacyCode": "624"
+                  "scopeNote": "Use for works chiefly about education & institutions within social studies, including libraries, library governance, digital literacy, maker spaces, memory labs, and civic educational institutions.",
+                  "seeAlso": ["613", "282"],
+                  "legacyCode": "174",
+                  "legacyCodes": ["174", "524"]
                 }
               ],
-              "keywords": ["literary", "study", "language", "literature"],
+              "keywords": ["social", "studies", "history", "society"],
               "status": "active",
-              "sort": 620,
+              "sort": 270,
               "allowAssign": true,
-              "includes": ["literary", "study", "language", "literature"],
-              "scopeNote": "Use for general works on literary study. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "620"
+              "includes": ["social", "studies", "history", "society"],
+              "scopeNote": "Use for general works on social studies. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "170",
+              "legacyCodes": ["170", "520"],
+              "seeAlso": []
             },
             {
               "code": "280",
-              "shortLabel": "FOG",
-              "label": "Forms & Genres",
+              "shortLabel": "LCL",
+              "label": "Law & Civic Life",
               "children": [
                 {
                   "code": "281",
-                  "shortLabel": "POE",
-                  "label": "Poetry",
+                  "shortLabel": "CPL",
+                  "label": "Constitutional & Public Law",
                   "keywords": [
-                    "poetry",
-                    "language",
-                    "literature",
-                    "forms",
-                    "genres"
+                    "constitutional",
+                    "public",
+                    "law",
+                    "history",
+                    "society",
+                    "civic",
+                    "life"
                   ],
                   "status": "active",
-                  "sort": 631,
+                  "sort": 281,
                   "includes": [
-                    "poetry",
-                    "language",
-                    "literature",
-                    "forms",
-                    "genres"
+                    "constitutional",
+                    "public",
+                    "law",
+                    "history",
+                    "society",
+                    "civic",
+                    "life"
                   ],
-                  "scopeNote": "Use for works chiefly about poetry within forms & genres.",
-                  "legacyCode": "631"
+                  "scopeNote": "Use for works chiefly about constitutional & public law within law & civic life.",
+                  "legacyCode": "181",
+                  "legacyCodes": ["181", "531"],
+                  "seeAlso": []
                 },
                 {
                   "code": "282",
-                  "shortLabel": "DRAM",
-                  "label": "Drama",
+                  "shortLabel": "JUR",
+                  "label": "Justice & Rights",
                   "keywords": [
-                    "drama",
-                    "language",
-                    "literature",
-                    "forms",
-                    "genres"
+                    "justice",
+                    "rights",
+                    "history",
+                    "society",
+                    "law",
+                    "civic",
+                    "life",
+                    "true crime",
+                    "criminal justice",
+                    "crime victims",
+                    "criminal cases",
+                    "investigations",
+                    "civil liberties",
+                    "civil rights",
+                    "foia",
+                    "freedom of information",
+                    "book challenges",
+                    "censorship",
+                    "book bans",
+                    "intellectual freedom law",
+                    "first amendment",
+                    "fourteenth amendment"
                   ],
                   "status": "active",
-                  "sort": 632,
+                  "sort": 282,
                   "includes": [
-                    "drama",
-                    "language",
-                    "literature",
-                    "forms",
-                    "genres"
+                    "justice",
+                    "rights",
+                    "history",
+                    "society",
+                    "law",
+                    "civic",
+                    "life",
+                    "true crime",
+                    "criminal cases",
+                    "investigations",
+                    "rights discourse",
+                    "civil rights",
+                    "civil liberties",
+                    "foia",
+                    "freedom of information",
+                    "book challenges",
+                    "censorship",
+                    "book bans",
+                    "intellectual freedom law",
+                    "first amendment"
                   ],
-                  "scopeNote": "Use for works chiefly about drama within forms & genres.",
-                  "legacyCode": "632"
+                  "scopeNote": "Use for justice, rights, civil liberties, civil rights, FOIA, and nonfiction works on crime or criminal cases when the emphasis is legal, social, documentary, or access-to-information related.",
+                  "seeAlso": ["134", "262", "284", "274"],
+                  "legacyCode": "182",
+                  "legacyCodes": ["182", "532"]
                 },
                 {
                   "code": "283",
-                  "shortLabel": "ESS",
-                  "label": "Essays",
+                  "shortLabel": "PUP",
+                  "label": "Public Policy",
                   "keywords": [
-                    "essays",
-                    "language",
-                    "literature",
-                    "forms",
-                    "genres",
-                    "humor",
-                    "humorous essays",
-                    "satire"
+                    "public",
+                    "policy",
+                    "history",
+                    "society",
+                    "law",
+                    "civic",
+                    "life",
+                    "public health",
+                    "health policy",
+                    "disability policy",
+                    "aging policy",
+                    "care policy",
+                    "county budgets",
+                    "audit transparency",
+                    "finance committee oversight",
+                    "housing data",
+                    "demographic analysis",
+                    "public data literacy"
                   ],
                   "status": "active",
-                  "sort": 633,
+                  "sort": 283,
                   "includes": [
-                    "essays",
-                    "language",
-                    "literature",
-                    "forms",
-                    "genres",
-                    "humor writing",
-                    "satirical essays"
+                    "public",
+                    "policy",
+                    "history",
+                    "society",
+                    "law",
+                    "civic",
+                    "life",
+                    "public health policy",
+                    "disability policy",
+                    "aging policy",
+                    "care policy",
+                    "county budgets",
+                    "audit transparency",
+                    "finance committee oversight",
+                    "housing data",
+                    "demographic analysis",
+                    "public data literacy"
                   ],
-                  "scopeNote": "Use for essays, including humorous essays and satirical prose when the primary form is essayistic rather than fictional.",
-                  "seeAlso": ["310"],
-                  "legacyCode": "633"
+                  "scopeNote": "Use for public policy, including public health, disability policy, aging policy, systems of care, budgets, audits, and evidence used in civic decision-making when the emphasis is civic or governmental.",
+                  "seeAlso": ["641"],
+                  "legacyCode": "183",
+                  "legacyCodes": ["183", "533"]
                 },
                 {
                   "code": "284",
-                  "shortLabel": "FOM",
-                  "label": "Folklore & Myth",
+                  "shortLabel": "CIP",
+                  "label": "Civic Practice",
                   "keywords": [
-                    "folklore",
-                    "myth",
-                    "language",
-                    "literature",
-                    "forms",
-                    "genres"
+                    "civic",
+                    "practice",
+                    "history",
+                    "society",
+                    "law",
+                    "life",
+                    "community organizing",
+                    "civic organizing",
+                    "nonprofits",
+                    "chamber of commerce",
+                    "festival planning",
+                    "public meetings",
+                    "nonprofit boards",
+                    "policy committees",
+                    "strategic planning",
+                    "fundraising",
+                    "public speaking",
+                    "leadership development",
+                    "toastmasters"
                   ],
                   "status": "active",
-                  "sort": 634,
+                  "sort": 284,
                   "includes": [
-                    "folklore",
-                    "myth",
-                    "language",
-                    "literature",
-                    "forms",
-                    "genres"
+                    "civic",
+                    "practice",
+                    "history",
+                    "society",
+                    "law",
+                    "life",
+                    "community organizing",
+                    "civic organizing",
+                    "nonprofits",
+                    "chamber of commerce",
+                    "festival planning",
+                    "public meetings",
+                    "nonprofit boards",
+                    "policy committees",
+                    "strategic planning",
+                    "fundraising",
+                    "public speaking",
+                    "leadership development"
                   ],
-                  "scopeNote": "Use for works chiefly about folklore & myth within forms & genres.",
-                  "legacyCode": "634"
+                  "scopeNote": "Use for civic practice, including community building, nonprofit work, chambers of commerce, festival organizing, public meetings, and hands-on participation in local institutions.",
+                  "seeAlso": ["271", "283", "274"],
+                  "legacyCode": "184",
+                  "legacyCodes": ["184", "534"]
                 }
               ],
-              "keywords": ["forms", "genres", "language", "literature"],
+              "keywords": ["law", "civic", "life", "history", "society"],
               "status": "active",
-              "sort": 630,
+              "sort": 280,
               "allowAssign": true,
-              "includes": ["forms", "genres", "language", "literature"],
-              "scopeNote": "Use for general works on forms & genres. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "630"
+              "includes": ["law", "civic", "life", "history", "society"],
+              "scopeNote": "Use for general works on law & civic life. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "180",
+              "legacyCodes": ["180", "530"],
+              "seeAlso": []
             },
             {
               "code": "290",
-              "shortLabel": "WRP",
-              "label": "Writing Practice",
+              "shortLabel": "GEP",
+              "label": "Geography & Place",
               "children": [
                 {
                   "code": "291",
-                  "shortLabel": "CRW",
-                  "label": "Creative Writing",
+                  "shortLabel": "CART",
+                  "label": "Cartography",
                   "keywords": [
-                    "creative",
-                    "writing",
-                    "language",
-                    "literature",
-                    "practice"
+                    "cartography",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
                   ],
                   "status": "active",
-                  "sort": 641,
+                  "sort": 291,
                   "includes": [
-                    "creative",
-                    "writing",
-                    "language",
-                    "literature",
-                    "practice"
+                    "cartography",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
                   ],
-                  "scopeNote": "Use for works chiefly about creative writing within writing practice.",
-                  "legacyCode": "641"
+                  "scopeNote": "Use for works chiefly about cartography within geography & place.",
+                  "legacyCode": "191",
+                  "legacyCodes": ["191", "541"],
+                  "seeAlso": []
                 },
                 {
                   "code": "292",
-                  "shortLabel": "NOW",
-                  "label": "Nonfiction Writing",
+                  "shortLabel": "REST",
+                  "label": "Regional Studies",
                   "keywords": [
-                    "nonfiction",
-                    "writing",
-                    "language",
-                    "literature",
-                    "practice"
+                    "regional",
+                    "studies",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
                   ],
                   "status": "active",
-                  "sort": 642,
+                  "sort": 292,
                   "includes": [
-                    "nonfiction",
-                    "writing",
-                    "language",
-                    "literature",
-                    "practice"
+                    "regional",
+                    "studies",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
                   ],
-                  "scopeNote": "Use for works chiefly about nonfiction writing within writing practice.",
-                  "legacyCode": "642"
+                  "scopeNote": "Use for works chiefly about regional studies within geography & place.",
+                  "legacyCode": "192",
+                  "legacyCodes": ["192", "542"],
+                  "seeAlso": []
                 },
                 {
                   "code": "293",
-                  "shortLabel": "EDIT",
-                  "label": "Editing",
+                  "shortLabel": "URS",
+                  "label": "Urban Studies",
                   "keywords": [
-                    "editing",
-                    "language",
-                    "literature",
-                    "writing",
-                    "practice"
+                    "urban",
+                    "studies",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
                   ],
                   "status": "active",
-                  "sort": 643,
+                  "sort": 293,
                   "includes": [
-                    "editing",
-                    "language",
-                    "literature",
-                    "writing",
-                    "practice"
+                    "urban",
+                    "studies",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
                   ],
-                  "scopeNote": "Use for works chiefly about editing within writing practice.",
-                  "legacyCode": "643"
+                  "scopeNote": "Use for works chiefly about urban studies within geography & place.",
+                  "legacyCode": "193",
+                  "legacyCodes": ["193", "543"],
+                  "seeAlso": []
                 },
                 {
                   "code": "294",
-                  "shortLabel": "PSP",
-                  "label": "Publishing & Small Press",
+                  "shortLabel": "RER",
+                  "label": "Rural & Environmental Regions",
                   "keywords": [
-                    "publishing",
-                    "small",
-                    "press",
-                    "language",
-                    "literature",
-                    "writing",
-                    "practice"
+                    "rural",
+                    "environmental",
+                    "regions",
+                    "history",
+                    "society",
+                    "geography",
+                    "place",
+                    "agriculture",
+                    "farming",
+                    "farmland",
+                    "homesteading",
+                    "rural life"
                   ],
                   "status": "active",
-                  "sort": 644,
+                  "sort": 294,
                   "includes": [
-                    "publishing",
-                    "small",
-                    "press",
-                    "language",
-                    "literature",
-                    "writing",
-                    "practice"
+                    "rural",
+                    "environmental",
+                    "regions",
+                    "history",
+                    "society",
+                    "geography",
+                    "place",
+                    "agriculture",
+                    "farming",
+                    "homesteading",
+                    "rural life",
+                    "farmland"
                   ],
-                  "scopeNote": "Use for works chiefly about publishing & small press within writing practice.",
-                  "legacyCode": "644"
+                  "scopeNote": "Use for rural and environmental regions, including agriculture, farming landscapes, and homesteading when the emphasis is place, region, or land use.",
+                  "seeAlso": ["623", "503"],
+                  "legacyCode": "194",
+                  "legacyCodes": ["194", "544"]
                 }
               ],
-              "keywords": ["writing", "practice", "language", "literature"],
+              "keywords": ["geography", "place", "history", "society"],
               "status": "active",
-              "sort": 640,
+              "sort": 290,
               "allowAssign": true,
-              "includes": ["writing", "practice", "language", "literature"],
-              "scopeNote": "Use for general works on writing practice. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "640"
+              "includes": ["geography", "place", "history", "society"],
+              "scopeNote": "Use for general works on geography & place. Class more specific works in the narrower categories below when needed.",
+              "legacyCode": "190",
+              "legacyCodes": ["190", "540"],
+              "seeAlso": []
             }
           ],
-          "keywords": ["language", "literature"],
+          "keywords": ["history", "society"],
           "status": "active",
-          "sort": 600,
+          "sort": 250,
           "allowAssign": true,
-          "includes": ["language", "literature"],
-          "scopeNote": "Use for general works on language & literature. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "600"
+          "includes": ["history", "society"],
+          "scopeNote": "Use for general works on history & society. Class more specific works in the narrower categories below when needed.",
+          "legacyCode": "150",
+          "legacyCodes": ["150", "500"],
+          "seeAlso": []
         },
         {
           "code": "300",
-          "shortLabel": "FIC",
-          "label": "Fiction",
+          "shortLabel": "RSP",
+          "label": "Religion, Spirituality & Philosophy",
           "children": [
             {
               "code": "310",
-              "shortLabel": "GEF",
-              "label": "General Fiction",
-              "children": [
-                {
-                  "code": "311",
-                  "shortLabel": "LIF",
-                  "label": "Literary Fiction",
-                  "keywords": ["literary", "fiction", "general"],
-                  "status": "active",
-                  "sort": 811,
-                  "includes": ["literary", "fiction", "general"],
-                  "scopeNote": "Use for works chiefly about literary fiction within general fiction.",
-                  "legacyCode": "811"
-                },
-                {
-                  "code": "312",
-                  "shortLabel": "COF",
-                  "label": "Contemporary Fiction",
-                  "keywords": ["contemporary", "fiction", "general"],
-                  "status": "active",
-                  "sort": 812,
-                  "includes": ["contemporary", "fiction", "general"],
-                  "scopeNote": "Use for works chiefly about contemporary fiction within general fiction.",
-                  "legacyCode": "812"
-                },
-                {
-                  "code": "313",
-                  "shortLabel": "HIF",
-                  "label": "Historical Fiction",
-                  "keywords": ["historical", "fiction", "general"],
-                  "status": "active",
-                  "sort": 813,
-                  "includes": ["historical", "fiction", "general"],
-                  "scopeNote": "Use for works chiefly about historical fiction within general fiction.",
-                  "legacyCode": "813"
-                },
-                {
-                  "code": "314",
-                  "shortLabel": "SOL",
-                  "label": "Slice of Life",
-                  "keywords": ["slice", "of", "life", "fiction", "general"],
-                  "status": "active",
-                  "sort": 814,
-                  "includes": ["slice", "of", "life", "fiction", "general"],
-                  "scopeNote": "Use for works chiefly about slice of life within general fiction.",
-                  "legacyCode": "814"
-                }
-              ],
+              "shortLabel": "REL",
+              "label": "Religion",
               "keywords": [
-                "general",
-                "fiction",
-                "humor fiction",
-                "satire",
-                "graphic novels",
-                "comic fiction"
+                "religion",
+                "spirituality",
+                "philosophy",
+                "freemasonry",
+                "masonic",
+                "fraternal orders"
               ],
               "status": "active",
-              "sort": 810,
-              "allowAssign": true,
+              "sort": 310,
+              "seeAlso": ["340", "170", "340.5"],
               "includes": [
-                "general",
-                "fiction",
-                "humor fiction",
-                "satire",
-                "graphic novels"
+                "religion",
+                "spirituality",
+                "philosophy",
+                "freemasonry",
+                "masonic traditions",
+                "fraternal orders"
               ],
-              "scopeNote": "Use for general fiction, including humor, satire, and graphic novels when they are shelved primarily as literary works rather than visual-art studies.",
-              "seeAlso": ["371", "340"],
-              "legacyCode": "810"
+              "scopeNote": "Use for works chiefly about religion within religion, spirituality & philosophy. Use here for religious traditions broadly, and see related classes for esoteric or symbolic societies such as Freemasonry.",
+              "legacyCode": "110",
+              "legacyCodes": ["110", "151"]
             },
             {
               "code": "320",
-              "shortLabel": "SPF",
-              "label": "Speculative Fiction",
-              "children": [
-                {
-                  "code": "321",
-                  "shortLabel": "SCF",
-                  "label": "Science Fiction",
-                  "keywords": ["science", "fiction", "speculative"],
-                  "status": "active",
-                  "sort": 821,
-                  "seeAlso": ["531", "533"],
-                  "includes": ["science", "fiction", "speculative"],
-                  "scopeNote": "Use for works chiefly about science fiction within speculative fiction.",
-                  "legacyCode": "821"
-                },
-                {
-                  "code": "322",
-                  "shortLabel": "FAN",
-                  "label": "Fantasy",
-                  "keywords": ["fantasy", "fiction", "speculative"],
-                  "status": "active",
-                  "sort": 822,
-                  "includes": ["fantasy", "fiction", "speculative"],
-                  "scopeNote": "Use for works chiefly about fantasy within speculative fiction.",
-                  "legacyCode": "822"
-                },
-                {
-                  "code": "323",
-                  "shortLabel": "HOR",
-                  "label": "Horror",
-                  "keywords": ["horror", "fiction", "speculative"],
-                  "status": "active",
-                  "sort": 823,
-                  "includes": ["horror", "fiction", "speculative"],
-                  "scopeNote": "Use for works chiefly about horror within speculative fiction.",
-                  "legacyCode": "823"
-                },
-                {
-                  "code": "324",
-                  "shortLabel": "MAR",
-                  "label": "Magical Realism",
-                  "keywords": ["magical", "realism", "fiction", "speculative"],
-                  "status": "active",
-                  "sort": 824,
-                  "seeAlso": ["140.1", "284"],
-                  "includes": ["magical", "realism", "fiction", "speculative"],
-                  "scopeNote": "Use for works chiefly about magical realism within speculative fiction.",
-                  "legacyCode": "824"
-                }
+              "shortLabel": "SPP",
+              "label": "Spiritual Practice",
+              "keywords": [
+                "spiritual",
+                "practice",
+                "dreamwork",
+                "dream practice",
+                "religion",
+                "spirituality",
+                "philosophy"
               ],
-              "keywords": ["speculative", "fiction"],
               "status": "active",
-              "sort": 820,
-              "allowAssign": true,
-              "includes": ["speculative", "fiction"],
-              "scopeNote": "Use for general works on speculative fiction. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "820"
+              "sort": 320,
+              "seeAlso": ["642", "330"],
+              "includes": [
+                "spiritual",
+                "practice",
+                "dreamwork",
+                "dream practice",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ],
+              "scopeNote": "Use for works chiefly about spiritual practice within religion, spirituality & philosophy. Use here for dreamwork, contemplative dream practices, and spiritually oriented work with dreams.",
+              "legacyCode": "120",
+              "legacyCodes": ["120", "152"]
             },
             {
               "code": "330",
-              "shortLabel": "GEFI",
-              "label": "Genre Fiction",
-              "children": [
-                {
-                  "code": "331",
-                  "shortLabel": "MYS",
-                  "label": "Mystery",
-                  "keywords": ["mystery", "fiction", "genre"],
-                  "status": "active",
-                  "sort": 831,
-                  "includes": ["mystery", "fiction", "genre"],
-                  "scopeNote": "Use for works chiefly about mystery within genre fiction.",
-                  "legacyCode": "831"
-                },
-                {
-                  "code": "332",
-                  "shortLabel": "ROM",
-                  "label": "Romance",
-                  "keywords": ["romance", "fiction", "genre"],
-                  "status": "active",
-                  "sort": 832,
-                  "includes": ["romance", "fiction", "genre"],
-                  "scopeNote": "Use for works chiefly about romance within genre fiction.",
-                  "legacyCode": "832"
-                },
-                {
-                  "code": "333",
-                  "shortLabel": "ADT",
-                  "label": "Adventure & Thriller",
-                  "keywords": ["adventure", "thriller", "fiction", "genre"],
-                  "status": "active",
-                  "sort": 833,
-                  "includes": ["adventure", "thriller", "fiction", "genre"],
-                  "scopeNote": "Use for works chiefly about adventure & thriller within genre fiction.",
-                  "legacyCode": "833"
-                },
-                {
-                  "code": "334",
-                  "shortLabel": "CRN",
-                  "label": "Crime & Noir",
-                  "keywords": ["crime", "noir", "fiction", "genre"],
-                  "status": "active",
-                  "sort": 834,
-                  "includes": ["crime", "noir", "fiction", "genre"],
-                  "scopeNote": "Use for works chiefly about crime & noir within genre fiction.",
-                  "legacyCode": "834"
-                }
-              ],
-              "keywords": ["genre", "fiction"],
+              "shortLabel": "PHI",
+              "label": "Philosophy",
+              "keywords": ["philosophy", "religion", "spirituality"],
               "status": "active",
-              "sort": 830,
-              "allowAssign": true,
-              "includes": ["genre", "fiction"],
-              "scopeNote": "Use for general works on genre fiction. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "830"
+              "sort": 330,
+              "seeAlso": ["271", "172"],
+              "includes": ["philosophy", "religion", "spirituality"],
+              "scopeNote": "Use for works chiefly about philosophy within religion, spirituality & philosophy.",
+              "legacyCode": "130",
+              "legacyCodes": ["130", "153"]
             },
             {
               "code": "340",
-              "shortLabel": "SHF",
-              "label": "Short Forms",
-              "children": [
-                {
-                  "code": "341",
-                  "shortLabel": "SHS",
-                  "label": "Short Stories",
-                  "keywords": ["short", "stories", "fiction", "forms"],
-                  "status": "active",
-                  "sort": 841,
-                  "includes": ["short", "stories", "fiction", "forms"],
-                  "scopeNote": "Use for works chiefly about short stories within short forms.",
-                  "legacyCode": "841"
-                },
-                {
-                  "code": "342",
-                  "shortLabel": "NOV",
-                  "label": "Novellas",
-                  "keywords": ["novellas", "fiction", "short", "forms"],
-                  "status": "active",
-                  "sort": 842,
-                  "includes": ["novellas", "fiction", "short", "forms"],
-                  "scopeNote": "Use for works chiefly about novellas within short forms.",
-                  "legacyCode": "842"
-                },
-                {
-                  "code": "343",
-                  "shortLabel": "FLF",
-                  "label": "Flash Fiction",
-                  "keywords": ["flash", "fiction", "short", "forms"],
-                  "status": "active",
-                  "sort": 843,
-                  "includes": ["flash", "fiction", "short", "forms"],
-                  "scopeNote": "Use for works chiefly about flash fiction within short forms.",
-                  "legacyCode": "843"
-                },
-                {
-                  "code": "344",
-                  "shortLabel": "FFT",
-                  "label": "Fables & Fairy Tales",
-                  "keywords": [
-                    "fables",
-                    "fairy",
-                    "tales",
-                    "fiction",
-                    "short",
-                    "forms"
-                  ],
-                  "status": "active",
-                  "sort": 844,
-                  "includes": [
-                    "fables",
-                    "fairy",
-                    "tales",
-                    "fiction",
-                    "short",
-                    "forms"
-                  ],
-                  "scopeNote": "Use for works chiefly about fables & fairy tales within short forms.",
-                  "legacyCode": "844"
-                }
-              ],
+              "shortLabel": "MYT",
+              "label": "Myth & Thought",
               "keywords": [
-                "short",
-                "forms",
-                "fiction",
-                "comics",
-                "graphic novels",
-                "comic strips",
-                "sequential narrative",
-                "humor collections"
+                "myth",
+                "thought",
+                "dreams",
+                "dream interpretation",
+                "dream symbolism",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "esoterica",
+                "symbolic societies",
+                "freemasonry"
               ],
               "status": "active",
-              "sort": 840,
-              "allowAssign": true,
+              "sort": 340,
               "includes": [
-                "short",
-                "forms",
-                "fiction",
-                "comics collections",
-                "graphic novels",
-                "comic strips",
-                "short humor"
+                "myth",
+                "thought",
+                "dreams",
+                "dream interpretation",
+                "dream symbolism",
+                "religion",
+                "spirituality",
+                "philosophy",
+                "esoteric symbolism",
+                "freemasonry"
               ],
-              "scopeNote": "Use for short-form literature and collections, including comics, graphic novels, comic strips, flash work, and other brief or episodic narrative forms when they are shelved by literary format.",
-              "seeAlso": ["371", "310"],
-              "legacyCode": "840"
+              "scopeNote": "Use for works chiefly about myth & thought within religion, spirituality & philosophy. Use here for symbolic or interpretive works about dreams, esoteric traditions, symbolic societies, and systems of meaning rather than devotional or strictly historical treatment.",
+              "seeAlso": ["310"],
+              "legacyCode": "140",
+              "legacyCodes": ["140", "154"]
             }
           ],
-          "keywords": ["fiction"],
+          "keywords": ["religion", "spirituality", "philosophy", "belief"],
           "status": "active",
-          "sort": 800,
+          "sort": 300,
           "allowAssign": true,
-          "includes": ["fiction"],
-          "scopeNote": "Use for general works on fiction. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "800"
+          "includes": ["religion", "spirituality", "philosophy", "belief"],
+          "scopeNote": "Use for general works on religion, spirituality & philosophy. Class more specific works in the narrower categories below when needed.",
+          "legacyCode": "100",
+          "legacyCodes": ["100", "150"],
+          "seeAlso": []
         },
         {
           "code": "350",
@@ -1947,10 +2127,12 @@
                   "label": "Drawing",
                   "keywords": ["drawing", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 111,
+                  "sort": 361,
                   "includes": ["drawing", "art", "visual", "arts"],
                   "scopeNote": "Use for works chiefly about drawing within visual arts.",
-                  "legacyCode": "111"
+                  "legacyCode": "111",
+                  "legacyCodes": ["111"],
+                  "seeAlso": []
                 },
                 {
                   "code": "362",
@@ -1958,10 +2140,12 @@
                   "label": "Painting",
                   "keywords": ["painting", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 112,
+                  "sort": 362,
                   "includes": ["painting", "art", "visual", "arts"],
                   "scopeNote": "Use for works chiefly about painting within visual arts.",
-                  "legacyCode": "112"
+                  "legacyCode": "112",
+                  "legacyCodes": ["112"],
+                  "seeAlso": []
                 },
                 {
                   "code": "363",
@@ -1980,7 +2164,7 @@
                     "letterpress"
                   ],
                   "status": "active",
-                  "sort": 113,
+                  "sort": 363,
                   "includes": [
                     "printmaking",
                     "art",
@@ -1994,7 +2178,9 @@
                     "letterpress"
                   ],
                   "scopeNote": "Use for works chiefly about printmaking within visual arts, including screen printing, linocut, etching, relief printing, woodcut, and letterpress as artistic processes.",
-                  "legacyCode": "113"
+                  "legacyCode": "113",
+                  "legacyCodes": ["113"],
+                  "seeAlso": []
                 },
                 {
                   "code": "364",
@@ -2002,19 +2188,23 @@
                   "label": "Sculpture",
                   "keywords": ["sculpture", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 114,
+                  "sort": 364,
                   "includes": ["sculpture", "art", "visual", "arts"],
                   "scopeNote": "Use for works chiefly about sculpture within visual arts.",
-                  "legacyCode": "114"
+                  "legacyCode": "114",
+                  "legacyCodes": ["114"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["visual", "arts", "art"],
               "status": "active",
-              "sort": 110,
+              "sort": 360,
               "allowAssign": true,
               "includes": ["visual", "arts", "art"],
               "scopeNote": "Use for general works on visual arts. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "110"
+              "legacyCode": "110",
+              "legacyCodes": ["110"],
+              "seeAlso": []
             },
             {
               "code": "370",
@@ -2037,8 +2227,8 @@
                     "lettering"
                   ],
                   "status": "active",
-                  "sort": 121,
-                  "seeAlso": ["543", "294", "340"],
+                  "sort": 371,
+                  "seeAlso": ["543", "194", "140"],
                   "includes": [
                     "graphic",
                     "design",
@@ -2049,7 +2239,8 @@
                     "illustration"
                   ],
                   "scopeNote": "Use for works chiefly about graphic design, comics form, sequential art, illustration, lettering, and the visual craft of graphic storytelling. Class literary works themselves with fiction or short forms as appropriate.",
-                  "legacyCode": "121"
+                  "legacyCode": "121",
+                  "legacyCodes": ["121"]
                 },
                 {
                   "code": "372",
@@ -2057,10 +2248,12 @@
                   "label": "Industrial Design",
                   "keywords": ["industrial", "design", "art"],
                   "status": "active",
-                  "sort": 122,
+                  "sort": 372,
                   "includes": ["industrial", "design", "art"],
                   "scopeNote": "Use for works chiefly about industrial design within design.",
-                  "legacyCode": "122"
+                  "legacyCode": "122",
+                  "legacyCodes": ["122"],
+                  "seeAlso": []
                 },
                 {
                   "code": "373",
@@ -2068,10 +2261,12 @@
                   "label": "Interior Design",
                   "keywords": ["interior", "design", "art"],
                   "status": "active",
-                  "sort": 123,
+                  "sort": 373,
                   "includes": ["interior", "design", "art"],
                   "scopeNote": "Use for works chiefly about interior design within design.",
-                  "legacyCode": "123"
+                  "legacyCode": "123",
+                  "legacyCodes": ["123"],
+                  "seeAlso": []
                 },
                 {
                   "code": "374",
@@ -2079,19 +2274,23 @@
                   "label": "Fashion & Textile Design",
                   "keywords": ["fashion", "textile", "design", "art"],
                   "status": "active",
-                  "sort": 124,
+                  "sort": 374,
                   "includes": ["fashion", "textile", "design", "art"],
                   "scopeNote": "Use for works chiefly about fashion & textile design within design.",
-                  "legacyCode": "124"
+                  "legacyCode": "124",
+                  "legacyCodes": ["124"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["design", "art"],
               "status": "active",
-              "sort": 120,
+              "sort": 370,
               "allowAssign": true,
               "includes": ["design", "art"],
               "scopeNote": "Use for general works on design. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "120"
+              "legacyCode": "120",
+              "legacyCodes": ["120"],
+              "seeAlso": []
             },
             {
               "code": "380",
@@ -2104,11 +2303,12 @@
                   "label": "Music",
                   "keywords": ["music", "art", "performing", "arts"],
                   "status": "active",
-                  "sort": 131,
+                  "sort": 381,
                   "seeAlso": ["660.1", "680.1"],
                   "includes": ["music", "art", "performing", "arts"],
                   "scopeNote": "Use for works chiefly about music within performing arts.",
-                  "legacyCode": "131"
+                  "legacyCode": "131",
+                  "legacyCodes": ["131"]
                 },
                 {
                   "code": "382",
@@ -2116,10 +2316,12 @@
                   "label": "Dance",
                   "keywords": ["dance", "art", "performing", "arts"],
                   "status": "active",
-                  "sort": 132,
+                  "sort": 382,
                   "includes": ["dance", "art", "performing", "arts"],
                   "scopeNote": "Use for works chiefly about dance within performing arts.",
-                  "legacyCode": "132"
+                  "legacyCode": "132",
+                  "legacyCodes": ["132"],
+                  "seeAlso": []
                 },
                 {
                   "code": "383",
@@ -2143,7 +2345,7 @@
                     "variety performance"
                   ],
                   "status": "active",
-                  "sort": 133,
+                  "sort": 383,
                   "includes": [
                     "theater",
                     "art",
@@ -2160,7 +2362,9 @@
                     "variety performance"
                   ],
                   "scopeNote": "Use for works chiefly about theater within performing arts, including stage magic, illusion performance, clowning, balloon sculpting, and other live variety arts when treated as performance practice.",
-                  "legacyCode": "133"
+                  "legacyCode": "133",
+                  "legacyCodes": ["133"],
+                  "seeAlso": []
                 },
                 {
                   "code": "384",
@@ -2178,7 +2382,7 @@
                     "screen storytelling"
                   ],
                   "status": "active",
-                  "sort": 134,
+                  "sort": 384,
                   "includes": [
                     "film",
                     "screen",
@@ -2190,16 +2394,20 @@
                     "screen storytelling"
                   ],
                   "scopeNote": "Use for works chiefly about film & screen arts within performing arts, including video production, screen storytelling, and moving-image performance practices.",
-                  "legacyCode": "134"
+                  "legacyCode": "134",
+                  "legacyCodes": ["134"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["performing", "arts", "art"],
               "status": "active",
-              "sort": 130,
+              "sort": 380,
               "allowAssign": true,
               "includes": ["performing", "arts", "art"],
               "scopeNote": "Use for general works on performing arts. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "130"
+              "legacyCode": "130",
+              "legacyCodes": ["130"],
+              "seeAlso": []
             },
             {
               "code": "390",
@@ -2212,10 +2420,12 @@
                   "label": "Photography",
                   "keywords": ["photography", "art", "media", "arts"],
                   "status": "active",
-                  "sort": 141,
+                  "sort": 391,
                   "includes": ["photography", "art", "media", "arts"],
                   "scopeNote": "Use for works chiefly about photography within media arts.",
-                  "legacyCode": "141"
+                  "legacyCode": "141",
+                  "legacyCodes": ["141"],
+                  "seeAlso": []
                 },
                 {
                   "code": "392",
@@ -2223,10 +2433,12 @@
                   "label": "Video Art",
                   "keywords": ["video", "art", "media", "arts"],
                   "status": "active",
-                  "sort": 142,
+                  "sort": 392,
                   "includes": ["video", "art", "media", "arts"],
                   "scopeNote": "Use for works chiefly about video art within media arts.",
-                  "legacyCode": "142"
+                  "legacyCode": "142",
+                  "legacyCodes": ["142"],
+                  "seeAlso": []
                 },
                 {
                   "code": "393",
@@ -2242,7 +2454,7 @@
                     "creative ai tools"
                   ],
                   "status": "active",
-                  "sort": 143,
+                  "sort": 393,
                   "includes": [
                     "digital",
                     "art",
@@ -2253,7 +2465,9 @@
                     "creative ai tools"
                   ],
                   "scopeNote": "Use for works chiefly about digital art within media arts.",
-                  "legacyCode": "143"
+                  "legacyCode": "143",
+                  "legacyCodes": ["143"],
+                  "seeAlso": []
                 },
                 {
                   "code": "394",
@@ -2261,10 +2475,12 @@
                   "label": "Mixed Media",
                   "keywords": ["mixed", "media", "art", "arts"],
                   "status": "active",
-                  "sort": 144,
+                  "sort": 394,
                   "includes": ["mixed", "media", "art", "arts"],
                   "scopeNote": "Use for works chiefly about mixed media within media arts.",
-                  "legacyCode": "144"
+                  "legacyCode": "144",
+                  "legacyCodes": ["144"],
+                  "seeAlso": []
                 }
               ],
               "keywords": [
@@ -2280,7 +2496,7 @@
                 "interactive exhibits"
               ],
               "status": "active",
-              "sort": 140,
+              "sort": 390,
               "allowAssign": true,
               "includes": [
                 "media",
@@ -2294,16 +2510,20 @@
                 "interactive exhibits"
               ],
               "scopeNote": "Use for general works on media arts. Class more specific works in the narrower categories below when needed. Use here as a broad home for audio media, public media exhibits, and experimental media practices.",
-              "legacyCode": "140"
+              "legacyCode": "140",
+              "legacyCodes": ["140"],
+              "seeAlso": []
             }
           ],
           "keywords": ["art"],
           "status": "active",
-          "sort": 100,
+          "sort": 350,
           "allowAssign": true,
           "includes": ["art"],
           "scopeNote": "Use for general works on art. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "100"
+          "legacyCode": "100",
+          "legacyCodes": ["100"],
+          "seeAlso": []
         },
         {
           "code": "400",
@@ -2316,11 +2536,12 @@
               "label": "Architecture",
               "keywords": ["architecture", "preservation"],
               "status": "active",
-              "sort": 161,
-              "seeAlso": ["190", "420"],
+              "sort": 410,
+              "seeAlso": ["290", "420"],
               "includes": ["architecture", "preservation"],
               "scopeNote": "Use for works chiefly about architecture within architecture & preservation.",
-              "legacyCode": "161"
+              "legacyCode": "161",
+              "legacyCodes": ["161"]
             },
             {
               "code": "420",
@@ -2336,8 +2557,8 @@
                 "architecture"
               ],
               "status": "active",
-              "sort": 162,
-              "seeAlso": ["161", "191"],
+              "sort": 420,
+              "seeAlso": ["261", "291"],
               "includes": [
                 "historic",
                 "preservation",
@@ -2348,7 +2569,8 @@
                 "architecture"
               ],
               "scopeNote": "Use for works chiefly about historic preservation within architecture & preservation.",
-              "legacyCode": "162"
+              "legacyCode": "162",
+              "legacyCodes": ["162"]
             },
             {
               "code": "430",
@@ -2377,7 +2599,7 @@
                 "tourism planning"
               ],
               "status": "active",
-              "sort": 163,
+              "sort": 430,
               "includes": [
                 "urban",
                 "design",
@@ -2398,8 +2620,9 @@
                 "tourism planning"
               ],
               "scopeNote": "Use for works on urban design, transportation systems, roads, rail, transit, mobility, and the planning of the built public realm. Use here for transportation as infrastructure or civic design rather than vehicle repair.",
-              "seeAlso": ["162", "440", "184"],
-              "legacyCode": "163"
+              "seeAlso": ["262", "440", "284"],
+              "legacyCode": "163",
+              "legacyCodes": ["163"]
             },
             {
               "code": "440",
@@ -2407,19 +2630,23 @@
               "label": "Building Craft",
               "keywords": ["building", "craft", "architecture", "preservation"],
               "status": "active",
-              "sort": 164,
+              "sort": 440,
               "includes": ["building", "craft", "architecture", "preservation"],
               "scopeNote": "Use for works chiefly about building craft within architecture & preservation.",
-              "legacyCode": "164"
+              "legacyCode": "164",
+              "legacyCodes": ["164"],
+              "seeAlso": []
             }
           ],
           "keywords": ["architecture", "preservation", "buildings", "heritage"],
           "status": "active",
-          "sort": 160,
+          "sort": 400,
           "allowAssign": true,
           "includes": ["architecture", "preservation", "buildings", "heritage"],
           "scopeNote": "Use for general works on architecture & preservation. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "160"
+          "legacyCode": "160",
+          "legacyCodes": ["160"],
+          "seeAlso": []
         },
         {
           "code": "450",
@@ -2443,7 +2670,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 711,
+                  "sort": 461,
                   "includes": [
                     "biology",
                     "science",
@@ -2452,7 +2679,9 @@
                     "sciences"
                   ],
                   "scopeNote": "Use for works chiefly about biology within life sciences.",
-                  "legacyCode": "711"
+                  "legacyCode": "711",
+                  "legacyCodes": ["711"],
+                  "seeAlso": []
                 },
                 {
                   "code": "462",
@@ -2466,7 +2695,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 712,
+                  "sort": 462,
                   "seeAlso": ["492", "502.3"],
                   "includes": [
                     "ecology",
@@ -2476,7 +2705,8 @@
                     "sciences"
                   ],
                   "scopeNote": "Use for works chiefly about ecology within life sciences.",
-                  "legacyCode": "712"
+                  "legacyCode": "712",
+                  "legacyCodes": ["712"]
                 },
                 {
                   "code": "463",
@@ -2490,7 +2720,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 713,
+                  "sort": 463,
                   "includes": [
                     "botany",
                     "science",
@@ -2499,7 +2729,9 @@
                     "sciences"
                   ],
                   "scopeNote": "Use for works chiefly about botany within life sciences.",
-                  "legacyCode": "713"
+                  "legacyCode": "713",
+                  "legacyCodes": ["713"],
+                  "seeAlso": []
                 },
                 {
                   "code": "464",
@@ -2513,7 +2745,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 714,
+                  "sort": 464,
                   "includes": [
                     "zoology",
                     "science",
@@ -2522,16 +2754,20 @@
                     "sciences"
                   ],
                   "scopeNote": "Use for works chiefly about zoology within life sciences.",
-                  "legacyCode": "714"
+                  "legacyCode": "714",
+                  "legacyCodes": ["714"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["life", "sciences", "science", "nature"],
               "status": "active",
-              "sort": 710,
+              "sort": 460,
               "allowAssign": true,
               "includes": ["life", "sciences", "science", "nature"],
               "scopeNote": "Use for general works on life sciences. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "710"
+              "legacyCode": "710",
+              "legacyCodes": ["710"],
+              "seeAlso": []
             },
             {
               "code": "470",
@@ -2550,7 +2786,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 721,
+                  "sort": 471,
                   "includes": [
                     "physics",
                     "science",
@@ -2559,7 +2795,9 @@
                     "sciences"
                   ],
                   "scopeNote": "Use for works chiefly about physics within physical sciences.",
-                  "legacyCode": "721"
+                  "legacyCode": "721",
+                  "legacyCodes": ["721"],
+                  "seeAlso": []
                 },
                 {
                   "code": "472",
@@ -2573,7 +2811,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 722,
+                  "sort": 472,
                   "includes": [
                     "chemistry",
                     "science",
@@ -2582,7 +2820,9 @@
                     "sciences"
                   ],
                   "scopeNote": "Use for works chiefly about chemistry within physical sciences.",
-                  "legacyCode": "722"
+                  "legacyCode": "722",
+                  "legacyCodes": ["722"],
+                  "seeAlso": []
                 },
                 {
                   "code": "473",
@@ -2597,7 +2837,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 723,
+                  "sort": 473,
                   "includes": [
                     "geology",
                     "earth",
@@ -2607,7 +2847,9 @@
                     "sciences"
                   ],
                   "scopeNote": "Use for works chiefly about geology & earth science within physical sciences.",
-                  "legacyCode": "723"
+                  "legacyCode": "723",
+                  "legacyCodes": ["723"],
+                  "seeAlso": []
                 },
                 {
                   "code": "474",
@@ -2622,7 +2864,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 724,
+                  "sort": 474,
                   "includes": [
                     "astronomy",
                     "space",
@@ -2632,16 +2874,20 @@
                     "sciences"
                   ],
                   "scopeNote": "Use for works chiefly about astronomy & space within physical sciences.",
-                  "legacyCode": "724"
+                  "legacyCode": "724",
+                  "legacyCodes": ["724"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["physical", "sciences", "science", "nature"],
               "status": "active",
-              "sort": 720,
+              "sort": 470,
               "allowAssign": true,
               "includes": ["physical", "sciences", "science", "nature"],
               "scopeNote": "Use for general works on physical sciences. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "720"
+              "legacyCode": "720",
+              "legacyCodes": ["720"],
+              "seeAlso": []
             },
             {
               "code": "480",
@@ -2660,7 +2906,7 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 731,
+                  "sort": 481,
                   "includes": [
                     "mathematics",
                     "science",
@@ -2669,7 +2915,9 @@
                     "logic"
                   ],
                   "scopeNote": "Use for works chiefly about mathematics within math & logic.",
-                  "legacyCode": "731"
+                  "legacyCode": "731",
+                  "legacyCodes": ["731"],
+                  "seeAlso": []
                 },
                 {
                   "code": "482",
@@ -2683,7 +2931,7 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 732,
+                  "sort": 482,
                   "includes": [
                     "statistics",
                     "science",
@@ -2692,7 +2940,9 @@
                     "logic"
                   ],
                   "scopeNote": "Use for works chiefly about statistics within math & logic.",
-                  "legacyCode": "732"
+                  "legacyCode": "732",
+                  "legacyCodes": ["732"],
+                  "seeAlso": []
                 },
                 {
                   "code": "483",
@@ -2700,10 +2950,12 @@
                   "label": "Logic",
                   "keywords": ["logic", "science", "nature", "math"],
                   "status": "active",
-                  "sort": 733,
+                  "sort": 483,
                   "includes": ["logic", "science", "nature", "math"],
                   "scopeNote": "Use for works chiefly about logic within math & logic.",
-                  "legacyCode": "733"
+                  "legacyCode": "733",
+                  "legacyCodes": ["733"],
+                  "seeAlso": []
                 },
                 {
                   "code": "484",
@@ -2719,7 +2971,7 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 734,
+                  "sort": 484,
                   "includes": [
                     "models",
                     "systems",
@@ -2730,16 +2982,20 @@
                     "logic"
                   ],
                   "scopeNote": "Use for works chiefly about models & systems thinking within math & logic.",
-                  "legacyCode": "734"
+                  "legacyCode": "734",
+                  "legacyCodes": ["734"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["math", "logic", "science", "nature"],
               "status": "active",
-              "sort": 730,
+              "sort": 480,
               "allowAssign": true,
               "includes": ["math", "logic", "science", "nature"],
               "scopeNote": "Use for general works on math & logic. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "730"
+              "legacyCode": "730",
+              "legacyCodes": ["730"],
+              "seeAlso": []
             },
             {
               "code": "490",
@@ -2758,7 +3014,7 @@
                     "writing"
                   ],
                   "status": "active",
-                  "sort": 741,
+                  "sort": 491,
                   "includes": [
                     "field",
                     "observation",
@@ -2767,7 +3023,9 @@
                     "writing"
                   ],
                   "scopeNote": "Use for works chiefly about field observation within nature writing.",
-                  "legacyCode": "741"
+                  "legacyCode": "741",
+                  "legacyCodes": ["741"],
+                  "seeAlso": []
                 },
                 {
                   "code": "492",
@@ -2775,10 +3033,12 @@
                   "label": "Environment",
                   "keywords": ["environment", "science", "nature", "writing"],
                   "status": "active",
-                  "sort": 742,
+                  "sort": 492,
                   "includes": ["environment", "science", "nature", "writing"],
                   "scopeNote": "Use for works chiefly about environment within nature writing.",
-                  "legacyCode": "742"
+                  "legacyCode": "742",
+                  "legacyCodes": ["742"],
+                  "seeAlso": []
                 },
                 {
                   "code": "493",
@@ -2786,10 +3046,12 @@
                   "label": "Climate",
                   "keywords": ["climate", "science", "nature", "writing"],
                   "status": "active",
-                  "sort": 743,
+                  "sort": 493,
                   "includes": ["climate", "science", "nature", "writing"],
                   "scopeNote": "Use for works chiefly about climate within nature writing.",
-                  "legacyCode": "743"
+                  "legacyCode": "743",
+                  "legacyCodes": ["743"],
+                  "seeAlso": []
                 },
                 {
                   "code": "494",
@@ -2803,7 +3065,7 @@
                     "writing"
                   ],
                   "status": "active",
-                  "sort": 744,
+                  "sort": 494,
                   "includes": [
                     "natural",
                     "history",
@@ -2812,16 +3074,20 @@
                     "writing"
                   ],
                   "scopeNote": "Use for works chiefly about natural history within nature writing.",
-                  "legacyCode": "744"
+                  "legacyCode": "744",
+                  "legacyCodes": ["744"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["nature", "writing", "science"],
               "status": "active",
-              "sort": 740,
+              "sort": 490,
               "allowAssign": true,
               "includes": ["nature", "writing", "science"],
               "scopeNote": "Use for general works on nature writing. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "740"
+              "legacyCode": "740",
+              "legacyCodes": ["740"],
+              "seeAlso": []
             },
             {
               "code": "500",
@@ -2834,11 +3100,12 @@
                   "label": "Wildlife",
                   "keywords": ["wildlife", "science", "nature", "animals"],
                   "status": "active",
-                  "sort": 751,
+                  "sort": 501,
                   "seeAlso": ["463", "504"],
                   "includes": ["wildlife", "science", "nature", "animals"],
                   "scopeNote": "Use for works chiefly about wildlife within animals & wildlife.",
-                  "legacyCode": "751"
+                  "legacyCode": "751",
+                  "legacyCodes": ["751"]
                 },
                 {
                   "code": "502",
@@ -2853,7 +3120,7 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 752,
+                  "sort": 502,
                   "includes": [
                     "animal",
                     "behavior",
@@ -2863,7 +3130,9 @@
                     "wildlife"
                   ],
                   "scopeNote": "Use for works chiefly about animal behavior within animals & wildlife.",
-                  "legacyCode": "752"
+                  "legacyCode": "752",
+                  "legacyCodes": ["752"],
+                  "seeAlso": []
                 },
                 {
                   "code": "503",
@@ -2877,7 +3146,7 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 753,
+                  "sort": 503,
                   "includes": [
                     "domesticated",
                     "animals",
@@ -2886,7 +3155,9 @@
                     "wildlife"
                   ],
                   "scopeNote": "Use for works chiefly about domesticated animals within animals & wildlife.",
-                  "legacyCode": "753"
+                  "legacyCode": "753",
+                  "legacyCodes": ["753"],
+                  "seeAlso": []
                 },
                 {
                   "code": "504",
@@ -2900,7 +3171,7 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 754,
+                  "sort": 504,
                   "includes": [
                     "nature",
                     "companions",
@@ -2909,7 +3180,9 @@
                     "wildlife"
                   ],
                   "scopeNote": "Use for works chiefly about nature companions within animals & wildlife.",
-                  "legacyCode": "754"
+                  "legacyCode": "754",
+                  "legacyCodes": ["754"],
+                  "seeAlso": []
                 }
               ],
               "keywords": [
@@ -2921,7 +3194,7 @@
                 "nature"
               ],
               "status": "active",
-              "sort": 750,
+              "sort": 500,
               "allowAssign": true,
               "includes": [
                 "animals",
@@ -2932,16 +3205,20 @@
                 "nature"
               ],
               "scopeNote": "Use for general works on animals & wildlife. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "750"
+              "legacyCode": "750",
+              "legacyCodes": ["750"],
+              "seeAlso": []
             }
           ],
           "keywords": ["science", "nature"],
           "status": "active",
-          "sort": 700,
+          "sort": 450,
           "allowAssign": true,
           "includes": ["science", "nature"],
           "scopeNote": "Use for general works on science & nature. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "700"
+          "legacyCode": "700",
+          "legacyCodes": ["700"],
+          "seeAlso": []
         },
         {
           "code": "500",
@@ -2965,7 +3242,7 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 411,
+                  "sort": 511,
                   "includes": [
                     "software",
                     "engineering",
@@ -2974,7 +3251,9 @@
                     "programming"
                   ],
                   "scopeNote": "Use for works chiefly about software engineering within programming.",
-                  "legacyCode": "411"
+                  "legacyCode": "411",
+                  "legacyCodes": ["411"],
+                  "seeAlso": []
                 },
                 {
                   "code": "512",
@@ -2988,7 +3267,7 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 412,
+                  "sort": 512,
                   "includes": [
                     "web",
                     "development",
@@ -2997,7 +3276,9 @@
                     "programming"
                   ],
                   "scopeNote": "Use for works chiefly about web development within programming.",
-                  "legacyCode": "412"
+                  "legacyCode": "412",
+                  "legacyCodes": ["412"],
+                  "seeAlso": []
                 },
                 {
                   "code": "513",
@@ -3011,7 +3292,7 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 413,
+                  "sort": 513,
                   "includes": [
                     "data",
                     "scripting",
@@ -3020,7 +3301,9 @@
                     "programming"
                   ],
                   "scopeNote": "Use for works chiefly about data & scripting within programming.",
-                  "legacyCode": "413"
+                  "legacyCode": "413",
+                  "legacyCodes": ["413"],
+                  "seeAlso": []
                 },
                 {
                   "code": "514",
@@ -3034,7 +3317,7 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 414,
+                  "sort": 514,
                   "includes": [
                     "languages",
                     "paradigms",
@@ -3043,16 +3326,20 @@
                     "programming"
                   ],
                   "scopeNote": "Use for works chiefly about languages & paradigms within programming.",
-                  "legacyCode": "414"
+                  "legacyCode": "414",
+                  "legacyCodes": ["414"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["programming", "computers", "technology"],
               "status": "active",
-              "sort": 410,
+              "sort": 510,
               "allowAssign": true,
               "includes": ["programming", "computers", "technology"],
               "scopeNote": "Use for general works on programming. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "410"
+              "legacyCode": "410",
+              "legacyCodes": ["410"],
+              "seeAlso": []
             },
             {
               "code": "520",
@@ -3070,7 +3357,7 @@
                     "technology"
                   ],
                   "status": "active",
-                  "sort": 421,
+                  "sort": 521,
                   "includes": [
                     "operating",
                     "systems",
@@ -3078,7 +3365,9 @@
                     "technology"
                   ],
                   "scopeNote": "Use for works chiefly about operating systems within systems.",
-                  "legacyCode": "421"
+                  "legacyCode": "421",
+                  "legacyCodes": ["421"],
+                  "seeAlso": []
                 },
                 {
                   "code": "522",
@@ -3096,7 +3385,7 @@
                     "network audio"
                   ],
                   "status": "active",
-                  "sort": 422,
+                  "sort": 522,
                   "includes": [
                     "networking",
                     "computers",
@@ -3109,7 +3398,9 @@
                     "network audio"
                   ],
                   "scopeNote": "Use for works chiefly about networking within systems, including telephony, VoIP, PBX systems, and networked communication infrastructure.",
-                  "legacyCode": "422"
+                  "legacyCode": "422",
+                  "legacyCodes": ["422"],
+                  "seeAlso": []
                 },
                 {
                   "code": "523",
@@ -3122,7 +3413,7 @@
                     "systems"
                   ],
                   "status": "active",
-                  "sort": 423,
+                  "sort": 523,
                   "includes": [
                     "security",
                     "computers",
@@ -3130,7 +3421,9 @@
                     "systems"
                   ],
                   "scopeNote": "Use for works chiefly about security within systems.",
-                  "legacyCode": "423"
+                  "legacyCode": "423",
+                  "legacyCodes": ["423"],
+                  "seeAlso": []
                 },
                 {
                   "code": "524",
@@ -3155,7 +3448,7 @@
                     "ollama"
                   ],
                   "status": "active",
-                  "sort": 424,
+                  "sort": 524,
                   "includes": [
                     "cloud",
                     "infrastructure",
@@ -3175,16 +3468,20 @@
                     "local ai"
                   ],
                   "scopeNote": "Use for works chiefly about cloud & infrastructure within systems, including self-hosting, homelabs, storage, containers, virtualization, home automation infrastructure, and local AI deployment.",
-                  "legacyCode": "424"
+                  "legacyCode": "424",
+                  "legacyCodes": ["424"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["systems", "computers", "technology"],
               "status": "active",
-              "sort": 420,
+              "sort": 520,
               "allowAssign": true,
               "includes": ["systems", "computers", "technology"],
               "scopeNote": "Use for general works on systems. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "420"
+              "legacyCode": "420",
+              "legacyCodes": ["420"],
+              "seeAlso": []
             },
             {
               "code": "530",
@@ -3204,8 +3501,8 @@
                     "computing"
                   ],
                   "status": "active",
-                  "sort": 431,
-                  "seeAlso": ["544", "130.4"],
+                  "sort": 531,
+                  "seeAlso": ["544", "330.4"],
                   "includes": [
                     "artificial",
                     "intelligence",
@@ -3215,7 +3512,8 @@
                     "computing"
                   ],
                   "scopeNote": "Use for works chiefly about artificial intelligence within applied computing.",
-                  "legacyCode": "431"
+                  "legacyCode": "431",
+                  "legacyCodes": ["431"]
                 },
                 {
                   "code": "532",
@@ -3235,7 +3533,7 @@
                     "ux"
                   ],
                   "status": "active",
-                  "sort": 432,
+                  "sort": 532,
                   "includes": [
                     "human",
                     "computer",
@@ -3250,7 +3548,9 @@
                     "ux"
                   ],
                   "scopeNote": "Use for works chiefly about human-computer interaction within applied computing, including accessibility, inclusive design, UX, and how people interact with systems.",
-                  "legacyCode": "432"
+                  "legacyCode": "432",
+                  "legacyCodes": ["432"],
+                  "seeAlso": []
                 },
                 {
                   "code": "533",
@@ -3265,7 +3565,7 @@
                     "computing"
                   ],
                   "status": "active",
-                  "sort": 433,
+                  "sort": 533,
                   "includes": [
                     "game",
                     "development",
@@ -3275,7 +3575,9 @@
                     "computing"
                   ],
                   "scopeNote": "Use for works chiefly about game development within applied computing.",
-                  "legacyCode": "433"
+                  "legacyCode": "433",
+                  "legacyCodes": ["433"],
+                  "seeAlso": []
                 },
                 {
                   "code": "534",
@@ -3298,7 +3600,7 @@
                     "makers"
                   ],
                   "status": "active",
-                  "sort": 434,
+                  "sort": 534,
                   "includes": [
                     "robotics",
                     "embedded",
@@ -3317,16 +3619,19 @@
                   ],
                   "scopeNote": "Use for works chiefly about robotics, embedded systems, electronics, circuits, electrical engineering, microcontrollers, and hardware control within applied computing.",
                   "seeAlso": ["472", "624"],
-                  "legacyCode": "434"
+                  "legacyCode": "434",
+                  "legacyCodes": ["434"]
                 }
               ],
               "keywords": ["applied", "computing", "computers", "technology"],
               "status": "active",
-              "sort": 430,
+              "sort": 530,
               "allowAssign": true,
               "includes": ["applied", "computing", "computers", "technology"],
               "scopeNote": "Use for general works on applied computing. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "430"
+              "legacyCode": "430",
+              "legacyCodes": ["430"],
+              "seeAlso": []
             },
             {
               "code": "540",
@@ -3345,7 +3650,7 @@
                     "digital"
                   ],
                   "status": "active",
-                  "sort": 441,
+                  "sort": 541,
                   "includes": [
                     "internet",
                     "culture",
@@ -3354,7 +3659,9 @@
                     "digital"
                   ],
                   "scopeNote": "Use for works chiefly about internet culture within digital culture.",
-                  "legacyCode": "441"
+                  "legacyCode": "441",
+                  "legacyCodes": ["441"],
+                  "seeAlso": []
                 },
                 {
                   "code": "542",
@@ -3369,7 +3676,7 @@
                     "culture"
                   ],
                   "status": "active",
-                  "sort": 442,
+                  "sort": 542,
                   "includes": [
                     "social",
                     "media",
@@ -3379,7 +3686,9 @@
                     "culture"
                   ],
                   "scopeNote": "Use for works chiefly about social media within digital culture.",
-                  "legacyCode": "442"
+                  "legacyCode": "442",
+                  "legacyCodes": ["442"],
+                  "seeAlso": []
                 },
                 {
                   "code": "543",
@@ -3397,7 +3706,7 @@
                     "interface design"
                   ],
                   "status": "active",
-                  "sort": 443,
+                  "sort": 543,
                   "includes": [
                     "digital",
                     "design",
@@ -3410,7 +3719,9 @@
                     "interface design"
                   ],
                   "scopeNote": "Use for works chiefly about digital design within digital culture.",
-                  "legacyCode": "443"
+                  "legacyCode": "443",
+                  "legacyCodes": ["443"],
+                  "seeAlso": []
                 },
                 {
                   "code": "544",
@@ -3428,7 +3739,7 @@
                     "public access to information"
                   ],
                   "status": "active",
-                  "sort": 444,
+                  "sort": 544,
                   "includes": [
                     "technology",
                     "ethics",
@@ -3442,25 +3753,30 @@
                   ],
                   "scopeNote": "Use for works chiefly about technology ethics within digital culture.",
                   "seeAlso": ["523", "613"],
-                  "legacyCode": "444"
+                  "legacyCode": "444",
+                  "legacyCodes": ["444"]
                 }
               ],
               "keywords": ["digital", "culture", "computers", "technology"],
               "status": "active",
-              "sort": 440,
+              "sort": 540,
               "allowAssign": true,
               "includes": ["digital", "culture", "computers", "technology"],
               "scopeNote": "Use for general works on digital culture. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "440"
+              "legacyCode": "440",
+              "legacyCodes": ["440"],
+              "seeAlso": []
             }
           ],
           "keywords": ["computers", "technology"],
           "status": "active",
-          "sort": 400,
+          "sort": 500,
           "allowAssign": true,
           "includes": ["computers", "technology"],
           "scopeNote": "Use for general works on computers & technology. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "400"
+          "legacyCode": "400",
+          "legacyCodes": ["400"],
+          "seeAlso": []
         },
         {
           "code": "550",
@@ -3478,10 +3794,12 @@
                   "label": "Leadership",
                   "keywords": ["leadership", "business", "work", "management"],
                   "status": "active",
-                  "sort": 311,
+                  "sort": 561,
                   "includes": ["leadership", "business", "work", "management"],
                   "scopeNote": "Use for works chiefly about leadership within management.",
-                  "legacyCode": "311"
+                  "legacyCode": "311",
+                  "legacyCodes": ["311"],
+                  "seeAlso": []
                 },
                 {
                   "code": "562",
@@ -3495,7 +3813,7 @@
                     "management"
                   ],
                   "status": "active",
-                  "sort": 312,
+                  "sort": 562,
                   "includes": [
                     "teams",
                     "culture",
@@ -3504,7 +3822,9 @@
                     "management"
                   ],
                   "scopeNote": "Use for works chiefly about teams & culture within management.",
-                  "legacyCode": "312"
+                  "legacyCode": "312",
+                  "legacyCodes": ["312"],
+                  "seeAlso": []
                 },
                 {
                   "code": "563",
@@ -3521,7 +3841,7 @@
                     "distribution"
                   ],
                   "status": "active",
-                  "sort": 313,
+                  "sort": 563,
                   "includes": [
                     "operations",
                     "business",
@@ -3532,7 +3852,9 @@
                     "distribution systems"
                   ],
                   "scopeNote": "Use for operations, logistics, supply chains, and the management side of moving goods and services.",
-                  "legacyCode": "313"
+                  "legacyCode": "313",
+                  "legacyCodes": ["313"],
+                  "seeAlso": []
                 },
                 {
                   "code": "564",
@@ -3540,19 +3862,23 @@
                   "label": "Strategy",
                   "keywords": ["strategy", "business", "work", "management"],
                   "status": "active",
-                  "sort": 314,
+                  "sort": 564,
                   "includes": ["strategy", "business", "work", "management"],
                   "scopeNote": "Use for works chiefly about strategy within management.",
-                  "legacyCode": "314"
+                  "legacyCode": "314",
+                  "legacyCodes": ["314"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["management", "business", "work"],
               "status": "active",
-              "sort": 310,
+              "sort": 560,
               "allowAssign": true,
               "includes": ["management", "business", "work"],
               "scopeNote": "Use for general works on management. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "310"
+              "legacyCode": "310",
+              "legacyCodes": ["310"],
+              "seeAlso": []
             },
             {
               "code": "570",
@@ -3570,7 +3896,7 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 321,
+                  "sort": 571,
                   "includes": [
                     "startups",
                     "business",
@@ -3578,7 +3904,9 @@
                     "entrepreneurship"
                   ],
                   "scopeNote": "Use for works chiefly about startups within entrepreneurship.",
-                  "legacyCode": "321"
+                  "legacyCode": "321",
+                  "legacyCodes": ["321"],
+                  "seeAlso": []
                 },
                 {
                   "code": "572",
@@ -3586,10 +3914,12 @@
                   "label": "Small Business",
                   "keywords": ["small", "business", "work", "entrepreneurship"],
                   "status": "active",
-                  "sort": 322,
+                  "sort": 572,
                   "includes": ["small", "business", "work", "entrepreneurship"],
                   "scopeNote": "Use for works chiefly about small business within entrepreneurship.",
-                  "legacyCode": "322"
+                  "legacyCode": "322",
+                  "legacyCodes": ["322"],
+                  "seeAlso": []
                 },
                 {
                   "code": "573",
@@ -3603,7 +3933,7 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 323,
+                  "sort": 573,
                   "includes": [
                     "freelance",
                     "practice",
@@ -3612,7 +3942,9 @@
                     "entrepreneurship"
                   ],
                   "scopeNote": "Use for works chiefly about freelance practice within entrepreneurship.",
-                  "legacyCode": "323"
+                  "legacyCode": "323",
+                  "legacyCodes": ["323"],
+                  "seeAlso": []
                 },
                 {
                   "code": "574",
@@ -3626,7 +3958,7 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 324,
+                  "sort": 574,
                   "includes": [
                     "sales",
                     "marketing",
@@ -3635,16 +3967,20 @@
                     "entrepreneurship"
                   ],
                   "scopeNote": "Use for works chiefly about sales & marketing within entrepreneurship.",
-                  "legacyCode": "324"
+                  "legacyCode": "324",
+                  "legacyCodes": ["324"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["entrepreneurship", "business", "work"],
               "status": "active",
-              "sort": 320,
+              "sort": 570,
               "allowAssign": true,
               "includes": ["entrepreneurship", "business", "work"],
               "scopeNote": "Use for general works on entrepreneurship. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "320"
+              "legacyCode": "320",
+              "legacyCodes": ["320"],
+              "seeAlso": []
             },
             {
               "code": "580",
@@ -3657,10 +3993,12 @@
                   "label": "Economics",
                   "keywords": ["economics", "business", "work", "finance"],
                   "status": "active",
-                  "sort": 331,
+                  "sort": 581,
                   "includes": ["economics", "business", "work", "finance"],
                   "scopeNote": "Use for works chiefly about economics within economics & finance.",
-                  "legacyCode": "331"
+                  "legacyCode": "331",
+                  "legacyCodes": ["331"],
+                  "seeAlso": []
                 },
                 {
                   "code": "582",
@@ -3674,7 +4012,7 @@
                     "economics"
                   ],
                   "status": "active",
-                  "sort": 332,
+                  "sort": 582,
                   "includes": [
                     "personal",
                     "finance",
@@ -3683,7 +4021,9 @@
                     "economics"
                   ],
                   "scopeNote": "Use for works chiefly about personal finance within economics & finance.",
-                  "legacyCode": "332"
+                  "legacyCode": "332",
+                  "legacyCodes": ["332"],
+                  "seeAlso": []
                 },
                 {
                   "code": "583",
@@ -3697,7 +4037,7 @@
                     "finance"
                   ],
                   "status": "active",
-                  "sort": 333,
+                  "sort": 583,
                   "includes": [
                     "investing",
                     "business",
@@ -3706,7 +4046,9 @@
                     "finance"
                   ],
                   "scopeNote": "Use for works chiefly about investing within economics & finance.",
-                  "legacyCode": "333"
+                  "legacyCode": "333",
+                  "legacyCodes": ["333"],
+                  "seeAlso": []
                 },
                 {
                   "code": "584",
@@ -3720,7 +4062,7 @@
                     "finance"
                   ],
                   "status": "active",
-                  "sort": 334,
+                  "sort": 584,
                   "includes": [
                     "accounting",
                     "business",
@@ -3729,16 +4071,20 @@
                     "finance"
                   ],
                   "scopeNote": "Use for works chiefly about accounting within economics & finance.",
-                  "legacyCode": "334"
+                  "legacyCode": "334",
+                  "legacyCodes": ["334"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["economics", "finance", "business", "work"],
               "status": "active",
-              "sort": 330,
+              "sort": 580,
               "allowAssign": true,
               "includes": ["economics", "finance", "business", "work"],
               "scopeNote": "Use for general works on economics & finance. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "330"
+              "legacyCode": "330",
+              "legacyCodes": ["330"],
+              "seeAlso": []
             },
             {
               "code": "590",
@@ -3751,10 +4097,12 @@
                   "label": "Careers",
                   "keywords": ["careers", "business", "work", "life"],
                   "status": "active",
-                  "sort": 341,
+                  "sort": 591,
                   "includes": ["careers", "business", "work", "life"],
                   "scopeNote": "Use for works chiefly about careers within work life.",
-                  "legacyCode": "341"
+                  "legacyCode": "341",
+                  "legacyCodes": ["341"],
+                  "seeAlso": []
                 },
                 {
                   "code": "592",
@@ -3762,10 +4110,12 @@
                   "label": "Productivity",
                   "keywords": ["productivity", "business", "work", "life"],
                   "status": "active",
-                  "sort": 342,
+                  "sort": 592,
                   "includes": ["productivity", "business", "work", "life"],
                   "scopeNote": "Use for works chiefly about productivity within work life.",
-                  "legacyCode": "342"
+                  "legacyCode": "342",
+                  "legacyCodes": ["342"],
+                  "seeAlso": []
                 },
                 {
                   "code": "593",
@@ -3773,10 +4123,12 @@
                   "label": "Remote Work",
                   "keywords": ["remote", "work", "business", "life"],
                   "status": "active",
-                  "sort": 343,
+                  "sort": 593,
                   "includes": ["remote", "work", "business", "life"],
                   "scopeNote": "Use for works chiefly about remote work within work life.",
-                  "legacyCode": "343"
+                  "legacyCode": "343",
+                  "legacyCodes": ["343"],
+                  "seeAlso": []
                 },
                 {
                   "code": "594",
@@ -3790,7 +4142,7 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 344,
+                  "sort": 594,
                   "includes": [
                     "labor",
                     "professions",
@@ -3799,25 +4151,31 @@
                     "life"
                   ],
                   "scopeNote": "Use for works chiefly about labor & professions within work life.",
-                  "legacyCode": "344"
+                  "legacyCode": "344",
+                  "legacyCodes": ["344"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["work", "life", "business"],
               "status": "active",
-              "sort": 340,
+              "sort": 590,
               "allowAssign": true,
               "includes": ["work", "life", "business"],
               "scopeNote": "Use for general works on work life. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "340"
+              "legacyCode": "340",
+              "legacyCodes": ["340"],
+              "seeAlso": []
             }
           ],
           "keywords": ["business", "work"],
           "status": "active",
-          "sort": 300,
+          "sort": 550,
           "allowAssign": true,
           "includes": ["business", "work"],
           "scopeNote": "Use for general works on business & work. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "300"
+          "legacyCode": "300",
+          "legacyCodes": ["300"],
+          "seeAlso": []
         },
         {
           "code": "600",
@@ -3840,7 +4198,7 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 911,
+                  "sort": 611,
                   "includes": [
                     "encyclopedias",
                     "guides",
@@ -3848,7 +4206,9 @@
                     "practical"
                   ],
                   "scopeNote": "Use for works chiefly about encyclopedias & guides within reference.",
-                  "legacyCode": "911"
+                  "legacyCode": "911",
+                  "legacyCodes": ["911"],
+                  "seeAlso": []
                 },
                 {
                   "code": "612",
@@ -3861,7 +4221,7 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 912,
+                  "sort": 612,
                   "includes": [
                     "dictionaries",
                     "glossaries",
@@ -3869,7 +4229,9 @@
                     "practical"
                   ],
                   "scopeNote": "Use for works chiefly about dictionaries & glossaries within reference.",
-                  "legacyCode": "912"
+                  "legacyCode": "912",
+                  "legacyCodes": ["912"],
+                  "seeAlso": []
                 },
                 {
                   "code": "613",
@@ -3891,7 +4253,7 @@
                     "rolodex cards"
                   ],
                   "status": "active",
-                  "sort": 913,
+                  "sort": 613,
                   "includes": [
                     "indexes",
                     "catalogs",
@@ -3906,7 +4268,9 @@
                     "information organization"
                   ],
                   "scopeNote": "Use for works chiefly about indexes, catalogs, metadata, tagging systems, classification systems, and information organization within reference.",
-                  "legacyCode": "913"
+                  "legacyCode": "913",
+                  "legacyCodes": ["913"],
+                  "seeAlso": []
                 },
                 {
                   "code": "614",
@@ -3919,7 +4283,7 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 914,
+                  "sort": 614,
                   "includes": [
                     "manuals",
                     "handbooks",
@@ -3927,16 +4291,20 @@
                     "practical"
                   ],
                   "scopeNote": "Use for works chiefly about manuals & handbooks within reference.",
-                  "legacyCode": "914"
+                  "legacyCode": "914",
+                  "legacyCodes": ["914"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["reference", "practical"],
               "status": "active",
-              "sort": 910,
+              "sort": 610,
               "allowAssign": true,
               "includes": ["reference", "practical"],
               "scopeNote": "Use for general works on reference. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "910"
+              "legacyCode": "910",
+              "legacyCodes": ["910"],
+              "seeAlso": []
             },
             {
               "code": "620",
@@ -3963,7 +4331,7 @@
                     "fermentation"
                   ],
                   "status": "active",
-                  "sort": 921,
+                  "sort": 621,
                   "includes": [
                     "cooking",
                     "reference",
@@ -3979,8 +4347,9 @@
                     "fermentation"
                   ],
                   "scopeNote": "Use for cooking and food practice, including baking, nutrition, food history, food culture, canning, preserving, and fermentation when the book is chiefly practical or culinary.",
-                  "seeAlso": ["173", "623"],
-                  "legacyCode": "921"
+                  "seeAlso": ["273", "623"],
+                  "legacyCode": "921",
+                  "legacyCodes": ["921"]
                 },
                 {
                   "code": "622",
@@ -3994,7 +4363,7 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 922,
+                  "sort": 622,
                   "includes": [
                     "crafts",
                     "reference",
@@ -4003,7 +4372,9 @@
                     "making"
                   ],
                   "scopeNote": "Use for works chiefly about crafts within home & making.",
-                  "legacyCode": "922"
+                  "legacyCode": "922",
+                  "legacyCodes": ["922"],
+                  "seeAlso": []
                 },
                 {
                   "code": "623",
@@ -4023,7 +4394,7 @@
                     "orchards"
                   ],
                   "status": "active",
-                  "sort": 923,
+                  "sort": 623,
                   "includes": [
                     "gardening",
                     "reference",
@@ -4037,8 +4408,9 @@
                     "orchards"
                   ],
                   "scopeNote": "Use for gardening, small-scale agriculture, homesteading, kitchen gardens, orchards, and related practical growing work. Use here when the emphasis is hands-on cultivation rather than regional land use.",
-                  "seeAlso": ["194", "503", "621"],
-                  "legacyCode": "923"
+                  "seeAlso": ["294", "503", "621"],
+                  "legacyCode": "923",
+                  "legacyCodes": ["923"]
                 },
                 {
                   "code": "624",
@@ -4064,7 +4436,7 @@
                     "antique cars"
                   ],
                   "status": "active",
-                  "sort": 924,
+                  "sort": 624,
                   "includes": [
                     "diy",
                     "repair",
@@ -4085,16 +4457,19 @@
                   ],
                   "scopeNote": "Use for practical repair and making, including vehicle or machine maintenance, electric vehicles, automotive restoration, and workshop rebuilding when the emphasis is hands-on fixing rather than design history or transport systems.",
                   "seeAlso": ["430", "534"],
-                  "legacyCode": "924"
+                  "legacyCode": "924",
+                  "legacyCodes": ["924"]
                 }
               ],
               "keywords": ["home", "making", "reference", "practical"],
               "status": "active",
-              "sort": 920,
+              "sort": 620,
               "allowAssign": true,
               "includes": ["home", "making", "reference", "practical"],
               "scopeNote": "Use for general works on home & making. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "920"
+              "legacyCode": "920",
+              "legacyCodes": ["920"],
+              "seeAlso": []
             },
             {
               "code": "630",
@@ -4116,7 +4491,7 @@
                     "local media"
                   ],
                   "status": "active",
-                  "sort": 931,
+                  "sort": 631,
                   "includes": [
                     "travel",
                     "writing",
@@ -4128,7 +4503,9 @@
                     "local media"
                   ],
                   "scopeNote": "Use for works chiefly about travel writing within travel & place.",
-                  "legacyCode": "931"
+                  "legacyCode": "931",
+                  "legacyCodes": ["931"],
+                  "seeAlso": []
                 },
                 {
                   "code": "632",
@@ -4143,7 +4520,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 932,
+                  "sort": 632,
                   "includes": [
                     "regional",
                     "guides",
@@ -4153,7 +4530,9 @@
                     "place"
                   ],
                   "scopeNote": "Use for works chiefly about regional guides within travel & place.",
-                  "legacyCode": "932"
+                  "legacyCode": "932",
+                  "legacyCodes": ["932"],
+                  "seeAlso": []
                 },
                 {
                   "code": "633",
@@ -4168,7 +4547,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 933,
+                  "sort": 633,
                   "includes": [
                     "maps",
                     "atlas",
@@ -4178,7 +4557,9 @@
                     "place"
                   ],
                   "scopeNote": "Use for works chiefly about maps & atlas within travel & place.",
-                  "legacyCode": "933"
+                  "legacyCode": "933",
+                  "legacyCodes": ["933"],
+                  "seeAlso": []
                 },
                 {
                   "code": "634",
@@ -4193,7 +4574,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 934,
+                  "sort": 634,
                   "includes": [
                     "cultural",
                     "guidebooks",
@@ -4203,16 +4584,20 @@
                     "place"
                   ],
                   "scopeNote": "Use for works chiefly about cultural guidebooks within travel & place.",
-                  "legacyCode": "934"
+                  "legacyCode": "934",
+                  "legacyCodes": ["934"],
+                  "seeAlso": []
                 }
               ],
               "keywords": ["travel", "place", "reference", "practical"],
               "status": "active",
-              "sort": 930,
+              "sort": 630,
               "allowAssign": true,
               "includes": ["travel", "place", "reference", "practical"],
               "scopeNote": "Use for general works on travel & place. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "930"
+              "legacyCode": "930",
+              "legacyCodes": ["930"],
+              "seeAlso": []
             },
             {
               "code": "640",
@@ -4249,7 +4634,7 @@
                     "psychology for everyday life"
                   ],
                   "status": "active",
-                  "sort": 941,
+                  "sort": 641,
                   "includes": [
                     "health",
                     "wellness",
@@ -4271,8 +4656,9 @@
                     "emotional wellbeing"
                   ],
                   "scopeNote": "Use for health, wellness, medicine, first aid, caregiving, elder care, disability, aging, nursing, public-health guides, and mental health when the emphasis is practical support, personal use, or general medical reference.",
-                  "seeAlso": ["183", "643", "642"],
-                  "legacyCode": "941"
+                  "seeAlso": ["283", "643", "642"],
+                  "legacyCode": "941",
+                  "legacyCodes": ["941"]
                 },
                 {
                   "code": "642",
@@ -4293,7 +4679,7 @@
                     "inner life"
                   ],
                   "status": "active",
-                  "sort": 942,
+                  "sort": 642,
                   "includes": [
                     "mindfulness",
                     "reflection",
@@ -4310,7 +4696,8 @@
                   ],
                   "scopeNote": "Use for works chiefly about mindfulness & reflection within wellbeing & daily life. Use here for reflective practices, self-observation, journaling prompts, and contemplative wellbeing rather than clinical or medical treatment.",
                   "seeAlso": ["641"],
-                  "legacyCode": "942"
+                  "legacyCode": "942",
+                  "legacyCodes": ["942"]
                 },
                 {
                   "code": "643",
@@ -4331,7 +4718,7 @@
                     "care relationships"
                   ],
                   "status": "active",
-                  "sort": 943,
+                  "sort": 643,
                   "includes": [
                     "relationships",
                     "family",
@@ -4346,7 +4733,8 @@
                   ],
                   "scopeNote": "Use for relationships and family life, including family caregiving, care relationships, and home support when the primary emphasis is interpersonal or domestic rather than medical.",
                   "seeAlso": ["641"],
-                  "legacyCode": "943"
+                  "legacyCode": "943",
+                  "legacyCodes": ["943"]
                 },
                 {
                   "code": "644",
@@ -4363,7 +4751,7 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 944,
+                  "sort": 644,
                   "includes": [
                     "lifestyle",
                     "habit",
@@ -4375,7 +4763,9 @@
                     "life"
                   ],
                   "scopeNote": "Use for works chiefly about lifestyle & habit building within wellbeing & daily life.",
-                  "legacyCode": "944"
+                  "legacyCode": "944",
+                  "legacyCodes": ["944"],
+                  "seeAlso": []
                 }
               ],
               "keywords": [
@@ -4386,7 +4776,7 @@
                 "practical"
               ],
               "status": "active",
-              "sort": 940,
+              "sort": 640,
               "allowAssign": true,
               "includes": [
                 "wellbeing",
@@ -4396,16 +4786,20 @@
                 "practical"
               ],
               "scopeNote": "Use for general works on wellbeing & daily life. Class more specific works in the narrower categories below when needed.",
-              "legacyCode": "940"
+              "legacyCode": "940",
+              "legacyCodes": ["940"],
+              "seeAlso": []
             }
           ],
           "keywords": ["reference", "practical"],
           "status": "active",
-          "sort": 900,
+          "sort": 600,
           "allowAssign": true,
           "includes": ["reference", "practical"],
           "scopeNote": "Use for general works on reference & practical. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "900"
+          "legacyCode": "900",
+          "legacyCodes": ["900"],
+          "seeAlso": []
         },
         {
           "code": "650",
@@ -4425,7 +4819,7 @@
                 "collaborative puzzles"
               ],
               "status": "active",
-              "sort": 951,
+              "sort": 660,
               "includes": [
                 "games",
                 "hobbies",
@@ -4435,7 +4829,9 @@
                 "collaborative puzzles"
               ],
               "scopeNote": "Use for works chiefly about games within games, hobbies & recreation.",
-              "legacyCode": "951"
+              "legacyCode": "951",
+              "legacyCodes": ["951"],
+              "seeAlso": []
             },
             {
               "code": "670",
@@ -4451,7 +4847,7 @@
                 "rolodex cards"
               ],
               "status": "active",
-              "sort": 952,
+              "sort": 670,
               "includes": [
                 "hobbies",
                 "games",
@@ -4461,7 +4857,9 @@
                 "typewriters"
               ],
               "scopeNote": "Use for works chiefly about hobbies within games, hobbies & recreation.",
-              "legacyCode": "952"
+              "legacyCode": "952",
+              "legacyCodes": ["952"],
+              "seeAlso": []
             },
             {
               "code": "680",
@@ -4479,7 +4877,7 @@
                 "athletics"
               ],
               "status": "active",
-              "sort": 953,
+              "sort": 680,
               "includes": [
                 "recreation",
                 "games",
@@ -4492,7 +4890,8 @@
               ],
               "scopeNote": "Use for recreation, including sports, athletics, fitness, camping, hiking, and outdoor recreation when the emphasis is leisure, training, or participation.",
               "seeAlso": ["641"],
-              "legacyCode": "953"
+              "legacyCode": "953",
+              "legacyCodes": ["953"]
             },
             {
               "code": "690",
@@ -4514,7 +4913,7 @@
                 "companion animals"
               ],
               "status": "active",
-              "sort": 954,
+              "sort": 690,
               "seeAlso": ["503", "502", "641"],
               "includes": [
                 "pets",
@@ -4531,19 +4930,22 @@
                 "animal training"
               ],
               "scopeNote": "Use for pets, companion animals, animal care, training, and behavior. Use here for practical pet ownership and care rather than zoological or wildlife study.",
-              "legacyCode": "954"
+              "legacyCode": "954",
+              "legacyCodes": ["954"]
             }
           ],
           "keywords": ["games", "hobbies", "recreation", "leisure"],
           "status": "active",
-          "sort": 950,
+          "sort": 650,
           "allowAssign": true,
           "includes": ["games", "hobbies", "recreation", "leisure"],
           "scopeNote": "Use for general works on games, hobbies & recreation. Class more specific works in the narrower categories below when needed.",
-          "legacyCode": "950"
+          "legacyCode": "950",
+          "legacyCodes": ["950"],
+          "seeAlso": []
         }
       ],
-      "version": "1.2.0",
+      "version": "1.3.0",
       "formats": [
         {
           "id": "code",
