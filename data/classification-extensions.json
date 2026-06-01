@@ -1664,6 +1664,22 @@
                 "recreation"
               ],
               "scopeNote": "Use for works chiefly about video games & play culture within games."
+            },
+            {
+              "extension": "5",
+              "shortLabel": "DES",
+              "label": "Game Design",
+              "keywords": [
+                "tabletop game design",
+                "card game design",
+                "collaborative puzzles"
+              ],
+              "includes": [
+                "tabletop game design",
+                "card game design",
+                "collaborative puzzles"
+              ],
+              "scopeNote": "Use for works chiefly about tabletop or card game design, puzzle design, and interactive rule systems within games."
             }
           ]
         },
@@ -1735,6 +1751,30 @@
               ],
               "seeAlso": ["434.4"],
               "scopeNote": "Use for hobby-oriented works on collecting, restoring, or building vintage computers when the emphasis is enthusiast practice rather than engineering."
+            },
+            {
+              "extension": "6",
+              "shortLabel": "LEG",
+              "label": "LEGO & Brick Building",
+              "keywords": ["lego", "lego user groups", "brick building"],
+              "includes": ["lego", "lego user groups", "brick building"],
+              "scopeNote": "Use for works chiefly about LEGO, brick building, and related hobby communities within hobbies."
+            },
+            {
+              "extension": "7",
+              "shortLabel": "TYP",
+              "label": "Typewriters & Office Objects",
+              "keywords": [
+                "antique typewriters",
+                "typewriter mechanics",
+                "rolodex cards"
+              ],
+              "includes": [
+                "antique typewriters",
+                "typewriter mechanics",
+                "rolodex cards"
+              ],
+              "scopeNote": "Use for works chiefly about typewriters, office artifacts, and related mechanical hobby objects within hobbies."
             }
           ]
         },
@@ -2229,6 +2269,317 @@
                 "classic cars"
               ],
               "scopeNote": "Use for works chiefly about antique, vintage, and classic car restoration within DIY & repair."
+            }
+          ]
+        },
+        {
+          "parentCode": "140",
+          "label": "Media Arts",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "POD",
+              "label": "Podcasts & Audio Storytelling",
+              "keywords": [
+                "podcasts",
+                "audio storytelling",
+                "audio diaries",
+                "telephone storytelling"
+              ],
+              "includes": [
+                "podcasts",
+                "audio storytelling",
+                "audio diaries",
+                "telephone storytelling"
+              ],
+              "scopeNote": "Use for works chiefly about podcasts, audio diaries, telephone storytelling, and spoken-word audio media within media arts."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "AUD",
+              "label": "Experimental Audio & Restoration",
+              "keywords": [
+                "experimental audio",
+                "audio restoration",
+                "audacity",
+                "sound collage"
+              ],
+              "includes": [
+                "experimental audio",
+                "audio restoration",
+                "audacity",
+                "sound collage"
+              ],
+              "scopeNote": "Use for works chiefly about experimental audio, sound collage, restoration, and creative audio practice within media arts."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "EXH",
+              "label": "Interactive & Public Exhibits",
+              "keywords": [
+                "interactive exhibits",
+                "public exhibits",
+                "accessibility in exhibits",
+                "offline audio exhibits"
+              ],
+              "includes": [
+                "interactive exhibits",
+                "public exhibits",
+                "accessibility in exhibits",
+                "offline audio exhibits"
+              ],
+              "scopeNote": "Use for works chiefly about interactive exhibits, public media installations, accessibility in exhibits, and offline audio exhibits within media arts."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "AIM",
+              "label": "AI Media Tools",
+              "keywords": [
+                "ai transcription",
+                "ai moderation",
+                "ai-assisted music",
+                "surreal ai voices"
+              ],
+              "includes": [
+                "ai transcription",
+                "ai moderation",
+                "ai-assisted music",
+                "surreal ai voices"
+              ],
+              "scopeNote": "Use for works chiefly about AI-assisted media tools, transcription, moderation, synthetic voice, and creative AI media practice within media arts."
+            }
+          ]
+        },
+        {
+          "parentCode": "422",
+          "label": "Networking",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "VOIP",
+              "label": "VoIP & PBX Systems",
+              "keywords": ["voip", "pbx", "asterisk", "grandstream ata"],
+              "includes": ["voip", "pbx", "asterisk", "grandstream ata"],
+              "scopeNote": "Use for works chiefly about VoIP, PBX systems, SIP devices, and telephone-over-network infrastructure within networking."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "LEG",
+              "label": "Legacy Telephony",
+              "keywords": [
+                "rotary phones",
+                "candlestick phones",
+                "magneto telephones",
+                "switchboards",
+                "payphones"
+              ],
+              "includes": [
+                "rotary phones",
+                "candlestick phones",
+                "magneto telephones",
+                "switchboards",
+                "payphones"
+              ],
+              "scopeNote": "Use for works chiefly about legacy telephony equipment, historic phone systems, and analog communication infrastructure within networking."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "TTY",
+              "label": "TTY & Signaling",
+              "keywords": [
+                "tty devices",
+                "baudot",
+                "ring detection",
+                "minimodem",
+                "telephone audio",
+                "morse code"
+              ],
+              "includes": [
+                "tty devices",
+                "baudot",
+                "ring detection",
+                "minimodem",
+                "telephone audio",
+                "morse code"
+              ],
+              "scopeNote": "Use for works chiefly about TTY devices, signaling, Baudot, modem-like telephony interfaces, and communications encoding within networking."
+            }
+          ]
+        },
+        {
+          "parentCode": "424",
+          "label": "Cloud & Infrastructure",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "HOM",
+              "label": "Self-Hosting & Homelabs",
+              "keywords": ["self-hosting", "homelab", "unraid", "linux"],
+              "includes": ["self-hosting", "homelab", "unraid", "linux"],
+              "scopeNote": "Use for works chiefly about self-hosting, homelabs, home servers, and personal infrastructure administration within cloud & infrastructure."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "CON",
+              "label": "Containers & Virtualization",
+              "keywords": ["docker", "kubernetes", "proxmox", "virtualization"],
+              "includes": ["docker", "kubernetes", "proxmox", "virtualization"],
+              "scopeNote": "Use for works chiefly about containers, orchestration, virtualization, and platform infrastructure within cloud & infrastructure."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "NAS",
+              "label": "Storage & Backup Systems",
+              "keywords": [
+                "nas",
+                "smb",
+                "cloud storage",
+                "local storage",
+                "json import export"
+              ],
+              "includes": [
+                "nas",
+                "smb",
+                "cloud storage",
+                "local storage",
+                "backup systems"
+              ],
+              "scopeNote": "Use for works chiefly about storage, NAS systems, backup, synchronization, and data portability within cloud & infrastructure."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "AUT",
+              "label": "Home Automation & Local AI",
+              "keywords": [
+                "home assistant",
+                "ollama",
+                "open webui",
+                "raspberry pi",
+                "build servers"
+              ],
+              "includes": [
+                "home assistant",
+                "ollama",
+                "open webui",
+                "raspberry pi",
+                "build servers"
+              ],
+              "scopeNote": "Use for works chiefly about home automation infrastructure, local AI systems, Raspberry Pi deployments, and small build infrastructure within cloud & infrastructure."
+            }
+          ]
+        },
+        {
+          "parentCode": "524",
+          "label": "Education & Institutions",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "LIB",
+              "label": "Libraries & Information Access",
+              "keywords": [
+                "libraries",
+                "public access to information",
+                "library services"
+              ],
+              "includes": [
+                "libraries",
+                "public access to information",
+                "library services"
+              ],
+              "scopeNote": "Use for works chiefly about libraries, library services, and public access to information within education & institutions."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "LGP",
+              "label": "Library Governance & Policy",
+              "keywords": [
+                "library governance",
+                "library policy",
+                "intellectual freedom",
+                "book challenges"
+              ],
+              "includes": [
+                "library governance",
+                "library policy",
+                "intellectual freedom",
+                "book challenges"
+              ],
+              "seeAlso": ["532"],
+              "scopeNote": "Use for works chiefly about library governance, library policy, intellectual freedom, and book challenges within education & institutions."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "DIL",
+              "label": "Digital Literacy & Inclusion",
+              "keywords": [
+                "digital literacy",
+                "inclusive design",
+                "web accessibility"
+              ],
+              "includes": [
+                "digital literacy",
+                "inclusive design",
+                "web accessibility"
+              ],
+              "scopeNote": "Use for works chiefly about digital literacy, accessibility, and inclusive participation in information systems within education & institutions."
+            },
+            {
+              "extension": "4",
+              "shortLabel": "MML",
+              "label": "Maker Spaces & Memory Labs",
+              "keywords": ["maker spaces", "memory lab", "digital archives"],
+              "includes": ["maker spaces", "memory lab", "digital archives"],
+              "scopeNote": "Use for works chiefly about maker spaces, memory labs, and public creation or digitization programs within education & institutions."
+            }
+          ]
+        },
+        {
+          "parentCode": "913",
+          "label": "Indexes & Catalogs",
+          "children": [
+            {
+              "extension": "1",
+              "shortLabel": "CLS",
+              "label": "Classification & Shelfmarks",
+              "keywords": [
+                "classification systems",
+                "shelfmarks",
+                "dewey decimal classification",
+                "open classification systems"
+              ],
+              "includes": [
+                "classification systems",
+                "shelfmarks",
+                "dewey decimal classification",
+                "open classification systems"
+              ],
+              "scopeNote": "Use for works chiefly about classification systems, shelfmarks, and the arrangement of knowledge within indexes & catalogs."
+            },
+            {
+              "extension": "2",
+              "shortLabel": "MET",
+              "label": "Metadata & Tagging",
+              "keywords": [
+                "metadata",
+                "tagging systems",
+                "title writing",
+                "tags"
+              ],
+              "includes": [
+                "metadata",
+                "tagging systems",
+                "title writing",
+                "tags"
+              ],
+              "scopeNote": "Use for works chiefly about metadata, tagging, descriptive structure, and lightweight information labeling within indexes & catalogs."
+            },
+            {
+              "extension": "3",
+              "shortLabel": "CAT",
+              "label": "Cataloging & Directories",
+              "keywords": ["cataloging", "directory entries", "rolodex cards"],
+              "includes": ["cataloging", "directory entries", "rolodex cards"],
+              "scopeNote": "Use for works chiefly about cataloging, directory structures, and reference listing systems within indexes & catalogs."
             }
           ]
         }

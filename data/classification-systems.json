@@ -199,7 +199,11 @@
                     "clowning",
                     "balloon sculpting",
                     "balloon art",
-                    "variety arts"
+                    "variety arts",
+                    "juggling",
+                    "puppetry",
+                    "marionettes",
+                    "variety performance"
                   ],
                   "status": "active",
                   "sort": 133,
@@ -212,7 +216,11 @@
                     "stage magic",
                     "clowning",
                     "balloon sculpting",
-                    "variety arts"
+                    "variety arts",
+                    "juggling",
+                    "puppetry",
+                    "marionettes",
+                    "variety performance"
                   ],
                   "scopeNote": "Use for works chiefly about theater within performing arts, including stage magic, illusion performance, clowning, balloon sculpting, and other live variety arts when treated as performance practice."
                 },
@@ -220,11 +228,30 @@
                   "code": "134",
                   "shortLabel": "FSA",
                   "label": "Film & Screen Arts",
-                  "keywords": ["film", "screen", "arts", "art", "performing"],
+                  "keywords": [
+                    "film",
+                    "screen",
+                    "arts",
+                    "art",
+                    "performing",
+                    "video production",
+                    "youtube",
+                    "hd video",
+                    "screen storytelling"
+                  ],
                   "status": "active",
                   "sort": 134,
-                  "includes": ["film", "screen", "arts", "art", "performing"],
-                  "scopeNote": "Use for works chiefly about film & screen arts within performing arts."
+                  "includes": [
+                    "film",
+                    "screen",
+                    "arts",
+                    "art",
+                    "performing",
+                    "video production",
+                    "youtube",
+                    "screen storytelling"
+                  ],
+                  "scopeNote": "Use for works chiefly about film & screen arts within performing arts, including video production, screen storytelling, and moving-image performance practices."
                 }
               ],
               "keywords": ["performing", "arts", "art"],
@@ -263,10 +290,26 @@
                   "code": "143",
                   "shortLabel": "DIA",
                   "label": "Digital Art",
-                  "keywords": ["digital", "art", "media", "arts"],
+                  "keywords": [
+                    "digital",
+                    "art",
+                    "media",
+                    "arts",
+                    "ai-generated imagery",
+                    "image generation",
+                    "creative ai tools"
+                  ],
                   "status": "active",
                   "sort": 143,
-                  "includes": ["digital", "art", "media", "arts"],
+                  "includes": [
+                    "digital",
+                    "art",
+                    "media",
+                    "arts",
+                    "ai-generated imagery",
+                    "image generation",
+                    "creative ai tools"
+                  ],
                   "scopeNote": "Use for works chiefly about digital art within media arts."
                 },
                 {
@@ -280,12 +323,33 @@
                   "scopeNote": "Use for works chiefly about mixed media within media arts."
                 }
               ],
-              "keywords": ["media", "arts", "art"],
+              "keywords": [
+                "media",
+                "arts",
+                "art",
+                "podcasts",
+                "audio diaries",
+                "audio exhibits",
+                "experimental audio",
+                "audio restoration",
+                "ai transcription",
+                "interactive exhibits"
+              ],
               "status": "active",
               "sort": 140,
               "allowAssign": true,
-              "includes": ["media", "arts", "art"],
-              "scopeNote": "Use for general works on media arts. Class more specific works in the narrower categories below when needed."
+              "includes": [
+                "media",
+                "arts",
+                "art",
+                "podcasts",
+                "audio diaries",
+                "audio exhibits",
+                "experimental audio",
+                "audio restoration",
+                "interactive exhibits"
+              ],
+              "scopeNote": "Use for general works on media arts. Class more specific works in the narrower categories below when needed. Use here as a broad home for audio media, public media exhibits, and experimental media practices."
             }
           ],
           "keywords": ["art"],
@@ -465,7 +529,14 @@
                 "aviation",
                 "transit",
                 "mobility",
-                "infrastructure"
+                "infrastructure",
+                "zoning",
+                "planning commissions",
+                "boards of supervisors",
+                "land use",
+                "data centers",
+                "short-term rentals",
+                "tourism planning"
               ],
               "status": "active",
               "sort": 163,
@@ -479,10 +550,17 @@
                 "railways",
                 "aviation networks",
                 "mobility",
-                "infrastructure"
+                "infrastructure",
+                "zoning",
+                "planning commissions",
+                "boards of supervisors",
+                "land use",
+                "data centers",
+                "short-term rentals",
+                "tourism planning"
               ],
               "scopeNote": "Use for works on urban design, transportation systems, roads, rail, transit, mobility, and the planning of the built public realm. Use here for transportation as infrastructure or civic design rather than vehicle repair.",
-              "seeAlso": ["512", "164"]
+              "seeAlso": ["512", "164", "534"]
             },
             {
               "code": "164",
@@ -1463,7 +1541,12 @@
                     "networking",
                     "computers",
                     "technology",
-                    "systems"
+                    "systems",
+                    "voip",
+                    "pbx",
+                    "telephony",
+                    "phone systems",
+                    "network audio"
                   ],
                   "status": "active",
                   "sort": 422,
@@ -1471,9 +1554,14 @@
                     "networking",
                     "computers",
                     "technology",
-                    "systems"
+                    "systems",
+                    "voip",
+                    "pbx",
+                    "telephony",
+                    "phone systems",
+                    "network audio"
                   ],
-                  "scopeNote": "Use for works chiefly about networking within systems."
+                  "scopeNote": "Use for works chiefly about networking within systems, including telephony, VoIP, PBX systems, and networked communication infrastructure."
                 },
                 {
                   "code": "423",
@@ -1504,7 +1592,18 @@
                     "infrastructure",
                     "computers",
                     "technology",
-                    "systems"
+                    "systems",
+                    "self-hosting",
+                    "homelab",
+                    "nas",
+                    "docker",
+                    "kubernetes",
+                    "proxmox",
+                    "cloud storage",
+                    "local storage",
+                    "build servers",
+                    "home assistant",
+                    "ollama"
                   ],
                   "status": "active",
                   "sort": 424,
@@ -1513,9 +1612,20 @@
                     "infrastructure",
                     "computers",
                     "technology",
-                    "systems"
+                    "systems",
+                    "self-hosting",
+                    "homelab",
+                    "nas",
+                    "docker",
+                    "kubernetes",
+                    "proxmox",
+                    "cloud storage",
+                    "local storage",
+                    "build servers",
+                    "home assistant",
+                    "local ai"
                   ],
-                  "scopeNote": "Use for works chiefly about cloud & infrastructure within systems."
+                  "scopeNote": "Use for works chiefly about cloud & infrastructure within systems, including self-hosting, homelabs, storage, containers, virtualization, home automation infrastructure, and local AI deployment."
                 }
               ],
               "keywords": ["systems", "computers", "technology"],
@@ -1566,7 +1676,11 @@
                     "computers",
                     "technology",
                     "applied",
-                    "computing"
+                    "computing",
+                    "inclusive design",
+                    "web accessibility",
+                    "accessibility",
+                    "ux"
                   ],
                   "status": "active",
                   "sort": 432,
@@ -1577,9 +1691,13 @@
                     "computers",
                     "technology",
                     "applied",
-                    "computing"
+                    "computing",
+                    "inclusive design",
+                    "web accessibility",
+                    "accessibility",
+                    "ux"
                   ],
-                  "scopeNote": "Use for works chiefly about human-computer interaction within applied computing."
+                  "scopeNote": "Use for works chiefly about human-computer interaction within applied computing, including accessibility, inclusive design, UX, and how people interact with systems."
                 },
                 {
                   "code": "433",
@@ -1714,7 +1832,11 @@
                     "design",
                     "computers",
                     "technology",
-                    "culture"
+                    "culture",
+                    "web design",
+                    "svg",
+                    "inkscape",
+                    "interface design"
                   ],
                   "status": "active",
                   "sort": 443,
@@ -1723,7 +1845,11 @@
                     "design",
                     "computers",
                     "technology",
-                    "culture"
+                    "culture",
+                    "web design",
+                    "svg",
+                    "inkscape",
+                    "interface design"
                   ],
                   "scopeNote": "Use for works chiefly about digital design within digital culture."
                 },
@@ -1736,7 +1862,11 @@
                     "ethics",
                     "computers",
                     "digital",
-                    "culture"
+                    "culture",
+                    "privacy",
+                    "data ownership",
+                    "ai moderation",
+                    "public access to information"
                   ],
                   "status": "active",
                   "sort": 444,
@@ -1745,9 +1875,14 @@
                     "ethics",
                     "computers",
                     "digital",
-                    "culture"
+                    "culture",
+                    "privacy",
+                    "data ownership",
+                    "ai moderation",
+                    "public access to information"
                   ],
-                  "scopeNote": "Use for works chiefly about technology ethics within digital culture."
+                  "scopeNote": "Use for works chiefly about technology ethics within digital culture.",
+                  "seeAlso": ["423", "913"]
                 }
               ],
               "keywords": ["digital", "culture", "computers", "technology"],
@@ -1976,7 +2111,17 @@
                     "history",
                     "society",
                     "social",
-                    "studies"
+                    "studies",
+                    "libraries",
+                    "library governance",
+                    "library policy",
+                    "digital literacy",
+                    "maker spaces",
+                    "memory lab",
+                    "public access to information",
+                    "school-business partnerships",
+                    "internships",
+                    "workforce development"
                   ],
                   "status": "active",
                   "sort": 524,
@@ -1986,9 +2131,18 @@
                     "history",
                     "society",
                     "social",
-                    "studies"
+                    "studies",
+                    "libraries",
+                    "library governance",
+                    "library policy",
+                    "digital literacy",
+                    "maker spaces",
+                    "memory lab",
+                    "public access to information",
+                    "workforce development"
                   ],
-                  "scopeNote": "Use for works chiefly about education & institutions within social studies."
+                  "scopeNote": "Use for works chiefly about education & institutions within social studies, including libraries, library governance, digital literacy, maker spaces, memory labs, and civic educational institutions.",
+                  "seeAlso": ["913", "532"]
                 }
               ],
               "keywords": ["social", "studies", "history", "society"],
@@ -2049,7 +2203,13 @@
                     "civil liberties",
                     "civil rights",
                     "foia",
-                    "freedom of information"
+                    "freedom of information",
+                    "book challenges",
+                    "censorship",
+                    "book bans",
+                    "intellectual freedom law",
+                    "first amendment",
+                    "fourteenth amendment"
                   ],
                   "status": "active",
                   "sort": 532,
@@ -2068,10 +2228,15 @@
                     "civil rights",
                     "civil liberties",
                     "foia",
-                    "freedom of information"
+                    "freedom of information",
+                    "book challenges",
+                    "censorship",
+                    "book bans",
+                    "intellectual freedom law",
+                    "first amendment"
                   ],
                   "scopeNote": "Use for justice, rights, civil liberties, civil rights, FOIA, and nonfiction works on crime or criminal cases when the emphasis is legal, social, documentary, or access-to-information related.",
-                  "seeAlso": ["834", "512", "534"]
+                  "seeAlso": ["834", "512", "534", "524"]
                 },
                 {
                   "code": "533",
@@ -2089,7 +2254,13 @@
                     "health policy",
                     "disability policy",
                     "aging policy",
-                    "care policy"
+                    "care policy",
+                    "county budgets",
+                    "audit transparency",
+                    "finance committee oversight",
+                    "housing data",
+                    "demographic analysis",
+                    "public data literacy"
                   ],
                   "status": "active",
                   "sort": 533,
@@ -2104,9 +2275,15 @@
                     "public health policy",
                     "disability policy",
                     "aging policy",
-                    "care policy"
+                    "care policy",
+                    "county budgets",
+                    "audit transparency",
+                    "finance committee oversight",
+                    "housing data",
+                    "demographic analysis",
+                    "public data literacy"
                   ],
-                  "scopeNote": "Use for public policy, including public health, disability policy, aging policy, and systems of care when the emphasis is civic or governmental.",
+                  "scopeNote": "Use for public policy, including public health, disability policy, aging policy, systems of care, budgets, audits, and evidence used in civic decision-making when the emphasis is civic or governmental.",
                   "seeAlso": ["941"]
                 },
                 {
@@ -2125,7 +2302,14 @@
                     "nonprofits",
                     "chamber of commerce",
                     "festival planning",
-                    "public meetings"
+                    "public meetings",
+                    "nonprofit boards",
+                    "policy committees",
+                    "strategic planning",
+                    "fundraising",
+                    "public speaking",
+                    "leadership development",
+                    "toastmasters"
                   ],
                   "status": "active",
                   "sort": 534,
@@ -2141,10 +2325,16 @@
                     "nonprofits",
                     "chamber of commerce",
                     "festival planning",
-                    "public meetings"
+                    "public meetings",
+                    "nonprofit boards",
+                    "policy committees",
+                    "strategic planning",
+                    "fundraising",
+                    "public speaking",
+                    "leadership development"
                   ],
                   "scopeNote": "Use for civic practice, including community building, nonprofit work, chambers of commerce, festival organizing, public meetings, and hands-on participation in local institutions.",
-                  "seeAlso": ["521", "533"]
+                  "seeAlso": ["521", "533", "524"]
                 }
               ],
               "keywords": ["law", "civic", "life", "history", "society"],
@@ -3523,11 +3713,37 @@
                   "code": "913",
                   "shortLabel": "INCA",
                   "label": "Indexes & Catalogs",
-                  "keywords": ["indexes", "catalogs", "reference", "practical"],
+                  "keywords": [
+                    "indexes",
+                    "catalogs",
+                    "reference",
+                    "practical",
+                    "metadata",
+                    "tagging systems",
+                    "cataloging",
+                    "classification systems",
+                    "shelfmarks",
+                    "dewey decimal classification",
+                    "information organization",
+                    "directory entries",
+                    "rolodex cards"
+                  ],
                   "status": "active",
                   "sort": 913,
-                  "includes": ["indexes", "catalogs", "reference", "practical"],
-                  "scopeNote": "Use for works chiefly about indexes & catalogs within reference."
+                  "includes": [
+                    "indexes",
+                    "catalogs",
+                    "reference",
+                    "practical",
+                    "metadata",
+                    "tagging systems",
+                    "cataloging",
+                    "classification systems",
+                    "shelfmarks",
+                    "dewey decimal classification",
+                    "information organization"
+                  ],
+                  "scopeNote": "Use for works chiefly about indexes, catalogs, metadata, tagging systems, classification systems, and information organization within reference."
                 },
                 {
                   "code": "914",
@@ -3724,7 +3940,10 @@
                     "writing",
                     "reference",
                     "practical",
-                    "place"
+                    "place",
+                    "reporting",
+                    "reporters",
+                    "local media"
                   ],
                   "status": "active",
                   "sort": 931,
@@ -3733,7 +3952,10 @@
                     "writing",
                     "reference",
                     "practical",
-                    "place"
+                    "place",
+                    "reporting",
+                    "reporters",
+                    "local media"
                   ],
                   "scopeNote": "Use for works chiefly about travel writing within travel & place."
                 },
@@ -4013,20 +4235,49 @@
               "code": "951",
               "shortLabel": "GAM",
               "label": "Games",
-              "keywords": ["games", "hobbies", "recreation"],
+              "keywords": [
+                "games",
+                "hobbies",
+                "recreation",
+                "tabletop game design",
+                "card game design",
+                "collaborative puzzles"
+              ],
               "status": "active",
               "sort": 951,
-              "includes": ["games", "hobbies", "recreation"],
+              "includes": [
+                "games",
+                "hobbies",
+                "recreation",
+                "tabletop game design",
+                "card game design",
+                "collaborative puzzles"
+              ],
               "scopeNote": "Use for works chiefly about games within games, hobbies & recreation."
             },
             {
               "code": "952",
               "shortLabel": "HOB",
               "label": "Hobbies",
-              "keywords": ["hobbies", "games", "recreation"],
+              "keywords": [
+                "hobbies",
+                "games",
+                "recreation",
+                "lego",
+                "maker hobbies",
+                "typewriters",
+                "rolodex cards"
+              ],
               "status": "active",
               "sort": 952,
-              "includes": ["hobbies", "games", "recreation"],
+              "includes": [
+                "hobbies",
+                "games",
+                "recreation",
+                "lego",
+                "maker hobbies",
+                "typewriters"
+              ],
               "scopeNote": "Use for works chiefly about hobbies within games, hobbies & recreation."
             },
             {
