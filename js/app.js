@@ -3098,6 +3098,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         renderCurrentViewPreservingSidebar();
         return;
       }
+      const customTextEdit = e.target.closest("[data-custom-text-edit]");
+      if (customTextEdit) {
+        e.preventDefault();
+        const group = customTextEdit.closest(".text-element-group");
+        if (group && TPP.openCustomTextDialog) TPP.openCustomTextDialog(group);
+        return;
+      }
       const textButton = e.target.closest("[data-text-action]");
       if (textButton) {
         TPP.sync("nosave");
@@ -4453,6 +4460,79 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
       const closeButton = e.target.closest("[data-action='close']");
       if (closeButton && dataTextDialog.open) dataTextDialog.close();
+    });
+  }
+  const customTextDialog = document.getElementById("customTextDialog");
+  const customTextDialogBody = document.getElementById("customTextDialogBody");
+  const customTextDialogTitle = document.getElementById(
+    "customTextDialogTitle",
+  );
+  TPP.openCustomTextDialog = function (group) {
+    if (
+      !group ||
+      !customTextDialog ||
+      !customTextDialogBody ||
+      typeof customTextDialog.showModal !== "function"
+    ) {
+      return;
+    }
+    TPP.customTextDialogTargetId = group.dataset.textId || "";
+    if (customTextDialogTitle)
+      customTextDialogTitle.textContent = "Edit Custom Text";
+    const valueInput = group.querySelector(".back-cover-text-custom-value");
+    customTextDialogBody.value = (valueInput && valueInput.value) || "";
+    if (!customTextDialog.open) customTextDialog.showModal();
+    setTimeout(function () {
+      customTextDialogBody.focus();
+      customTextDialogBody.select();
+    }, 0);
+  };
+  TPP.applyCustomTextDialog = function () {
+    if (!customTextDialogBody || !TPP.customTextDialogTargetId) return;
+    const group = document.querySelector(
+      '.text-element-group[data-text-id="' +
+        TPP.customTextDialogTargetId +
+        '"]',
+    );
+    if (!group) return;
+    const valueInput = group.querySelector(".back-cover-text-custom-value");
+    const label = group.querySelector(".back-cover-text-field-label");
+    const nextValue = customTextDialogBody.value || "";
+    if (valueInput) valueInput.value = nextValue;
+    if (label) label.textContent = nextValue.trim() || "Custom text";
+    if (TPP.readSingleTextElementGroup) {
+      TPP.readSingleTextElementGroup(TPP.active, group);
+      if (TPP.syncLegacyTextFieldsFromElements) {
+        TPP.syncLegacyTextFieldsFromElements(TPP.active);
+      }
+    }
+    TPP.save("commit", TPP.bookId(TPP.active));
+    const location = String(group.dataset.location || "").trim();
+    TPP.renderTextElementControls();
+    if (TPP.patchVisibleCoverTextPreview(location)) {
+      if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+      return;
+    }
+    renderCurrentViewPreservingSidebar();
+  };
+  if (customTextDialog) {
+    customTextDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === customTextDialog && !card && customTextDialog.open) {
+        customTextDialog.close("cancel");
+        return;
+      }
+      const actionButton = e.target.closest("[data-action]");
+      if (!actionButton) return;
+      const action = actionButton.dataset.action || "";
+      if (action === "cancel" && customTextDialog.open) {
+        customTextDialog.close("cancel");
+        return;
+      }
+      if (action === "save" && customTextDialog.open) {
+        TPP.applyCustomTextDialog();
+        customTextDialog.close("save");
+      }
     });
   }
   const imageExportDialog = document.getElementById("imageExportDialog");

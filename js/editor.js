@@ -429,19 +429,27 @@ TPP.backCoverTextRowHtml = function (book, element) {
   const entry = element || {};
   const fieldKey = entry.fieldKey || entry.part || "custom";
   const align = entry.align || "center";
+  const customText = String(entry.customText || "").trim();
+  const customPreview = customText || "Custom text";
   return (
     '<tr class="text-element-group back-cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
     TPP.esc(entry.id || "") +
     '" data-location="back">' +
-    '<td><div class="back-cover-text-field-cell"><div class="back-cover-text-field-top"><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span><span class="back-cover-text-field-label">' +
-    TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
-    "</span></div>" +
+    '<td><div class="back-cover-text-field-cell"><div class="back-cover-text-field-top"><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span><span class="back-cover-text-field-label' +
+    (fieldKey === "custom" ? " is-custom" : "") +
+    '">' +
+    TPP.esc(
+      fieldKey === "custom"
+        ? customPreview
+        : TPP.bookInfoFieldLabel(fieldKey, book),
+    ) +
+    "</span>" +
     (fieldKey === "custom"
-      ? '<textarea class="text-custom back-cover-text-custom" rows="2" placeholder="Custom text">' +
+      ? '<button type="button" class="small back-cover-text-edit-button" data-custom-text-edit="1" aria-label="Edit custom text" title="Edit custom text">✎</button><input class="text-custom back-cover-text-custom-value" type="hidden" value="' +
         TPP.esc(entry.customText || "") +
-        "</textarea>"
+        '">'
       : "") +
-    "</div></td>" +
+    "</div></div></td>" +
     '<td><input class="text-size" type="number" min="3" step=".5" value="' +
     TPP.esc(String(TPP.finiteNumberOr(entry.size, 4))) +
     '"></td>' +
@@ -617,6 +625,10 @@ TPP.readSingleTextElementGroup = function (book, group) {
   element.enabled = true;
   if (group.querySelector(".text-custom")) {
     element.customText = group.querySelector(".text-custom").value || "";
+  }
+  if (group.querySelector(".back-cover-text-custom-value")) {
+    element.customText =
+      group.querySelector(".back-cover-text-custom-value").value || "";
   }
   element.size =
     Number(group.querySelector(".text-size")?.value) || element.size || 4;
