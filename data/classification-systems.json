@@ -7,6 +7,477 @@
       "description": "A lightweight, original shelfmark system for small personal libraries, studios, and community collections. It groups nonfiction and fiction into broad practical areas and supports deeper subject browsing without relying on proprietary or discontinued standards.",
       "categories": [
         {
+          "code": "000",
+          "shortLabel": "LIS",
+          "label": "Library & Internal Use",
+          "children": [
+            {
+              "code": "010",
+              "shortLabel": "LOP",
+              "label": "Library Operations",
+              "children": [
+                {
+                  "code": "011",
+                  "shortLabel": "POL",
+                  "label": "Policies & Procedures",
+                  "keywords": [
+                    "policies",
+                    "procedures",
+                    "library",
+                    "internal",
+                    "operations"
+                  ],
+                  "status": "active",
+                  "sort": 11,
+                  "includes": [
+                    "circulation policies",
+                    "collection policies",
+                    "internal procedures",
+                    "library rules"
+                  ],
+                  "scopeNote": "Use for policy manuals, procedures, governance rules, and operating documents used to run the library or collection.",
+                  "seeAlso": ["560", "614"]
+                },
+                {
+                  "code": "012",
+                  "shortLabel": "COLL",
+                  "label": "Collection Development",
+                  "keywords": [
+                    "collection development",
+                    "acquisitions",
+                    "weeding",
+                    "library",
+                    "internal"
+                  ],
+                  "status": "active",
+                  "sort": 12,
+                  "includes": [
+                    "acquisitions",
+                    "selection",
+                    "weeding",
+                    "preservation planning",
+                    "collection strategy"
+                  ],
+                  "scopeNote": "Use for documents and guides about building, maintaining, weeding, and planning the collection itself.",
+                  "seeAlso": ["613"]
+                },
+                {
+                  "code": "013",
+                  "shortLabel": "FAC",
+                  "label": "Facilities & Access",
+                  "keywords": [
+                    "facilities",
+                    "access",
+                    "signage",
+                    "space planning",
+                    "library",
+                    "internal"
+                  ],
+                  "status": "active",
+                  "sort": 13,
+                  "includes": [
+                    "space use",
+                    "floor plans",
+                    "access services",
+                    "signage systems",
+                    "reading room operations"
+                  ],
+                  "scopeNote": "Use for internal documents on facilities, space planning, signage, public access, and service-point setup.",
+                  "seeAlso": ["443", "543"]
+                },
+                {
+                  "code": "014",
+                  "shortLabel": "TRN",
+                  "label": "Training & Staff Guides",
+                  "keywords": [
+                    "training",
+                    "staff guides",
+                    "manuals",
+                    "volunteers",
+                    "library",
+                    "internal"
+                  ],
+                  "status": "active",
+                  "sort": 14,
+                  "includes": [
+                    "staff manuals",
+                    "volunteer guides",
+                    "orientation packets",
+                    "workflow training"
+                  ],
+                  "scopeNote": "Use for staff and volunteer manuals, onboarding guides, and internal training materials.",
+                  "seeAlso": ["614"]
+                }
+              ],
+              "keywords": [
+                "library operations",
+                "internal documents",
+                "manuals",
+                "procedures"
+              ],
+              "status": "active",
+              "sort": 10,
+              "allowAssign": true,
+              "includes": [
+                "operations",
+                "procedures",
+                "internal manuals",
+                "training guides"
+              ],
+              "scopeNote": "Use for the internal operation of the library or collection, including policies, training, facilities, and collection management."
+            },
+            {
+              "code": "020",
+              "shortLabel": "SPC",
+              "label": "Special Collections",
+              "children": [
+                {
+                  "code": "021",
+                  "shortLabel": "ARC",
+                  "label": "Archives & Manuscripts",
+                  "keywords": [
+                    "archives",
+                    "manuscripts",
+                    "special collections",
+                    "finding aids"
+                  ],
+                  "status": "active",
+                  "sort": 21,
+                  "includes": [
+                    "manuscript collections",
+                    "archival holdings",
+                    "fonds",
+                    "personal papers"
+                  ],
+                  "scopeNote": "Use for archival and manuscript collections, including documentation that describes or controls those holdings.",
+                  "seeAlso": ["241", "613"]
+                },
+                {
+                  "code": "022",
+                  "shortLabel": "RBO",
+                  "label": "Rare Books & Artifacts",
+                  "keywords": [
+                    "rare books",
+                    "artifacts",
+                    "special collections",
+                    "objects"
+                  ],
+                  "status": "active",
+                  "sort": 22,
+                  "includes": [
+                    "rare books",
+                    "artists' books",
+                    "book objects",
+                    "collection artifacts"
+                  ],
+                  "scopeNote": "Use for rare books, significant printed artifacts, and special physical objects held as collection items.",
+                  "seeAlso": ["352", "423"]
+                },
+                {
+                  "code": "023",
+                  "shortLabel": "EPH",
+                  "label": "Ephemera & Vertical Files",
+                  "keywords": [
+                    "ephemera",
+                    "vertical files",
+                    "pamphlets",
+                    "clippings",
+                    "special collections"
+                  ],
+                  "status": "active",
+                  "sort": 23,
+                  "includes": [
+                    "broadsides",
+                    "clippings",
+                    "pamphlets",
+                    "press kits",
+                    "subject files"
+                  ],
+                  "scopeNote": "Use for ephemeral materials and vertical files gathered for reference, local memory, or supporting documentation.",
+                  "seeAlso": ["263", "614"]
+                },
+                {
+                  "code": "024",
+                  "shortLabel": "EXH",
+                  "label": "Exhibits & Interpretation",
+                  "keywords": [
+                    "exhibits",
+                    "interpretation",
+                    "special collections",
+                    "display",
+                    "curation"
+                  ],
+                  "status": "active",
+                  "sort": 24,
+                  "includes": [
+                    "exhibit plans",
+                    "display notes",
+                    "interpretive labels",
+                    "curation packets"
+                  ],
+                  "scopeNote": "Use for exhibit files, interpretive plans, and other documents created to present special collections to users.",
+                  "seeAlso": ["390", "684"]
+                }
+              ],
+              "keywords": [
+                "special collections",
+                "archives",
+                "rare books",
+                "ephemera"
+              ],
+              "status": "active",
+              "sort": 20,
+              "allowAssign": true,
+              "includes": [
+                "archives",
+                "rare books",
+                "ephemera",
+                "exhibit files"
+              ],
+              "scopeNote": "Use for special collections, archives, rare books, ephemera, and related curatorial or interpretive records."
+            },
+            {
+              "code": "030",
+              "shortLabel": "FND",
+              "label": "Finding Aids & Cataloging Control",
+              "children": [
+                {
+                  "code": "031",
+                  "shortLabel": "FIN",
+                  "label": "Finding Aids",
+                  "keywords": [
+                    "finding aids",
+                    "inventories",
+                    "box lists",
+                    "special collections",
+                    "library"
+                  ],
+                  "status": "active",
+                  "sort": 31,
+                  "includes": [
+                    "inventories",
+                    "box lists",
+                    "series descriptions",
+                    "folder lists"
+                  ],
+                  "scopeNote": "Use for finding aids, inventories, and other navigational tools that help users locate material within collections.",
+                  "seeAlso": ["021", "613"]
+                },
+                {
+                  "code": "032",
+                  "shortLabel": "CAT",
+                  "label": "Catalog Records & Metadata",
+                  "keywords": [
+                    "cataloging",
+                    "metadata",
+                    "authority control",
+                    "library",
+                    "internal"
+                  ],
+                  "status": "active",
+                  "sort": 32,
+                  "includes": [
+                    "catalog records",
+                    "authority files",
+                    "metadata templates",
+                    "controlled vocabularies"
+                  ],
+                  "scopeNote": "Use for internal metadata and cataloging records, templates, and authority-control material used to describe the collection.",
+                  "seeAlso": ["613"]
+                },
+                {
+                  "code": "033",
+                  "shortLabel": "LOC",
+                  "label": "Location & Shelf Control",
+                  "keywords": [
+                    "shelf control",
+                    "location records",
+                    "stack maps",
+                    "call numbers",
+                    "library"
+                  ],
+                  "status": "active",
+                  "sort": 33,
+                  "includes": [
+                    "stack maps",
+                    "shelf lists",
+                    "location inventories",
+                    "call number tracking"
+                  ],
+                  "scopeNote": "Use for internal location control, stack maps, shelf lists, and other records that track where items live.",
+                  "seeAlso": ["613", "013"]
+                },
+                {
+                  "code": "034",
+                  "shortLabel": "DIGI",
+                  "label": "Digitization & Access Copies",
+                  "keywords": [
+                    "digitization",
+                    "access copies",
+                    "scans",
+                    "digital surrogates",
+                    "library"
+                  ],
+                  "status": "active",
+                  "sort": 34,
+                  "includes": [
+                    "digitization logs",
+                    "scan projects",
+                    "digital surrogates",
+                    "access copy workflows"
+                  ],
+                  "scopeNote": "Use for records and guides concerning digitization, access copies, and other digital surrogates of collection material.",
+                  "seeAlso": ["534", "613"]
+                }
+              ],
+              "keywords": [
+                "finding aids",
+                "cataloging",
+                "metadata",
+                "shelf control"
+              ],
+              "status": "active",
+              "sort": 30,
+              "allowAssign": true,
+              "includes": [
+                "finding aids",
+                "metadata",
+                "cataloging control",
+                "location records"
+              ],
+              "scopeNote": "Use for control systems that help describe, locate, and surface materials in the library or collection."
+            },
+            {
+              "code": "040",
+              "shortLabel": "INS",
+              "label": "Institutional Records",
+              "children": [
+                {
+                  "code": "041",
+                  "shortLabel": "MIN",
+                  "label": "Minutes & Meeting Files",
+                  "keywords": [
+                    "minutes",
+                    "meeting files",
+                    "board records",
+                    "committee records",
+                    "institutional"
+                  ],
+                  "status": "active",
+                  "sort": 41,
+                  "includes": [
+                    "board minutes",
+                    "committee packets",
+                    "agendas",
+                    "working group records"
+                  ],
+                  "scopeNote": "Use for minutes, agendas, packets, and related documentation from boards, committees, and working groups.",
+                  "seeAlso": ["284", "560"]
+                },
+                {
+                  "code": "042",
+                  "shortLabel": "REP",
+                  "label": "Reports & Planning",
+                  "keywords": [
+                    "reports",
+                    "planning",
+                    "strategic plans",
+                    "annual reports",
+                    "institutional"
+                  ],
+                  "status": "active",
+                  "sort": 42,
+                  "includes": [
+                    "annual reports",
+                    "strategic plans",
+                    "assessment reports",
+                    "grant planning"
+                  ],
+                  "scopeNote": "Use for institutional reports, strategic plans, assessment files, and planning documents.",
+                  "seeAlso": ["012", "560"]
+                },
+                {
+                  "code": "043",
+                  "shortLabel": "LEG",
+                  "label": "Legal & Administrative Files",
+                  "keywords": [
+                    "legal files",
+                    "administrative files",
+                    "contracts",
+                    "policies",
+                    "institutional"
+                  ],
+                  "status": "active",
+                  "sort": 43,
+                  "includes": [
+                    "contracts",
+                    "administrative correspondence",
+                    "compliance files",
+                    "legal paperwork"
+                  ],
+                  "scopeNote": "Use for legal and administrative records generated by the institution or collection steward.",
+                  "seeAlso": ["281", "581"]
+                },
+                {
+                  "code": "044",
+                  "shortLabel": "PRM",
+                  "label": "Programs & Public Materials",
+                  "keywords": [
+                    "programs",
+                    "public materials",
+                    "event files",
+                    "outreach",
+                    "institutional"
+                  ],
+                  "status": "active",
+                  "sort": 44,
+                  "includes": [
+                    "event flyers",
+                    "program packets",
+                    "public handouts",
+                    "outreach records"
+                  ],
+                  "scopeNote": "Use for public-facing program files and materials produced by the institution for outreach, events, and community engagement.",
+                  "seeAlso": ["684", "934"]
+                }
+              ],
+              "keywords": [
+                "institutional records",
+                "board files",
+                "reports",
+                "administration"
+              ],
+              "status": "active",
+              "sort": 40,
+              "allowAssign": true,
+              "includes": [
+                "minutes",
+                "reports",
+                "administrative records",
+                "public program files"
+              ],
+              "scopeNote": "Use for records created by the library, archive, or stewarding institution in the course of governance, planning, and public programming."
+            }
+          ],
+          "keywords": [
+            "library",
+            "internal documents",
+            "special collections",
+            "manuals",
+            "archives"
+          ],
+          "status": "active",
+          "sort": 0,
+          "allowAssign": true,
+          "includes": [
+            "internal manuals",
+            "special collections",
+            "finding aids",
+            "institutional records"
+          ],
+          "scopeNote": "Use for library-facing and institution-facing material that supports the operation, stewardship, description, and interpretation of the collection itself."
+        },
+        {
           "code": "100",
           "shortLabel": "FIC",
           "label": "Fiction",
@@ -4945,7 +5416,7 @@
           "seeAlso": []
         }
       ],
-      "version": "1.3.0",
+      "version": "1.3.1",
       "formats": [
         {
           "id": "code",
