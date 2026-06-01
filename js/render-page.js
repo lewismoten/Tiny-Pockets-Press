@@ -30,6 +30,14 @@ TPP.finiteNumberOr =
     const number = Number(value);
     return Number.isFinite(number) ? number : fallback;
   };
+TPP.textRotationDegrees =
+  TPP.textRotationDegrees ||
+  function (value) {
+    if (value === true) return 90;
+    if (value === false || value == null || value === "") return 0;
+    const number = Number(value);
+    return Number.isFinite(number) ? number : 0;
+  };
 TPP.textBoxStyle = function (element, options) {
   const entry = element || {};
   const centerX = Number(options && options.centerX);
@@ -43,7 +51,8 @@ TPP.textBoxStyle = function (element, options) {
     ? entry.align
     : "center";
   const clip = entry.align === "clip";
-  const rotate = entry.rotate ? " rotate(90deg)" : "";
+  const rotateDegrees = TPP.textRotationDegrees(entry.rotate);
+  const rotate = rotateDegrees ? " rotate(" + rotateDegrees + "deg)" : "";
   return [
     "left:" + (Number.isFinite(x) ? x : 50) + "%",
     "top:" + y + "%",
@@ -72,6 +81,7 @@ TPP.spineTextStyle = function (element, titleLengthIn) {
     ? entry.align
     : "left";
   const clip = entry.align === "clip";
+  const rotateDegrees = TPP.textRotationDegrees(entry.rotate);
   const widthCss = entry.rotate
     ? "calc(" +
       Math.max(0.1, Number(titleLengthIn) || 0.1) +
@@ -83,7 +93,8 @@ TPP.spineTextStyle = function (element, titleLengthIn) {
     "left:" + x + "%",
     "top:" + y + "%",
     "width:" + widthCss,
-    "transform:translateX(-50%)" + (entry.rotate ? " rotate(90deg)" : ""),
+    "transform:translateX(-50%)" +
+      (rotateDegrees ? " rotate(" + rotateDegrees + "deg)" : ""),
     "text-align:" + (clip ? "left" : align),
     "text-align-last:" + (clip ? "left" : align),
     "color:" + (entry.color || "#ffffff"),
@@ -368,7 +379,7 @@ TPP.spineEl = function (settings, x, y, height) {
         return (
           '<div class="spine-text spine-text-' +
           index +
-          (entry.rotate ? " rot" : "") +
+          (TPP.textRotationDegrees(entry.rotate) ? " rot" : "") +
           '" style="' +
           TPP.spineTextStyle(entry, Math.max(0.1, height)) +
           '">' +

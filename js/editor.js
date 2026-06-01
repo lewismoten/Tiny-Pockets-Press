@@ -241,6 +241,7 @@ TPP.textElementEditorConfigs = {
   front: {
     containerId: "coverTextElements",
     location: "front",
+    addLabel: "Add Front Cover Text",
     minSize: 3,
     supportsX: true,
     supportsWidth: true,
@@ -315,6 +316,12 @@ TPP.textAlignCycleButtonHtml = function (mode) {
     "</button>"
   );
 };
+TPP.textRotationDegrees = function (value) {
+  if (value === true) return 90;
+  if (value === false || value == null || value === "") return 0;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
 TPP.finiteNumberOr = function (value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
@@ -365,8 +372,14 @@ TPP.textElementFieldOptionsHtml = function (selected) {
 };
 TPP.coverTextRowHtml = function (book, spec, element) {
   const entry = element || {};
-  const fieldKey = entry.fieldKey || entry.part || "title";
   const location = spec && spec.location ? spec.location : "front";
+  const sizeValue = TPP.finiteNumberOr(
+    entry.size,
+    location === "front" ? 4.2 : TPP.finiteNumberOr(spec && spec.minSize, 4),
+  );
+  const rotationValue = TPP.textRotationDegrees(entry.rotate);
+  const rotationInputId =
+    location === "spine" ? "text-rotate-" + TPP.uid() : "";
   return (
     '<tr class="text-element-group cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
     TPP.esc(entry.id || "") +
@@ -374,20 +387,25 @@ TPP.coverTextRowHtml = function (book, spec, element) {
     TPP.esc(location) +
     '">' +
     TPP.coverTextContentCellHtml(book, entry) +
-    '<td><input class="text-size" type="number" min="' +
-    TPP.esc(String(TPP.finiteNumberOr(spec && spec.minSize, 3))) +
-    '" step=".5" value="' +
-    TPP.esc(
-      String(
-        TPP.finiteNumberOr(
-          entry.size,
-          location === "front"
-            ? 4.2
-            : TPP.finiteNumberOr(spec && spec.minSize, 4),
-        ),
-      ),
-    ) +
-    '"></td>' +
+    "<td>" +
+    (location === "spine"
+      ? '<div class="cover-text-size-stack"><label><span>Sz</span><input class="text-size" type="range" min="' +
+        TPP.esc(String(TPP.finiteNumberOr(spec && spec.minSize, 3))) +
+        '" max="24" step=".25" data-range-unit="pt" value="' +
+        TPP.esc(String(sizeValue)) +
+        '"></label><label class="rotation-range-label"><span>Rot</span><span class="rotation-range-control"><input id="' +
+        TPP.esc(rotationInputId) +
+        '" class="text-rotate" type="range" min="-180" max="180" step="1" data-range-unit="°" value="' +
+        TPP.esc(String(rotationValue)) +
+        '"><button type="button" class="rotation-step-cycle" data-rotation-step-cycle="' +
+        TPP.esc(rotationInputId) +
+        '" aria-label="Rotation step 1 degrees" title="Rotation step 1 degrees"><span aria-hidden="true">⟳</span><span>1°</span></button></span></label></div>'
+      : '<input class="text-size" type="number" min="' +
+        TPP.esc(String(TPP.finiteNumberOr(spec && spec.minSize, 3))) +
+        '" step=".5" value="' +
+        TPP.esc(String(sizeValue)) +
+        '">') +
+    "</td>" +
     '<td><div class="back-cover-slider-stack"><label><span>X</span><input class="text-x" type="range" min="0" max="100" value="' +
     TPP.esc(String(TPP.finiteNumberOr(entry.x, 50))) +
     '"></label><label><span>Y</span><input class="text-y" type="range" min="0" max="100" value="' +
@@ -463,10 +481,13 @@ TPP.textColorOutlineControlHtml = function (entry) {
 };
 TPP.coverTextListHtml = function (book, spec) {
   const location = spec && spec.location ? spec.location : "front";
-  const addLabel =
-    location === "front" ? "Add Front Cover Text" : spec.addLabel || "Add Text";
-  const trashId =
-    location === "front" ? "frontCoverTrashDrop" : "backCoverTrashDrop";
+  const addLabel = spec.addLabel || "Add Text";
+  const trashIdMap = {
+    front: "frontCoverTrashDrop",
+    back: "backCoverTrashDrop",
+    spine: "spineTextTrashDrop",
+  };
+  const trashId = trashIdMap[location] || "frontCoverTrashDrop";
   return (
     '<div class="book-info-table-wrap"><table class="data-table cover-text-table"><colgroup><col class="cover-text-col-field"><col class="cover-text-col-size"><col class="cover-text-col-position"><col class="cover-text-col-align"><col class="cover-text-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Width</th><th>Color</th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, location)
@@ -554,7 +575,11 @@ TPP.textElementGroupHtml = function (book, spec, element) {
   );
 };
 TPP.textElementListHtml = function (book, spec) {
-  if (spec.location === "front" || spec.location === "back")
+  if (
+    spec.location === "front" ||
+    spec.location === "back" ||
+    spec.location === "spine"
+  )
     return TPP.coverTextListHtml(book, spec);
   const elements = TPP.textElementsForLocation(book, spec.location);
   return (
@@ -603,7 +628,9 @@ TPP.renderTextElementControls = function () {
     const node = document.getElementById(spec.containerId);
     if (!node) return;
     node.className =
-      spec.location === "front" || spec.location === "back"
+      spec.location === "front" ||
+      spec.location === "back" ||
+      spec.location === "spine"
         ? "cover-text-layout"
         : "cover-text-grid";
     node.innerHTML = TPP.textElementListHtml(TPP.active, spec);
@@ -613,6 +640,8 @@ TPP.renderTextElementControls = function () {
     copyright.className = "cover-text-grid";
     copyright.innerHTML = TPP.copyrightPageItemsHtml(TPP.active);
   }
+  if (TPP.refreshRangeInputTitles) TPP.refreshRangeInputTitles(document);
+  if (TPP.refreshRotationStepButtons) TPP.refreshRotationStepButtons(document);
 };
 TPP.readSingleTextElementGroup = function (book, group) {
   if (!book || !group) return;
@@ -650,7 +679,11 @@ TPP.readSingleTextElementGroup = function (book, group) {
     element.align = group.querySelector(".text-align").value || "left";
   }
   if (group.querySelector(".text-rotate")) {
-    element.rotate = group.querySelector(".text-rotate").checked;
+    const rotateInput = group.querySelector(".text-rotate");
+    element.rotate =
+      rotateInput.type === "checkbox"
+        ? rotateInput.checked
+        : TPP.textRotationDegrees(rotateInput.value);
   }
   element.color = group.querySelector(".text-color")?.value || element.color;
   element.outlineColor =
@@ -832,7 +865,9 @@ TPP.addTextElement = function (book, location, fieldKey) {
       0,
       TPP.finiteNumberOr(lastElement && lastElement.outlineSize, 0),
     ),
-    rotate: Boolean(lastElement && lastElement.rotate),
+    rotate: spec.supportsRotate
+      ? TPP.textRotationDegrees(lastElement && lastElement.rotate)
+      : 0,
     customText: "",
   };
   if (location === "front") {

@@ -2939,12 +2939,17 @@ document.addEventListener("DOMContentLoaded", async function () {
       label.textContent = text || "Dragging item";
     };
     const setTextTrashVisibility = function (location, active) {
-      ["frontCoverTrashDrop", "backCoverTrashDrop"].forEach(function (id) {
+      [
+        "frontCoverTrashDrop",
+        "backCoverTrashDrop",
+        "spineTextTrashDrop",
+      ].forEach(function (id) {
         const dropZone = document.getElementById(id);
         if (!dropZone) return;
         const isTarget =
           (location === "front" && id === "frontCoverTrashDrop") ||
-          (location === "back" && id === "backCoverTrashDrop");
+          (location === "back" && id === "backCoverTrashDrop") ||
+          (location === "spine" && id === "spineTextTrashDrop");
         dropZone.classList.toggle("is-visible", !!active && isTarget);
         if (!active || !isTarget) dropZone.classList.remove("is-over");
         dropZone.setAttribute(
@@ -3284,7 +3289,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       setTextTrashVisibility(
         dragState.location,
         dragState.kind === "text-element" &&
-          (dragState.location === "front" || dragState.location === "back"),
+          (dragState.location === "front" ||
+            dragState.location === "back" ||
+            dragState.location === "spine"),
       );
       if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = "move";
@@ -3295,12 +3302,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     controls.addEventListener("dragover", function (e) {
       if (!dragState) return;
       const trashTarget = e.target.closest(
-        "#frontCoverTrashDrop, #backCoverTrashDrop",
+        "#frontCoverTrashDrop, #backCoverTrashDrop, #spineTextTrashDrop",
       );
       if (
         trashTarget &&
         dragState.kind === "text-element" &&
-        (dragState.location === "front" || dragState.location === "back")
+        (dragState.location === "front" ||
+          dragState.location === "back" ||
+          dragState.location === "spine")
       ) {
         e.preventDefault();
         if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
@@ -3329,19 +3338,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     controls.addEventListener("dragleave", function (e) {
       const trashTarget = e.target.closest(
-        "#frontCoverTrashDrop, #backCoverTrashDrop",
+        "#frontCoverTrashDrop, #backCoverTrashDrop, #spineTextTrashDrop",
       );
       if (trashTarget) trashTarget.classList.remove("is-over");
     });
     controls.addEventListener("drop", function (e) {
       if (!dragState) return;
       const trashTarget = e.target.closest(
-        "#frontCoverTrashDrop, #backCoverTrashDrop",
+        "#frontCoverTrashDrop, #backCoverTrashDrop, #spineTextTrashDrop",
       );
       if (
         trashTarget &&
         dragState.kind === "text-element" &&
-        (dragState.location === "front" || dragState.location === "back")
+        (dragState.location === "front" ||
+          dragState.location === "back" ||
+          dragState.location === "spine")
       ) {
         e.preventDefault();
         controls

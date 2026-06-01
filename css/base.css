@@ -1318,7 +1318,7 @@ input[type="range"]::-moz-range-thumb {
   width: auto;
 }
 .cover-text-table col.cover-text-col-size {
-  width: 3.8rem;
+  width: 5.7rem;
 }
 .cover-text-table col.cover-text-col-position {
   width: 5.8rem;
@@ -1369,6 +1369,41 @@ input[type="range"]::-moz-range-thumb {
   width: 3.25rem;
   max-width: 100%;
   padding-inline: 0.2rem;
+}
+.cover-text-size-stack {
+  display: grid;
+  gap: 0.2rem;
+}
+.cover-text-size-stack label,
+.cover-text-size-stack .rotation-range-label {
+  display: grid;
+  gap: 0.14rem;
+  margin: 0;
+}
+.cover-text-size-stack label > span,
+.cover-text-size-stack .rotation-range-label > span:first-child {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7a6755;
+}
+.cover-text-size-stack input[type="range"] {
+  width: 100%;
+  max-width: 4.2rem;
+  margin: 0;
+}
+.cover-text-size-stack .rotation-range-control {
+  gap: 0.2rem;
+}
+.cover-text-size-stack .rotation-step-cycle {
+  min-width: 1.95rem;
+  min-height: 1.95rem;
+  padding: 0.16rem;
+  border-radius: 8px;
+}
+.cover-text-size-stack .rotation-step-cycle span:last-child {
+  font-size: 0.62rem;
 }
 .cover-text-table input[type="checkbox"] {
   width: auto;
