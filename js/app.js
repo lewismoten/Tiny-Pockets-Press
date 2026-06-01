@@ -2489,12 +2489,20 @@ document.addEventListener("DOMContentLoaded", async function () {
         .trim();
       label.textContent = text || "Dragging item";
     };
-    const setFrontCoverTrashVisibility = function (active) {
-      const dropZone = document.getElementById("frontCoverTrashDrop");
-      if (!dropZone) return;
-      dropZone.classList.toggle("is-visible", !!active);
-      if (!active) dropZone.classList.remove("is-over");
-      dropZone.setAttribute("aria-hidden", active ? "false" : "true");
+    const setTextTrashVisibility = function (location, active) {
+      ["frontCoverTrashDrop", "backCoverTrashDrop"].forEach(function (id) {
+        const dropZone = document.getElementById(id);
+        if (!dropZone) return;
+        const isTarget =
+          (location === "front" && id === "frontCoverTrashDrop") ||
+          (location === "back" && id === "backCoverTrashDrop");
+        dropZone.classList.toggle("is-visible", !!active && isTarget);
+        if (!active || !isTarget) dropZone.classList.remove("is-over");
+        dropZone.setAttribute(
+          "aria-hidden",
+          active && isTarget ? "false" : "true",
+        );
+      });
     };
     controls.addEventListener("input", function (e) {
       const bookInfoEntry = e.target.closest(".book-info-entry");
@@ -2681,8 +2689,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       };
       item.classList.add("is-dragging");
       setDragPreviewLabel(item);
-      setFrontCoverTrashVisibility(
-        dragState.kind === "text-element" && dragState.location === "front",
+      setTextTrashVisibility(
+        dragState.location,
+        dragState.kind === "text-element" &&
+          (dragState.location === "front" || dragState.location === "back"),
       );
       if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = "move";
@@ -2692,11 +2702,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     controls.addEventListener("dragover", function (e) {
       if (!dragState) return;
-      const trashTarget = e.target.closest("#frontCoverTrashDrop");
+      const trashTarget = e.target.closest(
+        "#frontCoverTrashDrop, #backCoverTrashDrop",
+      );
       if (
         trashTarget &&
         dragState.kind === "text-element" &&
-        dragState.location === "front"
+        (dragState.location === "front" || dragState.location === "back")
       ) {
         e.preventDefault();
         trashTarget.classList.add("is-over");
@@ -2719,22 +2731,26 @@ document.addEventListener("DOMContentLoaded", async function () {
       parent.insertBefore(dragging, before ? target : target.nextSibling);
     });
     controls.addEventListener("dragleave", function (e) {
-      const trashTarget = e.target.closest("#frontCoverTrashDrop");
+      const trashTarget = e.target.closest(
+        "#frontCoverTrashDrop, #backCoverTrashDrop",
+      );
       if (trashTarget) trashTarget.classList.remove("is-over");
     });
     controls.addEventListener("drop", function (e) {
       if (!dragState) return;
-      const trashTarget = e.target.closest("#frontCoverTrashDrop");
+      const trashTarget = e.target.closest(
+        "#frontCoverTrashDrop, #backCoverTrashDrop",
+      );
       if (
         trashTarget &&
         dragState.kind === "text-element" &&
-        dragState.location === "front"
+        (dragState.location === "front" || dragState.location === "back")
       ) {
         e.preventDefault();
         TPP.sync("nosave");
         TPP.removeTextElement(TPP.active, dragState.itemId);
         TPP.save();
-        setFrontCoverTrashVisibility(false);
+        setTextTrashVisibility(dragState.location, false);
         TPP.renderAll();
         dragState = null;
         return;
@@ -2745,13 +2761,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       dragging.classList.remove("is-dragging");
       TPP.sync("commit");
       TPP.renderAll();
-      setFrontCoverTrashVisibility(false);
+      setTextTrashVisibility(dragState.location, false);
       dragState = null;
     });
     controls.addEventListener("dragend", function () {
       const dragging = controls.querySelector(".is-dragging");
       if (dragging) dragging.classList.remove("is-dragging");
-      setFrontCoverTrashVisibility(false);
+      setTextTrashVisibility(dragState && dragState.location, false);
       dragState = null;
       dragHandleArmedId = "";
     });
