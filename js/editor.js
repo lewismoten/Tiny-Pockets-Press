@@ -339,7 +339,7 @@ TPP.frontCoverTextRowHtml = function (book, element) {
 };
 TPP.frontCoverTextListHtml = function (book, spec) {
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><thead><tr><th>Field</th><th>Size</th><th>Y</th><th>Color</th><th>Outline</th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><colgroup><col class="front-cover-col-field"><col class="front-cover-col-size"><col class="front-cover-col-y"><col class="front-cover-col-color"><col class="front-cover-col-outline"></colgroup><thead><tr><th>Field</th><th>Size</th><th>Y</th><th>Clr</th><th>Outl</th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, spec.location)
       .map(function (element) {
         return TPP.frontCoverTextRowHtml(book, element);
