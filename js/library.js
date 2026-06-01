@@ -1676,6 +1676,15 @@ TPP.renderAbout = function () {
     '<p class="about-note">ID: ' +
     TPP.esc(TPP.bookId(book)) +
     "</p>" +
+    '<article class="about-citation">' +
+    "<h3>Citation</h3>" +
+    '<label class="about-citation-format-label">Format<select id="aboutCitationFormat">' +
+    TPP.aboutCitationFormatOptionsHtml() +
+    "</select></label>" +
+    '<pre id="aboutCitationValue" class="about-citation-output">' +
+    TPP.esc(TPP.aboutCitationText(book, TPP.aboutCitationFormat())) +
+    "</pre>" +
+    "</article>" +
     "</article>" +
     "</div>" +
     "<div>" +
@@ -1788,6 +1797,146 @@ TPP.renderAbout = function () {
     coverEl.style.borderRadius = ".18in";
     coverMount.appendChild(coverEl);
   }
+  const citationFormat = document.getElementById("aboutCitationFormat");
+  if (citationFormat) {
+    citationFormat.value = TPP.aboutCitationFormat();
+    citationFormat.onchange = function () {
+      TPP.writeAboutCitationFormat(citationFormat.value);
+      TPP.syncAboutCitation();
+    };
+  }
+  TPP.syncAboutCitation();
+};
+TPP.aboutCitationFormats = function () {
+  return [
+    { id: "plain", label: "Plain" },
+    { id: "mla", label: "MLA 9" },
+    { id: "apa", label: "APA 7" },
+    { id: "chicago", label: "Chicago" },
+    { id: "bibtex", label: "BibTeX" },
+  ];
+};
+TPP.aboutCitationFormat = function () {
+  const state = TPP.readSettingsUi ? TPP.readSettingsUi() : {};
+  const saved = String(state.aboutCitationFormat || "")
+    .trim()
+    .toLowerCase();
+  return TPP.aboutCitationFormats().some(function (entry) {
+    return entry.id === saved;
+  })
+    ? saved
+    : "plain";
+};
+TPP.writeAboutCitationFormat = function (format) {
+  if (!TPP.readSettingsUi || !TPP.writeSettingsUi) return;
+  const state = TPP.readSettingsUi();
+  TPP.writeSettingsUi(
+    Object.assign({}, state, {
+      aboutCitationFormat: String(format || "plain")
+        .trim()
+        .toLowerCase(),
+    }),
+  );
+};
+TPP.aboutCitationFormatOptionsHtml = function () {
+  const selected = TPP.aboutCitationFormat();
+  return TPP.aboutCitationFormats()
+    .map(function (entry) {
+      return (
+        '<option value="' +
+        TPP.esc(entry.id) +
+        '"' +
+        (entry.id === selected ? " selected" : "") +
+        ">" +
+        TPP.esc(entry.label) +
+        "</option>"
+      );
+    })
+    .join("");
+};
+TPP.aboutCitationYear = function (book) {
+  const value = String((book && book.pubDate) || "").trim();
+  const match = value.match(/\b(\d{4})\b/);
+  return match ? match[1] : "";
+};
+TPP.aboutCitationAuthor = function (book) {
+  return String((book && book.author) || "").trim();
+};
+TPP.aboutCitationInvertedAuthor = function (book) {
+  const name = TPP.aboutCitationAuthor(book);
+  if (!name) return "";
+  if (name.includes(",")) return name;
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return name;
+  const last = parts.pop();
+  return last + ", " + parts.join(" ");
+};
+TPP.aboutCitationText = function (book, format) {
+  const citationFormat = String(format || "plain")
+    .trim()
+    .toLowerCase();
+  const id = TPP.bookId(book) || "untitled";
+  const author = TPP.aboutCitationAuthor(book);
+  const invertedAuthor = TPP.aboutCitationInvertedAuthor(book);
+  const title = String((book && book.title) || "Untitled").trim();
+  const publisher = String((book && book.publisher) || "").trim();
+  const year = TPP.aboutCitationYear(book);
+  const dateText = year || "n.d.";
+  if (citationFormat === "mla") {
+    return (
+      [invertedAuthor || author, title, publisher, dateText]
+        .filter(Boolean)
+        .join(". ")
+        .replace(/\.\s*$/, "") + "."
+    );
+  }
+  if (citationFormat === "apa") {
+    return (
+      [invertedAuthor || author, "(" + dateText + ")", title, publisher]
+        .filter(function (part) {
+          return part && part !== "()";
+        })
+        .join(". ")
+        .replace(/\.\s*$/, "") + "."
+    );
+  }
+  if (citationFormat === "chicago") {
+    return (
+      [
+        invertedAuthor || author,
+        title,
+        publisher && year ? publisher + ", " + year : publisher || dateText,
+      ]
+        .filter(Boolean)
+        .join(". ")
+        .replace(/\.\s*$/, "") + "."
+    );
+  }
+  if (citationFormat === "bibtex") {
+    const lines = [
+      "@book{" + id + ",",
+      "  title = {" + title + "},",
+      author ? "  author = {" + author + "}," : "",
+      publisher ? "  publisher = {" + publisher + "}," : "",
+      year ? "  year = {" + year + "}," : "",
+      "}",
+    ].filter(Boolean);
+    return lines.join("\n");
+  }
+  return (
+    [author, title, publisher, dateText]
+      .filter(Boolean)
+      .join(". ")
+      .replace(/\.\s*$/, "") + "."
+  );
+};
+TPP.syncAboutCitation = function () {
+  const output = document.getElementById("aboutCitationValue");
+  if (!output || !TPP.active) return;
+  output.textContent = TPP.aboutCitationText(
+    TPP.active,
+    TPP.aboutCitationFormat(),
+  );
 };
 TPP.softwareMetaCache = null;
 TPP.softwareCdnCache = null;
