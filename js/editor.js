@@ -416,12 +416,12 @@ TPP.backCoverTextRowHtml = function (book, element) {
     TPP.esc(String(Number(entry.x) || 50)) +
     '"></label><label><span>Y</span><input class="text-y" type="range" min="0" max="100" value="' +
     TPP.esc(String(Number(entry.y) || 0)) +
-    '"></label><label><span>W</span><input class="text-width" type="range" min="10" max="100" value="' +
+    '"></label></div></td>' +
+    '<td><div class="back-cover-align-stack">' +
+    TPP.textAlignCycleButtonHtml(align) +
+    '<label><span>W</span><input class="text-width" type="range" min="10" max="100" value="' +
     TPP.esc(String(Number(entry.width) || 100)) +
     '"></label></div></td>' +
-    "<td>" +
-    TPP.textAlignCycleButtonHtml(align) +
-    "</td>" +
     '<td><input class="text-color color-box" type="color" tabindex="-1" aria-label="Text color" value="' +
     TPP.esc(entry.color || "#ffffff") +
     '"></td>' +
@@ -435,7 +435,7 @@ TPP.backCoverTextRowHtml = function (book, element) {
 };
 TPP.backCoverTextListHtml = function (book, spec) {
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-position"><col class="back-cover-col-align"><col class="back-cover-col-color"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Aln</th><th>Clr</th><th>Outl</th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-position"><col class="back-cover-col-align"><col class="back-cover-col-color"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Aln/W</th><th>Clr</th><th>Outl</th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, spec.location)
       .map(function (element) {
         return TPP.backCoverTextRowHtml(book, element);
