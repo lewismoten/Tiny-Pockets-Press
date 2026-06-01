@@ -1,0 +1,50 @@
+.image-export-palette-dialog-card {
+  max-width: min(62rem, calc(100vw - 2rem));
+}
+.image-export-palette-dialog-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16rem;
+  gap: 1rem;
+  align-items: start;
+}
+.image-export-palette-dialog-stage {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #f8f2e6;
+  padding: 0.9rem;
+  overflow: auto;
+}
+.image-export-palette-dialog-stage canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  margin: 0 auto;
+  background: #f8f2e6;
+  cursor: pointer;
+}
+.image-export-palette-inspector {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+.image-export-palette-inspector label {
+  margin-bottom: 0;
+}
+.image-export-palette-inspector input[readonly] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  user-select: all;
+  cursor: text;
+}
+.image-export-palette-sample {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 2px solid #000;
+  border-radius: 14px;
+  background: #fff;
+}
+@media (max-width: 880px) {
+  .image-export-palette-dialog-layout {
+    grid-template-columns: 1fr;
+  }
+}

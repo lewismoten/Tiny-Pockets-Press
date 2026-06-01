@@ -1475,7 +1475,10 @@ TPP.renderDataSidebar = function (tabs, activeId) {
         "</div>"
       : "");
 };
-TPP.renderData = function () {
+TPP.renderData = async function () {
+  if (typeof TPP.ensureControlModule === "function") {
+    await TPP.ensureControlModule("data-panel");
+  }
   if (!TPP.active) return;
   TPP.sync("nosave");
   const summary = document.getElementById("dataSummary");
@@ -1622,7 +1625,10 @@ TPP.renderLibrary = function () {
     })
     .join("");
 };
-TPP.renderAbout = function () {
+TPP.renderAbout = async function () {
+  if (typeof TPP.ensureControlModule === "function") {
+    await TPP.ensureControlModule("about-panel");
+  }
   if (!TPP.active) return;
   const book = TPP.active;
   const pages = TPP.buildPages();
@@ -2081,6 +2087,9 @@ TPP.loadSoftwareCdns = async function () {
   return payload;
 };
 TPP.renderSoftwareAbout = async function () {
+  if (typeof TPP.ensureControlModule === "function") {
+    await TPP.ensureControlModule("about-panel");
+  }
   const summary = document.getElementById("softwareSummary");
   const panel = document.getElementById("softwarePanel");
   if (!summary || !panel) return;

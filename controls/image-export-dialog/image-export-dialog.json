@@ -1,0 +1,7 @@
+{
+  "id": "image-export-dialog",
+  "rootIds": ["imageExportDialog"],
+  "html": "image-export-dialog.html",
+  "css": "image-export-dialog.css",
+  "js": "image-export-dialog.js"
+}

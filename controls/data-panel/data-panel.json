@@ -1,0 +1,5 @@
+{
+  "id": "data-panel",
+  "rootIds": ["dataPanel", "dataSidebar"],
+  "js": "data-panel.js"
+}

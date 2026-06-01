@@ -1,0 +1,7 @@
+{
+  "id": "classification-dialog",
+  "rootIds": ["classificationDialog"],
+  "html": "classification-dialog.html",
+  "css": "classification-dialog.css",
+  "js": "classification-dialog.js"
+}

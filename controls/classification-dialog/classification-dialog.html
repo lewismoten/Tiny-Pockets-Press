@@ -1,0 +1,53 @@
+<dialog id="classificationDialog" class="modal">
+  <form method="dialog" class="modal-card classification-dialog-card">
+    <div class="classification-dialog-header">
+      <div>
+        <h2 id="classificationDialogTitle">Classification</h2>
+        <p id="classificationDialogDescription" class="about-note"></p>
+      </div>
+      <button
+        type="button"
+        class="button-cancel"
+        data-action="cancel-classification"
+      >
+        Close
+      </button>
+    </div>
+    <div
+      id="classificationBreadcrumbs"
+      class="classification-breadcrumbs"
+    ></div>
+    <div class="classification-search-wrap">
+      <label class="classification-search-label"
+        >Search
+        <input
+          id="classificationDialogSearch"
+          type="text"
+          spellcheck="false"
+          autocomplete="off"
+          placeholder="Search classifications and extensions"
+      /></label>
+      <div
+        id="classificationDialogSearchResults"
+        class="classification-dialog-search-results"
+        hidden
+      ></div>
+    </div>
+    <div
+      id="classificationSelection"
+      class="classification-selection"
+      hidden
+    ></div>
+    <div id="classificationDialogList" class="classification-dialog-list"></div>
+    <div class="classification-dialog-footer">
+      <div
+        id="classificationDialogMeta"
+        class="classification-dialog-meta"
+      ></div>
+      <label class="classification-profile-select">
+        <span>Profile</span>
+        <select id="classificationDialogProfile"></select>
+      </label>
+    </div>
+  </form>
+</dialog>

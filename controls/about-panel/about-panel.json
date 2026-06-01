@@ -1,0 +1,6 @@
+{
+  "id": "about-panel",
+  "rootIds": ["aboutPanel"],
+  "css": "about-panel.css",
+  "js": "about-panel.js"
+}

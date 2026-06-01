@@ -11,6 +11,11 @@ TPP.controlModuleRegistry = {
   "data-text-dialog": "controls/data-text-dialog/",
   "color-picker-popover": "controls/color-picker-popover/",
   toast: "controls/toast/",
+  "classification-dialog": "controls/classification-dialog/",
+  "image-export-dialog": "controls/image-export-dialog/",
+  "image-export-palette-dialog": "controls/image-export-palette-dialog/",
+  "about-panel": "controls/about-panel/",
+  "data-panel": "controls/data-panel/",
 };
 TPP.controlModuleState = TPP.controlModuleState || {};
 TPP.ensureControlModule = async function (id) {
