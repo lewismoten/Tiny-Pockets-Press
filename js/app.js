@@ -667,6 +667,101 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.closeClassificationSearchResults();
     TPP.renderClassificationDialog();
   };
+  TPP.classificationReferenceDetails = function (reference) {
+    const raw = String(reference || "").trim();
+    if (!raw) return null;
+    const match = raw.match(/^(\d{3})(?:\.([0-9A-Za-z]+))?$/);
+    const baseRef = match ? match[1] : raw;
+    const extensionRef = match ? String(match[2] || "") : "";
+    const basePath = TPP.classificationPathForCode(baseRef);
+    const baseNode = TPP.classificationNodeAtPath(basePath);
+    if (!baseNode || !baseNode.code) return null;
+    const baseBreadcrumb = TPP.classificationBreadcrumbNodes(basePath).map(
+      function (crumb) {
+        return crumb.node.label;
+      },
+    );
+    if (extensionRef) {
+      const extensionFound = TPP.classificationExtensionNode(
+        baseNode.code,
+        extensionRef,
+      );
+      if (!extensionFound || !extensionFound.node) return null;
+      const extensionBreadcrumb = TPP.classificationExtensionBreadcrumbNodes(
+        baseNode.code,
+        extensionRef,
+      );
+      return {
+        raw: raw,
+        code: baseNode.code,
+        extension: extensionRef,
+        shortLabel:
+          TPP.classificationShortLabel(baseNode) +
+          "." +
+          TPP.classificationShortLabel(extensionFound.node),
+        displayCode: TPP.classificationFormattedCode(
+          baseNode.code,
+          TPP.classificationShortLabel(baseNode),
+          extensionRef,
+        ),
+        label: String(extensionFound.node.label || ""),
+        pathLabel: baseBreadcrumb
+          .concat(
+            extensionBreadcrumb.map(function (node) {
+              return node.label;
+            }),
+          )
+          .join(" > "),
+        scopeNote: String(extensionFound.node.scopeNote || ""),
+      };
+    }
+    return {
+      raw: raw,
+      code: baseNode.code,
+      extension: "",
+      shortLabel: TPP.classificationShortLabel(baseNode),
+      displayCode: TPP.classificationFormattedCode(
+        baseNode.code,
+        TPP.classificationShortLabel(baseNode),
+        "",
+      ),
+      label: String(baseNode.label || ""),
+      pathLabel: baseBreadcrumb.join(" > "),
+      scopeNote: String(baseNode.scopeNote || ""),
+    };
+  };
+  TPP.renderClassificationSeeAlso = function (node) {
+    const refs = (Array.isArray(node && node.seeAlso) ? node.seeAlso : [])
+      .map(function (value) {
+        return String(value || "").trim();
+      })
+      .filter(Boolean)
+      .map(TPP.classificationReferenceDetails)
+      .filter(Boolean);
+    if (!refs.length) return "";
+    return (
+      '<div class="classification-see-also"><div class="small"><strong>See also</strong></div><div class="classification-see-also-list">' +
+      refs
+        .map(function (ref) {
+          return (
+            '<div class="classification-see-also-item"><button type="button" class="classification-see-also-link" data-classification-related="' +
+            TPP.esc(
+              JSON.stringify({
+                code: ref.code,
+                extension: ref.extension,
+              }),
+            ) +
+            '">' +
+            TPP.esc(ref.displayCode) +
+            '</button><div class="classification-see-also-meta">' +
+            TPP.esc(ref.pathLabel) +
+            "</div></div>"
+          );
+        })
+        .join("") +
+      "</div></div>"
+    );
+  };
   TPP.classificationSystem = function () {
     const catalog = TPP.classificationCatalog || { systems: [] };
     const systems = Array.isArray(catalog.systems) ? catalog.systems : [];
@@ -988,22 +1083,53 @@ document.addEventListener("DOMContentLoaded", async function () {
             TPP.defaultClassificationFormatId(),
           extension: TPP.classificationDialogSelection.extension || "",
         });
+        const selectedExtensionNode =
+          TPP.classificationDialogSelection.extension &&
+          TPP.classificationExtensionNode(
+            selectedNode.code,
+            TPP.classificationDialogSelection.extension,
+          )
+            ? TPP.classificationExtensionNode(
+                selectedNode.code,
+                TPP.classificationDialogSelection.extension,
+              ).node
+            : null;
+        const currentReferenceNode = selectedExtensionNode || selectedNode;
+        const currentPath = TPP.classificationBreadcrumbNodes(
+          TPP.classificationDialogPath,
+        )
+          .map(function (crumb) {
+            return crumb.node.label;
+          })
+          .concat(
+            selectedExtensionNode
+              ? TPP.classificationExtensionBreadcrumbNodes(
+                  selectedNode.code,
+                  TPP.classificationDialogSelection.extension,
+                ).map(function (node) {
+                  return node.label;
+                })
+              : [],
+          )
+          .join(" > ");
+        const currentScopeNote = String(
+          (currentReferenceNode && currentReferenceNode.scopeNote) || "",
+        );
+        const seeAlsoMarkup =
+          TPP.renderClassificationSeeAlso(currentReferenceNode);
         selection.hidden = false;
         selection.innerHTML =
-          "<div><strong>" +
+          '<div class="classification-selection-main"><strong>' +
           TPP.esc(preview || selectedNode.code) +
-          '</strong><div class="small">' +
-          TPP.esc(
-            TPP.classificationBreadcrumbNodes(TPP.classificationDialogPath)
-              .map(function (crumb) {
-                return crumb.node.label;
-              })
-              .join(" > "),
-          ) +
-          (selectedNode.scopeNote
-            ? '</div><div class="small">' + TPP.esc(selectedNode.scopeNote)
+          "</strong>" +
+          (currentPath
+            ? '<div class="small">' + TPP.esc(currentPath) + "</div>"
             : "") +
-          '</div></div><div class="classification-selection-controls">' +
+          (currentScopeNote
+            ? '<div class="small">' + TPP.esc(currentScopeNote) + "</div>"
+            : "") +
+          seeAlsoMarkup +
+          '</div><div class="classification-selection-controls">' +
           (extensionGroup
             ? '<label>Extension<select id="classificationExtensionSelect"><option value="">No extension</option>' +
               extensionOptions
@@ -1877,6 +2003,13 @@ document.addEventListener("DOMContentLoaded", async function () {
           TPP.classificationDialogSelection.extension || "",
         );
         TPP.renderClassificationDialog();
+        return;
+      }
+      const relatedButton = e.target.closest("[data-classification-related]");
+      if (relatedButton) {
+        TPP.applyClassificationSearchSelection(
+          JSON.parse(relatedButton.dataset.classificationRelated || "{}"),
+        );
         return;
       }
       const selectButton = e.target.closest("[data-classification-select]");
