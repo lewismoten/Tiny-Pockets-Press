@@ -2778,18 +2778,40 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.updateColorDialogPreview(TPP.colorDialogValue, true);
     TPP.positionColorPopover();
   };
-  TPP.renderFrontCoverFieldDialog = function () {
+  TPP.renderFrontCoverFieldDialog = function (location) {
     const list = document.getElementById("frontCoverFieldDialogList");
+    const title = document.getElementById("frontCoverFieldDialogTitle");
+    const note = document.getElementById("frontCoverFieldDialogNote");
     if (!list) return;
-    const options = TPP.frontCoverFieldPickerOptions(TPP.active);
+    const targetLocation =
+      location === "back" || location === "front"
+        ? location
+        : TPP.frontCoverFieldDialogLocation || "front";
+    TPP.frontCoverFieldDialogLocation = targetLocation;
+    if (title) {
+      title.textContent =
+        targetLocation === "back"
+          ? "Add Back Cover Text"
+          : "Add Front Cover Text";
+    }
+    if (note) {
+      note.textContent =
+        targetLocation === "back"
+          ? "Choose another field from Book Info to place on the back cover."
+          : "Choose another field from Book Info to place on the front cover.";
+    }
+    const options = TPP.textElementFieldPickerOptions(
+      TPP.active,
+      targetLocation,
+    );
     list.innerHTML = options.length
       ? options
           .map(function (option) {
             const preview = TPP.bookInfoFieldValue(TPP.active, option.value, {
-              location: "front",
+              location: targetLocation,
             });
             return (
-              '<button type="button" class="front-cover-field-option" data-front-cover-field="' +
+              '<button type="button" class="front-cover-field-option" data-cover-text-field="' +
               TPP.esc(option.value) +
               '"><span><strong>' +
               TPP.esc(option.label) +
@@ -2799,12 +2821,14 @@ document.addEventListener("DOMContentLoaded", async function () {
             );
           })
           .join("")
-      : '<div class="front-cover-field-empty">All current Book Info fields are already on the front cover.</div>';
+      : '<div class="front-cover-field-empty">All current Book Info fields are already on the ' +
+        TPP.esc(targetLocation === "back" ? "back" : "front") +
+        " cover.</div>";
   };
-  TPP.openFrontCoverFieldDialog = function () {
+  TPP.openFrontCoverFieldDialog = function (location) {
     const dialog = document.getElementById("frontCoverFieldDialog");
     if (!dialog || typeof dialog.showModal !== "function") return;
-    TPP.renderFrontCoverFieldDialog();
+    TPP.renderFrontCoverFieldDialog(location);
     if (!dialog.open) dialog.showModal();
   };
 
@@ -3107,11 +3131,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
       const textButton = e.target.closest("[data-text-action]");
       if (textButton) {
-        TPP.sync("nosave");
         const action = textButton.dataset.textAction;
         const group = textButton.closest(".text-element-group");
-        if (action === "add")
-          TPP.addTextElement(TPP.active, textButton.dataset.location);
+        if (action === "add") {
+          TPP.sync("nosave");
+          TPP.openFrontCoverFieldDialog(textButton.dataset.location || "front");
+          return;
+        }
+        TPP.sync("nosave");
         if (action === "remove" && group)
           TPP.removeTextElement(TPP.active, group.dataset.textId);
         TPP.save();
@@ -3313,10 +3340,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         frontCoverFieldDialog.close("cancel");
         return;
       }
-      const option = e.target.closest("[data-front-cover-field]");
+      const option = e.target.closest("[data-cover-text-field]");
       if (!option) return;
       TPP.sync("nosave");
-      TPP.addTextElement(TPP.active, "front", option.dataset.frontCoverField);
+      TPP.addTextElement(
+        TPP.active,
+        TPP.frontCoverFieldDialogLocation || "front",
+        option.dataset.coverTextField,
+      );
       TPP.save();
       if (frontCoverFieldDialog.open) frontCoverFieldDialog.close("selected");
       TPP.loadForm();

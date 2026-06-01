@@ -319,15 +319,20 @@ TPP.finiteNumberOr = function (value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 };
-TPP.frontCoverFieldPickerOptions = function (book) {
+TPP.textElementFieldPickerOptions = function (book, location) {
   const used = new Set(
-    TPP.textElementsForLocation(book, "front").map(function (entry) {
-      return (entry && entry.fieldKey) || "";
-    }),
+    TPP.textElementsForLocation(book, location || "front").map(
+      function (entry) {
+        return (entry && entry.fieldKey) || "";
+      },
+    ),
   );
   return TPP.bookInfoFieldOptions(book).filter(function (option) {
     return option && option.value && !used.has(option.value);
   });
+};
+TPP.frontCoverFieldPickerOptions = function (book) {
+  return TPP.textElementFieldPickerOptions(book, "front");
 };
 TPP.textElementFieldOptionsHtml = function (selected) {
   const options = TPP.bookInfoFieldOptions(TPP.active, {
