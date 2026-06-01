@@ -12,16 +12,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.classificationDialogSearchActiveIndex = -1;
   TPP.classificationDialogTargetEntryId = "";
   TPP.classificationDialogPath = [];
+  TPP.classificationDialogExtensionPath = [];
   TPP.classificationDialogSelection = {
     code: "",
     formatId: "",
     extension: "",
   };
   TPP.defaultClassificationFormatId = function () {
-    const system = TPP.classificationSystem && TPP.classificationSystem();
-    return String(
-      (system && system.defaultRecommendedFormat) || "code-short-author",
-    );
+    return "code-short-extension";
   };
   TPP.loadClassificationSystems = async function () {
     if (TPP.classificationCatalog) return TPP.classificationCatalog;
@@ -340,6 +338,47 @@ document.addEventListener("DOMContentLoaded", async function () {
       })
       .filter(Boolean);
   };
+  TPP.classificationExtensionPathForExtension = function (
+    parentCode,
+    extension,
+  ) {
+    const found = TPP.classificationExtensionNode(parentCode, extension);
+    return found ? found.path.slice() : [];
+  };
+  TPP.classificationExtensionChildren = function (parentCode, path) {
+    const group = TPP.classificationExtensionsForCode(parentCode);
+    let nodes = Array.isArray(group && group.children) ? group.children : [];
+    (Array.isArray(path) ? path : []).forEach(function (index) {
+      const node = nodes[index];
+      nodes = Array.isArray(node && node.children) ? node.children : [];
+    });
+    return nodes;
+  };
+  TPP.classificationExtensionNodeAtPath = function (parentCode, path) {
+    const fullPath = Array.isArray(path) ? path : [];
+    if (!fullPath.length) return null;
+    const parent = TPP.classificationExtensionChildren(
+      parentCode,
+      fullPath.slice(0, -1),
+    );
+    return parent[fullPath[fullPath.length - 1]] || null;
+  };
+  TPP.setClassificationDialogCode = function (code, extension) {
+    const nextCode = String(code || "");
+    const nextExtension = String(extension || "");
+    TPP.classificationDialogSelection.code = nextCode;
+    const validExtension =
+      nextCode &&
+      nextExtension &&
+      TPP.classificationExtensionNode(nextCode, nextExtension)
+        ? nextExtension
+        : "";
+    TPP.classificationDialogSelection.extension = validExtension;
+    TPP.classificationDialogSelection.formatId = "code-short-extension";
+    TPP.classificationDialogExtensionPath = validExtension
+      ? TPP.classificationExtensionPathForExtension(nextCode, validExtension)
+      : [];
+  };
   TPP.classificationSearchText = function (entry) {
     return [
       entry.fullCode,
@@ -354,6 +393,45 @@ document.addEventListener("DOMContentLoaded", async function () {
     ]
       .join(" ")
       .toLowerCase();
+  };
+  TPP.classificationFormattedCode = function (code, shortLabel, extension) {
+    const base = String(code || "").trim();
+    const label = String(shortLabel || "").trim();
+    const ext = String(extension || "")
+      .trim()
+      .replace(/^\.+/, "");
+    if (!base && !label) return "";
+    return base + (label ? "-" + label : "") + (ext ? "." + ext : "");
+  };
+  TPP.classificationExtensionOptions = function (parentCode) {
+    const baseNode = TPP.classificationNodeAtPath(
+      TPP.classificationPathForCode(parentCode),
+    );
+    const baseShortLabel = TPP.classificationShortLabel(baseNode || {});
+    const group = TPP.classificationExtensionsForCode(parentCode);
+    const options = [];
+    const walk = function (nodes, depth, pathLabels) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
+        if (!node) return;
+        const nextPath = pathLabels.concat(node.label || "");
+        options.push({
+          value: String(node.extension || ""),
+          label:
+            (depth ? "— ".repeat(depth) : "") +
+            TPP.classificationFormattedCode(
+              parentCode,
+              baseShortLabel,
+              node.extension,
+            ) +
+            " " +
+            String(node.label || ""),
+          pathLabel: nextPath.join(" > "),
+        });
+        walk(node.children, depth + 1, nextPath);
+      });
+    };
+    walk(group && group.children, 0, []);
+    return options;
   };
   TPP.buildClassificationSearchIndex = function () {
     const baseSystem = TPP.classificationSystem();
@@ -372,6 +450,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           code: String(node.code || ""),
           extension: "",
           fullCode: String(node.code || ""),
+          baseShortLabel: TPP.classificationShortLabel(node),
           shortLabel: TPP.classificationShortLabel(node),
           label: String(node.label || ""),
           pathLabel: nextLabels.join(" > "),
@@ -393,6 +472,12 @@ document.addEventListener("DOMContentLoaded", async function () {
           extension: String(node.extension || ""),
           fullCode:
             String(parentCode || "") + "." + String(node.extension || ""),
+          baseShortLabel:
+            TPP.classificationShortLabel(
+              TPP.classificationNodeAtPath(
+                TPP.classificationPathForCode(parentCode),
+              ) || {},
+            ) || "",
           shortLabel: TPP.classificationShortLabel(node),
           label: String(node.label || ""),
           pathLabel: basePath.concat(nextLabels).join(" > "),
@@ -485,7 +570,13 @@ document.addEventListener("DOMContentLoaded", async function () {
           ) +
           '">' +
           '<span class="classification-dialog-search-result-code">' +
-          TPP.esc(entry.fullCode) +
+          TPP.esc(
+            TPP.classificationFormattedCode(
+              entry.code,
+              entry.baseShortLabel || entry.shortLabel,
+              entry.extension,
+            ),
+          ) +
           '</span><span class="classification-dialog-search-result-main">' +
           '<span class="classification-dialog-search-result-label">' +
           TPP.esc(entry.label) +
@@ -506,8 +597,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.applyClassificationSearchSelection = function (selection) {
     const code = String((selection && selection.code) || "");
     const extension = String((selection && selection.extension) || "");
-    TPP.classificationDialogSelection.code = code;
-    TPP.classificationDialogSelection.extension = extension;
+    TPP.setClassificationDialogCode(code, extension);
     TPP.classificationDialogSelection.formatId = extension
       ? "code-short-extension"
       : TPP.defaultClassificationFormatId();
@@ -634,9 +724,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       systemId: String((payload && payload.systemId) || ""),
       code: String((payload && payload.code) || ""),
       shortLabel: String((payload && payload.shortLabel) || ""),
-      formatId: String(
-        (payload && payload.formatId) || TPP.defaultClassificationFormatId(),
-      ),
+      formatId: "code-short-extension",
       extension: String((payload && payload.extension) || ""),
     };
     if (!data.code && !data.shortLabel) return "";
@@ -812,6 +900,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     );
     if (selection) {
       if (selectedNode && selectedNode.code) {
+        const extensionGroup = TPP.classificationExtensionsForCode(
+          selectedNode.code,
+        );
+        const extensionOptions = TPP.classificationExtensionOptions(
+          selectedNode.code,
+        );
         const canAssign =
           !!selectedNode.allowAssign ||
           !(
@@ -841,25 +935,28 @@ document.addEventListener("DOMContentLoaded", async function () {
           (selectedNode.scopeNote
             ? '</div><div class="small">' + TPP.esc(selectedNode.scopeNote)
             : "") +
-          '</div></div><div class="classification-selection-controls"><label>Format<select id="classificationFormatSelect">' +
-          TPP.classificationFormats()
-            .map(function (format) {
-              return (
-                '<option value="' +
-                TPP.esc(format.id) +
-                '"' +
-                (format.id === TPP.classificationDialogSelection.formatId
-                  ? " selected"
-                  : "") +
-                ">" +
-                TPP.esc(format.label) +
-                "</option>"
-              );
-            })
-            .join("") +
-          '</select></label><label>Extension<input id="classificationExtensionInput" value="' +
-          TPP.esc(TPP.classificationDialogSelection.extension || "") +
-          '" placeholder="1"></label><div class="toolbar">' +
+          '</div></div><div class="classification-selection-controls">' +
+          (extensionGroup
+            ? '<label>Extension<select id="classificationExtensionSelect"><option value="">No extension</option>' +
+              extensionOptions
+                .map(function (option) {
+                  return (
+                    '<option value="' +
+                    TPP.esc(option.value) +
+                    '"' +
+                    (option.value ===
+                    String(TPP.classificationDialogSelection.extension || "")
+                      ? " selected"
+                      : "") +
+                    ">" +
+                    TPP.esc(option.label) +
+                    "</option>"
+                  );
+                })
+                .join("") +
+              "</select></label>"
+            : "") +
+          '<div class="toolbar">' +
           (canAssign
             ? '<button type="button" class="primary" data-classification-select="' +
               TPP.esc(selectedNode.code) +
@@ -918,12 +1015,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       currentValue && currentValue.value,
     );
     TPP.classificationDialogSelection = {
-      code: currentData.code || "",
+      code: "",
       formatId: currentData.formatId || TPP.defaultClassificationFormatId(),
-      extension: currentData.extension || "",
+      extension: "",
     };
     TPP.classificationDialogSearchQuery = "";
     TPP.classificationDialogSearchActiveIndex = -1;
+    TPP.setClassificationDialogCode(
+      currentData.code || "",
+      currentData.extension || "",
+    );
     TPP.classificationDialogPath =
       currentData.code && TPP.classificationPathForCode(currentData.code).length
         ? TPP.classificationPathForCode(currentData.code)
@@ -1648,18 +1749,19 @@ document.addEventListener("DOMContentLoaded", async function () {
   const classificationDialog = document.getElementById("classificationDialog");
   if (classificationDialog) {
     classificationDialog.addEventListener("change", function (e) {
-      const format = e.target.closest("#classificationFormatSelect");
-      if (format) {
-        TPP.classificationDialogSelection.formatId =
-          format.value || "code-short";
-        TPP.renderClassificationDialog();
-        return;
-      }
-      const extension = e.target.closest("#classificationExtensionInput");
-      if (extension) {
-        TPP.classificationDialogSelection.extension = String(
-          extension.value || "",
-        ).replace(/[^A-Za-z0-9_-]/g, "");
+      const extensionSelect = e.target.closest(
+        "#classificationExtensionSelect",
+      );
+      if (extensionSelect) {
+        const selectedExtension = String(extensionSelect.value || "");
+        TPP.classificationDialogSelection.extension = selectedExtension;
+        TPP.classificationDialogSelection.formatId = "code-short-extension";
+        TPP.classificationDialogExtensionPath = selectedExtension
+          ? TPP.classificationExtensionPathForExtension(
+              TPP.classificationDialogSelection.code,
+              selectedExtension,
+            )
+          : [];
         TPP.renderClassificationDialog();
       }
     });
@@ -1684,6 +1786,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (crumb) {
         const raw = crumb.dataset.classificationCrumb || "";
         TPP.classificationDialogPath = raw ? JSON.parse(raw) : [];
+        const crumbNode = TPP.classificationNodeAtPath(
+          TPP.classificationDialogPath,
+        );
+        TPP.setClassificationDialogCode(
+          (crumbNode && crumbNode.code) || "",
+          TPP.classificationDialogSelection.extension || "",
+        );
         TPP.renderClassificationDialog();
         return;
       }
@@ -1695,8 +1804,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         const selectedNode = TPP.classificationNodeAtPath(
           TPP.classificationDialogPath,
         );
-        TPP.classificationDialogSelection.code = String(
+        TPP.setClassificationDialogCode(
           (selectedNode && selectedNode.code) || "",
+          TPP.classificationDialogSelection.extension || "",
         );
         TPP.renderClassificationDialog();
         return;
@@ -1716,6 +1826,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         );
         const input = row && row.querySelector(".book-info-value");
         if (input) input.value = "";
+        TPP.classificationDialogSelection.code = "";
+        TPP.classificationDialogSelection.extension = "";
+        TPP.classificationDialogExtensionPath = [];
         TPP.sync("commit");
         TPP.loadForm();
         TPP.renderAll();
