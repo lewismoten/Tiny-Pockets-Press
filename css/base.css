@@ -1605,6 +1605,13 @@ input[type="checkbox"] {
 .classification-crumb.classification-crumb-extension.is-active {
   background: #bfe6df;
 }
+.classification-crumb.classification-crumb-hidden {
+  background: #efe2c7;
+  color: #7a4d14;
+}
+.classification-crumb.classification-crumb-hidden.is-active {
+  background: #e6d2a6;
+}
 .classification-crumb-sep {
   color: var(--muted);
   font-size: 0.82rem;

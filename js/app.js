@@ -1106,7 +1106,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         crumbs
           .map(function (crumb) {
             return (
-              '<span class="classification-crumb-sep">/</span><button type="button" class="classification-crumb is-active" data-classification-crumb="' +
+              '<span class="classification-crumb-sep">/</span><button type="button" class="classification-crumb is-active' +
+              (crumb.node && crumb.node.hidden
+                ? " classification-crumb-hidden"
+                : "") +
+              '" data-classification-crumb="' +
               TPP.esc(JSON.stringify(crumb.path)) +
               '">' +
               TPP.esc(crumb.node.label) +
