@@ -315,6 +315,10 @@ TPP.textAlignCycleButtonHtml = function (mode) {
     "</button>"
   );
 };
+TPP.finiteNumberOr = function (value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+};
 TPP.frontCoverFieldPickerOptions = function (book) {
   const used = new Set(
     TPP.textElementsForLocation(book, "front").map(function (entry) {
@@ -368,7 +372,7 @@ TPP.frontCoverTextRowHtml = function (book, element) {
     TPP.esc(String(Number(entry.size) || 4.2)) +
     '"></td>' +
     '<td><input class="text-y" type="range" min="0" max="100" value="' +
-    TPP.esc(String(Number(entry.y) || 0)) +
+    TPP.esc(String(TPP.finiteNumberOr(entry.y, 0))) +
     '"></td>' +
     "<td>" +
     TPP.textColorOutlineControlHtml(entry) +
@@ -379,7 +383,9 @@ TPP.frontCoverTextRowHtml = function (book, element) {
 TPP.textColorOutlineControlHtml = function (entry) {
   const textColor = entry.color || "#ffffff";
   const outlineColor = entry.outlineColor || "#000000";
-  const outlineSize = String(Math.max(0, Number(entry.outlineSize) || 0));
+  const outlineSize = String(
+    Math.max(0, TPP.finiteNumberOr(entry.outlineSize, 0)),
+  );
   const textInputId = "text-fill-" + TPP.uid();
   const outlineInputId = "text-outline-" + TPP.uid();
   return (
@@ -437,17 +443,17 @@ TPP.backCoverTextRowHtml = function (book, element) {
       : "") +
     "</div></td>" +
     '<td><input class="text-size" type="number" min="3" step=".5" value="' +
-    TPP.esc(String(Number(entry.size) || 4)) +
+    TPP.esc(String(TPP.finiteNumberOr(entry.size, 4))) +
     '"></td>' +
     '<td><div class="back-cover-slider-stack"><label><span>X</span><input class="text-x" type="range" min="0" max="100" value="' +
-    TPP.esc(String(Number(entry.x) || 50)) +
+    TPP.esc(String(TPP.finiteNumberOr(entry.x, 50))) +
     '"></label><label><span>Y</span><input class="text-y" type="range" min="0" max="100" value="' +
-    TPP.esc(String(Number(entry.y) || 0)) +
+    TPP.esc(String(TPP.finiteNumberOr(entry.y, 0))) +
     '"></label></div></td>' +
     '<td><div class="back-cover-align-stack">' +
     TPP.textAlignCycleButtonHtml(align) +
     '<label><input class="text-width" type="range" min="10" max="100" value="' +
-    TPP.esc(String(Number(entry.width) || 100)) +
+    TPP.esc(String(TPP.finiteNumberOr(entry.width, 100))) +
     '"></label></div></td>' +
     "<td>" +
     TPP.textColorOutlineControlHtml(entry) +
@@ -495,17 +501,17 @@ TPP.textElementGroupHtml = function (book, spec, element) {
     '<label>Size <input class="text-size" type="number" min="' +
     spec.minSize +
     '" step=".5" value="' +
-    TPP.esc(String(Number(entry.size) || spec.minSize)) +
+    TPP.esc(String(TPP.finiteNumberOr(entry.size, spec.minSize))) +
     '"></label>' +
     '<label>Y <input class="text-y" type="range" min="0" max="100" value="' +
-    TPP.esc(String(Number(entry.y) || 0)) +
+    TPP.esc(String(TPP.finiteNumberOr(entry.y, 0))) +
     '"></label>' +
     "</div>" +
     (spec.supportsX
       ? '<div class="two"><label>X <input class="text-x" type="range" min="0" max="100" value="' +
-        TPP.esc(String(Number(entry.x) || 50)) +
+        TPP.esc(String(TPP.finiteNumberOr(entry.x, 50))) +
         '"></label><label>Width <input class="text-width" type="range" min="10" max="100" value="' +
-        TPP.esc(String(Number(entry.width) || 100)) +
+        TPP.esc(String(TPP.finiteNumberOr(entry.width, 100))) +
         '"></label></div>'
       : "") +
     (spec.supportsAlign
@@ -533,7 +539,7 @@ TPP.textElementGroupHtml = function (book, spec, element) {
     TPP.esc(entry.outlineColor || "#000000") +
     '"></label></div>' +
     '<label>Outline px <input class="text-outline-size" type="number" min="0" step=".25" value="' +
-    TPP.esc(String(Math.max(0, Number(entry.outlineSize) || 0))) +
+    TPP.esc(String(Math.max(0, TPP.finiteNumberOr(entry.outlineSize, 0)))) +
     '"></label>' +
     "</section>"
   );
@@ -614,14 +620,17 @@ TPP.readSingleTextElementGroup = function (book, group) {
   }
   element.size =
     Number(group.querySelector(".text-size")?.value) || element.size || 4;
-  element.y = Number(group.querySelector(".text-y")?.value) || 0;
+  element.y = TPP.finiteNumberOr(group.querySelector(".text-y")?.value, 0);
   if (group.querySelector(".text-x")) {
-    element.x = Number(group.querySelector(".text-x").value) || 50;
+    element.x = TPP.finiteNumberOr(group.querySelector(".text-x").value, 50);
   }
   if (group.querySelector(".text-width")) {
     element.width = Math.max(
       10,
-      Math.min(100, Number(group.querySelector(".text-width").value) || 100),
+      Math.min(
+        100,
+        TPP.finiteNumberOr(group.querySelector(".text-width").value, 100),
+      ),
     );
   }
   if (group.querySelector(".text-align")) {
@@ -635,7 +644,7 @@ TPP.readSingleTextElementGroup = function (book, group) {
     group.querySelector(".text-outline-color")?.value || element.outlineColor;
   element.outlineSize = Math.max(
     0,
-    Number(group.querySelector(".text-outline-size")?.value) || 0,
+    TPP.finiteNumberOr(group.querySelector(".text-outline-size")?.value, 0),
   );
 };
 TPP.readSingleCopyrightItemGroup = function (book, group) {
@@ -800,15 +809,15 @@ TPP.addTextElement = function (book, location, fieldKey) {
     size:
       Number(lastElement && lastElement.size) ||
       (location === "front" ? 4.2 : 4),
-    x: Number(lastElement && lastElement.x) || 50,
-    y: Number(lastElement && lastElement.y) || 50,
+    x: TPP.finiteNumberOr(lastElement && lastElement.x, 50),
+    y: TPP.finiteNumberOr(lastElement && lastElement.y, 50),
     width: Math.max(10, Number(lastElement && lastElement.width) || 100),
     align: (lastElement && lastElement.align) || spec.defaultAlign,
     color: (lastElement && lastElement.color) || "#ffffff",
     outlineColor: (lastElement && lastElement.outlineColor) || "#000000",
     outlineSize: Math.max(
       0,
-      Number(lastElement && lastElement.outlineSize) || 0,
+      TPP.finiteNumberOr(lastElement && lastElement.outlineSize, 0),
     ),
     rotate: Boolean(lastElement && lastElement.rotate),
     customText: "",

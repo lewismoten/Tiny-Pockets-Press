@@ -24,22 +24,31 @@ TPP.stroke = function (enabled, size, color) {
 TPP.strokeWidth = function (size) {
   return Number(size) > 0 ? Number(size) + "px" : "0px";
 };
+TPP.finiteNumberOr =
+  TPP.finiteNumberOr ||
+  function (value, fallback) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : fallback;
+  };
 TPP.textBoxStyle = function (element, options) {
   const entry = element || {};
   const centerX = Number(options && options.centerX);
-  const x = Number(entry.x) || 0;
-  const y = Number(entry.y) || 0;
-  const width = Math.max(10, Math.min(100, Number(entry.width) || 100));
+  const x = TPP.finiteNumberOr(entry.x, centerX);
+  const y = TPP.finiteNumberOr(entry.y, 0);
+  const width = Math.max(
+    10,
+    Math.min(100, TPP.finiteNumberOr(entry.width, 100)),
+  );
   const align = ["left", "center", "right", "justify"].includes(entry.align)
     ? entry.align
     : "center";
   const clip = entry.align === "clip";
   const rotate = entry.rotate ? " rotate(90deg)" : "";
   return [
-    "left:" + (Number.isFinite(centerX) ? centerX : 50) + "%",
+    "left:" + (Number.isFinite(x) ? x : 50) + "%",
     "top:" + y + "%",
     "width:" + width + "%",
-    "transform:translateX(calc(-50% + " + x + "%))" + rotate,
+    "transform:translateX(-50%)" + rotate,
     "text-align:" + (clip ? "left" : align),
     "text-align-last:" + (clip ? "left" : align),
     "color:" + (entry.color || "#ffffff"),
@@ -53,9 +62,12 @@ TPP.textBoxStyle = function (element, options) {
 };
 TPP.spineTextStyle = function (element, titleLengthIn) {
   const entry = element || {};
-  const x = Number(entry.x) || 50;
-  const y = Number(entry.y) || 0;
-  const width = Math.max(10, Math.min(100, Number(entry.width) || 100));
+  const x = TPP.finiteNumberOr(entry.x, 50);
+  const y = TPP.finiteNumberOr(entry.y, 0);
+  const width = Math.max(
+    10,
+    Math.min(100, TPP.finiteNumberOr(entry.width, 100)),
+  );
   const align = ["left", "center", "right", "justify"].includes(entry.align)
     ? entry.align
     : "left";

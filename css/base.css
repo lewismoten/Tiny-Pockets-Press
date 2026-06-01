@@ -1215,6 +1215,20 @@ input[type="checkbox"] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.range-value-tooltip {
+  position: fixed;
+  z-index: 1200;
+  pointer-events: none;
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  background: rgb(28 24 20 / 0.92);
+  color: #fffaf2;
+  font-size: 0.72rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.22);
+  white-space: nowrap;
+}
 .is-dragging {
   background: #fff8e8;
   box-shadow: inset 0 0 0 1px #ead9ba;

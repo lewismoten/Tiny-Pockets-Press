@@ -5,6 +5,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   dragPreview.innerHTML =
     '<span class="drag-preview-handle">⋮⋮</span><span class="drag-preview-label"></span>';
   document.body.appendChild(dragPreview);
+  const rangeValueTooltip = document.createElement("div");
+  rangeValueTooltip.className = "range-value-tooltip";
+  rangeValueTooltip.hidden = true;
+  rangeValueTooltip.setAttribute("aria-hidden", "true");
+  document.body.appendChild(rangeValueTooltip);
   TPP.classificationCatalog = null;
   TPP.classificationExtensionsCatalog = null;
   TPP.classificationSearchIndex = [];
@@ -35,6 +40,65 @@ document.addEventListener("DOMContentLoaded", async function () {
     activeIndex: -1,
   };
   TPP.readerVisiblePageRoles = [];
+  TPP.rangeValueText = function (input) {
+    if (!input) return "";
+    const numericValue = Number(input.value);
+    const step = Number(input.step);
+    const decimals =
+      Number.isFinite(step) && step > 0 && !Number.isInteger(step)
+        ? String(step).split(".")[1]?.length || 0
+        : 0;
+    const valueText = Number.isFinite(numericValue)
+      ? numericValue
+          .toFixed(decimals)
+          .replace(/\.0+$/, "")
+          .replace(/(\.\d*?)0+$/, "$1")
+      : String(input.value || "");
+    const label = String(
+      input.dataset.rangeLabel ||
+        input.getAttribute("aria-label") ||
+        input.closest("label")?.textContent ||
+        "",
+    )
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(
+        new RegExp(valueText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"),
+        "",
+      )
+      .trim();
+    return (label ? label + ": " : "") + valueText;
+  };
+  TPP.positionRangeValueTooltip = function (input) {
+    if (!input || !rangeValueTooltip) return;
+    const text = TPP.rangeValueText(input);
+    input.title = text;
+    input.setAttribute("aria-valuetext", text);
+    rangeValueTooltip.textContent = text;
+    rangeValueTooltip.hidden = false;
+    const rect = input.getBoundingClientRect();
+    const tipRect = rangeValueTooltip.getBoundingClientRect();
+    const left = rect.left + rect.width / 2 - tipRect.width / 2;
+    const top = rect.top + window.scrollY - tipRect.height - 8;
+    rangeValueTooltip.style.left =
+      Math.round(
+        Math.max(8, Math.min(window.innerWidth - tipRect.width - 8, left)),
+      ) + "px";
+    rangeValueTooltip.style.top = Math.round(Math.max(8, top)) + "px";
+  };
+  TPP.hideRangeValueTooltip = function () {
+    if (!rangeValueTooltip) return;
+    rangeValueTooltip.hidden = true;
+  };
+  TPP.refreshRangeInputTitles = function (root) {
+    (root || document)
+      .querySelectorAll('input[type="range"]')
+      .forEach(function (input) {
+        const text = TPP.rangeValueText(input);
+        input.title = text;
+        input.setAttribute("aria-valuetext", text);
+      });
+  };
   TPP.defaultClassificationFormatId = function () {
     const system = TPP.classificationSystem();
     const configuredDefault = String(
@@ -2135,6 +2199,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     else if (TPP.view === "reader") TPP.renderReader();
     else if (TPP.view === "library") TPP.renderLibrary();
     if (TPP.renderColorPalettes) TPP.renderColorPalettes();
+    if (TPP.refreshRangeInputTitles) TPP.refreshRangeInputTitles(document);
   };
   TPP.patchCoverPreviewSurface = function (location) {
     const side = location === "back" ? "back" : "front";
@@ -2688,6 +2753,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     const el = document.getElementById(id);
     if (!el) return;
     el.oninput = function () {
+      if (el.type === "range" && TPP.positionRangeValueTooltip) {
+        TPP.positionRangeValueTooltip(el);
+      }
       if (
         TPP.applyCoverImageFieldDraft &&
         TPP.applyCoverImageFieldDraft(id, el)
@@ -2721,6 +2789,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.renderAll();
     };
     el.onchange = function () {
+      if (el.type === "range" && TPP.positionRangeValueTooltip) {
+        TPP.positionRangeValueTooltip(el);
+      }
       if (
         TPP.applyCoverImageFieldDraft &&
         TPP.applyCoverImageFieldDraft(id, el)
@@ -2779,6 +2850,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       });
     };
     controls.addEventListener("input", function (e) {
+      if (
+        e.target.matches('input[type="range"]') &&
+        TPP.positionRangeValueTooltip
+      ) {
+        TPP.positionRangeValueTooltip(e.target);
+      }
       const bookInfoEntry = e.target.closest(".book-info-entry");
       const textElementEntry = e.target.closest(".text-element-group");
       const copyrightItem = e.target.closest(".copyright-item-group");
@@ -2839,6 +2916,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       scheduleEditorRender("full", draftRenderOptions);
     });
     controls.addEventListener("change", function (e) {
+      if (
+        e.target.matches('input[type="range"]') &&
+        TPP.positionRangeValueTooltip
+      ) {
+        TPP.positionRangeValueTooltip(e.target);
+      }
       const bookInfoEntry = e.target.closest(".book-info-entry");
       const textElementEntry = e.target.closest(".text-element-group");
       const copyrightItem = e.target.closest(".copyright-item-group");
@@ -2992,6 +3075,38 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.save();
         TPP.renderAll();
         return;
+      }
+    });
+    controls.addEventListener("focusin", function (e) {
+      if (
+        e.target.matches('input[type="range"]') &&
+        TPP.positionRangeValueTooltip
+      ) {
+        TPP.positionRangeValueTooltip(e.target);
+      }
+    });
+    controls.addEventListener("pointerdown", function (e) {
+      if (
+        e.target.matches('input[type="range"]') &&
+        TPP.positionRangeValueTooltip
+      ) {
+        TPP.positionRangeValueTooltip(e.target);
+      }
+    });
+    controls.addEventListener("focusout", function (e) {
+      if (
+        e.target.matches('input[type="range"]') &&
+        TPP.hideRangeValueTooltip
+      ) {
+        TPP.hideRangeValueTooltip();
+      }
+    });
+    controls.addEventListener("pointerup", function (e) {
+      if (
+        e.target.matches('input[type="range"]') &&
+        TPP.hideRangeValueTooltip
+      ) {
+        window.setTimeout(TPP.hideRangeValueTooltip, 250);
       }
     });
     controls.addEventListener("mousedown", function (e) {
