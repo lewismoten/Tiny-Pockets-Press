@@ -1260,6 +1260,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         shortLabel: "",
         formatId: TPP.defaultClassificationFormatId(),
         extension: "",
+        title: "",
+        meta: "",
       };
     try {
       const parsed = JSON.parse(raw);
@@ -1271,6 +1273,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             parsed.formatId || TPP.defaultClassificationFormatId(),
           ),
           extension: String(parsed.extension || ""),
+          title: String(parsed.title || ""),
+          meta: String(parsed.meta || ""),
         };
       }
     } catch (_error) {}
@@ -1279,14 +1283,20 @@ document.addEventListener("DOMContentLoaded", async function () {
       shortLabel: "",
       formatId: TPP.defaultClassificationFormatId(),
       extension: "",
+      title: "",
+      meta: "",
     };
   };
   TPP.classificationStorageValue = function (payload) {
     const data = {
       code: String((payload && payload.code) || ""),
       shortLabel: String((payload && payload.shortLabel) || ""),
-      formatId: TPP.defaultClassificationFormatId(),
+      formatId: String(
+        (payload && payload.formatId) || TPP.defaultClassificationFormatId(),
+      ),
       extension: String((payload && payload.extension) || ""),
+      title: String((payload && payload.title) || ""),
+      meta: String((payload && payload.meta) || ""),
     };
     if (!data.code && !data.shortLabel) return "";
     return JSON.stringify(data);
@@ -1305,6 +1315,49 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.classificationLanguageCountry = function (book) {
     return String(TPP.bookInfoValue(book, "languageCountry") || "").trim();
   };
+  TPP.cachedClassificationResolution = function (book, entryId, value) {
+    if (!book || !entryId || !TPP.bookInfoEntryById) return null;
+    const entry = TPP.bookInfoEntryById(book, entryId);
+    if (!entry || entry.key !== "classification") return null;
+    const data = TPP.classificationValueData(value);
+    return {
+      title: String(data.title || ""),
+      meta: String(data.meta || ""),
+    };
+  };
+  TPP.setCachedClassificationResolution = function (
+    book,
+    entryId,
+    value,
+    summary,
+  ) {
+    if (!book || !entryId || !TPP.bookInfoEntryById) return;
+    const entry = TPP.bookInfoEntryById(book, entryId);
+    if (!entry || entry.key !== "classification") return;
+    entry.customLabel = "";
+    if (!String(value || "").trim()) {
+      entry.value = "";
+      return;
+    }
+    entry.value = TPP.classificationStorageValue(
+      Object.assign({}, TPP.classificationValueData(value), {
+        title: String((summary && summary.title) || ""),
+        meta: String((summary && summary.meta) || ""),
+      }),
+    );
+  };
+  TPP.classificationFallbackDisplayString = function (book, value) {
+    const data =
+      typeof value === "string" ? TPP.classificationValueData(value) : value;
+    if (!data || (!data.code && !data.shortLabel)) return "";
+    const code = String(data.code || "").trim();
+    const shortLabel = String(data.shortLabel || "").trim();
+    const extension = String(data.extension || "").replace(/^\.+/, "");
+    if (code && shortLabel) {
+      return code + "-" + shortLabel + (extension ? "." + extension : "");
+    }
+    return code || shortLabel;
+  };
   TPP.classificationNodeForData = function (data) {
     const path = TPP.classificationPathForData(data);
     return path.length ? TPP.classificationNodeAtPath(path) : null;
@@ -1320,7 +1373,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             shortLabel: data.shortLabel || data.code,
           }
         : null);
-    if (!node) return "";
+    if (!node) {
+      return TPP.classificationFallbackDisplayString(book, data);
+    }
     const format =
       TPP.classificationFormats().find(function (entry) {
         return entry && entry.id === data.formatId;
@@ -1349,7 +1404,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       .replace(/\s+/g, " ")
       .trim();
   };
-  TPP.classificationSummary = function (value) {
+  TPP.computeClassificationSummary = function (value) {
     const data = TPP.classificationValueData(value);
     if (!data.code && !data.shortLabel)
       return {
@@ -1399,6 +1454,34 @@ document.addEventListener("DOMContentLoaded", async function () {
     return {
       title: TPP.classificationDisplayString(TPP.active, data) || data.code,
       meta: "Custom or unknown shelfmark",
+    };
+  };
+  TPP.classificationSummary = function (value, options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const book = settings.book || TPP.active || null;
+    const entryId = String(settings.entryId || "").trim();
+    const data = TPP.classificationValueData(value);
+    if (!data.code && !data.shortLabel) {
+      return {
+        title: "Choose classification",
+        meta: "No classification selected",
+      };
+    }
+    const cached = TPP.cachedClassificationResolution(book, entryId, value);
+    if (cached && (cached.title || cached.meta)) {
+      return {
+        title: String(cached.title || "") || "Choose classification",
+        meta:
+          String(cached.meta || "") ||
+          "Open classification picker for full path",
+      };
+    }
+    if (TPP.classificationCatalog && TPP.classificationExtensionsCatalog) {
+      return TPP.computeClassificationSummary(value);
+    }
+    return {
+      title: TPP.classificationFallbackDisplayString(book, data) || data.code,
+      meta: "Open classification picker for full path",
     };
   };
   TPP.renderClassificationDialog = function () {
@@ -1708,7 +1791,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const selectedNode = TPP.classificationNodeAtPath(
       TPP.classificationDialogPath,
     );
-    input.value = selectedNode
+    const rawValue = selectedNode
       ? TPP.classificationStorageValue({
           code: selectedNode.code,
           shortLabel: TPP.classificationShortLabel(selectedNode),
@@ -1718,6 +1801,20 @@ document.addEventListener("DOMContentLoaded", async function () {
           extension: TPP.classificationDialogSelection.extension || "",
         })
       : "";
+    const summary = selectedNode
+      ? TPP.computeClassificationSummary(rawValue)
+      : null;
+    TPP.setCachedClassificationResolution(
+      TPP.active,
+      TPP.classificationDialogTargetEntryId,
+      rawValue,
+      summary,
+    );
+    const entry = TPP.bookInfoEntryById(
+      TPP.active,
+      TPP.classificationDialogTargetEntryId,
+    );
+    input.value = entry ? String(entry.value || "") : rawValue;
     TPP.sync("commit");
     TPP.loadForm();
     TPP.renderAll();
@@ -1726,9 +1823,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.populate();
   await TPP.load();
   await TPP.loadStaleKeyLookup();
-  await TPP.loadClassificationSystems();
-  await TPP.loadClassificationExtensions();
-  TPP.buildClassificationReverseSeeAlsoIndex();
   TPP.view = TPP.initialView();
   if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();

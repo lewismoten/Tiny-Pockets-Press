@@ -824,6 +824,33 @@ TPP.bookInfoFieldSpec = function (key) {
 };
 TPP.normalizeBookInfoEntries = function (book) {
   const source = book && book.bookInfo;
+  const legacyClassificationResolutions =
+    book &&
+    book.meta &&
+    book.meta.classificationResolutions &&
+    typeof book.meta.classificationResolutions === "object"
+      ? book.meta.classificationResolutions
+      : {};
+  const normalizeClassificationValue = function (rawValue, metaText) {
+    const value = String(rawValue || "");
+    const extraMeta = String(metaText || "");
+    if (!value) return "";
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === "object") {
+        const normalized = {
+          code: String(parsed.code || ""),
+          shortLabel: String(parsed.shortLabel || ""),
+          formatId: String(parsed.formatId || ""),
+          extension: String(parsed.extension || ""),
+          title: String(parsed.title || ""),
+          meta: String(parsed.meta || extraMeta || ""),
+        };
+        return JSON.stringify(normalized);
+      }
+    } catch (_error) {}
+    return value;
+  };
   let entries = [];
   if (Array.isArray(source)) {
     entries = source
@@ -835,11 +862,42 @@ TPP.normalizeBookInfoEntries = function (book) {
             ? "custom"
             : "";
         if (!key) return null;
+        const resolution =
+          key === "classification"
+            ? entry.classificationSummary ||
+              legacyClassificationResolutions[
+                entry.id || TPP.bookInfoEntryId(key, index + 1)
+              ]
+            : null;
+        const classificationValue =
+          key === "classification"
+            ? (function () {
+                const normalizedValue = normalizeClassificationValue(
+                  entry.value,
+                  resolution && resolution.meta,
+                );
+                if (!normalizedValue) return "";
+                try {
+                  const parsed = JSON.parse(normalizedValue);
+                  if (parsed && typeof parsed === "object") {
+                    parsed.title = String(
+                      parsed.title ||
+                        entry.customLabel ||
+                        (resolution && resolution.title) ||
+                        "",
+                    );
+                    return JSON.stringify(parsed);
+                  }
+                } catch (_error) {}
+                return normalizedValue;
+              })()
+            : String(entry.value || "");
         return {
           id: entry.id || TPP.bookInfoEntryId(key, index + 1),
           key: key,
-          value: String(entry.value || ""),
-          customLabel: String(entry.customLabel || ""),
+          value: classificationValue,
+          customLabel:
+            key === "classification" ? "" : String(entry.customLabel || ""),
         };
       })
       .filter(Boolean);
@@ -878,6 +936,14 @@ TPP.normalizeBookInfoEntries = function (book) {
   entries.forEach(function (entry) {
     if (entry.key === "custom") normalized.push(entry);
   });
+  if (
+    book &&
+    book.meta &&
+    book.meta.classificationResolutions &&
+    typeof book.meta.classificationResolutions === "object"
+  ) {
+    delete book.meta.classificationResolutions;
+  }
   return normalized;
 };
 TPP.bookInfo = function (book) {
@@ -889,6 +955,15 @@ TPP.bookInfoEntry = function (book, key) {
   return (
     TPP.bookInfo(book).find(function (entry) {
       return entry && entry.key === key;
+    }) || null
+  );
+};
+TPP.bookInfoEntryById = function (book, entryId) {
+  const target = String(entryId || "").trim();
+  if (!target) return null;
+  return (
+    TPP.bookInfo(book).find(function (entry) {
+      return entry && String(entry.id || "") === target;
     }) || null
   );
 };
@@ -2261,6 +2336,7 @@ TPP.compactBookMeta = function (book) {
   if (!meta.lastImportedAt) delete meta.lastImportedAt;
   if (!Array.isArray(meta.provenance) || !meta.provenance.length)
     delete meta.provenance;
+  if (meta.classificationResolutions) delete meta.classificationResolutions;
 };
 TPP.bookExportName = function (book) {
   if (!book) return "book.book";

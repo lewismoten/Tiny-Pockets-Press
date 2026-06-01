@@ -23,7 +23,10 @@ TPP.bookInfoFieldInputHtml = function (entry) {
   const value = String(entry.value || "");
   if (spec.input === "classification") {
     const summary = TPP.classificationSummary
-      ? TPP.classificationSummary(value)
+      ? TPP.classificationSummary(value, {
+          book: TPP.active,
+          entryId: entry.id || "",
+        })
       : value;
     return (
       '<div class="book-info-classification-picker">' +
@@ -139,11 +142,14 @@ TPP.readBookInfoControls = function (book) {
         return item && item.id === row.dataset.entryId;
       });
       if (!entry) return null;
+      const customLabelInput = row.querySelector(".book-info-custom-label");
       return {
         id: entry.id,
         key: entry.key,
         value: row.querySelector(".book-info-value")?.value || "",
-        customLabel: row.querySelector(".book-info-custom-label")?.value || "",
+        customLabel: customLabelInput
+          ? customLabelInput.value || ""
+          : String(entry.customLabel || ""),
       };
     })
     .filter(Boolean);
