@@ -11,8 +11,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.classificationDialogPath = [];
   TPP.classificationDialogSelection = {
     code: "",
-    formatId: "code-short",
+    formatId: "",
     extension: "",
+  };
+  TPP.defaultClassificationFormatId = function () {
+    const system = TPP.classificationSystem && TPP.classificationSystem();
+    return String(
+      (system && system.defaultRecommendedFormat) || "code-short-author",
+    );
   };
   TPP.loadClassificationSystems = async function () {
     if (TPP.classificationCatalog) return TPP.classificationCatalog;
@@ -83,37 +89,41 @@ document.addEventListener("DOMContentLoaded", async function () {
     const explicit = String((node && node.shortLabel) || "")
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "");
-    if (explicit) return explicit.slice(0, 3);
+    if (explicit) return explicit.slice(0, 4);
     const label = String((node && node.label) || "")
       .toUpperCase()
-      .replace(/[^A-Z0-9]/g, "");
-    if (label.length >= 3) return label.slice(0, 3);
+      .replace(/[^A-Z]/g, "");
+    if (label.length >= 3) return label.slice(0, 4);
     const code = String((node && node.code) || "")
       .toUpperCase()
-      .replace(/[^A-Z0-9]/g, "");
-    return (label + code + "XXX").slice(0, 3);
+      .replace(/[^A-Z]/g, "");
+    return (label + code + "XXXX").slice(0, 4);
   };
   TPP.uniqueClassificationShortLabel = function (node, used) {
     const seed = TPP.classificationShortLabelSeed(node);
-    const code = String((node && node.code) || "")
+    const label = String((node && node.label) || "")
       .toUpperCase()
-      .replace(/[^A-Z0-9]/g, "");
-    const candidates = [
-      seed,
-      (seed.slice(0, 2) + code.slice(-1)).padEnd(3, "X").slice(0, 3),
-      (seed.slice(0, 1) + code.slice(-2)).padEnd(3, "X").slice(0, 3),
-      (seed.slice(0, 1) + code.slice(0, 2)).padEnd(3, "X").slice(0, 3),
-    ];
+      .replace(/[^A-Z]/g, "");
+    const candidates = [seed.slice(0, 3), seed.slice(0, 4)];
+    for (let i = 0; i < label.length; i += 1) {
+      const candidate = (seed.slice(0, 2) + label.slice(i, i + 2))
+        .replace(/[^A-Z]/g, "")
+        .padEnd(4, "X")
+        .slice(0, 4);
+      candidates.push(candidate.slice(0, 3), candidate);
+    }
     for (const candidate of candidates) {
       if (candidate && !used.has(candidate)) return candidate;
     }
-    const prefix = seed.slice(0, 1) || "X";
-    for (let i = 0; i < 1296; i += 1) {
-      const suffix = i.toString(36).toUpperCase().padStart(2, "0");
-      const candidate = (prefix + suffix).slice(0, 3);
+    const prefix = seed.slice(0, 2) || "X";
+    for (let i = 0; i < 676; i += 1) {
+      const suffix =
+        String.fromCharCode(65 + Math.floor(i / 26)) +
+        String.fromCharCode(65 + (i % 26));
+      const candidate = (prefix + suffix).slice(0, 4);
       if (!used.has(candidate)) return candidate;
     }
-    return ("X" + Date.now().toString(36).toUpperCase()).slice(0, 3);
+    return ("X" + label + "XXXX").slice(0, 4);
   };
   TPP.normalizeClassificationCatalog = function (catalog) {
     const used = new Set();
@@ -127,6 +137,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         node.sort = Number(node.sort || node.code || position);
         node.seeAlso = Array.isArray(node.seeAlso) ? node.seeAlso : [];
         node.keywords = Array.isArray(node.keywords) ? node.keywords : [];
+        node.includes = Array.isArray(node.includes) ? node.includes : [];
+        node.scopeNote = String(node.scopeNote || "");
+        node.historyNote = String(node.historyNote || "");
+        node.allowAssign =
+          typeof node.allowAssign === "boolean"
+            ? node.allowAssign
+            : !(Array.isArray(node.children) && node.children.length);
         const shortLabel = TPP.uniqueClassificationShortLabel(node, used);
         used.add(shortLabel);
         node.shortLabel = shortLabel;
@@ -137,6 +154,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     (Array.isArray(catalog && catalog.systems) ? catalog.systems : []).forEach(
       function (system) {
         system.version = String(system.version || "1.0.0");
+        system.defaultRecommendedFormat = String(
+          system.defaultRecommendedFormat || "code-short-author",
+        );
         system.formats =
           Array.isArray(system.formats) && system.formats.length
             ? system.formats
@@ -151,37 +171,41 @@ document.addEventListener("DOMContentLoaded", async function () {
     const explicit = String((node && node.shortLabel) || "")
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "");
-    if (explicit) return explicit.slice(0, 3);
+    if (explicit) return explicit.slice(0, 4);
     const label = String((node && node.label) || "")
       .toUpperCase()
-      .replace(/[^A-Z0-9]/g, "");
-    if (label.length >= 3) return label.slice(0, 3);
+      .replace(/[^A-Z]/g, "");
+    if (label.length >= 3) return label.slice(0, 4);
     const extension = String((node && node.extension) || "")
       .toUpperCase()
-      .replace(/[^A-Z0-9]/g, "");
-    return (label + extension + "XXX").slice(0, 3);
+      .replace(/[^A-Z]/g, "");
+    return (label + extension + "XXXX").slice(0, 4);
   };
   TPP.uniqueClassificationExtensionShortLabel = function (node, used) {
     const seed = TPP.classificationExtensionShortLabelSeed(node);
-    const extension = String((node && node.extension) || "")
+    const label = String((node && node.label) || "")
       .toUpperCase()
-      .replace(/[^A-Z0-9]/g, "");
-    const candidates = [
-      seed,
-      (seed.slice(0, 2) + extension.slice(-1)).padEnd(3, "X").slice(0, 3),
-      (seed.slice(0, 1) + extension.slice(-2)).padEnd(3, "X").slice(0, 3),
-      (seed.slice(0, 1) + extension.slice(0, 2)).padEnd(3, "X").slice(0, 3),
-    ];
+      .replace(/[^A-Z]/g, "");
+    const candidates = [seed.slice(0, 3), seed.slice(0, 4)];
+    for (let i = 0; i < label.length; i += 1) {
+      const candidate = (seed.slice(0, 2) + label.slice(i, i + 2))
+        .replace(/[^A-Z]/g, "")
+        .padEnd(4, "X")
+        .slice(0, 4);
+      candidates.push(candidate.slice(0, 3), candidate);
+    }
     for (const candidate of candidates) {
       if (candidate && !used.has(candidate)) return candidate;
     }
-    const prefix = seed.slice(0, 1) || "X";
-    for (let i = 0; i < 1296; i += 1) {
-      const suffix = i.toString(36).toUpperCase().padStart(2, "0");
-      const candidate = (prefix + suffix).slice(0, 3);
+    const prefix = seed.slice(0, 2) || "X";
+    for (let i = 0; i < 676; i += 1) {
+      const suffix =
+        String.fromCharCode(65 + Math.floor(i / 26)) +
+        String.fromCharCode(65 + (i % 26));
+      const candidate = (prefix + suffix).slice(0, 4);
       if (!used.has(candidate)) return candidate;
     }
-    return ("X" + Date.now().toString(36).toUpperCase()).slice(0, 3);
+    return ("X" + label + "XXXX").slice(0, 4);
   };
   TPP.normalizeClassificationExtensionsCatalog = function (catalog) {
     const shortLabelIndex = {};
@@ -203,6 +227,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         normalized.keywords = Array.isArray(normalized.keywords)
           ? normalized.keywords
           : [];
+        normalized.includes = Array.isArray(normalized.includes)
+          ? normalized.includes
+          : [];
+        normalized.scopeNote = String(normalized.scopeNote || "");
+        normalized.historyNote = String(normalized.historyNote || "");
+        normalized.allowAssign =
+          typeof normalized.allowAssign === "boolean"
+            ? normalized.allowAssign
+            : !(
+                Array.isArray(normalized.children) && normalized.children.length
+              );
         const shortLabel = TPP.uniqueClassificationExtensionShortLabel(
           normalized,
           used,
@@ -351,7 +386,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         systemId: "",
         code: "",
         shortLabel: "",
-        formatId: "code-short",
+        formatId: TPP.defaultClassificationFormatId(),
         extension: "",
       };
     try {
@@ -361,7 +396,9 @@ document.addEventListener("DOMContentLoaded", async function () {
           systemId: String(parsed.systemId || ""),
           code: String(parsed.code || ""),
           shortLabel: String(parsed.shortLabel || ""),
-          formatId: String(parsed.formatId || "code-short"),
+          formatId: String(
+            parsed.formatId || TPP.defaultClassificationFormatId(),
+          ),
           extension: String(parsed.extension || ""),
         };
       }
@@ -370,7 +407,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       systemId: "",
       code: raw,
       shortLabel: "",
-      formatId: "code-short",
+      formatId: TPP.defaultClassificationFormatId(),
       extension: "",
     };
   };
@@ -379,7 +416,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       systemId: String((payload && payload.systemId) || ""),
       code: String((payload && payload.code) || ""),
       shortLabel: String((payload && payload.shortLabel) || ""),
-      formatId: String((payload && payload.formatId) || "code-short"),
+      formatId: String(
+        (payload && payload.formatId) || TPP.defaultClassificationFormatId(),
+      ),
       extension: String((payload && payload.extension) || ""),
     };
     if (!data.code && !data.shortLabel) return "";
@@ -424,7 +463,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       TPP.classificationFormats().find(function (entry) {
         return entry && entry.id === data.formatId;
       }) ||
-      TPP.classificationFormats()[1] ||
+      TPP.classificationFormats().find(function (entry) {
+        return entry && entry.id === TPP.defaultClassificationFormatId();
+      }) ||
       TPP.classificationFormats()[0];
     const extension = String((data && data.extension) || "").replace(
       /^\.+/,
@@ -536,11 +577,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     );
     if (selection) {
       if (selectedNode && selectedNode.code) {
+        const canAssign =
+          !!selectedNode.allowAssign ||
+          !(
+            Array.isArray(selectedNode.children) && selectedNode.children.length
+          );
         const preview = TPP.classificationDisplayString(TPP.active, {
           systemId: (system && system.id) || "",
           code: selectedNode.code,
           shortLabel: TPP.classificationShortLabel(selectedNode),
-          formatId: TPP.classificationDialogSelection.formatId || "code-short",
+          formatId:
+            TPP.classificationDialogSelection.formatId ||
+            TPP.defaultClassificationFormatId(),
           extension: TPP.classificationDialogSelection.extension || "",
         });
         selection.hidden = false;
@@ -555,6 +603,9 @@ document.addEventListener("DOMContentLoaded", async function () {
               })
               .join(" > "),
           ) +
+          (selectedNode.scopeNote
+            ? '</div><div class="small">' + TPP.esc(selectedNode.scopeNote)
+            : "") +
           '</div></div><div class="classification-selection-controls"><label>Format<select id="classificationFormatSelect">' +
           TPP.classificationFormats()
             .map(function (format) {
@@ -573,9 +624,13 @@ document.addEventListener("DOMContentLoaded", async function () {
             .join("") +
           '</select></label><label>Extension<input id="classificationExtensionInput" value="' +
           TPP.esc(TPP.classificationDialogSelection.extension || "") +
-          '" placeholder="1234"></label><div class="toolbar"><button type="button" class="primary" data-classification-select="' +
-          TPP.esc(selectedNode.code) +
-          '">Use This Shelfmark</button><button type="button" data-classification-clear="1">Clear</button></div>';
+          '" placeholder="1"></label><div class="toolbar">' +
+          (canAssign
+            ? '<button type="button" class="primary" data-classification-select="' +
+              TPP.esc(selectedNode.code) +
+              '">Use This Shelfmark</button>'
+            : "") +
+          '<button type="button" data-classification-clear="1">Clear</button></div>';
       } else {
         selection.hidden = true;
         selection.innerHTML = "";
@@ -624,7 +679,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     );
     TPP.classificationDialogSelection = {
       code: currentData.code || "",
-      formatId: currentData.formatId || "code-short",
+      formatId: currentData.formatId || TPP.defaultClassificationFormatId(),
       extension: currentData.extension || "",
     };
     TPP.classificationDialogPath =
@@ -653,7 +708,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             (TPP.classificationSystem() && TPP.classificationSystem().id) || "",
           code: selectedNode.code,
           shortLabel: TPP.classificationShortLabel(selectedNode),
-          formatId: TPP.classificationDialogSelection.formatId || "code-short",
+          formatId:
+            TPP.classificationDialogSelection.formatId ||
+            TPP.defaultClassificationFormatId(),
           extension: TPP.classificationDialogSelection.extension || "",
         })
       : "";

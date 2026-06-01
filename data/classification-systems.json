@@ -13,59 +13,72 @@
           "children": [
             {
               "code": "110",
-              "shortLabel": "VIS",
+              "shortLabel": "VIA",
               "label": "Visual Arts",
               "children": [
                 {
                   "code": "111",
-                  "shortLabel": "DRW",
+                  "shortLabel": "DRA",
                   "label": "Drawing",
                   "keywords": ["drawing", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 111
+                  "sort": 111,
+                  "includes": ["drawing", "art", "visual", "arts"],
+                  "scopeNote": "Use for works chiefly about drawing within visual arts."
                 },
                 {
                   "code": "112",
-                  "shortLabel": "PNT",
+                  "shortLabel": "PAI",
                   "label": "Painting",
                   "keywords": ["painting", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 112
+                  "sort": 112,
+                  "includes": ["painting", "art", "visual", "arts"],
+                  "scopeNote": "Use for works chiefly about painting within visual arts."
                 },
                 {
                   "code": "113",
-                  "shortLabel": "PRT",
+                  "shortLabel": "PRI",
                   "label": "Printmaking",
                   "keywords": ["printmaking", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 113
+                  "sort": 113,
+                  "includes": ["printmaking", "art", "visual", "arts"],
+                  "scopeNote": "Use for works chiefly about printmaking within visual arts."
                 },
                 {
                   "code": "114",
-                  "shortLabel": "SCL",
+                  "shortLabel": "SCU",
                   "label": "Sculpture",
                   "keywords": ["sculpture", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 114
+                  "sort": 114,
+                  "includes": ["sculpture", "art", "visual", "arts"],
+                  "scopeNote": "Use for works chiefly about sculpture within visual arts."
                 }
               ],
               "keywords": ["visual", "arts", "art"],
               "status": "active",
-              "sort": 110
+              "sort": 110,
+              "allowAssign": true,
+              "includes": ["visual", "arts", "art"],
+              "scopeNote": "Use for general works on visual arts. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "120",
-              "shortLabel": "DSN",
+              "shortLabel": "DES",
               "label": "Design",
               "children": [
                 {
                   "code": "121",
-                  "shortLabel": "GRF",
+                  "shortLabel": "GRD",
                   "label": "Graphic Design",
                   "keywords": ["graphic", "design", "art"],
                   "status": "active",
                   "sort": 121,
-                  "seeAlso": ["443", "644"]
+                  "seeAlso": ["443", "644"],
+                  "includes": ["graphic", "design", "art"],
+                  "scopeNote": "Use for works chiefly about graphic design within design."
                 },
                 {
                   "code": "122",
@@ -73,32 +86,41 @@
                   "label": "Industrial Design",
                   "keywords": ["industrial", "design", "art"],
                   "status": "active",
-                  "sort": 122
+                  "sort": 122,
+                  "includes": ["industrial", "design", "art"],
+                  "scopeNote": "Use for works chiefly about industrial design within design."
                 },
                 {
                   "code": "123",
-                  "shortLabel": "IDN",
+                  "shortLabel": "INDE",
                   "label": "Interior Design",
                   "keywords": ["interior", "design", "art"],
                   "status": "active",
-                  "sort": 123
+                  "sort": 123,
+                  "includes": ["interior", "design", "art"],
+                  "scopeNote": "Use for works chiefly about interior design within design."
                 },
                 {
                   "code": "124",
-                  "shortLabel": "FAS",
+                  "shortLabel": "FTD",
                   "label": "Fashion & Textile Design",
                   "keywords": ["fashion", "textile", "design", "art"],
                   "status": "active",
-                  "sort": 124
+                  "sort": 124,
+                  "includes": ["fashion", "textile", "design", "art"],
+                  "scopeNote": "Use for works chiefly about fashion & textile design within design."
                 }
               ],
               "keywords": ["design", "art"],
               "status": "active",
-              "sort": 120
+              "sort": 120,
+              "allowAssign": true,
+              "includes": ["design", "art"],
+              "scopeNote": "Use for general works on design. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "130",
-              "shortLabel": "PER",
+              "shortLabel": "PEA",
               "label": "Performing Arts",
               "children": [
                 {
@@ -108,7 +130,9 @@
                   "keywords": ["music", "art", "performing", "arts"],
                   "status": "active",
                   "sort": 131,
-                  "seeAlso": ["9511", "9531"]
+                  "seeAlso": ["951.1", "953.1"],
+                  "includes": ["music", "art", "performing", "arts"],
+                  "scopeNote": "Use for works chiefly about music within performing arts."
                 },
                 {
                   "code": "132",
@@ -116,32 +140,41 @@
                   "label": "Dance",
                   "keywords": ["dance", "art", "performing", "arts"],
                   "status": "active",
-                  "sort": 132
+                  "sort": 132,
+                  "includes": ["dance", "art", "performing", "arts"],
+                  "scopeNote": "Use for works chiefly about dance within performing arts."
                 },
                 {
                   "code": "133",
-                  "shortLabel": "THT",
+                  "shortLabel": "THE",
                   "label": "Theater",
                   "keywords": ["theater", "art", "performing", "arts"],
                   "status": "active",
-                  "sort": 133
+                  "sort": 133,
+                  "includes": ["theater", "art", "performing", "arts"],
+                  "scopeNote": "Use for works chiefly about theater within performing arts."
                 },
                 {
                   "code": "134",
-                  "shortLabel": "FIL",
+                  "shortLabel": "FSA",
                   "label": "Film & Screen Arts",
                   "keywords": ["film", "screen", "arts", "art", "performing"],
                   "status": "active",
-                  "sort": 134
+                  "sort": 134,
+                  "includes": ["film", "screen", "arts", "art", "performing"],
+                  "scopeNote": "Use for works chiefly about film & screen arts within performing arts."
                 }
               ],
               "keywords": ["performing", "arts", "art"],
               "status": "active",
-              "sort": 130
+              "sort": 130,
+              "allowAssign": true,
+              "includes": ["performing", "arts", "art"],
+              "scopeNote": "Use for general works on performing arts. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "140",
-              "shortLabel": "MED",
+              "shortLabel": "MEA",
               "label": "Media Arts",
               "children": [
                 {
@@ -150,41 +183,55 @@
                   "label": "Photography",
                   "keywords": ["photography", "art", "media", "arts"],
                   "status": "active",
-                  "sort": 141
+                  "sort": 141,
+                  "includes": ["photography", "art", "media", "arts"],
+                  "scopeNote": "Use for works chiefly about photography within media arts."
                 },
                 {
                   "code": "142",
-                  "shortLabel": "VID",
+                  "shortLabel": "VIAR",
                   "label": "Video Art",
                   "keywords": ["video", "art", "media", "arts"],
                   "status": "active",
-                  "sort": 142
+                  "sort": 142,
+                  "includes": ["video", "art", "media", "arts"],
+                  "scopeNote": "Use for works chiefly about video art within media arts."
                 },
                 {
                   "code": "143",
-                  "shortLabel": "DGA",
+                  "shortLabel": "DIA",
                   "label": "Digital Art",
                   "keywords": ["digital", "art", "media", "arts"],
                   "status": "active",
-                  "sort": 143
+                  "sort": 143,
+                  "includes": ["digital", "art", "media", "arts"],
+                  "scopeNote": "Use for works chiefly about digital art within media arts."
                 },
                 {
                   "code": "144",
-                  "shortLabel": "MIX",
+                  "shortLabel": "MIM",
                   "label": "Mixed Media",
                   "keywords": ["mixed", "media", "art", "arts"],
                   "status": "active",
-                  "sort": 144
+                  "sort": 144,
+                  "includes": ["mixed", "media", "art", "arts"],
+                  "scopeNote": "Use for works chiefly about mixed media within media arts."
                 }
               ],
               "keywords": ["media", "arts", "art"],
               "status": "active",
-              "sort": 140
+              "sort": 140,
+              "allowAssign": true,
+              "includes": ["media", "arts", "art"],
+              "scopeNote": "Use for general works on media arts. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["art"],
           "status": "active",
-          "sort": 100
+          "sort": 100,
+          "allowAssign": true,
+          "includes": ["art"],
+          "scopeNote": "Use for general works on art. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "150",
@@ -198,11 +245,13 @@
               "keywords": ["religion", "spirituality", "philosophy"],
               "status": "active",
               "sort": 151,
-              "seeAlso": ["154", "620"]
+              "seeAlso": ["154", "620"],
+              "includes": ["religion", "spirituality", "philosophy"],
+              "scopeNote": "Use for works chiefly about religion within religion, spirituality & philosophy."
             },
             {
               "code": "152",
-              "shortLabel": "SPR",
+              "shortLabel": "SPP",
               "label": "Spiritual Practice",
               "keywords": [
                 "spiritual",
@@ -213,20 +262,30 @@
               ],
               "status": "active",
               "sort": 152,
-              "seeAlso": ["942", "153"]
+              "seeAlso": ["942", "153"],
+              "includes": [
+                "spiritual",
+                "practice",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ],
+              "scopeNote": "Use for works chiefly about spiritual practice within religion, spirituality & philosophy."
             },
             {
               "code": "153",
-              "shortLabel": "PHL",
+              "shortLabel": "PHI",
               "label": "Philosophy",
               "keywords": ["philosophy", "religion", "spirituality"],
               "status": "active",
               "sort": 153,
-              "seeAlso": ["521", "622"]
+              "seeAlso": ["521", "622"],
+              "includes": ["philosophy", "religion", "spirituality"],
+              "scopeNote": "Use for works chiefly about philosophy within religion, spirituality & philosophy."
             },
             {
               "code": "154",
-              "shortLabel": "TH4",
+              "shortLabel": "MYT",
               "label": "Myth & Thought",
               "keywords": [
                 "myth",
@@ -236,12 +295,23 @@
                 "philosophy"
               ],
               "status": "active",
-              "sort": 154
+              "sort": 154,
+              "includes": [
+                "myth",
+                "thought",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ],
+              "scopeNote": "Use for works chiefly about myth & thought within religion, spirituality & philosophy."
             }
           ],
           "keywords": ["religion", "spirituality", "philosophy", "belief"],
           "status": "active",
-          "sort": 150
+          "sort": 150,
+          "allowAssign": true,
+          "includes": ["religion", "spirituality", "philosophy", "belief"],
+          "scopeNote": "Use for general works on religion, spirituality & philosophy. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "160",
@@ -250,16 +320,18 @@
           "children": [
             {
               "code": "161",
-              "shortLabel": "ARQ",
+              "shortLabel": "ARC",
               "label": "Architecture",
               "keywords": ["architecture", "preservation"],
               "status": "active",
               "sort": 161,
-              "seeAlso": ["540", "162"]
+              "seeAlso": ["540", "162"],
+              "includes": ["architecture", "preservation"],
+              "scopeNote": "Use for works chiefly about architecture within architecture & preservation."
             },
             {
               "code": "162",
-              "shortLabel": "HPR",
+              "shortLabel": "HIP",
               "label": "Historic Preservation",
               "keywords": [
                 "historic preservation",
@@ -272,7 +344,17 @@
               ],
               "status": "active",
               "sort": 162,
-              "seeAlso": ["511", "541"]
+              "seeAlso": ["511", "541"],
+              "includes": [
+                "historic",
+                "preservation",
+                "historic preservation",
+                "restoration",
+                "heritage",
+                "conservation",
+                "architecture"
+              ],
+              "scopeNote": "Use for works chiefly about historic preservation within architecture & preservation."
             },
             {
               "code": "163",
@@ -280,24 +362,31 @@
               "label": "Urban Design",
               "keywords": ["urban", "design", "architecture", "preservation"],
               "status": "active",
-              "sort": 163
+              "sort": 163,
+              "includes": ["urban", "design", "architecture", "preservation"],
+              "scopeNote": "Use for works chiefly about urban design within architecture & preservation."
             },
             {
               "code": "164",
-              "shortLabel": "BLD",
+              "shortLabel": "BUC",
               "label": "Building Craft",
               "keywords": ["building", "craft", "architecture", "preservation"],
               "status": "active",
-              "sort": 164
+              "sort": 164,
+              "includes": ["building", "craft", "architecture", "preservation"],
+              "scopeNote": "Use for works chiefly about building craft within architecture & preservation."
             }
           ],
           "keywords": ["architecture", "preservation", "buildings", "heritage"],
           "status": "active",
-          "sort": 160
+          "sort": 160,
+          "allowAssign": true,
+          "includes": ["architecture", "preservation", "buildings", "heritage"],
+          "scopeNote": "Use for general works on architecture & preservation. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "200",
-          "shortLabel": "BGM",
+          "shortLabel": "BIM",
           "label": "Biography & Memoir",
           "children": [
             {
@@ -317,7 +406,15 @@
                     "stories"
                   ],
                   "status": "active",
-                  "sort": 211
+                  "sort": 211,
+                  "includes": [
+                    "memoir",
+                    "biography",
+                    "personal",
+                    "life",
+                    "stories"
+                  ],
+                  "scopeNote": "Use for works chiefly about memoir within personal life stories."
                 },
                 {
                   "code": "212",
@@ -332,11 +429,20 @@
                     "stories"
                   ],
                   "status": "active",
-                  "sort": 212
+                  "sort": 212,
+                  "includes": [
+                    "autobiography",
+                    "biography",
+                    "memoir",
+                    "personal",
+                    "life",
+                    "stories"
+                  ],
+                  "scopeNote": "Use for works chiefly about autobiography within personal life stories."
                 },
                 {
                   "code": "213",
-                  "shortLabel": "JRL",
+                  "shortLabel": "JOL",
                   "label": "Journals & Letters",
                   "keywords": [
                     "journals",
@@ -348,11 +454,21 @@
                     "stories"
                   ],
                   "status": "active",
-                  "sort": 213
+                  "sort": 213,
+                  "includes": [
+                    "journals",
+                    "letters",
+                    "biography",
+                    "memoir",
+                    "personal",
+                    "life",
+                    "stories"
+                  ],
+                  "scopeNote": "Use for works chiefly about journals & letters within personal life stories."
                 },
                 {
                   "code": "214",
-                  "shortLabel": "PES",
+                  "shortLabel": "PEE",
                   "label": "Personal Essays",
                   "keywords": [
                     "personal",
@@ -363,7 +479,16 @@
                     "stories"
                   ],
                   "status": "active",
-                  "sort": 214
+                  "sort": 214,
+                  "includes": [
+                    "personal",
+                    "essays",
+                    "biography",
+                    "memoir",
+                    "life",
+                    "stories"
+                  ],
+                  "scopeNote": "Use for works chiefly about personal essays within personal life stories."
                 }
               ],
               "keywords": [
@@ -374,11 +499,20 @@
                 "memoir"
               ],
               "status": "active",
-              "sort": 210
+              "sort": 210,
+              "allowAssign": true,
+              "includes": [
+                "personal",
+                "life",
+                "stories",
+                "biography",
+                "memoir"
+              ],
+              "scopeNote": "Use for general works on personal life stories. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "220",
-              "shortLabel": "LIV",
+              "shortLabel": "COL",
               "label": "Collected Lives",
               "children": [
                 {
@@ -394,11 +528,20 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 221
+                  "sort": 221,
+                  "includes": [
+                    "artists",
+                    "writers",
+                    "biography",
+                    "memoir",
+                    "collected",
+                    "lives"
+                  ],
+                  "scopeNote": "Use for works chiefly about artists & writers within collected lives."
                 },
                 {
                   "code": "222",
-                  "shortLabel": "LDA",
+                  "shortLabel": "LEA",
                   "label": "Leaders & Activists",
                   "keywords": [
                     "leaders",
@@ -409,11 +552,20 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 222
+                  "sort": 222,
+                  "includes": [
+                    "leaders",
+                    "activists",
+                    "biography",
+                    "memoir",
+                    "collected",
+                    "lives"
+                  ],
+                  "scopeNote": "Use for works chiefly about leaders & activists within collected lives."
                 },
                 {
                   "code": "223",
-                  "shortLabel": "INV",
+                  "shortLabel": "SCI",
                   "label": "Scientists & Inventors",
                   "keywords": [
                     "scientists",
@@ -424,7 +576,16 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 223
+                  "sort": 223,
+                  "includes": [
+                    "scientists",
+                    "inventors",
+                    "biography",
+                    "memoir",
+                    "collected",
+                    "lives"
+                  ],
+                  "scopeNote": "Use for works chiefly about scientists & inventors within collected lives."
                 },
                 {
                   "code": "224",
@@ -439,21 +600,33 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 224
+                  "sort": 224,
+                  "includes": [
+                    "entertainers",
+                    "athletes",
+                    "biography",
+                    "memoir",
+                    "collected",
+                    "lives"
+                  ],
+                  "scopeNote": "Use for works chiefly about entertainers & athletes within collected lives."
                 }
               ],
               "keywords": ["collected", "lives", "biography", "memoir"],
               "status": "active",
-              "sort": 220
+              "sort": 220,
+              "allowAssign": true,
+              "includes": ["collected", "lives", "biography", "memoir"],
+              "scopeNote": "Use for general works on collected lives. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "230",
-              "shortLabel": "FAM",
+              "shortLabel": "FCH",
               "label": "Family & Community Histories",
               "children": [
                 {
                   "code": "231",
-                  "shortLabel": "GNY",
+                  "shortLabel": "GEN",
                   "label": "Genealogy",
                   "keywords": [
                     "genealogy",
@@ -464,11 +637,20 @@
                     "histories"
                   ],
                   "status": "active",
-                  "sort": 231
+                  "sort": 231,
+                  "includes": [
+                    "genealogy",
+                    "biography",
+                    "memoir",
+                    "family",
+                    "community",
+                    "histories"
+                  ],
+                  "scopeNote": "Use for works chiefly about genealogy within family & community histories."
                 },
                 {
                   "code": "232",
-                  "shortLabel": "ORL",
+                  "shortLabel": "ORH",
                   "label": "Oral Histories",
                   "keywords": [
                     "oral",
@@ -479,11 +661,20 @@
                     "community"
                   ],
                   "status": "active",
-                  "sort": 232
+                  "sort": 232,
+                  "includes": [
+                    "oral",
+                    "histories",
+                    "biography",
+                    "memoir",
+                    "family",
+                    "community"
+                  ],
+                  "scopeNote": "Use for works chiefly about oral histories within family & community histories."
                 },
                 {
                   "code": "233",
-                  "shortLabel": "CMM",
+                  "shortLabel": "COM",
                   "label": "Community Memory",
                   "keywords": [
                     "community",
@@ -494,11 +685,20 @@
                     "histories"
                   ],
                   "status": "active",
-                  "sort": 233
+                  "sort": 233,
+                  "includes": [
+                    "community",
+                    "memory",
+                    "biography",
+                    "memoir",
+                    "family",
+                    "histories"
+                  ],
+                  "scopeNote": "Use for works chiefly about community memory within family & community histories."
                 },
                 {
                   "code": "234",
-                  "shortLabel": "TRB",
+                  "shortLabel": "TIL",
                   "label": "Tribal & Indigenous Life Stories",
                   "keywords": [
                     "tribal",
@@ -512,7 +712,18 @@
                     "histories"
                   ],
                   "status": "active",
-                  "sort": 234
+                  "sort": 234,
+                  "includes": [
+                    "tribal",
+                    "indigenous",
+                    "life",
+                    "stories",
+                    "biography",
+                    "memoir",
+                    "family",
+                    "community"
+                  ],
+                  "scopeNote": "Use for works chiefly about tribal & indigenous life stories within family & community histories."
                 }
               ],
               "keywords": [
@@ -523,16 +734,25 @@
                 "memoir"
               ],
               "status": "active",
-              "sort": 230
+              "sort": 230,
+              "allowAssign": true,
+              "includes": [
+                "family",
+                "community",
+                "histories",
+                "biography",
+                "memoir"
+              ],
+              "scopeNote": "Use for general works on family & community histories. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "240",
-              "shortLabel": "RLV",
+              "shortLabel": "RELI",
               "label": "Reference Lives",
               "children": [
                 {
                   "code": "241",
-                  "shortLabel": "CBI",
+                  "shortLabel": "COB",
                   "label": "Collected Biography",
                   "keywords": [
                     "collected",
@@ -542,11 +762,19 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 241
+                  "sort": 241,
+                  "includes": [
+                    "collected",
+                    "biography",
+                    "memoir",
+                    "reference",
+                    "lives"
+                  ],
+                  "scopeNote": "Use for works chiefly about collected biography within reference lives."
                 },
                 {
                   "code": "242",
-                  "shortLabel": "TIM",
+                  "shortLabel": "TIP",
                   "label": "Timelines & Profiles",
                   "keywords": [
                     "timelines",
@@ -557,11 +785,20 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 242
+                  "sort": 242,
+                  "includes": [
+                    "timelines",
+                    "profiles",
+                    "biography",
+                    "memoir",
+                    "reference",
+                    "lives"
+                  ],
+                  "scopeNote": "Use for works chiefly about timelines & profiles within reference lives."
                 },
                 {
                   "code": "243",
-                  "shortLabel": "LET",
+                  "shortLabel": "LEC",
                   "label": "Letters & Correspondence",
                   "keywords": [
                     "letters",
@@ -572,11 +809,20 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 243
+                  "sort": 243,
+                  "includes": [
+                    "letters",
+                    "correspondence",
+                    "biography",
+                    "memoir",
+                    "reference",
+                    "lives"
+                  ],
+                  "scopeNote": "Use for works chiefly about letters & correspondence within reference lives."
                 },
                 {
                   "code": "244",
-                  "shortLabel": "ARC",
+                  "shortLabel": "ARS",
                   "label": "Archival Sourcebooks",
                   "keywords": [
                     "archival",
@@ -587,39 +833,56 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 244
+                  "sort": 244,
+                  "includes": [
+                    "archival",
+                    "sourcebooks",
+                    "biography",
+                    "memoir",
+                    "reference",
+                    "lives"
+                  ],
+                  "scopeNote": "Use for works chiefly about archival sourcebooks within reference lives."
                 }
               ],
               "keywords": ["reference", "lives", "biography", "memoir"],
               "status": "active",
-              "sort": 240
+              "sort": 240,
+              "allowAssign": true,
+              "includes": ["reference", "lives", "biography", "memoir"],
+              "scopeNote": "Use for general works on reference lives. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["biography", "memoir"],
           "status": "active",
-          "sort": 200
+          "sort": 200,
+          "allowAssign": true,
+          "includes": ["biography", "memoir"],
+          "scopeNote": "Use for general works on biography & memoir. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "300",
-          "shortLabel": "BUS",
+          "shortLabel": "BUW",
           "label": "Business & Work",
           "children": [
             {
               "code": "310",
-              "shortLabel": "MGT",
+              "shortLabel": "MAN",
               "label": "Management",
               "children": [
                 {
                   "code": "311",
-                  "shortLabel": "LDR",
+                  "shortLabel": "LEAD",
                   "label": "Leadership",
                   "keywords": ["leadership", "business", "work", "management"],
                   "status": "active",
-                  "sort": 311
+                  "sort": 311,
+                  "includes": ["leadership", "business", "work", "management"],
+                  "scopeNote": "Use for works chiefly about leadership within management."
                 },
                 {
                   "code": "312",
-                  "shortLabel": "TMC",
+                  "shortLabel": "TEC",
                   "label": "Teams & Culture",
                   "keywords": [
                     "teams",
@@ -629,37 +892,52 @@
                     "management"
                   ],
                   "status": "active",
-                  "sort": 312
+                  "sort": 312,
+                  "includes": [
+                    "teams",
+                    "culture",
+                    "business",
+                    "work",
+                    "management"
+                  ],
+                  "scopeNote": "Use for works chiefly about teams & culture within management."
                 },
                 {
                   "code": "313",
-                  "shortLabel": "OPR",
+                  "shortLabel": "OPE",
                   "label": "Operations",
                   "keywords": ["operations", "business", "work", "management"],
                   "status": "active",
-                  "sort": 313
+                  "sort": 313,
+                  "includes": ["operations", "business", "work", "management"],
+                  "scopeNote": "Use for works chiefly about operations within management."
                 },
                 {
                   "code": "314",
-                  "shortLabel": "ST4",
+                  "shortLabel": "STR",
                   "label": "Strategy",
                   "keywords": ["strategy", "business", "work", "management"],
                   "status": "active",
-                  "sort": 314
+                  "sort": 314,
+                  "includes": ["strategy", "business", "work", "management"],
+                  "scopeNote": "Use for works chiefly about strategy within management."
                 }
               ],
               "keywords": ["management", "business", "work"],
               "status": "active",
-              "sort": 310
+              "sort": 310,
+              "allowAssign": true,
+              "includes": ["management", "business", "work"],
+              "scopeNote": "Use for general works on management. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "320",
-              "shortLabel": "ETP",
+              "shortLabel": "ENT",
               "label": "Entrepreneurship",
               "children": [
                 {
                   "code": "321",
-                  "shortLabel": "STU",
+                  "shortLabel": "STA",
                   "label": "Startups",
                   "keywords": [
                     "startups",
@@ -668,19 +946,28 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 321
+                  "sort": 321,
+                  "includes": [
+                    "startups",
+                    "business",
+                    "work",
+                    "entrepreneurship"
+                  ],
+                  "scopeNote": "Use for works chiefly about startups within entrepreneurship."
                 },
                 {
                   "code": "322",
-                  "shortLabel": "SML",
+                  "shortLabel": "SMB",
                   "label": "Small Business",
                   "keywords": ["small", "business", "work", "entrepreneurship"],
                   "status": "active",
-                  "sort": 322
+                  "sort": 322,
+                  "includes": ["small", "business", "work", "entrepreneurship"],
+                  "scopeNote": "Use for works chiefly about small business within entrepreneurship."
                 },
                 {
                   "code": "323",
-                  "shortLabel": "FRL",
+                  "shortLabel": "FRP",
                   "label": "Freelance Practice",
                   "keywords": [
                     "freelance",
@@ -690,11 +977,19 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 323
+                  "sort": 323,
+                  "includes": [
+                    "freelance",
+                    "practice",
+                    "business",
+                    "work",
+                    "entrepreneurship"
+                  ],
+                  "scopeNote": "Use for works chiefly about freelance practice within entrepreneurship."
                 },
                 {
                   "code": "324",
-                  "shortLabel": "SAL",
+                  "shortLabel": "SAM",
                   "label": "Sales & Marketing",
                   "keywords": [
                     "sales",
@@ -704,12 +999,23 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 324
+                  "sort": 324,
+                  "includes": [
+                    "sales",
+                    "marketing",
+                    "business",
+                    "work",
+                    "entrepreneurship"
+                  ],
+                  "scopeNote": "Use for works chiefly about sales & marketing within entrepreneurship."
                 }
               ],
               "keywords": ["entrepreneurship", "business", "work"],
               "status": "active",
-              "sort": 320
+              "sort": 320,
+              "allowAssign": true,
+              "includes": ["entrepreneurship", "business", "work"],
+              "scopeNote": "Use for general works on entrepreneurship. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "330",
@@ -718,15 +1024,17 @@
               "children": [
                 {
                   "code": "331",
-                  "shortLabel": "ECN",
+                  "shortLabel": "ECO",
                   "label": "Economics",
                   "keywords": ["economics", "business", "work", "finance"],
                   "status": "active",
-                  "sort": 331
+                  "sort": 331,
+                  "includes": ["economics", "business", "work", "finance"],
+                  "scopeNote": "Use for works chiefly about economics within economics & finance."
                 },
                 {
                   "code": "332",
-                  "shortLabel": "PFN",
+                  "shortLabel": "PEF",
                   "label": "Personal Finance",
                   "keywords": [
                     "personal",
@@ -736,11 +1044,19 @@
                     "economics"
                   ],
                   "status": "active",
-                  "sort": 332
+                  "sort": 332,
+                  "includes": [
+                    "personal",
+                    "finance",
+                    "business",
+                    "work",
+                    "economics"
+                  ],
+                  "scopeNote": "Use for works chiefly about personal finance within economics & finance."
                 },
                 {
                   "code": "333",
-                  "shortLabel": "IVT",
+                  "shortLabel": "INV",
                   "label": "Investing",
                   "keywords": [
                     "investing",
@@ -750,7 +1066,15 @@
                     "finance"
                   ],
                   "status": "active",
-                  "sort": 333
+                  "sort": 333,
+                  "includes": [
+                    "investing",
+                    "business",
+                    "work",
+                    "economics",
+                    "finance"
+                  ],
+                  "scopeNote": "Use for works chiefly about investing within economics & finance."
                 },
                 {
                   "code": "334",
@@ -764,16 +1088,27 @@
                     "finance"
                   ],
                   "status": "active",
-                  "sort": 334
+                  "sort": 334,
+                  "includes": [
+                    "accounting",
+                    "business",
+                    "work",
+                    "economics",
+                    "finance"
+                  ],
+                  "scopeNote": "Use for works chiefly about accounting within economics & finance."
                 }
               ],
               "keywords": ["economics", "finance", "business", "work"],
               "status": "active",
-              "sort": 330
+              "sort": 330,
+              "allowAssign": true,
+              "includes": ["economics", "finance", "business", "work"],
+              "scopeNote": "Use for general works on economics & finance. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "340",
-              "shortLabel": "WR0",
+              "shortLabel": "WOL",
               "label": "Work Life",
               "children": [
                 {
@@ -782,27 +1117,33 @@
                   "label": "Careers",
                   "keywords": ["careers", "business", "work", "life"],
                   "status": "active",
-                  "sort": 341
+                  "sort": 341,
+                  "includes": ["careers", "business", "work", "life"],
+                  "scopeNote": "Use for works chiefly about careers within work life."
                 },
                 {
                   "code": "342",
-                  "shortLabel": "PRD",
+                  "shortLabel": "PRO",
                   "label": "Productivity",
                   "keywords": ["productivity", "business", "work", "life"],
                   "status": "active",
-                  "sort": 342
+                  "sort": 342,
+                  "includes": ["productivity", "business", "work", "life"],
+                  "scopeNote": "Use for works chiefly about productivity within work life."
                 },
                 {
                   "code": "343",
-                  "shortLabel": "REM",
+                  "shortLabel": "REW",
                   "label": "Remote Work",
                   "keywords": ["remote", "work", "business", "life"],
                   "status": "active",
-                  "sort": 343
+                  "sort": 343,
+                  "includes": ["remote", "work", "business", "life"],
+                  "scopeNote": "Use for works chiefly about remote work within work life."
                 },
                 {
                   "code": "344",
-                  "shortLabel": "LAB",
+                  "shortLabel": "LAP",
                   "label": "Labor & Professions",
                   "keywords": [
                     "labor",
@@ -812,31 +1153,45 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 344
+                  "sort": 344,
+                  "includes": [
+                    "labor",
+                    "professions",
+                    "business",
+                    "work",
+                    "life"
+                  ],
+                  "scopeNote": "Use for works chiefly about labor & professions within work life."
                 }
               ],
               "keywords": ["work", "life", "business"],
               "status": "active",
-              "sort": 340
+              "sort": 340,
+              "allowAssign": true,
+              "includes": ["work", "life", "business"],
+              "scopeNote": "Use for general works on work life. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["business", "work"],
           "status": "active",
-          "sort": 300
+          "sort": 300,
+          "allowAssign": true,
+          "includes": ["business", "work"],
+          "scopeNote": "Use for general works on business & work. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "400",
-          "shortLabel": "TEC",
+          "shortLabel": "COT",
           "label": "Computers & Technology",
           "children": [
             {
               "code": "410",
-              "shortLabel": "PRG",
+              "shortLabel": "PROG",
               "label": "Programming",
               "children": [
                 {
                   "code": "411",
-                  "shortLabel": "SWE",
+                  "shortLabel": "SOE",
                   "label": "Software Engineering",
                   "keywords": [
                     "software",
@@ -846,11 +1201,19 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 411
+                  "sort": 411,
+                  "includes": [
+                    "software",
+                    "engineering",
+                    "computers",
+                    "technology",
+                    "programming"
+                  ],
+                  "scopeNote": "Use for works chiefly about software engineering within programming."
                 },
                 {
                   "code": "412",
-                  "shortLabel": "WEB",
+                  "shortLabel": "WED",
                   "label": "Web Development",
                   "keywords": [
                     "web",
@@ -860,11 +1223,19 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 412
+                  "sort": 412,
+                  "includes": [
+                    "web",
+                    "development",
+                    "computers",
+                    "technology",
+                    "programming"
+                  ],
+                  "scopeNote": "Use for works chiefly about web development within programming."
                 },
                 {
                   "code": "413",
-                  "shortLabel": "DAT",
+                  "shortLabel": "DAS",
                   "label": "Data & Scripting",
                   "keywords": [
                     "data",
@@ -874,11 +1245,19 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 413
+                  "sort": 413,
+                  "includes": [
+                    "data",
+                    "scripting",
+                    "computers",
+                    "technology",
+                    "programming"
+                  ],
+                  "scopeNote": "Use for works chiefly about data & scripting within programming."
                 },
                 {
                   "code": "414",
-                  "shortLabel": "LA4",
+                  "shortLabel": "LAPA",
                   "label": "Languages & Paradigms",
                   "keywords": [
                     "languages",
@@ -888,12 +1267,23 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 414
+                  "sort": 414,
+                  "includes": [
+                    "languages",
+                    "paradigms",
+                    "computers",
+                    "technology",
+                    "programming"
+                  ],
+                  "scopeNote": "Use for works chiefly about languages & paradigms within programming."
                 }
               ],
               "keywords": ["programming", "computers", "technology"],
               "status": "active",
-              "sort": 410
+              "sort": 410,
+              "allowAssign": true,
+              "includes": ["programming", "computers", "technology"],
+              "scopeNote": "Use for general works on programming. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "420",
@@ -902,7 +1292,7 @@
               "children": [
                 {
                   "code": "421",
-                  "shortLabel": "OSY",
+                  "shortLabel": "OPS",
                   "label": "Operating Systems",
                   "keywords": [
                     "operating",
@@ -911,7 +1301,14 @@
                     "technology"
                   ],
                   "status": "active",
-                  "sort": 421
+                  "sort": 421,
+                  "includes": [
+                    "operating",
+                    "systems",
+                    "computers",
+                    "technology"
+                  ],
+                  "scopeNote": "Use for works chiefly about operating systems within systems."
                 },
                 {
                   "code": "422",
@@ -924,7 +1321,14 @@
                     "systems"
                   ],
                   "status": "active",
-                  "sort": 422
+                  "sort": 422,
+                  "includes": [
+                    "networking",
+                    "computers",
+                    "technology",
+                    "systems"
+                  ],
+                  "scopeNote": "Use for works chiefly about networking within systems."
                 },
                 {
                   "code": "423",
@@ -937,11 +1341,18 @@
                     "systems"
                   ],
                   "status": "active",
-                  "sort": 423
+                  "sort": 423,
+                  "includes": [
+                    "security",
+                    "computers",
+                    "technology",
+                    "systems"
+                  ],
+                  "scopeNote": "Use for works chiefly about security within systems."
                 },
                 {
                   "code": "424",
-                  "shortLabel": "CLD",
+                  "shortLabel": "CLI",
                   "label": "Cloud & Infrastructure",
                   "keywords": [
                     "cloud",
@@ -951,21 +1362,32 @@
                     "systems"
                   ],
                   "status": "active",
-                  "sort": 424
+                  "sort": 424,
+                  "includes": [
+                    "cloud",
+                    "infrastructure",
+                    "computers",
+                    "technology",
+                    "systems"
+                  ],
+                  "scopeNote": "Use for works chiefly about cloud & infrastructure within systems."
                 }
               ],
               "keywords": ["systems", "computers", "technology"],
               "status": "active",
-              "sort": 420
+              "sort": 420,
+              "allowAssign": true,
+              "includes": ["systems", "computers", "technology"],
+              "scopeNote": "Use for general works on systems. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "430",
-              "shortLabel": "APL",
+              "shortLabel": "APC",
               "label": "Applied Computing",
               "children": [
                 {
                   "code": "431",
-                  "shortLabel": "AIF",
+                  "shortLabel": "ARI",
                   "label": "Artificial Intelligence",
                   "keywords": [
                     "artificial",
@@ -977,7 +1399,16 @@
                   ],
                   "status": "active",
                   "sort": 431,
-                  "seeAlso": ["444", "1534"]
+                  "seeAlso": ["444", "153.4"],
+                  "includes": [
+                    "artificial",
+                    "intelligence",
+                    "computers",
+                    "technology",
+                    "applied",
+                    "computing"
+                  ],
+                  "scopeNote": "Use for works chiefly about artificial intelligence within applied computing."
                 },
                 {
                   "code": "432",
@@ -993,11 +1424,21 @@
                     "computing"
                   ],
                   "status": "active",
-                  "sort": 432
+                  "sort": 432,
+                  "includes": [
+                    "human",
+                    "computer",
+                    "interaction",
+                    "computers",
+                    "technology",
+                    "applied",
+                    "computing"
+                  ],
+                  "scopeNote": "Use for works chiefly about human-computer interaction within applied computing."
                 },
                 {
                   "code": "433",
-                  "shortLabel": "GAM",
+                  "shortLabel": "GAD",
                   "label": "Game Development",
                   "keywords": [
                     "game",
@@ -1008,11 +1449,20 @@
                     "computing"
                   ],
                   "status": "active",
-                  "sort": 433
+                  "sort": 433,
+                  "includes": [
+                    "game",
+                    "development",
+                    "computers",
+                    "technology",
+                    "applied",
+                    "computing"
+                  ],
+                  "scopeNote": "Use for works chiefly about game development within applied computing."
                 },
                 {
                   "code": "434",
-                  "shortLabel": "ROB",
+                  "shortLabel": "RES",
                   "label": "Robotics & Embedded Systems",
                   "keywords": [
                     "robotics",
@@ -1024,21 +1474,34 @@
                     "computing"
                   ],
                   "status": "active",
-                  "sort": 434
+                  "sort": 434,
+                  "includes": [
+                    "robotics",
+                    "embedded",
+                    "systems",
+                    "computers",
+                    "technology",
+                    "applied",
+                    "computing"
+                  ],
+                  "scopeNote": "Use for works chiefly about robotics & embedded systems within applied computing."
                 }
               ],
               "keywords": ["applied", "computing", "computers", "technology"],
               "status": "active",
-              "sort": 430
+              "sort": 430,
+              "allowAssign": true,
+              "includes": ["applied", "computing", "computers", "technology"],
+              "scopeNote": "Use for general works on applied computing. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "440",
-              "shortLabel": "DCL",
+              "shortLabel": "DIC",
               "label": "Digital Culture",
               "children": [
                 {
                   "code": "441",
-                  "shortLabel": "NTC",
+                  "shortLabel": "INC",
                   "label": "Internet Culture",
                   "keywords": [
                     "internet",
@@ -1048,11 +1511,19 @@
                     "digital"
                   ],
                   "status": "active",
-                  "sort": 441
+                  "sort": 441,
+                  "includes": [
+                    "internet",
+                    "culture",
+                    "computers",
+                    "technology",
+                    "digital"
+                  ],
+                  "scopeNote": "Use for works chiefly about internet culture within digital culture."
                 },
                 {
                   "code": "442",
-                  "shortLabel": "SMD",
+                  "shortLabel": "SOM",
                   "label": "Social Media",
                   "keywords": [
                     "social",
@@ -1063,11 +1534,20 @@
                     "culture"
                   ],
                   "status": "active",
-                  "sort": 442
+                  "sort": 442,
+                  "includes": [
+                    "social",
+                    "media",
+                    "computers",
+                    "technology",
+                    "digital",
+                    "culture"
+                  ],
+                  "scopeNote": "Use for works chiefly about social media within digital culture."
                 },
                 {
                   "code": "443",
-                  "shortLabel": "DGD",
+                  "shortLabel": "DID",
                   "label": "Digital Design",
                   "keywords": [
                     "digital",
@@ -1077,11 +1557,19 @@
                     "culture"
                   ],
                   "status": "active",
-                  "sort": 443
+                  "sort": 443,
+                  "includes": [
+                    "digital",
+                    "design",
+                    "computers",
+                    "technology",
+                    "culture"
+                  ],
+                  "scopeNote": "Use for works chiefly about digital design within digital culture."
                 },
                 {
                   "code": "444",
-                  "shortLabel": "ET4",
+                  "shortLabel": "TEE",
                   "label": "Technology Ethics",
                   "keywords": [
                     "technology",
@@ -1091,68 +1579,93 @@
                     "culture"
                   ],
                   "status": "active",
-                  "sort": 444
+                  "sort": 444,
+                  "includes": [
+                    "technology",
+                    "ethics",
+                    "computers",
+                    "digital",
+                    "culture"
+                  ],
+                  "scopeNote": "Use for works chiefly about technology ethics within digital culture."
                 }
               ],
               "keywords": ["digital", "culture", "computers", "technology"],
               "status": "active",
-              "sort": 440
+              "sort": 440,
+              "allowAssign": true,
+              "includes": ["digital", "culture", "computers", "technology"],
+              "scopeNote": "Use for general works on digital culture. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["computers", "technology"],
           "status": "active",
-          "sort": 400
+          "sort": 400,
+          "allowAssign": true,
+          "includes": ["computers", "technology"],
+          "scopeNote": "Use for general works on computers & technology. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "500",
-          "shortLabel": "HSY",
+          "shortLabel": "HIS",
           "label": "History & Society",
           "children": [
             {
               "code": "510",
-              "shortLabel": "HST",
+              "shortLabel": "HIST",
               "label": "History",
               "children": [
                 {
                   "code": "511",
-                  "shortLabel": "ANC",
+                  "shortLabel": "ANM",
                   "label": "Ancient & Medieval",
                   "keywords": ["ancient", "medieval", "history", "society"],
                   "status": "active",
-                  "sort": 511
+                  "sort": 511,
+                  "includes": ["ancient", "medieval", "history", "society"],
+                  "scopeNote": "Use for works chiefly about ancient & medieval within history."
                 },
                 {
                   "code": "512",
-                  "shortLabel": "MHI",
+                  "shortLabel": "MOH",
                   "label": "Modern History",
                   "keywords": ["modern", "history", "society"],
                   "status": "active",
-                  "sort": 512
+                  "sort": 512,
+                  "includes": ["modern", "history", "society"],
+                  "scopeNote": "Use for works chiefly about modern history within history."
                 },
                 {
                   "code": "513",
-                  "shortLabel": "LOC",
+                  "shortLabel": "LRH",
                   "label": "Local & Regional History",
                   "keywords": ["local", "regional", "history", "society"],
                   "status": "active",
-                  "sort": 513
+                  "sort": 513,
+                  "includes": ["local", "regional", "history", "society"],
+                  "scopeNote": "Use for works chiefly about local & regional history within history."
                 },
                 {
                   "code": "514",
-                  "shortLabel": "WRL",
+                  "shortLabel": "WOH",
                   "label": "World History",
                   "keywords": ["world", "history", "society"],
                   "status": "active",
-                  "sort": 514
+                  "sort": 514,
+                  "includes": ["world", "history", "society"],
+                  "scopeNote": "Use for works chiefly about world history within history."
                 }
               ],
               "keywords": ["history", "society"],
               "status": "active",
-              "sort": 510
+              "sort": 510,
+              "allowAssign": true,
+              "includes": ["history", "society"],
+              "scopeNote": "Use for general works on history. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "520",
-              "shortLabel": "SST",
+              "shortLabel": "SOS",
               "label": "Social Studies",
               "children": [
                 {
@@ -1168,11 +1681,20 @@
                     "studies"
                   ],
                   "status": "active",
-                  "sort": 521
+                  "sort": 521,
+                  "includes": [
+                    "politics",
+                    "government",
+                    "history",
+                    "society",
+                    "social",
+                    "studies"
+                  ],
+                  "scopeNote": "Use for works chiefly about politics & government within social studies."
                 },
                 {
                   "code": "522",
-                  "shortLabel": "SOL",
+                  "shortLabel": "SOC",
                   "label": "Sociology",
                   "keywords": [
                     "sociology",
@@ -1182,7 +1704,15 @@
                     "studies"
                   ],
                   "status": "active",
-                  "sort": 522
+                  "sort": 522,
+                  "includes": [
+                    "sociology",
+                    "history",
+                    "society",
+                    "social",
+                    "studies"
+                  ],
+                  "scopeNote": "Use for works chiefly about sociology within social studies."
                 },
                 {
                   "code": "523",
@@ -1197,11 +1727,19 @@
                   ],
                   "status": "active",
                   "sort": 523,
-                  "seeAlso": ["154", "934"]
+                  "seeAlso": ["154", "934"],
+                  "includes": [
+                    "cultural",
+                    "studies",
+                    "history",
+                    "society",
+                    "social"
+                  ],
+                  "scopeNote": "Use for works chiefly about cultural studies within social studies."
                 },
                 {
                   "code": "524",
-                  "shortLabel": "EDU",
+                  "shortLabel": "EDI",
                   "label": "Education & Institutions",
                   "keywords": [
                     "education",
@@ -1212,16 +1750,28 @@
                     "studies"
                   ],
                   "status": "active",
-                  "sort": 524
+                  "sort": 524,
+                  "includes": [
+                    "education",
+                    "institutions",
+                    "history",
+                    "society",
+                    "social",
+                    "studies"
+                  ],
+                  "scopeNote": "Use for works chiefly about education & institutions within social studies."
                 }
               ],
               "keywords": ["social", "studies", "history", "society"],
               "status": "active",
-              "sort": 520
+              "sort": 520,
+              "allowAssign": true,
+              "includes": ["social", "studies", "history", "society"],
+              "scopeNote": "Use for general works on social studies. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "530",
-              "shortLabel": "LAW",
+              "shortLabel": "LCL",
               "label": "Law & Civic Life",
               "children": [
                 {
@@ -1238,11 +1788,21 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 531
+                  "sort": 531,
+                  "includes": [
+                    "constitutional",
+                    "public",
+                    "law",
+                    "history",
+                    "society",
+                    "civic",
+                    "life"
+                  ],
+                  "scopeNote": "Use for works chiefly about constitutional & public law within law & civic life."
                 },
                 {
                   "code": "532",
-                  "shortLabel": "JUS",
+                  "shortLabel": "JUR",
                   "label": "Justice & Rights",
                   "keywords": [
                     "justice",
@@ -1254,11 +1814,21 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 532
+                  "sort": 532,
+                  "includes": [
+                    "justice",
+                    "rights",
+                    "history",
+                    "society",
+                    "law",
+                    "civic",
+                    "life"
+                  ],
+                  "scopeNote": "Use for works chiefly about justice & rights within law & civic life."
                 },
                 {
                   "code": "533",
-                  "shortLabel": "PPL",
+                  "shortLabel": "PUP",
                   "label": "Public Policy",
                   "keywords": [
                     "public",
@@ -1270,11 +1840,21 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 533
+                  "sort": 533,
+                  "includes": [
+                    "public",
+                    "policy",
+                    "history",
+                    "society",
+                    "law",
+                    "civic",
+                    "life"
+                  ],
+                  "scopeNote": "Use for works chiefly about public policy within law & civic life."
                 },
                 {
                   "code": "534",
-                  "shortLabel": "CIV",
+                  "shortLabel": "CIP",
                   "label": "Civic Practice",
                   "keywords": [
                     "civic",
@@ -1285,21 +1865,33 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 534
+                  "sort": 534,
+                  "includes": [
+                    "civic",
+                    "practice",
+                    "history",
+                    "society",
+                    "law",
+                    "life"
+                  ],
+                  "scopeNote": "Use for works chiefly about civic practice within law & civic life."
                 }
               ],
               "keywords": ["law", "civic", "life", "history", "society"],
               "status": "active",
-              "sort": 530
+              "sort": 530,
+              "allowAssign": true,
+              "includes": ["law", "civic", "life", "history", "society"],
+              "scopeNote": "Use for general works on law & civic life. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "540",
-              "shortLabel": "GPL",
+              "shortLabel": "GEP",
               "label": "Geography & Place",
               "children": [
                 {
                   "code": "541",
-                  "shortLabel": "CRG",
+                  "shortLabel": "CART",
                   "label": "Cartography",
                   "keywords": [
                     "cartography",
@@ -1309,11 +1901,19 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 541
+                  "sort": 541,
+                  "includes": [
+                    "cartography",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
+                  ],
+                  "scopeNote": "Use for works chiefly about cartography within geography & place."
                 },
                 {
                   "code": "542",
-                  "shortLabel": "REG",
+                  "shortLabel": "REST",
                   "label": "Regional Studies",
                   "keywords": [
                     "regional",
@@ -1324,11 +1924,20 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 542
+                  "sort": 542,
+                  "includes": [
+                    "regional",
+                    "studies",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
+                  ],
+                  "scopeNote": "Use for works chiefly about regional studies within geography & place."
                 },
                 {
                   "code": "543",
-                  "shortLabel": "URB",
+                  "shortLabel": "URS",
                   "label": "Urban Studies",
                   "keywords": [
                     "urban",
@@ -1339,11 +1948,20 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 543
+                  "sort": 543,
+                  "includes": [
+                    "urban",
+                    "studies",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
+                  ],
+                  "scopeNote": "Use for works chiefly about urban studies within geography & place."
                 },
                 {
                   "code": "544",
-                  "shortLabel": "RUR",
+                  "shortLabel": "RER",
                   "label": "Rural & Environmental Regions",
                   "keywords": [
                     "rural",
@@ -1355,26 +1973,42 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 544
+                  "sort": 544,
+                  "includes": [
+                    "rural",
+                    "environmental",
+                    "regions",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
+                  ],
+                  "scopeNote": "Use for works chiefly about rural & environmental regions within geography & place."
                 }
               ],
               "keywords": ["geography", "place", "history", "society"],
               "status": "active",
-              "sort": 540
+              "sort": 540,
+              "allowAssign": true,
+              "includes": ["geography", "place", "history", "society"],
+              "scopeNote": "Use for general works on geography & place. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["history", "society"],
           "status": "active",
-          "sort": 500
+          "sort": 500,
+          "allowAssign": true,
+          "includes": ["history", "society"],
+          "scopeNote": "Use for general works on history & society. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "600",
-          "shortLabel": "LLT",
+          "shortLabel": "LAL",
           "label": "Language & Literature",
           "children": [
             {
               "code": "610",
-              "shortLabel": "LNG",
+              "shortLabel": "LAS",
               "label": "Language Study",
               "children": [
                 {
@@ -1388,11 +2022,18 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 611
+                  "sort": 611,
+                  "includes": [
+                    "linguistics",
+                    "language",
+                    "literature",
+                    "study"
+                  ],
+                  "scopeNote": "Use for works chiefly about linguistics within language study."
                 },
                 {
                   "code": "612",
-                  "shortLabel": "GRM",
+                  "shortLabel": "GRU",
                   "label": "Grammar & Usage",
                   "keywords": [
                     "grammar",
@@ -1402,19 +2043,29 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 612
+                  "sort": 612,
+                  "includes": [
+                    "grammar",
+                    "usage",
+                    "language",
+                    "literature",
+                    "study"
+                  ],
+                  "scopeNote": "Use for works chiefly about grammar & usage within language study."
                 },
                 {
                   "code": "613",
-                  "shortLabel": "LRN",
+                  "shortLabel": "LALE",
                   "label": "Language Learning",
                   "keywords": ["language", "learning", "literature", "study"],
                   "status": "active",
-                  "sort": 613
+                  "sort": 613,
+                  "includes": ["language", "learning", "literature", "study"],
+                  "scopeNote": "Use for works chiefly about language learning within language study."
                 },
                 {
                   "code": "614",
-                  "shortLabel": "TR4",
+                  "shortLabel": "TRA",
                   "label": "Translation",
                   "keywords": [
                     "translation",
@@ -1424,21 +2075,31 @@
                   ],
                   "status": "active",
                   "sort": 614,
-                  "seeAlso": ["642", "931"]
+                  "seeAlso": ["642", "931"],
+                  "includes": [
+                    "translation",
+                    "language",
+                    "literature",
+                    "study"
+                  ],
+                  "scopeNote": "Use for works chiefly about translation within language study."
                 }
               ],
               "keywords": ["language", "study", "literature"],
               "status": "active",
-              "sort": 610
+              "sort": 610,
+              "allowAssign": true,
+              "includes": ["language", "study", "literature"],
+              "scopeNote": "Use for general works on language study. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "620",
-              "shortLabel": "LST",
+              "shortLabel": "LIS",
               "label": "Literary Study",
               "children": [
                 {
                   "code": "621",
-                  "shortLabel": "CRT",
+                  "shortLabel": "CRI",
                   "label": "Criticism",
                   "keywords": [
                     "criticism",
@@ -1448,11 +2109,19 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 621
+                  "sort": 621,
+                  "includes": [
+                    "criticism",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
+                  ],
+                  "scopeNote": "Use for works chiefly about criticism within literary study."
                 },
                 {
                   "code": "622",
-                  "shortLabel": "PCT",
+                  "shortLabel": "POC",
                   "label": "Poetics & Craft",
                   "keywords": [
                     "poetics",
@@ -1463,7 +2132,16 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 622
+                  "sort": 622,
+                  "includes": [
+                    "poetics",
+                    "craft",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
+                  ],
+                  "scopeNote": "Use for works chiefly about poetics & craft within literary study."
                 },
                 {
                   "code": "623",
@@ -1477,11 +2155,19 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 623
+                  "sort": 623,
+                  "includes": [
+                    "anthologies",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
+                  ],
+                  "scopeNote": "Use for works chiefly about anthologies within literary study."
                 },
                 {
                   "code": "624",
-                  "shortLabel": "TRD",
+                  "shortLabel": "TRM",
                   "label": "Traditions & Movements",
                   "keywords": [
                     "traditions",
@@ -1492,21 +2178,33 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 624
+                  "sort": 624,
+                  "includes": [
+                    "traditions",
+                    "movements",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
+                  ],
+                  "scopeNote": "Use for works chiefly about traditions & movements within literary study."
                 }
               ],
               "keywords": ["literary", "study", "language", "literature"],
               "status": "active",
-              "sort": 620
+              "sort": 620,
+              "allowAssign": true,
+              "includes": ["literary", "study", "language", "literature"],
+              "scopeNote": "Use for general works on literary study. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "630",
-              "shortLabel": "FRM",
+              "shortLabel": "FOG",
               "label": "Forms & Genres",
               "children": [
                 {
                   "code": "631",
-                  "shortLabel": "POY",
+                  "shortLabel": "POE",
                   "label": "Poetry",
                   "keywords": [
                     "poetry",
@@ -1516,11 +2214,19 @@
                     "genres"
                   ],
                   "status": "active",
-                  "sort": 631
+                  "sort": 631,
+                  "includes": [
+                    "poetry",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
+                  ],
+                  "scopeNote": "Use for works chiefly about poetry within forms & genres."
                 },
                 {
                   "code": "632",
-                  "shortLabel": "DRM",
+                  "shortLabel": "DRAM",
                   "label": "Drama",
                   "keywords": [
                     "drama",
@@ -1530,11 +2236,19 @@
                     "genres"
                   ],
                   "status": "active",
-                  "sort": 632
+                  "sort": 632,
+                  "includes": [
+                    "drama",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
+                  ],
+                  "scopeNote": "Use for works chiefly about drama within forms & genres."
                 },
                 {
                   "code": "633",
-                  "shortLabel": "ESY",
+                  "shortLabel": "ESS",
                   "label": "Essays",
                   "keywords": [
                     "essays",
@@ -1544,11 +2258,19 @@
                     "genres"
                   ],
                   "status": "active",
-                  "sort": 633
+                  "sort": 633,
+                  "includes": [
+                    "essays",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
+                  ],
+                  "scopeNote": "Use for works chiefly about essays within forms & genres."
                 },
                 {
                   "code": "634",
-                  "shortLabel": "FOL",
+                  "shortLabel": "FOM",
                   "label": "Folklore & Myth",
                   "keywords": [
                     "folklore",
@@ -1559,16 +2281,28 @@
                     "genres"
                   ],
                   "status": "active",
-                  "sort": 634
+                  "sort": 634,
+                  "includes": [
+                    "folklore",
+                    "myth",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
+                  ],
+                  "scopeNote": "Use for works chiefly about folklore & myth within forms & genres."
                 }
               ],
               "keywords": ["forms", "genres", "language", "literature"],
               "status": "active",
-              "sort": 630
+              "sort": 630,
+              "allowAssign": true,
+              "includes": ["forms", "genres", "language", "literature"],
+              "scopeNote": "Use for general works on forms & genres. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "640",
-              "shortLabel": "WRI",
+              "shortLabel": "WRP",
               "label": "Writing Practice",
               "children": [
                 {
@@ -1583,11 +2317,19 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 641
+                  "sort": 641,
+                  "includes": [
+                    "creative",
+                    "writing",
+                    "language",
+                    "literature",
+                    "practice"
+                  ],
+                  "scopeNote": "Use for works chiefly about creative writing within writing practice."
                 },
                 {
                   "code": "642",
-                  "shortLabel": "NFW",
+                  "shortLabel": "NOW",
                   "label": "Nonfiction Writing",
                   "keywords": [
                     "nonfiction",
@@ -1597,11 +2339,19 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 642
+                  "sort": 642,
+                  "includes": [
+                    "nonfiction",
+                    "writing",
+                    "language",
+                    "literature",
+                    "practice"
+                  ],
+                  "scopeNote": "Use for works chiefly about nonfiction writing within writing practice."
                 },
                 {
                   "code": "643",
-                  "shortLabel": "EDT",
+                  "shortLabel": "EDIT",
                   "label": "Editing",
                   "keywords": [
                     "editing",
@@ -1611,11 +2361,19 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 643
+                  "sort": 643,
+                  "includes": [
+                    "editing",
+                    "language",
+                    "literature",
+                    "writing",
+                    "practice"
+                  ],
+                  "scopeNote": "Use for works chiefly about editing within writing practice."
                 },
                 {
                   "code": "644",
-                  "shortLabel": "PU4",
+                  "shortLabel": "PSP",
                   "label": "Publishing & Small Press",
                   "keywords": [
                     "publishing",
@@ -1627,17 +2385,33 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 644
+                  "sort": 644,
+                  "includes": [
+                    "publishing",
+                    "small",
+                    "press",
+                    "language",
+                    "literature",
+                    "writing",
+                    "practice"
+                  ],
+                  "scopeNote": "Use for works chiefly about publishing & small press within writing practice."
                 }
               ],
               "keywords": ["writing", "practice", "language", "literature"],
               "status": "active",
-              "sort": 640
+              "sort": 640,
+              "allowAssign": true,
+              "includes": ["writing", "practice", "language", "literature"],
+              "scopeNote": "Use for general works on writing practice. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["language", "literature"],
           "status": "active",
-          "sort": 600
+          "sort": 600,
+          "allowAssign": true,
+          "includes": ["language", "literature"],
+          "scopeNote": "Use for general works on language & literature. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "700",
@@ -1646,12 +2420,12 @@
           "children": [
             {
               "code": "710",
-              "shortLabel": "LSC",
+              "shortLabel": "LISC",
               "label": "Life Sciences",
               "children": [
                 {
                   "code": "711",
-                  "shortLabel": "BYO",
+                  "shortLabel": "BIO",
                   "label": "Biology",
                   "keywords": [
                     "biology",
@@ -1661,11 +2435,19 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 711
+                  "sort": 711,
+                  "includes": [
+                    "biology",
+                    "science",
+                    "nature",
+                    "life",
+                    "sciences"
+                  ],
+                  "scopeNote": "Use for works chiefly about biology within life sciences."
                 },
                 {
                   "code": "712",
-                  "shortLabel": "ECL",
+                  "shortLabel": "ECOL",
                   "label": "Ecology",
                   "keywords": [
                     "ecology",
@@ -1676,7 +2458,15 @@
                   ],
                   "status": "active",
                   "sort": 712,
-                  "seeAlso": ["742", "7523"]
+                  "seeAlso": ["742", "752.3"],
+                  "includes": [
+                    "ecology",
+                    "science",
+                    "nature",
+                    "life",
+                    "sciences"
+                  ],
+                  "scopeNote": "Use for works chiefly about ecology within life sciences."
                 },
                 {
                   "code": "713",
@@ -1690,7 +2480,15 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 713
+                  "sort": 713,
+                  "includes": [
+                    "botany",
+                    "science",
+                    "nature",
+                    "life",
+                    "sciences"
+                  ],
+                  "scopeNote": "Use for works chiefly about botany within life sciences."
                 },
                 {
                   "code": "714",
@@ -1704,21 +2502,32 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 714
+                  "sort": 714,
+                  "includes": [
+                    "zoology",
+                    "science",
+                    "nature",
+                    "life",
+                    "sciences"
+                  ],
+                  "scopeNote": "Use for works chiefly about zoology within life sciences."
                 }
               ],
               "keywords": ["life", "sciences", "science", "nature"],
               "status": "active",
-              "sort": 710
+              "sort": 710,
+              "allowAssign": true,
+              "includes": ["life", "sciences", "science", "nature"],
+              "scopeNote": "Use for general works on life sciences. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "720",
-              "shortLabel": "PHY",
+              "shortLabel": "PHS",
               "label": "Physical Sciences",
               "children": [
                 {
                   "code": "721",
-                  "shortLabel": "PHS",
+                  "shortLabel": "PHY",
                   "label": "Physics",
                   "keywords": [
                     "physics",
@@ -1728,11 +2537,19 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 721
+                  "sort": 721,
+                  "includes": [
+                    "physics",
+                    "science",
+                    "nature",
+                    "physical",
+                    "sciences"
+                  ],
+                  "scopeNote": "Use for works chiefly about physics within physical sciences."
                 },
                 {
                   "code": "722",
-                  "shortLabel": "CHM",
+                  "shortLabel": "CHE",
                   "label": "Chemistry",
                   "keywords": [
                     "chemistry",
@@ -1742,7 +2559,15 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 722
+                  "sort": 722,
+                  "includes": [
+                    "chemistry",
+                    "science",
+                    "nature",
+                    "physical",
+                    "sciences"
+                  ],
+                  "scopeNote": "Use for works chiefly about chemistry within physical sciences."
                 },
                 {
                   "code": "723",
@@ -1757,11 +2582,20 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 723
+                  "sort": 723,
+                  "includes": [
+                    "geology",
+                    "earth",
+                    "science",
+                    "nature",
+                    "physical",
+                    "sciences"
+                  ],
+                  "scopeNote": "Use for works chiefly about geology & earth science within physical sciences."
                 },
                 {
                   "code": "724",
-                  "shortLabel": "AST",
+                  "shortLabel": "ASS",
                   "label": "Astronomy & Space",
                   "keywords": [
                     "astronomy",
@@ -1772,21 +2606,33 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 724
+                  "sort": 724,
+                  "includes": [
+                    "astronomy",
+                    "space",
+                    "science",
+                    "nature",
+                    "physical",
+                    "sciences"
+                  ],
+                  "scopeNote": "Use for works chiefly about astronomy & space within physical sciences."
                 }
               ],
               "keywords": ["physical", "sciences", "science", "nature"],
               "status": "active",
-              "sort": 720
+              "sort": 720,
+              "allowAssign": true,
+              "includes": ["physical", "sciences", "science", "nature"],
+              "scopeNote": "Use for general works on physical sciences. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "730",
-              "shortLabel": "MTL",
+              "shortLabel": "MAL",
               "label": "Math & Logic",
               "children": [
                 {
                   "code": "731",
-                  "shortLabel": "MTH",
+                  "shortLabel": "MAT",
                   "label": "Mathematics",
                   "keywords": [
                     "mathematics",
@@ -1796,11 +2642,19 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 731
+                  "sort": 731,
+                  "includes": [
+                    "mathematics",
+                    "science",
+                    "nature",
+                    "math",
+                    "logic"
+                  ],
+                  "scopeNote": "Use for works chiefly about mathematics within math & logic."
                 },
                 {
                   "code": "732",
-                  "shortLabel": "STA",
+                  "shortLabel": "STAT",
                   "label": "Statistics",
                   "keywords": [
                     "statistics",
@@ -1810,7 +2664,15 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 732
+                  "sort": 732,
+                  "includes": [
+                    "statistics",
+                    "science",
+                    "nature",
+                    "math",
+                    "logic"
+                  ],
+                  "scopeNote": "Use for works chiefly about statistics within math & logic."
                 },
                 {
                   "code": "733",
@@ -1818,7 +2680,9 @@
                   "label": "Logic",
                   "keywords": ["logic", "science", "nature", "math"],
                   "status": "active",
-                  "sort": 733
+                  "sort": 733,
+                  "includes": ["logic", "science", "nature", "math"],
+                  "scopeNote": "Use for works chiefly about logic within math & logic."
                 },
                 {
                   "code": "734",
@@ -1834,21 +2698,34 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 734
+                  "sort": 734,
+                  "includes": [
+                    "models",
+                    "systems",
+                    "thinking",
+                    "science",
+                    "nature",
+                    "math",
+                    "logic"
+                  ],
+                  "scopeNote": "Use for works chiefly about models & systems thinking within math & logic."
                 }
               ],
               "keywords": ["math", "logic", "science", "nature"],
               "status": "active",
-              "sort": 730
+              "sort": 730,
+              "allowAssign": true,
+              "includes": ["math", "logic", "science", "nature"],
+              "scopeNote": "Use for general works on math & logic. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "740",
-              "shortLabel": "NAT",
+              "shortLabel": "NAW",
               "label": "Nature Writing",
               "children": [
                 {
                   "code": "741",
-                  "shortLabel": "OBS",
+                  "shortLabel": "FIO",
                   "label": "Field Observation",
                   "keywords": [
                     "field",
@@ -1858,27 +2735,39 @@
                     "writing"
                   ],
                   "status": "active",
-                  "sort": 741
+                  "sort": 741,
+                  "includes": [
+                    "field",
+                    "observation",
+                    "science",
+                    "nature",
+                    "writing"
+                  ],
+                  "scopeNote": "Use for works chiefly about field observation within nature writing."
                 },
                 {
                   "code": "742",
-                  "shortLabel": "EN2",
+                  "shortLabel": "ENV",
                   "label": "Environment",
                   "keywords": ["environment", "science", "nature", "writing"],
                   "status": "active",
-                  "sort": 742
+                  "sort": 742,
+                  "includes": ["environment", "science", "nature", "writing"],
+                  "scopeNote": "Use for works chiefly about environment within nature writing."
                 },
                 {
                   "code": "743",
-                  "shortLabel": "CLM",
+                  "shortLabel": "CLIM",
                   "label": "Climate",
                   "keywords": ["climate", "science", "nature", "writing"],
                   "status": "active",
-                  "sort": 743
+                  "sort": 743,
+                  "includes": ["climate", "science", "nature", "writing"],
+                  "scopeNote": "Use for works chiefly about climate within nature writing."
                 },
                 {
                   "code": "744",
-                  "shortLabel": "NTR",
+                  "shortLabel": "NAH",
                   "label": "Natural History",
                   "keywords": [
                     "natural",
@@ -1888,12 +2777,23 @@
                     "writing"
                   ],
                   "status": "active",
-                  "sort": 744
+                  "sort": 744,
+                  "includes": [
+                    "natural",
+                    "history",
+                    "science",
+                    "nature",
+                    "writing"
+                  ],
+                  "scopeNote": "Use for works chiefly about natural history within nature writing."
                 }
               ],
               "keywords": ["nature", "writing", "science"],
               "status": "active",
-              "sort": 740
+              "sort": 740,
+              "allowAssign": true,
+              "includes": ["nature", "writing", "science"],
+              "scopeNote": "Use for general works on nature writing. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "750",
@@ -1902,12 +2802,14 @@
               "children": [
                 {
                   "code": "751",
-                  "shortLabel": "WLD",
+                  "shortLabel": "WIL",
                   "label": "Wildlife",
                   "keywords": ["wildlife", "science", "nature", "animals"],
                   "status": "active",
                   "sort": 751,
-                  "seeAlso": ["713", "754"]
+                  "seeAlso": ["713", "754"],
+                  "includes": ["wildlife", "science", "nature", "animals"],
+                  "scopeNote": "Use for works chiefly about wildlife within animals & wildlife."
                 },
                 {
                   "code": "752",
@@ -1922,11 +2824,20 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 752
+                  "sort": 752,
+                  "includes": [
+                    "animal",
+                    "behavior",
+                    "science",
+                    "nature",
+                    "animals",
+                    "wildlife"
+                  ],
+                  "scopeNote": "Use for works chiefly about animal behavior within animals & wildlife."
                 },
                 {
                   "code": "753",
-                  "shortLabel": "DOM",
+                  "shortLabel": "DOA",
                   "label": "Domesticated Animals",
                   "keywords": [
                     "domesticated",
@@ -1936,11 +2847,19 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 753
+                  "sort": 753,
+                  "includes": [
+                    "domesticated",
+                    "animals",
+                    "science",
+                    "nature",
+                    "wildlife"
+                  ],
+                  "scopeNote": "Use for works chiefly about domesticated animals within animals & wildlife."
                 },
                 {
                   "code": "754",
-                  "shortLabel": "NT4",
+                  "shortLabel": "NAC",
                   "label": "Nature Companions",
                   "keywords": [
                     "nature",
@@ -1950,7 +2869,15 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 754
+                  "sort": 754,
+                  "includes": [
+                    "nature",
+                    "companions",
+                    "science",
+                    "animals",
+                    "wildlife"
+                  ],
+                  "scopeNote": "Use for works chiefly about nature companions within animals & wildlife."
                 }
               ],
               "keywords": [
@@ -1962,12 +2889,25 @@
                 "nature"
               ],
               "status": "active",
-              "sort": 750
+              "sort": 750,
+              "allowAssign": true,
+              "includes": [
+                "animals",
+                "wildlife",
+                "zoology",
+                "fauna",
+                "science",
+                "nature"
+              ],
+              "scopeNote": "Use for general works on animals & wildlife. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["science", "nature"],
           "status": "active",
-          "sort": 700
+          "sort": 700,
+          "allowAssign": true,
+          "includes": ["science", "nature"],
+          "scopeNote": "Use for general works on science & nature. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "800",
@@ -1976,49 +2916,60 @@
           "children": [
             {
               "code": "810",
-              "shortLabel": "GFC",
+              "shortLabel": "GEF",
               "label": "General Fiction",
               "children": [
                 {
                   "code": "811",
-                  "shortLabel": "LFI",
+                  "shortLabel": "LIF",
                   "label": "Literary Fiction",
                   "keywords": ["literary", "fiction", "general"],
                   "status": "active",
-                  "sort": 811
+                  "sort": 811,
+                  "includes": ["literary", "fiction", "general"],
+                  "scopeNote": "Use for works chiefly about literary fiction within general fiction."
                 },
                 {
                   "code": "812",
-                  "shortLabel": "CFI",
+                  "shortLabel": "COF",
                   "label": "Contemporary Fiction",
                   "keywords": ["contemporary", "fiction", "general"],
                   "status": "active",
-                  "sort": 812
+                  "sort": 812,
+                  "includes": ["contemporary", "fiction", "general"],
+                  "scopeNote": "Use for works chiefly about contemporary fiction within general fiction."
                 },
                 {
                   "code": "813",
-                  "shortLabel": "HFI",
+                  "shortLabel": "HIF",
                   "label": "Historical Fiction",
                   "keywords": ["historical", "fiction", "general"],
                   "status": "active",
-                  "sort": 813
+                  "sort": 813,
+                  "includes": ["historical", "fiction", "general"],
+                  "scopeNote": "Use for works chiefly about historical fiction within general fiction."
                 },
                 {
                   "code": "814",
-                  "shortLabel": "SLC",
+                  "shortLabel": "SOL",
                   "label": "Slice of Life",
                   "keywords": ["slice", "of", "life", "fiction", "general"],
                   "status": "active",
-                  "sort": 814
+                  "sort": 814,
+                  "includes": ["slice", "of", "life", "fiction", "general"],
+                  "scopeNote": "Use for works chiefly about slice of life within general fiction."
                 }
               ],
               "keywords": ["general", "fiction"],
               "status": "active",
-              "sort": 810
+              "sort": 810,
+              "allowAssign": true,
+              "includes": ["general", "fiction"],
+              "scopeNote": "Use for general works on general fiction. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "820",
-              "shortLabel": "SPC",
+              "shortLabel": "SPF",
               "label": "Speculative Fiction",
               "children": [
                 {
@@ -2028,7 +2979,9 @@
                   "keywords": ["science", "fiction", "speculative"],
                   "status": "active",
                   "sort": 821,
-                  "seeAlso": ["431", "433"]
+                  "seeAlso": ["431", "433"],
+                  "includes": ["science", "fiction", "speculative"],
+                  "scopeNote": "Use for works chiefly about science fiction within speculative fiction."
                 },
                 {
                   "code": "822",
@@ -2036,7 +2989,9 @@
                   "label": "Fantasy",
                   "keywords": ["fantasy", "fiction", "speculative"],
                   "status": "active",
-                  "sort": 822
+                  "sort": 822,
+                  "includes": ["fantasy", "fiction", "speculative"],
+                  "scopeNote": "Use for works chiefly about fantasy within speculative fiction."
                 },
                 {
                   "code": "823",
@@ -2044,34 +2999,43 @@
                   "label": "Horror",
                   "keywords": ["horror", "fiction", "speculative"],
                   "status": "active",
-                  "sort": 823
+                  "sort": 823,
+                  "includes": ["horror", "fiction", "speculative"],
+                  "scopeNote": "Use for works chiefly about horror within speculative fiction."
                 },
                 {
                   "code": "824",
-                  "shortLabel": "MAG",
+                  "shortLabel": "MAR",
                   "label": "Magical Realism",
                   "keywords": ["magical", "realism", "fiction", "speculative"],
                   "status": "active",
                   "sort": 824,
-                  "seeAlso": ["1541", "634"]
+                  "seeAlso": ["154.1", "634"],
+                  "includes": ["magical", "realism", "fiction", "speculative"],
+                  "scopeNote": "Use for works chiefly about magical realism within speculative fiction."
                 }
               ],
               "keywords": ["speculative", "fiction"],
               "status": "active",
-              "sort": 820
+              "sort": 820,
+              "allowAssign": true,
+              "includes": ["speculative", "fiction"],
+              "scopeNote": "Use for general works on speculative fiction. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "830",
-              "shortLabel": "GNR",
+              "shortLabel": "GEFI",
               "label": "Genre Fiction",
               "children": [
                 {
                   "code": "831",
-                  "shortLabel": "MY1",
+                  "shortLabel": "MYS",
                   "label": "Mystery",
                   "keywords": ["mystery", "fiction", "genre"],
                   "status": "active",
-                  "sort": 831
+                  "sort": 831,
+                  "includes": ["mystery", "fiction", "genre"],
+                  "scopeNote": "Use for works chiefly about mystery within genre fiction."
                 },
                 {
                   "code": "832",
@@ -2079,61 +3043,76 @@
                   "label": "Romance",
                   "keywords": ["romance", "fiction", "genre"],
                   "status": "active",
-                  "sort": 832
+                  "sort": 832,
+                  "includes": ["romance", "fiction", "genre"],
+                  "scopeNote": "Use for works chiefly about romance within genre fiction."
                 },
                 {
                   "code": "833",
-                  "shortLabel": "ATR",
+                  "shortLabel": "ADT",
                   "label": "Adventure & Thriller",
                   "keywords": ["adventure", "thriller", "fiction", "genre"],
                   "status": "active",
-                  "sort": 833
+                  "sort": 833,
+                  "includes": ["adventure", "thriller", "fiction", "genre"],
+                  "scopeNote": "Use for works chiefly about adventure & thriller within genre fiction."
                 },
                 {
                   "code": "834",
-                  "shortLabel": "CRI",
+                  "shortLabel": "CRN",
                   "label": "Crime & Noir",
                   "keywords": ["crime", "noir", "fiction", "genre"],
                   "status": "active",
-                  "sort": 834
+                  "sort": 834,
+                  "includes": ["crime", "noir", "fiction", "genre"],
+                  "scopeNote": "Use for works chiefly about crime & noir within genre fiction."
                 }
               ],
               "keywords": ["genre", "fiction"],
               "status": "active",
-              "sort": 830
+              "sort": 830,
+              "allowAssign": true,
+              "includes": ["genre", "fiction"],
+              "scopeNote": "Use for general works on genre fiction. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "840",
-              "shortLabel": "SFM",
+              "shortLabel": "SHF",
               "label": "Short Forms",
               "children": [
                 {
                   "code": "841",
-                  "shortLabel": "SHT",
+                  "shortLabel": "SHS",
                   "label": "Short Stories",
                   "keywords": ["short", "stories", "fiction", "forms"],
                   "status": "active",
-                  "sort": 841
+                  "sort": 841,
+                  "includes": ["short", "stories", "fiction", "forms"],
+                  "scopeNote": "Use for works chiefly about short stories within short forms."
                 },
                 {
                   "code": "842",
-                  "shortLabel": "NVT",
+                  "shortLabel": "NOV",
                   "label": "Novellas",
                   "keywords": ["novellas", "fiction", "short", "forms"],
                   "status": "active",
-                  "sort": 842
+                  "sort": 842,
+                  "includes": ["novellas", "fiction", "short", "forms"],
+                  "scopeNote": "Use for works chiefly about novellas within short forms."
                 },
                 {
                   "code": "843",
-                  "shortLabel": "FLS",
+                  "shortLabel": "FLF",
                   "label": "Flash Fiction",
                   "keywords": ["flash", "fiction", "short", "forms"],
                   "status": "active",
-                  "sort": 843
+                  "sort": 843,
+                  "includes": ["flash", "fiction", "short", "forms"],
+                  "scopeNote": "Use for works chiefly about flash fiction within short forms."
                 },
                 {
                   "code": "844",
-                  "shortLabel": "FBL",
+                  "shortLabel": "FFT",
                   "label": "Fables & Fairy Tales",
                   "keywords": [
                     "fables",
@@ -2144,31 +3123,46 @@
                     "forms"
                   ],
                   "status": "active",
-                  "sort": 844
+                  "sort": 844,
+                  "includes": [
+                    "fables",
+                    "fairy",
+                    "tales",
+                    "fiction",
+                    "short",
+                    "forms"
+                  ],
+                  "scopeNote": "Use for works chiefly about fables & fairy tales within short forms."
                 }
               ],
               "keywords": ["short", "forms", "fiction"],
               "status": "active",
-              "sort": 840
+              "sort": 840,
+              "allowAssign": true,
+              "includes": ["short", "forms", "fiction"],
+              "scopeNote": "Use for general works on short forms. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["fiction"],
           "status": "active",
-          "sort": 800
+          "sort": 800,
+          "allowAssign": true,
+          "includes": ["fiction"],
+          "scopeNote": "Use for general works on fiction. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "900",
-          "shortLabel": "RFP",
+          "shortLabel": "REP",
           "label": "Reference & Practical",
           "children": [
             {
               "code": "910",
-              "shortLabel": "RFC",
+              "shortLabel": "REF",
               "label": "Reference",
               "children": [
                 {
                   "code": "911",
-                  "shortLabel": "ENC",
+                  "shortLabel": "ENG",
                   "label": "Encyclopedias & Guides",
                   "keywords": [
                     "encyclopedias",
@@ -2177,11 +3171,18 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 911
+                  "sort": 911,
+                  "includes": [
+                    "encyclopedias",
+                    "guides",
+                    "reference",
+                    "practical"
+                  ],
+                  "scopeNote": "Use for works chiefly about encyclopedias & guides within reference."
                 },
                 {
                   "code": "912",
-                  "shortLabel": "DIC",
+                  "shortLabel": "DIG",
                   "label": "Dictionaries & Glossaries",
                   "keywords": [
                     "dictionaries",
@@ -2190,19 +3191,28 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 912
+                  "sort": 912,
+                  "includes": [
+                    "dictionaries",
+                    "glossaries",
+                    "reference",
+                    "practical"
+                  ],
+                  "scopeNote": "Use for works chiefly about dictionaries & glossaries within reference."
                 },
                 {
                   "code": "913",
-                  "shortLabel": "IDX",
+                  "shortLabel": "INCA",
                   "label": "Indexes & Catalogs",
                   "keywords": ["indexes", "catalogs", "reference", "practical"],
                   "status": "active",
-                  "sort": 913
+                  "sort": 913,
+                  "includes": ["indexes", "catalogs", "reference", "practical"],
+                  "scopeNote": "Use for works chiefly about indexes & catalogs within reference."
                 },
                 {
                   "code": "914",
-                  "shortLabel": "MAN",
+                  "shortLabel": "MAH",
                   "label": "Manuals & Handbooks",
                   "keywords": [
                     "manuals",
@@ -2211,12 +3221,22 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 914
+                  "sort": 914,
+                  "includes": [
+                    "manuals",
+                    "handbooks",
+                    "reference",
+                    "practical"
+                  ],
+                  "scopeNote": "Use for works chiefly about manuals & handbooks within reference."
                 }
               ],
               "keywords": ["reference", "practical"],
               "status": "active",
-              "sort": 910
+              "sort": 910,
+              "allowAssign": true,
+              "includes": ["reference", "practical"],
+              "scopeNote": "Use for general works on reference. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "920",
@@ -2235,11 +3255,19 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 921
+                  "sort": 921,
+                  "includes": [
+                    "cooking",
+                    "reference",
+                    "practical",
+                    "home",
+                    "making"
+                  ],
+                  "scopeNote": "Use for works chiefly about cooking within home & making."
                 },
                 {
                   "code": "922",
-                  "shortLabel": "CRF",
+                  "shortLabel": "CRA",
                   "label": "Crafts",
                   "keywords": [
                     "crafts",
@@ -2249,7 +3277,15 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 922
+                  "sort": 922,
+                  "includes": [
+                    "crafts",
+                    "reference",
+                    "practical",
+                    "home",
+                    "making"
+                  ],
+                  "scopeNote": "Use for works chiefly about crafts within home & making."
                 },
                 {
                   "code": "923",
@@ -2263,11 +3299,19 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 923
+                  "sort": 923,
+                  "includes": [
+                    "gardening",
+                    "reference",
+                    "practical",
+                    "home",
+                    "making"
+                  ],
+                  "scopeNote": "Use for works chiefly about gardening within home & making."
                 },
                 {
                   "code": "924",
-                  "shortLabel": "DIY",
+                  "shortLabel": "DIR",
                   "label": "DIY & Repair",
                   "keywords": [
                     "diy",
@@ -2278,16 +3322,28 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 924
+                  "sort": 924,
+                  "includes": [
+                    "diy",
+                    "repair",
+                    "reference",
+                    "practical",
+                    "home",
+                    "making"
+                  ],
+                  "scopeNote": "Use for works chiefly about diy & repair within home & making."
                 }
               ],
               "keywords": ["home", "making", "reference", "practical"],
               "status": "active",
-              "sort": 920
+              "sort": 920,
+              "allowAssign": true,
+              "includes": ["home", "making", "reference", "practical"],
+              "scopeNote": "Use for general works on home & making. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "930",
-              "shortLabel": "TRV",
+              "shortLabel": "TRP",
               "label": "Travel & Place",
               "children": [
                 {
@@ -2302,11 +3358,19 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 931
+                  "sort": 931,
+                  "includes": [
+                    "travel",
+                    "writing",
+                    "reference",
+                    "practical",
+                    "place"
+                  ],
+                  "scopeNote": "Use for works chiefly about travel writing within travel & place."
                 },
                 {
                   "code": "932",
-                  "shortLabel": "RGN",
+                  "shortLabel": "REG",
                   "label": "Regional Guides",
                   "keywords": [
                     "regional",
@@ -2317,11 +3381,20 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 932
+                  "sort": 932,
+                  "includes": [
+                    "regional",
+                    "guides",
+                    "reference",
+                    "practical",
+                    "travel",
+                    "place"
+                  ],
+                  "scopeNote": "Use for works chiefly about regional guides within travel & place."
                 },
                 {
                   "code": "933",
-                  "shortLabel": "ATL",
+                  "shortLabel": "MAA",
                   "label": "Maps & Atlas",
                   "keywords": [
                     "maps",
@@ -2332,11 +3405,20 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 933
+                  "sort": 933,
+                  "includes": [
+                    "maps",
+                    "atlas",
+                    "reference",
+                    "practical",
+                    "travel",
+                    "place"
+                  ],
+                  "scopeNote": "Use for works chiefly about maps & atlas within travel & place."
                 },
                 {
                   "code": "934",
-                  "shortLabel": "CGD",
+                  "shortLabel": "CUG",
                   "label": "Cultural Guidebooks",
                   "keywords": [
                     "cultural",
@@ -2347,21 +3429,33 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 934
+                  "sort": 934,
+                  "includes": [
+                    "cultural",
+                    "guidebooks",
+                    "reference",
+                    "practical",
+                    "travel",
+                    "place"
+                  ],
+                  "scopeNote": "Use for works chiefly about cultural guidebooks within travel & place."
                 }
               ],
               "keywords": ["travel", "place", "reference", "practical"],
               "status": "active",
-              "sort": 930
+              "sort": 930,
+              "allowAssign": true,
+              "includes": ["travel", "place", "reference", "practical"],
+              "scopeNote": "Use for general works on travel & place. Class more specific works in the narrower categories below when needed."
             },
             {
               "code": "940",
-              "shortLabel": "WLB",
+              "shortLabel": "WDL",
               "label": "Wellbeing & Daily Life",
               "children": [
                 {
                   "code": "941",
-                  "shortLabel": "HLT",
+                  "shortLabel": "HEW",
                   "label": "Health & Wellness",
                   "keywords": [
                     "health",
@@ -2373,11 +3467,21 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 941
+                  "sort": 941,
+                  "includes": [
+                    "health",
+                    "wellness",
+                    "reference",
+                    "practical",
+                    "wellbeing",
+                    "daily",
+                    "life"
+                  ],
+                  "scopeNote": "Use for works chiefly about health & wellness within wellbeing & daily life."
                 },
                 {
                   "code": "942",
-                  "shortLabel": "MIN",
+                  "shortLabel": "MIR",
                   "label": "Mindfulness & Reflection",
                   "keywords": [
                     "mindfulness",
@@ -2389,11 +3493,21 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 942
+                  "sort": 942,
+                  "includes": [
+                    "mindfulness",
+                    "reflection",
+                    "reference",
+                    "practical",
+                    "wellbeing",
+                    "daily",
+                    "life"
+                  ],
+                  "scopeNote": "Use for works chiefly about mindfulness & reflection within wellbeing & daily life."
                 },
                 {
                   "code": "943",
-                  "shortLabel": "RE3",
+                  "shortLabel": "RFL",
                   "label": "Relationships & Family Life",
                   "keywords": [
                     "relationships",
@@ -2405,7 +3519,17 @@
                     "daily"
                   ],
                   "status": "active",
-                  "sort": 943
+                  "sort": 943,
+                  "includes": [
+                    "relationships",
+                    "family",
+                    "life",
+                    "reference",
+                    "practical",
+                    "wellbeing",
+                    "daily"
+                  ],
+                  "scopeNote": "Use for works chiefly about relationships & family life within wellbeing & daily life."
                 },
                 {
                   "code": "944",
@@ -2422,7 +3546,18 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 944
+                  "sort": 944,
+                  "includes": [
+                    "lifestyle",
+                    "habit",
+                    "building",
+                    "reference",
+                    "practical",
+                    "wellbeing",
+                    "daily",
+                    "life"
+                  ],
+                  "scopeNote": "Use for works chiefly about lifestyle & habit building within wellbeing & daily life."
                 }
               ],
               "keywords": [
@@ -2433,12 +3568,24 @@
                 "practical"
               ],
               "status": "active",
-              "sort": 940
+              "sort": 940,
+              "allowAssign": true,
+              "includes": [
+                "wellbeing",
+                "daily",
+                "life",
+                "reference",
+                "practical"
+              ],
+              "scopeNote": "Use for general works on wellbeing & daily life. Class more specific works in the narrower categories below when needed."
             }
           ],
           "keywords": ["reference", "practical"],
           "status": "active",
-          "sort": 900
+          "sort": 900,
+          "allowAssign": true,
+          "includes": ["reference", "practical"],
+          "scopeNote": "Use for general works on reference & practical. Class more specific works in the narrower categories below when needed."
         },
         {
           "code": "950",
@@ -2447,11 +3594,13 @@
           "children": [
             {
               "code": "951",
-              "shortLabel": "GA1",
+              "shortLabel": "GAM",
               "label": "Games",
               "keywords": ["games", "hobbies", "recreation"],
               "status": "active",
-              "sort": 951
+              "sort": 951,
+              "includes": ["games", "hobbies", "recreation"],
+              "scopeNote": "Use for works chiefly about games within games, hobbies & recreation."
             },
             {
               "code": "952",
@@ -2459,7 +3608,9 @@
               "label": "Hobbies",
               "keywords": ["hobbies", "games", "recreation"],
               "status": "active",
-              "sort": 952
+              "sort": 952,
+              "includes": ["hobbies", "games", "recreation"],
+              "scopeNote": "Use for works chiefly about hobbies within games, hobbies & recreation."
             },
             {
               "code": "953",
@@ -2467,11 +3618,13 @@
               "label": "Recreation",
               "keywords": ["recreation", "games", "hobbies"],
               "status": "active",
-              "sort": 953
+              "sort": 953,
+              "includes": ["recreation", "games", "hobbies"],
+              "scopeNote": "Use for works chiefly about recreation within games, hobbies & recreation."
             },
             {
               "code": "954",
-              "shortLabel": "PE4",
+              "shortLabel": "PAC",
               "label": "Pets & Animal Care",
               "keywords": [
                 "pets",
@@ -2486,12 +3639,26 @@
               ],
               "status": "active",
               "sort": 954,
-              "seeAlso": ["753", "752"]
+              "seeAlso": ["753", "752"],
+              "includes": [
+                "pets",
+                "animal",
+                "care",
+                "animal care",
+                "companions",
+                "training",
+                "games",
+                "hobbies"
+              ],
+              "scopeNote": "Use for works chiefly about pets & animal care within games, hobbies & recreation."
             }
           ],
           "keywords": ["games", "hobbies", "recreation", "leisure"],
           "status": "active",
-          "sort": 950
+          "sort": 950,
+          "allowAssign": true,
+          "includes": ["games", "hobbies", "recreation", "leisure"],
+          "scopeNote": "Use for general works on games, hobbies & recreation. Class more specific works in the narrower categories below when needed."
         }
       ],
       "version": "1.1.0",
@@ -2526,7 +3693,8 @@
           "label": "Full shelfmark",
           "template": "{code}-{shortLabel}{extensionPart} {authorMark} {year} {languageCountry}"
         }
-      ]
+      ],
+      "defaultRecommendedFormat": "code-short-author"
     }
   ]
 }
