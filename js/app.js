@@ -21,12 +21,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
   TPP.classificationExtensionsDataPath = "data/classification-extensions.json";
   TPP.defaultClassificationFormatId = function () {
+    const system = TPP.classificationSystem();
+    const configuredDefault = String(
+      (system && system.defaultFormatId) || "",
+    ).trim();
     const formats = TPP.classificationFormats();
-    const explicitDefault = formats.find(function (entry) {
-      return entry && entry.default === true;
-    });
-    if (explicitDefault && explicitDefault.id) {
-      return explicitDefault.id;
+    if (
+      configuredDefault &&
+      formats.find(function (entry) {
+        return entry && entry.id === configuredDefault;
+      })
+    ) {
+      return configuredDefault;
     }
     const preferred = formats.find(function (entry) {
       return entry && entry.id === "code-short-extension";
@@ -344,6 +350,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
     catalog.id = String(catalog.id || "tiny-shelf");
     catalog.version = String(catalog.version || "1.0.0");
+    catalog.defaultFormatId = String(catalog.defaultFormatId || "").trim();
     catalog.formats = (
       Array.isArray(catalog.formats) && catalog.formats.length
         ? catalog.formats
@@ -355,7 +362,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       normalized.template = String(normalized.template || "{code}");
       normalized.example = String(normalized.example || "");
       normalized.priority = String(normalized.priority || "");
-      normalized.default = normalized.default === true;
       return normalized;
     });
     catalog.license =

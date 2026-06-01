@@ -457,15 +457,15 @@ if (!Array.isArray(system.rules) || !system.rules.length) {
 if (!Array.isArray(system.formats) || !system.formats.length) {
   problems.push("Classification system is missing classification formats.");
 } else {
-  const defaultFormats = [];
+  const formatIds = new Set();
   for (const format of system.formats) {
     const formatId = String((format && format.id) || "").trim();
     const priority = String((format && format.priority) || "").trim();
-    const isDefault = format && format.default === true;
     if (!formatId) {
       problems.push("Classification format is missing an id.");
       continue;
     }
+    formatIds.add(formatId);
     if (!priority) {
       problems.push(`Classification format ${formatId} is missing a priority.`);
       continue;
@@ -476,11 +476,13 @@ if (!Array.isArray(system.formats) || !system.formats.length) {
       );
       continue;
     }
-    if (isDefault) defaultFormats.push(formatId);
   }
-  if (defaultFormats.length !== 1) {
+  const defaultFormatId = String(system.defaultFormatId || "").trim();
+  if (!defaultFormatId) {
+    problems.push("Classification system is missing defaultFormatId.");
+  } else if (!formatIds.has(defaultFormatId)) {
     problems.push(
-      `Classification formats must define exactly one default format; found ${defaultFormats.length}${defaultFormats.length ? ` (${defaultFormats.join(", ")})` : ""}.`,
+      `Classification system defaultFormatId ${defaultFormatId} does not match any format id.`,
     );
   }
 }

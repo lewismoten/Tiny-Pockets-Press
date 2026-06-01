@@ -4563,6 +4563,7 @@
     }
   ],
   "version": "1.5.0",
+  "defaultFormatId": "code-short-extension",
   "formats": [
     {
       "id": "code",
@@ -4590,8 +4591,7 @@
       "label": "Code + short + extension",
       "template": "{code}-{shortLabel}{extensionPart}",
       "example": "524-CLC.3",
-      "priority": "high",
-      "default": true
+      "priority": "high"
     },
     {
       "id": "code-short-author",
