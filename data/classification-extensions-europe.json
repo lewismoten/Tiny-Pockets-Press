@@ -1,0 +1,272 @@
+{
+  "id": "tiny-shelf-europe-regions",
+  "name": "Tiny Shelf Extensions: Europe Regions",
+  "classificationId": "tiny-shelf",
+  "version": "1.0.0",
+  "description": "Regional extension branches for Europe geography within Tiny Shelf.",
+  "extensions": [
+    {
+      "parentCode": "263",
+      "attachTo": "2",
+      "label": "Europe",
+      "children": [
+        {
+          "extension": "21",
+          "shortLabel": "BRI",
+          "label": "Britain & Ireland",
+          "keywords": ["britain", "ireland"],
+          "children": [
+            {
+              "extension": "211",
+              "shortLabel": "ENG",
+              "label": "England",
+              "keywords": ["england"],
+              "includes": ["england", "britain", "ireland", "europe"],
+              "scopeNote": "Use for works chiefly about england within britain & ireland.",
+              "sort": 211
+            },
+            {
+              "extension": "212",
+              "shortLabel": "IRE",
+              "label": "Ireland",
+              "keywords": ["ireland"],
+              "includes": ["ireland", "britain", "europe"],
+              "scopeNote": "Use for works chiefly about ireland within britain & ireland.",
+              "sort": 212
+            },
+            {
+              "extension": "213",
+              "shortLabel": "SCO",
+              "label": "Scotland",
+              "keywords": ["scotland"],
+              "includes": ["scotland", "britain", "ireland", "europe"],
+              "scopeNote": "Use for works chiefly about scotland within britain & ireland.",
+              "sort": 213
+            },
+            {
+              "extension": "214",
+              "shortLabel": "WAL",
+              "label": "Wales",
+              "keywords": ["wales"],
+              "includes": ["wales", "britain", "ireland", "europe"],
+              "scopeNote": "Use for works chiefly about wales within britain & ireland.",
+              "sort": 214
+            }
+          ],
+          "allowAssign": true,
+          "includes": [
+            "britain",
+            "ireland",
+            "local",
+            "regional",
+            "history",
+            "europe"
+          ],
+          "scopeNote": "Use for general works on britain & ireland within europe. Class more specific works in the refinements below when appropriate.",
+          "sort": 21
+        },
+        {
+          "extension": "22",
+          "shortLabel": "SCA",
+          "label": "Scandinavia",
+          "keywords": ["scandinavia", "nordic"],
+          "children": [
+            {
+              "extension": "221",
+              "shortLabel": "DEN",
+              "label": "Denmark",
+              "keywords": ["denmark"],
+              "includes": ["denmark", "scandinavia", "nordic", "europe"],
+              "scopeNote": "Use for works chiefly about denmark within scandinavia.",
+              "sort": 221
+            },
+            {
+              "extension": "222",
+              "shortLabel": "NOR",
+              "label": "Norway",
+              "keywords": ["norway"],
+              "includes": ["norway", "scandinavia", "nordic", "europe"],
+              "scopeNote": "Use for works chiefly about norway within scandinavia.",
+              "sort": 222
+            },
+            {
+              "extension": "223",
+              "shortLabel": "SWE",
+              "label": "Sweden",
+              "keywords": ["sweden"],
+              "includes": ["sweden", "scandinavia", "nordic", "europe"],
+              "scopeNote": "Use for works chiefly about sweden within scandinavia.",
+              "sort": 223
+            }
+          ],
+          "allowAssign": true,
+          "includes": [
+            "scandinavia",
+            "nordic",
+            "local",
+            "regional",
+            "history",
+            "europe"
+          ],
+          "scopeNote": "Use for general works on scandinavia within europe. Class more specific works in the refinements below when appropriate.",
+          "sort": 22
+        },
+        {
+          "extension": "23",
+          "shortLabel": "WCEU",
+          "label": "Western & Central Europe",
+          "keywords": ["western europe", "central europe"],
+          "children": [
+            {
+              "extension": "231",
+              "shortLabel": "FRA",
+              "label": "France",
+              "keywords": ["france"],
+              "includes": ["france", "western europe", "central europe"],
+              "scopeNote": "Use for works chiefly about france within western & central europe.",
+              "sort": 231
+            },
+            {
+              "extension": "232",
+              "shortLabel": "GER",
+              "label": "Germany",
+              "keywords": ["germany"],
+              "includes": ["germany", "western europe", "central europe"],
+              "scopeNote": "Use for works chiefly about germany within western & central europe.",
+              "sort": 232
+            },
+            {
+              "extension": "233",
+              "shortLabel": "NET",
+              "label": "Netherlands",
+              "keywords": ["netherlands"],
+              "includes": ["netherlands", "western europe", "central europe"],
+              "scopeNote": "Use for works chiefly about the netherlands within western & central europe.",
+              "sort": 233
+            },
+            {
+              "extension": "234",
+              "shortLabel": "SWI",
+              "label": "Switzerland",
+              "keywords": ["switzerland"],
+              "includes": ["switzerland", "western europe", "central europe"],
+              "scopeNote": "Use for works chiefly about switzerland within western & central europe.",
+              "sort": 234
+            }
+          ],
+          "allowAssign": true,
+          "includes": [
+            "western europe",
+            "central europe",
+            "local",
+            "regional",
+            "history",
+            "europe"
+          ],
+          "scopeNote": "Use for general works on western & central europe within local & regional history. Class more specific works in the refinements below when appropriate.",
+          "sort": 23
+        },
+        {
+          "extension": "24",
+          "shortLabel": "SMED",
+          "label": "Southern Europe & Mediterranean",
+          "keywords": ["southern europe", "mediterranean"],
+          "children": [
+            {
+              "extension": "241",
+              "shortLabel": "GRE",
+              "label": "Greece",
+              "keywords": ["greece"],
+              "includes": ["greece", "southern europe", "mediterranean"],
+              "scopeNote": "Use for works chiefly about greece within southern europe & mediterranean.",
+              "sort": 241
+            },
+            {
+              "extension": "242",
+              "shortLabel": "ITA",
+              "label": "Italy",
+              "keywords": ["italy"],
+              "includes": ["italy", "southern europe", "mediterranean"],
+              "scopeNote": "Use for works chiefly about italy within southern europe & mediterranean.",
+              "sort": 242
+            },
+            {
+              "extension": "243",
+              "shortLabel": "POR",
+              "label": "Portugal",
+              "keywords": ["portugal"],
+              "includes": ["portugal", "southern europe", "mediterranean"],
+              "scopeNote": "Use for works chiefly about portugal within southern europe & mediterranean.",
+              "sort": 243
+            },
+            {
+              "extension": "244",
+              "shortLabel": "SPA",
+              "label": "Spain",
+              "keywords": ["spain"],
+              "includes": ["spain", "southern europe", "mediterranean"],
+              "scopeNote": "Use for works chiefly about spain within southern europe & mediterranean.",
+              "sort": 244
+            }
+          ],
+          "allowAssign": true,
+          "includes": [
+            "southern europe",
+            "mediterranean",
+            "local",
+            "regional",
+            "history",
+            "europe"
+          ],
+          "scopeNote": "Use for general works on southern europe & the mediterranean within local & regional history. Class more specific works in the refinements below when appropriate.",
+          "sort": 24
+        },
+        {
+          "extension": "25",
+          "shortLabel": "EEUR",
+          "label": "Eastern Europe",
+          "keywords": ["eastern europe"],
+          "children": [
+            {
+              "extension": "251",
+              "shortLabel": "POL",
+              "label": "Poland",
+              "keywords": ["poland"],
+              "includes": ["poland", "eastern europe"],
+              "scopeNote": "Use for works chiefly about poland within eastern europe.",
+              "sort": 251
+            },
+            {
+              "extension": "252",
+              "shortLabel": "RUS",
+              "label": "Russia",
+              "keywords": ["russia"],
+              "includes": ["russia", "eastern europe"],
+              "scopeNote": "Use for works chiefly about russia within eastern europe when the shelving intent is regional european history.",
+              "sort": 252
+            },
+            {
+              "extension": "253",
+              "shortLabel": "UKR",
+              "label": "Ukraine",
+              "keywords": ["ukraine"],
+              "includes": ["ukraine", "eastern europe"],
+              "scopeNote": "Use for works chiefly about ukraine within eastern europe.",
+              "sort": 253
+            }
+          ],
+          "allowAssign": true,
+          "includes": [
+            "eastern europe",
+            "local",
+            "regional",
+            "history",
+            "europe"
+          ],
+          "scopeNote": "Use for general works on eastern europe within local & regional history. Class more specific works in the refinements below when appropriate.",
+          "sort": 25
+        }
+      ]
+    }
+  ]
+}

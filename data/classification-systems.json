@@ -4647,6 +4647,11 @@
       "rule": "Use dotted extensions only when they add meaningful browsing value under an existing base class; do not invent a new base code when a scoped extension fits."
     },
     {
+      "id": "regional-extension-files",
+      "label": "Regional extension files",
+      "rule": "Regional extension trees may live in separate classification-extensions files when they attach to an existing parent extension path. Keep extension numbers unique within the same parent code after merge, even when branches are split across multiple files. For example, a regional file may attach children to 263.1 or 263.2, but it must not reuse an extension number already defined elsewhere under that same parent."
+    },
+    {
       "id": "format",
       "label": "Shelfmark format",
       "rule": "The standard display format is {code}-{shortLabel}{extensionPart}, for example 263-LRH.127."

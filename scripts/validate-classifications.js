@@ -5,7 +5,7 @@ const path = require("path");
 
 const rootDir = path.resolve(__dirname, "..");
 const systemsPath = path.join(rootDir, "data", "classification-systems.json");
-const extensionsPath = path.join(
+const mainExtensionsPath = path.join(
   rootDir,
   "data",
   "classification-extensions.json",
@@ -13,6 +13,97 @@ const extensionsPath = path.join(
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value || null));
+}
+
+function findExtensionNode(nodes, targetExtension) {
+  const target = String(targetExtension || "").trim();
+  if (!target) return null;
+  let found = null;
+  function walk(entries) {
+    for (const node of Array.isArray(entries) ? entries : []) {
+      if (!node || found) continue;
+      if (String(node.extension || "").trim() === target) {
+        found = node;
+        return;
+      }
+      walk(node.children);
+    }
+  }
+  walk(nodes);
+  return found;
+}
+
+function mergeExtensionCatalogs(baseCatalog, importedCatalogs) {
+  const merged = cloneJson(baseCatalog) || {
+    id: "tiny-shelf",
+    classificationId: "tiny-shelf",
+    imports: [],
+    extensions: [],
+  };
+  const issues = [];
+  merged.imports = Array.isArray(merged.imports) ? merged.imports : [];
+  merged.extensions = Array.isArray(merged.extensions) ? merged.extensions : [];
+
+  function appendChildren(targetNodes, sourceChildren) {
+    const additions = Array.isArray(sourceChildren) ? sourceChildren : [];
+    targetNodes.push(...additions.map((child) => cloneJson(child)));
+  }
+
+  for (const catalog of Array.isArray(importedCatalogs)
+    ? importedCatalogs
+    : []) {
+    const imported = cloneJson(catalog);
+    if (!imported || typeof imported !== "object") continue;
+    for (const group of Array.isArray(imported.extensions)
+      ? imported.extensions
+      : []) {
+      if (!group) continue;
+      const parentCode = String(group.parentCode || "").trim();
+      const attachTo = String(group.attachTo || "").trim();
+      if (!parentCode) {
+        issues.push("Imported extension group is missing a parentCode.");
+        continue;
+      }
+      const existingGroup = merged.extensions.find(
+        (entry) =>
+          entry && String(entry.parentCode || "").trim() === parentCode,
+      );
+      if (attachTo) {
+        if (!existingGroup) {
+          issues.push(
+            `Imported extension group ${parentCode}.${attachTo} cannot attach because parent group ${parentCode} does not exist.`,
+          );
+          continue;
+        }
+        const targetNode = findExtensionNode(existingGroup.children, attachTo);
+        if (!targetNode) {
+          issues.push(
+            `Imported extension group ${parentCode}.${attachTo} cannot attach because extension ${parentCode}.${attachTo} does not exist.`,
+          );
+          continue;
+        }
+        targetNode.children = Array.isArray(targetNode.children)
+          ? targetNode.children
+          : [];
+        appendChildren(targetNode.children, group.children);
+        continue;
+      }
+      if (!existingGroup) {
+        merged.extensions.push(cloneJson(group));
+        continue;
+      }
+      existingGroup.children = Array.isArray(existingGroup.children)
+        ? existingGroup.children
+        : [];
+      appendChildren(existingGroup.children, group.children);
+    }
+  }
+
+  return { merged, issues };
 }
 
 function normalizeList(values) {
@@ -204,7 +295,28 @@ function validateNodeReferences(nodes, kind, unresolved) {
 }
 
 const system = readJson(systemsPath);
-const extensionSystem = readJson(extensionsPath);
+const baseExtensionSystem = readJson(mainExtensionsPath);
+const importedExtensionSystems = [];
+const extensionImportProblems = [];
+
+for (const importPath of normalizeList(
+  baseExtensionSystem && baseExtensionSystem.imports,
+)) {
+  const resolvedPath = path.join(rootDir, importPath);
+  if (!fs.existsSync(resolvedPath)) {
+    extensionImportProblems.push(
+      `Classification extension import does not exist: ${importPath}`,
+    );
+    continue;
+  }
+  importedExtensionSystems.push(readJson(resolvedPath));
+}
+
+const mergedExtensions = mergeExtensionCatalogs(
+  baseExtensionSystem,
+  importedExtensionSystems,
+);
+const extensionSystem = mergedExtensions.merged;
 
 if (!system || !extensionSystem) {
   console.error("Unable to load classification system or extension system.");
@@ -234,6 +346,8 @@ validateNodeReferences(ext.nodes, "extension", unresolved);
 const problems = [];
 const profileIds = new Map();
 const allowedFormatPriorities = new Set(["highest", "high", "medium", "low"]);
+
+problems.push(...extensionImportProblems, ...mergedExtensions.issues);
 
 if (!String(system.id || "").trim()) {
   problems.push("Classification system is missing an id.");

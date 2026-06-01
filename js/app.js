@@ -19,8 +19,94 @@ document.addEventListener("DOMContentLoaded", async function () {
     formatId: "",
     extension: "",
   };
+  TPP.classificationExtensionsDataPath = "data/classification-extensions.json";
   TPP.defaultClassificationFormatId = function () {
     return "code-short-extension";
+  };
+  TPP.defaultClassificationExtensionsCatalog = function () {
+    return {
+      id: "tiny-shelf",
+      name: "",
+      classificationId: "tiny-shelf",
+      imports: [],
+      extensions: [],
+    };
+  };
+  TPP.cloneClassificationJson = function (value) {
+    return JSON.parse(JSON.stringify(value || null));
+  };
+  TPP.findClassificationExtensionNode = function (nodes, targetExtension) {
+    const target = String(targetExtension || "").trim();
+    if (!target) return null;
+    let found = null;
+    const walk = function (entries) {
+      (Array.isArray(entries) ? entries : []).forEach(function (node) {
+        if (!node || found) return;
+        if (String(node.extension || "").trim() === target) {
+          found = node;
+          return;
+        }
+        walk(node.children);
+      });
+    };
+    walk(nodes);
+    return found;
+  };
+  TPP.mergeClassificationExtensionsCatalogs = function (baseCatalog, imports) {
+    const merged =
+      TPP.cloneClassificationJson(baseCatalog) ||
+      TPP.defaultClassificationExtensionsCatalog();
+    merged.imports = Array.isArray(merged.imports) ? merged.imports : [];
+    merged.extensions = Array.isArray(merged.extensions)
+      ? merged.extensions
+      : [];
+    const appendChildren = function (targetNodes, sourceChildren) {
+      const additions = Array.isArray(sourceChildren) ? sourceChildren : [];
+      targetNodes.push.apply(
+        targetNodes,
+        additions.map(function (child) {
+          return TPP.cloneClassificationJson(child);
+        }),
+      );
+    };
+    (Array.isArray(imports) ? imports : []).forEach(function (catalog) {
+      const imported = TPP.cloneClassificationJson(catalog);
+      if (!imported || typeof imported !== "object") return;
+      const groups = Array.isArray(imported.extensions)
+        ? imported.extensions
+        : [];
+      groups.forEach(function (group) {
+        if (!group) return;
+        const parentCode = String(group.parentCode || "").trim();
+        const attachTo = String(group.attachTo || "").trim();
+        if (!parentCode) return;
+        const existingGroup = merged.extensions.find(function (entry) {
+          return entry && String(entry.parentCode || "").trim() === parentCode;
+        });
+        if (attachTo) {
+          if (!existingGroup) return;
+          const targetNode = TPP.findClassificationExtensionNode(
+            existingGroup.children,
+            attachTo,
+          );
+          if (!targetNode) return;
+          targetNode.children = Array.isArray(targetNode.children)
+            ? targetNode.children
+            : [];
+          appendChildren(targetNode.children, group.children);
+          return;
+        }
+        if (!existingGroup) {
+          merged.extensions.push(TPP.cloneClassificationJson(group));
+          return;
+        }
+        existingGroup.children = Array.isArray(existingGroup.children)
+          ? existingGroup.children
+          : [];
+        appendChildren(existingGroup.children, group.children);
+      });
+    });
+    return merged;
   };
   TPP.loadClassificationSystems = async function () {
     if (TPP.classificationCatalog) return TPP.classificationCatalog;
@@ -45,15 +131,33 @@ document.addEventListener("DOMContentLoaded", async function () {
       return TPP.classificationExtensionsCatalog;
     }
     try {
-      const response = await fetch("data/classification-extensions.json");
+      const response = await fetch(TPP.classificationExtensionsDataPath);
       if (!response.ok) throw new Error("classification-extensions");
-      TPP.classificationExtensionsCatalog = await response.json();
+      const baseCatalog = await response.json();
+      const importPaths = Array.isArray(baseCatalog && baseCatalog.imports)
+        ? baseCatalog.imports
+            .map(function (filePath) {
+              return String(filePath || "").trim();
+            })
+            .filter(Boolean)
+        : [];
+      const importedCatalogs = await Promise.all(
+        importPaths.map(async function (filePath) {
+          const importedResponse = await fetch(filePath);
+          if (!importedResponse.ok) {
+            throw new Error("classification-extensions-import");
+          }
+          return importedResponse.json();
+        }),
+      );
+      TPP.classificationExtensionsCatalog =
+        TPP.mergeClassificationExtensionsCatalogs(
+          baseCatalog,
+          importedCatalogs,
+        );
     } catch (_error) {
-      TPP.classificationExtensionsCatalog = {
-        id: "tiny-shelf",
-        name: "",
-        extensions: [],
-      };
+      TPP.classificationExtensionsCatalog =
+        TPP.defaultClassificationExtensionsCatalog();
     }
     TPP.normalizeClassificationExtensionsCatalog(
       TPP.classificationExtensionsCatalog,
@@ -316,6 +420,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     catalog.id = String(catalog.id || "tiny-shelf");
     catalog.classificationId = String(catalog.classificationId || catalog.id);
     catalog.version = String(catalog.version || "1.0.0");
+    catalog.imports = Array.isArray(catalog.imports)
+      ? catalog.imports
+          .map(function (filePath) {
+            return String(filePath || "").trim();
+          })
+          .filter(Boolean)
+      : [];
     catalog.extensions = (
       Array.isArray(catalog.extensions) ? catalog.extensions : []
     ).map(function (group) {
@@ -323,6 +434,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       normalizedGroup.parentCode = String(
         normalizedGroup.parentCode || "",
       ).trim();
+      normalizedGroup.attachTo = String(normalizedGroup.attachTo || "").trim();
       normalizedGroup.children = normalizeTree(
         normalizedGroup.children,
         new Set(),
