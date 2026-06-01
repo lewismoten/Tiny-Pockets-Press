@@ -2689,7 +2689,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     popover.hidden = true;
     TPP.colorDialogAnchorId = "";
   };
-  TPP.openColorDialog = function (input, anchor) {
+  TPP.openColorDialog = async function (input, anchor) {
+    if (typeof TPP.ensureControlModule === "function") {
+      await TPP.ensureControlModule("color-picker-popover");
+    }
     const popover = document.getElementById("colorPickerPopover");
     if (!popover || !input) return;
     if (!input.dataset.colorInputId)
@@ -3549,98 +3552,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     }, 0);
   });
-  const colorPickerPopover = document.getElementById("colorPickerPopover");
-  const colorPickerHex = document.getElementById("colorPickerHex");
-  const colorPickerSurface = document.getElementById("colorPickerSurface");
-  const colorPickerHue = document.getElementById("colorPickerHue");
-  if (colorPickerHex) {
-    colorPickerHex.addEventListener("input", function () {
-      const value = TPP.normalizeHexColor(colorPickerHex.value);
-      if (value) TPP.updateColorDialogPreview(value);
-    });
-  }
-  const bindColorPointerField = function (element, onUpdate) {
-    if (!element) return;
-    let dragging = false;
-    const update = function (event) {
-      const rect = element.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      const x = (event.clientX - rect.left) / rect.width;
-      const y = (event.clientY - rect.top) / rect.height;
-      onUpdate(TPP.clamp01(x), TPP.clamp01(y));
-    };
-    element.addEventListener("pointerdown", function (event) {
-      dragging = true;
-      if (element.setPointerCapture) element.setPointerCapture(event.pointerId);
-      update(event);
-      event.preventDefault();
-    });
-    element.addEventListener("pointermove", function (event) {
-      if (!dragging) return;
-      update(event);
-      event.preventDefault();
-    });
-    element.addEventListener("pointerup", function (event) {
-      dragging = false;
-      if (
-        element.hasPointerCapture &&
-        element.hasPointerCapture(event.pointerId)
-      )
-        element.releasePointerCapture(event.pointerId);
-    });
-    element.addEventListener("pointercancel", function (event) {
-      dragging = false;
-      if (
-        element.hasPointerCapture &&
-        element.hasPointerCapture(event.pointerId)
-      )
-        element.releasePointerCapture(event.pointerId);
-    });
-  };
-  bindColorPointerField(colorPickerSurface, function (x, y) {
-    TPP.colorPickerState.s = x;
-    TPP.colorPickerState.v = 1 - y;
-    TPP.updateColorDialogPreview(TPP.colorFromPickerState());
-  });
-  bindColorPointerField(colorPickerHue, function (x) {
-    TPP.colorPickerState.h = x * 360;
-    TPP.updateColorDialogPreview(TPP.colorFromPickerState());
-  });
-  if (colorPickerPopover) {
-    colorPickerPopover.addEventListener("click", function (e) {
-      const swatch = e.target.closest("[data-dialog-color]");
-      if (swatch) {
-        TPP.updateColorDialogPreview(swatch.dataset.dialogColor || "#000000");
-      }
-    });
-  }
-  document.addEventListener("keydown", function (event) {
-    const popover = document.getElementById("colorPickerPopover");
-    if (!popover || popover.hidden) return;
-    if (event.key === "Escape") {
-      event.preventDefault();
-      TPP.closeColorDialog();
-      return;
-    }
-    if (event.key === "Enter") {
-      event.preventDefault();
-      const hex = document.getElementById("colorPickerHex");
-      const value = TPP.normalizeHexColor(hex && hex.value);
-      if (value) TPP.updateColorDialogPreview(value);
-      TPP.closeColorDialog();
-    }
-  });
-  document.addEventListener("mousedown", function (e) {
-    const popover = document.getElementById("colorPickerPopover");
-    if (!popover || popover.hidden) return;
-    const trigger = e.target.closest(
-      ".color-picker-trigger, .front-cover-text-outline-hit",
-    );
-    if (trigger) return;
-    if (!e.target.closest("#colorPickerPopover")) TPP.closeColorDialog();
-  });
-  window.addEventListener("resize", TPP.positionColorPopover);
-  window.addEventListener("scroll", TPP.positionColorPopover, true);
   if (TPP.renderColorPalettes) TPP.renderColorPalettes();
   const bookInfoAddButton = document.getElementById("bookInfoAddButton");
   if (bookInfoAddButton) {
@@ -3932,30 +3843,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("readerMode").onchange = TPP.renderReader;
 
   document.getElementById("librarySearch").oninput = TPP.renderLibrary;
-  const libraryUploadDialog = document.getElementById("libraryUploadDialog");
-  const openLibraryUploadDialog = function () {
-    const input = document.getElementById("importJson");
-    if (!input) return;
-    input.value = "";
-    if (
-      libraryUploadDialog &&
-      typeof libraryUploadDialog.showModal === "function"
-    ) {
-      libraryUploadDialog.showModal();
-    }
-  };
   const libraryUploadBookButton = document.getElementById("libraryUploadBook");
   if (libraryUploadBookButton)
-    libraryUploadBookButton.onclick = openLibraryUploadDialog;
-  if (libraryUploadDialog) {
-    libraryUploadDialog.addEventListener("click", function (e) {
-      const card = e.target.closest(".modal-card");
-      if (e.target === libraryUploadDialog && !card && libraryUploadDialog.open)
-        libraryUploadDialog.close("cancel");
-      const closeButton = e.target.closest("[data-action='cancel']");
-      if (closeButton) libraryUploadDialog.close("cancel");
-    });
-  }
+    libraryUploadBookButton.onclick = function () {
+      TPP.openLibraryUploadDialog();
+    };
   document.getElementById("libraryGrid").onclick = function (e) {
     const card = e.target.closest("[data-id]");
     if (!card) return;
@@ -4096,105 +3988,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   );
   if (libraryDownloadLibraryButton)
     libraryDownloadLibraryButton.onclick = downloadLibrary;
-  document.getElementById("importJson").onchange = async function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (libraryUploadDialog && libraryUploadDialog.open)
-      libraryUploadDialog.close("selected");
-    const reader = new FileReader();
-    reader.onload = async function () {
-      const payload = TPP.unwrapImportPayload(JSON.parse(reader.result));
-      if (payload.kind === "library") {
-        const stamp = TPP.nowIso();
-        for (const rawBook of payload.value) {
-          const incoming = TPP.bookImported(rawBook, stamp);
-          const existingIndex = TPP.library.findIndex(function (book) {
-            return TPP.bookId(book) === TPP.bookId(incoming);
-          });
-          if (existingIndex < 0) {
-            TPP.library.push(incoming);
-            continue;
-          }
-          const existing = TPP.library[existingIndex];
-          const action = await TPP.resolveImportConflict(incoming, existing);
-          if (action === "merge") {
-            TPP.library[existingIndex] = TPP.mergeImportedBook(
-              existing,
-              incoming,
-              stamp,
-            );
-          } else if (action === "overwrite") {
-            TPP.bookMeta(incoming).lastExportedAt =
-              TPP.bookLastExportedAt(existing) ||
-              TPP.bookLastExportedAt(incoming) ||
-              "";
-            TPP.library[existingIndex] = incoming;
-          } else if (action === "copy") {
-            TPP.library.push(
-              TPP.bookDescendant(incoming, { id: TPP.uid() }, "import", stamp),
-            );
-          }
-        }
-        TPP.save();
-        TPP.setActive(TPP.library[0]);
-        TPP.switchView("library");
-      } else if (payload.kind === "style") {
-        Object.entries(payload.value).forEach(function (entry) {
-          TPP.active[entry[0]] = entry[1];
-        });
-        TPP.save();
-        TPP.loadForm();
-        TPP.renderAll();
-      } else {
-        const stamp = TPP.nowIso();
-        const incoming = TPP.bookImported(payload.value, stamp);
-        const existingIndex = TPP.library.findIndex(function (book) {
-          return TPP.bookId(book) === TPP.bookId(incoming);
-        });
-        if (existingIndex < 0) {
-          TPP.library.push(incoming);
-          TPP.save();
-          TPP.setActive(incoming);
-        } else {
-          const existing = TPP.library[existingIndex];
-          const action = await TPP.resolveImportConflict(incoming, existing);
-          if (action === "cancel") return;
-          if (action === "merge") {
-            TPP.library[existingIndex] = TPP.mergeImportedBook(
-              existing,
-              incoming,
-              stamp,
-            );
-          } else if (action === "overwrite") {
-            TPP.bookMeta(incoming).lastExportedAt =
-              TPP.bookLastExportedAt(existing) ||
-              TPP.bookLastExportedAt(incoming) ||
-              "";
-            TPP.library[existingIndex] = incoming;
-          } else if (action === "copy") {
-            const copy = TPP.bookDescendant(
-              incoming,
-              { id: TPP.uid() },
-              "import",
-              stamp,
-            );
-            TPP.library.push(copy);
-            TPP.save();
-            TPP.setActive(copy);
-            return;
-          }
-          TPP.save();
-          TPP.setActive(TPP.library[existingIndex]);
-        }
-      }
-    };
-    reader.readAsText(file);
-  };
-
   const dataPanel = document.getElementById("dataPanel");
   const dataSidebar = document.getElementById("dataSidebar");
-  const dataImageDialog = document.getElementById("dataImageDialog");
-  const dataTextDialog = document.getElementById("dataTextDialog");
   if (dataPanel) {
     dataPanel.addEventListener("click", function (e) {
       const chip = e.target.closest("[data-image-src]");
@@ -4247,28 +4042,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (!tabButton) return;
       TPP.writeDataTab(tabButton.dataset.dataTab || "top");
       TPP.renderData();
-    });
-  }
-  if (dataImageDialog) {
-    dataImageDialog.addEventListener("click", function (e) {
-      const card = e.target.closest(".modal-card");
-      if (e.target === dataImageDialog && !card && dataImageDialog.open) {
-        dataImageDialog.close();
-        return;
-      }
-      const closeButton = e.target.closest("[data-action='close']");
-      if (closeButton && dataImageDialog.open) dataImageDialog.close();
-    });
-  }
-  if (dataTextDialog) {
-    dataTextDialog.addEventListener("click", function (e) {
-      const card = e.target.closest(".modal-card");
-      if (e.target === dataTextDialog && !card && dataTextDialog.open) {
-        dataTextDialog.close();
-        return;
-      }
-      const closeButton = e.target.closest("[data-action='close']");
-      if (closeButton && dataTextDialog.open) dataTextDialog.close();
     });
   }
   const imageExportDialog = document.getElementById("imageExportDialog");
@@ -5258,19 +5031,26 @@ TPP.validViews = function () {
   ];
 };
 TPP.toast = function (message) {
-  const toast = document.getElementById("toast");
-  if (!toast) return;
-  clearTimeout(TPP.toastTimer);
-  toast.textContent = message;
-  if (toast.open && typeof toast.close === "function") toast.close();
-  if (typeof toast.showModal === "function") toast.showModal();
-  toast.classList.add("show");
-  TPP.toastTimer = setTimeout(function () {
-    toast.classList.remove("show");
-    setTimeout(function () {
-      if (toast.open && typeof toast.close === "function") toast.close();
-    }, 180);
-  }, 1800);
+  const showToast = function () {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+    clearTimeout(TPP.toastTimer);
+    toast.textContent = message;
+    if (toast.open && typeof toast.close === "function") toast.close();
+    if (typeof toast.showModal === "function") toast.showModal();
+    toast.classList.add("show");
+    TPP.toastTimer = setTimeout(function () {
+      toast.classList.remove("show");
+      setTimeout(function () {
+        if (toast.open && typeof toast.close === "function") toast.close();
+      }, 180);
+    }, 1800);
+  };
+  if (typeof TPP.ensureControlModule === "function") {
+    TPP.ensureControlModule("toast").then(showToast);
+    return;
+  }
+  showToast();
 };
 TPP.initialView = function () {
   const hash = window.location.hash.replace(/^#/, "");

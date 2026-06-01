@@ -1,0 +1,7 @@
+{
+  "id": "data-text-dialog",
+  "rootIds": ["dataTextDialog"],
+  "html": "data-text-dialog.html",
+  "css": "data-text-dialog.css",
+  "js": "data-text-dialog.js"
+}

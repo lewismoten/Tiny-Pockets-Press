@@ -1506,25 +1506,22 @@ TPP.registerDataPreview = function (title, body, mode) {
   return id;
 };
 TPP.openDataImagePreview = function (src, title) {
-  const dialog = document.getElementById("dataImageDialog");
-  const image = document.getElementById("dataImagePreview");
-  const heading = document.getElementById("dataImageTitle");
-  if (!dialog || !image || !heading || typeof dialog.showModal !== "function")
-    return;
-  image.src = src || "";
-  heading.textContent = title || "Image Preview";
-  if (!dialog.open) dialog.showModal();
+  if (typeof TPP.ensureControlModule === "function") {
+    TPP.ensureControlModule("data-image-dialog").then(function () {
+      if (typeof TPP._openDataImagePreview === "function") {
+        TPP._openDataImagePreview(src, title);
+      }
+    });
+  }
 };
 TPP.openDataTextPreview = function (title, body, mode) {
-  const dialog = document.getElementById("dataTextDialog");
-  const heading = document.getElementById("dataTextTitle");
-  const pre = document.getElementById("dataTextBody");
-  if (!dialog || !heading || !pre || typeof dialog.showModal !== "function")
-    return;
-  heading.textContent = title || "Data Preview";
-  pre.textContent = body || "";
-  pre.className = mode === "hex" ? "data-code data-code-hex" : "data-code";
-  if (!dialog.open) dialog.showModal();
+  if (typeof TPP.ensureControlModule === "function") {
+    TPP.ensureControlModule("data-text-dialog").then(function () {
+      if (typeof TPP._openDataTextPreview === "function") {
+        TPP._openDataTextPreview(title, body, mode);
+      }
+    });
+  }
 };
 TPP.openDataPreviewById = function (id) {
   const entry = TPP.dataPreviewStore && TPP.dataPreviewStore[id];

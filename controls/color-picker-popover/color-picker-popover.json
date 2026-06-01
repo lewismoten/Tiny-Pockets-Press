@@ -1,0 +1,7 @@
+{
+  "id": "color-picker-popover",
+  "rootIds": ["colorPickerPopover"],
+  "html": "color-picker-popover.html",
+  "css": "color-picker-popover.css",
+  "js": "color-picker-popover.js"
+}

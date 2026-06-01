@@ -1,0 +1,7 @@
+{
+  "id": "data-image-dialog",
+  "rootIds": ["dataImageDialog"],
+  "html": "data-image-dialog.html",
+  "css": "data-image-dialog.css",
+  "js": "data-image-dialog.js"
+}

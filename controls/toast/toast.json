@@ -1,0 +1,7 @@
+{
+  "id": "toast",
+  "rootIds": ["toast"],
+  "html": "toast.html",
+  "css": "toast.css",
+  "js": "toast.js"
+}

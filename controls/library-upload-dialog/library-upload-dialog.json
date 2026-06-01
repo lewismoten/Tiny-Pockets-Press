@@ -1,0 +1,6 @@
+{
+  "id": "library-upload-dialog",
+  "rootIds": ["libraryUploadDialog"],
+  "html": "library-upload-dialog.html",
+  "js": "library-upload-dialog.js"
+}

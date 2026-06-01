@@ -764,25 +764,6 @@
         </section>
       </section>
     </main>
-    <dialog id="toast" class="toast" role="status" aria-live="polite"></dialog>
-    <dialog id="libraryUploadDialog" class="modal">
-      <form method="dialog" class="modal-card">
-        <h2>Upload Books</h2>
-        <p class="hint">
-          Import a book or library JSON file into your library.
-        </p>
-        <label
-          >Choose JSON file
-          <input
-            id="importJson"
-            type="file"
-            accept=".book,.library,.json,application/json"
-        /></label>
-        <div class="toolbar">
-          <button type="button" data-action="cancel">Cancel</button>
-        </div>
-      </form>
-    </dialog>
     <dialog id="classificationDialog" class="modal">
       <form method="dialog" class="modal-card classification-dialog-card">
         <div class="classification-dialog-header">
@@ -840,46 +821,6 @@
         </div>
       </form>
     </dialog>
-    <div id="colorPickerPopover" class="color-picker-popover" hidden>
-      <div class="color-picker-popover-card">
-        <div class="color-picker-popover-top">
-          <div id="colorPickerPreview" class="color-picker-preview"></div>
-          <label
-            >Hex Color
-            <input
-              id="colorPickerHex"
-              type="text"
-              inputmode="text"
-              spellcheck="false"
-              placeholder="#000000"
-          /></label>
-        </div>
-        <div
-          id="colorPickerSurface"
-          class="color-picker-surface"
-          aria-label="Saturation and brightness"
-        >
-          <div
-            id="colorPickerSurfaceMarker"
-            class="color-picker-surface-marker"
-          ></div>
-        </div>
-        <div
-          id="colorPickerHue"
-          class="color-picker-hue"
-          aria-label="Hue selector"
-        >
-          <div id="colorPickerHueMarker" class="color-picker-hue-marker"></div>
-        </div>
-        <div class="color-picker-section">
-          <h3>Used Colors</h3>
-          <div
-            id="colorPickerUsedColors"
-            class="color-picker-swatch-grid"
-          ></div>
-        </div>
-      </div>
-    </div>
     <dialog id="imageExportDialog" class="modal">
       <form method="dialog" class="modal-card image-export-dialog-card">
         <h3>Export Page Images</h3>
@@ -1100,30 +1041,6 @@
             </label>
           </div>
         </div>
-        <div class="modal-actions">
-          <button type="button" data-action="close">Close</button>
-        </div>
-      </form>
-    </dialog>
-    <dialog id="dataImageDialog" class="modal">
-      <form method="dialog" class="modal-card data-image-dialog-card">
-        <div class="workspace-header">
-          <h2 id="dataImageTitle">Image Preview</h2>
-        </div>
-        <div class="data-image-stage">
-          <img id="dataImagePreview" alt="Preview" />
-        </div>
-        <div class="modal-actions">
-          <button type="button" data-action="close">Close</button>
-        </div>
-      </form>
-    </dialog>
-    <dialog id="dataTextDialog" class="modal">
-      <form method="dialog" class="modal-card data-text-dialog-card">
-        <div class="workspace-header">
-          <h2 id="dataTextTitle">Data Preview</h2>
-        </div>
-        <pre id="dataTextBody" class="data-code"></pre>
         <div class="modal-actions">
           <button type="button" data-action="close">Close</button>
         </div>

@@ -6,6 +6,11 @@ TPP.controlModuleRegistry = {
   "book-info-picker-dialog": "controls/book-info-picker-dialog/",
   "custom-text-dialog": "controls/custom-text-dialog/",
   "import-conflict-dialog": "controls/import-conflict-dialog/",
+  "library-upload-dialog": "controls/library-upload-dialog/",
+  "data-image-dialog": "controls/data-image-dialog/",
+  "data-text-dialog": "controls/data-text-dialog/",
+  "color-picker-popover": "controls/color-picker-popover/",
+  toast: "controls/toast/",
 };
 TPP.controlModuleState = TPP.controlModuleState || {};
 TPP.ensureControlModule = async function (id) {
@@ -29,7 +34,7 @@ TPP.ensureControlModule = async function (id) {
     }
     const manifest = await manifestResponse.json();
     manifest.id = manifest.id || moduleId;
-    manifest.basePath = manifestUrl.href.replace(/module\.json(?:\?.*)?$/, "");
+    manifest.basePath = manifestUrl.href.replace(/[^/]+(?:\?.*)?$/, "");
     if (manifest.css) {
       const href = new URL(manifest.css, manifest.basePath).href;
       const linkId = "control-module-css-" + manifest.id;
@@ -57,12 +62,15 @@ TPP.ensureControlModule = async function (id) {
       }
       document.body.insertAdjacentHTML("beforeend", await htmlResponse.text());
     }
-    const moduleUrl = new URL(manifest.js, manifest.basePath);
-    const moduleExports = await import(moduleUrl.href);
-    const api =
-      moduleExports && typeof moduleExports.init === "function"
-        ? await moduleExports.init(TPP, manifest)
-        : {};
+    let api = {};
+    if (manifest.js) {
+      const moduleUrl = new URL(manifest.js, manifest.basePath);
+      const moduleExports = await import(moduleUrl.href);
+      api =
+        moduleExports && typeof moduleExports.init === "function"
+          ? await moduleExports.init(TPP, manifest)
+          : {};
+    }
     state.api = api || {};
     state.manifest = manifest;
     return state.api;
@@ -101,4 +109,16 @@ TPP.resolveImportConflict = async function (incoming, existing) {
     return api.resolve(incoming, existing);
   }
   return "cancel";
+};
+TPP.openLibraryUploadDialog = async function () {
+  const api = await TPP.ensureControlModule("library-upload-dialog");
+  if (api && typeof api.open === "function") return api.open();
+};
+TPP.openDataImagePreview = async function (src, title) {
+  const api = await TPP.ensureControlModule("data-image-dialog");
+  if (api && typeof api.open === "function") return api.open(src, title);
+};
+TPP.openDataTextPreview = async function (title, body, mode) {
+  const api = await TPP.ensureControlModule("data-text-dialog");
+  if (api && typeof api.open === "function") return api.open(title, body, mode);
 };
