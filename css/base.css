@@ -1073,10 +1073,35 @@ input[type="checkbox"] {
 .classification-search-wrap {
   position: relative;
 }
+.classification-dialog-meta {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.8rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #e4d8c5;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.classification-dialog-rules {
+  margin: 0;
+  padding-left: 1rem;
+}
 .classification-search-label {
   display: grid;
   gap: 0.35rem;
   font-weight: 700;
+}
+.classification-hidden-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.classification-hidden-toggle input {
+  width: auto;
+  margin: 0;
 }
 .classification-search-label input {
   width: 100%;
@@ -1596,6 +1621,10 @@ input[type="checkbox"] {
 }
 .classification-selection-main {
   min-width: 0;
+}
+.classification-selection-main .classification-hidden-note {
+  margin-top: 0.45rem;
+  color: #8a5d1d;
 }
 .classification-selection-controls {
   display: grid;

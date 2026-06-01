@@ -158,16 +158,8 @@ function validateNodeReferences(nodes, kind, unresolved) {
   }
 }
 
-const systemsCatalog = readJson(systemsPath);
-const extensionsCatalog = readJson(extensionsPath);
-const system =
-  (systemsCatalog.systems || []).find(
-    (entry) => entry && entry.id === systemsCatalog.defaultSystemId,
-  ) || (systemsCatalog.systems || [])[0];
-const extensionSystem =
-  (extensionsCatalog.systems || []).find(
-    (entry) => entry && entry.id === extensionsCatalog.defaultSystemId,
-  ) || (extensionsCatalog.systems || [])[0];
+const system = readJson(systemsPath);
+const extensionSystem = readJson(extensionsPath);
 
 if (!system || !extensionSystem) {
   console.error("Unable to load classification system or extension system.");
@@ -195,6 +187,32 @@ validateNodeReferences(base.nodes, "base", unresolved);
 validateNodeReferences(ext.nodes, "extension", unresolved);
 
 const problems = [];
+
+if (!String(system.id || "").trim()) {
+  problems.push("Classification system is missing an id.");
+}
+
+if (!String(extensionSystem.id || "").trim()) {
+  problems.push("Classification extensions are missing an id.");
+}
+
+if (
+  String(extensionSystem.classificationId || "").trim() &&
+  String(extensionSystem.classificationId || "").trim() !==
+    String(system.id || "").trim()
+) {
+  problems.push(
+    `Extension classificationId ${extensionSystem.classificationId} does not match system id ${system.id}.`,
+  );
+}
+
+if (!system.license || !String(system.license.name || "").trim()) {
+  problems.push("Classification system is missing license metadata.");
+}
+
+if (!Array.isArray(system.rules) || !system.rules.length) {
+  problems.push("Classification system is missing classification rules.");
+}
 
 for (const duplicate of base.duplicates) {
   problems.push(
