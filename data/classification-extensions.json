@@ -438,7 +438,8 @@
             "history"
           ],
           "scopeNote": "Use for general works on united states within local & regional history. Class more specific works in the refinements below when appropriate.",
-          "sort": 1
+          "sort": 1,
+          "sharedChildrenRef": "geo-united-states-regions"
         },
         {
           "extension": "2",
@@ -455,7 +456,44 @@
             "history"
           ],
           "scopeNote": "Use for general works on europe within local & regional history. Class more specific works in the refinements below when appropriate.",
-          "sort": 2
+          "sort": 2,
+          "sharedChildrenRef": "geo-europe-regions"
+        }
+      ]
+    },
+    {
+      "parentCode": "292",
+      "label": "Regional Studies",
+      "children": [
+        {
+          "extension": "1",
+          "shortLabel": "USA",
+          "label": "United States",
+          "keywords": ["united states", "usa", "regional studies", "place"],
+          "includes": [
+            "united states",
+            "usa",
+            "regional studies",
+            "place",
+            "region"
+          ],
+          "scopeNote": "Use for regional studies works centered on the United States when place, region, migration, or settlement patterns are the main frame.",
+          "allowAssign": true,
+          "sort": 1,
+          "sharedChildrenRef": "geo-united-states-regions",
+          "children": []
+        },
+        {
+          "extension": "2",
+          "shortLabel": "EUR",
+          "label": "Europe",
+          "keywords": ["europe", "regional studies", "place"],
+          "includes": ["europe", "regional studies", "place", "region"],
+          "scopeNote": "Use for regional studies works centered on Europe when place, region, migration, or settlement patterns are the main frame.",
+          "allowAssign": true,
+          "sort": 2,
+          "sharedChildrenRef": "geo-europe-regions",
+          "children": []
         }
       ]
     },

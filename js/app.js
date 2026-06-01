@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       name: "",
       classificationId: "tiny-shelf",
       imports: [],
+      sharedExtensionTrees: [],
       extensions: [],
     };
   };
@@ -65,11 +66,61 @@ document.addEventListener("DOMContentLoaded", async function () {
     walk(nodes);
     return found;
   };
+  TPP.expandClassificationExtensionSharedTrees = function (catalog) {
+    const expanded =
+      TPP.cloneClassificationJson(catalog) ||
+      TPP.defaultClassificationExtensionsCatalog();
+    const sharedTreeMap = {};
+    (Array.isArray(expanded.sharedExtensionTrees)
+      ? expanded.sharedExtensionTrees
+      : []
+    ).forEach(function (definition) {
+      const definitionId = String((definition && definition.id) || "").trim();
+      if (!definitionId) return;
+      sharedTreeMap[definitionId] = TPP.cloneClassificationJson(definition);
+    });
+    const expandNodes = function (nodes, stack) {
+      return (Array.isArray(nodes) ? nodes : []).map(function (node) {
+        const expandedNode = TPP.cloneClassificationJson(node) || {};
+        const sharedChildrenRef = String(
+          expandedNode.sharedChildrenRef || "",
+        ).trim();
+        const ownChildren = expandNodes(expandedNode.children, stack);
+        let sharedChildren = [];
+        if (
+          sharedChildrenRef &&
+          !stack.includes(sharedChildrenRef) &&
+          sharedTreeMap[sharedChildrenRef]
+        ) {
+          const definitionChildren = TPP.cloneClassificationJson(
+            sharedTreeMap[sharedChildrenRef].children,
+          );
+          sharedChildren = expandNodes(
+            definitionChildren,
+            stack.concat(sharedChildrenRef),
+          );
+        }
+        expandedNode.children = ownChildren.concat(sharedChildren);
+        return expandedNode;
+      });
+    };
+    expanded.extensions = (
+      Array.isArray(expanded.extensions) ? expanded.extensions : []
+    ).map(function (group) {
+      const expandedGroup = TPP.cloneClassificationJson(group) || {};
+      expandedGroup.children = expandNodes(expandedGroup.children, []);
+      return expandedGroup;
+    });
+    return expanded;
+  };
   TPP.mergeClassificationExtensionsCatalogs = function (baseCatalog, imports) {
     const merged =
       TPP.cloneClassificationJson(baseCatalog) ||
       TPP.defaultClassificationExtensionsCatalog();
     merged.imports = Array.isArray(merged.imports) ? merged.imports : [];
+    merged.sharedExtensionTrees = Array.isArray(merged.sharedExtensionTrees)
+      ? merged.sharedExtensionTrees
+      : [];
     merged.extensions = Array.isArray(merged.extensions)
       ? merged.extensions
       : [];
@@ -85,6 +136,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     (Array.isArray(imports) ? imports : []).forEach(function (catalog) {
       const imported = TPP.cloneClassificationJson(catalog);
       if (!imported || typeof imported !== "object") return;
+      const sharedTrees = Array.isArray(imported.sharedExtensionTrees)
+        ? imported.sharedExtensionTrees
+        : [];
+      merged.sharedExtensionTrees.push.apply(
+        merged.sharedExtensionTrees,
+        sharedTrees.map(function (definition) {
+          return TPP.cloneClassificationJson(definition);
+        }),
+      );
       const groups = Array.isArray(imported.extensions)
         ? imported.extensions
         : [];
@@ -164,9 +224,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         }),
       );
       TPP.classificationExtensionsCatalog =
-        TPP.mergeClassificationExtensionsCatalogs(
-          baseCatalog,
-          importedCatalogs,
+        TPP.expandClassificationExtensionSharedTrees(
+          TPP.mergeClassificationExtensionsCatalogs(
+            baseCatalog,
+            importedCatalogs,
+          ),
         );
     } catch (_error) {
       TPP.classificationExtensionsCatalog =
@@ -440,6 +502,23 @@ document.addEventListener("DOMContentLoaded", async function () {
             return String(filePath || "").trim();
           })
           .filter(Boolean)
+      : [];
+    catalog.sharedExtensionTrees = Array.isArray(catalog.sharedExtensionTrees)
+      ? catalog.sharedExtensionTrees.map(function (definition) {
+          const normalizedDefinition =
+            definition && typeof definition === "object"
+              ? Object.assign({}, definition)
+              : {};
+          normalizedDefinition.id = String(
+            normalizedDefinition.id || "",
+          ).trim();
+          normalizedDefinition.children = Array.isArray(
+            normalizedDefinition.children,
+          )
+            ? normalizedDefinition.children
+            : [];
+          return normalizedDefinition;
+        })
       : [];
     catalog.extensions = (
       Array.isArray(catalog.extensions) ? catalog.extensions : []

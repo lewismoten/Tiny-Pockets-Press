@@ -1,14 +1,13 @@
 {
   "id": "tiny-shelf-us-regions",
-  "name": "Tiny Shelf Extensions: United States Regions",
+  "name": "Tiny Shelf Shared Geography: United States",
   "classificationId": "tiny-shelf",
-  "version": "1.0.0",
-  "description": "Regional extension branches for United States geography within Tiny Shelf.",
-  "extensions": [
+  "version": "1.1.0",
+  "description": "Shared regional geography extensions for United States place breakdowns within Tiny Shelf.",
+  "sharedExtensionTrees": [
     {
-      "parentCode": "263",
-      "attachTo": "1",
-      "label": "United States",
+      "id": "geo-united-states-regions",
+      "label": "United States Regions",
       "children": [
         {
           "extension": "11",

@@ -4631,6 +4631,7 @@
     }
   ],
   "biasAndInclusionNote": "Tiny Shelf is designed for small, practical collections and is expected to evolve. Category names should use respectful, current, community-preferred language wherever possible. Users may extend, rename, hide, or localize categories to fit their community while preserving stable base codes.",
+  "regionalExtensionsNote": "Regional extensions are shared place breakdowns that can be reused by more than one classification or extension path. Use them when multiple subjects need the same geographic subdivisions, such as United States or Europe, so country and region numbering stays consistent across the system.",
   "rules": [
     {
       "id": "primary-subject",
@@ -4651,6 +4652,11 @@
       "id": "regional-extension-files",
       "label": "Regional extension files",
       "rule": "Regional extension trees may live in separate classification-extensions files when they attach to an existing parent extension path. Keep extension numbers unique within the same parent code after merge, even when branches are split across multiple files. For example, a regional file may attach children to 263.1 or 263.2, but it must not reuse an extension number already defined elsewhere under that same parent."
+    },
+    {
+      "id": "shared-regional-extensions",
+      "label": "Shared regional extensions",
+      "rule": "When two or more classifications need the same geographic breakdown, point them at the same shared regional extension tree instead of copying the branches. This keeps place-based extension numbers stable and consistent wherever that geography is reused."
     },
     {
       "id": "format",

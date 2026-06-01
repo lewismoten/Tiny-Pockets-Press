@@ -42,10 +42,14 @@ function mergeExtensionCatalogs(baseCatalog, importedCatalogs) {
     id: "tiny-shelf",
     classificationId: "tiny-shelf",
     imports: [],
+    sharedExtensionTrees: [],
     extensions: [],
   };
   const issues = [];
   merged.imports = Array.isArray(merged.imports) ? merged.imports : [];
+  merged.sharedExtensionTrees = Array.isArray(merged.sharedExtensionTrees)
+    ? merged.sharedExtensionTrees
+    : [];
   merged.extensions = Array.isArray(merged.extensions) ? merged.extensions : [];
 
   function appendChildren(targetNodes, sourceChildren) {
@@ -58,6 +62,12 @@ function mergeExtensionCatalogs(baseCatalog, importedCatalogs) {
     : []) {
     const imported = cloneJson(catalog);
     if (!imported || typeof imported !== "object") continue;
+    merged.sharedExtensionTrees.push(
+      ...(Array.isArray(imported.sharedExtensionTrees)
+        ? imported.sharedExtensionTrees
+        : []
+      ).map((definition) => cloneJson(definition)),
+    );
     for (const group of Array.isArray(imported.extensions)
       ? imported.extensions
       : []) {
@@ -104,6 +114,70 @@ function mergeExtensionCatalogs(baseCatalog, importedCatalogs) {
   }
 
   return { merged, issues };
+}
+
+function expandExtensionSharedTrees(catalog) {
+  const expanded = cloneJson(catalog) || {
+    id: "tiny-shelf",
+    classificationId: "tiny-shelf",
+    imports: [],
+    sharedExtensionTrees: [],
+    extensions: [],
+  };
+  const definitionMap = new Map();
+  const issues = [];
+  for (const definition of Array.isArray(expanded.sharedExtensionTrees)
+    ? expanded.sharedExtensionTrees
+    : []) {
+    const definitionId = String((definition && definition.id) || "").trim();
+    if (!definitionId) {
+      issues.push("Shared extension tree is missing an id.");
+      continue;
+    }
+    if (definitionMap.has(definitionId)) {
+      issues.push(`Duplicate shared extension tree id ${definitionId}.`);
+      continue;
+    }
+    definitionMap.set(definitionId, cloneJson(definition));
+  }
+
+  function expandNodes(nodes, stack) {
+    return (Array.isArray(nodes) ? nodes : []).map((node) => {
+      const expandedNode = cloneJson(node) || {};
+      const sharedChildrenRef = String(
+        expandedNode.sharedChildrenRef || "",
+      ).trim();
+      const ownChildren = expandNodes(expandedNode.children, stack);
+      let sharedChildren = [];
+      if (sharedChildrenRef) {
+        if (stack.includes(sharedChildrenRef)) {
+          issues.push(
+            `Shared extension tree cycle detected for ${sharedChildrenRef}.`,
+          );
+        } else if (!definitionMap.has(sharedChildrenRef)) {
+          issues.push(
+            `Unknown shared extension tree reference ${sharedChildrenRef}.`,
+          );
+        } else {
+          sharedChildren = expandNodes(
+            cloneJson(definitionMap.get(sharedChildrenRef).children),
+            stack.concat(sharedChildrenRef),
+          );
+        }
+      }
+      expandedNode.children = ownChildren.concat(sharedChildren);
+      return expandedNode;
+    });
+  }
+
+  expanded.extensions = (
+    Array.isArray(expanded.extensions) ? expanded.extensions : []
+  ).map((group) => {
+    const expandedGroup = cloneJson(group) || {};
+    expandedGroup.children = expandNodes(expandedGroup.children, []);
+    return expandedGroup;
+  });
+  return { expanded, issues };
 }
 
 function normalizeList(values) {
@@ -316,7 +390,8 @@ const mergedExtensions = mergeExtensionCatalogs(
   baseExtensionSystem,
   importedExtensionSystems,
 );
-const extensionSystem = mergedExtensions.merged;
+const expandedExtensions = expandExtensionSharedTrees(mergedExtensions.merged);
+const extensionSystem = expandedExtensions.expanded;
 
 if (!system || !extensionSystem) {
   console.error("Unable to load classification system or extension system.");
@@ -347,7 +422,11 @@ const problems = [];
 const profileIds = new Map();
 const allowedFormatPriorities = new Set(["high", "medium", "low"]);
 
-problems.push(...extensionImportProblems, ...mergedExtensions.issues);
+problems.push(
+  ...extensionImportProblems,
+  ...mergedExtensions.issues,
+  ...expandedExtensions.issues,
+);
 
 if (!String(system.id || "").trim()) {
   problems.push("Classification system is missing an id.");
