@@ -1304,6 +1304,12 @@ input[type="range"]::-moz-range-thumb {
   background: #fff8e8;
   box-shadow: inset 0 0 0 1px #ead9ba;
 }
+.drag-drop-before {
+  box-shadow: inset 0 3px 0 #d1a84c;
+}
+.drag-drop-after {
+  box-shadow: inset 0 -3px 0 #d1a84c;
+}
 .front-cover-text-table {
   table-layout: fixed;
   font-size: 0.82rem;

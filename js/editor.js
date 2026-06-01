@@ -884,6 +884,26 @@ TPP.moveTextElement = function (book, id, direction) {
   list.splice(index, 1);
   list.splice(targetIndex, 0, current);
 };
+TPP.moveTextElementToTarget = function (book, id, targetId, before) {
+  const list = Array.isArray(book && book.textElements)
+    ? book.textElements
+    : [];
+  const sourceIndex = list.findIndex(function (entry) {
+    return entry && entry.id === id;
+  });
+  const targetIndex = list.findIndex(function (entry) {
+    return entry && entry.id === targetId;
+  });
+  if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
+  const source = list[sourceIndex];
+  const target = list[targetIndex];
+  if (!source || !target || source.location !== target.location) return;
+  list.splice(sourceIndex, 1);
+  const nextTargetIndex = list.findIndex(function (entry) {
+    return entry && entry.id === targetId;
+  });
+  list.splice(Math.max(0, nextTargetIndex + (before ? 0 : 1)), 0, source);
+};
 TPP.removeTextElement = function (book, id) {
   if (!book || !Array.isArray(book.textElements)) return;
   book.textElements = book.textElements.filter(function (entry) {

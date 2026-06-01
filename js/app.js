@@ -2925,6 +2925,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (controls) {
     let dragState = null;
     let dragHandleArmedId = "";
+    let pendingTextReorderRefresh = false;
+    let pendingTextReorderRefreshTimer = 0;
     const setDragPreviewLabel = function (item) {
       const label = dragPreview.querySelector(".drag-preview-label");
       if (!label) return;
@@ -3274,6 +3276,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         kind: item.dataset.dragKind,
         location: item.dataset.location || "",
         itemId: item.dataset.textId || item.dataset.itemId || "",
+        targetId: "",
+        beforeTarget: true,
       };
       item.classList.add("is-dragging");
       setDragPreviewLabel(item);
@@ -3299,6 +3303,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         (dragState.location === "front" || dragState.location === "back")
       ) {
         e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
         trashTarget.classList.add("is-over");
         return;
       }
@@ -3310,13 +3315,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         (target.dataset.location || "") === dragState.location;
       if (!sameKind || !sameLocation) return;
       e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
       const rect = target.getBoundingClientRect();
       const before = e.clientY < rect.top + rect.height / 2;
-      const parent = target.parentNode;
-      if (!parent) return;
-      const dragging = controls.querySelector(".is-dragging");
-      if (!dragging || dragging === target) return;
-      parent.insertBefore(dragging, before ? target : target.nextSibling);
+      controls
+        .querySelectorAll(".drag-drop-before, .drag-drop-after")
+        .forEach(function (node) {
+          node.classList.remove("drag-drop-before", "drag-drop-after");
+        });
+      target.classList.add(before ? "drag-drop-before" : "drag-drop-after");
+      dragState.targetId = target.dataset.textId || target.dataset.itemId || "";
+      dragState.beforeTarget = before;
     });
     controls.addEventListener("dragleave", function (e) {
       const trashTarget = e.target.closest(
@@ -3335,6 +3344,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         (dragState.location === "front" || dragState.location === "back")
       ) {
         e.preventDefault();
+        controls
+          .querySelectorAll(".drag-drop-before, .drag-drop-after")
+          .forEach(function (node) {
+            node.classList.remove("drag-drop-before", "drag-drop-after");
+          });
         const dragging = controls.querySelector(".is-dragging");
         if (dragging) dragging.classList.remove("is-dragging");
         TPP.sync("nosave");
@@ -3344,23 +3358,71 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (TPP.renderTextElementControls) TPP.renderTextElementControls();
         renderCurrentViewPreservingSidebar();
         dragState = null;
+        pendingTextReorderRefresh = false;
         return;
       }
-      const dragging = controls.querySelector(".is-dragging");
-      if (!dragging) return;
       e.preventDefault();
-      dragging.classList.remove("is-dragging");
+      const markerTarget = controls.querySelector(
+        ".drag-drop-before, .drag-drop-after",
+      );
+      const markerTargetId = markerTarget
+        ? markerTarget.dataset.textId || markerTarget.dataset.itemId || ""
+        : "";
+      const markerBefore = markerTarget
+        ? markerTarget.classList.contains("drag-drop-before")
+        : true;
+      controls
+        .querySelectorAll(".drag-drop-before, .drag-drop-after")
+        .forEach(function (node) {
+          node.classList.remove("drag-drop-before", "drag-drop-after");
+        });
+      const dragging = controls.querySelector(".is-dragging");
+      if (dragging) dragging.classList.remove("is-dragging");
+      if (
+        dragState.kind === "text-element" &&
+        markerTargetId &&
+        TPP.moveTextElementToTarget
+      ) {
+        TPP.sync("nosave");
+        TPP.moveTextElementToTarget(
+          TPP.active,
+          dragState.itemId,
+          markerTargetId,
+          markerBefore,
+        );
+        TPP.save();
+        pendingTextReorderRefresh = true;
+        setTextTrashVisibility(dragState.location, false);
+        dragState = null;
+        return;
+      }
       TPP.sync("commit");
       TPP.renderAll();
       setTextTrashVisibility(dragState.location, false);
       dragState = null;
     });
     controls.addEventListener("dragend", function () {
+      controls
+        .querySelectorAll(".drag-drop-before, .drag-drop-after")
+        .forEach(function (node) {
+          node.classList.remove("drag-drop-before", "drag-drop-after");
+        });
       const dragging = controls.querySelector(".is-dragging");
       if (dragging) dragging.classList.remove("is-dragging");
       setTextTrashVisibility(dragState && dragState.location, false);
       dragState = null;
       dragHandleArmedId = "";
+      if (pendingTextReorderRefresh) {
+        pendingTextReorderRefresh = false;
+        if (pendingTextReorderRefreshTimer) {
+          window.clearTimeout(pendingTextReorderRefreshTimer);
+        }
+        pendingTextReorderRefreshTimer = window.setTimeout(function () {
+          pendingTextReorderRefreshTimer = 0;
+          if (TPP.renderTextElementControls) TPP.renderTextElementControls();
+          TPP.renderAll();
+        }, 80);
+      }
     });
   }
   const frontCoverFieldDialog = document.getElementById(
