@@ -1231,6 +1231,9 @@
               "keywords": [
                 "leaders",
                 "activists",
+                "civil rights leaders",
+                "community organizers",
+                "movement leaders",
                 "biography",
                 "memoir",
                 "collected",
@@ -1240,12 +1243,15 @@
               "includes": [
                 "leaders",
                 "activists",
+                "civil rights leaders",
+                "community organizers",
+                "movement leaders",
                 "biography",
                 "memoir",
                 "collected",
                 "lives"
               ],
-              "scopeNote": "Use for works chiefly about leaders & activists within collected lives."
+              "scopeNote": "Use for works chiefly about leaders, activists, movement figures, and community organizers within collected lives, including civil rights and identity-based justice leadership."
             },
             {
               "code": "223",
@@ -1358,6 +1364,11 @@
               "keywords": [
                 "community",
                 "memory",
+                "community identity",
+                "cultural identity",
+                "ethnic identity",
+                "diaspora communities",
+                "migration stories",
                 "biography",
                 "memoir",
                 "family",
@@ -1367,12 +1378,18 @@
               "includes": [
                 "community",
                 "memory",
+                "community identity",
+                "cultural identity",
+                "ethnic identity",
+                "diaspora communities",
+                "migration stories",
                 "biography",
                 "memoir",
                 "family",
                 "histories"
               ],
-              "scopeNote": "Use for works chiefly about community memory within family & community histories."
+              "scopeNote": "Use for works chiefly about community memory, collective identity, diaspora memory, neighborhood history, and shared cultural remembrance within family & community histories.",
+              "seeAlso": ["234", "272", "273"]
             },
             {
               "code": "234",
@@ -1381,6 +1398,11 @@
               "keywords": [
                 "tribal",
                 "indigenous",
+                "indigenous studies",
+                "first nations",
+                "native studies",
+                "sovereignty",
+                "decolonization",
                 "life",
                 "stories",
                 "biography",
@@ -1393,6 +1415,11 @@
               "includes": [
                 "tribal",
                 "indigenous",
+                "indigenous studies",
+                "first nations",
+                "native studies",
+                "sovereignty",
+                "decolonization",
                 "life",
                 "stories",
                 "biography",
@@ -1400,7 +1427,8 @@
                 "family",
                 "community"
               ],
-              "scopeNote": "Use for works chiefly about tribal & indigenous life stories within family & community histories."
+              "scopeNote": "Use for works chiefly about Indigenous, tribal, First Nations, and Native life stories within family & community histories, especially where personal narrative, oral tradition, land, kinship, or sovereignty are central.",
+              "seeAlso": ["233", "273", "282"]
             }
           ],
           "keywords": [
@@ -1680,12 +1708,23 @@
                 "society",
                 "social",
                 "studies",
+                "race",
+                "ethnicity",
+                "racial identity",
+                "ethnic identity",
+                "gender",
                 "lgbt",
                 "lgbtq",
                 "lgbtqia",
+                "queer studies",
+                "trans studies",
                 "queer communities",
                 "gender identity",
-                "sexuality"
+                "sexuality",
+                "disability studies",
+                "migration",
+                "diaspora",
+                "community identity"
               ],
               "sort": 272,
               "includes": [
@@ -1694,11 +1733,21 @@
                 "society",
                 "social",
                 "studies",
+                "race and ethnicity",
+                "racial formation",
+                "gender",
                 "lgbt communities",
+                "queer studies",
+                "trans studies",
                 "gender identity",
-                "sexuality"
+                "sexuality",
+                "disability studies",
+                "migration",
+                "diaspora",
+                "community identity"
               ],
-              "scopeNote": "Use for works chiefly about sociology within social studies, including social life, identity, and community studies related to gender and sexuality."
+              "scopeNote": "Use for works chiefly about sociology within social studies, including race and ethnicity, gender, sexuality, LGBTQ+ studies, disability studies, migration, diaspora, and community identity as matters of social life and structure.",
+              "seeAlso": ["233", "273", "282", "283"]
             },
             {
               "code": "273",
@@ -1710,6 +1759,16 @@
                 "history",
                 "society",
                 "social",
+                "race",
+                "ethnicity",
+                "gender",
+                "lgbtq studies",
+                "queer culture",
+                "disability culture",
+                "migration",
+                "diaspora",
+                "indigenous studies",
+                "community identity",
                 "food culture",
                 "foodways",
                 "culinary history",
@@ -1724,12 +1783,21 @@
                 "history",
                 "society",
                 "social",
+                "race and ethnicity",
+                "gender expression",
+                "lgbtq studies",
+                "queer culture",
+                "disability culture",
+                "migration and diaspora",
+                "indigenous studies",
+                "community identity",
                 "food culture",
                 "foodways",
                 "culinary history",
                 "comics culture"
               ],
-              "scopeNote": "Use for cultural studies topics, including foodways, culinary history, everyday media culture, and comics or graphic storytelling as cultural forms."
+              "scopeNote": "Use for cultural studies topics, including race and ethnicity, gender, LGBTQ+ studies, disability culture, migration and diaspora, Indigenous studies, community identity, foodways, everyday media culture, and comics or graphic storytelling as cultural forms.",
+              "seeAlso": ["233", "234", "272", "282", "292"]
             },
             {
               "code": "274",
@@ -1829,12 +1897,18 @@
                 "investigations",
                 "civil liberties",
                 "civil rights",
+                "racial justice",
+                "disability rights",
+                "indigenous rights",
+                "tribal sovereignty",
+                "migration justice",
                 "lgbt",
                 "lgbtq",
                 "gay rights",
                 "lesbian rights",
                 "trans rights",
                 "queer rights",
+                "gender justice",
                 "foia",
                 "freedom of information",
                 "book challenges",
@@ -1859,6 +1933,11 @@
                 "rights discourse",
                 "civil rights",
                 "civil liberties",
+                "racial justice",
+                "disability rights",
+                "indigenous rights",
+                "tribal sovereignty",
+                "migration justice",
                 "lgbt rights",
                 "gender identity rights",
                 "sexuality rights",
@@ -1870,8 +1949,8 @@
                 "intellectual freedom law",
                 "first amendment"
               ],
-              "scopeNote": "Use for justice, rights, civil liberties, civil rights, LGBTQ+ rights, FOIA, and nonfiction works on crime or criminal cases when the emphasis is legal, social, documentary, or access-to-information related.",
-              "seeAlso": ["134", "262", "284", "274"]
+              "scopeNote": "Use for justice, rights, civil liberties, civil rights, racial justice, disability rights, Indigenous rights, migration justice, LGBTQ+ rights, FOIA, and nonfiction works on crime or criminal cases when the emphasis is legal, social, documentary, or access-to-information related.",
+              "seeAlso": ["134", "262", "284", "274", "272", "273", "234"]
             },
             {
               "code": "283",
@@ -1890,6 +1969,13 @@
                 "disability policy",
                 "aging policy",
                 "care policy",
+                "migration policy",
+                "immigration policy",
+                "diaspora policy",
+                "racial equity policy",
+                "gender policy",
+                "lgbtq policy",
+                "indigenous policy",
                 "county budgets",
                 "audit transparency",
                 "finance committee oversight",
@@ -1910,6 +1996,13 @@
                 "disability policy",
                 "aging policy",
                 "care policy",
+                "migration policy",
+                "immigration policy",
+                "diaspora policy",
+                "racial equity policy",
+                "gender policy",
+                "lgbtq policy",
+                "indigenous policy",
                 "county budgets",
                 "audit transparency",
                 "finance committee oversight",
@@ -1917,8 +2010,8 @@
                 "demographic analysis",
                 "public data literacy"
               ],
-              "scopeNote": "Use for public policy, including public health, disability policy, aging policy, systems of care, budgets, audits, and evidence used in civic decision-making when the emphasis is civic or governmental.",
-              "seeAlso": ["641"]
+              "scopeNote": "Use for public policy, including public health, disability policy, aging policy, migration and immigration policy, racial equity, gender policy, LGBTQ+ policy, Indigenous policy, systems of care, budgets, audits, and evidence used in civic decision-making when the emphasis is civic or governmental.",
+              "seeAlso": ["641", "272", "282"]
             },
             {
               "code": "284",
@@ -2012,7 +2105,11 @@
                 "history",
                 "society",
                 "geography",
-                "place"
+                "place",
+                "migration",
+                "diaspora",
+                "ethnic communities",
+                "indigenous regions"
               ],
               "sort": 292,
               "includes": [
@@ -2021,9 +2118,14 @@
                 "history",
                 "society",
                 "geography",
-                "place"
+                "place",
+                "migration",
+                "diaspora",
+                "ethnic communities",
+                "indigenous regions"
               ],
-              "scopeNote": "Use for works chiefly about regional studies within geography & place."
+              "scopeNote": "Use for works chiefly about regional studies within geography & place, including migration, diaspora communities, ethnic settlement, and Indigenous regional identity when the emphasis is place.",
+              "seeAlso": ["263", "272", "273", "234"]
             },
             {
               "code": "293",
@@ -4175,6 +4277,8 @@
                 "aging",
                 "disability",
                 "disabled",
+                "disability support",
+                "access needs",
                 "first aid",
                 "public health",
                 "nursing",
@@ -4197,6 +4301,8 @@
                 "caregiving",
                 "elder care",
                 "disability",
+                "disability support",
+                "access needs",
                 "aging",
                 "first aid",
                 "public health",
@@ -4205,8 +4311,8 @@
                 "counseling",
                 "emotional wellbeing"
               ],
-              "scopeNote": "Use for health, wellness, medicine, first aid, caregiving, elder care, disability, aging, nursing, public-health guides, and mental health when the emphasis is practical support, personal use, or general medical reference.",
-              "seeAlso": ["283", "643", "642"]
+              "scopeNote": "Use for health, wellness, medicine, first aid, caregiving, elder care, disability, access needs, aging, nursing, public-health guides, and mental health when the emphasis is practical support, personal use, or general medical reference.",
+              "seeAlso": ["283", "643", "642", "272", "282"]
             },
             {
               "code": "642",
@@ -4260,6 +4366,8 @@
                 "practical",
                 "wellbeing",
                 "daily",
+                "gender identity",
+                "gender affirmation",
                 "caregiving",
                 "family caregiving",
                 "elder care at home",
@@ -4278,12 +4386,14 @@
                 "practical",
                 "wellbeing",
                 "daily",
+                "gender identity",
+                "gender affirmation",
                 "family caregiving",
                 "care relationships",
                 "support at home"
               ],
-              "scopeNote": "Use for relationships and family life, including family caregiving, LGBTQ+ relationships, chosen family, care relationships, and home support when the primary emphasis is interpersonal or domestic rather than medical.",
-              "seeAlso": ["641"]
+              "scopeNote": "Use for relationships and family life, including family caregiving, LGBTQ+ relationships, gender-affirming family and interpersonal life, chosen family, care relationships, and home support when the primary emphasis is interpersonal or domestic rather than medical.",
+              "seeAlso": ["641", "272"]
             },
             {
               "code": "644",
