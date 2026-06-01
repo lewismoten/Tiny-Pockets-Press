@@ -1091,17 +1091,15 @@ input[type="checkbox"] {
   gap: 0.35rem;
   font-weight: 700;
 }
-.classification-hidden-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
+.classification-profile-select {
+  display: grid;
+  gap: 0.35rem;
   margin-top: 0.2rem;
   font-size: 0.78rem;
   font-weight: 700;
 }
-.classification-hidden-toggle input {
-  width: auto;
-  margin: 0;
+.classification-profile-select select {
+  width: 100%;
 }
 .classification-search-label input {
   width: 100%;

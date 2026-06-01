@@ -232,6 +232,7 @@ validateNodeReferences(base.nodes, "base", unresolved);
 validateNodeReferences(ext.nodes, "extension", unresolved);
 
 const problems = [];
+const profileIds = new Map();
 
 if (!String(system.id || "").trim()) {
   problems.push("Classification system is missing an id.");
@@ -257,6 +258,39 @@ if (!system.license || !String(system.license.name || "").trim()) {
 
 if (!Array.isArray(system.rules) || !system.rules.length) {
   problems.push("Classification system is missing classification rules.");
+}
+
+if (!Array.isArray(system.profiles) || !system.profiles.length) {
+  problems.push("Classification system is missing classification profiles.");
+} else {
+  for (const profile of system.profiles) {
+    const profileId = String((profile && profile.id) || "").trim();
+    if (!profileId) {
+      problems.push("Classification profile is missing an id.");
+      continue;
+    }
+    if (profileIds.has(profileId)) {
+      problems.push(
+        `Duplicate classification profile id ${profileId}: ${profileIds.get(profileId)} | ${String((profile && profile.label) || profileId).trim()}`,
+      );
+    } else {
+      profileIds.set(
+        profileId,
+        String((profile && profile.label) || profileId).trim(),
+      );
+    }
+    const hiddenCodes = normalizeList(profile && profile.hiddenCodes);
+    for (const code of hiddenCodes) {
+      if (!base.currentCodes.has(code)) {
+        problems.push(
+          `Classification profile ${profileId} references hidden code ${code} that does not exist.`,
+        );
+      }
+    }
+  }
+  if (!profileIds.has("home")) {
+    problems.push("Classification system should define a home profile.");
+  }
 }
 
 for (const duplicate of base.duplicates) {

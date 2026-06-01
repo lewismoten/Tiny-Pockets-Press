@@ -4491,6 +4491,23 @@
     "url": "https://creativecommons.org/licenses/by/4.0/",
     "summary": "You may use, adapt, and redistribute Tiny Shelf Classification with attribution."
   },
+  "profiles": [
+    {
+      "id": "home",
+      "label": "Home Library",
+      "hiddenCodes": ["000"]
+    },
+    {
+      "id": "archive",
+      "label": "Archive",
+      "showHiddenCodes": true
+    },
+    {
+      "id": "full",
+      "label": "Full Collection",
+      "showHiddenCodes": true
+    }
+  ],
   "rules": [
     {
       "id": "primary-subject",

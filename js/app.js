@@ -179,6 +179,30 @@ document.addEventListener("DOMContentLoaded", async function () {
     catalog.license.name = String(catalog.license.name || "");
     catalog.license.url = String(catalog.license.url || "");
     catalog.license.summary = String(catalog.license.summary || "");
+    catalog.profiles = Array.isArray(catalog.profiles)
+      ? catalog.profiles.map(function (profile, index) {
+          const normalized =
+            profile && typeof profile === "object" ? profile : {};
+          normalized.id = String(normalized.id || "profile-" + index);
+          normalized.label = String(normalized.label || normalized.id);
+          normalized.showHiddenCodes = normalized.showHiddenCodes === true;
+          normalized.hiddenCodes = Array.isArray(normalized.hiddenCodes)
+            ? normalized.hiddenCodes
+                .map(function (code) {
+                  return String(code || "").trim();
+                })
+                .filter(Boolean)
+            : [];
+          return normalized;
+        })
+      : [
+          {
+            id: "home",
+            label: "Home Library",
+            showHiddenCodes: false,
+            hiddenCodes: ["000"],
+          },
+        ];
     catalog.rules = Array.isArray(catalog.rules)
       ? catalog.rules.map(function (rule, index) {
           const normalized = rule && typeof rule === "object" ? rule : {};
@@ -462,17 +486,55 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!base && !label) return "";
     return base + (label ? "-" + label : "") + (ext ? "." + ext : "");
   };
-  TPP.classificationShowHiddenCategories = function () {
-    return TPP.readSettingsUi().showHiddenClassificationCategories === true;
+  TPP.classificationProfiles = function () {
+    const system = TPP.classificationSystem();
+    return Array.isArray(system && system.profiles) ? system.profiles : [];
   };
-  TPP.setClassificationShowHiddenCategories = function (showHidden) {
+  TPP.classificationProfile = function () {
+    const profiles = TPP.classificationProfiles();
+    const savedId = String(TPP.readSettingsUi().classificationProfileId || "");
+    return (
+      profiles.find(function (profile) {
+        return profile && profile.id === savedId;
+      }) ||
+      profiles.find(function (profile) {
+        return profile && profile.id === "home";
+      }) ||
+      profiles[0] || { id: "home", label: "Home Library", hiddenCodes: ["000"] }
+    );
+  };
+  TPP.setClassificationProfile = function (profileId) {
     const state = TPP.readSettingsUi();
-    state.showHiddenClassificationCategories = showHidden === true;
+    state.classificationProfileId = String(profileId || "home");
     TPP.writeSettingsUi(state);
   };
+  TPP.classificationShowHiddenCategories = function () {
+    return TPP.classificationProfile().showHiddenCodes === true;
+  };
+  TPP.classificationHiddenCodes = function () {
+    return Array.isArray(TPP.classificationProfile().hiddenCodes)
+      ? TPP.classificationProfile()
+          .hiddenCodes.map(function (code) {
+            return String(code || "").trim();
+          })
+          .filter(Boolean)
+      : [];
+  };
+  TPP.classificationPathCodes = function (path) {
+    return TPP.classificationBreadcrumbNodes(path).map(function (crumb) {
+      return String((crumb && crumb.node && crumb.node.code) || "").trim();
+    });
+  };
   TPP.classificationPathIsHidden = function (path) {
+    if (TPP.classificationShowHiddenCategories()) return false;
+    const hiddenCodes = new Set(TPP.classificationHiddenCodes());
     return TPP.classificationBreadcrumbNodes(path).some(function (crumb) {
-      return crumb && crumb.node && crumb.node.hidden;
+      return (
+        (crumb && crumb.node && crumb.node.hidden) ||
+        hiddenCodes.has(
+          String((crumb && crumb.node && crumb.node.code) || "").trim(),
+        )
+      );
     });
   };
   TPP.classificationEntryIsVisible = function (entry) {
@@ -1106,8 +1168,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const meta = document.getElementById("classificationDialogMeta");
     const breadcrumbs = document.getElementById("classificationBreadcrumbs");
     const searchInput = document.getElementById("classificationDialogSearch");
-    const showHiddenInput = document.getElementById(
-      "classificationDialogShowHidden",
+    const profileSelect = document.getElementById(
+      "classificationDialogProfile",
     );
     const selection = document.getElementById("classificationSelection");
     const list = document.getElementById("classificationDialogList");
@@ -1140,8 +1202,24 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (searchInput) {
       searchInput.value = TPP.classificationDialogSearchQuery || "";
     }
-    if (showHiddenInput) {
-      showHiddenInput.checked = TPP.classificationShowHiddenCategories();
+    if (profileSelect) {
+      const profiles = TPP.classificationProfiles();
+      const currentProfile = TPP.classificationProfile();
+      profileSelect.innerHTML = profiles
+        .map(function (profile) {
+          return (
+            '<option value="' +
+            TPP.esc(profile.id) +
+            '"' +
+            (currentProfile && currentProfile.id === profile.id
+              ? " selected"
+              : "") +
+            ">" +
+            TPP.esc(profile.label || profile.id) +
+            "</option>"
+          );
+        })
+        .join("");
     }
     if (breadcrumbs) {
       const crumbs = TPP.classificationBreadcrumbNodes(
@@ -1268,7 +1346,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           (currentScopeNote
             ? '<div class="small">' + TPP.esc(currentScopeNote) + "</div>"
             : "") +
-          (selectedNode.hidden
+          (TPP.classificationPathIsHidden(TPP.classificationDialogPath)
             ? '<div class="small classification-hidden-note">Hidden category. Intended for library-internal or special-use shelving.</div>'
             : "") +
           seeAlsoMarkup +
@@ -2210,9 +2288,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
   document.addEventListener("input", function (e) {
-    const hiddenToggle = e.target.closest("#classificationDialogShowHidden");
-    if (hiddenToggle) {
-      TPP.setClassificationShowHiddenCategories(hiddenToggle.checked);
+    const profileSelect = e.target.closest("#classificationDialogProfile");
+    if (profileSelect) {
+      TPP.setClassificationProfile(profileSelect.value || "home");
       TPP.renderClassificationDialog();
       return;
     }
@@ -4657,10 +4735,9 @@ TPP.saveSettingsUi = function () {
   });
   if (TPP.active) readerByBook[TPP.bookId(TPP.active)] = TPP.readerUiState();
   TPP.writeSettingsUi({
+    classificationProfileId: String(state.classificationProfileId || "home"),
     dataTabByBook: dataTabByBook,
     imageExport: state.imageExport || { dpi: 300 },
-    showHiddenClassificationCategories:
-      state.showHiddenClassificationCategories === true,
     showBookButtonText: state.showBookButtonText !== false,
     readerByBook: readerByBook,
     open: open,
