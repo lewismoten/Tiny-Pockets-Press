@@ -1,0 +1,258 @@
+{
+  "defaultSystemId": "tiny-shelf-v1",
+  "systems": [
+    {
+      "id": "tiny-shelf-v1",
+      "name": "Tiny Shelf Extensions",
+      "version": "1.0.0",
+      "description": "Optional extension trees that refine a base Tiny Shelf code without colliding with the main three-digit classification. Extensions are scoped to a parent code and can branch up to four levels deep.",
+      "extensions": [
+        {
+          "parentCode": "513",
+          "label": "Local & Regional History",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "USA",
+              "label": "United States",
+              "keywords": ["united states", "usa", "regional history"],
+              "children": [
+                {
+                  "extension": "1100",
+                  "shortLabel": "NEN",
+                  "label": "New England",
+                  "keywords": ["new england", "northeast"],
+                  "children": [
+                    {
+                      "extension": "1110",
+                      "shortLabel": "MNE",
+                      "label": "Maine",
+                      "keywords": ["maine"]
+                    },
+                    {
+                      "extension": "1120",
+                      "shortLabel": "MAS",
+                      "label": "Massachusetts",
+                      "keywords": ["massachusetts"]
+                    }
+                  ]
+                },
+                {
+                  "extension": "1200",
+                  "shortLabel": "MID",
+                  "label": "Mid-Atlantic",
+                  "keywords": ["mid-atlantic"],
+                  "children": [
+                    {
+                      "extension": "1210",
+                      "shortLabel": "NYC",
+                      "label": "New York City",
+                      "keywords": ["new york city", "nyc"],
+                      "children": [
+                        {
+                          "extension": "1211",
+                          "shortLabel": "BRK",
+                          "label": "Brooklyn",
+                          "keywords": ["brooklyn"]
+                        },
+                        {
+                          "extension": "1212",
+                          "shortLabel": "HAR",
+                          "label": "Harlem",
+                          "keywords": ["harlem"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "EUR",
+              "label": "Europe",
+              "keywords": ["europe", "regional history"],
+              "children": [
+                {
+                  "extension": "2100",
+                  "shortLabel": "BRT",
+                  "label": "Britain & Ireland",
+                  "keywords": ["britain", "ireland"]
+                },
+                {
+                  "extension": "2200",
+                  "shortLabel": "SCA",
+                  "label": "Scandinavia",
+                  "keywords": ["scandinavia", "nordic"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "821",
+          "label": "Science Fiction",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "SPO",
+              "label": "Space Opera",
+              "keywords": ["space opera", "science fiction"],
+              "seeAlso": ["2000"],
+              "children": [
+                {
+                  "extension": "1100",
+                  "shortLabel": "EMP",
+                  "label": "Interstellar Empires",
+                  "keywords": ["empires", "galactic politics"]
+                },
+                {
+                  "extension": "1200",
+                  "shortLabel": "MIS",
+                  "label": "Mission Crews",
+                  "keywords": ["mission", "crew", "starship"]
+                }
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "CYB",
+              "label": "Cyberpunk",
+              "keywords": ["cyberpunk", "science fiction"],
+              "seeAlso": ["3000"],
+              "children": [
+                {
+                  "extension": "2100",
+                  "shortLabel": "NRN",
+                  "label": "Neon Noir",
+                  "keywords": ["noir", "urban future"]
+                },
+                {
+                  "extension": "2200",
+                  "shortLabel": "NET",
+                  "label": "Networked Selves",
+                  "keywords": ["virtual", "network", "identity"]
+                }
+              ]
+            },
+            {
+              "extension": "3000",
+              "shortLabel": "DYS",
+              "label": "Dystopian Futures",
+              "keywords": ["dystopian", "future"],
+              "status": "deprecated",
+              "replacedBy": "3100",
+              "children": [
+                {
+                  "extension": "3100",
+                  "shortLabel": "CLI",
+                  "label": "Climate Collapse Futures",
+                  "keywords": ["climate", "collapse", "future"]
+                },
+                {
+                  "extension": "3200",
+                  "shortLabel": "AUR",
+                  "label": "Authoritarian Regimes",
+                  "keywords": ["authoritarian", "regime", "state"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "922",
+          "label": "Crafts",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "TEX",
+              "label": "Textile Crafts",
+              "keywords": ["textile", "fiber", "craft"],
+              "children": [
+                {
+                  "extension": "1100",
+                  "shortLabel": "KNT",
+                  "label": "Knitting",
+                  "keywords": ["knitting"]
+                },
+                {
+                  "extension": "1200",
+                  "shortLabel": "QIL",
+                  "label": "Quilting",
+                  "keywords": ["quilting"]
+                }
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "PPR",
+              "label": "Paper Crafts",
+              "keywords": ["paper", "book arts", "craft"],
+              "seeAlso": ["124", "644"],
+              "children": [
+                {
+                  "extension": "2100",
+                  "shortLabel": "BND",
+                  "label": "Bookbinding",
+                  "keywords": ["bookbinding", "binding"]
+                },
+                {
+                  "extension": "2200",
+                  "shortLabel": "ORI",
+                  "label": "Origami",
+                  "keywords": ["origami", "folding"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "parentCode": "951",
+          "label": "Games",
+          "children": [
+            {
+              "extension": "1000",
+              "shortLabel": "TAB",
+              "label": "Tabletop Games",
+              "keywords": ["tabletop", "games"],
+              "children": [
+                {
+                  "extension": "1100",
+                  "shortLabel": "RPG",
+                  "label": "Role-Playing Games",
+                  "keywords": ["rpg", "role-playing", "games"]
+                },
+                {
+                  "extension": "1200",
+                  "shortLabel": "BRD",
+                  "label": "Board Games",
+                  "keywords": ["board games"]
+                }
+              ]
+            },
+            {
+              "extension": "2000",
+              "shortLabel": "VID",
+              "label": "Video Games",
+              "keywords": ["video games", "games"],
+              "children": [
+                {
+                  "extension": "2100",
+                  "shortLabel": "DES",
+                  "label": "Design & Development",
+                  "keywords": ["game design", "development"]
+                },
+                {
+                  "extension": "2200",
+                  "shortLabel": "CUL",
+                  "label": "Culture & Criticism",
+                  "keywords": ["game studies", "criticism", "culture"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

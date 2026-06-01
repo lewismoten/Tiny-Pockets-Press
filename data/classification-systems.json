@@ -22,8 +22,7 @@
                   "label": "Drawing",
                   "keywords": ["drawing", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 111,
-                  "seeAlso": []
+                  "sort": 111
                 },
                 {
                   "code": "112",
@@ -31,8 +30,7 @@
                   "label": "Painting",
                   "keywords": ["painting", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 112,
-                  "seeAlso": []
+                  "sort": 112
                 },
                 {
                   "code": "113",
@@ -40,8 +38,7 @@
                   "label": "Printmaking",
                   "keywords": ["printmaking", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 113,
-                  "seeAlso": []
+                  "sort": 113
                 },
                 {
                   "code": "114",
@@ -49,14 +46,12 @@
                   "label": "Sculpture",
                   "keywords": ["sculpture", "art", "visual", "arts"],
                   "status": "active",
-                  "sort": 114,
-                  "seeAlso": []
+                  "sort": 114
                 }
               ],
               "keywords": ["visual", "arts", "art"],
               "status": "active",
-              "sort": 110,
-              "seeAlso": []
+              "sort": 110
             },
             {
               "code": "120",
@@ -78,8 +73,7 @@
                   "label": "Industrial Design",
                   "keywords": ["industrial", "design", "art"],
                   "status": "active",
-                  "sort": 122,
-                  "seeAlso": []
+                  "sort": 122
                 },
                 {
                   "code": "123",
@@ -87,8 +81,7 @@
                   "label": "Interior Design",
                   "keywords": ["interior", "design", "art"],
                   "status": "active",
-                  "sort": 123,
-                  "seeAlso": []
+                  "sort": 123
                 },
                 {
                   "code": "124",
@@ -96,14 +89,12 @@
                   "label": "Fashion & Textile Design",
                   "keywords": ["fashion", "textile", "design", "art"],
                   "status": "active",
-                  "sort": 124,
-                  "seeAlso": []
+                  "sort": 124
                 }
               ],
               "keywords": ["design", "art"],
               "status": "active",
-              "sort": 120,
-              "seeAlso": []
+              "sort": 120
             },
             {
               "code": "130",
@@ -125,8 +116,7 @@
                   "label": "Dance",
                   "keywords": ["dance", "art", "performing", "arts"],
                   "status": "active",
-                  "sort": 132,
-                  "seeAlso": []
+                  "sort": 132
                 },
                 {
                   "code": "133",
@@ -134,8 +124,7 @@
                   "label": "Theater",
                   "keywords": ["theater", "art", "performing", "arts"],
                   "status": "active",
-                  "sort": 133,
-                  "seeAlso": []
+                  "sort": 133
                 },
                 {
                   "code": "134",
@@ -143,14 +132,12 @@
                   "label": "Film & Screen Arts",
                   "keywords": ["film", "screen", "arts", "art", "performing"],
                   "status": "active",
-                  "sort": 134,
-                  "seeAlso": []
+                  "sort": 134
                 }
               ],
               "keywords": ["performing", "arts", "art"],
               "status": "active",
-              "sort": 130,
-              "seeAlso": []
+              "sort": 130
             },
             {
               "code": "140",
@@ -163,8 +150,7 @@
                   "label": "Photography",
                   "keywords": ["photography", "art", "media", "arts"],
                   "status": "active",
-                  "sort": 141,
-                  "seeAlso": []
+                  "sort": 141
                 },
                 {
                   "code": "142",
@@ -172,8 +158,7 @@
                   "label": "Video Art",
                   "keywords": ["video", "art", "media", "arts"],
                   "status": "active",
-                  "sort": 142,
-                  "seeAlso": []
+                  "sort": 142
                 },
                 {
                   "code": "143",
@@ -181,8 +166,7 @@
                   "label": "Digital Art",
                   "keywords": ["digital", "art", "media", "arts"],
                   "status": "active",
-                  "sort": 143,
-                  "seeAlso": []
+                  "sort": 143
                 },
                 {
                   "code": "144",
@@ -190,20 +174,17 @@
                   "label": "Mixed Media",
                   "keywords": ["mixed", "media", "art", "arts"],
                   "status": "active",
-                  "sort": 144,
-                  "seeAlso": []
+                  "sort": 144
                 }
               ],
               "keywords": ["media", "arts", "art"],
               "status": "active",
-              "sort": 140,
-              "seeAlso": []
+              "sort": 140
             }
           ],
           "keywords": ["art"],
           "status": "active",
-          "sort": 100,
-          "seeAlso": []
+          "sort": 100
         },
         {
           "code": "150",
@@ -227,8 +208,7 @@
                     "philosophy"
                   ],
                   "status": "active",
-                  "sort": 1511,
-                  "seeAlso": []
+                  "sort": 1511
                 },
                 {
                   "code": "1512",
@@ -242,8 +222,7 @@
                     "philosophy"
                   ],
                   "status": "active",
-                  "sort": 1512,
-                  "seeAlso": []
+                  "sort": 1512
                 },
                 {
                   "code": "1513",
@@ -258,8 +237,7 @@
                     "philosophy"
                   ],
                   "status": "active",
-                  "sort": 1513,
-                  "seeAlso": []
+                  "sort": 1513
                 },
                 {
                   "code": "1514",
@@ -272,8 +250,7 @@
                     "philosophy"
                   ],
                   "status": "active",
-                  "sort": 1514,
-                  "seeAlso": []
+                  "sort": 1514
                 }
               ],
               "keywords": ["religion", "spirituality", "philosophy"],
@@ -299,8 +276,7 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 1521,
-                  "seeAlso": []
+                  "sort": 1521
                 },
                 {
                   "code": "1522",
@@ -316,8 +292,7 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 1522,
-                  "seeAlso": []
+                  "sort": 1522
                 },
                 {
                   "code": "1523",
@@ -333,8 +308,7 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 1523,
-                  "seeAlso": []
+                  "sort": 1523
                 },
                 {
                   "code": "1524",
@@ -350,8 +324,7 @@
                     "spiritual"
                   ],
                   "status": "active",
-                  "sort": 1524,
-                  "seeAlso": []
+                  "sort": 1524
                 }
               ],
               "keywords": [
@@ -381,8 +354,7 @@
                     "philosophy"
                   ],
                   "status": "active",
-                  "sort": 1531,
-                  "seeAlso": []
+                  "sort": 1531
                 },
                 {
                   "code": "1532",
@@ -395,8 +367,7 @@
                     "philosophy"
                   ],
                   "status": "active",
-                  "sort": 1532,
-                  "seeAlso": []
+                  "sort": 1532
                 },
                 {
                   "code": "1533",
@@ -409,8 +380,7 @@
                     "spirituality"
                   ],
                   "status": "active",
-                  "sort": 1533,
-                  "seeAlso": []
+                  "sort": 1533
                 },
                 {
                   "code": "1534",
@@ -424,8 +394,7 @@
                     "philosophy"
                   ],
                   "status": "active",
-                  "sort": 1534,
-                  "seeAlso": []
+                  "sort": 1534
                 }
               ],
               "keywords": ["philosophy", "religion", "spirituality"],
@@ -451,8 +420,7 @@
                     "thought"
                   ],
                   "status": "active",
-                  "sort": 1541,
-                  "seeAlso": []
+                  "sort": 1541
                 },
                 {
                   "code": "1542",
@@ -467,8 +435,7 @@
                     "thought"
                   ],
                   "status": "active",
-                  "sort": 1542,
-                  "seeAlso": []
+                  "sort": 1542
                 },
                 {
                   "code": "1543",
@@ -483,8 +450,7 @@
                     "thought"
                   ],
                   "status": "active",
-                  "sort": 1543,
-                  "seeAlso": []
+                  "sort": 1543
                 },
                 {
                   "code": "1544",
@@ -501,8 +467,7 @@
                     "thought"
                   ],
                   "status": "active",
-                  "sort": 1544,
-                  "seeAlso": []
+                  "sort": 1544
                 }
               ],
               "keywords": [
@@ -513,14 +478,12 @@
                 "philosophy"
               ],
               "status": "active",
-              "sort": 154,
-              "seeAlso": []
+              "sort": 154
             }
           ],
           "keywords": ["religion", "spirituality", "philosophy", "belief"],
           "status": "active",
-          "sort": 150,
-          "seeAlso": []
+          "sort": 150
         },
         {
           "code": "160",
@@ -543,8 +506,7 @@
                     "preservation"
                   ],
                   "status": "active",
-                  "sort": 1611,
-                  "seeAlso": []
+                  "sort": 1611
                 },
                 {
                   "code": "1612",
@@ -557,8 +519,7 @@
                     "preservation"
                   ],
                   "status": "active",
-                  "sort": 1612,
-                  "seeAlso": []
+                  "sort": 1612
                 },
                 {
                   "code": "1613",
@@ -566,8 +527,7 @@
                   "label": "Sacred Architecture",
                   "keywords": ["sacred", "architecture", "preservation"],
                   "status": "active",
-                  "sort": 1613,
-                  "seeAlso": []
+                  "sort": 1613
                 },
                 {
                   "code": "1614",
@@ -575,8 +535,7 @@
                   "label": "Landscape Architecture",
                   "keywords": ["landscape", "architecture", "preservation"],
                   "status": "active",
-                  "sort": 1614,
-                  "seeAlso": []
+                  "sort": 1614
                 }
               ],
               "keywords": ["architecture", "preservation"],
@@ -601,8 +560,7 @@
                     "historic"
                   ],
                   "status": "active",
-                  "sort": 1621,
-                  "seeAlso": []
+                  "sort": 1621
                 },
                 {
                   "code": "1622",
@@ -616,8 +574,7 @@
                     "historic"
                   ],
                   "status": "active",
-                  "sort": 1622,
-                  "seeAlso": []
+                  "sort": 1622
                 },
                 {
                   "code": "1623",
@@ -631,8 +588,7 @@
                     "historic"
                   ],
                   "status": "active",
-                  "sort": 1623,
-                  "seeAlso": []
+                  "sort": 1623
                 },
                 {
                   "code": "1624",
@@ -646,8 +602,7 @@
                     "historic"
                   ],
                   "status": "active",
-                  "sort": 1624,
-                  "seeAlso": []
+                  "sort": 1624
                 }
               ],
               "keywords": [
@@ -681,8 +636,7 @@
                     "design"
                   ],
                   "status": "active",
-                  "sort": 1631,
-                  "seeAlso": []
+                  "sort": 1631
                 },
                 {
                   "code": "1632",
@@ -698,8 +652,7 @@
                     "design"
                   ],
                   "status": "active",
-                  "sort": 1632,
-                  "seeAlso": []
+                  "sort": 1632
                 },
                 {
                   "code": "1633",
@@ -714,8 +667,7 @@
                     "design"
                   ],
                   "status": "active",
-                  "sort": 1633,
-                  "seeAlso": []
+                  "sort": 1633
                 },
                 {
                   "code": "1634",
@@ -730,14 +682,12 @@
                     "design"
                   ],
                   "status": "active",
-                  "sort": 1634,
-                  "seeAlso": []
+                  "sort": 1634
                 }
               ],
               "keywords": ["urban", "design", "architecture", "preservation"],
               "status": "active",
-              "sort": 163,
-              "seeAlso": []
+              "sort": 163
             },
             {
               "code": "164",
@@ -757,8 +707,7 @@
                     "craft"
                   ],
                   "status": "active",
-                  "sort": 1641,
-                  "seeAlso": []
+                  "sort": 1641
                 },
                 {
                   "code": "1642",
@@ -774,8 +723,7 @@
                     "craft"
                   ],
                   "status": "active",
-                  "sort": 1642,
-                  "seeAlso": []
+                  "sort": 1642
                 },
                 {
                   "code": "1643",
@@ -789,8 +737,7 @@
                     "craft"
                   ],
                   "status": "active",
-                  "sort": 1643,
-                  "seeAlso": []
+                  "sort": 1643
                 },
                 {
                   "code": "1644",
@@ -805,20 +752,17 @@
                     "craft"
                   ],
                   "status": "active",
-                  "sort": 1644,
-                  "seeAlso": []
+                  "sort": 1644
                 }
               ],
               "keywords": ["building", "craft", "architecture", "preservation"],
               "status": "active",
-              "sort": 164,
-              "seeAlso": []
+              "sort": 164
             }
           ],
           "keywords": ["architecture", "preservation", "buildings", "heritage"],
           "status": "active",
-          "sort": 160,
-          "seeAlso": []
+          "sort": 160
         },
         {
           "code": "200",
@@ -842,8 +786,7 @@
                     "stories"
                   ],
                   "status": "active",
-                  "sort": 211,
-                  "seeAlso": []
+                  "sort": 211
                 },
                 {
                   "code": "212",
@@ -858,8 +801,7 @@
                     "stories"
                   ],
                   "status": "active",
-                  "sort": 212,
-                  "seeAlso": []
+                  "sort": 212
                 },
                 {
                   "code": "213",
@@ -875,8 +817,7 @@
                     "stories"
                   ],
                   "status": "active",
-                  "sort": 213,
-                  "seeAlso": []
+                  "sort": 213
                 },
                 {
                   "code": "214",
@@ -891,8 +832,7 @@
                     "stories"
                   ],
                   "status": "active",
-                  "sort": 214,
-                  "seeAlso": []
+                  "sort": 214
                 }
               ],
               "keywords": [
@@ -903,8 +843,7 @@
                 "memoir"
               ],
               "status": "active",
-              "sort": 210,
-              "seeAlso": []
+              "sort": 210
             },
             {
               "code": "220",
@@ -924,8 +863,7 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 221,
-                  "seeAlso": []
+                  "sort": 221
                 },
                 {
                   "code": "222",
@@ -940,8 +878,7 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 222,
-                  "seeAlso": []
+                  "sort": 222
                 },
                 {
                   "code": "223",
@@ -956,8 +893,7 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 223,
-                  "seeAlso": []
+                  "sort": 223
                 },
                 {
                   "code": "224",
@@ -972,14 +908,12 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 224,
-                  "seeAlso": []
+                  "sort": 224
                 }
               ],
               "keywords": ["collected", "lives", "biography", "memoir"],
               "status": "active",
-              "sort": 220,
-              "seeAlso": []
+              "sort": 220
             },
             {
               "code": "230",
@@ -999,8 +933,7 @@
                     "histories"
                   ],
                   "status": "active",
-                  "sort": 231,
-                  "seeAlso": []
+                  "sort": 231
                 },
                 {
                   "code": "232",
@@ -1015,8 +948,7 @@
                     "community"
                   ],
                   "status": "active",
-                  "sort": 232,
-                  "seeAlso": []
+                  "sort": 232
                 },
                 {
                   "code": "233",
@@ -1031,8 +963,7 @@
                     "histories"
                   ],
                   "status": "active",
-                  "sort": 233,
-                  "seeAlso": []
+                  "sort": 233
                 },
                 {
                   "code": "234",
@@ -1050,8 +981,7 @@
                     "histories"
                   ],
                   "status": "active",
-                  "sort": 234,
-                  "seeAlso": []
+                  "sort": 234
                 }
               ],
               "keywords": [
@@ -1062,8 +992,7 @@
                 "memoir"
               ],
               "status": "active",
-              "sort": 230,
-              "seeAlso": []
+              "sort": 230
             },
             {
               "code": "240",
@@ -1082,8 +1011,7 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 241,
-                  "seeAlso": []
+                  "sort": 241
                 },
                 {
                   "code": "242",
@@ -1098,8 +1026,7 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 242,
-                  "seeAlso": []
+                  "sort": 242
                 },
                 {
                   "code": "243",
@@ -1114,8 +1041,7 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 243,
-                  "seeAlso": []
+                  "sort": 243
                 },
                 {
                   "code": "244",
@@ -1130,20 +1056,17 @@
                     "lives"
                   ],
                   "status": "active",
-                  "sort": 244,
-                  "seeAlso": []
+                  "sort": 244
                 }
               ],
               "keywords": ["reference", "lives", "biography", "memoir"],
               "status": "active",
-              "sort": 240,
-              "seeAlso": []
+              "sort": 240
             }
           ],
           "keywords": ["biography", "memoir"],
           "status": "active",
-          "sort": 200,
-          "seeAlso": []
+          "sort": 200
         },
         {
           "code": "300",
@@ -1161,8 +1084,7 @@
                   "label": "Leadership",
                   "keywords": ["leadership", "business", "work", "management"],
                   "status": "active",
-                  "sort": 311,
-                  "seeAlso": []
+                  "sort": 311
                 },
                 {
                   "code": "312",
@@ -1176,8 +1098,7 @@
                     "management"
                   ],
                   "status": "active",
-                  "sort": 312,
-                  "seeAlso": []
+                  "sort": 312
                 },
                 {
                   "code": "313",
@@ -1185,8 +1106,7 @@
                   "label": "Operations",
                   "keywords": ["operations", "business", "work", "management"],
                   "status": "active",
-                  "sort": 313,
-                  "seeAlso": []
+                  "sort": 313
                 },
                 {
                   "code": "314",
@@ -1194,14 +1114,12 @@
                   "label": "Strategy",
                   "keywords": ["strategy", "business", "work", "management"],
                   "status": "active",
-                  "sort": 314,
-                  "seeAlso": []
+                  "sort": 314
                 }
               ],
               "keywords": ["management", "business", "work"],
               "status": "active",
-              "sort": 310,
-              "seeAlso": []
+              "sort": 310
             },
             {
               "code": "320",
@@ -1219,8 +1137,7 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 321,
-                  "seeAlso": []
+                  "sort": 321
                 },
                 {
                   "code": "322",
@@ -1228,8 +1145,7 @@
                   "label": "Small Business",
                   "keywords": ["small", "business", "work", "entrepreneurship"],
                   "status": "active",
-                  "sort": 322,
-                  "seeAlso": []
+                  "sort": 322
                 },
                 {
                   "code": "323",
@@ -1243,8 +1159,7 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 323,
-                  "seeAlso": []
+                  "sort": 323
                 },
                 {
                   "code": "324",
@@ -1258,14 +1173,12 @@
                     "entrepreneurship"
                   ],
                   "status": "active",
-                  "sort": 324,
-                  "seeAlso": []
+                  "sort": 324
                 }
               ],
               "keywords": ["entrepreneurship", "business", "work"],
               "status": "active",
-              "sort": 320,
-              "seeAlso": []
+              "sort": 320
             },
             {
               "code": "330",
@@ -1278,8 +1191,7 @@
                   "label": "Economics",
                   "keywords": ["economics", "business", "work", "finance"],
                   "status": "active",
-                  "sort": 331,
-                  "seeAlso": []
+                  "sort": 331
                 },
                 {
                   "code": "332",
@@ -1293,8 +1205,7 @@
                     "economics"
                   ],
                   "status": "active",
-                  "sort": 332,
-                  "seeAlso": []
+                  "sort": 332
                 },
                 {
                   "code": "333",
@@ -1308,8 +1219,7 @@
                     "finance"
                   ],
                   "status": "active",
-                  "sort": 333,
-                  "seeAlso": []
+                  "sort": 333
                 },
                 {
                   "code": "334",
@@ -1323,14 +1233,12 @@
                     "finance"
                   ],
                   "status": "active",
-                  "sort": 334,
-                  "seeAlso": []
+                  "sort": 334
                 }
               ],
               "keywords": ["economics", "finance", "business", "work"],
               "status": "active",
-              "sort": 330,
-              "seeAlso": []
+              "sort": 330
             },
             {
               "code": "340",
@@ -1343,8 +1251,7 @@
                   "label": "Careers",
                   "keywords": ["careers", "business", "work", "life"],
                   "status": "active",
-                  "sort": 341,
-                  "seeAlso": []
+                  "sort": 341
                 },
                 {
                   "code": "342",
@@ -1352,8 +1259,7 @@
                   "label": "Productivity",
                   "keywords": ["productivity", "business", "work", "life"],
                   "status": "active",
-                  "sort": 342,
-                  "seeAlso": []
+                  "sort": 342
                 },
                 {
                   "code": "343",
@@ -1361,8 +1267,7 @@
                   "label": "Remote Work",
                   "keywords": ["remote", "work", "business", "life"],
                   "status": "active",
-                  "sort": 343,
-                  "seeAlso": []
+                  "sort": 343
                 },
                 {
                   "code": "344",
@@ -1376,20 +1281,17 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 344,
-                  "seeAlso": []
+                  "sort": 344
                 }
               ],
               "keywords": ["work", "life", "business"],
               "status": "active",
-              "sort": 340,
-              "seeAlso": []
+              "sort": 340
             }
           ],
           "keywords": ["business", "work"],
           "status": "active",
-          "sort": 300,
-          "seeAlso": []
+          "sort": 300
         },
         {
           "code": "400",
@@ -1413,8 +1315,7 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 411,
-                  "seeAlso": []
+                  "sort": 411
                 },
                 {
                   "code": "412",
@@ -1428,8 +1329,7 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 412,
-                  "seeAlso": []
+                  "sort": 412
                 },
                 {
                   "code": "413",
@@ -1443,8 +1343,7 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 413,
-                  "seeAlso": []
+                  "sort": 413
                 },
                 {
                   "code": "414",
@@ -1458,14 +1357,12 @@
                     "programming"
                   ],
                   "status": "active",
-                  "sort": 414,
-                  "seeAlso": []
+                  "sort": 414
                 }
               ],
               "keywords": ["programming", "computers", "technology"],
               "status": "active",
-              "sort": 410,
-              "seeAlso": []
+              "sort": 410
             },
             {
               "code": "420",
@@ -1483,8 +1380,7 @@
                     "technology"
                   ],
                   "status": "active",
-                  "sort": 421,
-                  "seeAlso": []
+                  "sort": 421
                 },
                 {
                   "code": "422",
@@ -1497,8 +1393,7 @@
                     "systems"
                   ],
                   "status": "active",
-                  "sort": 422,
-                  "seeAlso": []
+                  "sort": 422
                 },
                 {
                   "code": "423",
@@ -1511,8 +1406,7 @@
                     "systems"
                   ],
                   "status": "active",
-                  "sort": 423,
-                  "seeAlso": []
+                  "sort": 423
                 },
                 {
                   "code": "424",
@@ -1526,14 +1420,12 @@
                     "systems"
                   ],
                   "status": "active",
-                  "sort": 424,
-                  "seeAlso": []
+                  "sort": 424
                 }
               ],
               "keywords": ["systems", "computers", "technology"],
               "status": "active",
-              "sort": 420,
-              "seeAlso": []
+              "sort": 420
             },
             {
               "code": "430",
@@ -1570,8 +1462,7 @@
                     "computing"
                   ],
                   "status": "active",
-                  "sort": 432,
-                  "seeAlso": []
+                  "sort": 432
                 },
                 {
                   "code": "433",
@@ -1586,8 +1477,7 @@
                     "computing"
                   ],
                   "status": "active",
-                  "sort": 433,
-                  "seeAlso": []
+                  "sort": 433
                 },
                 {
                   "code": "434",
@@ -1603,14 +1493,12 @@
                     "computing"
                   ],
                   "status": "active",
-                  "sort": 434,
-                  "seeAlso": []
+                  "sort": 434
                 }
               ],
               "keywords": ["applied", "computing", "computers", "technology"],
               "status": "active",
-              "sort": 430,
-              "seeAlso": []
+              "sort": 430
             },
             {
               "code": "440",
@@ -1629,8 +1517,7 @@
                     "digital"
                   ],
                   "status": "active",
-                  "sort": 441,
-                  "seeAlso": []
+                  "sort": 441
                 },
                 {
                   "code": "442",
@@ -1645,8 +1532,7 @@
                     "culture"
                   ],
                   "status": "active",
-                  "sort": 442,
-                  "seeAlso": []
+                  "sort": 442
                 },
                 {
                   "code": "443",
@@ -1660,8 +1546,7 @@
                     "culture"
                   ],
                   "status": "active",
-                  "sort": 443,
-                  "seeAlso": []
+                  "sort": 443
                 },
                 {
                   "code": "444",
@@ -1675,20 +1560,17 @@
                     "culture"
                   ],
                   "status": "active",
-                  "sort": 444,
-                  "seeAlso": []
+                  "sort": 444
                 }
               ],
               "keywords": ["digital", "culture", "computers", "technology"],
               "status": "active",
-              "sort": 440,
-              "seeAlso": []
+              "sort": 440
             }
           ],
           "keywords": ["computers", "technology"],
           "status": "active",
-          "sort": 400,
-          "seeAlso": []
+          "sort": 400
         },
         {
           "code": "500",
@@ -1706,8 +1588,7 @@
                   "label": "Ancient & Medieval",
                   "keywords": ["ancient", "medieval", "history", "society"],
                   "status": "active",
-                  "sort": 511,
-                  "seeAlso": []
+                  "sort": 511
                 },
                 {
                   "code": "512",
@@ -1715,8 +1596,7 @@
                   "label": "Modern History",
                   "keywords": ["modern", "history", "society"],
                   "status": "active",
-                  "sort": 512,
-                  "seeAlso": []
+                  "sort": 512
                 },
                 {
                   "code": "513",
@@ -1724,8 +1604,7 @@
                   "label": "Local & Regional History",
                   "keywords": ["local", "regional", "history", "society"],
                   "status": "active",
-                  "sort": 513,
-                  "seeAlso": []
+                  "sort": 513
                 },
                 {
                   "code": "514",
@@ -1733,14 +1612,12 @@
                   "label": "World History",
                   "keywords": ["world", "history", "society"],
                   "status": "active",
-                  "sort": 514,
-                  "seeAlso": []
+                  "sort": 514
                 }
               ],
               "keywords": ["history", "society"],
               "status": "active",
-              "sort": 510,
-              "seeAlso": []
+              "sort": 510
             },
             {
               "code": "520",
@@ -1760,8 +1637,7 @@
                     "studies"
                   ],
                   "status": "active",
-                  "sort": 521,
-                  "seeAlso": []
+                  "sort": 521
                 },
                 {
                   "code": "522",
@@ -1775,8 +1651,7 @@
                     "studies"
                   ],
                   "status": "active",
-                  "sort": 522,
-                  "seeAlso": []
+                  "sort": 522
                 },
                 {
                   "code": "523",
@@ -1806,14 +1681,12 @@
                     "studies"
                   ],
                   "status": "active",
-                  "sort": 524,
-                  "seeAlso": []
+                  "sort": 524
                 }
               ],
               "keywords": ["social", "studies", "history", "society"],
               "status": "active",
-              "sort": 520,
-              "seeAlso": []
+              "sort": 520
             },
             {
               "code": "530",
@@ -1834,8 +1707,7 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 531,
-                  "seeAlso": []
+                  "sort": 531
                 },
                 {
                   "code": "532",
@@ -1851,8 +1723,7 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 532,
-                  "seeAlso": []
+                  "sort": 532
                 },
                 {
                   "code": "533",
@@ -1868,8 +1739,7 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 533,
-                  "seeAlso": []
+                  "sort": 533
                 },
                 {
                   "code": "534",
@@ -1884,14 +1754,12 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 534,
-                  "seeAlso": []
+                  "sort": 534
                 }
               ],
               "keywords": ["law", "civic", "life", "history", "society"],
               "status": "active",
-              "sort": 530,
-              "seeAlso": []
+              "sort": 530
             },
             {
               "code": "540",
@@ -1910,8 +1778,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 541,
-                  "seeAlso": []
+                  "sort": 541
                 },
                 {
                   "code": "542",
@@ -1926,8 +1793,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 542,
-                  "seeAlso": []
+                  "sort": 542
                 },
                 {
                   "code": "543",
@@ -1942,8 +1808,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 543,
-                  "seeAlso": []
+                  "sort": 543
                 },
                 {
                   "code": "544",
@@ -1959,20 +1824,17 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 544,
-                  "seeAlso": []
+                  "sort": 544
                 }
               ],
               "keywords": ["geography", "place", "history", "society"],
               "status": "active",
-              "sort": 540,
-              "seeAlso": []
+              "sort": 540
             }
           ],
           "keywords": ["history", "society"],
           "status": "active",
-          "sort": 500,
-          "seeAlso": []
+          "sort": 500
         },
         {
           "code": "600",
@@ -1995,8 +1857,7 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 611,
-                  "seeAlso": []
+                  "sort": 611
                 },
                 {
                   "code": "612",
@@ -2010,8 +1871,7 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 612,
-                  "seeAlso": []
+                  "sort": 612
                 },
                 {
                   "code": "613",
@@ -2019,8 +1879,7 @@
                   "label": "Language Learning",
                   "keywords": ["language", "learning", "literature", "study"],
                   "status": "active",
-                  "sort": 613,
-                  "seeAlso": []
+                  "sort": 613
                 },
                 {
                   "code": "614",
@@ -2039,8 +1898,7 @@
               ],
               "keywords": ["language", "study", "literature"],
               "status": "active",
-              "sort": 610,
-              "seeAlso": []
+              "sort": 610
             },
             {
               "code": "620",
@@ -2059,8 +1917,7 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 621,
-                  "seeAlso": []
+                  "sort": 621
                 },
                 {
                   "code": "622",
@@ -2075,8 +1932,7 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 622,
-                  "seeAlso": []
+                  "sort": 622
                 },
                 {
                   "code": "623",
@@ -2090,8 +1946,7 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 623,
-                  "seeAlso": []
+                  "sort": 623
                 },
                 {
                   "code": "624",
@@ -2106,14 +1961,12 @@
                     "study"
                   ],
                   "status": "active",
-                  "sort": 624,
-                  "seeAlso": []
+                  "sort": 624
                 }
               ],
               "keywords": ["literary", "study", "language", "literature"],
               "status": "active",
-              "sort": 620,
-              "seeAlso": []
+              "sort": 620
             },
             {
               "code": "630",
@@ -2132,8 +1985,7 @@
                     "genres"
                   ],
                   "status": "active",
-                  "sort": 631,
-                  "seeAlso": []
+                  "sort": 631
                 },
                 {
                   "code": "632",
@@ -2147,8 +1999,7 @@
                     "genres"
                   ],
                   "status": "active",
-                  "sort": 632,
-                  "seeAlso": []
+                  "sort": 632
                 },
                 {
                   "code": "633",
@@ -2162,8 +2013,7 @@
                     "genres"
                   ],
                   "status": "active",
-                  "sort": 633,
-                  "seeAlso": []
+                  "sort": 633
                 },
                 {
                   "code": "634",
@@ -2178,14 +2028,12 @@
                     "genres"
                   ],
                   "status": "active",
-                  "sort": 634,
-                  "seeAlso": []
+                  "sort": 634
                 }
               ],
               "keywords": ["forms", "genres", "language", "literature"],
               "status": "active",
-              "sort": 630,
-              "seeAlso": []
+              "sort": 630
             },
             {
               "code": "640",
@@ -2204,8 +2052,7 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 641,
-                  "seeAlso": []
+                  "sort": 641
                 },
                 {
                   "code": "642",
@@ -2219,8 +2066,7 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 642,
-                  "seeAlso": []
+                  "sort": 642
                 },
                 {
                   "code": "643",
@@ -2234,8 +2080,7 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 643,
-                  "seeAlso": []
+                  "sort": 643
                 },
                 {
                   "code": "644",
@@ -2251,20 +2096,17 @@
                     "practice"
                   ],
                   "status": "active",
-                  "sort": 644,
-                  "seeAlso": []
+                  "sort": 644
                 }
               ],
               "keywords": ["writing", "practice", "language", "literature"],
               "status": "active",
-              "sort": 640,
-              "seeAlso": []
+              "sort": 640
             }
           ],
           "keywords": ["language", "literature"],
           "status": "active",
-          "sort": 600,
-          "seeAlso": []
+          "sort": 600
         },
         {
           "code": "700",
@@ -2288,8 +2130,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 711,
-                  "seeAlso": []
+                  "sort": 711
                 },
                 {
                   "code": "712",
@@ -2318,8 +2159,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 713,
-                  "seeAlso": []
+                  "sort": 713
                 },
                 {
                   "code": "714",
@@ -2333,14 +2173,12 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 714,
-                  "seeAlso": []
+                  "sort": 714
                 }
               ],
               "keywords": ["life", "sciences", "science", "nature"],
               "status": "active",
-              "sort": 710,
-              "seeAlso": []
+              "sort": 710
             },
             {
               "code": "720",
@@ -2359,8 +2197,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 721,
-                  "seeAlso": []
+                  "sort": 721
                 },
                 {
                   "code": "722",
@@ -2374,8 +2211,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 722,
-                  "seeAlso": []
+                  "sort": 722
                 },
                 {
                   "code": "723",
@@ -2390,8 +2226,7 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 723,
-                  "seeAlso": []
+                  "sort": 723
                 },
                 {
                   "code": "724",
@@ -2406,14 +2241,12 @@
                     "sciences"
                   ],
                   "status": "active",
-                  "sort": 724,
-                  "seeAlso": []
+                  "sort": 724
                 }
               ],
               "keywords": ["physical", "sciences", "science", "nature"],
               "status": "active",
-              "sort": 720,
-              "seeAlso": []
+              "sort": 720
             },
             {
               "code": "730",
@@ -2432,8 +2265,7 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 731,
-                  "seeAlso": []
+                  "sort": 731
                 },
                 {
                   "code": "732",
@@ -2447,8 +2279,7 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 732,
-                  "seeAlso": []
+                  "sort": 732
                 },
                 {
                   "code": "733",
@@ -2456,8 +2287,7 @@
                   "label": "Logic",
                   "keywords": ["logic", "science", "nature", "math"],
                   "status": "active",
-                  "sort": 733,
-                  "seeAlso": []
+                  "sort": 733
                 },
                 {
                   "code": "734",
@@ -2473,14 +2303,12 @@
                     "logic"
                   ],
                   "status": "active",
-                  "sort": 734,
-                  "seeAlso": []
+                  "sort": 734
                 }
               ],
               "keywords": ["math", "logic", "science", "nature"],
               "status": "active",
-              "sort": 730,
-              "seeAlso": []
+              "sort": 730
             },
             {
               "code": "740",
@@ -2499,8 +2327,7 @@
                     "writing"
                   ],
                   "status": "active",
-                  "sort": 741,
-                  "seeAlso": []
+                  "sort": 741
                 },
                 {
                   "code": "742",
@@ -2508,8 +2335,7 @@
                   "label": "Environment",
                   "keywords": ["environment", "science", "nature", "writing"],
                   "status": "active",
-                  "sort": 742,
-                  "seeAlso": []
+                  "sort": 742
                 },
                 {
                   "code": "743",
@@ -2517,8 +2343,7 @@
                   "label": "Climate",
                   "keywords": ["climate", "science", "nature", "writing"],
                   "status": "active",
-                  "sort": 743,
-                  "seeAlso": []
+                  "sort": 743
                 },
                 {
                   "code": "744",
@@ -2532,14 +2357,12 @@
                     "writing"
                   ],
                   "status": "active",
-                  "sort": 744,
-                  "seeAlso": []
+                  "sort": 744
                 }
               ],
               "keywords": ["nature", "writing", "science"],
               "status": "active",
-              "sort": 740,
-              "seeAlso": []
+              "sort": 740
             },
             {
               "code": "750",
@@ -2563,8 +2386,7 @@
                         "wildlife"
                       ],
                       "status": "active",
-                      "sort": 7511,
-                      "seeAlso": []
+                      "sort": 7511
                     },
                     {
                       "code": "7512",
@@ -2578,8 +2400,7 @@
                         "wildlife"
                       ],
                       "status": "active",
-                      "sort": 7512,
-                      "seeAlso": []
+                      "sort": 7512
                     },
                     {
                       "code": "7513",
@@ -2594,8 +2415,7 @@
                         "wildlife"
                       ],
                       "status": "active",
-                      "sort": 7513,
-                      "seeAlso": []
+                      "sort": 7513
                     },
                     {
                       "code": "7514",
@@ -2610,8 +2430,7 @@
                         "wildlife"
                       ],
                       "status": "active",
-                      "sort": 7514,
-                      "seeAlso": []
+                      "sort": 7514
                     }
                   ],
                   "keywords": ["wildlife", "science", "nature", "animals"],
@@ -2639,8 +2458,7 @@
                         "behavior"
                       ],
                       "status": "active",
-                      "sort": 7521,
-                      "seeAlso": []
+                      "sort": 7521
                     },
                     {
                       "code": "7522",
@@ -2656,8 +2474,7 @@
                         "behavior"
                       ],
                       "status": "active",
-                      "sort": 7522,
-                      "seeAlso": []
+                      "sort": 7522
                     },
                     {
                       "code": "7523",
@@ -2674,8 +2491,7 @@
                         "behavior"
                       ],
                       "status": "active",
-                      "sort": 7523,
-                      "seeAlso": []
+                      "sort": 7523
                     },
                     {
                       "code": "7524",
@@ -2692,8 +2508,7 @@
                         "behavior"
                       ],
                       "status": "active",
-                      "sort": 7524,
-                      "seeAlso": []
+                      "sort": 7524
                     }
                   ],
                   "keywords": [
@@ -2705,8 +2520,7 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 752,
-                  "seeAlso": []
+                  "sort": 752
                 },
                 {
                   "code": "753",
@@ -2726,8 +2540,7 @@
                         "domesticated"
                       ],
                       "status": "active",
-                      "sort": 7531,
-                      "seeAlso": []
+                      "sort": 7531
                     },
                     {
                       "code": "7532",
@@ -2742,8 +2555,7 @@
                         "domesticated"
                       ],
                       "status": "active",
-                      "sort": 7532,
-                      "seeAlso": []
+                      "sort": 7532
                     },
                     {
                       "code": "7533",
@@ -2758,8 +2570,7 @@
                         "domesticated"
                       ],
                       "status": "active",
-                      "sort": 7533,
-                      "seeAlso": []
+                      "sort": 7533
                     },
                     {
                       "code": "7534",
@@ -2774,8 +2585,7 @@
                         "domesticated"
                       ],
                       "status": "active",
-                      "sort": 7534,
-                      "seeAlso": []
+                      "sort": 7534
                     }
                   ],
                   "keywords": [
@@ -2786,8 +2596,7 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 753,
-                  "seeAlso": []
+                  "sort": 753
                 },
                 {
                   "code": "754",
@@ -2808,8 +2617,7 @@
                         "companions"
                       ],
                       "status": "active",
-                      "sort": 7541,
-                      "seeAlso": []
+                      "sort": 7541
                     },
                     {
                       "code": "7542",
@@ -2825,8 +2633,7 @@
                         "companions"
                       ],
                       "status": "active",
-                      "sort": 7542,
-                      "seeAlso": []
+                      "sort": 7542
                     },
                     {
                       "code": "7543",
@@ -2841,8 +2648,7 @@
                         "companions"
                       ],
                       "status": "active",
-                      "sort": 7543,
-                      "seeAlso": []
+                      "sort": 7543
                     },
                     {
                       "code": "7544",
@@ -2858,8 +2664,7 @@
                         "companions"
                       ],
                       "status": "active",
-                      "sort": 7544,
-                      "seeAlso": []
+                      "sort": 7544
                     }
                   ],
                   "keywords": [
@@ -2870,8 +2675,7 @@
                     "wildlife"
                   ],
                   "status": "active",
-                  "sort": 754,
-                  "seeAlso": []
+                  "sort": 754
                 }
               ],
               "keywords": [
@@ -2883,14 +2687,12 @@
                 "nature"
               ],
               "status": "active",
-              "sort": 750,
-              "seeAlso": []
+              "sort": 750
             }
           ],
           "keywords": ["science", "nature"],
           "status": "active",
-          "sort": 700,
-          "seeAlso": []
+          "sort": 700
         },
         {
           "code": "800",
@@ -2908,8 +2710,7 @@
                   "label": "Literary Fiction",
                   "keywords": ["literary", "fiction", "general"],
                   "status": "active",
-                  "sort": 811,
-                  "seeAlso": []
+                  "sort": 811
                 },
                 {
                   "code": "812",
@@ -2917,8 +2718,7 @@
                   "label": "Contemporary Fiction",
                   "keywords": ["contemporary", "fiction", "general"],
                   "status": "active",
-                  "sort": 812,
-                  "seeAlso": []
+                  "sort": 812
                 },
                 {
                   "code": "813",
@@ -2926,8 +2726,7 @@
                   "label": "Historical Fiction",
                   "keywords": ["historical", "fiction", "general"],
                   "status": "active",
-                  "sort": 813,
-                  "seeAlso": []
+                  "sort": 813
                 },
                 {
                   "code": "814",
@@ -2935,14 +2734,12 @@
                   "label": "Slice of Life",
                   "keywords": ["slice", "of", "life", "fiction", "general"],
                   "status": "active",
-                  "sort": 814,
-                  "seeAlso": []
+                  "sort": 814
                 }
               ],
               "keywords": ["general", "fiction"],
               "status": "active",
-              "sort": 810,
-              "seeAlso": []
+              "sort": 810
             },
             {
               "code": "820",
@@ -2964,8 +2761,7 @@
                   "label": "Fantasy",
                   "keywords": ["fantasy", "fiction", "speculative"],
                   "status": "active",
-                  "sort": 822,
-                  "seeAlso": []
+                  "sort": 822
                 },
                 {
                   "code": "823",
@@ -2973,8 +2769,7 @@
                   "label": "Horror",
                   "keywords": ["horror", "fiction", "speculative"],
                   "status": "active",
-                  "sort": 823,
-                  "seeAlso": []
+                  "sort": 823
                 },
                 {
                   "code": "824",
@@ -2988,8 +2783,7 @@
               ],
               "keywords": ["speculative", "fiction"],
               "status": "active",
-              "sort": 820,
-              "seeAlso": []
+              "sort": 820
             },
             {
               "code": "830",
@@ -3002,8 +2796,7 @@
                   "label": "Mystery",
                   "keywords": ["mystery", "fiction", "genre"],
                   "status": "active",
-                  "sort": 831,
-                  "seeAlso": []
+                  "sort": 831
                 },
                 {
                   "code": "832",
@@ -3011,8 +2804,7 @@
                   "label": "Romance",
                   "keywords": ["romance", "fiction", "genre"],
                   "status": "active",
-                  "sort": 832,
-                  "seeAlso": []
+                  "sort": 832
                 },
                 {
                   "code": "833",
@@ -3020,8 +2812,7 @@
                   "label": "Adventure & Thriller",
                   "keywords": ["adventure", "thriller", "fiction", "genre"],
                   "status": "active",
-                  "sort": 833,
-                  "seeAlso": []
+                  "sort": 833
                 },
                 {
                   "code": "834",
@@ -3029,14 +2820,12 @@
                   "label": "Crime & Noir",
                   "keywords": ["crime", "noir", "fiction", "genre"],
                   "status": "active",
-                  "sort": 834,
-                  "seeAlso": []
+                  "sort": 834
                 }
               ],
               "keywords": ["genre", "fiction"],
               "status": "active",
-              "sort": 830,
-              "seeAlso": []
+              "sort": 830
             },
             {
               "code": "840",
@@ -3049,8 +2838,7 @@
                   "label": "Short Stories",
                   "keywords": ["short", "stories", "fiction", "forms"],
                   "status": "active",
-                  "sort": 841,
-                  "seeAlso": []
+                  "sort": 841
                 },
                 {
                   "code": "842",
@@ -3058,8 +2846,7 @@
                   "label": "Novellas",
                   "keywords": ["novellas", "fiction", "short", "forms"],
                   "status": "active",
-                  "sort": 842,
-                  "seeAlso": []
+                  "sort": 842
                 },
                 {
                   "code": "843",
@@ -3067,8 +2854,7 @@
                   "label": "Flash Fiction",
                   "keywords": ["flash", "fiction", "short", "forms"],
                   "status": "active",
-                  "sort": 843,
-                  "seeAlso": []
+                  "sort": 843
                 },
                 {
                   "code": "844",
@@ -3083,20 +2869,17 @@
                     "forms"
                   ],
                   "status": "active",
-                  "sort": 844,
-                  "seeAlso": []
+                  "sort": 844
                 }
               ],
               "keywords": ["short", "forms", "fiction"],
               "status": "active",
-              "sort": 840,
-              "seeAlso": []
+              "sort": 840
             }
           ],
           "keywords": ["fiction"],
           "status": "active",
-          "sort": 800,
-          "seeAlso": []
+          "sort": 800
         },
         {
           "code": "900",
@@ -3119,8 +2902,7 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 911,
-                  "seeAlso": []
+                  "sort": 911
                 },
                 {
                   "code": "912",
@@ -3133,8 +2915,7 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 912,
-                  "seeAlso": []
+                  "sort": 912
                 },
                 {
                   "code": "913",
@@ -3142,8 +2923,7 @@
                   "label": "Indexes & Catalogs",
                   "keywords": ["indexes", "catalogs", "reference", "practical"],
                   "status": "active",
-                  "sort": 913,
-                  "seeAlso": []
+                  "sort": 913
                 },
                 {
                   "code": "914",
@@ -3156,14 +2936,12 @@
                     "practical"
                   ],
                   "status": "active",
-                  "sort": 914,
-                  "seeAlso": []
+                  "sort": 914
                 }
               ],
               "keywords": ["reference", "practical"],
               "status": "active",
-              "sort": 910,
-              "seeAlso": []
+              "sort": 910
             },
             {
               "code": "920",
@@ -3182,8 +2960,7 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 921,
-                  "seeAlso": []
+                  "sort": 921
                 },
                 {
                   "code": "922",
@@ -3197,8 +2974,7 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 922,
-                  "seeAlso": []
+                  "sort": 922
                 },
                 {
                   "code": "923",
@@ -3212,8 +2988,7 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 923,
-                  "seeAlso": []
+                  "sort": 923
                 },
                 {
                   "code": "924",
@@ -3228,14 +3003,12 @@
                     "making"
                   ],
                   "status": "active",
-                  "sort": 924,
-                  "seeAlso": []
+                  "sort": 924
                 }
               ],
               "keywords": ["home", "making", "reference", "practical"],
               "status": "active",
-              "sort": 920,
-              "seeAlso": []
+              "sort": 920
             },
             {
               "code": "930",
@@ -3254,8 +3027,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 931,
-                  "seeAlso": []
+                  "sort": 931
                 },
                 {
                   "code": "932",
@@ -3270,8 +3042,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 932,
-                  "seeAlso": []
+                  "sort": 932
                 },
                 {
                   "code": "933",
@@ -3286,8 +3057,7 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 933,
-                  "seeAlso": []
+                  "sort": 933
                 },
                 {
                   "code": "934",
@@ -3302,14 +3072,12 @@
                     "place"
                   ],
                   "status": "active",
-                  "sort": 934,
-                  "seeAlso": []
+                  "sort": 934
                 }
               ],
               "keywords": ["travel", "place", "reference", "practical"],
               "status": "active",
-              "sort": 930,
-              "seeAlso": []
+              "sort": 930
             },
             {
               "code": "940",
@@ -3330,8 +3098,7 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 941,
-                  "seeAlso": []
+                  "sort": 941
                 },
                 {
                   "code": "942",
@@ -3347,8 +3114,7 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 942,
-                  "seeAlso": []
+                  "sort": 942
                 },
                 {
                   "code": "943",
@@ -3364,8 +3130,7 @@
                     "daily"
                   ],
                   "status": "active",
-                  "sort": 943,
-                  "seeAlso": []
+                  "sort": 943
                 },
                 {
                   "code": "944",
@@ -3382,8 +3147,7 @@
                     "life"
                   ],
                   "status": "active",
-                  "sort": 944,
-                  "seeAlso": []
+                  "sort": 944
                 }
               ],
               "keywords": [
@@ -3394,14 +3158,12 @@
                 "practical"
               ],
               "status": "active",
-              "sort": 940,
-              "seeAlso": []
+              "sort": 940
             }
           ],
           "keywords": ["reference", "practical"],
           "status": "active",
-          "sort": 900,
-          "seeAlso": []
+          "sort": 900
         },
         {
           "code": "950",
@@ -3425,8 +3187,7 @@
                     "recreation"
                   ],
                   "status": "active",
-                  "sort": 9511,
-                  "seeAlso": []
+                  "sort": 9511
                 },
                 {
                   "code": "9512",
@@ -3440,8 +3201,7 @@
                     "recreation"
                   ],
                   "status": "active",
-                  "sort": 9512,
-                  "seeAlso": []
+                  "sort": 9512
                 },
                 {
                   "code": "9513",
@@ -3455,8 +3215,7 @@
                     "recreation"
                   ],
                   "status": "active",
-                  "sort": 9513,
-                  "seeAlso": []
+                  "sort": 9513
                 },
                 {
                   "code": "9514",
@@ -3471,14 +3230,12 @@
                     "recreation"
                   ],
                   "status": "active",
-                  "sort": 9514,
-                  "seeAlso": []
+                  "sort": 9514
                 }
               ],
               "keywords": ["games", "hobbies", "recreation"],
               "status": "active",
-              "sort": 951,
-              "seeAlso": []
+              "sort": 951
             },
             {
               "code": "952",
@@ -3491,8 +3248,7 @@
                   "label": "Collecting",
                   "keywords": ["collecting", "games", "hobbies", "recreation"],
                   "status": "active",
-                  "sort": 9521,
-                  "seeAlso": []
+                  "sort": 9521
                 },
                 {
                   "code": "9522",
@@ -3506,8 +3262,7 @@
                     "recreation"
                   ],
                   "status": "active",
-                  "sort": 9522,
-                  "seeAlso": []
+                  "sort": 9522
                 },
                 {
                   "code": "9523",
@@ -3515,8 +3270,7 @@
                   "label": "Handcraft Hobbies",
                   "keywords": ["handcraft", "hobbies", "games", "recreation"],
                   "status": "active",
-                  "sort": 9523,
-                  "seeAlso": []
+                  "sort": 9523
                 },
                 {
                   "code": "9524",
@@ -3524,14 +3278,12 @@
                   "label": "Outdoor Hobbies",
                   "keywords": ["outdoor", "hobbies", "games", "recreation"],
                   "status": "active",
-                  "sort": 9524,
-                  "seeAlso": []
+                  "sort": 9524
                 }
               ],
               "keywords": ["hobbies", "games", "recreation"],
               "status": "active",
-              "sort": 952,
-              "seeAlso": []
+              "sort": 952
             },
             {
               "code": "953",
@@ -3550,8 +3302,7 @@
                     "recreation"
                   ],
                   "status": "active",
-                  "sort": 9531,
-                  "seeAlso": []
+                  "sort": 9531
                 },
                 {
                   "code": "9532",
@@ -3565,8 +3316,7 @@
                     "recreation"
                   ],
                   "status": "active",
-                  "sort": 9532,
-                  "seeAlso": []
+                  "sort": 9532
                 },
                 {
                   "code": "9533",
@@ -3581,8 +3331,7 @@
                     "recreation"
                   ],
                   "status": "active",
-                  "sort": 9533,
-                  "seeAlso": []
+                  "sort": 9533
                 },
                 {
                   "code": "9534",
@@ -3596,14 +3345,12 @@
                     "hobbies"
                   ],
                   "status": "active",
-                  "sort": 9534,
-                  "seeAlso": []
+                  "sort": 9534
                 }
               ],
               "keywords": ["recreation", "games", "hobbies"],
               "status": "active",
-              "sort": 953,
-              "seeAlso": []
+              "sort": 953
             },
             {
               "code": "954",
@@ -3624,8 +3371,7 @@
                     "care"
                   ],
                   "status": "active",
-                  "sort": 9541,
-                  "seeAlso": []
+                  "sort": 9541
                 },
                 {
                   "code": "9542",
@@ -3641,8 +3387,7 @@
                     "care"
                   ],
                   "status": "active",
-                  "sort": 9542,
-                  "seeAlso": []
+                  "sort": 9542
                 },
                 {
                   "code": "9543",
@@ -3659,8 +3404,7 @@
                     "care"
                   ],
                   "status": "active",
-                  "sort": 9543,
-                  "seeAlso": []
+                  "sort": 9543
                 },
                 {
                   "code": "9544",
@@ -3677,8 +3421,7 @@
                     "care"
                   ],
                   "status": "active",
-                  "sort": 9544,
-                  "seeAlso": []
+                  "sort": 9544
                 }
               ],
               "keywords": [
@@ -3699,8 +3442,7 @@
           ],
           "keywords": ["games", "hobbies", "recreation", "leisure"],
           "status": "active",
-          "sort": 950,
-          "seeAlso": []
+          "sort": 950
         }
       ],
       "version": "1.1.0",

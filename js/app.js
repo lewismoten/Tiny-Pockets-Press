@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     '<span class="drag-preview-handle">⋮⋮</span><span class="drag-preview-label"></span>';
   document.body.appendChild(dragPreview);
   TPP.classificationCatalog = null;
+  TPP.classificationExtensionsCatalog = null;
   TPP.classificationDialogTargetEntryId = "";
   TPP.classificationDialogPath = [];
   TPP.classificationDialogSelection = {
@@ -27,6 +28,25 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     TPP.normalizeClassificationCatalog(TPP.classificationCatalog);
     return TPP.classificationCatalog;
+  };
+  TPP.loadClassificationExtensions = async function () {
+    if (TPP.classificationExtensionsCatalog) {
+      return TPP.classificationExtensionsCatalog;
+    }
+    try {
+      const response = await fetch("data/classification-extensions.json");
+      if (!response.ok) throw new Error("classification-extensions");
+      TPP.classificationExtensionsCatalog = await response.json();
+    } catch (_error) {
+      TPP.classificationExtensionsCatalog = {
+        defaultSystemId: "",
+        systems: [],
+      };
+    }
+    TPP.normalizeClassificationExtensionsCatalog(
+      TPP.classificationExtensionsCatalog,
+    );
+    return TPP.classificationExtensionsCatalog;
   };
   TPP.defaultClassificationFormats = function () {
     return [
@@ -103,6 +123,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (!node) return;
         const nextPath = path.concat(position);
         node.status = String(node.status || "active");
+        node.replacedBy = String(node.replacedBy || "");
         node.sort = Number(node.sort || node.code || position);
         node.seeAlso = Array.isArray(node.seeAlso) ? node.seeAlso : [];
         node.keywords = Array.isArray(node.keywords) ? node.keywords : [];
@@ -125,6 +146,124 @@ document.addEventListener("DOMContentLoaded", async function () {
     );
     TPP.classificationShortLabelIndex = index;
     return catalog;
+  };
+  TPP.classificationExtensionShortLabelSeed = function (node) {
+    const explicit = String((node && node.shortLabel) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    if (explicit) return explicit.slice(0, 3);
+    const label = String((node && node.label) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    if (label.length >= 3) return label.slice(0, 3);
+    const extension = String((node && node.extension) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    return (label + extension + "XXX").slice(0, 3);
+  };
+  TPP.uniqueClassificationExtensionShortLabel = function (node, used) {
+    const seed = TPP.classificationExtensionShortLabelSeed(node);
+    const extension = String((node && node.extension) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    const candidates = [
+      seed,
+      (seed.slice(0, 2) + extension.slice(-1)).padEnd(3, "X").slice(0, 3),
+      (seed.slice(0, 1) + extension.slice(-2)).padEnd(3, "X").slice(0, 3),
+      (seed.slice(0, 1) + extension.slice(0, 2)).padEnd(3, "X").slice(0, 3),
+    ];
+    for (const candidate of candidates) {
+      if (candidate && !used.has(candidate)) return candidate;
+    }
+    const prefix = seed.slice(0, 1) || "X";
+    for (let i = 0; i < 1296; i += 1) {
+      const suffix = i.toString(36).toUpperCase().padStart(2, "0");
+      const candidate = (prefix + suffix).slice(0, 3);
+      if (!used.has(candidate)) return candidate;
+    }
+    return ("X" + Date.now().toString(36).toUpperCase()).slice(0, 3);
+  };
+  TPP.normalizeClassificationExtensionsCatalog = function (catalog) {
+    const shortLabelIndex = {};
+    const normalizeTree = function (nodes, used, path, parentCode) {
+      return (Array.isArray(nodes) ? nodes : []).map(function (node, position) {
+        const normalized = Object.assign({}, node || {});
+        const nextPath = path.concat(position);
+        normalized.status = String(normalized.status || "active");
+        normalized.replacedBy = String(normalized.replacedBy || "");
+        const extensionValue = String(normalized.extension || "").replace(
+          /[^0-9A-Za-z]/g,
+          "",
+        );
+        normalized.extension = extensionValue;
+        normalized.sort = Number(normalized.sort || extensionValue || position);
+        normalized.seeAlso = Array.isArray(normalized.seeAlso)
+          ? normalized.seeAlso
+          : [];
+        normalized.keywords = Array.isArray(normalized.keywords)
+          ? normalized.keywords
+          : [];
+        const shortLabel = TPP.uniqueClassificationExtensionShortLabel(
+          normalized,
+          used,
+        );
+        used.add(shortLabel);
+        normalized.shortLabel = shortLabel;
+        if (!shortLabelIndex[parentCode]) shortLabelIndex[parentCode] = {};
+        shortLabelIndex[parentCode][shortLabel] = nextPath.slice();
+        normalized.children = normalizeTree(
+          normalized.children,
+          used,
+          nextPath,
+          parentCode,
+        );
+        return normalized;
+      });
+    };
+    (Array.isArray(catalog && catalog.systems) ? catalog.systems : []).forEach(
+      function (system) {
+        system.version = String(system.version || "1.0.0");
+        system.extensions = (
+          Array.isArray(system.extensions) ? system.extensions : []
+        ).map(function (group) {
+          const normalizedGroup = Object.assign({}, group || {});
+          normalizedGroup.parentCode = String(
+            normalizedGroup.parentCode || "",
+          ).trim();
+          normalizedGroup.children = normalizeTree(
+            normalizedGroup.children,
+            new Set(),
+            [],
+            normalizedGroup.parentCode,
+          );
+          return normalizedGroup;
+        });
+      },
+    );
+    TPP.classificationExtensionShortLabelIndex = shortLabelIndex;
+    return catalog;
+  };
+  TPP.classificationExtensionsSystem = function () {
+    const catalog = TPP.classificationExtensionsCatalog || { systems: [] };
+    const systems = Array.isArray(catalog.systems) ? catalog.systems : [];
+    return (
+      systems.find(function (system) {
+        return system && system.id === catalog.defaultSystemId;
+      }) ||
+      systems[0] ||
+      null
+    );
+  };
+  TPP.classificationExtensionsForCode = function (parentCode) {
+    const system = TPP.classificationExtensionsSystem();
+    const groups = Array.isArray(system && system.extensions)
+      ? system.extensions
+      : [];
+    return (
+      groups.find(function (group) {
+        return group && group.parentCode === String(parentCode || "");
+      }) || null
+    );
   };
   TPP.classificationSystem = function () {
     const catalog = TPP.classificationCatalog || { systems: [] };
@@ -527,6 +666,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   await TPP.load();
   await TPP.loadStaleKeyLookup();
   await TPP.loadClassificationSystems();
+  await TPP.loadClassificationExtensions();
   TPP.view = TPP.initialView();
   if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();
