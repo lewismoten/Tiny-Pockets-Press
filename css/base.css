@@ -1125,9 +1125,9 @@ input[type="checkbox"] {
 }
 .classification-dialog-search-result {
   display: grid;
-  grid-template-columns: 8.5rem minmax(0, 1fr);
-  gap: 0.5rem;
-  align-items: start;
+  grid-template-columns: 6.4rem minmax(0, 1fr);
+  gap: 0.4rem;
+  align-items: baseline;
   width: 100%;
   padding: 0.45rem 0.5rem;
   border: 0;
@@ -1145,6 +1145,7 @@ input[type="checkbox"] {
   font-weight: 900;
   color: #7a6755;
   white-space: nowrap;
+  min-width: 0;
 }
 .classification-dialog-search-result-main {
   min-width: 0;

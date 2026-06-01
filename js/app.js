@@ -527,7 +527,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           baseShortLabel: TPP.classificationShortLabel(node),
           shortLabel: TPP.classificationShortLabel(node),
           label: String(node.label || ""),
-          pathLabel: nextLabels.join(" > "),
+          pathLabel: pathLabels.join(" > "),
           keywords: Array.isArray(node.keywords) ? node.keywords : [],
           includes: Array.isArray(node.includes) ? node.includes : [],
           scopeNote: String(node.scopeNote || ""),
@@ -555,7 +555,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           baseShortLabel: TPP.classificationShortLabel(baseNode) || "",
           shortLabel: TPP.classificationShortLabel(node),
           label: String(node.label || ""),
-          pathLabel: basePath.concat(nextLabels).join(" > "),
+          pathLabel: basePath.concat(pathLabels).join(" > "),
           keywords: Array.isArray(node.keywords) ? node.keywords : [],
           includes: Array.isArray(node.includes) ? node.includes : [],
           scopeNote: String(node.scopeNote || ""),
@@ -657,9 +657,13 @@ document.addEventListener("DOMContentLoaded", async function () {
           '</span><span class="classification-dialog-search-result-main">' +
           '<span class="classification-dialog-search-result-label">' +
           TPP.esc(entry.label) +
-          '</span><span class="classification-dialog-search-result-meta">' +
-          TPP.esc(entry.pathLabel) +
-          "</span></span></button>"
+          "</span>" +
+          (entry.pathLabel
+            ? '<span class="classification-dialog-search-result-meta">' +
+              TPP.esc(entry.pathLabel) +
+              "</span>"
+            : "") +
+          "</span></button>"
         );
       })
       .join("");
