@@ -1393,20 +1393,12 @@ document.addEventListener("DOMContentLoaded", async function () {
           .join(" > ") + (extensionPath ? " > " + extensionPath : "");
       return {
         title: TPP.classificationDisplayString(TPP.active, data),
-        meta:
-          (system && system.name
-            ? system.name + " v" + system.version + ": "
-            : "") +
-          fullPath +
-          (shortPath ? " [" + shortPath + "]" : ""),
+        meta: fullPath + (shortPath ? " [" + shortPath + "]" : ""),
       };
     }
     return {
       title: TPP.classificationDisplayString(TPP.active, data) || data.code,
-      meta:
-        (system && system.name
-          ? system.name + " v" + system.version + ": "
-          : "") + "Custom or unknown shelfmark",
+      meta: "Custom or unknown shelfmark",
     };
   };
   TPP.renderClassificationDialog = function () {
