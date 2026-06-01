@@ -2,6 +2,32 @@
   "id": "tiny-shelf",
   "name": "Tiny Shelf Classification",
   "description": "A lightweight, original shelfmark system for small personal libraries, studios, and community collections. It groups nonfiction and fiction into broad practical areas and supports deeper subject browsing without relying on proprietary or discontinued standards.",
+  "position": "Tiny Shelf is designed for small and medium collections, browsing collections, community archives, personal libraries, studios, and local-use shelfmark systems. Large libraries may use it as a supplemental browsing layer or local classification, but it is not intended to replace full-scale professional classification systems for very large research collections.",
+  "targets": [
+    {
+      "min": 50,
+      "max": 5000,
+      "result": "excellent",
+      "note": "items"
+    },
+    {
+      "min": 5000,
+      "max": 50000,
+      "result": "good",
+      "note": "items with extensions"
+    },
+    {
+      "min": 50000,
+      "max": 150000,
+      "result": "possible",
+      "note": "items with strong local rules"
+    },
+    {
+      "min": 150000,
+      "result": "supplemental",
+      "note": "best used as a browsing layer, local classification, exhibit system, or special-collection aid rather than as the primary shelf system"
+    }
+  ],
   "categories": [
     {
       "code": "000",
