@@ -39,14 +39,19 @@ function addRefTarget(targets, code, sourceLabel) {
 function collectBaseData(system) {
   const currentCodes = new Map();
   const activeCodes = new Map();
+  const activeShortLabels = new Map();
   const referenceTargets = new Map();
   const duplicates = [];
+  const shortLabelDuplicates = [];
   const nodes = [];
 
   function walk(entries, pathLabels) {
     for (const node of Array.isArray(entries) ? entries : []) {
       if (!node) continue;
       const code = String(node.code || "").trim();
+      const shortLabel = String(node.shortLabel || "")
+        .trim()
+        .toUpperCase();
       const labelPath = pathLabels.concat(String(node.label || "")).join(" > ");
 
       nodes.push({ node, labelPath });
@@ -64,30 +69,52 @@ function collectBaseData(system) {
           activeCodes.set(code, labelPath);
         }
       }
+      if (shortLabel && isActiveNode(node)) {
+        if (activeShortLabels.has(shortLabel)) {
+          shortLabelDuplicates.push({
+            shortLabel,
+            first: activeShortLabels.get(shortLabel),
+            second: labelPath,
+          });
+        } else {
+          activeShortLabels.set(shortLabel, labelPath);
+        }
+      }
 
       walk(node.children, pathLabels.concat(String(node.label || "")));
     }
   }
 
   walk(system.categories, []);
-  return { currentCodes, referenceTargets, duplicates, nodes };
+  return {
+    currentCodes,
+    referenceTargets,
+    duplicates,
+    shortLabelDuplicates,
+    nodes,
+  };
 }
 
 function collectExtensionData(extensionSystem) {
   const referenceTargets = new Map();
   const activeCodes = new Map();
   const duplicates = [];
+  const shortLabelDuplicates = [];
   const orphanGroups = [];
   const nodes = [];
 
   function walkGroup(group) {
     const parentCode = String(group.parentCode || "").trim();
     const groupLabel = String(group.label || parentCode || "Extension Group");
+    const activeShortLabels = new Map();
 
     function walk(entries, pathLabels) {
       for (const node of Array.isArray(entries) ? entries : []) {
         if (!node) continue;
         const extension = String(node.extension || "").trim();
+        const shortLabel = String(node.shortLabel || "")
+          .trim()
+          .toUpperCase();
         const fullCode =
           parentCode && extension ? `${parentCode}.${extension}` : "";
         const labelPath = [groupLabel]
@@ -109,6 +136,18 @@ function collectExtensionData(extensionSystem) {
             activeCodes.set(fullCode, labelPath);
           }
         }
+        if (shortLabel && isActiveNode(node)) {
+          if (activeShortLabels.has(shortLabel)) {
+            shortLabelDuplicates.push({
+              parentCode,
+              shortLabel,
+              first: activeShortLabels.get(shortLabel),
+              second: labelPath,
+            });
+          } else {
+            activeShortLabels.set(shortLabel, labelPath);
+          }
+        }
 
         walk(node.children, pathLabels.concat(String(node.label || "")));
       }
@@ -128,7 +167,13 @@ function collectExtensionData(extensionSystem) {
     walkGroup(group);
   }
 
-  return { referenceTargets, duplicates, orphanGroups, nodes };
+  return {
+    referenceTargets,
+    duplicates,
+    shortLabelDuplicates,
+    orphanGroups,
+    nodes,
+  };
 }
 
 function validateNodeReferences(nodes, kind, unresolved) {
@@ -220,9 +265,21 @@ for (const duplicate of base.duplicates) {
   );
 }
 
+for (const duplicate of base.shortLabelDuplicates) {
+  problems.push(
+    `Duplicate active base shortLabel ${duplicate.shortLabel}: ${duplicate.first} | ${duplicate.second}`,
+  );
+}
+
 for (const duplicate of ext.duplicates) {
   problems.push(
     `Duplicate active extension code ${duplicate.code}: ${duplicate.first} | ${duplicate.second}`,
+  );
+}
+
+for (const duplicate of ext.shortLabelDuplicates) {
+  problems.push(
+    `Duplicate active extension shortLabel ${duplicate.shortLabel} under parent ${duplicate.parentCode}: ${duplicate.first} | ${duplicate.second}`,
   );
 }
 

@@ -125,7 +125,7 @@
           "children": [
             {
               "code": "021",
-              "shortLabel": "ARC",
+              "shortLabel": "ANM",
               "label": "Archives & Manuscripts",
               "keywords": [
                 "archives",
@@ -352,7 +352,7 @@
             },
             {
               "code": "042",
-              "shortLabel": "REP",
+              "shortLabel": "RNP",
               "label": "Reports & Planning",
               "keywords": [
                 "reports",
@@ -1542,7 +1542,7 @@
           "children": [
             {
               "code": "261",
-              "shortLabel": "ANM",
+              "shortLabel": "ANC",
               "label": "Ancient & Medieval",
               "keywords": ["ancient", "medieval", "history", "society"],
               "sort": 261,
@@ -3799,7 +3799,7 @@
     },
     {
       "code": "600",
-      "shortLabel": "REP",
+      "shortLabel": "RFP",
       "label": "Reference & Practical",
       "children": [
         {
