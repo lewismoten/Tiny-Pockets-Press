@@ -1475,6 +1475,194 @@
       ]
     },
     {
+      "parentCode": "272",
+      "label": "Sociology",
+      "children": [
+        {
+          "extension": "1",
+          "shortLabel": "CMID",
+          "label": "Communities & Identity",
+          "sort": 1,
+          "keywords": [
+            "communities",
+            "identity",
+            "community identity",
+            "social identity",
+            "belonging",
+            "sociology"
+          ],
+          "includes": [
+            "communities",
+            "identity",
+            "community identity",
+            "social identity",
+            "belonging",
+            "sociology"
+          ],
+          "scopeNote": "Use for works chiefly about communities and identity within sociology, especially where belonging, representation, solidarity, or social location are central.",
+          "seeAlso": ["233", "273"],
+          "children": [
+            {
+              "extension": "11",
+              "shortLabel": "RCET",
+              "label": "Race & Ethnicity",
+              "sort": 11,
+              "keywords": [
+                "race",
+                "ethnicity",
+                "racial identity",
+                "ethnic identity",
+                "communities",
+                "identity",
+                "sociology"
+              ],
+              "includes": [
+                "race",
+                "ethnicity",
+                "racial identity",
+                "ethnic identity",
+                "communities",
+                "identity",
+                "sociology"
+              ],
+              "scopeNote": "Use for works chiefly about race, ethnicity, racial identity, ethnic identity, and the social formation of communities within sociology.",
+              "seeAlso": ["273", "282"]
+            },
+            {
+              "extension": "12",
+              "shortLabel": "GNDR",
+              "label": "Gender",
+              "sort": 12,
+              "keywords": [
+                "gender",
+                "gender identity",
+                "gender roles",
+                "communities",
+                "identity",
+                "sociology"
+              ],
+              "includes": [
+                "gender",
+                "gender identity",
+                "gender roles",
+                "communities",
+                "identity",
+                "sociology"
+              ],
+              "scopeNote": "Use for works chiefly about gender, gender identity, gender roles, and the social experience of gender within sociology.",
+              "seeAlso": ["273", "282", "643"]
+            },
+            {
+              "extension": "13",
+              "shortLabel": "LGBT",
+              "label": "LGBTQ+ Studies",
+              "sort": 13,
+              "keywords": [
+                "lgbt",
+                "lgbtq",
+                "lgbtqia",
+                "queer studies",
+                "trans studies",
+                "sexuality",
+                "communities",
+                "identity",
+                "sociology"
+              ],
+              "includes": [
+                "lgbt",
+                "lgbtq",
+                "lgbtqia",
+                "queer studies",
+                "trans studies",
+                "sexuality",
+                "communities",
+                "identity",
+                "sociology"
+              ],
+              "scopeNote": "Use for works chiefly about LGBTQ+ studies, queer communities, trans studies, sexuality, and identity-centered social life within sociology.",
+              "seeAlso": ["273", "282", "643"]
+            },
+            {
+              "extension": "14",
+              "shortLabel": "DSTS",
+              "label": "Disability Studies",
+              "sort": 14,
+              "keywords": [
+                "disability studies",
+                "disability",
+                "disabled communities",
+                "access",
+                "identity",
+                "sociology"
+              ],
+              "includes": [
+                "disability studies",
+                "disability",
+                "disabled communities",
+                "access",
+                "identity",
+                "sociology"
+              ],
+              "scopeNote": "Use for works chiefly about disability studies, disabled communities, access, and the social experience of disability within sociology.",
+              "seeAlso": ["282", "283", "641"]
+            },
+            {
+              "extension": "15",
+              "shortLabel": "MDSP",
+              "label": "Migration & Diaspora",
+              "sort": 15,
+              "keywords": [
+                "migration",
+                "diaspora",
+                "immigration",
+                "emigration",
+                "displacement",
+                "identity",
+                "sociology"
+              ],
+              "includes": [
+                "migration",
+                "diaspora",
+                "immigration",
+                "emigration",
+                "displacement",
+                "identity",
+                "sociology"
+              ],
+              "scopeNote": "Use for works chiefly about migration, diaspora, immigration, displacement, and community identity across movement and settlement within sociology.",
+              "seeAlso": ["283", "292", "233"]
+            },
+            {
+              "extension": "16",
+              "shortLabel": "INDS",
+              "label": "Indigenous Studies",
+              "sort": 16,
+              "keywords": [
+                "indigenous studies",
+                "native studies",
+                "first nations",
+                "tribal communities",
+                "sovereignty",
+                "identity",
+                "sociology"
+              ],
+              "includes": [
+                "indigenous studies",
+                "native studies",
+                "first nations",
+                "tribal communities",
+                "sovereignty",
+                "identity",
+                "sociology"
+              ],
+              "scopeNote": "Use for works chiefly about Indigenous studies, Native and First Nations communities, sovereignty, and identity-centered social life within sociology.",
+              "seeAlso": ["234", "273", "282", "292"]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "parentCode": "383",
       "label": "Theater",
       "children": [

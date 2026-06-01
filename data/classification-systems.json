@@ -4629,11 +4629,17 @@
       "showHiddenCodes": true
     }
   ],
+  "biasAndInclusionNote": "Tiny Shelf is designed for small, practical collections and is expected to evolve. Category names should use respectful, current, community-preferred language wherever possible. Users may extend, rename, hide, or localize categories to fit their community while preserving stable base codes.",
   "rules": [
     {
       "id": "primary-subject",
       "label": "Primary subject",
       "rule": "Assign one primary three-digit base code that best matches the book's dominant subject or shelving neighborhood."
+    },
+    {
+      "id": "secondary-codes",
+      "label": "Secondary codes",
+      "rule": "A book may also carry secondary code references when it meaningfully belongs in more than one place, especially for interdisciplinary, identity-centered, or cross-community works."
     },
     {
       "id": "extensions",
@@ -4654,6 +4660,11 @@
       "id": "hidden-categories",
       "label": "Hidden categories",
       "rule": "Hidden categories are reserved for library-internal or collection-management use and are excluded from normal browsing unless explicitly shown."
+    },
+    {
+      "id": "bias-and-inclusion",
+      "label": "Bias & inclusion",
+      "rule": "Use respectful, current, community-preferred language wherever possible, and adapt local labels when needed while preserving stable base codes for continuity."
     }
   ]
 }
