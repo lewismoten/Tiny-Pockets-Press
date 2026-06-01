@@ -446,7 +446,7 @@ TPP.backCoverTextRowHtml = function (book, element) {
     '"></label></div></td>' +
     '<td><div class="back-cover-align-stack">' +
     TPP.textAlignCycleButtonHtml(align) +
-    '<label><span>W</span><input class="text-width" type="range" min="10" max="100" value="' +
+    '<label><input class="text-width" type="range" min="10" max="100" value="' +
     TPP.esc(String(Number(entry.width) || 100)) +
     '"></label></div></td>' +
     "<td>" +
@@ -457,7 +457,7 @@ TPP.backCoverTextRowHtml = function (book, element) {
 };
 TPP.backCoverTextListHtml = function (book, spec) {
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-position"><col class="back-cover-col-align"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Aln/W</th><th>Color</th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-position"><col class="back-cover-col-align"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Width</th><th>Color</th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, spec.location)
       .map(function (element) {
         return TPP.backCoverTextRowHtml(book, element);
