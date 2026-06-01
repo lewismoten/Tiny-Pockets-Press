@@ -42,6 +42,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     activeIndex: -1,
   };
   TPP.readerVisiblePageRoles = [];
+  TPP.readerGoPrev = async function () {
+    await TPP.ensureControlModule("reader-controls");
+    if (typeof TPP.readerGoPrevImpl === "function") {
+      return TPP.readerGoPrevImpl();
+    }
+  };
+  TPP.readerGoNext = async function () {
+    await TPP.ensureControlModule("reader-controls");
+    if (typeof TPP.readerGoNextImpl === "function") {
+      return TPP.readerGoNextImpl();
+    }
+  };
   TPP.rotationSnapSteps = [1, 5, 15, 45, 90];
   TPP.rangeValueUnit = function (input) {
     if (!input) return "";
@@ -2136,6 +2148,83 @@ document.addEventListener("DOMContentLoaded", async function () {
       api.handleClick(event);
     }
   });
+  document.addEventListener("click", async function (event) {
+    const target = event.target;
+    if (
+      target.closest("#coverImageSlot .asset-picker-open") ||
+      target.closest("#backImageSlot .asset-picker-open") ||
+      target.closest("#spineImageSlot .asset-picker-open")
+    ) {
+      const api = await TPP.ensureControlModule("editor-asset-slot-controls");
+      if (api && typeof api.handleClick === "function") api.handleClick(event);
+      return;
+    }
+    if (target.closest("#chapterList [data-i]")) {
+      const api = await TPP.ensureControlModule("editor-chapter-list-controls");
+      if (api && typeof api.handleClick === "function") api.handleClick(event);
+      return;
+    }
+    if (target.closest("#chapterEditor") || target.closest("#addChapter")) {
+      const api = await TPP.ensureControlModule(
+        "editor-chapter-editor-controls",
+      );
+      if (api && typeof api.handleClick === "function") api.handleClick(event);
+      return;
+    }
+    if (
+      target.closest("#readerStagePrev") ||
+      target.closest("#readerStageNext")
+    ) {
+      const api = await TPP.ensureControlModule("reader-controls");
+      if (api && typeof api.handleClick === "function") api.handleClick(event);
+      return;
+    }
+    if (
+      target.closest("#libraryNewBook") ||
+      target.closest("#aboutDuplicateBook") ||
+      target.closest("#aboutDeleteBook") ||
+      target.closest("#libraryUploadBook") ||
+      target.closest("#libraryGrid [data-id]")
+    ) {
+      const api = await TPP.ensureControlModule("library-controls");
+      if (api && typeof api.handleClick === "function") api.handleClick(event);
+    }
+  });
+  document.addEventListener("input", async function (event) {
+    const target = event.target;
+    if (target.closest("#chapterEditor")) {
+      const api = await TPP.ensureControlModule(
+        "editor-chapter-editor-controls",
+      );
+      if (api && typeof api.handleInput === "function") api.handleInput(event);
+      return;
+    }
+    if (target.closest("#readerScrub")) {
+      const api = await TPP.ensureControlModule("reader-controls");
+      if (api && typeof api.handleInput === "function") api.handleInput(event);
+      return;
+    }
+    if (target.closest("#librarySearch")) {
+      const api = await TPP.ensureControlModule("library-controls");
+      if (api && typeof api.handleInput === "function") api.handleInput(event);
+    }
+  });
+  document.addEventListener("change", async function (event) {
+    const target = event.target;
+    if (target.closest("#chapterEditor")) {
+      const api = await TPP.ensureControlModule(
+        "editor-chapter-editor-controls",
+      );
+      if (api && typeof api.handleChange === "function")
+        api.handleChange(event);
+      return;
+    }
+    if (target.closest("#readerJump") || target.closest("#readerMode")) {
+      const api = await TPP.ensureControlModule("reader-controls");
+      if (api && typeof api.handleChange === "function")
+        api.handleChange(event);
+    }
+  });
 
   const renderCurrentViewPreservingSidebar = function () {
     if (TPP.view === "about") TPP.renderAbout();
@@ -3185,346 +3274,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
   if (TPP.renderColorPalettes) TPP.renderColorPalettes();
-
-  ["coverImageSlot", "backImageSlot", "spineImageSlot"].forEach(function (id) {
-    const node = document.getElementById(id);
-    if (!node) return;
-    node.onclick = function (e) {
-      const button = e.target.closest(".asset-picker-open");
-      if (!button) return;
-      TPP.openAssetDialog(button.dataset.targetType, button.dataset.targetKey);
-    };
-  });
-
-  document.getElementById("chapterList").onclick = function (e) {
-    const row = e.target.closest("[data-i]");
-    if (!row) return;
-    TPP.sync();
-    const index = Number(row.dataset.i);
-    const action = e.target.dataset.act;
-    if (action === "select") TPP.currentChapter = index;
-    else if (action === "up" && index > 0) {
-      [TPP.active.chapters[index - 1], TPP.active.chapters[index]] = [
-        TPP.active.chapters[index],
-        TPP.active.chapters[index - 1],
-      ];
-      TPP.currentChapter = index - 1;
-    } else if (action === "down" && index < TPP.active.chapters.length - 1) {
-      [TPP.active.chapters[index + 1], TPP.active.chapters[index]] = [
-        TPP.active.chapters[index],
-        TPP.active.chapters[index + 1],
-      ];
-      TPP.currentChapter = index + 1;
-    } else if (action === "indent") {
-      TPP.active.chapters[index].level = Math.min(
-        6,
-        (TPP.active.chapters[index].level || 0) + 1,
-      );
-    } else if (action === "outdent") {
-      TPP.active.chapters[index].level = Math.max(
-        0,
-        (TPP.active.chapters[index].level || 0) - 1,
-      );
-    }
-    TPP.save();
-    TPP.renderAll();
-  };
-
-  document.getElementById("chapterEditor").oninput = function (e) {
-    const card = e.target.closest(".chapter-card");
-    if (!card) return;
-    if (e.target.classList.contains("chapter-metadata") && e.target.checked) {
-      const textarea = card.querySelector(".chapter-text");
-      if (textarea && !textarea.value.trim())
-        textarea.value = '{\n  "type": "blank",\n  "pages": 12\n}';
-    }
-    TPP.sync("draft");
-    const preview = card.querySelector(".md-preview");
-    const textarea = card.querySelector(".chapter-text");
-    if (preview && textarea) {
-      preview.innerHTML = card.querySelector(".chapter-metadata").checked
-        ? TPP.metadataPreview(textarea.value)
-        : TPP.previewWithBreaks(textarea.value);
-      TPP.renderQr(preview);
-    }
-    TPP.renderChapterList();
-  };
-  document
-    .getElementById("chapterEditor")
-    .addEventListener("change", function (e) {
-      const card = e.target.closest(".chapter-card");
-      if (!card) return;
-      TPP.sync("commit");
-      TPP.renderAll();
-    });
-
-  document.getElementById("chapterEditor").onclick = function (e) {
-    const fmt = e.target.dataset.fmt;
-    if (fmt) {
-      const textarea = document.querySelector(".chapter-text");
-      const map = {
-        bold: ["**", "**"],
-        italic: ["*", "*"],
-        underline: ["<u>", "</u>"],
-        strike: ["~~", "~~"],
-        ul: ["- ", ""],
-        h2: ["## ", ""],
-        table: ["\n| A | B |\n|---|---|\n| 1 | 2 |\n", ""],
-      };
-      const pair = map[fmt];
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      textarea.value =
-        textarea.value.slice(0, start) +
-        pair[0] +
-        textarea.value.slice(start, end) +
-        pair[1] +
-        textarea.value.slice(end);
-      textarea.dispatchEvent(new Event("input", { bubbles: true }));
-      textarea.focus();
-    }
-    const main = e.target.dataset.main;
-    if (main === "remove" && TPP.active.chapters.length > 1) {
-      TPP.sync();
-      const card = e.target.closest(".chapter-card");
-      const removeIndex = Math.max(
-        0,
-        Math.min(
-          Number(card && card.dataset.index),
-          TPP.active.chapters.length - 1,
-        ),
-      );
-      TPP.active.chapters.splice(removeIndex, 1);
-      TPP.currentChapter = Math.min(
-        removeIndex,
-        TPP.active.chapters.length - 1,
-      );
-      TPP.save();
-      TPP.renderAll();
-    }
-    if (main === "read") {
-      const pages = TPP.buildPages();
-      const title = TPP.active.chapters[TPP.currentChapter].title;
-      TPP.readerIndex = Math.max(
-        0,
-        pages.findIndex(function (p) {
-          return p.html.includes(TPP.esc(title));
-        }),
-      );
-      TPP.switchView("reader");
-    }
-    const assetButton = e.target.closest(".asset-picker-open");
-    if (assetButton) {
-      TPP.openAssetDialog(
-        assetButton.dataset.targetType,
-        assetButton.dataset.targetKey,
-      );
-    }
-  };
-
-  document.getElementById("addChapter").onclick = function () {
-    TPP.sync();
-    TPP.active.chapters.push({
-      id: TPP.uid(),
-      title: "New Chapter",
-      tocTitle: "",
-      text: "",
-      imageId: "",
-      imageElementId: "",
-      imagePlacement: "none",
-      imageZoom: 70,
-      imageRotate: 0,
-      level: 0,
-      isSubsection: false,
-      isMetadata: false,
-      includeInToc: true,
-    });
-    if (TPP.migrateImageElements)
-      TPP.migrateImageElements(TPP.active, TPP.fallbackBook());
-    if (TPP.syncLegacyImageFieldsFromElements)
-      TPP.syncLegacyImageFieldsFromElements(TPP.active);
-    TPP.currentChapter = TPP.active.chapters.length - 1;
-    TPP.save();
-    TPP.renderAll();
-  };
-
-  const createNewBook = function () {
-    const book = TPP.norm(TPP.fallbackBook());
-    book.title = "Untitled Tiny Book";
-    book.chapters = [
-      {
-        id: TPP.uid(),
-        title: "New Chapter",
-        tocTitle: "",
-        text: "",
-        imageId: "",
-        imageElementId: "",
-        imagePlacement: "none",
-        imageZoom: 70,
-        imageRotate: 0,
-        level: 0,
-        isSubsection: false,
-        isMetadata: false,
-        includeInToc: true,
-      },
-    ];
-    if (TPP.migrateImageElements)
-      TPP.migrateImageElements(book, TPP.fallbackBook());
-    if (TPP.syncLegacyImageFieldsFromElements)
-      TPP.syncLegacyImageFieldsFromElements(book);
-    TPP.library.push(book);
-    TPP.save();
-    TPP.setActive(book);
-  };
-  const libraryNewBookButton = document.getElementById("libraryNewBook");
-  if (libraryNewBookButton) libraryNewBookButton.onclick = createNewBook;
-
-  const duplicateActiveBook = function () {
-    TPP.sync();
-    const name = prompt(
-      "Title for duplicated book:",
-      "Copy of " + TPP.active.title,
-    );
-    if (name === null) return;
-    const stamp = TPP.nowIso();
-    const book = TPP.bookDescendant(
-      TPP.active,
-      {
-        id: TPP.uid(),
-        title: name || "Copy of " + TPP.active.title,
-      },
-      "copy",
-      stamp,
-    );
-    TPP.library.push(book);
-    TPP.save();
-    TPP.setActive(book);
-  };
-  const aboutDuplicateBookButton =
-    document.getElementById("aboutDuplicateBook");
-  if (aboutDuplicateBookButton)
-    aboutDuplicateBookButton.onclick = duplicateActiveBook;
-
-  const deleteActiveBook = function () {
-    if (TPP.library.length <= 1) return alert("Keep at least one book.");
-    if (confirm("Delete this book?")) {
-      TPP.library = TPP.library.filter(function (book) {
-        return TPP.bookId(book) !== TPP.bookId(TPP.active);
-      });
-      TPP.save();
-      TPP.setActive(TPP.library[0]);
-    }
-  };
-  const aboutDeleteBookButton = document.getElementById("aboutDeleteBook");
-  if (aboutDeleteBookButton) aboutDeleteBookButton.onclick = deleteActiveBook;
-
-  TPP.readerGoPrev = function () {
-    const pages = TPP.buildPages();
-    const mode = document.getElementById("readerMode").value;
-    const settings = TPP.settings();
-    TPP.readerIndex = TPP.readerNormalizeIndex(
-      TPP.readerIndex - (mode === "spread" ? 2 : 1),
-      pages,
-      mode,
-      settings,
-    );
-    TPP.renderReader();
-  };
-  document.getElementById("readerStagePrev").onclick = TPP.readerGoPrev;
-  TPP.readerGoNext = function () {
-    const pages = TPP.buildPages();
-    const mode = document.getElementById("readerMode").value;
-    const settings = TPP.settings();
-    const next =
-      mode === "spread" && TPP.readerIndex === 0
-        ? 1
-        : TPP.readerIndex + (mode === "spread" ? 2 : 1);
-    TPP.readerIndex = TPP.readerNormalizeIndex(next, pages, mode, settings);
-    TPP.renderReader();
-  };
-  document.getElementById("readerStageNext").onclick = TPP.readerGoNext;
-  document.getElementById("readerJump").onchange = function () {
-    TPP.readerIndex = Number(document.getElementById("readerJump").value);
-    TPP.renderReader();
-  };
-  document.getElementById("readerScrub").oninput = function () {
-    const pages = TPP.buildPages();
-    const mode = document.getElementById("readerMode").value;
-    const settings = TPP.settings();
-    TPP.readerIndex = TPP.readerNormalizeIndex(
-      Number(document.getElementById("readerScrub").value),
-      pages,
-      mode,
-      settings,
-    );
-    TPP.renderReader();
-  };
-  document.getElementById("readerMode").onchange = TPP.renderReader;
-
-  document.getElementById("librarySearch").oninput = TPP.renderLibrary;
-  const libraryUploadBookButton = document.getElementById("libraryUploadBook");
-  if (libraryUploadBookButton)
-    libraryUploadBookButton.onclick = function () {
-      TPP.openLibraryUploadDialog();
-    };
-  document.getElementById("libraryGrid").onclick = function (e) {
-    const card = e.target.closest("[data-id]");
-    if (!card) return;
-    const book = TPP.library.find(function (b) {
-      return TPP.bookId(b) === card.dataset.id;
-    });
-    if (!book) return;
-    const cover = e.target.closest(".library-cover");
-    if (cover) {
-      TPP.setActive(book);
-      TPP.switchView("editor");
-      return;
-    }
-    const button = e.target.closest("[data-act]");
-    if (!button) return;
-    if (button.dataset.act === "edit") {
-      TPP.setActive(book);
-      TPP.switchView("editor");
-    }
-    if (button.dataset.act === "about") {
-      TPP.setActive(book);
-      TPP.switchView("about");
-    }
-    if (button.dataset.act === "view") {
-      TPP.setActive(book);
-      TPP.switchView("reader");
-    }
-    if (button.dataset.act === "dup") {
-      const name = prompt(
-        "Title for duplicated book:",
-        "Copy of " + book.title,
-      );
-      if (name !== null) {
-        const stamp = TPP.nowIso();
-        const copy = TPP.bookDescendant(
-          book,
-          {
-            id: TPP.uid(),
-            title: name || "Copy of " + book.title,
-          },
-          "copy",
-          stamp,
-        );
-        TPP.library.push(copy);
-        TPP.save();
-        TPP.renderLibrary();
-      }
-    }
-    if (button.dataset.act === "export") {
-      TPP.markBookExported(book);
-      TPP.save();
-      TPP.download(TPP.bookExportName(book), {
-        type: "tiny-pockets-book",
-        schemaVersion: TPP.SCHEMA_VERSION,
-        book: book,
-      });
-    }
-  };
 
   document.getElementById("saveBook").onclick = async function () {
     TPP.sync();

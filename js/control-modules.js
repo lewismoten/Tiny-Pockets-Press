@@ -21,6 +21,11 @@ TPP.controlModuleRegistry = {
   "editor-book-info-controls": "controls/editor-book-info-controls/",
   "editor-cover-text-controls": "controls/editor-cover-text-controls/",
   "editor-copyright-controls": "controls/editor-copyright-controls/",
+  "editor-asset-slot-controls": "controls/editor-asset-slot-controls/",
+  "editor-chapter-list-controls": "controls/editor-chapter-list-controls/",
+  "editor-chapter-editor-controls": "controls/editor-chapter-editor-controls/",
+  "reader-controls": "controls/reader-controls/",
+  "library-controls": "controls/library-controls/",
 };
 TPP.controlModuleState = TPP.controlModuleState || {};
 TPP.ensureControlModule = async function (id) {
