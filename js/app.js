@@ -132,6 +132,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const used = new Set();
     const index = {};
     const codeIndex = {};
+    const legacyCodeIndex = {};
     const walk = function (nodes, path) {
       (Array.isArray(nodes) ? nodes : []).forEach(function (node, position) {
         if (!node) return;
@@ -165,9 +166,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         index[shortLabel] = nextPath.slice();
         if (node.code) codeIndex[String(node.code)] = nextPath.slice();
         if (node.legacyCode)
-          codeIndex[String(node.legacyCode)] = nextPath.slice();
+          legacyCodeIndex[String(node.legacyCode)] = nextPath.slice();
         node.legacyCodes.forEach(function (legacyCode) {
-          codeIndex[String(legacyCode)] = nextPath.slice();
+          if (!legacyCodeIndex[String(legacyCode)]) {
+            legacyCodeIndex[String(legacyCode)] = nextPath.slice();
+          }
         });
         walk(node.children, nextPath);
       });
@@ -187,6 +190,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     );
     TPP.classificationShortLabelIndex = index;
     TPP.classificationCodeIndex = codeIndex;
+    TPP.classificationLegacyCodeIndex = legacyCodeIndex;
     return catalog;
   };
   TPP.classificationExtensionShortLabelSeed = function (node) {
@@ -728,6 +732,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!target) return [];
     if (TPP.classificationCodeIndex && TPP.classificationCodeIndex[target]) {
       return TPP.classificationCodeIndex[target].slice();
+    }
+    if (
+      TPP.classificationLegacyCodeIndex &&
+      TPP.classificationLegacyCodeIndex[target]
+    ) {
+      return TPP.classificationLegacyCodeIndex[target].slice();
     }
     const system = TPP.classificationSystem();
     let found = [];

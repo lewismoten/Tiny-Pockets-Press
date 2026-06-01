@@ -171,7 +171,7 @@
                     "collection artifacts"
                   ],
                   "scopeNote": "Use for rare books, significant printed artifacts, and special physical objects held as collection items.",
-                  "seeAlso": ["352", "423"]
+                  "seeAlso": ["363", "423"]
                 },
                 {
                   "code": "023",
@@ -216,7 +216,7 @@
                     "curation packets"
                   ],
                   "scopeNote": "Use for exhibit files, interpretive plans, and other documents created to present special collections to users.",
-                  "seeAlso": ["390", "684"]
+                  "seeAlso": ["390", "390.3"]
                 }
               ],
               "keywords": [
@@ -438,7 +438,7 @@
                     "outreach records"
                   ],
                   "scopeNote": "Use for public-facing program files and materials produced by the institution for outreach, events, and community engagement.",
-                  "seeAlso": ["684", "934"]
+                  "seeAlso": ["284.5", "934"]
                 }
               ],
               "keywords": [

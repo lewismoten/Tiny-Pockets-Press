@@ -6,7 +6,8 @@
   "author": "Lewis Moten",
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
-    "check": "node --check js/config.js && node --check js/state.js && node --check js/markdown-media.js && node --check js/layout-engine.js && node --check js/render-page.js && node --check js/imposition.js && node --check js/library.js && node --check js/editor.js && node --check js/export.js && node --check js/app.js",
+    "check": "node --check js/config.js && node --check js/state.js && node --check js/markdown-media.js && node --check js/layout-engine.js && node --check js/render-page.js && node --check js/imposition.js && node --check js/library.js && node --check js/editor.js && node --check js/export.js && node --check js/app.js && npm run check:classification",
+    "check:classification": "node scripts/validate-classifications.js",
     "format": "prettier --write \"css/**/*.css\" \"js/**/*.js\" \"data/**/*.json\" \"*.json\" \"*.html\"",
     "format:check": "prettier --check \"css/**/*.css\" \"js/**/*.js\" \"data/**/*.json\" \"*.json\" \"*.html\"",
     "localhost": "node server.js"
