@@ -242,9 +242,9 @@ TPP.textElementEditorConfigs = {
     containerId: "coverTextElements",
     location: "front",
     minSize: 3,
-    supportsX: false,
-    supportsWidth: false,
-    supportsAlign: false,
+    supportsX: true,
+    supportsWidth: true,
+    supportsAlign: true,
     supportsRotate: false,
     defaultAlign: "center",
   },
@@ -363,26 +363,68 @@ TPP.textElementFieldOptionsHtml = function (selected) {
     })
     .join("");
 };
-TPP.frontCoverTextRowHtml = function (book, element) {
+TPP.coverTextRowHtml = function (book, spec, element) {
   const entry = element || {};
   const fieldKey = entry.fieldKey || entry.part || "title";
+  const location = spec && spec.location ? spec.location : "front";
   return (
-    '<tr class="text-element-group front-cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
+    '<tr class="text-element-group cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
     TPP.esc(entry.id || "") +
-    '" data-location="front">' +
-    '<td><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span>' +
-    TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
-    "</td>" +
-    '<td><input class="text-size" type="number" min="3" step=".5" value="' +
-    TPP.esc(String(Number(entry.size) || 4.2)) +
+    '" data-location="' +
+    TPP.esc(location) +
+    '">' +
+    TPP.coverTextContentCellHtml(book, entry) +
+    '<td><input class="text-size" type="number" min="' +
+    TPP.esc(String(TPP.finiteNumberOr(spec && spec.minSize, 3))) +
+    '" step=".5" value="' +
+    TPP.esc(
+      String(
+        TPP.finiteNumberOr(
+          entry.size,
+          location === "front"
+            ? 4.2
+            : TPP.finiteNumberOr(spec && spec.minSize, 4),
+        ),
+      ),
+    ) +
     '"></td>' +
-    '<td><input class="text-y" type="range" min="0" max="100" value="' +
+    '<td><div class="back-cover-slider-stack"><label><span>X</span><input class="text-x" type="range" min="0" max="100" value="' +
+    TPP.esc(String(TPP.finiteNumberOr(entry.x, 50))) +
+    '"></label><label><span>Y</span><input class="text-y" type="range" min="0" max="100" value="' +
     TPP.esc(String(TPP.finiteNumberOr(entry.y, 0))) +
-    '"></td>' +
+    '"></label></div></td>' +
+    '<td><div class="back-cover-align-stack">' +
+    TPP.textAlignCycleButtonHtml(entry.align || "center") +
+    '<label><input class="text-width" type="range" min="10" max="100" value="' +
+    TPP.esc(String(TPP.finiteNumberOr(entry.width, 100))) +
+    '"></label></div></td>' +
     "<td>" +
     TPP.textColorOutlineControlHtml(entry) +
     "</td>" +
     "</tr>"
+  );
+};
+TPP.coverTextContentCellHtml = function (book, element) {
+  const entry = element || {};
+  const fieldKey = entry.fieldKey || entry.part || "title";
+  const customText = String(entry.customText || "").trim();
+  const customPreview = customText || "Custom text";
+  return (
+    '<td><div class="back-cover-text-field-cell"><div class="back-cover-text-field-top"><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span><span class="back-cover-text-field-label' +
+    (fieldKey === "custom" ? " is-custom" : "") +
+    '">' +
+    TPP.esc(
+      fieldKey === "custom"
+        ? customPreview
+        : TPP.bookInfoFieldLabel(fieldKey, book),
+    ) +
+    "</span>" +
+    (fieldKey === "custom"
+      ? '<button type="button" class="small back-cover-text-edit-button" data-custom-text-edit="1" aria-label="Edit custom text" title="Edit custom text">✎</button><input class="text-custom back-cover-text-custom-value" type="hidden" value="' +
+        TPP.esc(entry.customText || "") +
+        '">'
+      : "") +
+    "</div></div></td>"
   );
 };
 TPP.textColorOutlineControlHtml = function (entry) {
@@ -419,74 +461,28 @@ TPP.textColorOutlineControlHtml = function (entry) {
     '"></div>'
   );
 };
-TPP.frontCoverTextListHtml = function (book, spec) {
+TPP.coverTextListHtml = function (book, spec) {
+  const location = spec && spec.location ? spec.location : "front";
+  const addLabel =
+    location === "front" ? "Add Front Cover Text" : spec.addLabel || "Add Text";
+  const trashId =
+    location === "front" ? "frontCoverTrashDrop" : "backCoverTrashDrop";
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><colgroup><col class="front-cover-col-field"><col class="front-cover-col-size"><col class="front-cover-col-y"><col class="front-cover-col-outline"></colgroup><thead><tr><th>Field</th><th>Size</th><th>Y</th><th>Color</th></tr></thead><tbody>' +
-    TPP.textElementsForLocation(book, spec.location)
+    '<div class="book-info-table-wrap"><table class="data-table cover-text-table"><colgroup><col class="cover-text-col-field"><col class="cover-text-col-size"><col class="cover-text-col-position"><col class="cover-text-col-align"><col class="cover-text-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Width</th><th>Color</th></tr></thead><tbody>' +
+    TPP.textElementsForLocation(book, location)
       .map(function (element) {
-        return TPP.frontCoverTextRowHtml(book, element);
+        return TPP.coverTextRowHtml(book, spec, element);
       })
       .join("") +
-    '</tbody></table></div><div class="front-cover-text-actions-bar"><button type="button" class="small" id="openFrontCoverFieldPicker">Add Front Cover Text</button><div id="frontCoverTrashDrop" class="front-cover-trash-drop" aria-hidden="true"><span class="front-cover-trash-icon">🗑</span><span>Drop here to remove</span></div></div>'
-  );
-};
-TPP.backCoverTextRowHtml = function (book, element) {
-  const entry = element || {};
-  const fieldKey = entry.fieldKey || entry.part || "custom";
-  const align = entry.align || "center";
-  const customText = String(entry.customText || "").trim();
-  const customPreview = customText || "Custom text";
-  return (
-    '<tr class="text-element-group back-cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
-    TPP.esc(entry.id || "") +
-    '" data-location="back">' +
-    '<td><div class="back-cover-text-field-cell"><div class="back-cover-text-field-top"><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span><span class="back-cover-text-field-label' +
-    (fieldKey === "custom" ? " is-custom" : "") +
+    '</tbody></table></div><div class="' +
+    "cover-text-actions-bar" +
+    '"><button type="button" class="small" data-text-action="add" data-location="' +
+    TPP.esc(location) +
     '">' +
-    TPP.esc(
-      fieldKey === "custom"
-        ? customPreview
-        : TPP.bookInfoFieldLabel(fieldKey, book),
-    ) +
-    "</span>" +
-    (fieldKey === "custom"
-      ? '<button type="button" class="small back-cover-text-edit-button" data-custom-text-edit="1" aria-label="Edit custom text" title="Edit custom text">✎</button><input class="text-custom back-cover-text-custom-value" type="hidden" value="' +
-        TPP.esc(entry.customText || "") +
-        '">'
-      : "") +
-    "</div></div></td>" +
-    '<td><input class="text-size" type="number" min="3" step=".5" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.size, 4))) +
-    '"></td>' +
-    '<td><div class="back-cover-slider-stack"><label><span>X</span><input class="text-x" type="range" min="0" max="100" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.x, 50))) +
-    '"></label><label><span>Y</span><input class="text-y" type="range" min="0" max="100" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.y, 0))) +
-    '"></label></div></td>' +
-    '<td><div class="back-cover-align-stack">' +
-    TPP.textAlignCycleButtonHtml(align) +
-    '<label><input class="text-width" type="range" min="10" max="100" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.width, 100))) +
-    '"></label></div></td>' +
-    "<td>" +
-    TPP.textColorOutlineControlHtml(entry) +
-    "</td>" +
-    "</tr>"
-  );
-};
-TPP.backCoverTextListHtml = function (book, spec) {
-  return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-position"><col class="back-cover-col-align"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Width</th><th>Color</th></tr></thead><tbody>' +
-    TPP.textElementsForLocation(book, spec.location)
-      .map(function (element) {
-        return TPP.backCoverTextRowHtml(book, element);
-      })
-      .join("") +
-    '</tbody></table></div><div class="back-cover-text-actions-bar"><button type="button" class="small" data-text-action="add" data-location="' +
-    TPP.esc(spec.location) +
-    '">' +
-    TPP.esc(spec.addLabel) +
-    '</button><div id="backCoverTrashDrop" class="front-cover-trash-drop" aria-hidden="true"><span class="front-cover-trash-icon">🗑</span><span>Drop here to remove</span></div></div>'
+    TPP.esc(addLabel) +
+    '</button><div id="' +
+    TPP.esc(trashId) +
+    '" class="front-cover-trash-drop" aria-hidden="true"><span class="front-cover-trash-icon">🗑</span><span>Drop here to remove</span></div></div>'
   );
 };
 TPP.textElementGroupHtml = function (book, spec, element) {
@@ -558,8 +554,8 @@ TPP.textElementGroupHtml = function (book, spec, element) {
   );
 };
 TPP.textElementListHtml = function (book, spec) {
-  if (spec.location === "front") return TPP.frontCoverTextListHtml(book, spec);
-  if (spec.location === "back") return TPP.backCoverTextListHtml(book, spec);
+  if (spec.location === "front" || spec.location === "back")
+    return TPP.coverTextListHtml(book, spec);
   const elements = TPP.textElementsForLocation(book, spec.location);
   return (
     elements
@@ -608,7 +604,7 @@ TPP.renderTextElementControls = function () {
     if (!node) return;
     node.className =
       spec.location === "front" || spec.location === "back"
-        ? "front-cover-text-layout"
+        ? "cover-text-layout"
         : "cover-text-grid";
     node.innerHTML = TPP.textElementListHtml(TPP.active, spec);
   });
