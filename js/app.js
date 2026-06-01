@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   rangeValueTooltip.hidden = true;
   rangeValueTooltip.setAttribute("aria-hidden", "true");
   document.body.appendChild(rangeValueTooltip);
+  let rangeHoverTooltipTimer = 0;
   TPP.classificationCatalog = null;
   TPP.classificationExtensionsCatalog = null;
   TPP.classificationSearchIndex = [];
@@ -41,6 +42,28 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
   TPP.readerVisiblePageRoles = [];
   TPP.rotationSnapSteps = [1, 5, 15, 45, 90];
+  TPP.rangeValueUnit = function (input) {
+    if (!input) return "";
+    const explicit = String(input.dataset.rangeUnit || "").trim();
+    if (explicit) return explicit;
+    const id = String(input.id || "").trim();
+    if (
+      input.classList.contains("chapter-image-rotate") ||
+      /(?:^|)(Rotate)$/.test(id) ||
+      /ImgRotate$/.test(id)
+    ) {
+      return "°";
+    }
+    if (
+      input.classList.contains("text-x") ||
+      input.classList.contains("text-y") ||
+      input.classList.contains("text-width") ||
+      /(?:ImgX|ImgY|ImgZoom|Quality)$/.test(id)
+    ) {
+      return "%";
+    }
+    return "";
+  };
   TPP.rangeValueText = function (input) {
     if (!input) return "";
     const numericValue = Number(input.value);
@@ -55,26 +78,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           .replace(/\.0+$/, "")
           .replace(/(\.\d*?)0+$/, "$1")
       : String(input.value || "");
-    if (
-      input.classList.contains("chapter-image-rotate") ||
-      /ImgRotate$/.test(input.id || "")
-    ) {
-      return valueText + "°";
-    }
-    const label = String(
-      input.dataset.rangeLabel ||
-        input.getAttribute("aria-label") ||
-        input.closest("label")?.textContent ||
-        "",
-    )
-      .replace(/\s+/g, " ")
-      .trim()
-      .replace(
-        new RegExp(valueText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"),
-        "",
-      )
-      .trim();
-    return (label ? label + ": " : "") + valueText;
+    return valueText + TPP.rangeValueUnit(input);
   };
   TPP.positionRangeValueTooltip = function (input) {
     if (!input || !rangeValueTooltip) return;
@@ -95,7 +99,22 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
   TPP.hideRangeValueTooltip = function () {
     if (!rangeValueTooltip) return;
+    if (rangeHoverTooltipTimer) {
+      window.clearTimeout(rangeHoverTooltipTimer);
+      rangeHoverTooltipTimer = 0;
+    }
     rangeValueTooltip.hidden = true;
+  };
+  TPP.scheduleRangeValueTooltip = function (input, delay) {
+    if (!input || !TPP.positionRangeValueTooltip) return;
+    if (rangeHoverTooltipTimer) window.clearTimeout(rangeHoverTooltipTimer);
+    rangeHoverTooltipTimer = window.setTimeout(
+      function () {
+        rangeHoverTooltipTimer = 0;
+        TPP.positionRangeValueTooltip(input);
+      },
+      Math.max(0, Number(delay) || 0),
+    );
   };
   TPP.refreshRangeInputTitles = function (root) {
     (root || document)
@@ -3189,7 +3208,27 @@ document.addEventListener("DOMContentLoaded", async function () {
         e.target.matches('input[type="range"]') &&
         TPP.positionRangeValueTooltip
       ) {
+        if (rangeHoverTooltipTimer) {
+          window.clearTimeout(rangeHoverTooltipTimer);
+          rangeHoverTooltipTimer = 0;
+        }
         TPP.positionRangeValueTooltip(e.target);
+      }
+    });
+    controls.addEventListener("pointerover", function (e) {
+      if (
+        e.target.matches('input[type="range"]') &&
+        TPP.scheduleRangeValueTooltip
+      ) {
+        TPP.scheduleRangeValueTooltip(e.target, 420);
+      }
+    });
+    controls.addEventListener("pointerout", function (e) {
+      if (
+        e.target.matches('input[type="range"]') &&
+        TPP.hideRangeValueTooltip
+      ) {
+        TPP.hideRangeValueTooltip();
       }
     });
     controls.addEventListener("focusout", function (e) {
