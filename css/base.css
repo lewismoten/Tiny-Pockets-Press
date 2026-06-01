@@ -1573,6 +1573,13 @@ input[type="checkbox"] {
 .classification-crumb.is-active {
   background: #ffecb8;
 }
+.classification-crumb.classification-crumb-extension {
+  background: #dff1ee;
+  color: #295d57;
+}
+.classification-crumb.classification-crumb-extension.is-active {
+  background: #bfe6df;
+}
 .classification-crumb-sep {
   color: var(--muted);
   font-size: 0.82rem;

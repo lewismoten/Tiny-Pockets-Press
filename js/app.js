@@ -1126,7 +1126,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           .concat(
             extensionCrumbs.map(function (crumb, index) {
               return (
-                '<span class="classification-crumb-sep">/</span><button type="button" class="classification-crumb is-active" data-classification-extension-crumb="' +
+                '<span class="classification-crumb-sep">/</span><button type="button" class="classification-crumb classification-crumb-extension is-active" data-classification-extension-crumb="' +
                 TPP.esc(
                   JSON.stringify(
                     TPP.classificationDialogExtensionPath.slice(0, index + 1),
@@ -2047,7 +2047,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         );
         TPP.setClassificationDialogCode(
           (crumbNode && crumbNode.code) || "",
-          TPP.classificationDialogSelection.extension || "",
+          "",
         );
         TPP.renderClassificationDialog();
         return;
