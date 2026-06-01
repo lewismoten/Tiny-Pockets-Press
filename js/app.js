@@ -415,6 +415,39 @@ document.addEventListener("DOMContentLoaded", async function () {
     );
     return parent[fullPath[fullPath.length - 1]] || null;
   };
+  TPP.classificationDialogListState = function () {
+    const selectedNode = TPP.classificationNodeAtPath(
+      TPP.classificationDialogPath,
+    );
+    const baseChildren = TPP.classificationNodeChildren(
+      TPP.classificationDialogPath,
+    );
+    if (baseChildren.length) {
+      return {
+        mode: "base",
+        node: selectedNode,
+        items: baseChildren,
+      };
+    }
+    if (selectedNode && selectedNode.code) {
+      const extensionChildren = TPP.classificationExtensionChildren(
+        selectedNode.code,
+        TPP.classificationDialogExtensionPath,
+      );
+      if (extensionChildren.length) {
+        return {
+          mode: "extension",
+          node: selectedNode,
+          items: extensionChildren,
+        };
+      }
+    }
+    return {
+      mode: "base",
+      node: selectedNode,
+      items: [],
+    };
+  };
   TPP.setClassificationDialogCode = function (code, extension) {
     const nextCode = String(code || "");
     const nextExtension = String(extension || "");
@@ -1042,6 +1075,18 @@ document.addEventListener("DOMContentLoaded", async function () {
       const crumbs = TPP.classificationBreadcrumbNodes(
         TPP.classificationDialogPath,
       );
+      const selectedNode = TPP.classificationNodeAtPath(
+        TPP.classificationDialogPath,
+      );
+      const extensionCrumbs =
+        selectedNode &&
+        selectedNode.code &&
+        TPP.classificationDialogSelection.extension
+          ? TPP.classificationExtensionBreadcrumbNodes(
+              selectedNode.code,
+              TPP.classificationDialogSelection.extension,
+            )
+          : [];
       breadcrumbs.innerHTML =
         '<button type="button" class="classification-crumb' +
         (crumbs.length ? "" : " is-active") +
@@ -1056,6 +1101,21 @@ document.addEventListener("DOMContentLoaded", async function () {
               "</button>"
             );
           })
+          .concat(
+            extensionCrumbs.map(function (crumb, index) {
+              return (
+                '<span class="classification-crumb-sep">/</span><button type="button" class="classification-crumb is-active" data-classification-extension-crumb="' +
+                TPP.esc(
+                  JSON.stringify(
+                    TPP.classificationDialogExtensionPath.slice(0, index + 1),
+                  ),
+                ) +
+                '">' +
+                TPP.esc(crumb.label) +
+                "</button>"
+              );
+            }),
+          )
           .join("");
     }
     const selectedNode = TPP.classificationNodeAtPath(
@@ -1064,9 +1124,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (selection) {
       if (selectedNode && selectedNode.code) {
         const extensionGroup = TPP.classificationExtensionsForCode(
-          selectedNode.code,
-        );
-        const extensionOptions = TPP.classificationExtensionOptions(
           selectedNode.code,
         );
         const canAssign =
@@ -1131,24 +1188,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           seeAlsoMarkup +
           '</div><div class="classification-selection-controls">' +
           (extensionGroup
-            ? '<label>Extension<select id="classificationExtensionSelect"><option value="">No extension</option>' +
-              extensionOptions
-                .map(function (option) {
-                  return (
-                    '<option value="' +
-                    TPP.esc(option.value) +
-                    '"' +
-                    (option.value ===
-                    String(TPP.classificationDialogSelection.extension || "")
-                      ? " selected"
-                      : "") +
-                    ">" +
-                    TPP.esc(option.label) +
-                    "</option>"
-                  );
-                })
-                .join("") +
-              "</select></label>"
+            ? '<div class="small">Extensions appear below in deeper categories.</div>'
             : "") +
           '<div class="toolbar">' +
           (canAssign
@@ -1163,15 +1203,33 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     }
     if (list) {
-      const children = TPP.classificationNodeChildren(
-        TPP.classificationDialogPath,
-      );
-      list.innerHTML = children.length
-        ? children
+      const listState = TPP.classificationDialogListState();
+      list.innerHTML = listState.items.length
+        ? listState.items
             .map(function (node, index) {
+              if (listState.mode === "extension") {
+                const nextPath =
+                  TPP.classificationDialogExtensionPath.concat(index);
+                return (
+                  '<div class="classification-option is-openable" data-classification-extension-open="' +
+                  TPP.esc(JSON.stringify(nextPath)) +
+                  '"' +
+                  "><div><strong>" +
+                  TPP.esc(
+                    TPP.classificationFormattedCode(
+                      listState.node.code,
+                      TPP.classificationShortLabel(listState.node),
+                      node.extension,
+                    ),
+                  ) +
+                  '</strong> <span class="classification-short-label">' +
+                  TPP.esc(TPP.classificationShortLabel(node)) +
+                  "</span> " +
+                  TPP.esc(node.label || "") +
+                  '</div><div class="toolbar"></div></div>'
+                );
+              }
               const nextPath = TPP.classificationDialogPath.concat(index);
-              const hasChildren =
-                Array.isArray(node.children) && node.children.length;
               return (
                 '<div class="classification-option is-openable" data-classification-open="' +
                 TPP.esc(JSON.stringify(nextPath)) +
@@ -1942,23 +2000,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   const classificationDialog = document.getElementById("classificationDialog");
   if (classificationDialog) {
-    classificationDialog.addEventListener("change", function (e) {
-      const extensionSelect = e.target.closest(
-        "#classificationExtensionSelect",
-      );
-      if (extensionSelect) {
-        const selectedExtension = String(extensionSelect.value || "");
-        TPP.classificationDialogSelection.extension = selectedExtension;
-        TPP.classificationDialogSelection.formatId = "code-short-extension";
-        TPP.classificationDialogExtensionPath = selectedExtension
-          ? TPP.classificationExtensionPathForExtension(
-              TPP.classificationDialogSelection.code,
-              selectedExtension,
-            )
-          : [];
-        TPP.renderClassificationDialog();
-      }
-    });
     classificationDialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");
       if (
@@ -1980,12 +2021,36 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (crumb) {
         const raw = crumb.dataset.classificationCrumb || "";
         TPP.classificationDialogPath = raw ? JSON.parse(raw) : [];
+        TPP.classificationDialogExtensionPath = [];
         const crumbNode = TPP.classificationNodeAtPath(
           TPP.classificationDialogPath,
         );
         TPP.setClassificationDialogCode(
           (crumbNode && crumbNode.code) || "",
           TPP.classificationDialogSelection.extension || "",
+        );
+        TPP.renderClassificationDialog();
+        return;
+      }
+      const extensionCrumb = e.target.closest(
+        "[data-classification-extension-crumb]",
+      );
+      if (extensionCrumb) {
+        const raw = extensionCrumb.dataset.classificationExtensionCrumb || "";
+        TPP.classificationDialogExtensionPath = raw ? JSON.parse(raw) : [];
+        const selectedNode = TPP.classificationNodeAtPath(
+          TPP.classificationDialogPath,
+        );
+        const extensionNode =
+          selectedNode && selectedNode.code
+            ? TPP.classificationExtensionNodeAtPath(
+                selectedNode.code,
+                TPP.classificationDialogExtensionPath,
+              )
+            : null;
+        TPP.setClassificationDialogCode(
+          (selectedNode && selectedNode.code) || "",
+          (extensionNode && extensionNode.extension) || "",
         );
         TPP.renderClassificationDialog();
         return;
@@ -2001,6 +2066,30 @@ document.addEventListener("DOMContentLoaded", async function () {
         TPP.setClassificationDialogCode(
           (selectedNode && selectedNode.code) || "",
           TPP.classificationDialogSelection.extension || "",
+        );
+        TPP.renderClassificationDialog();
+        return;
+      }
+      const extensionOpenButton = e.target.closest(
+        "[data-classification-extension-open]",
+      );
+      if (extensionOpenButton) {
+        TPP.classificationDialogExtensionPath = JSON.parse(
+          extensionOpenButton.dataset.classificationExtensionOpen || "[]",
+        );
+        const selectedNode = TPP.classificationNodeAtPath(
+          TPP.classificationDialogPath,
+        );
+        const extensionNode =
+          selectedNode && selectedNode.code
+            ? TPP.classificationExtensionNodeAtPath(
+                selectedNode.code,
+                TPP.classificationDialogExtensionPath,
+              )
+            : null;
+        TPP.setClassificationDialogCode(
+          (selectedNode && selectedNode.code) || "",
+          (extensionNode && extensionNode.extension) || "",
         );
         TPP.renderClassificationDialog();
         return;
