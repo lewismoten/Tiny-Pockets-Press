@@ -2131,6 +2131,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.populate();
   await TPP.load();
   await TPP.loadStaleKeyLookup();
+  await TPP.ensureControlModule("settings-ui-controls");
   TPP.view = TPP.initialView();
   if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();
@@ -2187,6 +2188,30 @@ document.addEventListener("DOMContentLoaded", async function () {
       target.closest("#libraryGrid [data-id]")
     ) {
       const api = await TPP.ensureControlModule("library-controls");
+      if (api && typeof api.handleClick === "function") api.handleClick(event);
+      return;
+    }
+    if (target.closest("#saveBook")) {
+      const api = await TPP.ensureControlModule("book-save-controls");
+      if (api && typeof api.handleClick === "function") api.handleClick(event);
+      return;
+    }
+    if (
+      target.closest("#exportInteriorPdf") ||
+      target.closest("#exportReadablePdf") ||
+      target.closest("#exportImagesZip") ||
+      target.closest("#exportCoverPdf") ||
+      target.closest("#printBrowser")
+    ) {
+      const api = await TPP.ensureControlModule("book-export-controls");
+      if (api && typeof api.handleClick === "function") api.handleClick(event);
+      return;
+    }
+    if (
+      target.closest("#aboutDownloadBook") ||
+      target.closest("#libraryDownloadLibrary")
+    ) {
+      const api = await TPP.ensureControlModule("book-download-controls");
       if (api && typeof api.handleClick === "function") api.handleClick(event);
     }
   });
@@ -2893,41 +2918,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
   const controls = document.querySelector(".controls");
   if (controls) {
-    let dragState = null;
-    let dragHandleArmedId = "";
-    let pendingTextReorderRefresh = false;
-    let pendingTextReorderRefreshTimer = 0;
-    const setDragPreviewLabel = function (item) {
-      const label = dragPreview.querySelector(".drag-preview-label");
-      if (!label) return;
-      const source =
-        item?.querySelector("td:first-child, .toolbar strong, strong") || item;
-      const text = (source?.textContent || "")
-        .replace(/⋮+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-      label.textContent = text || "Dragging item";
-    };
-    const setTextTrashVisibility = function (location, active) {
-      [
-        "frontCoverTrashDrop",
-        "backCoverTrashDrop",
-        "spineTextTrashDrop",
-      ].forEach(function (id) {
-        const dropZone = document.getElementById(id);
-        if (!dropZone) return;
-        const isTarget =
-          (location === "front" && id === "frontCoverTrashDrop") ||
-          (location === "back" && id === "backCoverTrashDrop") ||
-          (location === "spine" && id === "spineTextTrashDrop");
-        dropZone.classList.toggle("is-visible", !!active && isTarget);
-        if (!active || !isTarget) dropZone.classList.remove("is-over");
-        dropZone.setAttribute(
-          "aria-hidden",
-          active && isTarget ? "false" : "true",
-        );
-      });
-    };
     controls.addEventListener("input", async function (e) {
       if (e.target.matches('input[type="range"]')) {
         const rangeApi = await TPP.ensureControlModule("editor-range-controls");
@@ -3097,265 +3087,44 @@ document.addEventListener("DOMContentLoaded", async function () {
         api.handlePointerUp(e);
       }
     });
-    controls.addEventListener("mousedown", function (e) {
-      const handle = e.target.closest("[data-drag-handle]");
-      if (!handle) {
-        dragHandleArmedId = "";
-        return;
-      }
-      const item = handle.closest("[data-drag-kind]");
-      dragHandleArmedId =
-        (item && (item.dataset.textId || item.dataset.itemId)) || "";
-    });
-    controls.addEventListener("dragstart", function (e) {
-      const item = e.target.closest("[data-drag-kind]");
-      const itemId = item && (item.dataset.textId || item.dataset.itemId || "");
-      if (!item || !itemId || itemId !== dragHandleArmedId) {
-        e.preventDefault();
-        return;
-      }
-      dragState = {
-        kind: item.dataset.dragKind,
-        location: item.dataset.location || "",
-        itemId: item.dataset.textId || item.dataset.itemId || "",
-        targetId: "",
-        beforeTarget: true,
-      };
-      item.classList.add("is-dragging");
-      setDragPreviewLabel(item);
-      setTextTrashVisibility(
-        dragState.location,
-        dragState.kind === "text-element" &&
-          (dragState.location === "front" ||
-            dragState.location === "back" ||
-            dragState.location === "spine"),
-      );
-      if (e.dataTransfer) {
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", dragState.itemId);
-        e.dataTransfer.setDragImage(dragPreview, 18, 14);
+    controls.addEventListener("mousedown", async function (e) {
+      const api = await TPP.ensureControlModule("editor-drag-controls");
+      if (api && typeof api.handleMouseDown === "function") {
+        api.handleMouseDown(e);
       }
     });
-    controls.addEventListener("dragover", function (e) {
-      if (!dragState) return;
-      const trashTarget = e.target.closest(
-        "#frontCoverTrashDrop, #backCoverTrashDrop, #spineTextTrashDrop",
-      );
-      if (
-        trashTarget &&
-        dragState.kind === "text-element" &&
-        (dragState.location === "front" ||
-          dragState.location === "back" ||
-          dragState.location === "spine")
-      ) {
-        e.preventDefault();
-        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-        trashTarget.classList.add("is-over");
-        return;
+    controls.addEventListener("dragstart", async function (e) {
+      const api = await TPP.ensureControlModule("editor-drag-controls");
+      if (api && typeof api.handleDragStart === "function") {
+        api.handleDragStart(e, controls);
       }
-      const target = e.target.closest("[data-drag-kind]");
-      if (!target || target.classList.contains("is-dragging")) return;
-      const sameKind = target.dataset.dragKind === dragState.kind;
-      const sameLocation =
-        dragState.kind !== "text-element" ||
-        (target.dataset.location || "") === dragState.location;
-      if (!sameKind || !sameLocation) return;
-      e.preventDefault();
-      if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-      const rect = target.getBoundingClientRect();
-      const before = e.clientY < rect.top + rect.height / 2;
-      controls
-        .querySelectorAll(".drag-drop-before, .drag-drop-after")
-        .forEach(function (node) {
-          node.classList.remove("drag-drop-before", "drag-drop-after");
-        });
-      target.classList.add(before ? "drag-drop-before" : "drag-drop-after");
-      dragState.targetId = target.dataset.textId || target.dataset.itemId || "";
-      dragState.beforeTarget = before;
     });
-    controls.addEventListener("dragleave", function (e) {
-      const trashTarget = e.target.closest(
-        "#frontCoverTrashDrop, #backCoverTrashDrop, #spineTextTrashDrop",
-      );
-      if (trashTarget) trashTarget.classList.remove("is-over");
-    });
-    controls.addEventListener("drop", function (e) {
-      if (!dragState) return;
-      const trashTarget = e.target.closest(
-        "#frontCoverTrashDrop, #backCoverTrashDrop, #spineTextTrashDrop",
-      );
-      if (
-        trashTarget &&
-        dragState.kind === "text-element" &&
-        (dragState.location === "front" ||
-          dragState.location === "back" ||
-          dragState.location === "spine")
-      ) {
-        e.preventDefault();
-        controls
-          .querySelectorAll(".drag-drop-before, .drag-drop-after")
-          .forEach(function (node) {
-            node.classList.remove("drag-drop-before", "drag-drop-after");
-          });
-        const dragging = controls.querySelector(".is-dragging");
-        if (dragging) dragging.classList.remove("is-dragging");
-        TPP.sync("nosave");
-        TPP.removeTextElement(TPP.active, dragState.itemId);
-        TPP.save();
-        setTextTrashVisibility(dragState.location, false);
-        if (TPP.renderTextElementControls) TPP.renderTextElementControls();
-        renderCurrentViewPreservingSidebar();
-        dragState = null;
-        pendingTextReorderRefresh = false;
-        return;
+    controls.addEventListener("dragover", async function (e) {
+      const api = await TPP.ensureControlModule("editor-drag-controls");
+      if (api && typeof api.handleDragOver === "function") {
+        api.handleDragOver(e, controls);
       }
-      e.preventDefault();
-      const markerTarget = controls.querySelector(
-        ".drag-drop-before, .drag-drop-after",
-      );
-      const markerTargetId = markerTarget
-        ? markerTarget.dataset.textId || markerTarget.dataset.itemId || ""
-        : "";
-      const markerBefore = markerTarget
-        ? markerTarget.classList.contains("drag-drop-before")
-        : true;
-      controls
-        .querySelectorAll(".drag-drop-before, .drag-drop-after")
-        .forEach(function (node) {
-          node.classList.remove("drag-drop-before", "drag-drop-after");
-        });
-      const dragging = controls.querySelector(".is-dragging");
-      if (dragging) dragging.classList.remove("is-dragging");
-      if (
-        dragState.kind === "text-element" &&
-        markerTargetId &&
-        TPP.moveTextElementToTarget
-      ) {
-        TPP.sync("nosave");
-        TPP.moveTextElementToTarget(
-          TPP.active,
-          dragState.itemId,
-          markerTargetId,
-          markerBefore,
-        );
-        TPP.save();
-        pendingTextReorderRefresh = true;
-        setTextTrashVisibility(dragState.location, false);
-        dragState = null;
-        return;
-      }
-      TPP.sync("commit");
-      TPP.renderAll();
-      setTextTrashVisibility(dragState.location, false);
-      dragState = null;
     });
-    controls.addEventListener("dragend", function () {
-      controls
-        .querySelectorAll(".drag-drop-before, .drag-drop-after")
-        .forEach(function (node) {
-          node.classList.remove("drag-drop-before", "drag-drop-after");
-        });
-      const dragging = controls.querySelector(".is-dragging");
-      if (dragging) dragging.classList.remove("is-dragging");
-      setTextTrashVisibility(dragState && dragState.location, false);
-      dragState = null;
-      dragHandleArmedId = "";
-      if (pendingTextReorderRefresh) {
-        pendingTextReorderRefresh = false;
-        if (pendingTextReorderRefreshTimer) {
-          window.clearTimeout(pendingTextReorderRefreshTimer);
-        }
-        pendingTextReorderRefreshTimer = window.setTimeout(function () {
-          pendingTextReorderRefreshTimer = 0;
-          if (TPP.renderTextElementControls) TPP.renderTextElementControls();
-          TPP.renderAll();
-        }, 80);
+    controls.addEventListener("dragleave", async function (e) {
+      const api = await TPP.ensureControlModule("editor-drag-controls");
+      if (api && typeof api.handleDragLeave === "function") {
+        api.handleDragLeave(e);
+      }
+    });
+    controls.addEventListener("drop", async function (e) {
+      const api = await TPP.ensureControlModule("editor-drag-controls");
+      if (api && typeof api.handleDrop === "function") {
+        api.handleDrop(e, controls);
+      }
+    });
+    controls.addEventListener("dragend", async function () {
+      const api = await TPP.ensureControlModule("editor-drag-controls");
+      if (api && typeof api.handleDragEnd === "function") {
+        api.handleDragEnd(controls);
       }
     });
   }
   if (TPP.renderColorPalettes) TPP.renderColorPalettes();
-
-  document.getElementById("saveBook").onclick = async function () {
-    TPP.sync();
-    TPP.buildPages();
-    await TPP.captureCover();
-    TPP.toast("Saved.");
-  };
-  document.getElementById("exportInteriorPdf").onclick = function () {
-    TPP.exportPdfFrom("interior");
-  };
-  document.getElementById("exportReadablePdf").onclick = function () {
-    TPP.exportReadablePdf();
-  };
-  document.getElementById("exportImagesZip").onclick = function () {
-    TPP.openImageExportDialog();
-  };
-  document.getElementById("exportCoverPdf").onclick = function () {
-    TPP.exportPdfFrom("cover");
-  };
-  TPP.prepareBrowserPrint = function () {
-    if (TPP.view !== "interior") return null;
-    const interiorPreview = document.getElementById("interiorPreview");
-    const coverPreview = document.getElementById("coverPreview");
-    if (!interiorPreview || !coverPreview) return null;
-    TPP.renderCover();
-    const coverSheet = coverPreview.querySelector(".sheet");
-    if (!coverSheet) return null;
-    const clone = coverSheet.cloneNode(true);
-    clone.classList.add("print-extra-cover-page");
-    clone.querySelectorAll(".sheet-title").forEach(function (title) {
-      title.textContent = "Cover print sheet";
-    });
-    interiorPreview.appendChild(clone);
-    return function cleanupPrintCoverPage() {
-      const node = interiorPreview.querySelector(".print-extra-cover-page");
-      if (node) node.remove();
-    };
-  };
-  document.getElementById("printBrowser").onclick = function () {
-    const cleanup = TPP.prepareBrowserPrint();
-    const finalize = function () {
-      window.removeEventListener("afterprint", finalize);
-      if (typeof cleanup === "function") cleanup();
-    };
-    window.addEventListener("afterprint", finalize);
-    setTimeout(function () {
-      print();
-      setTimeout(function () {
-        finalize();
-      }, 180);
-    }, 80);
-  };
-  const downloadActiveBook = function () {
-    TPP.sync();
-    TPP.markBookExported(TPP.active);
-    TPP.save();
-    TPP.download(TPP.bookExportName(TPP.active), {
-      type: "tiny-pockets-book",
-      schemaVersion: TPP.SCHEMA_VERSION,
-      book: TPP.active,
-    });
-  };
-  const aboutDownloadBookButton = document.getElementById("aboutDownloadBook");
-  if (aboutDownloadBookButton)
-    aboutDownloadBookButton.onclick = downloadActiveBook;
-  const downloadLibrary = function () {
-    const stamp = TPP.nowIso();
-    TPP.library.forEach(function (book) {
-      TPP.markBookExported(book, stamp);
-    });
-    TPP.save();
-    TPP.download("tiny-pockets-library.library", {
-      type: "tiny-pockets-library",
-      schemaVersion: TPP.SCHEMA_VERSION,
-      books: TPP.library,
-    });
-  };
-  const libraryDownloadLibraryButton = document.getElementById(
-    "libraryDownloadLibrary",
-  );
-  if (libraryDownloadLibraryButton)
-    libraryDownloadLibraryButton.onclick = downloadLibrary;
 });
 
 TPP.openImageExportDialog = async function () {
@@ -4084,87 +3853,6 @@ TPP.restoreReaderUi = function (state) {
     mode.value = saved.mode;
   }
   TPP.readerIndex = Math.max(0, Number(saved && saved.index) || 0);
-};
-TPP.settingsDetails = function () {
-  return Array.from(document.querySelectorAll(".controls details"));
-};
-TPP.enforceSingleOpenSettingsSection = function (activeDetails) {
-  if (!activeDetails || !activeDetails.open) return;
-  TPP.settingsDetails().forEach(function (details) {
-    if (details !== activeDetails) details.open = false;
-  });
-};
-TPP.setBookButtonTextVisibility = function (showText) {
-  const show = showText !== false;
-  document.body.classList.toggle("book-icons-only", !show);
-  const toggle = document.getElementById("toggleBookButtonText");
-  if (!toggle) return;
-  const label = toggle.querySelector(".book-toolbar-label");
-  if (label) label.textContent = show ? "Hide Labels" : "Show Labels";
-  toggle.setAttribute("aria-pressed", show ? "false" : "true");
-};
-TPP.restoreSettingsUi = function () {
-  const state = TPP.readSettingsUi();
-  let lastOpen = null;
-  TPP.settingsDetails().forEach(function (details, index) {
-    details.dataset.settingsIndex = index;
-    if (state.open && Object.prototype.hasOwnProperty.call(state.open, index)) {
-      details.open = Boolean(state.open[index]);
-      if (details.open) lastOpen = details;
-    }
-  });
-  if (lastOpen) TPP.enforceSingleOpenSettingsSection(lastOpen);
-  const controls = document.querySelector(".controls");
-  if (controls && Number.isFinite(Number(state.scrollTop))) {
-    requestAnimationFrame(function () {
-      controls.scrollTop = Number(state.scrollTop) || 0;
-    });
-  }
-  TPP.setBookButtonTextVisibility(state.showBookButtonText !== false);
-  TPP.restoreReaderUi(state);
-};
-TPP.saveSettingsUi = function () {
-  const controls = document.querySelector(".controls");
-  const open = {};
-  const state = TPP.readSettingsUi();
-  const readerByBook = Object.assign({}, state.readerByBook || {});
-  const dataTabByBook = Object.assign({}, state.dataTabByBook || {});
-  TPP.settingsDetails().forEach(function (details, index) {
-    open[index] = details.open;
-  });
-  if (TPP.active) readerByBook[TPP.bookId(TPP.active)] = TPP.readerUiState();
-  TPP.writeSettingsUi({
-    classificationProfileId: String(state.classificationProfileId || "home"),
-    dataTabByBook: dataTabByBook,
-    imageExport: state.imageExport || { dpi: 300 },
-    showBookButtonText: state.showBookButtonText !== false,
-    readerByBook: readerByBook,
-    open: open,
-    scrollTop: controls ? controls.scrollTop : 0,
-    view: TPP.view,
-  });
-};
-TPP.bindSettingsUiPersistence = function () {
-  const controls = document.querySelector(".controls");
-  let scrollTimer = 0;
-  TPP.settingsDetails().forEach(function (details, index) {
-    details.dataset.settingsIndex = index;
-    details.addEventListener("toggle", function () {
-      if (details.open) TPP.enforceSingleOpenSettingsSection(details);
-      TPP.saveSettingsUi();
-    });
-  });
-  if (controls) {
-    controls.addEventListener("scroll", function () {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(TPP.saveSettingsUi, 120);
-    });
-  }
-  window.addEventListener("beforeunload", TPP.saveSettingsUi);
-  window.addEventListener("hashchange", function () {
-    const view = TPP.initialView();
-    if (view !== TPP.view) TPP.switchView(view, true);
-  });
 };
 TPP.renderSidebarMode = function () {
   const body = document.body;
