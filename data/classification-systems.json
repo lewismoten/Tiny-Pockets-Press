@@ -16,11 +16,47 @@
               "shortLabel": "VIS",
               "label": "Visual Arts",
               "children": [
-                { "code": "111", "shortLabel": "DRW", "label": "Drawing" },
-                { "code": "112", "shortLabel": "PNT", "label": "Painting" },
-                { "code": "113", "shortLabel": "PRT", "label": "Printmaking" },
-                { "code": "114", "shortLabel": "SCL", "label": "Sculpture" }
-              ]
+                {
+                  "code": "111",
+                  "shortLabel": "DRW",
+                  "label": "Drawing",
+                  "keywords": ["drawing", "art", "visual", "arts"],
+                  "status": "active",
+                  "sort": 111,
+                  "seeAlso": []
+                },
+                {
+                  "code": "112",
+                  "shortLabel": "PNT",
+                  "label": "Painting",
+                  "keywords": ["painting", "art", "visual", "arts"],
+                  "status": "active",
+                  "sort": 112,
+                  "seeAlso": []
+                },
+                {
+                  "code": "113",
+                  "shortLabel": "PRT",
+                  "label": "Printmaking",
+                  "keywords": ["printmaking", "art", "visual", "arts"],
+                  "status": "active",
+                  "sort": 113,
+                  "seeAlso": []
+                },
+                {
+                  "code": "114",
+                  "shortLabel": "SCL",
+                  "label": "Sculpture",
+                  "keywords": ["sculpture", "art", "visual", "arts"],
+                  "status": "active",
+                  "sort": 114,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["visual", "arts", "art"],
+              "status": "active",
+              "sort": 110,
+              "seeAlso": []
             },
             {
               "code": "120",
@@ -30,52 +66,759 @@
                 {
                   "code": "121",
                   "shortLabel": "GRF",
-                  "label": "Graphic Design"
+                  "label": "Graphic Design",
+                  "keywords": ["graphic", "design", "art"],
+                  "status": "active",
+                  "sort": 121,
+                  "seeAlso": ["443", "644"]
                 },
                 {
                   "code": "122",
                   "shortLabel": "IND",
-                  "label": "Industrial Design"
+                  "label": "Industrial Design",
+                  "keywords": ["industrial", "design", "art"],
+                  "status": "active",
+                  "sort": 122,
+                  "seeAlso": []
                 },
                 {
                   "code": "123",
                   "shortLabel": "IDN",
-                  "label": "Interior Design"
+                  "label": "Interior Design",
+                  "keywords": ["interior", "design", "art"],
+                  "status": "active",
+                  "sort": 123,
+                  "seeAlso": []
                 },
                 {
                   "code": "124",
                   "shortLabel": "FAS",
-                  "label": "Fashion & Textile Design"
+                  "label": "Fashion & Textile Design",
+                  "keywords": ["fashion", "textile", "design", "art"],
+                  "status": "active",
+                  "sort": 124,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["design", "art"],
+              "status": "active",
+              "sort": 120,
+              "seeAlso": []
             },
             {
               "code": "130",
               "shortLabel": "PER",
               "label": "Performing Arts",
               "children": [
-                { "code": "131", "shortLabel": "MUS", "label": "Music" },
-                { "code": "132", "shortLabel": "DAN", "label": "Dance" },
-                { "code": "133", "shortLabel": "THT", "label": "Theater" },
+                {
+                  "code": "131",
+                  "shortLabel": "MUS",
+                  "label": "Music",
+                  "keywords": ["music", "art", "performing", "arts"],
+                  "status": "active",
+                  "sort": 131,
+                  "seeAlso": ["9511", "9531"]
+                },
+                {
+                  "code": "132",
+                  "shortLabel": "DAN",
+                  "label": "Dance",
+                  "keywords": ["dance", "art", "performing", "arts"],
+                  "status": "active",
+                  "sort": 132,
+                  "seeAlso": []
+                },
+                {
+                  "code": "133",
+                  "shortLabel": "THT",
+                  "label": "Theater",
+                  "keywords": ["theater", "art", "performing", "arts"],
+                  "status": "active",
+                  "sort": 133,
+                  "seeAlso": []
+                },
                 {
                   "code": "134",
                   "shortLabel": "FIL",
-                  "label": "Film & Screen Arts"
+                  "label": "Film & Screen Arts",
+                  "keywords": ["film", "screen", "arts", "art", "performing"],
+                  "status": "active",
+                  "sort": 134,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["performing", "arts", "art"],
+              "status": "active",
+              "sort": 130,
+              "seeAlso": []
             },
             {
               "code": "140",
               "shortLabel": "MED",
               "label": "Media Arts",
               "children": [
-                { "code": "141", "shortLabel": "PHO", "label": "Photography" },
-                { "code": "142", "shortLabel": "VID", "label": "Video Art" },
-                { "code": "143", "shortLabel": "DGA", "label": "Digital Art" },
-                { "code": "144", "shortLabel": "MIX", "label": "Mixed Media" }
-              ]
+                {
+                  "code": "141",
+                  "shortLabel": "PHO",
+                  "label": "Photography",
+                  "keywords": ["photography", "art", "media", "arts"],
+                  "status": "active",
+                  "sort": 141,
+                  "seeAlso": []
+                },
+                {
+                  "code": "142",
+                  "shortLabel": "VID",
+                  "label": "Video Art",
+                  "keywords": ["video", "art", "media", "arts"],
+                  "status": "active",
+                  "sort": 142,
+                  "seeAlso": []
+                },
+                {
+                  "code": "143",
+                  "shortLabel": "DGA",
+                  "label": "Digital Art",
+                  "keywords": ["digital", "art", "media", "arts"],
+                  "status": "active",
+                  "sort": 143,
+                  "seeAlso": []
+                },
+                {
+                  "code": "144",
+                  "shortLabel": "MIX",
+                  "label": "Mixed Media",
+                  "keywords": ["mixed", "media", "art", "arts"],
+                  "status": "active",
+                  "sort": 144,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["media", "arts", "art"],
+              "status": "active",
+              "sort": 140,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["art"],
+          "status": "active",
+          "sort": 100,
+          "seeAlso": []
+        },
+        {
+          "code": "150",
+          "shortLabel": "RSP",
+          "label": "Religion, Spirituality & Philosophy",
+          "children": [
+            {
+              "code": "151",
+              "shortLabel": "REL",
+              "label": "Religion",
+              "children": [
+                {
+                  "code": "1511",
+                  "shortLabel": "ABR",
+                  "label": "Abrahamic Traditions",
+                  "keywords": [
+                    "abrahamic",
+                    "traditions",
+                    "religion",
+                    "spirituality",
+                    "philosophy"
+                  ],
+                  "status": "active",
+                  "sort": 1511,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1512",
+                  "shortLabel": "DHR",
+                  "label": "Dharmic Traditions",
+                  "keywords": [
+                    "dharmic",
+                    "traditions",
+                    "religion",
+                    "spirituality",
+                    "philosophy"
+                  ],
+                  "status": "active",
+                  "sort": 1512,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1513",
+                  "shortLabel": "IN3",
+                  "label": "Indigenous & Folk Religions",
+                  "keywords": [
+                    "indigenous",
+                    "folk",
+                    "religions",
+                    "religion",
+                    "spirituality",
+                    "philosophy"
+                  ],
+                  "status": "active",
+                  "sort": 1513,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1514",
+                  "shortLabel": "CMP",
+                  "label": "Comparative Religion",
+                  "keywords": [
+                    "comparative",
+                    "religion",
+                    "spirituality",
+                    "philosophy"
+                  ],
+                  "status": "active",
+                  "sort": 1514,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["religion", "spirituality", "philosophy"],
+              "status": "active",
+              "sort": 151,
+              "seeAlso": ["154", "620"]
+            },
+            {
+              "code": "152",
+              "shortLabel": "SPR",
+              "label": "Spiritual Practice",
+              "children": [
+                {
+                  "code": "1521",
+                  "shortLabel": "MDT",
+                  "label": "Meditation",
+                  "keywords": [
+                    "meditation",
+                    "religion",
+                    "spirituality",
+                    "philosophy",
+                    "spiritual",
+                    "practice"
+                  ],
+                  "status": "active",
+                  "sort": 1521,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1522",
+                  "shortLabel": "CNT",
+                  "label": "Contemplation & Prayer",
+                  "keywords": [
+                    "contemplation",
+                    "prayer",
+                    "religion",
+                    "spirituality",
+                    "philosophy",
+                    "spiritual",
+                    "practice"
+                  ],
+                  "status": "active",
+                  "sort": 1522,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1523",
+                  "shortLabel": "RIT",
+                  "label": "Ritual & Ceremony",
+                  "keywords": [
+                    "ritual",
+                    "ceremony",
+                    "religion",
+                    "spirituality",
+                    "philosophy",
+                    "spiritual",
+                    "practice"
+                  ],
+                  "status": "active",
+                  "sort": 1523,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1524",
+                  "shortLabel": "MYS",
+                  "label": "Mysticism & Esoteric Practice",
+                  "keywords": [
+                    "mysticism",
+                    "esoteric",
+                    "practice",
+                    "religion",
+                    "spirituality",
+                    "philosophy",
+                    "spiritual"
+                  ],
+                  "status": "active",
+                  "sort": 1524,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": [
+                "spiritual",
+                "practice",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ],
+              "status": "active",
+              "sort": 152,
+              "seeAlso": ["942", "153"]
+            },
+            {
+              "code": "153",
+              "shortLabel": "PHL",
+              "label": "Philosophy",
+              "children": [
+                {
+                  "code": "1531",
+                  "shortLabel": "MET",
+                  "label": "Metaphysics",
+                  "keywords": [
+                    "metaphysics",
+                    "religion",
+                    "spirituality",
+                    "philosophy"
+                  ],
+                  "status": "active",
+                  "sort": 1531,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1532",
+                  "shortLabel": "ETH",
+                  "label": "Ethics",
+                  "keywords": [
+                    "ethics",
+                    "religion",
+                    "spirituality",
+                    "philosophy"
+                  ],
+                  "status": "active",
+                  "sort": 1532,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1533",
+                  "shortLabel": "POL",
+                  "label": "Political Philosophy",
+                  "keywords": [
+                    "political",
+                    "philosophy",
+                    "religion",
+                    "spirituality"
+                  ],
+                  "status": "active",
+                  "sort": 1533,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1534",
+                  "shortLabel": "AEP",
+                  "label": "Aesthetics & Epistemology",
+                  "keywords": [
+                    "aesthetics",
+                    "epistemology",
+                    "religion",
+                    "spirituality",
+                    "philosophy"
+                  ],
+                  "status": "active",
+                  "sort": 1534,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["philosophy", "religion", "spirituality"],
+              "status": "active",
+              "sort": 153,
+              "seeAlso": ["521", "622"]
+            },
+            {
+              "code": "154",
+              "shortLabel": "TH4",
+              "label": "Myth & Thought",
+              "children": [
+                {
+                  "code": "1541",
+                  "shortLabel": "MYT",
+                  "label": "Mythology",
+                  "keywords": [
+                    "mythology",
+                    "religion",
+                    "spirituality",
+                    "philosophy",
+                    "myth",
+                    "thought"
+                  ],
+                  "status": "active",
+                  "sort": 1541,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1542",
+                  "shortLabel": "SYM",
+                  "label": "Symbolism",
+                  "keywords": [
+                    "symbolism",
+                    "religion",
+                    "spirituality",
+                    "philosophy",
+                    "myth",
+                    "thought"
+                  ],
+                  "status": "active",
+                  "sort": 1542,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1543",
+                  "shortLabel": "COS",
+                  "label": "Cosmology",
+                  "keywords": [
+                    "cosmology",
+                    "religion",
+                    "spirituality",
+                    "philosophy",
+                    "myth",
+                    "thought"
+                  ],
+                  "status": "active",
+                  "sort": 1543,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1544",
+                  "shortLabel": "LIF",
+                  "label": "Meaning & Life Questions",
+                  "keywords": [
+                    "meaning",
+                    "life",
+                    "questions",
+                    "religion",
+                    "spirituality",
+                    "philosophy",
+                    "myth",
+                    "thought"
+                  ],
+                  "status": "active",
+                  "sort": 1544,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": [
+                "myth",
+                "thought",
+                "religion",
+                "spirituality",
+                "philosophy"
+              ],
+              "status": "active",
+              "sort": 154,
+              "seeAlso": []
+            }
+          ],
+          "keywords": ["religion", "spirituality", "philosophy", "belief"],
+          "status": "active",
+          "sort": 150,
+          "seeAlso": []
+        },
+        {
+          "code": "160",
+          "shortLabel": "ARP",
+          "label": "Architecture & Preservation",
+          "children": [
+            {
+              "code": "161",
+              "shortLabel": "ARQ",
+              "label": "Architecture",
+              "children": [
+                {
+                  "code": "1611",
+                  "shortLabel": "HOU",
+                  "label": "Housing & Domestic Architecture",
+                  "keywords": [
+                    "housing",
+                    "domestic",
+                    "architecture",
+                    "preservation"
+                  ],
+                  "status": "active",
+                  "sort": 1611,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1612",
+                  "shortLabel": "PUB",
+                  "label": "Public & Civic Architecture",
+                  "keywords": [
+                    "public",
+                    "civic",
+                    "architecture",
+                    "preservation"
+                  ],
+                  "status": "active",
+                  "sort": 1612,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1613",
+                  "shortLabel": "SAC",
+                  "label": "Sacred Architecture",
+                  "keywords": ["sacred", "architecture", "preservation"],
+                  "status": "active",
+                  "sort": 1613,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1614",
+                  "shortLabel": "LAN",
+                  "label": "Landscape Architecture",
+                  "keywords": ["landscape", "architecture", "preservation"],
+                  "status": "active",
+                  "sort": 1614,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["architecture", "preservation"],
+              "status": "active",
+              "sort": 161,
+              "seeAlso": ["540", "162"]
+            },
+            {
+              "code": "162",
+              "shortLabel": "HPR",
+              "label": "Historic Preservation",
+              "children": [
+                {
+                  "code": "1621",
+                  "shortLabel": "BLC",
+                  "label": "Building Conservation",
+                  "keywords": [
+                    "building",
+                    "conservation",
+                    "architecture",
+                    "preservation",
+                    "historic"
+                  ],
+                  "status": "active",
+                  "sort": 1621,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1622",
+                  "shortLabel": "RST",
+                  "label": "Restoration Practice",
+                  "keywords": [
+                    "restoration",
+                    "practice",
+                    "architecture",
+                    "preservation",
+                    "historic"
+                  ],
+                  "status": "active",
+                  "sort": 1622,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1623",
+                  "shortLabel": "HRG",
+                  "label": "Heritage & Registry",
+                  "keywords": [
+                    "heritage",
+                    "registry",
+                    "architecture",
+                    "preservation",
+                    "historic"
+                  ],
+                  "status": "active",
+                  "sort": 1623,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1624",
+                  "shortLabel": "ADA",
+                  "label": "Adaptive Reuse",
+                  "keywords": [
+                    "adaptive",
+                    "reuse",
+                    "architecture",
+                    "preservation",
+                    "historic"
+                  ],
+                  "status": "active",
+                  "sort": 1624,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": [
+                "historic preservation",
+                "restoration",
+                "heritage",
+                "conservation",
+                "historic",
+                "preservation",
+                "architecture"
+              ],
+              "status": "active",
+              "sort": 162,
+              "seeAlso": ["511", "541"]
+            },
+            {
+              "code": "163",
+              "shortLabel": "URD",
+              "label": "Urban Design",
+              "children": [
+                {
+                  "code": "1631",
+                  "shortLabel": "PLN",
+                  "label": "Planning & Zoning",
+                  "keywords": [
+                    "planning",
+                    "zoning",
+                    "architecture",
+                    "preservation",
+                    "urban",
+                    "design"
+                  ],
+                  "status": "active",
+                  "sort": 1631,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1632",
+                  "shortLabel": "STR",
+                  "label": "Streetscape & Public Space",
+                  "keywords": [
+                    "streetscape",
+                    "public",
+                    "space",
+                    "architecture",
+                    "preservation",
+                    "urban",
+                    "design"
+                  ],
+                  "status": "active",
+                  "sort": 1632,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1633",
+                  "shortLabel": "TRN",
+                  "label": "Transit & Mobility",
+                  "keywords": [
+                    "transit",
+                    "mobility",
+                    "architecture",
+                    "preservation",
+                    "urban",
+                    "design"
+                  ],
+                  "status": "active",
+                  "sort": 1633,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1634",
+                  "shortLabel": "COM",
+                  "label": "Community Development",
+                  "keywords": [
+                    "community",
+                    "development",
+                    "architecture",
+                    "preservation",
+                    "urban",
+                    "design"
+                  ],
+                  "status": "active",
+                  "sort": 1634,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["urban", "design", "architecture", "preservation"],
+              "status": "active",
+              "sort": 163,
+              "seeAlso": []
+            },
+            {
+              "code": "164",
+              "shortLabel": "BLD",
+              "label": "Building Craft",
+              "children": [
+                {
+                  "code": "1641",
+                  "shortLabel": "MAT",
+                  "label": "Materials & Methods",
+                  "keywords": [
+                    "materials",
+                    "methods",
+                    "architecture",
+                    "preservation",
+                    "building",
+                    "craft"
+                  ],
+                  "status": "active",
+                  "sort": 1641,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1642",
+                  "shortLabel": "WRK",
+                  "label": "Wood, Stone & Masonry",
+                  "keywords": [
+                    "wood",
+                    "stone",
+                    "masonry",
+                    "architecture",
+                    "preservation",
+                    "building",
+                    "craft"
+                  ],
+                  "status": "active",
+                  "sort": 1642,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1643",
+                  "shortLabel": "ENV",
+                  "label": "Environmental Building",
+                  "keywords": [
+                    "environmental",
+                    "building",
+                    "architecture",
+                    "preservation",
+                    "craft"
+                  ],
+                  "status": "active",
+                  "sort": 1643,
+                  "seeAlso": []
+                },
+                {
+                  "code": "1644",
+                  "shortLabel": "DOC",
+                  "label": "Documentation & Survey",
+                  "keywords": [
+                    "documentation",
+                    "survey",
+                    "architecture",
+                    "preservation",
+                    "building",
+                    "craft"
+                  ],
+                  "status": "active",
+                  "sort": 1644,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["building", "craft", "architecture", "preservation"],
+              "status": "active",
+              "sort": 164,
+              "seeAlso": []
+            }
+          ],
+          "keywords": ["architecture", "preservation", "buildings", "heritage"],
+          "status": "active",
+          "sort": 160,
+          "seeAlso": []
         },
         {
           "code": "200",
@@ -87,23 +830,81 @@
               "shortLabel": "PLS",
               "label": "Personal Life Stories",
               "children": [
-                { "code": "211", "shortLabel": "MEM", "label": "Memoir" },
+                {
+                  "code": "211",
+                  "shortLabel": "MEM",
+                  "label": "Memoir",
+                  "keywords": [
+                    "memoir",
+                    "biography",
+                    "personal",
+                    "life",
+                    "stories"
+                  ],
+                  "status": "active",
+                  "sort": 211,
+                  "seeAlso": []
+                },
                 {
                   "code": "212",
                   "shortLabel": "AUT",
-                  "label": "Autobiography"
+                  "label": "Autobiography",
+                  "keywords": [
+                    "autobiography",
+                    "biography",
+                    "memoir",
+                    "personal",
+                    "life",
+                    "stories"
+                  ],
+                  "status": "active",
+                  "sort": 212,
+                  "seeAlso": []
                 },
                 {
                   "code": "213",
                   "shortLabel": "JRL",
-                  "label": "Journals & Letters"
+                  "label": "Journals & Letters",
+                  "keywords": [
+                    "journals",
+                    "letters",
+                    "biography",
+                    "memoir",
+                    "personal",
+                    "life",
+                    "stories"
+                  ],
+                  "status": "active",
+                  "sort": 213,
+                  "seeAlso": []
                 },
                 {
                   "code": "214",
                   "shortLabel": "PES",
-                  "label": "Personal Essays"
+                  "label": "Personal Essays",
+                  "keywords": [
+                    "personal",
+                    "essays",
+                    "biography",
+                    "memoir",
+                    "life",
+                    "stories"
+                  ],
+                  "status": "active",
+                  "sort": 214,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": [
+                "personal",
+                "life",
+                "stories",
+                "biography",
+                "memoir"
+              ],
+              "status": "active",
+              "sort": 210,
+              "seeAlso": []
             },
             {
               "code": "220",
@@ -113,47 +914,156 @@
                 {
                   "code": "221",
                   "shortLabel": "ARW",
-                  "label": "Artists & Writers"
+                  "label": "Artists & Writers",
+                  "keywords": [
+                    "artists",
+                    "writers",
+                    "biography",
+                    "memoir",
+                    "collected",
+                    "lives"
+                  ],
+                  "status": "active",
+                  "sort": 221,
+                  "seeAlso": []
                 },
                 {
                   "code": "222",
                   "shortLabel": "LDA",
-                  "label": "Leaders & Activists"
+                  "label": "Leaders & Activists",
+                  "keywords": [
+                    "leaders",
+                    "activists",
+                    "biography",
+                    "memoir",
+                    "collected",
+                    "lives"
+                  ],
+                  "status": "active",
+                  "sort": 222,
+                  "seeAlso": []
                 },
                 {
                   "code": "223",
                   "shortLabel": "INV",
-                  "label": "Scientists & Inventors"
+                  "label": "Scientists & Inventors",
+                  "keywords": [
+                    "scientists",
+                    "inventors",
+                    "biography",
+                    "memoir",
+                    "collected",
+                    "lives"
+                  ],
+                  "status": "active",
+                  "sort": 223,
+                  "seeAlso": []
                 },
                 {
                   "code": "224",
                   "shortLabel": "ENA",
-                  "label": "Entertainers & Athletes"
+                  "label": "Entertainers & Athletes",
+                  "keywords": [
+                    "entertainers",
+                    "athletes",
+                    "biography",
+                    "memoir",
+                    "collected",
+                    "lives"
+                  ],
+                  "status": "active",
+                  "sort": 224,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["collected", "lives", "biography", "memoir"],
+              "status": "active",
+              "sort": 220,
+              "seeAlso": []
             },
             {
               "code": "230",
               "shortLabel": "FAM",
               "label": "Family & Community Histories",
               "children": [
-                { "code": "231", "shortLabel": "GNY", "label": "Genealogy" },
+                {
+                  "code": "231",
+                  "shortLabel": "GNY",
+                  "label": "Genealogy",
+                  "keywords": [
+                    "genealogy",
+                    "biography",
+                    "memoir",
+                    "family",
+                    "community",
+                    "histories"
+                  ],
+                  "status": "active",
+                  "sort": 231,
+                  "seeAlso": []
+                },
                 {
                   "code": "232",
                   "shortLabel": "ORL",
-                  "label": "Oral Histories"
+                  "label": "Oral Histories",
+                  "keywords": [
+                    "oral",
+                    "histories",
+                    "biography",
+                    "memoir",
+                    "family",
+                    "community"
+                  ],
+                  "status": "active",
+                  "sort": 232,
+                  "seeAlso": []
                 },
                 {
                   "code": "233",
                   "shortLabel": "CMM",
-                  "label": "Community Memory"
+                  "label": "Community Memory",
+                  "keywords": [
+                    "community",
+                    "memory",
+                    "biography",
+                    "memoir",
+                    "family",
+                    "histories"
+                  ],
+                  "status": "active",
+                  "sort": 233,
+                  "seeAlso": []
                 },
                 {
                   "code": "234",
                   "shortLabel": "TRB",
-                  "label": "Tribal & Indigenous Life Stories"
+                  "label": "Tribal & Indigenous Life Stories",
+                  "keywords": [
+                    "tribal",
+                    "indigenous",
+                    "life",
+                    "stories",
+                    "biography",
+                    "memoir",
+                    "family",
+                    "community",
+                    "histories"
+                  ],
+                  "status": "active",
+                  "sort": 234,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": [
+                "family",
+                "community",
+                "histories",
+                "biography",
+                "memoir"
+              ],
+              "status": "active",
+              "sort": 230,
+              "seeAlso": []
             },
             {
               "code": "240",
@@ -163,26 +1073,77 @@
                 {
                   "code": "241",
                   "shortLabel": "CBI",
-                  "label": "Collected Biography"
+                  "label": "Collected Biography",
+                  "keywords": [
+                    "collected",
+                    "biography",
+                    "memoir",
+                    "reference",
+                    "lives"
+                  ],
+                  "status": "active",
+                  "sort": 241,
+                  "seeAlso": []
                 },
                 {
                   "code": "242",
                   "shortLabel": "TIM",
-                  "label": "Timelines & Profiles"
+                  "label": "Timelines & Profiles",
+                  "keywords": [
+                    "timelines",
+                    "profiles",
+                    "biography",
+                    "memoir",
+                    "reference",
+                    "lives"
+                  ],
+                  "status": "active",
+                  "sort": 242,
+                  "seeAlso": []
                 },
                 {
                   "code": "243",
                   "shortLabel": "LET",
-                  "label": "Letters & Correspondence"
+                  "label": "Letters & Correspondence",
+                  "keywords": [
+                    "letters",
+                    "correspondence",
+                    "biography",
+                    "memoir",
+                    "reference",
+                    "lives"
+                  ],
+                  "status": "active",
+                  "sort": 243,
+                  "seeAlso": []
                 },
                 {
                   "code": "244",
                   "shortLabel": "ARC",
-                  "label": "Archival Sourcebooks"
+                  "label": "Archival Sourcebooks",
+                  "keywords": [
+                    "archival",
+                    "sourcebooks",
+                    "biography",
+                    "memoir",
+                    "reference",
+                    "lives"
+                  ],
+                  "status": "active",
+                  "sort": 244,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["reference", "lives", "biography", "memoir"],
+              "status": "active",
+              "sort": 240,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["biography", "memoir"],
+          "status": "active",
+          "sort": 200,
+          "seeAlso": []
         },
         {
           "code": "300",
@@ -194,70 +1155,241 @@
               "shortLabel": "MGT",
               "label": "Management",
               "children": [
-                { "code": "311", "shortLabel": "LDR", "label": "Leadership" },
+                {
+                  "code": "311",
+                  "shortLabel": "LDR",
+                  "label": "Leadership",
+                  "keywords": ["leadership", "business", "work", "management"],
+                  "status": "active",
+                  "sort": 311,
+                  "seeAlso": []
+                },
                 {
                   "code": "312",
                   "shortLabel": "TMC",
-                  "label": "Teams & Culture"
+                  "label": "Teams & Culture",
+                  "keywords": [
+                    "teams",
+                    "culture",
+                    "business",
+                    "work",
+                    "management"
+                  ],
+                  "status": "active",
+                  "sort": 312,
+                  "seeAlso": []
                 },
-                { "code": "313", "shortLabel": "OPR", "label": "Operations" },
-                { "code": "314", "shortLabel": "STR", "label": "Strategy" }
-              ]
+                {
+                  "code": "313",
+                  "shortLabel": "OPR",
+                  "label": "Operations",
+                  "keywords": ["operations", "business", "work", "management"],
+                  "status": "active",
+                  "sort": 313,
+                  "seeAlso": []
+                },
+                {
+                  "code": "314",
+                  "shortLabel": "ST4",
+                  "label": "Strategy",
+                  "keywords": ["strategy", "business", "work", "management"],
+                  "status": "active",
+                  "sort": 314,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["management", "business", "work"],
+              "status": "active",
+              "sort": 310,
+              "seeAlso": []
             },
             {
               "code": "320",
               "shortLabel": "ETP",
               "label": "Entrepreneurship",
               "children": [
-                { "code": "321", "shortLabel": "STU", "label": "Startups" },
+                {
+                  "code": "321",
+                  "shortLabel": "STU",
+                  "label": "Startups",
+                  "keywords": [
+                    "startups",
+                    "business",
+                    "work",
+                    "entrepreneurship"
+                  ],
+                  "status": "active",
+                  "sort": 321,
+                  "seeAlso": []
+                },
                 {
                   "code": "322",
                   "shortLabel": "SML",
-                  "label": "Small Business"
+                  "label": "Small Business",
+                  "keywords": ["small", "business", "work", "entrepreneurship"],
+                  "status": "active",
+                  "sort": 322,
+                  "seeAlso": []
                 },
                 {
                   "code": "323",
                   "shortLabel": "FRL",
-                  "label": "Freelance Practice"
+                  "label": "Freelance Practice",
+                  "keywords": [
+                    "freelance",
+                    "practice",
+                    "business",
+                    "work",
+                    "entrepreneurship"
+                  ],
+                  "status": "active",
+                  "sort": 323,
+                  "seeAlso": []
                 },
                 {
                   "code": "324",
                   "shortLabel": "SAL",
-                  "label": "Sales & Marketing"
+                  "label": "Sales & Marketing",
+                  "keywords": [
+                    "sales",
+                    "marketing",
+                    "business",
+                    "work",
+                    "entrepreneurship"
+                  ],
+                  "status": "active",
+                  "sort": 324,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["entrepreneurship", "business", "work"],
+              "status": "active",
+              "sort": 320,
+              "seeAlso": []
             },
             {
               "code": "330",
               "shortLabel": "ECF",
               "label": "Economics & Finance",
               "children": [
-                { "code": "331", "shortLabel": "ECN", "label": "Economics" },
+                {
+                  "code": "331",
+                  "shortLabel": "ECN",
+                  "label": "Economics",
+                  "keywords": ["economics", "business", "work", "finance"],
+                  "status": "active",
+                  "sort": 331,
+                  "seeAlso": []
+                },
                 {
                   "code": "332",
                   "shortLabel": "PFN",
-                  "label": "Personal Finance"
+                  "label": "Personal Finance",
+                  "keywords": [
+                    "personal",
+                    "finance",
+                    "business",
+                    "work",
+                    "economics"
+                  ],
+                  "status": "active",
+                  "sort": 332,
+                  "seeAlso": []
                 },
-                { "code": "333", "shortLabel": "IVT", "label": "Investing" },
-                { "code": "334", "shortLabel": "ACC", "label": "Accounting" }
-              ]
+                {
+                  "code": "333",
+                  "shortLabel": "IVT",
+                  "label": "Investing",
+                  "keywords": [
+                    "investing",
+                    "business",
+                    "work",
+                    "economics",
+                    "finance"
+                  ],
+                  "status": "active",
+                  "sort": 333,
+                  "seeAlso": []
+                },
+                {
+                  "code": "334",
+                  "shortLabel": "ACC",
+                  "label": "Accounting",
+                  "keywords": [
+                    "accounting",
+                    "business",
+                    "work",
+                    "economics",
+                    "finance"
+                  ],
+                  "status": "active",
+                  "sort": 334,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["economics", "finance", "business", "work"],
+              "status": "active",
+              "sort": 330,
+              "seeAlso": []
             },
             {
               "code": "340",
-              "shortLabel": "WRK",
+              "shortLabel": "WR0",
               "label": "Work Life",
               "children": [
-                { "code": "341", "shortLabel": "CAR", "label": "Careers" },
-                { "code": "342", "shortLabel": "PRD", "label": "Productivity" },
-                { "code": "343", "shortLabel": "REM", "label": "Remote Work" },
+                {
+                  "code": "341",
+                  "shortLabel": "CAR",
+                  "label": "Careers",
+                  "keywords": ["careers", "business", "work", "life"],
+                  "status": "active",
+                  "sort": 341,
+                  "seeAlso": []
+                },
+                {
+                  "code": "342",
+                  "shortLabel": "PRD",
+                  "label": "Productivity",
+                  "keywords": ["productivity", "business", "work", "life"],
+                  "status": "active",
+                  "sort": 342,
+                  "seeAlso": []
+                },
+                {
+                  "code": "343",
+                  "shortLabel": "REM",
+                  "label": "Remote Work",
+                  "keywords": ["remote", "work", "business", "life"],
+                  "status": "active",
+                  "sort": 343,
+                  "seeAlso": []
+                },
                 {
                   "code": "344",
                   "shortLabel": "LAB",
-                  "label": "Labor & Professions"
+                  "label": "Labor & Professions",
+                  "keywords": [
+                    "labor",
+                    "professions",
+                    "business",
+                    "work",
+                    "life"
+                  ],
+                  "status": "active",
+                  "sort": 344,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["work", "life", "business"],
+              "status": "active",
+              "sort": 340,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["business", "work"],
+          "status": "active",
+          "sort": 300,
+          "seeAlso": []
         },
         {
           "code": "400",
@@ -272,24 +1404,68 @@
                 {
                   "code": "411",
                   "shortLabel": "SWE",
-                  "label": "Software Engineering"
+                  "label": "Software Engineering",
+                  "keywords": [
+                    "software",
+                    "engineering",
+                    "computers",
+                    "technology",
+                    "programming"
+                  ],
+                  "status": "active",
+                  "sort": 411,
+                  "seeAlso": []
                 },
                 {
                   "code": "412",
                   "shortLabel": "WEB",
-                  "label": "Web Development"
+                  "label": "Web Development",
+                  "keywords": [
+                    "web",
+                    "development",
+                    "computers",
+                    "technology",
+                    "programming"
+                  ],
+                  "status": "active",
+                  "sort": 412,
+                  "seeAlso": []
                 },
                 {
                   "code": "413",
                   "shortLabel": "DAT",
-                  "label": "Data & Scripting"
+                  "label": "Data & Scripting",
+                  "keywords": [
+                    "data",
+                    "scripting",
+                    "computers",
+                    "technology",
+                    "programming"
+                  ],
+                  "status": "active",
+                  "sort": 413,
+                  "seeAlso": []
                 },
                 {
                   "code": "414",
-                  "shortLabel": "LAN",
-                  "label": "Languages & Paradigms"
+                  "shortLabel": "LA4",
+                  "label": "Languages & Paradigms",
+                  "keywords": [
+                    "languages",
+                    "paradigms",
+                    "computers",
+                    "technology",
+                    "programming"
+                  ],
+                  "status": "active",
+                  "sort": 414,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["programming", "computers", "technology"],
+              "status": "active",
+              "sort": 410,
+              "seeAlso": []
             },
             {
               "code": "420",
@@ -299,16 +1475,65 @@
                 {
                   "code": "421",
                   "shortLabel": "OSY",
-                  "label": "Operating Systems"
+                  "label": "Operating Systems",
+                  "keywords": [
+                    "operating",
+                    "systems",
+                    "computers",
+                    "technology"
+                  ],
+                  "status": "active",
+                  "sort": 421,
+                  "seeAlso": []
                 },
-                { "code": "422", "shortLabel": "NET", "label": "Networking" },
-                { "code": "423", "shortLabel": "SEC", "label": "Security" },
+                {
+                  "code": "422",
+                  "shortLabel": "NET",
+                  "label": "Networking",
+                  "keywords": [
+                    "networking",
+                    "computers",
+                    "technology",
+                    "systems"
+                  ],
+                  "status": "active",
+                  "sort": 422,
+                  "seeAlso": []
+                },
+                {
+                  "code": "423",
+                  "shortLabel": "SEC",
+                  "label": "Security",
+                  "keywords": [
+                    "security",
+                    "computers",
+                    "technology",
+                    "systems"
+                  ],
+                  "status": "active",
+                  "sort": 423,
+                  "seeAlso": []
+                },
                 {
                   "code": "424",
                   "shortLabel": "CLD",
-                  "label": "Cloud & Infrastructure"
+                  "label": "Cloud & Infrastructure",
+                  "keywords": [
+                    "cloud",
+                    "infrastructure",
+                    "computers",
+                    "technology",
+                    "systems"
+                  ],
+                  "status": "active",
+                  "sort": 424,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["systems", "computers", "technology"],
+              "status": "active",
+              "sort": 420,
+              "seeAlso": []
             },
             {
               "code": "430",
@@ -318,24 +1543,74 @@
                 {
                   "code": "431",
                   "shortLabel": "AIF",
-                  "label": "Artificial Intelligence"
+                  "label": "Artificial Intelligence",
+                  "keywords": [
+                    "artificial",
+                    "intelligence",
+                    "computers",
+                    "technology",
+                    "applied",
+                    "computing"
+                  ],
+                  "status": "active",
+                  "sort": 431,
+                  "seeAlso": ["444", "1534"]
                 },
                 {
                   "code": "432",
                   "shortLabel": "HCI",
-                  "label": "Human-Computer Interaction"
+                  "label": "Human-Computer Interaction",
+                  "keywords": [
+                    "human",
+                    "computer",
+                    "interaction",
+                    "computers",
+                    "technology",
+                    "applied",
+                    "computing"
+                  ],
+                  "status": "active",
+                  "sort": 432,
+                  "seeAlso": []
                 },
                 {
                   "code": "433",
                   "shortLabel": "GAM",
-                  "label": "Game Development"
+                  "label": "Game Development",
+                  "keywords": [
+                    "game",
+                    "development",
+                    "computers",
+                    "technology",
+                    "applied",
+                    "computing"
+                  ],
+                  "status": "active",
+                  "sort": 433,
+                  "seeAlso": []
                 },
                 {
                   "code": "434",
                   "shortLabel": "ROB",
-                  "label": "Robotics & Embedded Systems"
+                  "label": "Robotics & Embedded Systems",
+                  "keywords": [
+                    "robotics",
+                    "embedded",
+                    "systems",
+                    "computers",
+                    "technology",
+                    "applied",
+                    "computing"
+                  ],
+                  "status": "active",
+                  "sort": 434,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["applied", "computing", "computers", "technology"],
+              "status": "active",
+              "sort": 430,
+              "seeAlso": []
             },
             {
               "code": "440",
@@ -345,22 +1620,75 @@
                 {
                   "code": "441",
                   "shortLabel": "NTC",
-                  "label": "Internet Culture"
+                  "label": "Internet Culture",
+                  "keywords": [
+                    "internet",
+                    "culture",
+                    "computers",
+                    "technology",
+                    "digital"
+                  ],
+                  "status": "active",
+                  "sort": 441,
+                  "seeAlso": []
                 },
-                { "code": "442", "shortLabel": "SMD", "label": "Social Media" },
+                {
+                  "code": "442",
+                  "shortLabel": "SMD",
+                  "label": "Social Media",
+                  "keywords": [
+                    "social",
+                    "media",
+                    "computers",
+                    "technology",
+                    "digital",
+                    "culture"
+                  ],
+                  "status": "active",
+                  "sort": 442,
+                  "seeAlso": []
+                },
                 {
                   "code": "443",
                   "shortLabel": "DGD",
-                  "label": "Digital Design"
+                  "label": "Digital Design",
+                  "keywords": [
+                    "digital",
+                    "design",
+                    "computers",
+                    "technology",
+                    "culture"
+                  ],
+                  "status": "active",
+                  "sort": 443,
+                  "seeAlso": []
                 },
                 {
                   "code": "444",
-                  "shortLabel": "ETH",
-                  "label": "Technology Ethics"
+                  "shortLabel": "ET4",
+                  "label": "Technology Ethics",
+                  "keywords": [
+                    "technology",
+                    "ethics",
+                    "computers",
+                    "digital",
+                    "culture"
+                  ],
+                  "status": "active",
+                  "sort": 444,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["digital", "culture", "computers", "technology"],
+              "status": "active",
+              "sort": 440,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["computers", "technology"],
+          "status": "active",
+          "sort": 400,
+          "seeAlso": []
         },
         {
           "code": "500",
@@ -375,20 +1703,44 @@
                 {
                   "code": "511",
                   "shortLabel": "ANC",
-                  "label": "Ancient & Medieval"
+                  "label": "Ancient & Medieval",
+                  "keywords": ["ancient", "medieval", "history", "society"],
+                  "status": "active",
+                  "sort": 511,
+                  "seeAlso": []
                 },
                 {
                   "code": "512",
                   "shortLabel": "MHI",
-                  "label": "Modern History"
+                  "label": "Modern History",
+                  "keywords": ["modern", "history", "society"],
+                  "status": "active",
+                  "sort": 512,
+                  "seeAlso": []
                 },
                 {
                   "code": "513",
                   "shortLabel": "LOC",
-                  "label": "Local & Regional History"
+                  "label": "Local & Regional History",
+                  "keywords": ["local", "regional", "history", "society"],
+                  "status": "active",
+                  "sort": 513,
+                  "seeAlso": []
                 },
-                { "code": "514", "shortLabel": "WRL", "label": "World History" }
-              ]
+                {
+                  "code": "514",
+                  "shortLabel": "WRL",
+                  "label": "World History",
+                  "keywords": ["world", "history", "society"],
+                  "status": "active",
+                  "sort": 514,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["history", "society"],
+              "status": "active",
+              "sort": 510,
+              "seeAlso": []
             },
             {
               "code": "520",
@@ -398,20 +1750,70 @@
                 {
                   "code": "521",
                   "shortLabel": "POG",
-                  "label": "Politics & Government"
+                  "label": "Politics & Government",
+                  "keywords": [
+                    "politics",
+                    "government",
+                    "history",
+                    "society",
+                    "social",
+                    "studies"
+                  ],
+                  "status": "active",
+                  "sort": 521,
+                  "seeAlso": []
                 },
-                { "code": "522", "shortLabel": "SOL", "label": "Sociology" },
+                {
+                  "code": "522",
+                  "shortLabel": "SOL",
+                  "label": "Sociology",
+                  "keywords": [
+                    "sociology",
+                    "history",
+                    "society",
+                    "social",
+                    "studies"
+                  ],
+                  "status": "active",
+                  "sort": 522,
+                  "seeAlso": []
+                },
                 {
                   "code": "523",
                   "shortLabel": "CUS",
-                  "label": "Cultural Studies"
+                  "label": "Cultural Studies",
+                  "keywords": [
+                    "cultural",
+                    "studies",
+                    "history",
+                    "society",
+                    "social"
+                  ],
+                  "status": "active",
+                  "sort": 523,
+                  "seeAlso": ["154", "934"]
                 },
                 {
                   "code": "524",
                   "shortLabel": "EDU",
-                  "label": "Education & Institutions"
+                  "label": "Education & Institutions",
+                  "keywords": [
+                    "education",
+                    "institutions",
+                    "history",
+                    "society",
+                    "social",
+                    "studies"
+                  ],
+                  "status": "active",
+                  "sort": 524,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["social", "studies", "history", "society"],
+              "status": "active",
+              "sort": 520,
+              "seeAlso": []
             },
             {
               "code": "530",
@@ -421,49 +1823,156 @@
                 {
                   "code": "531",
                   "shortLabel": "CPL",
-                  "label": "Constitutional & Public Law"
+                  "label": "Constitutional & Public Law",
+                  "keywords": [
+                    "constitutional",
+                    "public",
+                    "law",
+                    "history",
+                    "society",
+                    "civic",
+                    "life"
+                  ],
+                  "status": "active",
+                  "sort": 531,
+                  "seeAlso": []
                 },
                 {
                   "code": "532",
                   "shortLabel": "JUS",
-                  "label": "Justice & Rights"
+                  "label": "Justice & Rights",
+                  "keywords": [
+                    "justice",
+                    "rights",
+                    "history",
+                    "society",
+                    "law",
+                    "civic",
+                    "life"
+                  ],
+                  "status": "active",
+                  "sort": 532,
+                  "seeAlso": []
                 },
                 {
                   "code": "533",
                   "shortLabel": "PPL",
-                  "label": "Public Policy"
+                  "label": "Public Policy",
+                  "keywords": [
+                    "public",
+                    "policy",
+                    "history",
+                    "society",
+                    "law",
+                    "civic",
+                    "life"
+                  ],
+                  "status": "active",
+                  "sort": 533,
+                  "seeAlso": []
                 },
                 {
                   "code": "534",
                   "shortLabel": "CIV",
-                  "label": "Civic Practice"
+                  "label": "Civic Practice",
+                  "keywords": [
+                    "civic",
+                    "practice",
+                    "history",
+                    "society",
+                    "law",
+                    "life"
+                  ],
+                  "status": "active",
+                  "sort": 534,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["law", "civic", "life", "history", "society"],
+              "status": "active",
+              "sort": 530,
+              "seeAlso": []
             },
             {
               "code": "540",
               "shortLabel": "GPL",
               "label": "Geography & Place",
               "children": [
-                { "code": "541", "shortLabel": "CRG", "label": "Cartography" },
+                {
+                  "code": "541",
+                  "shortLabel": "CRG",
+                  "label": "Cartography",
+                  "keywords": [
+                    "cartography",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
+                  ],
+                  "status": "active",
+                  "sort": 541,
+                  "seeAlso": []
+                },
                 {
                   "code": "542",
                   "shortLabel": "REG",
-                  "label": "Regional Studies"
+                  "label": "Regional Studies",
+                  "keywords": [
+                    "regional",
+                    "studies",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
+                  ],
+                  "status": "active",
+                  "sort": 542,
+                  "seeAlso": []
                 },
                 {
                   "code": "543",
                   "shortLabel": "URB",
-                  "label": "Urban Studies"
+                  "label": "Urban Studies",
+                  "keywords": [
+                    "urban",
+                    "studies",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
+                  ],
+                  "status": "active",
+                  "sort": 543,
+                  "seeAlso": []
                 },
                 {
                   "code": "544",
                   "shortLabel": "RUR",
-                  "label": "Rural & Environmental Regions"
+                  "label": "Rural & Environmental Regions",
+                  "keywords": [
+                    "rural",
+                    "environmental",
+                    "regions",
+                    "history",
+                    "society",
+                    "geography",
+                    "place"
+                  ],
+                  "status": "active",
+                  "sort": 544,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["geography", "place", "history", "society"],
+              "status": "active",
+              "sort": 540,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["history", "society"],
+          "status": "active",
+          "sort": 500,
+          "seeAlso": []
         },
         {
           "code": "600",
@@ -475,53 +1984,208 @@
               "shortLabel": "LNG",
               "label": "Language Study",
               "children": [
-                { "code": "611", "shortLabel": "LIN", "label": "Linguistics" },
+                {
+                  "code": "611",
+                  "shortLabel": "LIN",
+                  "label": "Linguistics",
+                  "keywords": [
+                    "linguistics",
+                    "language",
+                    "literature",
+                    "study"
+                  ],
+                  "status": "active",
+                  "sort": 611,
+                  "seeAlso": []
+                },
                 {
                   "code": "612",
                   "shortLabel": "GRM",
-                  "label": "Grammar & Usage"
+                  "label": "Grammar & Usage",
+                  "keywords": [
+                    "grammar",
+                    "usage",
+                    "language",
+                    "literature",
+                    "study"
+                  ],
+                  "status": "active",
+                  "sort": 612,
+                  "seeAlso": []
                 },
                 {
                   "code": "613",
                   "shortLabel": "LRN",
-                  "label": "Language Learning"
+                  "label": "Language Learning",
+                  "keywords": ["language", "learning", "literature", "study"],
+                  "status": "active",
+                  "sort": 613,
+                  "seeAlso": []
                 },
-                { "code": "614", "shortLabel": "TRN", "label": "Translation" }
-              ]
+                {
+                  "code": "614",
+                  "shortLabel": "TR4",
+                  "label": "Translation",
+                  "keywords": [
+                    "translation",
+                    "language",
+                    "literature",
+                    "study"
+                  ],
+                  "status": "active",
+                  "sort": 614,
+                  "seeAlso": ["642", "931"]
+                }
+              ],
+              "keywords": ["language", "study", "literature"],
+              "status": "active",
+              "sort": 610,
+              "seeAlso": []
             },
             {
               "code": "620",
               "shortLabel": "LST",
               "label": "Literary Study",
               "children": [
-                { "code": "621", "shortLabel": "CRT", "label": "Criticism" },
+                {
+                  "code": "621",
+                  "shortLabel": "CRT",
+                  "label": "Criticism",
+                  "keywords": [
+                    "criticism",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
+                  ],
+                  "status": "active",
+                  "sort": 621,
+                  "seeAlso": []
+                },
                 {
                   "code": "622",
                   "shortLabel": "PCT",
-                  "label": "Poetics & Craft"
+                  "label": "Poetics & Craft",
+                  "keywords": [
+                    "poetics",
+                    "craft",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
+                  ],
+                  "status": "active",
+                  "sort": 622,
+                  "seeAlso": []
                 },
-                { "code": "623", "shortLabel": "ANT", "label": "Anthologies" },
+                {
+                  "code": "623",
+                  "shortLabel": "ANT",
+                  "label": "Anthologies",
+                  "keywords": [
+                    "anthologies",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
+                  ],
+                  "status": "active",
+                  "sort": 623,
+                  "seeAlso": []
+                },
                 {
                   "code": "624",
                   "shortLabel": "TRD",
-                  "label": "Traditions & Movements"
+                  "label": "Traditions & Movements",
+                  "keywords": [
+                    "traditions",
+                    "movements",
+                    "language",
+                    "literature",
+                    "literary",
+                    "study"
+                  ],
+                  "status": "active",
+                  "sort": 624,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["literary", "study", "language", "literature"],
+              "status": "active",
+              "sort": 620,
+              "seeAlso": []
             },
             {
               "code": "630",
               "shortLabel": "FRM",
               "label": "Forms & Genres",
               "children": [
-                { "code": "631", "shortLabel": "POY", "label": "Poetry" },
-                { "code": "632", "shortLabel": "DRM", "label": "Drama" },
-                { "code": "633", "shortLabel": "ESY", "label": "Essays" },
+                {
+                  "code": "631",
+                  "shortLabel": "POY",
+                  "label": "Poetry",
+                  "keywords": [
+                    "poetry",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
+                  ],
+                  "status": "active",
+                  "sort": 631,
+                  "seeAlso": []
+                },
+                {
+                  "code": "632",
+                  "shortLabel": "DRM",
+                  "label": "Drama",
+                  "keywords": [
+                    "drama",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
+                  ],
+                  "status": "active",
+                  "sort": 632,
+                  "seeAlso": []
+                },
+                {
+                  "code": "633",
+                  "shortLabel": "ESY",
+                  "label": "Essays",
+                  "keywords": [
+                    "essays",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
+                  ],
+                  "status": "active",
+                  "sort": 633,
+                  "seeAlso": []
+                },
                 {
                   "code": "634",
                   "shortLabel": "FOL",
-                  "label": "Folklore & Myth"
+                  "label": "Folklore & Myth",
+                  "keywords": [
+                    "folklore",
+                    "myth",
+                    "language",
+                    "literature",
+                    "forms",
+                    "genres"
+                  ],
+                  "status": "active",
+                  "sort": 634,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["forms", "genres", "language", "literature"],
+              "status": "active",
+              "sort": 630,
+              "seeAlso": []
             },
             {
               "code": "640",
@@ -531,22 +2195,76 @@
                 {
                   "code": "641",
                   "shortLabel": "CRW",
-                  "label": "Creative Writing"
+                  "label": "Creative Writing",
+                  "keywords": [
+                    "creative",
+                    "writing",
+                    "language",
+                    "literature",
+                    "practice"
+                  ],
+                  "status": "active",
+                  "sort": 641,
+                  "seeAlso": []
                 },
                 {
                   "code": "642",
                   "shortLabel": "NFW",
-                  "label": "Nonfiction Writing"
+                  "label": "Nonfiction Writing",
+                  "keywords": [
+                    "nonfiction",
+                    "writing",
+                    "language",
+                    "literature",
+                    "practice"
+                  ],
+                  "status": "active",
+                  "sort": 642,
+                  "seeAlso": []
                 },
-                { "code": "643", "shortLabel": "EDT", "label": "Editing" },
+                {
+                  "code": "643",
+                  "shortLabel": "EDT",
+                  "label": "Editing",
+                  "keywords": [
+                    "editing",
+                    "language",
+                    "literature",
+                    "writing",
+                    "practice"
+                  ],
+                  "status": "active",
+                  "sort": 643,
+                  "seeAlso": []
+                },
                 {
                   "code": "644",
-                  "shortLabel": "PUB",
-                  "label": "Publishing & Small Press"
+                  "shortLabel": "PU4",
+                  "label": "Publishing & Small Press",
+                  "keywords": [
+                    "publishing",
+                    "small",
+                    "press",
+                    "language",
+                    "literature",
+                    "writing",
+                    "practice"
+                  ],
+                  "status": "active",
+                  "sort": 644,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["writing", "practice", "language", "literature"],
+              "status": "active",
+              "sort": 640,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["language", "literature"],
+          "status": "active",
+          "sort": 600,
+          "seeAlso": []
         },
         {
           "code": "700",
@@ -558,45 +2276,211 @@
               "shortLabel": "LSC",
               "label": "Life Sciences",
               "children": [
-                { "code": "711", "shortLabel": "BYO", "label": "Biology" },
-                { "code": "712", "shortLabel": "ECL", "label": "Ecology" },
-                { "code": "713", "shortLabel": "BOT", "label": "Botany" },
-                { "code": "714", "shortLabel": "ZOO", "label": "Zoology" }
-              ]
+                {
+                  "code": "711",
+                  "shortLabel": "BYO",
+                  "label": "Biology",
+                  "keywords": [
+                    "biology",
+                    "science",
+                    "nature",
+                    "life",
+                    "sciences"
+                  ],
+                  "status": "active",
+                  "sort": 711,
+                  "seeAlso": []
+                },
+                {
+                  "code": "712",
+                  "shortLabel": "ECL",
+                  "label": "Ecology",
+                  "keywords": [
+                    "ecology",
+                    "science",
+                    "nature",
+                    "life",
+                    "sciences"
+                  ],
+                  "status": "active",
+                  "sort": 712,
+                  "seeAlso": ["742", "7523"]
+                },
+                {
+                  "code": "713",
+                  "shortLabel": "BOT",
+                  "label": "Botany",
+                  "keywords": [
+                    "botany",
+                    "science",
+                    "nature",
+                    "life",
+                    "sciences"
+                  ],
+                  "status": "active",
+                  "sort": 713,
+                  "seeAlso": []
+                },
+                {
+                  "code": "714",
+                  "shortLabel": "ZOO",
+                  "label": "Zoology",
+                  "keywords": [
+                    "zoology",
+                    "science",
+                    "nature",
+                    "life",
+                    "sciences"
+                  ],
+                  "status": "active",
+                  "sort": 714,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["life", "sciences", "science", "nature"],
+              "status": "active",
+              "sort": 710,
+              "seeAlso": []
             },
             {
               "code": "720",
               "shortLabel": "PHY",
               "label": "Physical Sciences",
               "children": [
-                { "code": "721", "shortLabel": "PHS", "label": "Physics" },
-                { "code": "722", "shortLabel": "CHM", "label": "Chemistry" },
+                {
+                  "code": "721",
+                  "shortLabel": "PHS",
+                  "label": "Physics",
+                  "keywords": [
+                    "physics",
+                    "science",
+                    "nature",
+                    "physical",
+                    "sciences"
+                  ],
+                  "status": "active",
+                  "sort": 721,
+                  "seeAlso": []
+                },
+                {
+                  "code": "722",
+                  "shortLabel": "CHM",
+                  "label": "Chemistry",
+                  "keywords": [
+                    "chemistry",
+                    "science",
+                    "nature",
+                    "physical",
+                    "sciences"
+                  ],
+                  "status": "active",
+                  "sort": 722,
+                  "seeAlso": []
+                },
                 {
                   "code": "723",
                   "shortLabel": "GES",
-                  "label": "Geology & Earth Science"
+                  "label": "Geology & Earth Science",
+                  "keywords": [
+                    "geology",
+                    "earth",
+                    "science",
+                    "nature",
+                    "physical",
+                    "sciences"
+                  ],
+                  "status": "active",
+                  "sort": 723,
+                  "seeAlso": []
                 },
                 {
                   "code": "724",
                   "shortLabel": "AST",
-                  "label": "Astronomy & Space"
+                  "label": "Astronomy & Space",
+                  "keywords": [
+                    "astronomy",
+                    "space",
+                    "science",
+                    "nature",
+                    "physical",
+                    "sciences"
+                  ],
+                  "status": "active",
+                  "sort": 724,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["physical", "sciences", "science", "nature"],
+              "status": "active",
+              "sort": 720,
+              "seeAlso": []
             },
             {
               "code": "730",
               "shortLabel": "MTL",
               "label": "Math & Logic",
               "children": [
-                { "code": "731", "shortLabel": "MTH", "label": "Mathematics" },
-                { "code": "732", "shortLabel": "STA", "label": "Statistics" },
-                { "code": "733", "shortLabel": "LOG", "label": "Logic" },
+                {
+                  "code": "731",
+                  "shortLabel": "MTH",
+                  "label": "Mathematics",
+                  "keywords": [
+                    "mathematics",
+                    "science",
+                    "nature",
+                    "math",
+                    "logic"
+                  ],
+                  "status": "active",
+                  "sort": 731,
+                  "seeAlso": []
+                },
+                {
+                  "code": "732",
+                  "shortLabel": "STA",
+                  "label": "Statistics",
+                  "keywords": [
+                    "statistics",
+                    "science",
+                    "nature",
+                    "math",
+                    "logic"
+                  ],
+                  "status": "active",
+                  "sort": 732,
+                  "seeAlso": []
+                },
+                {
+                  "code": "733",
+                  "shortLabel": "LOG",
+                  "label": "Logic",
+                  "keywords": ["logic", "science", "nature", "math"],
+                  "status": "active",
+                  "sort": 733,
+                  "seeAlso": []
+                },
                 {
                   "code": "734",
                   "shortLabel": "MST",
-                  "label": "Models & Systems Thinking"
+                  "label": "Models & Systems Thinking",
+                  "keywords": [
+                    "models",
+                    "systems",
+                    "thinking",
+                    "science",
+                    "nature",
+                    "math",
+                    "logic"
+                  ],
+                  "status": "active",
+                  "sort": 734,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["math", "logic", "science", "nature"],
+              "status": "active",
+              "sort": 730,
+              "seeAlso": []
             },
             {
               "code": "740",
@@ -606,18 +2490,407 @@
                 {
                   "code": "741",
                   "shortLabel": "OBS",
-                  "label": "Field Observation"
+                  "label": "Field Observation",
+                  "keywords": [
+                    "field",
+                    "observation",
+                    "science",
+                    "nature",
+                    "writing"
+                  ],
+                  "status": "active",
+                  "sort": 741,
+                  "seeAlso": []
                 },
-                { "code": "742", "shortLabel": "ENV", "label": "Environment" },
-                { "code": "743", "shortLabel": "CLM", "label": "Climate" },
+                {
+                  "code": "742",
+                  "shortLabel": "EN2",
+                  "label": "Environment",
+                  "keywords": ["environment", "science", "nature", "writing"],
+                  "status": "active",
+                  "sort": 742,
+                  "seeAlso": []
+                },
+                {
+                  "code": "743",
+                  "shortLabel": "CLM",
+                  "label": "Climate",
+                  "keywords": ["climate", "science", "nature", "writing"],
+                  "status": "active",
+                  "sort": 743,
+                  "seeAlso": []
+                },
                 {
                   "code": "744",
                   "shortLabel": "NTR",
-                  "label": "Natural History"
+                  "label": "Natural History",
+                  "keywords": [
+                    "natural",
+                    "history",
+                    "science",
+                    "nature",
+                    "writing"
+                  ],
+                  "status": "active",
+                  "sort": 744,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["nature", "writing", "science"],
+              "status": "active",
+              "sort": 740,
+              "seeAlso": []
+            },
+            {
+              "code": "750",
+              "shortLabel": "ANW",
+              "label": "Animals & Wildlife",
+              "children": [
+                {
+                  "code": "751",
+                  "shortLabel": "WLD",
+                  "label": "Wildlife",
+                  "children": [
+                    {
+                      "code": "7511",
+                      "shortLabel": "BRD",
+                      "label": "Birds",
+                      "keywords": [
+                        "birds",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife"
+                      ],
+                      "status": "active",
+                      "sort": 7511,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7512",
+                      "shortLabel": "MML",
+                      "label": "Mammals",
+                      "keywords": [
+                        "mammals",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife"
+                      ],
+                      "status": "active",
+                      "sort": 7512,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7513",
+                      "shortLabel": "MRN",
+                      "label": "Marine Life",
+                      "keywords": [
+                        "marine",
+                        "life",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife"
+                      ],
+                      "status": "active",
+                      "sort": 7513,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7514",
+                      "shortLabel": "INS",
+                      "label": "Insects & Invertebrates",
+                      "keywords": [
+                        "insects",
+                        "invertebrates",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife"
+                      ],
+                      "status": "active",
+                      "sort": 7514,
+                      "seeAlso": []
+                    }
+                  ],
+                  "keywords": ["wildlife", "science", "nature", "animals"],
+                  "status": "active",
+                  "sort": 751,
+                  "seeAlso": ["713", "754"]
+                },
+                {
+                  "code": "752",
+                  "shortLabel": "ANB",
+                  "label": "Animal Behavior",
+                  "children": [
+                    {
+                      "code": "7521",
+                      "shortLabel": "OB1",
+                      "label": "Observation & Tracking",
+                      "keywords": [
+                        "observation",
+                        "tracking",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "animal",
+                        "behavior"
+                      ],
+                      "status": "active",
+                      "sort": 7521,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7522",
+                      "shortLabel": "ET2",
+                      "label": "Ethology",
+                      "keywords": [
+                        "ethology",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "animal",
+                        "behavior"
+                      ],
+                      "status": "active",
+                      "sort": 7522,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7523",
+                      "shortLabel": "ECO",
+                      "label": "Ecology of Animals",
+                      "keywords": [
+                        "ecology",
+                        "of",
+                        "animals",
+                        "science",
+                        "nature",
+                        "wildlife",
+                        "animal",
+                        "behavior"
+                      ],
+                      "status": "active",
+                      "sort": 7523,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7524",
+                      "shortLabel": "CON",
+                      "label": "Conservation Biology",
+                      "keywords": [
+                        "conservation",
+                        "biology",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "animal",
+                        "behavior"
+                      ],
+                      "status": "active",
+                      "sort": 7524,
+                      "seeAlso": []
+                    }
+                  ],
+                  "keywords": [
+                    "animal",
+                    "behavior",
+                    "science",
+                    "nature",
+                    "animals",
+                    "wildlife"
+                  ],
+                  "status": "active",
+                  "sort": 752,
+                  "seeAlso": []
+                },
+                {
+                  "code": "753",
+                  "shortLabel": "DOM",
+                  "label": "Domesticated Animals",
+                  "children": [
+                    {
+                      "code": "7531",
+                      "shortLabel": "EQN",
+                      "label": "Equine",
+                      "keywords": [
+                        "equine",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "domesticated"
+                      ],
+                      "status": "active",
+                      "sort": 7531,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7532",
+                      "shortLabel": "FAR",
+                      "label": "Farm Animals",
+                      "keywords": [
+                        "farm",
+                        "animals",
+                        "science",
+                        "nature",
+                        "wildlife",
+                        "domesticated"
+                      ],
+                      "status": "active",
+                      "sort": 7532,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7533",
+                      "shortLabel": "CAN",
+                      "label": "Canines",
+                      "keywords": [
+                        "canines",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "domesticated"
+                      ],
+                      "status": "active",
+                      "sort": 7533,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7534",
+                      "shortLabel": "FLN",
+                      "label": "Felines",
+                      "keywords": [
+                        "felines",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "domesticated"
+                      ],
+                      "status": "active",
+                      "sort": 7534,
+                      "seeAlso": []
+                    }
+                  ],
+                  "keywords": [
+                    "domesticated",
+                    "animals",
+                    "science",
+                    "nature",
+                    "wildlife"
+                  ],
+                  "status": "active",
+                  "sort": 753,
+                  "seeAlso": []
+                },
+                {
+                  "code": "754",
+                  "shortLabel": "NT4",
+                  "label": "Nature Companions",
+                  "children": [
+                    {
+                      "code": "7541",
+                      "shortLabel": "PET",
+                      "label": "Pet Care",
+                      "keywords": [
+                        "pet",
+                        "care",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "companions"
+                      ],
+                      "status": "active",
+                      "sort": 7541,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7542",
+                      "shortLabel": "AQL",
+                      "label": "Aquariums & Terrariums",
+                      "keywords": [
+                        "aquariums",
+                        "terrariums",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "companions"
+                      ],
+                      "status": "active",
+                      "sort": 7542,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7543",
+                      "shortLabel": "BR3",
+                      "label": "Birdkeeping",
+                      "keywords": [
+                        "birdkeeping",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "companions"
+                      ],
+                      "status": "active",
+                      "sort": 7543,
+                      "seeAlso": []
+                    },
+                    {
+                      "code": "7544",
+                      "shortLabel": "RSC",
+                      "label": "Rescue & Rehabilitation",
+                      "keywords": [
+                        "rescue",
+                        "rehabilitation",
+                        "science",
+                        "nature",
+                        "animals",
+                        "wildlife",
+                        "companions"
+                      ],
+                      "status": "active",
+                      "sort": 7544,
+                      "seeAlso": []
+                    }
+                  ],
+                  "keywords": [
+                    "nature",
+                    "companions",
+                    "science",
+                    "animals",
+                    "wildlife"
+                  ],
+                  "status": "active",
+                  "sort": 754,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": [
+                "animals",
+                "wildlife",
+                "zoology",
+                "fauna",
+                "science",
+                "nature"
+              ],
+              "status": "active",
+              "sort": 750,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["science", "nature"],
+          "status": "active",
+          "sort": 700,
+          "seeAlso": []
         },
         {
           "code": "800",
@@ -632,20 +2905,44 @@
                 {
                   "code": "811",
                   "shortLabel": "LFI",
-                  "label": "Literary Fiction"
+                  "label": "Literary Fiction",
+                  "keywords": ["literary", "fiction", "general"],
+                  "status": "active",
+                  "sort": 811,
+                  "seeAlso": []
                 },
                 {
                   "code": "812",
                   "shortLabel": "CFI",
-                  "label": "Contemporary Fiction"
+                  "label": "Contemporary Fiction",
+                  "keywords": ["contemporary", "fiction", "general"],
+                  "status": "active",
+                  "sort": 812,
+                  "seeAlso": []
                 },
                 {
                   "code": "813",
                   "shortLabel": "HFI",
-                  "label": "Historical Fiction"
+                  "label": "Historical Fiction",
+                  "keywords": ["historical", "fiction", "general"],
+                  "status": "active",
+                  "sort": 813,
+                  "seeAlso": []
                 },
-                { "code": "814", "shortLabel": "SLC", "label": "Slice of Life" }
-              ]
+                {
+                  "code": "814",
+                  "shortLabel": "SLC",
+                  "label": "Slice of Life",
+                  "keywords": ["slice", "of", "life", "fiction", "general"],
+                  "status": "active",
+                  "sort": 814,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["general", "fiction"],
+              "status": "active",
+              "sort": 810,
+              "seeAlso": []
             },
             {
               "code": "820",
@@ -655,31 +2952,91 @@
                 {
                   "code": "821",
                   "shortLabel": "SCF",
-                  "label": "Science Fiction"
+                  "label": "Science Fiction",
+                  "keywords": ["science", "fiction", "speculative"],
+                  "status": "active",
+                  "sort": 821,
+                  "seeAlso": ["431", "433"]
                 },
-                { "code": "822", "shortLabel": "FAN", "label": "Fantasy" },
-                { "code": "823", "shortLabel": "HOR", "label": "Horror" },
+                {
+                  "code": "822",
+                  "shortLabel": "FAN",
+                  "label": "Fantasy",
+                  "keywords": ["fantasy", "fiction", "speculative"],
+                  "status": "active",
+                  "sort": 822,
+                  "seeAlso": []
+                },
+                {
+                  "code": "823",
+                  "shortLabel": "HOR",
+                  "label": "Horror",
+                  "keywords": ["horror", "fiction", "speculative"],
+                  "status": "active",
+                  "sort": 823,
+                  "seeAlso": []
+                },
                 {
                   "code": "824",
                   "shortLabel": "MAG",
-                  "label": "Magical Realism"
+                  "label": "Magical Realism",
+                  "keywords": ["magical", "realism", "fiction", "speculative"],
+                  "status": "active",
+                  "sort": 824,
+                  "seeAlso": ["1541", "634"]
                 }
-              ]
+              ],
+              "keywords": ["speculative", "fiction"],
+              "status": "active",
+              "sort": 820,
+              "seeAlso": []
             },
             {
               "code": "830",
               "shortLabel": "GNR",
               "label": "Genre Fiction",
               "children": [
-                { "code": "831", "shortLabel": "MYS", "label": "Mystery" },
-                { "code": "832", "shortLabel": "ROM", "label": "Romance" },
+                {
+                  "code": "831",
+                  "shortLabel": "MY1",
+                  "label": "Mystery",
+                  "keywords": ["mystery", "fiction", "genre"],
+                  "status": "active",
+                  "sort": 831,
+                  "seeAlso": []
+                },
+                {
+                  "code": "832",
+                  "shortLabel": "ROM",
+                  "label": "Romance",
+                  "keywords": ["romance", "fiction", "genre"],
+                  "status": "active",
+                  "sort": 832,
+                  "seeAlso": []
+                },
                 {
                   "code": "833",
                   "shortLabel": "ATR",
-                  "label": "Adventure & Thriller"
+                  "label": "Adventure & Thriller",
+                  "keywords": ["adventure", "thriller", "fiction", "genre"],
+                  "status": "active",
+                  "sort": 833,
+                  "seeAlso": []
                 },
-                { "code": "834", "shortLabel": "CRI", "label": "Crime & Noir" }
-              ]
+                {
+                  "code": "834",
+                  "shortLabel": "CRI",
+                  "label": "Crime & Noir",
+                  "keywords": ["crime", "noir", "fiction", "genre"],
+                  "status": "active",
+                  "sort": 834,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["genre", "fiction"],
+              "status": "active",
+              "sort": 830,
+              "seeAlso": []
             },
             {
               "code": "840",
@@ -689,22 +3046,57 @@
                 {
                   "code": "841",
                   "shortLabel": "SHT",
-                  "label": "Short Stories"
+                  "label": "Short Stories",
+                  "keywords": ["short", "stories", "fiction", "forms"],
+                  "status": "active",
+                  "sort": 841,
+                  "seeAlso": []
                 },
-                { "code": "842", "shortLabel": "NVT", "label": "Novellas" },
+                {
+                  "code": "842",
+                  "shortLabel": "NVT",
+                  "label": "Novellas",
+                  "keywords": ["novellas", "fiction", "short", "forms"],
+                  "status": "active",
+                  "sort": 842,
+                  "seeAlso": []
+                },
                 {
                   "code": "843",
                   "shortLabel": "FLS",
-                  "label": "Flash Fiction"
+                  "label": "Flash Fiction",
+                  "keywords": ["flash", "fiction", "short", "forms"],
+                  "status": "active",
+                  "sort": 843,
+                  "seeAlso": []
                 },
                 {
                   "code": "844",
                   "shortLabel": "FBL",
-                  "label": "Fables & Fairy Tales"
+                  "label": "Fables & Fairy Tales",
+                  "keywords": [
+                    "fables",
+                    "fairy",
+                    "tales",
+                    "fiction",
+                    "short",
+                    "forms"
+                  ],
+                  "status": "active",
+                  "sort": 844,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["short", "forms", "fiction"],
+              "status": "active",
+              "sort": 840,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["fiction"],
+          "status": "active",
+          "sort": 800,
+          "seeAlso": []
         },
         {
           "code": "900",
@@ -719,35 +3111,131 @@
                 {
                   "code": "911",
                   "shortLabel": "ENC",
-                  "label": "Encyclopedias & Guides"
+                  "label": "Encyclopedias & Guides",
+                  "keywords": [
+                    "encyclopedias",
+                    "guides",
+                    "reference",
+                    "practical"
+                  ],
+                  "status": "active",
+                  "sort": 911,
+                  "seeAlso": []
                 },
                 {
                   "code": "912",
                   "shortLabel": "DIC",
-                  "label": "Dictionaries & Glossaries"
+                  "label": "Dictionaries & Glossaries",
+                  "keywords": [
+                    "dictionaries",
+                    "glossaries",
+                    "reference",
+                    "practical"
+                  ],
+                  "status": "active",
+                  "sort": 912,
+                  "seeAlso": []
                 },
                 {
                   "code": "913",
                   "shortLabel": "IDX",
-                  "label": "Indexes & Catalogs"
+                  "label": "Indexes & Catalogs",
+                  "keywords": ["indexes", "catalogs", "reference", "practical"],
+                  "status": "active",
+                  "sort": 913,
+                  "seeAlso": []
                 },
                 {
                   "code": "914",
                   "shortLabel": "MAN",
-                  "label": "Manuals & Handbooks"
+                  "label": "Manuals & Handbooks",
+                  "keywords": [
+                    "manuals",
+                    "handbooks",
+                    "reference",
+                    "practical"
+                  ],
+                  "status": "active",
+                  "sort": 914,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["reference", "practical"],
+              "status": "active",
+              "sort": 910,
+              "seeAlso": []
             },
             {
               "code": "920",
               "shortLabel": "HOM",
               "label": "Home & Making",
               "children": [
-                { "code": "921", "shortLabel": "COO", "label": "Cooking" },
-                { "code": "922", "shortLabel": "CRF", "label": "Crafts" },
-                { "code": "923", "shortLabel": "GAR", "label": "Gardening" },
-                { "code": "924", "shortLabel": "DIY", "label": "DIY & Repair" }
-              ]
+                {
+                  "code": "921",
+                  "shortLabel": "COO",
+                  "label": "Cooking",
+                  "keywords": [
+                    "cooking",
+                    "reference",
+                    "practical",
+                    "home",
+                    "making"
+                  ],
+                  "status": "active",
+                  "sort": 921,
+                  "seeAlso": []
+                },
+                {
+                  "code": "922",
+                  "shortLabel": "CRF",
+                  "label": "Crafts",
+                  "keywords": [
+                    "crafts",
+                    "reference",
+                    "practical",
+                    "home",
+                    "making"
+                  ],
+                  "status": "active",
+                  "sort": 922,
+                  "seeAlso": []
+                },
+                {
+                  "code": "923",
+                  "shortLabel": "GAR",
+                  "label": "Gardening",
+                  "keywords": [
+                    "gardening",
+                    "reference",
+                    "practical",
+                    "home",
+                    "making"
+                  ],
+                  "status": "active",
+                  "sort": 923,
+                  "seeAlso": []
+                },
+                {
+                  "code": "924",
+                  "shortLabel": "DIY",
+                  "label": "DIY & Repair",
+                  "keywords": [
+                    "diy",
+                    "repair",
+                    "reference",
+                    "practical",
+                    "home",
+                    "making"
+                  ],
+                  "status": "active",
+                  "sort": 924,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["home", "making", "reference", "practical"],
+              "status": "active",
+              "sort": 920,
+              "seeAlso": []
             },
             {
               "code": "930",
@@ -757,20 +3245,71 @@
                 {
                   "code": "931",
                   "shortLabel": "TRW",
-                  "label": "Travel Writing"
+                  "label": "Travel Writing",
+                  "keywords": [
+                    "travel",
+                    "writing",
+                    "reference",
+                    "practical",
+                    "place"
+                  ],
+                  "status": "active",
+                  "sort": 931,
+                  "seeAlso": []
                 },
                 {
                   "code": "932",
                   "shortLabel": "RGN",
-                  "label": "Regional Guides"
+                  "label": "Regional Guides",
+                  "keywords": [
+                    "regional",
+                    "guides",
+                    "reference",
+                    "practical",
+                    "travel",
+                    "place"
+                  ],
+                  "status": "active",
+                  "sort": 932,
+                  "seeAlso": []
                 },
-                { "code": "933", "shortLabel": "ATL", "label": "Maps & Atlas" },
+                {
+                  "code": "933",
+                  "shortLabel": "ATL",
+                  "label": "Maps & Atlas",
+                  "keywords": [
+                    "maps",
+                    "atlas",
+                    "reference",
+                    "practical",
+                    "travel",
+                    "place"
+                  ],
+                  "status": "active",
+                  "sort": 933,
+                  "seeAlso": []
+                },
                 {
                   "code": "934",
                   "shortLabel": "CGD",
-                  "label": "Cultural Guidebooks"
+                  "label": "Cultural Guidebooks",
+                  "keywords": [
+                    "cultural",
+                    "guidebooks",
+                    "reference",
+                    "practical",
+                    "travel",
+                    "place"
+                  ],
+                  "status": "active",
+                  "sort": 934,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": ["travel", "place", "reference", "practical"],
+              "status": "active",
+              "sort": 930,
+              "seeAlso": []
             },
             {
               "code": "940",
@@ -780,26 +3319,421 @@
                 {
                   "code": "941",
                   "shortLabel": "HLT",
-                  "label": "Health & Wellness"
+                  "label": "Health & Wellness",
+                  "keywords": [
+                    "health",
+                    "wellness",
+                    "reference",
+                    "practical",
+                    "wellbeing",
+                    "daily",
+                    "life"
+                  ],
+                  "status": "active",
+                  "sort": 941,
+                  "seeAlso": []
                 },
                 {
                   "code": "942",
                   "shortLabel": "MIN",
-                  "label": "Mindfulness & Reflection"
+                  "label": "Mindfulness & Reflection",
+                  "keywords": [
+                    "mindfulness",
+                    "reflection",
+                    "reference",
+                    "practical",
+                    "wellbeing",
+                    "daily",
+                    "life"
+                  ],
+                  "status": "active",
+                  "sort": 942,
+                  "seeAlso": []
                 },
                 {
                   "code": "943",
-                  "shortLabel": "REL",
-                  "label": "Relationships & Family Life"
+                  "shortLabel": "RE3",
+                  "label": "Relationships & Family Life",
+                  "keywords": [
+                    "relationships",
+                    "family",
+                    "life",
+                    "reference",
+                    "practical",
+                    "wellbeing",
+                    "daily"
+                  ],
+                  "status": "active",
+                  "sort": 943,
+                  "seeAlso": []
                 },
                 {
                   "code": "944",
                   "shortLabel": "LHB",
-                  "label": "Lifestyle & Habit Building"
+                  "label": "Lifestyle & Habit Building",
+                  "keywords": [
+                    "lifestyle",
+                    "habit",
+                    "building",
+                    "reference",
+                    "practical",
+                    "wellbeing",
+                    "daily",
+                    "life"
+                  ],
+                  "status": "active",
+                  "sort": 944,
+                  "seeAlso": []
                 }
-              ]
+              ],
+              "keywords": [
+                "wellbeing",
+                "daily",
+                "life",
+                "reference",
+                "practical"
+              ],
+              "status": "active",
+              "sort": 940,
+              "seeAlso": []
             }
-          ]
+          ],
+          "keywords": ["reference", "practical"],
+          "status": "active",
+          "sort": 900,
+          "seeAlso": []
+        },
+        {
+          "code": "950",
+          "shortLabel": "GHR",
+          "label": "Games, Hobbies & Recreation",
+          "children": [
+            {
+              "code": "951",
+              "shortLabel": "GA1",
+              "label": "Games",
+              "children": [
+                {
+                  "code": "9511",
+                  "shortLabel": "BGA",
+                  "label": "Board & Card Games",
+                  "keywords": [
+                    "board",
+                    "card",
+                    "games",
+                    "hobbies",
+                    "recreation"
+                  ],
+                  "status": "active",
+                  "sort": 9511,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9512",
+                  "shortLabel": "RPG",
+                  "label": "Role-Playing Games",
+                  "keywords": [
+                    "role",
+                    "playing",
+                    "games",
+                    "hobbies",
+                    "recreation"
+                  ],
+                  "status": "active",
+                  "sort": 9512,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9513",
+                  "shortLabel": "PUZ",
+                  "label": "Puzzles & Logic Games",
+                  "keywords": [
+                    "puzzles",
+                    "logic",
+                    "games",
+                    "hobbies",
+                    "recreation"
+                  ],
+                  "status": "active",
+                  "sort": 9513,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9514",
+                  "shortLabel": "VI4",
+                  "label": "Video Games & Play Culture",
+                  "keywords": [
+                    "video",
+                    "games",
+                    "play",
+                    "culture",
+                    "hobbies",
+                    "recreation"
+                  ],
+                  "status": "active",
+                  "sort": 9514,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["games", "hobbies", "recreation"],
+              "status": "active",
+              "sort": 951,
+              "seeAlso": []
+            },
+            {
+              "code": "952",
+              "shortLabel": "HOB",
+              "label": "Hobbies",
+              "children": [
+                {
+                  "code": "9521",
+                  "shortLabel": "COL",
+                  "label": "Collecting",
+                  "keywords": ["collecting", "games", "hobbies", "recreation"],
+                  "status": "active",
+                  "sort": 9521,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9522",
+                  "shortLabel": "MOD",
+                  "label": "Models & Miniatures",
+                  "keywords": [
+                    "models",
+                    "miniatures",
+                    "games",
+                    "hobbies",
+                    "recreation"
+                  ],
+                  "status": "active",
+                  "sort": 9522,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9523",
+                  "shortLabel": "HND",
+                  "label": "Handcraft Hobbies",
+                  "keywords": ["handcraft", "hobbies", "games", "recreation"],
+                  "status": "active",
+                  "sort": 9523,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9524",
+                  "shortLabel": "OUT",
+                  "label": "Outdoor Hobbies",
+                  "keywords": ["outdoor", "hobbies", "games", "recreation"],
+                  "status": "active",
+                  "sort": 9524,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["hobbies", "games", "recreation"],
+              "status": "active",
+              "sort": 952,
+              "seeAlso": []
+            },
+            {
+              "code": "953",
+              "shortLabel": "REC",
+              "label": "Recreation",
+              "children": [
+                {
+                  "code": "9531",
+                  "shortLabel": "SPT",
+                  "label": "Sports & Athletics",
+                  "keywords": [
+                    "sports",
+                    "athletics",
+                    "games",
+                    "hobbies",
+                    "recreation"
+                  ],
+                  "status": "active",
+                  "sort": 9531,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9532",
+                  "shortLabel": "FIT",
+                  "label": "Fitness & Movement",
+                  "keywords": [
+                    "fitness",
+                    "movement",
+                    "games",
+                    "hobbies",
+                    "recreation"
+                  ],
+                  "status": "active",
+                  "sort": 9532,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9533",
+                  "shortLabel": "TRL",
+                  "label": "Trails, Camping & Hiking",
+                  "keywords": [
+                    "trails",
+                    "camping",
+                    "hiking",
+                    "games",
+                    "hobbies",
+                    "recreation"
+                  ],
+                  "status": "active",
+                  "sort": 9533,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9534",
+                  "shortLabel": "WTR",
+                  "label": "Water & Winter Recreation",
+                  "keywords": [
+                    "water",
+                    "winter",
+                    "recreation",
+                    "games",
+                    "hobbies"
+                  ],
+                  "status": "active",
+                  "sort": 9534,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": ["recreation", "games", "hobbies"],
+              "status": "active",
+              "sort": 953,
+              "seeAlso": []
+            },
+            {
+              "code": "954",
+              "shortLabel": "PE4",
+              "label": "Pets & Animal Care",
+              "children": [
+                {
+                  "code": "9541",
+                  "shortLabel": "DOG",
+                  "label": "Dogs",
+                  "keywords": [
+                    "dogs",
+                    "games",
+                    "hobbies",
+                    "recreation",
+                    "pets",
+                    "animal",
+                    "care"
+                  ],
+                  "status": "active",
+                  "sort": 9541,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9542",
+                  "shortLabel": "CAT",
+                  "label": "Cats",
+                  "keywords": [
+                    "cats",
+                    "games",
+                    "hobbies",
+                    "recreation",
+                    "pets",
+                    "animal",
+                    "care"
+                  ],
+                  "status": "active",
+                  "sort": 9542,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9543",
+                  "shortLabel": "SM3",
+                  "label": "Small Animals",
+                  "keywords": [
+                    "small",
+                    "animals",
+                    "games",
+                    "hobbies",
+                    "recreation",
+                    "pets",
+                    "animal",
+                    "care"
+                  ],
+                  "status": "active",
+                  "sort": 9543,
+                  "seeAlso": []
+                },
+                {
+                  "code": "9544",
+                  "shortLabel": "T44",
+                  "label": "Training & Behavior",
+                  "keywords": [
+                    "training",
+                    "behavior",
+                    "games",
+                    "hobbies",
+                    "recreation",
+                    "pets",
+                    "animal",
+                    "care"
+                  ],
+                  "status": "active",
+                  "sort": 9544,
+                  "seeAlso": []
+                }
+              ],
+              "keywords": [
+                "pets",
+                "animal care",
+                "companions",
+                "training",
+                "animal",
+                "care",
+                "games",
+                "hobbies",
+                "recreation"
+              ],
+              "status": "active",
+              "sort": 954,
+              "seeAlso": ["753", "752"]
+            }
+          ],
+          "keywords": ["games", "hobbies", "recreation", "leisure"],
+          "status": "active",
+          "sort": 950,
+          "seeAlso": []
+        }
+      ],
+      "version": "1.1.0",
+      "formats": [
+        {
+          "id": "code",
+          "label": "Code only",
+          "template": "{code}"
+        },
+        {
+          "id": "code-short",
+          "label": "Code + short label",
+          "template": "{code}-{shortLabel}"
+        },
+        {
+          "id": "short-extension",
+          "label": "Short label + extension",
+          "template": "{shortLabel}{extensionPart}"
+        },
+        {
+          "id": "code-short-extension",
+          "label": "Code + short + extension",
+          "template": "{code}-{shortLabel}{extensionPart}"
+        },
+        {
+          "id": "code-short-author",
+          "label": "Code + short + author",
+          "template": "{code}-{shortLabel} {authorMark}"
+        },
+        {
+          "id": "full-shelfmark",
+          "label": "Full shelfmark",
+          "template": "{code}-{shortLabel}{extensionPart} {authorMark} {year} {languageCountry}"
         }
       ]
     }

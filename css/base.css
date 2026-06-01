@@ -1524,6 +1524,14 @@ input[type="checkbox"] {
   border-radius: 16px;
   background: #fff8e8;
 }
+.classification-selection-controls {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 16rem;
+}
+.classification-selection-controls label {
+  margin: 0;
+}
 .classification-dialog-list {
   display: grid;
   gap: 0.55rem;
