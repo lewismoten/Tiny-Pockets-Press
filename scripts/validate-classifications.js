@@ -345,7 +345,7 @@ validateNodeReferences(ext.nodes, "extension", unresolved);
 
 const problems = [];
 const profileIds = new Map();
-const allowedFormatPriorities = new Set(["highest", "high", "medium", "low"]);
+const allowedFormatPriorities = new Set(["high", "medium", "low"]);
 
 problems.push(...extensionImportProblems, ...mergedExtensions.issues);
 
@@ -378,10 +378,11 @@ if (!Array.isArray(system.rules) || !system.rules.length) {
 if (!Array.isArray(system.formats) || !system.formats.length) {
   problems.push("Classification system is missing classification formats.");
 } else {
-  const highestFormats = [];
+  const defaultFormats = [];
   for (const format of system.formats) {
     const formatId = String((format && format.id) || "").trim();
     const priority = String((format && format.priority) || "").trim();
+    const isDefault = format && format.default === true;
     if (!formatId) {
       problems.push("Classification format is missing an id.");
       continue;
@@ -396,11 +397,11 @@ if (!Array.isArray(system.formats) || !system.formats.length) {
       );
       continue;
     }
-    if (priority === "highest") highestFormats.push(formatId);
+    if (isDefault) defaultFormats.push(formatId);
   }
-  if (highestFormats.length !== 1) {
+  if (defaultFormats.length !== 1) {
     problems.push(
-      `Classification formats must define exactly one highest priority format; found ${highestFormats.length}${highestFormats.length ? ` (${highestFormats.join(", ")})` : ""}.`,
+      `Classification formats must define exactly one default format; found ${defaultFormats.length}${defaultFormats.length ? ` (${defaultFormats.join(", ")})` : ""}.`,
     );
   }
 }

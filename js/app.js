@@ -21,7 +21,20 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
   TPP.classificationExtensionsDataPath = "data/classification-extensions.json";
   TPP.defaultClassificationFormatId = function () {
-    return "code-short-extension";
+    const formats = TPP.classificationFormats();
+    const explicitDefault = formats.find(function (entry) {
+      return entry && entry.default === true;
+    });
+    if (explicitDefault && explicitDefault.id) {
+      return explicitDefault.id;
+    }
+    const preferred = formats.find(function (entry) {
+      return entry && entry.id === "code-short-extension";
+    });
+    if (preferred && preferred.id) {
+      return preferred.id;
+    }
+    return formats[0] && formats[0].id ? formats[0].id : "code-short-extension";
   };
   TPP.defaultClassificationExtensionsCatalog = function () {
     return {
@@ -280,6 +293,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       normalized.template = String(normalized.template || "{code}");
       normalized.example = String(normalized.example || "");
       normalized.priority = String(normalized.priority || "");
+      normalized.default = normalized.default === true;
       return normalized;
     });
     catalog.license =
@@ -1153,7 +1167,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const data = {
       code: String((payload && payload.code) || ""),
       shortLabel: String((payload && payload.shortLabel) || ""),
-      formatId: "code-short-extension",
+      formatId: TPP.defaultClassificationFormatId(),
       extension: String((payload && payload.extension) || ""),
     };
     if (!data.code && !data.shortLabel) return "";

@@ -4590,7 +4590,8 @@
       "label": "Code + short + extension",
       "template": "{code}-{shortLabel}{extensionPart}",
       "example": "524-CLC.3",
-      "priority": "highest"
+      "priority": "high",
+      "default": true
     },
     {
       "id": "code-short-author",
