@@ -21,14 +21,12 @@ function normalizeList(values) {
     : [];
 }
 
-function nodeStatus(node) {
-  return String((node && node.status) || "active")
-    .trim()
-    .toLowerCase();
-}
-
 function isActiveNode(node) {
-  return nodeStatus(node) === "active";
+  return (
+    String((node && node.status) || "active")
+      .trim()
+      .toLowerCase() === "active"
+  );
 }
 
 function addRefTarget(targets, code, sourceLabel) {
@@ -38,31 +36,33 @@ function addRefTarget(targets, code, sourceLabel) {
   targets.get(value).add(sourceLabel);
 }
 
-function collectBaseNodes(system) {
+function collectBaseData(system) {
   const currentCodes = new Map();
-  const allReferenceTargets = new Map();
-  const baseNodes = [];
+  const activeCodes = new Map();
+  const referenceTargets = new Map();
+  const duplicates = [];
+  const nodes = [];
 
-  function walk(nodes, pathLabels) {
-    for (const node of Array.isArray(nodes) ? nodes : []) {
+  function walk(entries, pathLabels) {
+    for (const node of Array.isArray(entries) ? entries : []) {
       if (!node) continue;
       const code = String(node.code || "").trim();
-      const legacyCodes = normalizeList([
-        node.legacyCode,
-        ...normalizeList(node.legacyCodes),
-      ]);
       const labelPath = pathLabels.concat(String(node.label || "")).join(" > ");
 
-      baseNodes.push({
-        code,
-        labelPath,
-        node,
-      });
+      nodes.push({ node, labelPath });
+      addRefTarget(referenceTargets, code, labelPath);
 
-      if (code) currentCodes.set(code, { code, labelPath, node });
-      addRefTarget(allReferenceTargets, code, labelPath);
-      for (const legacyCode of legacyCodes) {
-        addRefTarget(allReferenceTargets, legacyCode, `${labelPath} [legacy]`);
+      if (code) currentCodes.set(code, { node, labelPath });
+      if (code && isActiveNode(node)) {
+        if (activeCodes.has(code)) {
+          duplicates.push({
+            code,
+            first: activeCodes.get(code),
+            second: labelPath,
+          });
+        } else {
+          activeCodes.set(code, labelPath);
+        }
       }
 
       walk(node.children, pathLabels.concat(String(node.label || "")));
@@ -70,57 +70,43 @@ function collectBaseNodes(system) {
   }
 
   walk(system.categories, []);
-  return { currentCodes, allReferenceTargets, baseNodes };
+  return { currentCodes, referenceTargets, duplicates, nodes };
 }
 
-function collectExtensionNodes(extensionSystem) {
-  const allReferenceTargets = new Map();
-  const currentActiveFullCodes = new Map();
-  const activeDuplicates = [];
-  const extensionNodes = [];
+function collectExtensionData(extensionSystem) {
+  const referenceTargets = new Map();
+  const activeCodes = new Map();
+  const duplicates = [];
+  const orphanGroups = [];
+  const nodes = [];
 
   function walkGroup(group) {
     const parentCode = String(group.parentCode || "").trim();
-    const parentAliases = normalizeList([
-      group.legacyParentCode,
-      ...normalizeList(group.legacyParentCodes),
-    ]);
     const groupLabel = String(group.label || parentCode || "Extension Group");
 
-    function walk(nodes, pathLabels) {
-      for (const node of Array.isArray(nodes) ? nodes : []) {
+    function walk(entries, pathLabels) {
+      for (const node of Array.isArray(entries) ? entries : []) {
         if (!node) continue;
         const extension = String(node.extension || "").trim();
         const fullCode =
           parentCode && extension ? `${parentCode}.${extension}` : "";
-        const aliasCodes = parentAliases.map((alias) =>
-          alias && extension ? `${alias}.${extension}` : "",
-        );
         const labelPath = [groupLabel]
           .concat(pathLabels, String(node.label || ""))
           .filter(Boolean)
           .join(" > ");
 
-        extensionNodes.push({
-          fullCode,
-          labelPath,
-          node,
-        });
-
-        addRefTarget(allReferenceTargets, fullCode, labelPath);
-        for (const aliasCode of aliasCodes) {
-          addRefTarget(allReferenceTargets, aliasCode, `${labelPath} [legacy]`);
-        }
+        nodes.push({ node, labelPath, fullCode });
+        addRefTarget(referenceTargets, fullCode, labelPath);
 
         if (fullCode && isActiveNode(node)) {
-          if (currentActiveFullCodes.has(fullCode)) {
-            activeDuplicates.push({
+          if (activeCodes.has(fullCode)) {
+            duplicates.push({
               code: fullCode,
-              first: currentActiveFullCodes.get(fullCode),
+              first: activeCodes.get(fullCode),
               second: labelPath,
             });
           } else {
-            currentActiveFullCodes.set(fullCode, labelPath);
+            activeCodes.set(fullCode, labelPath);
           }
         }
 
@@ -135,121 +121,110 @@ function collectExtensionNodes(extensionSystem) {
     ? extensionSystem.extensions
     : []) {
     if (!group) continue;
+    if (!String(group.parentCode || "").trim()) {
+      orphanGroups.push("[missing parentCode]");
+      continue;
+    }
     walkGroup(group);
   }
 
-  return { allReferenceTargets, activeDuplicates, extensionNodes };
+  return { referenceTargets, duplicates, orphanGroups, nodes };
 }
 
-function validateReferences(nodes, kind, unresolved, validTargets, pathLabels) {
-  for (const node of Array.isArray(nodes) ? nodes : []) {
-    if (!node) continue;
-    const nextLabels = pathLabels.concat(String(node.label || ""));
-    const labelPath = nextLabels.join(" > ");
-    const seeAlso = normalizeList(node.seeAlso);
-    for (const ref of seeAlso) {
-      if (!validTargets.has(ref)) {
+function validateNodeReferences(nodes, kind, unresolved) {
+  for (const entry of nodes) {
+    const refs = normalizeList(entry.node && entry.node.seeAlso);
+    for (const ref of refs) {
+      if (!allReferenceTargets.has(ref)) {
         unresolved.push({
           kind,
           type: "seeAlso",
-          source: labelPath,
+          source: entry.labelPath,
           ref,
         });
       }
     }
-    const replacedBy = String(node.replacedBy || "").trim();
-    if (replacedBy && !validTargets.has(replacedBy)) {
+    const replacedBy = String(
+      (entry.node && entry.node.replacedBy) || "",
+    ).trim();
+    if (replacedBy && !allReferenceTargets.has(replacedBy)) {
       unresolved.push({
         kind,
         type: "replacedBy",
-        source: labelPath,
+        source: entry.labelPath,
         ref: replacedBy,
       });
     }
-    validateReferences(
-      node.children,
-      kind,
-      unresolved,
-      validTargets,
-      nextLabels,
-    );
   }
 }
 
-function main() {
-  const systemsCatalog = readJson(systemsPath);
-  const extensionsCatalog = readJson(extensionsPath);
-  const system =
-    (systemsCatalog.systems || []).find(
-      (entry) => entry && entry.id === systemsCatalog.defaultSystemId,
-    ) || (systemsCatalog.systems || [])[0];
-  const extensionSystem =
-    (extensionsCatalog.systems || []).find(
-      (entry) => entry && entry.id === extensionsCatalog.defaultSystemId,
-    ) || (extensionsCatalog.systems || [])[0];
+const systemsCatalog = readJson(systemsPath);
+const extensionsCatalog = readJson(extensionsPath);
+const system =
+  (systemsCatalog.systems || []).find(
+    (entry) => entry && entry.id === systemsCatalog.defaultSystemId,
+  ) || (systemsCatalog.systems || [])[0];
+const extensionSystem =
+  (extensionsCatalog.systems || []).find(
+    (entry) => entry && entry.id === extensionsCatalog.defaultSystemId,
+  ) || (extensionsCatalog.systems || [])[0];
 
-  if (!system || !extensionSystem) {
-    console.error("Unable to load classification system or extension system.");
-    process.exit(1);
+if (!system || !extensionSystem) {
+  console.error("Unable to load classification system or extension system.");
+  process.exit(1);
+}
+
+const base = collectBaseData(system);
+const ext = collectExtensionData(extensionSystem);
+const allReferenceTargets = new Map([
+  ...base.referenceTargets,
+  ...ext.referenceTargets,
+]);
+const unresolved = [];
+
+for (const group of Array.isArray(extensionSystem.extensions)
+  ? extensionSystem.extensions
+  : []) {
+  const parentCode = String((group && group.parentCode) || "").trim();
+  if (parentCode && !base.currentCodes.has(parentCode)) {
+    ext.orphanGroups.push(parentCode);
   }
+}
 
-  const base = collectBaseNodes(system);
-  const ext = collectExtensionNodes(extensionSystem);
-  const validTargets = new Map([
-    ...base.allReferenceTargets,
-    ...ext.allReferenceTargets,
-  ]);
-  const unresolved = [];
+validateNodeReferences(base.nodes, "base", unresolved);
+validateNodeReferences(ext.nodes, "extension", unresolved);
 
-  validateReferences(system.categories, "base", unresolved, validTargets, []);
-  for (const group of Array.isArray(extensionSystem.extensions)
-    ? extensionSystem.extensions
-    : []) {
-    const prefix = [
-      String(group.label || group.parentCode || "Extension Group"),
-    ];
-    validateReferences(
-      group.children,
-      "extension",
-      unresolved,
-      validTargets,
-      prefix,
-    );
-  }
+const problems = [];
 
-  const problems = [];
-
-  if (ext.activeDuplicates.length) {
-    problems.push("Duplicate active extension codes:");
-    for (const duplicate of ext.activeDuplicates) {
-      problems.push(
-        `  - ${duplicate.code} appears in both "${duplicate.first}" and "${duplicate.second}"`,
-      );
-    }
-  }
-
-  if (unresolved.length) {
-    problems.push("Broken classification references:");
-    for (const item of unresolved) {
-      problems.push(
-        `  - ${item.type} "${item.ref}" from ${item.kind} node "${item.source}" does not resolve`,
-      );
-    }
-  }
-
-  if (problems.length) {
-    console.error(problems.join("\n"));
-    process.exit(1);
-  }
-
-  console.log(
-    [
-      "Classification validation passed.",
-      `  Base nodes: ${base.baseNodes.length}`,
-      `  Extension nodes: ${ext.extensionNodes.length}`,
-      `  Valid reference targets: ${validTargets.size}`,
-    ].join("\n"),
+for (const duplicate of base.duplicates) {
+  problems.push(
+    `Duplicate active base code ${duplicate.code}: ${duplicate.first} | ${duplicate.second}`,
   );
 }
 
-main();
+for (const duplicate of ext.duplicates) {
+  problems.push(
+    `Duplicate active extension code ${duplicate.code}: ${duplicate.first} | ${duplicate.second}`,
+  );
+}
+
+for (const parentCode of ext.orphanGroups) {
+  problems.push(`Extension group parentCode does not exist: ${parentCode}`);
+}
+
+for (const issue of unresolved) {
+  problems.push(
+    `Broken ${issue.type} reference in ${issue.kind} node "${issue.source}": ${issue.ref}`,
+  );
+}
+
+if (problems.length) {
+  console.error("Classification validation failed.");
+  for (const problem of problems) console.error(`- ${problem}`);
+  process.exit(1);
+}
+
+console.log("Classification validation passed.");
+console.log(`Base nodes: ${base.nodes.length}`);
+console.log(`Extension nodes: ${ext.nodes.length}`);
+console.log(`Valid reference targets: ${allReferenceTargets.size}`);

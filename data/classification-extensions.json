@@ -15,7 +15,7 @@
               "extension": "1",
               "shortLabel": "ABT",
               "label": "Abrahamic Traditions",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "abrahamic",
                 "traditions",
@@ -40,14 +40,13 @@
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about abrahamic traditions within religion, including the Bible, scriptural traditions, Christianity, Judaism, and Islam.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about abrahamic traditions within religion, including the Bible, scriptural traditions, Christianity, Judaism, and Islam."
             },
             {
               "extension": "2",
               "shortLabel": "DHT",
               "label": "Dharmic Traditions",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "dharmic",
                 "traditions",
@@ -62,14 +61,13 @@
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about dharmic traditions within religion.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about dharmic traditions within religion."
             },
             {
               "extension": "3",
               "shortLabel": "IFR",
               "label": "Indigenous & Folk Religions",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "indigenous",
                 "folk",
@@ -86,14 +84,13 @@
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about indigenous & folk religions within religion.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about indigenous & folk religions within religion."
             },
             {
               "extension": "4",
               "shortLabel": "COR",
               "label": "Comparative Religion",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "comparative",
                 "religion",
@@ -106,12 +103,9 @@
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about comparative religion within religion.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about comparative religion within religion."
             }
-          ],
-          "legacyParentCode": "110",
-          "legacyParentCodes": ["110", "151"]
+          ]
         },
         {
           "parentCode": "320",
@@ -121,7 +115,7 @@
               "extension": "1",
               "shortLabel": "MED",
               "label": "Meditation",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "meditation",
                 "religion",
@@ -138,14 +132,13 @@
                 "spiritual",
                 "practice"
               ],
-              "scopeNote": "Use for works chiefly about meditation within spiritual practice.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about meditation within spiritual practice."
             },
             {
               "extension": "2",
               "shortLabel": "COP",
               "label": "Contemplation & Prayer",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "contemplation",
                 "prayer",
@@ -164,14 +157,13 @@
                 "spiritual",
                 "practice"
               ],
-              "scopeNote": "Use for works chiefly about contemplation & prayer within spiritual practice.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about contemplation & prayer within spiritual practice."
             },
             {
               "extension": "3",
               "shortLabel": "RIC",
               "label": "Ritual & Ceremony",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "ritual",
                 "ceremony",
@@ -190,14 +182,13 @@
                 "spiritual",
                 "practice"
               ],
-              "scopeNote": "Use for works chiefly about ritual & ceremony within spiritual practice.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about ritual & ceremony within spiritual practice."
             },
             {
               "extension": "4",
               "shortLabel": "MEP",
               "label": "Mysticism & Esoteric Practice",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "mysticism",
                 "esoteric",
@@ -216,12 +207,9 @@
                 "philosophy",
                 "spiritual"
               ],
-              "scopeNote": "Use for works chiefly about mysticism & esoteric practice within spiritual practice.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about mysticism & esoteric practice within spiritual practice."
             }
-          ],
-          "legacyParentCode": "120",
-          "legacyParentCodes": ["120", "152"]
+          ]
         },
         {
           "parentCode": "330",
@@ -231,7 +219,7 @@
               "extension": "1",
               "shortLabel": "MET",
               "label": "Metaphysics",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "metaphysics",
                 "religion",
@@ -244,24 +232,22 @@
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about metaphysics within philosophy.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about metaphysics within philosophy."
             },
             {
               "extension": "2",
               "shortLabel": "ETH",
               "label": "Ethics",
-              "sort": 2000,
+              "sort": 2,
               "keywords": ["ethics", "religion", "spirituality", "philosophy"],
               "includes": ["ethics", "religion", "spirituality", "philosophy"],
-              "scopeNote": "Use for works chiefly about ethics within philosophy.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about ethics within philosophy."
             },
             {
               "extension": "3",
               "shortLabel": "POP",
               "label": "Political Philosophy",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "political",
                 "philosophy",
@@ -274,14 +260,13 @@
                 "religion",
                 "spirituality"
               ],
-              "scopeNote": "Use for works chiefly about political philosophy within philosophy.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about political philosophy within philosophy."
             },
             {
               "extension": "4",
               "shortLabel": "AEE",
               "label": "Aesthetics & Epistemology",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "aesthetics",
                 "epistemology",
@@ -296,12 +281,9 @@
                 "spirituality",
                 "philosophy"
               ],
-              "scopeNote": "Use for works chiefly about aesthetics & epistemology within philosophy.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about aesthetics & epistemology within philosophy."
             }
-          ],
-          "legacyParentCode": "130",
-          "legacyParentCodes": ["130", "153"]
+          ]
         },
         {
           "parentCode": "340",
@@ -311,7 +293,7 @@
               "extension": "1",
               "shortLabel": "MYT",
               "label": "Mythology",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "mythology",
                 "religion",
@@ -328,14 +310,13 @@
                 "myth",
                 "thought"
               ],
-              "scopeNote": "Use for works chiefly about mythology within myth & thought.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about mythology within myth & thought."
             },
             {
               "extension": "2",
               "shortLabel": "SYM",
               "label": "Symbolism",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "symbolism",
                 "religion",
@@ -352,14 +333,13 @@
                 "myth",
                 "thought"
               ],
-              "scopeNote": "Use for works chiefly about symbolism within myth & thought.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about symbolism within myth & thought."
             },
             {
               "extension": "3",
               "shortLabel": "COS",
               "label": "Cosmology",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "cosmology",
                 "religion",
@@ -376,14 +356,13 @@
                 "myth",
                 "thought"
               ],
-              "scopeNote": "Use for works chiefly about cosmology within myth & thought.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about cosmology within myth & thought."
             },
             {
               "extension": "4",
               "shortLabel": "MLQ",
               "label": "Meaning & Life Questions",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "meaning",
                 "life",
@@ -404,8 +383,7 @@
                 "myth",
                 "thought"
               ],
-              "scopeNote": "Use for works chiefly about meaning & life questions within myth & thought.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about meaning & life questions within myth & thought."
             },
             {
               "extension": "5",
@@ -424,11 +402,10 @@
                 "symbolic societies"
               ],
               "seeAlso": ["310"],
-              "scopeNote": "Use for works chiefly about Freemasonry, Masonic symbolism, fraternal orders, and related symbolic societies within myth & thought."
+              "scopeNote": "Use for works chiefly about Freemasonry, Masonic symbolism, fraternal orders, and related symbolic societies within myth & thought.",
+              "sort": 5
             }
-          ],
-          "legacyParentCode": "140",
-          "legacyParentCodes": ["140", "154"]
+          ]
         },
         {
           "parentCode": "262",
@@ -449,7 +426,7 @@
                 "founding era"
               ],
               "scopeNote": "Use for works chiefly about the American Revolution within modern history.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -458,7 +435,7 @@
               "keywords": ["civil war", "union", "confederacy"],
               "includes": ["civil war", "union", "confederacy"],
               "scopeNote": "Use for works chiefly about the Civil War within modern history.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
@@ -475,11 +452,10 @@
                 "voting rights"
               ],
               "seeAlso": ["282", "284.1"],
-              "scopeNote": "Use for works chiefly about the Civil Rights Movement as a historical period or movement within modern history."
+              "scopeNote": "Use for works chiefly about the Civil Rights Movement as a historical period or movement within modern history.",
+              "sort": 3
             }
-          ],
-          "legacyParentCode": "162",
-          "legacyParentCodes": ["162", "512"]
+          ]
         },
         {
           "parentCode": "263",
@@ -510,7 +486,7 @@
                         "england"
                       ],
                       "scopeNote": "Use for works chiefly about connecticut within new england.",
-                      "seeAlso": []
+                      "sort": 110
                     },
                     {
                       "extension": "111",
@@ -525,7 +501,7 @@
                         "england"
                       ],
                       "scopeNote": "Use for works chiefly about maine within new england.",
-                      "seeAlso": []
+                      "sort": 111
                     },
                     {
                       "extension": "112",
@@ -540,7 +516,7 @@
                         "england"
                       ],
                       "scopeNote": "Use for works chiefly about massachusetts within new england.",
-                      "seeAlso": []
+                      "sort": 112
                     },
                     {
                       "extension": "113",
@@ -555,7 +531,7 @@
                         "england"
                       ],
                       "scopeNote": "Use for works chiefly about new hampshire within new england.",
-                      "seeAlso": []
+                      "sort": 113
                     },
                     {
                       "extension": "114",
@@ -570,7 +546,7 @@
                         "england"
                       ],
                       "scopeNote": "Use for works chiefly about rhode island within new england.",
-                      "seeAlso": []
+                      "sort": 114
                     },
                     {
                       "extension": "115",
@@ -585,7 +561,7 @@
                         "england"
                       ],
                       "scopeNote": "Use for works chiefly about vermont within new england.",
-                      "seeAlso": []
+                      "sort": 115
                     }
                   ],
                   "allowAssign": true,
@@ -600,7 +576,7 @@
                     "united"
                   ],
                   "scopeNote": "Use for general works on new england within united states. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 11
                 },
                 {
                   "extension": "12",
@@ -620,7 +596,7 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about delaware within mid-atlantic.",
-                      "seeAlso": []
+                      "sort": 120
                     },
                     {
                       "extension": "121",
@@ -642,7 +618,7 @@
                             "city"
                           ],
                           "scopeNote": "Use for works chiefly about brooklyn within new york city.",
-                          "seeAlso": []
+                          "sort": 1211
                         },
                         {
                           "extension": "1212",
@@ -658,7 +634,7 @@
                             "city"
                           ],
                           "scopeNote": "Use for works chiefly about harlem within new york city.",
-                          "seeAlso": []
+                          "sort": 1212
                         }
                       ],
                       "allowAssign": true,
@@ -673,7 +649,7 @@
                         "mid"
                       ],
                       "scopeNote": "Use for general works on new york city within mid-atlantic. Class more specific works in the refinements below when appropriate.",
-                      "seeAlso": []
+                      "sort": 121
                     },
                     {
                       "extension": "122",
@@ -687,7 +663,8 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about new york state within mid-atlantic, aside from works focused specifically on new york city.",
-                      "seeAlso": ["121"]
+                      "seeAlso": ["121"],
+                      "sort": 122
                     },
                     {
                       "extension": "123",
@@ -701,7 +678,7 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about pennsylvania within mid-atlantic.",
-                      "seeAlso": []
+                      "sort": 123
                     },
                     {
                       "extension": "124",
@@ -715,11 +692,11 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about new jersey within mid-atlantic.",
-                      "seeAlso": []
+                      "sort": 124
                     },
                     {
                       "extension": "125",
-                      "shortLabel": "DCA",
+                      "shortLabel": "WDC",
                       "label": "District of Columbia",
                       "keywords": [
                         "district of columbia",
@@ -735,7 +712,7 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about washington, dc and the district of columbia within mid-atlantic.",
-                      "seeAlso": []
+                      "sort": 125
                     },
                     {
                       "extension": "126",
@@ -749,7 +726,7 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about maryland within mid-atlantic.",
-                      "seeAlso": []
+                      "sort": 126
                     },
                     {
                       "extension": "127",
@@ -763,7 +740,7 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about virginia within mid-atlantic.",
-                      "seeAlso": []
+                      "sort": 127
                     },
                     {
                       "extension": "128",
@@ -777,7 +754,7 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about west virginia within mid-atlantic.",
-                      "seeAlso": []
+                      "sort": 128
                     }
                   ],
                   "allowAssign": true,
@@ -792,7 +769,7 @@
                     "states"
                   ],
                   "scopeNote": "Use for general works on mid-atlantic within united states. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 12
                 },
                 {
                   "extension": "13",
@@ -807,16 +784,16 @@
                       "keywords": ["illinois"],
                       "includes": ["illinois", "midwest", "united", "states"],
                       "scopeNote": "Use for works chiefly about illinois within midwest.",
-                      "seeAlso": []
+                      "sort": 131
                     },
                     {
                       "extension": "132",
-                      "shortLabel": "MCH",
+                      "shortLabel": "MICH",
                       "label": "Michigan",
                       "keywords": ["michigan"],
                       "includes": ["michigan", "midwest", "united", "states"],
                       "scopeNote": "Use for works chiefly about michigan within midwest.",
-                      "seeAlso": []
+                      "sort": 132
                     },
                     {
                       "extension": "133",
@@ -825,7 +802,7 @@
                       "keywords": ["ohio"],
                       "includes": ["ohio", "midwest", "united", "states"],
                       "scopeNote": "Use for works chiefly about ohio within midwest.",
-                      "seeAlso": []
+                      "sort": 133
                     },
                     {
                       "extension": "134",
@@ -834,7 +811,7 @@
                       "keywords": ["wisconsin"],
                       "includes": ["wisconsin", "midwest", "united", "states"],
                       "scopeNote": "Use for works chiefly about wisconsin within midwest.",
-                      "seeAlso": []
+                      "sort": 134
                     }
                   ],
                   "allowAssign": true,
@@ -848,7 +825,7 @@
                     "states"
                   ],
                   "scopeNote": "Use for general works on the midwestern united states within local & regional history. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 13
                 },
                 {
                   "extension": "14",
@@ -863,7 +840,7 @@
                       "keywords": ["georgia"],
                       "includes": ["georgia", "south", "united", "states"],
                       "scopeNote": "Use for works chiefly about georgia within the american south.",
-                      "seeAlso": []
+                      "sort": 141
                     },
                     {
                       "extension": "142",
@@ -872,7 +849,7 @@
                       "keywords": ["louisiana"],
                       "includes": ["louisiana", "south", "united", "states"],
                       "scopeNote": "Use for works chiefly about louisiana within the american south.",
-                      "seeAlso": []
+                      "sort": 142
                     },
                     {
                       "extension": "143",
@@ -886,7 +863,7 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about north carolina within the american south.",
-                      "seeAlso": []
+                      "sort": 143
                     },
                     {
                       "extension": "144",
@@ -895,7 +872,7 @@
                       "keywords": ["texas"],
                       "includes": ["texas", "south", "united", "states"],
                       "scopeNote": "Use for works chiefly about texas within the american south.",
-                      "seeAlso": []
+                      "sort": 144
                     }
                   ],
                   "allowAssign": true,
@@ -909,7 +886,7 @@
                     "states"
                   ],
                   "scopeNote": "Use for general works on the american south within local & regional history. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 14
                 },
                 {
                   "extension": "15",
@@ -924,7 +901,7 @@
                       "keywords": ["california"],
                       "includes": ["california", "west", "united", "states"],
                       "scopeNote": "Use for works chiefly about california within the american west.",
-                      "seeAlso": []
+                      "sort": 151
                     },
                     {
                       "extension": "152",
@@ -933,7 +910,7 @@
                       "keywords": ["colorado"],
                       "includes": ["colorado", "west", "united", "states"],
                       "scopeNote": "Use for works chiefly about colorado within the american west.",
-                      "seeAlso": []
+                      "sort": 152
                     },
                     {
                       "extension": "153",
@@ -942,7 +919,7 @@
                       "keywords": ["new mexico"],
                       "includes": ["new mexico", "west", "united", "states"],
                       "scopeNote": "Use for works chiefly about new mexico within the american west.",
-                      "seeAlso": []
+                      "sort": 153
                     },
                     {
                       "extension": "154",
@@ -957,7 +934,7 @@
                         "states"
                       ],
                       "scopeNote": "Use for works chiefly about the pacific northwest within the american west.",
-                      "seeAlso": []
+                      "sort": 154
                     }
                   ],
                   "allowAssign": true,
@@ -971,7 +948,7 @@
                     "states"
                   ],
                   "scopeNote": "Use for general works on the american west within local & regional history. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 15
                 }
               ],
               "allowAssign": true,
@@ -986,7 +963,7 @@
                 "history"
               ],
               "scopeNote": "Use for general works on united states within local & regional history. Class more specific works in the refinements below when appropriate.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -1007,7 +984,7 @@
                       "keywords": ["england"],
                       "includes": ["england", "britain", "ireland", "europe"],
                       "scopeNote": "Use for works chiefly about england within britain & ireland.",
-                      "seeAlso": []
+                      "sort": 211
                     },
                     {
                       "extension": "212",
@@ -1016,7 +993,7 @@
                       "keywords": ["ireland"],
                       "includes": ["ireland", "britain", "europe"],
                       "scopeNote": "Use for works chiefly about ireland within britain & ireland.",
-                      "seeAlso": []
+                      "sort": 212
                     },
                     {
                       "extension": "213",
@@ -1025,7 +1002,7 @@
                       "keywords": ["scotland"],
                       "includes": ["scotland", "britain", "ireland", "europe"],
                       "scopeNote": "Use for works chiefly about scotland within britain & ireland.",
-                      "seeAlso": []
+                      "sort": 213
                     },
                     {
                       "extension": "214",
@@ -1034,7 +1011,7 @@
                       "keywords": ["wales"],
                       "includes": ["wales", "britain", "ireland", "europe"],
                       "scopeNote": "Use for works chiefly about wales within britain & ireland.",
-                      "seeAlso": []
+                      "sort": 214
                     }
                   ],
                   "allowAssign": true,
@@ -1047,7 +1024,7 @@
                     "europe"
                   ],
                   "scopeNote": "Use for general works on britain & ireland within europe. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 21
                 },
                 {
                   "extension": "22",
@@ -1067,7 +1044,7 @@
                         "europe"
                       ],
                       "scopeNote": "Use for works chiefly about denmark within scandinavia.",
-                      "seeAlso": []
+                      "sort": 221
                     },
                     {
                       "extension": "222",
@@ -1076,7 +1053,7 @@
                       "keywords": ["norway"],
                       "includes": ["norway", "scandinavia", "nordic", "europe"],
                       "scopeNote": "Use for works chiefly about norway within scandinavia.",
-                      "seeAlso": []
+                      "sort": 222
                     },
                     {
                       "extension": "223",
@@ -1085,7 +1062,7 @@
                       "keywords": ["sweden"],
                       "includes": ["sweden", "scandinavia", "nordic", "europe"],
                       "scopeNote": "Use for works chiefly about sweden within scandinavia.",
-                      "seeAlso": []
+                      "sort": 223
                     }
                   ],
                   "allowAssign": true,
@@ -1098,11 +1075,11 @@
                     "europe"
                   ],
                   "scopeNote": "Use for general works on scandinavia within europe. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 22
                 },
                 {
                   "extension": "23",
-                  "shortLabel": "WCE",
+                  "shortLabel": "WCEU",
                   "label": "Western & Central Europe",
                   "keywords": ["western europe", "central europe"],
                   "children": [
@@ -1117,7 +1094,7 @@
                         "central europe"
                       ],
                       "scopeNote": "Use for works chiefly about france within western & central europe.",
-                      "seeAlso": []
+                      "sort": 231
                     },
                     {
                       "extension": "232",
@@ -1130,7 +1107,7 @@
                         "central europe"
                       ],
                       "scopeNote": "Use for works chiefly about germany within western & central europe.",
-                      "seeAlso": []
+                      "sort": 232
                     },
                     {
                       "extension": "233",
@@ -1143,7 +1120,7 @@
                         "central europe"
                       ],
                       "scopeNote": "Use for works chiefly about the netherlands within western & central europe.",
-                      "seeAlso": []
+                      "sort": 233
                     },
                     {
                       "extension": "234",
@@ -1156,7 +1133,7 @@
                         "central europe"
                       ],
                       "scopeNote": "Use for works chiefly about switzerland within western & central europe.",
-                      "seeAlso": []
+                      "sort": 234
                     }
                   ],
                   "allowAssign": true,
@@ -1169,11 +1146,11 @@
                     "europe"
                   ],
                   "scopeNote": "Use for general works on western & central europe within local & regional history. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 23
                 },
                 {
                   "extension": "24",
-                  "shortLabel": "SOE",
+                  "shortLabel": "SMED",
                   "label": "Southern Europe & Mediterranean",
                   "keywords": ["southern europe", "mediterranean"],
                   "children": [
@@ -1188,7 +1165,7 @@
                         "mediterranean"
                       ],
                       "scopeNote": "Use for works chiefly about greece within southern europe & mediterranean.",
-                      "seeAlso": []
+                      "sort": 241
                     },
                     {
                       "extension": "242",
@@ -1197,7 +1174,7 @@
                       "keywords": ["italy"],
                       "includes": ["italy", "southern europe", "mediterranean"],
                       "scopeNote": "Use for works chiefly about italy within southern europe & mediterranean.",
-                      "seeAlso": []
+                      "sort": 242
                     },
                     {
                       "extension": "243",
@@ -1210,7 +1187,7 @@
                         "mediterranean"
                       ],
                       "scopeNote": "Use for works chiefly about portugal within southern europe & mediterranean.",
-                      "seeAlso": []
+                      "sort": 243
                     },
                     {
                       "extension": "244",
@@ -1219,7 +1196,7 @@
                       "keywords": ["spain"],
                       "includes": ["spain", "southern europe", "mediterranean"],
                       "scopeNote": "Use for works chiefly about spain within southern europe & mediterranean.",
-                      "seeAlso": []
+                      "sort": 244
                     }
                   ],
                   "allowAssign": true,
@@ -1232,11 +1209,11 @@
                     "europe"
                   ],
                   "scopeNote": "Use for general works on southern europe & the mediterranean within local & regional history. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 24
                 },
                 {
                   "extension": "25",
-                  "shortLabel": "EAE",
+                  "shortLabel": "EEUR",
                   "label": "Eastern Europe",
                   "keywords": ["eastern europe"],
                   "children": [
@@ -1247,7 +1224,7 @@
                       "keywords": ["poland"],
                       "includes": ["poland", "eastern europe"],
                       "scopeNote": "Use for works chiefly about poland within eastern europe.",
-                      "seeAlso": []
+                      "sort": 251
                     },
                     {
                       "extension": "252",
@@ -1256,7 +1233,7 @@
                       "keywords": ["russia"],
                       "includes": ["russia", "eastern europe"],
                       "scopeNote": "Use for works chiefly about russia within eastern europe when the shelving intent is regional european history.",
-                      "seeAlso": []
+                      "sort": 252
                     },
                     {
                       "extension": "253",
@@ -1265,7 +1242,7 @@
                       "keywords": ["ukraine"],
                       "includes": ["ukraine", "eastern europe"],
                       "scopeNote": "Use for works chiefly about ukraine within eastern europe.",
-                      "seeAlso": []
+                      "sort": 253
                     }
                   ],
                   "allowAssign": true,
@@ -1277,7 +1254,7 @@
                     "europe"
                   ],
                   "scopeNote": "Use for general works on eastern europe within local & regional history. Class more specific works in the refinements below when appropriate.",
-                  "seeAlso": []
+                  "sort": 25
                 }
               ],
               "allowAssign": true,
@@ -1289,11 +1266,9 @@
                 "history"
               ],
               "scopeNote": "Use for general works on europe within local & regional history. Class more specific works in the refinements below when appropriate.",
-              "seeAlso": []
+              "sort": 2
             }
-          ],
-          "legacyParentCode": "163",
-          "legacyParentCodes": ["163", "513"]
+          ]
         },
         {
           "parentCode": "274",
@@ -1314,7 +1289,7 @@
                 "library services"
               ],
               "scopeNote": "Use for works chiefly about libraries, library services, and public access to information within education & institutions.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -1333,7 +1308,8 @@
                 "book challenges"
               ],
               "seeAlso": ["282"],
-              "scopeNote": "Use for works chiefly about library governance, library policy, intellectual freedom, and book challenges within education & institutions."
+              "scopeNote": "Use for works chiefly about library governance, library policy, intellectual freedom, and book challenges within education & institutions.",
+              "sort": 2
             },
             {
               "extension": "3",
@@ -1350,7 +1326,7 @@
                 "web accessibility"
               ],
               "scopeNote": "Use for works chiefly about digital literacy, accessibility, and inclusive participation in information systems within education & institutions.",
-              "seeAlso": []
+              "sort": 3
             },
             {
               "extension": "4",
@@ -1359,11 +1335,9 @@
               "keywords": ["maker spaces", "memory lab", "digital archives"],
               "includes": ["maker spaces", "memory lab", "digital archives"],
               "scopeNote": "Use for works chiefly about maker spaces, memory labs, and public creation or digitization programs within education & institutions.",
-              "seeAlso": []
+              "sort": 4
             }
-          ],
-          "legacyParentCode": "174",
-          "legacyParentCodes": ["174", "524"]
+          ]
         },
         {
           "parentCode": "284",
@@ -1384,7 +1358,7 @@
                 "grassroots"
               ],
               "scopeNote": "Use for works chiefly about building communities, grassroots organizing, and neighborhood civic participation within civic practice.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -1401,7 +1375,7 @@
                 "meeting procedure"
               ],
               "scopeNote": "Use for works chiefly about understanding government proceedings, public meetings, and how civic bodies conduct business within civic practice.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
@@ -1410,7 +1384,7 @@
               "keywords": ["elections", "committees", "campaigns", "ballots"],
               "includes": ["elections", "committees", "campaigns", "ballots"],
               "scopeNote": "Use for works chiefly about elections, committees, and civic decision-making within civic practice.",
-              "seeAlso": []
+              "sort": 3
             },
             {
               "extension": "4",
@@ -1419,7 +1393,7 @@
               "keywords": ["nonprofits", "chamber of commerce", "associations"],
               "includes": ["nonprofits", "chamber of commerce", "associations"],
               "scopeNote": "Use for works chiefly about nonprofit organizations, chambers of commerce, and civic associations within civic practice.",
-              "seeAlso": []
+              "sort": 4
             },
             {
               "extension": "5",
@@ -1436,7 +1410,7 @@
                 "parades"
               ],
               "scopeNote": "Use for works chiefly about organizing festivals, parades, and civic events within civic practice.",
-              "seeAlso": []
+              "sort": 5
             },
             {
               "extension": "6",
@@ -1445,11 +1419,10 @@
               "keywords": ["foia", "freedom of information", "public records"],
               "includes": ["foia", "freedom of information", "public records"],
               "seeAlso": ["282"],
-              "scopeNote": "Use for works chiefly about FOIA, access to public records, and information rights in civic practice."
+              "scopeNote": "Use for works chiefly about FOIA, access to public records, and information rights in civic practice.",
+              "sort": 6
             }
-          ],
-          "legacyParentCode": "184",
-          "legacyParentCodes": ["184", "534"]
+          ]
         },
         {
           "parentCode": "121",
@@ -1477,7 +1450,7 @@
                     "opera"
                   ],
                   "scopeNote": "Use for works chiefly about interstellar empires within space opera.",
-                  "seeAlso": []
+                  "sort": 11
                 },
                 {
                   "extension": "12",
@@ -1495,7 +1468,7 @@
                     "opera"
                   ],
                   "scopeNote": "Use for works chiefly about mission crews within space opera.",
-                  "seeAlso": []
+                  "sort": 12
                 }
               ],
               "allowAssign": true,
@@ -1507,7 +1480,8 @@
                 "science",
                 "fiction"
               ],
-              "scopeNote": "Use for general works on space opera within science fiction. Class more specific works in the refinements below when appropriate."
+              "scopeNote": "Use for general works on space opera within science fiction. Class more specific works in the refinements below when appropriate.",
+              "sort": 1
             },
             {
               "extension": "2",
@@ -1518,7 +1492,7 @@
               "children": [
                 {
                   "extension": "21",
-                  "shortLabel": "NEN",
+                  "shortLabel": "NNR",
                   "label": "Neon Noir",
                   "keywords": ["noir", "urban future"],
                   "includes": [
@@ -1530,7 +1504,7 @@
                     "cyberpunk"
                   ],
                   "scopeNote": "Use for works chiefly about neon noir within cyberpunk.",
-                  "seeAlso": []
+                  "sort": 21
                 },
                 {
                   "extension": "22",
@@ -1548,7 +1522,7 @@
                     "cyberpunk"
                   ],
                   "scopeNote": "Use for works chiefly about networked selves within cyberpunk.",
-                  "seeAlso": []
+                  "sort": 22
                 }
               ],
               "allowAssign": true,
@@ -1558,7 +1532,8 @@
                 "science",
                 "fiction"
               ],
-              "scopeNote": "Use for general works on cyberpunk within science fiction. Class more specific works in the refinements below when appropriate."
+              "scopeNote": "Use for general works on cyberpunk within science fiction. Class more specific works in the refinements below when appropriate.",
+              "sort": 2
             },
             {
               "extension": "3",
@@ -1566,7 +1541,6 @@
               "label": "Dystopian Futures",
               "keywords": ["dystopian", "future"],
               "status": "deprecated",
-              "replacedBy": "121.31",
               "children": [
                 {
                   "extension": "31",
@@ -1583,7 +1557,7 @@
                     "dystopian"
                   ],
                   "scopeNote": "Use for works chiefly about climate collapse futures within dystopian futures.",
-                  "seeAlso": []
+                  "sort": 31
                 },
                 {
                   "extension": "32",
@@ -1601,7 +1575,7 @@
                     "futures"
                   ],
                   "scopeNote": "Use for works chiefly about authoritarian regimes within dystopian futures.",
-                  "seeAlso": []
+                  "sort": 32
                 }
               ],
               "allowAssign": true,
@@ -1613,12 +1587,9 @@
                 "fiction"
               ],
               "scopeNote": "Use for general works on dystopian futures within science fiction. Class more specific works in the refinements below when appropriate.",
-              "historyNote": "Deprecated to direct catalogers to the more precise replacement 321.31.",
-              "seeAlso": []
+              "sort": 3
             }
-          ],
-          "legacyParentCode": "321",
-          "legacyParentCodes": ["321", "821"]
+          ]
         },
         {
           "parentCode": "383",
@@ -1641,7 +1612,7 @@
                 "sleight of hand"
               ],
               "scopeNote": "Use for works chiefly about magic tricks, illusion performance, sleight of hand, and stage magic within theater.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -1650,7 +1621,7 @@
               "keywords": ["clowning", "clowns", "physical comedy"],
               "includes": ["clowning", "clowns", "physical comedy"],
               "scopeNote": "Use for works chiefly about clowning, clown performance, and physical comedy within theater.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
@@ -1667,11 +1638,9 @@
                 "twisting balloons"
               ],
               "scopeNote": "Use for works chiefly about balloon sculpting and balloon art as live performance or entertainment craft within theater.",
-              "seeAlso": []
+              "sort": 3
             }
-          ],
-          "legacyParentCode": "133",
-          "legacyParentCodes": ["133"]
+          ]
         },
         {
           "parentCode": "390",
@@ -1694,7 +1663,7 @@
                 "telephone storytelling"
               ],
               "scopeNote": "Use for works chiefly about podcasts, audio diaries, telephone storytelling, and spoken-word audio media within media arts.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -1713,7 +1682,7 @@
                 "sound collage"
               ],
               "scopeNote": "Use for works chiefly about experimental audio, sound collage, restoration, and creative audio practice within media arts.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
@@ -1732,7 +1701,8 @@
                 "offline audio exhibits"
               ],
               "scopeNote": "Use for works chiefly about interactive exhibits, public media installations, accessibility in exhibits, and offline audio exhibits within media arts.",
-              "seeAlso": ["024", "044"]
+              "seeAlso": ["024", "044"],
+              "sort": 3
             },
             {
               "extension": "4",
@@ -1751,11 +1721,9 @@
                 "surreal ai voices"
               ],
               "scopeNote": "Use for works chiefly about AI-assisted media tools, transcription, moderation, synthetic voice, and creative AI media practice within media arts.",
-              "seeAlso": []
+              "sort": 4
             }
-          ],
-          "legacyParentCode": "140",
-          "legacyParentCodes": ["140"]
+          ]
         },
         {
           "parentCode": "410",
@@ -1765,7 +1733,7 @@
               "extension": "1",
               "shortLabel": "HDA",
               "label": "Housing & Domestic Architecture",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "housing",
                 "domestic",
@@ -1778,42 +1746,36 @@
                 "architecture",
                 "preservation"
               ],
-              "scopeNote": "Use for works chiefly about housing & domestic architecture within architecture.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about housing & domestic architecture within architecture."
             },
             {
               "extension": "2",
               "shortLabel": "PCA",
               "label": "Public & Civic Architecture",
-              "sort": 2000,
+              "sort": 2,
               "keywords": ["public", "civic", "architecture", "preservation"],
               "includes": ["public", "civic", "architecture", "preservation"],
-              "scopeNote": "Use for works chiefly about public & civic architecture within architecture.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about public & civic architecture within architecture."
             },
             {
               "extension": "3",
               "shortLabel": "SAA",
               "label": "Sacred Architecture",
-              "sort": 3000,
+              "sort": 3,
               "keywords": ["sacred", "architecture", "preservation"],
               "includes": ["sacred", "architecture", "preservation"],
-              "scopeNote": "Use for works chiefly about sacred architecture within architecture.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about sacred architecture within architecture."
             },
             {
               "extension": "4",
               "shortLabel": "LAA",
               "label": "Landscape Architecture",
-              "sort": 4000,
+              "sort": 4,
               "keywords": ["landscape", "architecture", "preservation"],
               "includes": ["landscape", "architecture", "preservation"],
-              "scopeNote": "Use for works chiefly about landscape architecture within architecture.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about landscape architecture within architecture."
             }
-          ],
-          "legacyParentCode": "161",
-          "legacyParentCodes": ["161"]
+          ]
         },
         {
           "parentCode": "420",
@@ -1823,7 +1785,7 @@
               "extension": "1",
               "shortLabel": "BUC",
               "label": "Building Conservation",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "building",
                 "conservation",
@@ -1838,14 +1800,13 @@
                 "preservation",
                 "historic"
               ],
-              "scopeNote": "Use for works chiefly about building conservation within historic preservation.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about building conservation within historic preservation."
             },
             {
               "extension": "2",
               "shortLabel": "REP",
               "label": "Restoration Practice",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "restoration",
                 "practice",
@@ -1860,14 +1821,13 @@
                 "preservation",
                 "historic"
               ],
-              "scopeNote": "Use for works chiefly about restoration practice within historic preservation.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about restoration practice within historic preservation."
             },
             {
               "extension": "3",
               "shortLabel": "HER",
               "label": "Heritage & Registry",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "heritage",
                 "registry",
@@ -1882,14 +1842,13 @@
                 "preservation",
                 "historic"
               ],
-              "scopeNote": "Use for works chiefly about heritage & registry within historic preservation.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about heritage & registry within historic preservation."
             },
             {
               "extension": "4",
               "shortLabel": "ADR",
               "label": "Adaptive Reuse",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "adaptive",
                 "reuse",
@@ -1904,12 +1863,9 @@
                 "preservation",
                 "historic"
               ],
-              "scopeNote": "Use for works chiefly about adaptive reuse within historic preservation.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about adaptive reuse within historic preservation."
             }
-          ],
-          "legacyParentCode": "162",
-          "legacyParentCodes": ["162"]
+          ]
         },
         {
           "parentCode": "430",
@@ -1919,7 +1875,7 @@
               "extension": "1",
               "shortLabel": "PLZ",
               "label": "Planning & Zoning",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "planning",
                 "zoning",
@@ -1936,14 +1892,13 @@
                 "urban",
                 "design"
               ],
-              "scopeNote": "Use for works chiefly about planning & zoning within urban design.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about planning & zoning within urban design."
             },
             {
               "extension": "2",
               "shortLabel": "SPS",
               "label": "Streetscape & Public Space",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "streetscape",
                 "public",
@@ -1962,14 +1917,13 @@
                 "urban",
                 "design"
               ],
-              "scopeNote": "Use for works chiefly about streetscape & public space within urban design.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about streetscape & public space within urban design."
             },
             {
               "extension": "3",
               "shortLabel": "TRM",
               "label": "Transit & Mobility",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "transit",
                 "mobility",
@@ -1986,14 +1940,13 @@
                 "urban",
                 "design"
               ],
-              "scopeNote": "Use for works chiefly about transit & mobility within urban design.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about transit & mobility within urban design."
             },
             {
               "extension": "4",
               "shortLabel": "COD",
               "label": "Community Development",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "community",
                 "development",
@@ -2013,9 +1966,7 @@
               "scopeNote": "Use for works chiefly about community development within urban design, especially when the emphasis is neighborhood planning, placemaking, or the built environment.",
               "seeAlso": ["284.1"]
             }
-          ],
-          "legacyParentCode": "163",
-          "legacyParentCodes": ["163"]
+          ]
         },
         {
           "parentCode": "440",
@@ -2025,7 +1976,7 @@
               "extension": "1",
               "shortLabel": "MAM",
               "label": "Materials & Methods",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "materials",
                 "methods",
@@ -2042,14 +1993,13 @@
                 "building",
                 "craft"
               ],
-              "scopeNote": "Use for works chiefly about materials & methods within building craft.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about materials & methods within building craft."
             },
             {
               "extension": "2",
               "shortLabel": "WSM",
               "label": "Wood, Stone & Masonry",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "wood",
                 "stone",
@@ -2068,14 +2018,13 @@
                 "building",
                 "craft"
               ],
-              "scopeNote": "Use for works chiefly about wood, stone & masonry within building craft.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about wood, stone & masonry within building craft."
             },
             {
               "extension": "3",
               "shortLabel": "ENB",
               "label": "Environmental Building",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "environmental",
                 "building",
@@ -2090,14 +2039,13 @@
                 "preservation",
                 "craft"
               ],
-              "scopeNote": "Use for works chiefly about environmental building within building craft.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about environmental building within building craft."
             },
             {
               "extension": "4",
               "shortLabel": "DOS",
               "label": "Documentation & Survey",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "documentation",
                 "survey",
@@ -2114,32 +2062,28 @@
                 "building",
                 "craft"
               ],
-              "scopeNote": "Use for works chiefly about documentation & survey within building craft.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about documentation & survey within building craft."
             }
-          ],
-          "legacyParentCode": "164",
-          "legacyParentCodes": ["164"]
+          ]
         },
         {
-          "parentCode": "501",
+          "parentCode": "496",
           "label": "Wildlife",
           "children": [
             {
               "extension": "1",
               "shortLabel": "BIR",
               "label": "Birds",
-              "sort": 1000,
+              "sort": 1,
               "keywords": ["birds", "science", "nature", "animals", "wildlife"],
               "includes": ["birds", "science", "nature", "animals", "wildlife"],
-              "scopeNote": "Use for works chiefly about birds within wildlife.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about birds within wildlife."
             },
             {
               "extension": "2",
               "shortLabel": "MAM",
               "label": "Mammals",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "mammals",
                 "science",
@@ -2154,14 +2098,13 @@
                 "animals",
                 "wildlife"
               ],
-              "scopeNote": "Use for works chiefly about mammals within wildlife.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about mammals within wildlife."
             },
             {
               "extension": "3",
               "shortLabel": "MAL",
               "label": "Marine Life",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "marine",
                 "life",
@@ -2178,14 +2121,13 @@
                 "animals",
                 "wildlife"
               ],
-              "scopeNote": "Use for works chiefly about marine life within wildlife.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about marine life within wildlife."
             },
             {
               "extension": "4",
               "shortLabel": "INI",
               "label": "Insects & Invertebrates",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "insects",
                 "invertebrates",
@@ -2202,22 +2144,19 @@
                 "animals",
                 "wildlife"
               ],
-              "scopeNote": "Use for works chiefly about insects & invertebrates within wildlife.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about insects & invertebrates within wildlife."
             }
-          ],
-          "legacyParentCode": "751",
-          "legacyParentCodes": ["751"]
+          ]
         },
         {
-          "parentCode": "502",
+          "parentCode": "497",
           "label": "Animal Behavior",
           "children": [
             {
               "extension": "1",
               "shortLabel": "OBT",
               "label": "Observation & Tracking",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "observation",
                 "tracking",
@@ -2238,14 +2177,13 @@
                 "animal",
                 "behavior"
               ],
-              "scopeNote": "Use for works chiefly about observation & tracking within animal behavior.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about observation & tracking within animal behavior."
             },
             {
               "extension": "2",
               "shortLabel": "ETH",
               "label": "Ethology",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "ethology",
                 "science",
@@ -2264,14 +2202,13 @@
                 "animal",
                 "behavior"
               ],
-              "scopeNote": "Use for works chiefly about ethology within animal behavior.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about ethology within animal behavior."
             },
             {
               "extension": "3",
               "shortLabel": "EOA",
               "label": "Ecology of Animals",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "ecology",
                 "of",
@@ -2292,14 +2229,13 @@
                 "animal",
                 "behavior"
               ],
-              "scopeNote": "Use for works chiefly about ecology of animals within animal behavior.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about ecology of animals within animal behavior."
             },
             {
               "extension": "4",
               "shortLabel": "COB",
               "label": "Conservation Biology",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "conservation",
                 "biology",
@@ -2320,22 +2256,19 @@
                 "animal",
                 "behavior"
               ],
-              "scopeNote": "Use for works chiefly about conservation biology within animal behavior.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about conservation biology within animal behavior."
             }
-          ],
-          "legacyParentCode": "752",
-          "legacyParentCodes": ["752"]
+          ]
         },
         {
-          "parentCode": "503",
+          "parentCode": "498",
           "label": "Domesticated Animals",
           "children": [
             {
               "extension": "1",
               "shortLabel": "EQU",
               "label": "Equine",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "equine",
                 "science",
@@ -2352,14 +2285,13 @@
                 "wildlife",
                 "domesticated"
               ],
-              "scopeNote": "Use for works chiefly about equine within domesticated animals.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about equine within domesticated animals."
             },
             {
               "extension": "2",
               "shortLabel": "FAA",
               "label": "Farm Animals",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "farm",
                 "animals",
@@ -2376,14 +2308,13 @@
                 "wildlife",
                 "domesticated"
               ],
-              "scopeNote": "Use for works chiefly about farm animals within domesticated animals.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about farm animals within domesticated animals."
             },
             {
               "extension": "3",
               "shortLabel": "CAN",
               "label": "Canines",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "canines",
                 "science",
@@ -2407,7 +2338,7 @@
               "extension": "4",
               "shortLabel": "FEL",
               "label": "Felines",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "felines",
                 "science",
@@ -2427,19 +2358,17 @@
               "scopeNote": "Use for works chiefly about felines within domesticated animals when the emphasis is zoological, breed, or scientific rather than everyday pet ownership.",
               "seeAlso": ["690.2"]
             }
-          ],
-          "legacyParentCode": "753",
-          "legacyParentCodes": ["753"]
+          ]
         },
         {
-          "parentCode": "504",
+          "parentCode": "499",
           "label": "Nature Companions",
           "children": [
             {
               "extension": "1",
               "shortLabel": "PEC",
               "label": "Pet Care",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "pet",
                 "care",
@@ -2465,7 +2394,7 @@
               "extension": "2",
               "shortLabel": "AQT",
               "label": "Aquariums & Terrariums",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "aquariums",
                 "terrariums",
@@ -2484,14 +2413,13 @@
                 "wildlife",
                 "companions"
               ],
-              "scopeNote": "Use for works chiefly about aquariums & terrariums within nature companions.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about aquariums & terrariums within nature companions."
             },
             {
               "extension": "3",
               "shortLabel": "BIR",
               "label": "Birdkeeping",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "birdkeeping",
                 "science",
@@ -2508,14 +2436,13 @@
                 "wildlife",
                 "companions"
               ],
-              "scopeNote": "Use for works chiefly about birdkeeping within nature companions.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about birdkeeping within nature companions."
             },
             {
               "extension": "4",
               "shortLabel": "RER",
               "label": "Rescue & Rehabilitation",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "rescue",
                 "rehabilitation",
@@ -2534,12 +2461,9 @@
                 "wildlife",
                 "companions"
               ],
-              "scopeNote": "Use for works chiefly about rescue & rehabilitation within nature companions.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about rescue & rehabilitation within nature companions."
             }
-          ],
-          "legacyParentCode": "754",
-          "legacyParentCodes": ["754"]
+          ]
         },
         {
           "parentCode": "522",
@@ -2552,7 +2476,7 @@
               "keywords": ["voip", "pbx", "asterisk", "grandstream ata"],
               "includes": ["voip", "pbx", "asterisk", "grandstream ata"],
               "scopeNote": "Use for works chiefly about VoIP, PBX systems, SIP devices, and telephone-over-network infrastructure within networking.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -2573,7 +2497,7 @@
                 "payphones"
               ],
               "scopeNote": "Use for works chiefly about legacy telephony equipment, historic phone systems, and analog communication infrastructure within networking.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
@@ -2596,11 +2520,9 @@
                 "morse code"
               ],
               "scopeNote": "Use for works chiefly about TTY devices, signaling, Baudot, modem-like telephony interfaces, and communications encoding within networking.",
-              "seeAlso": []
+              "sort": 3
             }
-          ],
-          "legacyParentCode": "422",
-          "legacyParentCodes": ["422"]
+          ]
         },
         {
           "parentCode": "524",
@@ -2613,7 +2535,7 @@
               "keywords": ["self-hosting", "homelab", "unraid", "linux"],
               "includes": ["self-hosting", "homelab", "unraid", "linux"],
               "scopeNote": "Use for works chiefly about self-hosting, homelabs, home servers, and personal infrastructure administration within cloud & infrastructure.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -2622,7 +2544,7 @@
               "keywords": ["docker", "kubernetes", "proxmox", "virtualization"],
               "includes": ["docker", "kubernetes", "proxmox", "virtualization"],
               "scopeNote": "Use for works chiefly about containers, orchestration, virtualization, and platform infrastructure within cloud & infrastructure.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
@@ -2643,7 +2565,7 @@
                 "backup systems"
               ],
               "scopeNote": "Use for works chiefly about storage, NAS systems, backup, synchronization, and data portability within cloud & infrastructure.",
-              "seeAlso": []
+              "sort": 3
             },
             {
               "extension": "4",
@@ -2664,11 +2586,9 @@
                 "build servers"
               ],
               "scopeNote": "Use for works chiefly about home automation infrastructure, local AI systems, Raspberry Pi deployments, and small build infrastructure within cloud & infrastructure.",
-              "seeAlso": []
+              "sort": 4
             }
-          ],
-          "legacyParentCode": "424",
-          "legacyParentCodes": ["424"]
+          ]
         },
         {
           "parentCode": "534",
@@ -2691,7 +2611,7 @@
                 "microcontrollers"
               ],
               "scopeNote": "Use for works chiefly about electronics, circuits, soldering, and component-level hardware within robotics & embedded systems.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -2700,7 +2620,7 @@
               "keywords": ["robotics", "robots", "automation"],
               "includes": ["robotics", "robots", "automation"],
               "scopeNote": "Use for works chiefly about robotics and robotic systems within robotics & embedded systems.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
@@ -2717,7 +2637,7 @@
                 "control systems"
               ],
               "scopeNote": "Use for works chiefly about electrical engineering and control systems within robotics & embedded systems.",
-              "seeAlso": []
+              "sort": 3
             },
             {
               "extension": "4",
@@ -2736,11 +2656,9 @@
                 "computer restoration"
               ],
               "scopeNote": "Use for works chiefly about building, restoring, or maintaining vintage computers and retro computing hardware within robotics & embedded systems.",
-              "seeAlso": []
+              "sort": 4
             }
-          ],
-          "legacyParentCode": "434",
-          "legacyParentCodes": ["434"]
+          ]
         },
         {
           "parentCode": "613",
@@ -2763,7 +2681,7 @@
                 "open classification systems"
               ],
               "scopeNote": "Use for works chiefly about classification systems, shelfmarks, and the arrangement of knowledge within indexes & catalogs.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -2782,7 +2700,7 @@
                 "tags"
               ],
               "scopeNote": "Use for works chiefly about metadata, tagging, descriptive structure, and lightweight information labeling within indexes & catalogs.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
@@ -2791,7 +2709,7 @@
               "keywords": ["cataloging", "directory entries", "rolodex cards"],
               "includes": ["cataloging", "directory entries", "rolodex cards"],
               "scopeNote": "Use for works chiefly about cataloging, directory structures, and reference listing systems within indexes & catalogs.",
-              "seeAlso": []
+              "sort": 3
             },
             {
               "extension": "4",
@@ -2818,7 +2736,7 @@
                     "periodicals"
                   ],
                   "scopeNote": "Use for works chiefly about newspapers within serials & periodicals.",
-                  "seeAlso": []
+                  "sort": 41
                 },
                 {
                   "extension": "42",
@@ -2836,7 +2754,7 @@
                     "serials"
                   ],
                   "scopeNote": "Use for works chiefly about magazines within serials & periodicals.",
-                  "seeAlso": []
+                  "sort": 42
                 },
                 {
                   "extension": "43",
@@ -2856,7 +2774,8 @@
                     "serials"
                   ],
                   "scopeNote": "Use for works chiefly about journals, reviews, and recurring review publications within serials & periodicals.",
-                  "seeAlso": ["213"]
+                  "seeAlso": ["213"],
+                  "sort": 43
                 }
               ],
               "allowAssign": true,
@@ -2868,11 +2787,9 @@
                 "journals"
               ],
               "scopeNote": "Use for general works on serial publications, including newspapers, magazines, journals, and other recurring periodicals within indexes & catalogs.",
-              "seeAlso": []
+              "sort": 4
             }
-          ],
-          "legacyParentCode": "913",
-          "legacyParentCodes": ["913"]
+          ]
         },
         {
           "parentCode": "622",
@@ -2891,7 +2808,7 @@
                   "keywords": ["knitting"],
                   "includes": ["knitting", "crafts", "textile"],
                   "scopeNote": "Use for works chiefly about knitting within textile crafts.",
-                  "seeAlso": []
+                  "sort": 11
                 },
                 {
                   "extension": "12",
@@ -2900,13 +2817,13 @@
                   "keywords": ["quilting"],
                   "includes": ["quilting", "crafts", "textile"],
                   "scopeNote": "Use for works chiefly about quilting within textile crafts.",
-                  "seeAlso": []
+                  "sort": 12
                 }
               ],
               "allowAssign": true,
               "includes": ["textile", "crafts", "fiber", "craft"],
               "scopeNote": "Use for general works on textile crafts within crafts. Class more specific works in the refinements below when appropriate.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -2922,7 +2839,7 @@
                   "keywords": ["bookbinding", "binding"],
                   "includes": ["bookbinding", "binding", "crafts", "paper"],
                   "scopeNote": "Use for works chiefly about bookbinding within paper crafts.",
-                  "seeAlso": []
+                  "sort": 21
                 },
                 {
                   "extension": "22",
@@ -2931,16 +2848,15 @@
                   "keywords": ["origami", "folding"],
                   "includes": ["origami", "folding", "crafts", "paper"],
                   "scopeNote": "Use for works chiefly about origami within paper crafts.",
-                  "seeAlso": []
+                  "sort": 22
                 }
               ],
               "allowAssign": true,
               "includes": ["paper", "crafts", "book arts", "craft"],
-              "scopeNote": "Use for general works on paper crafts within crafts. Class more specific works in the refinements below when appropriate."
+              "scopeNote": "Use for general works on paper crafts within crafts. Class more specific works in the refinements below when appropriate.",
+              "sort": 2
             }
-          ],
-          "legacyParentCode": "922",
-          "legacyParentCodes": ["922"]
+          ]
         },
         {
           "parentCode": "624",
@@ -2953,7 +2869,7 @@
               "keywords": ["electric cars", "evs", "battery systems"],
               "includes": ["electric cars", "evs", "battery systems"],
               "scopeNote": "Use for works chiefly about electric cars, EV systems, and hands-on electric vehicle maintenance within DIY & repair.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -2970,11 +2886,9 @@
                 "classic cars"
               ],
               "scopeNote": "Use for works chiefly about antique, vintage, and classic car restoration within DIY & repair.",
-              "seeAlso": []
+              "sort": 2
             }
-          ],
-          "legacyParentCode": "924",
-          "legacyParentCodes": ["924"]
+          ]
         },
         {
           "parentCode": "641",
@@ -2999,7 +2913,7 @@
                 "counseling"
               ],
               "scopeNote": "Use for works chiefly about mental health, therapy, counseling, and emotional wellbeing within health & wellness.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -3008,11 +2922,9 @@
               "keywords": ["caregiving", "caregiver support", "home care"],
               "includes": ["caregiving", "caregiver support", "home care"],
               "scopeNote": "Use for works chiefly about caregiving, caregiver support, and practical care within health & wellness.",
-              "seeAlso": []
+              "sort": 2
             }
-          ],
-          "legacyParentCode": "941",
-          "legacyParentCodes": ["941"]
+          ]
         },
         {
           "parentCode": "660",
@@ -3038,7 +2950,7 @@
                     "tabletop"
                   ],
                   "scopeNote": "Use for works chiefly about role-playing games within tabletop games.",
-                  "seeAlso": []
+                  "sort": 11
                 },
                 {
                   "extension": "12",
@@ -3047,13 +2959,13 @@
                   "keywords": ["board games"],
                   "includes": ["board", "games", "board games", "tabletop"],
                   "scopeNote": "Use for works chiefly about board games within tabletop games.",
-                  "seeAlso": []
+                  "sort": 12
                 }
               ],
               "allowAssign": true,
               "includes": ["tabletop", "games"],
               "scopeNote": "Use for general works on tabletop games within games. Class more specific works in the refinements below when appropriate.",
-              "seeAlso": []
+              "sort": 1
             },
             {
               "extension": "2",
@@ -3074,7 +2986,7 @@
                     "video"
                   ],
                   "scopeNote": "Use for works chiefly about design & development within video games.",
-                  "seeAlso": []
+                  "sort": 21
                 },
                 {
                   "extension": "22",
@@ -3089,19 +3001,19 @@
                     "video"
                   ],
                   "scopeNote": "Use for works chiefly about culture & criticism within video games.",
-                  "seeAlso": []
+                  "sort": 22
                 }
               ],
               "allowAssign": true,
               "includes": ["video", "games", "video games"],
               "scopeNote": "Use for general works on video games within games. Class more specific works in the refinements below when appropriate.",
-              "seeAlso": []
+              "sort": 2
             },
             {
               "extension": "3",
               "shortLabel": "PLG",
               "label": "Puzzles & Logic Games",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "puzzles",
                 "logic",
@@ -3116,14 +3028,13 @@
                 "hobbies",
                 "recreation"
               ],
-              "scopeNote": "Use for works chiefly about puzzles & logic games within games.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about puzzles & logic games within games."
             },
             {
               "extension": "4",
               "shortLabel": "EPC",
               "label": "Esports & Play Culture",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "esports",
                 "play",
@@ -3162,11 +3073,10 @@
                 "collaborative puzzles"
               ],
               "scopeNote": "Use for works chiefly about tabletop, card, and other analog game design, puzzle design, and interactive rule systems within games.",
-              "seeAlso": ["660.2"]
+              "seeAlso": ["660.2"],
+              "sort": 5
             }
-          ],
-          "legacyParentCode": "951",
-          "legacyParentCodes": ["951"]
+          ]
         },
         {
           "parentCode": "670",
@@ -3176,17 +3086,16 @@
               "extension": "1",
               "shortLabel": "COL",
               "label": "Collecting",
-              "sort": 1000,
+              "sort": 1,
               "keywords": ["collecting", "games", "hobbies", "recreation"],
               "includes": ["collecting", "games", "hobbies", "recreation"],
-              "scopeNote": "Use for works chiefly about collecting within hobbies.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about collecting within hobbies."
             },
             {
               "extension": "2",
               "shortLabel": "MOM",
               "label": "Models & Miniatures",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "models",
                 "miniatures",
@@ -3201,28 +3110,25 @@
                 "hobbies",
                 "recreation"
               ],
-              "scopeNote": "Use for works chiefly about models & miniatures within hobbies.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about models & miniatures within hobbies."
             },
             {
               "extension": "3",
               "shortLabel": "HAH",
               "label": "Handcraft Hobbies",
-              "sort": 3000,
+              "sort": 3,
               "keywords": ["handcraft", "hobbies", "games", "recreation"],
               "includes": ["handcraft", "hobbies", "games", "recreation"],
-              "scopeNote": "Use for works chiefly about handcraft hobbies within hobbies.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about handcraft hobbies within hobbies."
             },
             {
               "extension": "4",
               "shortLabel": "OUH",
               "label": "Outdoor Hobbies",
-              "sort": 4000,
+              "sort": 4,
               "keywords": ["outdoor", "hobbies", "games", "recreation"],
               "includes": ["outdoor", "hobbies", "games", "recreation"],
-              "scopeNote": "Use for works chiefly about outdoor hobbies within hobbies.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about outdoor hobbies within hobbies."
             },
             {
               "extension": "5",
@@ -3239,7 +3145,8 @@
                 "computer collecting"
               ],
               "seeAlso": ["534.4"],
-              "scopeNote": "Use for hobby-oriented works on collecting, restoring, or building vintage computers when the emphasis is enthusiast practice rather than engineering."
+              "scopeNote": "Use for hobby-oriented works on collecting, restoring, or building vintage computers when the emphasis is enthusiast practice rather than engineering.",
+              "sort": 5
             },
             {
               "extension": "6",
@@ -3248,7 +3155,7 @@
               "keywords": ["lego", "lego user groups", "brick building"],
               "includes": ["lego", "lego user groups", "brick building"],
               "scopeNote": "Use for works chiefly about LEGO, brick building, and related hobby communities within hobbies.",
-              "seeAlso": []
+              "sort": 6
             },
             {
               "extension": "7",
@@ -3265,11 +3172,9 @@
                 "rolodex cards"
               ],
               "scopeNote": "Use for works chiefly about typewriters, office artifacts, and related mechanical hobby objects within hobbies.",
-              "seeAlso": []
+              "sort": 7
             }
-          ],
-          "legacyParentCode": "952",
-          "legacyParentCodes": ["952"]
+          ]
         },
         {
           "parentCode": "680",
@@ -3279,7 +3184,7 @@
               "extension": "1",
               "shortLabel": "SPA",
               "label": "Sports & Athletics",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "sports",
                 "athletics",
@@ -3294,14 +3199,13 @@
                 "hobbies",
                 "recreation"
               ],
-              "scopeNote": "Use for works chiefly about sports & athletics within recreation.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about sports & athletics within recreation."
             },
             {
               "extension": "2",
               "shortLabel": "FIM",
               "label": "Fitness & Movement",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "fitness",
                 "movement",
@@ -3316,14 +3220,13 @@
                 "hobbies",
                 "recreation"
               ],
-              "scopeNote": "Use for works chiefly about fitness & movement within recreation.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about fitness & movement within recreation."
             },
             {
               "extension": "3",
               "shortLabel": "TCH",
               "label": "Trails, Camping & Hiking",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "trails",
                 "camping",
@@ -3340,22 +3243,18 @@
                 "hobbies",
                 "recreation"
               ],
-              "scopeNote": "Use for works chiefly about trails, camping & hiking within recreation.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about trails, camping & hiking within recreation."
             },
             {
               "extension": "4",
               "shortLabel": "WWR",
               "label": "Water & Winter Recreation",
-              "sort": 4000,
+              "sort": 4,
               "keywords": ["water", "winter", "recreation", "games", "hobbies"],
               "includes": ["water", "winter", "recreation", "games", "hobbies"],
-              "scopeNote": "Use for works chiefly about water & winter recreation within recreation.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about water & winter recreation within recreation."
             }
-          ],
-          "legacyParentCode": "953",
-          "legacyParentCodes": ["953"]
+          ]
         },
         {
           "parentCode": "690",
@@ -3365,7 +3264,7 @@
               "extension": "1",
               "shortLabel": "DOG",
               "label": "Dogs",
-              "sort": 1000,
+              "sort": 1,
               "keywords": [
                 "dogs",
                 "games",
@@ -3384,14 +3283,13 @@
                 "animal",
                 "care"
               ],
-              "scopeNote": "Use for works chiefly about dogs within pets & animal care.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about dogs within pets & animal care."
             },
             {
               "extension": "2",
               "shortLabel": "CAT",
               "label": "Cats",
-              "sort": 2000,
+              "sort": 2,
               "keywords": [
                 "cats",
                 "games",
@@ -3410,14 +3308,13 @@
                 "animal",
                 "care"
               ],
-              "scopeNote": "Use for works chiefly about cats within pets & animal care.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about cats within pets & animal care."
             },
             {
               "extension": "3",
               "shortLabel": "SMA",
               "label": "Small Animals",
-              "sort": 3000,
+              "sort": 3,
               "keywords": [
                 "small",
                 "animals",
@@ -3438,14 +3335,13 @@
                 "animal",
                 "care"
               ],
-              "scopeNote": "Use for works chiefly about small animals within pets & animal care.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about small animals within pets & animal care."
             },
             {
               "extension": "4",
               "shortLabel": "TRB",
               "label": "Training & Behavior",
-              "sort": 4000,
+              "sort": 4,
               "keywords": [
                 "training",
                 "behavior",
@@ -3466,12 +3362,9 @@
                 "animal",
                 "care"
               ],
-              "scopeNote": "Use for works chiefly about training & behavior within pets & animal care.",
-              "seeAlso": []
+              "scopeNote": "Use for works chiefly about training & behavior within pets & animal care."
             }
-          ],
-          "legacyParentCode": "954",
-          "legacyParentCodes": ["954"]
+          ]
         }
       ],
       "defaultRecommendedFormat": "code-short-author"

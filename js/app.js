@@ -132,23 +132,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const used = new Set();
     const index = {};
     const codeIndex = {};
-    const legacyCodeIndex = {};
     const walk = function (nodes, path) {
       (Array.isArray(nodes) ? nodes : []).forEach(function (node, position) {
         if (!node) return;
         const nextPath = path.concat(position);
         node.status = String(node.status || "active");
-        node.legacyCode = String(node.legacyCode || "");
-        node.legacyCodes = Array.isArray(node.legacyCodes)
-          ? node.legacyCodes
-              .map(function (value) {
-                return String(value || "").trim();
-              })
-              .filter(Boolean)
-          : [];
-        if (node.legacyCode && !node.legacyCodes.includes(node.legacyCode)) {
-          node.legacyCodes.unshift(node.legacyCode);
-        }
         node.replacedBy = String(node.replacedBy || "");
         node.sort = Number(node.sort || node.code || position);
         node.seeAlso = Array.isArray(node.seeAlso) ? node.seeAlso : [];
@@ -165,13 +153,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         node.shortLabel = shortLabel;
         index[shortLabel] = nextPath.slice();
         if (node.code) codeIndex[String(node.code)] = nextPath.slice();
-        if (node.legacyCode)
-          legacyCodeIndex[String(node.legacyCode)] = nextPath.slice();
-        node.legacyCodes.forEach(function (legacyCode) {
-          if (!legacyCodeIndex[String(legacyCode)]) {
-            legacyCodeIndex[String(legacyCode)] = nextPath.slice();
-          }
-        });
         walk(node.children, nextPath);
       });
     };
@@ -190,7 +171,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     );
     TPP.classificationShortLabelIndex = index;
     TPP.classificationCodeIndex = codeIndex;
-    TPP.classificationLegacyCodeIndex = legacyCodeIndex;
     return catalog;
   };
   TPP.classificationExtensionShortLabelSeed = function (node) {
@@ -291,28 +271,6 @@ document.addEventListener("DOMContentLoaded", async function () {
           normalizedGroup.parentCode = String(
             normalizedGroup.parentCode || "",
           ).trim();
-          normalizedGroup.legacyParentCode = String(
-            normalizedGroup.legacyParentCode || "",
-          ).trim();
-          normalizedGroup.legacyParentCodes = Array.isArray(
-            normalizedGroup.legacyParentCodes,
-          )
-            ? normalizedGroup.legacyParentCodes
-                .map(function (value) {
-                  return String(value || "").trim();
-                })
-                .filter(Boolean)
-            : [];
-          if (
-            normalizedGroup.legacyParentCode &&
-            !normalizedGroup.legacyParentCodes.includes(
-              normalizedGroup.legacyParentCode,
-            )
-          ) {
-            normalizedGroup.legacyParentCodes.unshift(
-              normalizedGroup.legacyParentCode,
-            );
-          }
           normalizedGroup.children = normalizeTree(
             normalizedGroup.children,
             new Set(),
@@ -343,22 +301,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       ? system.extensions
       : [];
     const target = String(parentCode || "");
-    const exactMatch =
-      groups.find(function (group) {
-        return group && group.parentCode === target;
-      }) || null;
-    if (exactMatch) return exactMatch;
-    if (TPP.classificationCodeIndex && TPP.classificationCodeIndex[target]) {
-      return null;
-    }
     return (
       groups.find(function (group) {
-        return (
-          group &&
-          (group.legacyParentCode === target ||
-            (Array.isArray(group.legacyParentCodes) &&
-              group.legacyParentCodes.includes(target)))
-        );
+        return group && group.parentCode === target;
       }) || null
     );
   };
@@ -480,8 +425,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     return [
       entry.fullCode,
       entry.code,
-      entry.legacyCode,
-      ...(entry.legacyCodes || []),
       entry.extension && entry.code ? entry.code + "." + entry.extension : "",
       entry.shortLabel,
       entry.label,
@@ -547,8 +490,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         entries.push({
           kind: "base",
           code: String(node.code || ""),
-          legacyCode: String(node.legacyCode || ""),
-          legacyCodes: Array.isArray(node.legacyCodes) ? node.legacyCodes : [],
           extension: "",
           fullCode: String(node.code || ""),
           baseShortLabel: TPP.classificationShortLabel(node),
@@ -574,10 +515,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         entries.push({
           kind: "extension",
           code: String(parentCode || ""),
-          legacyCode: String(baseNode.legacyCode || ""),
-          legacyCodes: Array.isArray(baseNode.legacyCodes)
-            ? baseNode.legacyCodes
-            : [],
           extension: String(node.extension || ""),
           fullCode:
             String(parentCode || "") + "." + String(node.extension || ""),
@@ -873,12 +810,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (TPP.classificationCodeIndex && TPP.classificationCodeIndex[target]) {
       return TPP.classificationCodeIndex[target].slice();
     }
-    if (
-      TPP.classificationLegacyCodeIndex &&
-      TPP.classificationLegacyCodeIndex[target]
-    ) {
-      return TPP.classificationLegacyCodeIndex[target].slice();
-    }
     const system = TPP.classificationSystem();
     let found = [];
     const walk = function (nodes, path) {
@@ -901,9 +832,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       .trim()
       .toUpperCase();
     const codePath = code ? TPP.classificationPathForCode(code) : [];
-    if (!shortLabel) return codePath;
+    if (!shortLabel || !codePath.length) {
+      return shortLabel
+        ? TPP.classificationPathForShortLabel(shortLabel)
+        : codePath;
+    }
     const shortLabelPath = TPP.classificationPathForShortLabel(shortLabel);
-    if (!codePath.length) return shortLabelPath;
     const codeNode = TPP.classificationNodeAtPath(codePath);
     if (
       codeNode &&
