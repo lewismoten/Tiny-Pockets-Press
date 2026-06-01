@@ -37,8 +37,7 @@ TPP.bookInfoFieldInputHtml = function (entry) {
       TPP.esc(summary.title || "Choose classification") +
       '</span><span class="book-info-classification-meta">' +
       TPP.esc(summary.meta || "No classification selected") +
-      "</span></button>" +
-      "</div>"
+      "</span></button></div>"
     );
   }
   if (spec.input === "textarea") {

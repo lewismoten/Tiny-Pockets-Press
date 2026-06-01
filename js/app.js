@@ -7,6 +7,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.body.appendChild(dragPreview);
   TPP.classificationCatalog = null;
   TPP.classificationExtensionsCatalog = null;
+  TPP.classificationSearchIndex = [];
+  TPP.classificationDialogSearchQuery = "";
+  TPP.classificationDialogSearchActiveIndex = -1;
   TPP.classificationDialogTargetEntryId = "";
   TPP.classificationDialogPath = [];
   TPP.classificationDialogSelection = {
@@ -33,6 +36,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       };
     }
     TPP.normalizeClassificationCatalog(TPP.classificationCatalog);
+    TPP.buildClassificationSearchIndex();
     return TPP.classificationCatalog;
   };
   TPP.loadClassificationExtensions = async function () {
@@ -52,6 +56,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.normalizeClassificationExtensionsCatalog(
       TPP.classificationExtensionsCatalog,
     );
+    TPP.buildClassificationSearchIndex();
     return TPP.classificationExtensionsCatalog;
   };
   TPP.defaultClassificationFormats = function () {
@@ -300,6 +305,219 @@ document.addEventListener("DOMContentLoaded", async function () {
       }) || null
     );
   };
+  TPP.classificationExtensionNode = function (parentCode, extension) {
+    const group = TPP.classificationExtensionsForCode(parentCode);
+    const target = String(extension || "").trim();
+    if (!group || !target) return null;
+    let found = null;
+    const walk = function (nodes, path) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node, index) {
+        if (!node || found) return;
+        const nextPath = path.concat(index);
+        if (String(node.extension || "") === target) {
+          found = { node: node, path: nextPath.slice() };
+          return;
+        }
+        walk(node.children, nextPath);
+      });
+    };
+    walk(group.children, []);
+    return found;
+  };
+  TPP.classificationExtensionBreadcrumbNodes = function (
+    parentCode,
+    extension,
+  ) {
+    const group = TPP.classificationExtensionsForCode(parentCode);
+    const found = TPP.classificationExtensionNode(parentCode, extension);
+    if (!group || !found) return [];
+    let nodes = Array.isArray(group.children) ? group.children : [];
+    return found.path
+      .map(function (index) {
+        const node = nodes[index] || null;
+        nodes = Array.isArray(node && node.children) ? node.children : [];
+        return node;
+      })
+      .filter(Boolean);
+  };
+  TPP.classificationSearchText = function (entry) {
+    return [
+      entry.fullCode,
+      entry.code,
+      entry.extension && entry.code ? entry.code + "." + entry.extension : "",
+      entry.shortLabel,
+      entry.label,
+      entry.pathLabel,
+      entry.scopeNote,
+      ...(entry.keywords || []),
+      ...(entry.includes || []),
+    ]
+      .join(" ")
+      .toLowerCase();
+  };
+  TPP.buildClassificationSearchIndex = function () {
+    const baseSystem = TPP.classificationSystem();
+    const extensionSystem = TPP.classificationExtensionsSystem();
+    if (!baseSystem) {
+      TPP.classificationSearchIndex = [];
+      return [];
+    }
+    const entries = [];
+    const walkBase = function (nodes, pathLabels) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
+        if (!node) return;
+        const nextLabels = pathLabels.concat(node.label || "");
+        entries.push({
+          kind: "base",
+          code: String(node.code || ""),
+          extension: "",
+          fullCode: String(node.code || ""),
+          shortLabel: TPP.classificationShortLabel(node),
+          label: String(node.label || ""),
+          pathLabel: nextLabels.join(" > "),
+          keywords: Array.isArray(node.keywords) ? node.keywords : [],
+          includes: Array.isArray(node.includes) ? node.includes : [],
+          scopeNote: String(node.scopeNote || ""),
+          allowAssign: !!node.allowAssign,
+        });
+        walkBase(node.children, nextLabels);
+      });
+    };
+    const walkExtension = function (parentCode, nodes, pathLabels, basePath) {
+      (Array.isArray(nodes) ? nodes : []).forEach(function (node) {
+        if (!node) return;
+        const nextLabels = pathLabels.concat(node.label || "");
+        entries.push({
+          kind: "extension",
+          code: String(parentCode || ""),
+          extension: String(node.extension || ""),
+          fullCode:
+            String(parentCode || "") + "." + String(node.extension || ""),
+          shortLabel: TPP.classificationShortLabel(node),
+          label: String(node.label || ""),
+          pathLabel: basePath.concat(nextLabels).join(" > "),
+          keywords: Array.isArray(node.keywords) ? node.keywords : [],
+          includes: Array.isArray(node.includes) ? node.includes : [],
+          scopeNote: String(node.scopeNote || ""),
+          allowAssign: !!node.allowAssign,
+        });
+        walkExtension(parentCode, node.children, nextLabels, basePath);
+      });
+    };
+    walkBase(baseSystem.categories, []);
+    (Array.isArray(extensionSystem && extensionSystem.extensions)
+      ? extensionSystem.extensions
+      : []
+    ).forEach(function (group) {
+      if (!group || !group.parentCode) return;
+      const basePath = TPP.classificationBreadcrumbNodes(
+        TPP.classificationPathForCode(group.parentCode),
+      ).map(function (crumb) {
+        return crumb.node.label;
+      });
+      walkExtension(group.parentCode, group.children, [], basePath);
+    });
+    entries.forEach(function (entry) {
+      entry.searchText = TPP.classificationSearchText(entry);
+    });
+    TPP.classificationSearchIndex = entries;
+    return entries;
+  };
+  TPP.searchClassificationIndex = function (query, limit) {
+    const text = String(query || "")
+      .trim()
+      .toLowerCase();
+    if (!text) return [];
+    const tokens = text.split(/\s+/).filter(Boolean);
+    return (TPP.classificationSearchIndex || [])
+      .map(function (entry) {
+        let score = 0;
+        if (entry.fullCode.toLowerCase() === text) score += 500;
+        else if (entry.fullCode.toLowerCase().startsWith(text)) score += 300;
+        if (entry.code.toLowerCase() === text) score += 260;
+        if (entry.shortLabel.toLowerCase() === text) score += 240;
+        if (entry.label.toLowerCase() === text) score += 220;
+        if (entry.label.toLowerCase().startsWith(text)) score += 180;
+        if (entry.pathLabel.toLowerCase().includes(text)) score += 100;
+        tokens.forEach(function (token) {
+          if (entry.searchText.includes(token)) score += 30;
+          if (entry.label.toLowerCase().includes(token)) score += 35;
+          if (entry.shortLabel.toLowerCase().includes(token)) score += 25;
+        });
+        return { entry: entry, score: score };
+      })
+      .filter(function (item) {
+        return item.score > 0;
+      })
+      .sort(function (a, b) {
+        return (
+          b.score - a.score ||
+          a.entry.fullCode.localeCompare(b.entry.fullCode) ||
+          a.entry.label.localeCompare(b.entry.label)
+        );
+      })
+      .slice(0, limit || 8)
+      .map(function (item) {
+        return item.entry;
+      });
+  };
+  TPP.renderClassificationSearchResults = function (results, activeIndex) {
+    const list = document.getElementById("classificationDialogSearchResults");
+    if (!list) return;
+    if (!results.length) {
+      list.hidden = true;
+      list.innerHTML = "";
+      return;
+    }
+    list.hidden = false;
+    list.innerHTML = results
+      .map(function (entry, index) {
+        return (
+          '<button type="button" class="classification-dialog-search-result' +
+          (index === activeIndex ? " is-active" : "") +
+          '" data-classification-search-select="' +
+          TPP.esc(
+            JSON.stringify({
+              code: entry.code,
+              extension: entry.extension,
+              kind: entry.kind,
+            }),
+          ) +
+          '">' +
+          '<span class="classification-dialog-search-result-code">' +
+          TPP.esc(entry.fullCode) +
+          '</span><span class="classification-dialog-search-result-main">' +
+          '<span class="classification-dialog-search-result-label">' +
+          TPP.esc(entry.label) +
+          '</span><span class="classification-dialog-search-result-meta">' +
+          TPP.esc(entry.pathLabel) +
+          "</span></span></button>"
+        );
+      })
+      .join("");
+  };
+  TPP.closeClassificationSearchResults = function () {
+    const list = document.getElementById("classificationDialogSearchResults");
+    if (!list) return;
+    list.hidden = true;
+    list.innerHTML = "";
+    TPP.classificationDialogSearchActiveIndex = -1;
+  };
+  TPP.applyClassificationSearchSelection = function (selection) {
+    const code = String((selection && selection.code) || "");
+    const extension = String((selection && selection.extension) || "");
+    TPP.classificationDialogSelection.code = code;
+    TPP.classificationDialogSelection.extension = extension;
+    TPP.classificationDialogSelection.formatId = extension
+      ? "code-short-extension"
+      : TPP.defaultClassificationFormatId();
+    TPP.classificationDialogPath = code
+      ? TPP.classificationPathForCode(code)
+      : [];
+    TPP.classificationDialogSearchQuery = "";
+    TPP.closeClassificationSearchResults();
+    TPP.renderClassificationDialog();
+  };
   TPP.classificationSystem = function () {
     const catalog = TPP.classificationCatalog || { systems: [] };
     const systems = Array.isArray(catalog.systems) ? catalog.systems : [];
@@ -509,16 +727,29 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     if (found.length) {
       const nodes = found[0];
+      const extensionNodes =
+        data.code && data.extension
+          ? TPP.classificationExtensionBreadcrumbNodes(
+              data.code,
+              data.extension,
+            )
+          : [];
       const shortPath = nodes
         .map(function (node) {
           return TPP.classificationShortLabel(node);
         })
         .join("/");
-      const fullPath = nodes
+      const extensionPath = extensionNodes
         .map(function (node) {
           return node.label;
         })
         .join(" > ");
+      const fullPath =
+        nodes
+          .map(function (node) {
+            return node.label;
+          })
+          .join(" > ") + (extensionPath ? " > " + extensionPath : "");
       return {
         title: TPP.classificationDisplayString(TPP.active, data),
         meta:
@@ -544,6 +775,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       "classificationDialogDescription",
     );
     const breadcrumbs = document.getElementById("classificationBreadcrumbs");
+    const searchInput = document.getElementById("classificationDialogSearch");
     const selection = document.getElementById("classificationSelection");
     const list = document.getElementById("classificationDialogList");
     if (title) title.textContent = (system && system.name) || "Classification";
@@ -552,6 +784,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         (system && system.description ? system.description + " " : "") +
           (system && system.version ? "Version " + system.version + "." : "") ||
         "Choose a shelfmark by drilling into categories.";
+    if (searchInput) {
+      searchInput.value = TPP.classificationDialogSearchQuery || "";
+    }
     if (breadcrumbs) {
       const crumbs = TPP.classificationBreadcrumbNodes(
         TPP.classificationDialogPath,
@@ -662,11 +897,16 @@ document.addEventListener("DOMContentLoaded", async function () {
             .join("")
         : '<div class="front-cover-field-empty">No deeper categories here.</div>';
     }
+    TPP.renderClassificationSearchResults(
+      TPP.searchClassificationIndex(TPP.classificationDialogSearchQuery, 8),
+      TPP.classificationDialogSearchActiveIndex,
+    );
   };
   TPP.openClassificationDialog = async function (entryId) {
     const dialog = document.getElementById("classificationDialog");
     if (!dialog || typeof dialog.showModal !== "function") return;
     await TPP.loadClassificationSystems();
+    await TPP.loadClassificationExtensions();
     TPP.classificationDialogTargetEntryId = entryId || "";
     const row = document.querySelector(
       '.book-info-entry[data-entry-id="' +
@@ -682,6 +922,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       formatId: currentData.formatId || TPP.defaultClassificationFormatId(),
       extension: currentData.extension || "",
     };
+    TPP.classificationDialogSearchQuery = "";
+    TPP.classificationDialogSearchActiveIndex = -1;
     TPP.classificationDialogPath =
       currentData.code && TPP.classificationPathForCode(currentData.code).length
         ? TPP.classificationPathForCode(currentData.code)
@@ -690,6 +932,13 @@ document.addEventListener("DOMContentLoaded", async function () {
           );
     TPP.renderClassificationDialog();
     if (!dialog.open) dialog.showModal();
+    const searchInput = document.getElementById("classificationDialogSearch");
+    if (searchInput) {
+      window.setTimeout(function () {
+        searchInput.focus();
+        searchInput.select();
+      }, 0);
+    }
   };
   TPP.applyClassificationValue = function () {
     const row = document.querySelector(
@@ -1474,6 +1723,92 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     });
   }
+  document.addEventListener("input", function (e) {
+    const searchInput = e.target.closest("#classificationDialogSearch");
+    if (!searchInput) return;
+    TPP.classificationDialogSearchQuery = searchInput.value || "";
+    const results = TPP.searchClassificationIndex(
+      TPP.classificationDialogSearchQuery,
+      8,
+    );
+    TPP.classificationDialogSearchActiveIndex = results.length ? 0 : -1;
+    TPP.renderClassificationSearchResults(results, 0);
+  });
+  document.addEventListener("focusin", function (e) {
+    const searchInput = e.target.closest("#classificationDialogSearch");
+    if (!searchInput) return;
+    const results = TPP.searchClassificationIndex(searchInput.value, 8);
+    if (!results.length) return;
+    TPP.classificationDialogSearchActiveIndex = 0;
+    TPP.renderClassificationSearchResults(results, 0);
+  });
+  document.addEventListener("click", function (e) {
+    const searchInput = e.target.closest("#classificationDialogSearch");
+    if (searchInput) {
+      const results = TPP.searchClassificationIndex(searchInput.value, 8);
+      if (results.length) {
+        const activeIndex = Number(TPP.classificationDialogSearchActiveIndex);
+        TPP.renderClassificationSearchResults(
+          results,
+          activeIndex >= 0 ? activeIndex : 0,
+        );
+      }
+      return;
+    }
+    const result = e.target.closest("[data-classification-search-select]");
+    if (result) {
+      TPP.applyClassificationSearchSelection(
+        JSON.parse(result.dataset.classificationSearchSelect || "{}"),
+      );
+      return;
+    }
+    if (!e.target.closest(".classification-search-wrap")) {
+      TPP.closeClassificationSearchResults();
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    const searchInput = e.target.closest("#classificationDialogSearch");
+    if (!searchInput) return;
+    const results = TPP.searchClassificationIndex(searchInput.value, 8);
+    if (!results.length) {
+      if (e.key === "Escape") TPP.closeClassificationSearchResults();
+      return;
+    }
+    const currentIndex = Number(TPP.classificationDialogSearchActiveIndex || 0);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextIndex = Math.min(currentIndex + 1, results.length - 1);
+      TPP.classificationDialogSearchActiveIndex = nextIndex;
+      TPP.renderClassificationSearchResults(results, nextIndex);
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const nextIndex = Math.max(currentIndex - 1, 0);
+      TPP.classificationDialogSearchActiveIndex = nextIndex;
+      TPP.renderClassificationSearchResults(results, nextIndex);
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const nextIndex = Math.min(Math.max(currentIndex, 0), results.length - 1);
+      TPP.applyClassificationSearchSelection(results[nextIndex]);
+      return;
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      TPP.closeClassificationSearchResults();
+    }
+  });
+  document.addEventListener("focusout", function (e) {
+    const wrap = e.target.closest(".classification-search-wrap");
+    if (!wrap) return;
+    window.setTimeout(function () {
+      if (!wrap.contains(document.activeElement)) {
+        TPP.closeClassificationSearchResults();
+      }
+    }, 0);
+  });
   const colorPickerPopover = document.getElementById("colorPickerPopover");
   const colorPickerHex = document.getElementById("colorPickerHex");
   const colorPickerSurface = document.getElementById("colorPickerSurface");
