@@ -2283,6 +2283,24 @@ document.addEventListener("DOMContentLoaded", async function () {
     const side = location === "back" ? "back" : "front";
     const preview = document.getElementById("coverPreview");
     if (!preview || !TPP.active || TPP.view !== "cover") return false;
+    if (location === "spine") {
+      const settings = TPP.settings();
+      const spineW = TPP.spineWidth(settings);
+      if (!(spineW > 0) || !TPP.spineEl) return false;
+      const spineNodes = Array.from(preview.querySelectorAll(".spine-piece"));
+      if (!spineNodes.length) return false;
+      spineNodes.forEach(function (node) {
+        node.replaceWith(
+          TPP.spineEl(
+            settings,
+            TPP.coverWrap(settings) + settings.page.w + spineW / 2,
+            TPP.coverWrap(settings),
+            settings.page.h,
+          ),
+        );
+      });
+      return true;
+    }
     const selector = side === "back" ? ".page.back" : ".page.cover";
     const pageNodes = Array.from(preview.querySelectorAll(selector));
     if (!pageNodes.length || !TPP.coverHTML) return false;
@@ -2302,11 +2320,24 @@ document.addEventListener("DOMContentLoaded", async function () {
       !TPP.active ||
       TPP.view !== "reader" ||
       !Array.isArray(TPP.readerVisiblePageRoles) ||
-      !TPP.readerVisiblePageRoles.includes(role) ||
-      !TPP.coverHTML
+      !TPP.readerVisiblePageRoles.includes(
+        location === "spine" ? "front" : role,
+      )
     ) {
       return false;
     }
+    if (location === "spine") {
+      const settings = TPP.settings();
+      const spineW = TPP.spineWidth(settings);
+      if (!(spineW > 0) || !TPP.spineEl) return false;
+      const spineNodes = Array.from(preview.querySelectorAll(".spine-piece"));
+      if (!spineNodes.length) return false;
+      spineNodes.forEach(function (node) {
+        node.replaceWith(TPP.spineEl(settings, spineW / 2, 0, settings.page.h));
+      });
+      return true;
+    }
+    if (!TPP.coverHTML) return false;
     const selector =
       role === "back"
         ? '.page[data-page-role="back"]'
@@ -2320,7 +2351,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     return true;
   };
   TPP.patchVisibleCoverTextPreview = function (location) {
-    if (location !== "front" && location !== "back") return false;
+    if (location !== "front" && location !== "back" && location !== "spine")
+      return false;
     if (TPP.view === "cover") return TPP.patchCoverPreviewSurface(location);
     if (TPP.view === "reader") return TPP.patchReaderPreviewSurface(location);
     return false;
@@ -2397,10 +2429,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     const textElementEntry = target && target.closest(".text-element-group");
     if (textElementEntry) {
       const location = String(textElementEntry.dataset.location || "").trim();
-      if (location === "front" || location === "back") {
+      if (location === "front" || location === "back" || location === "spine") {
         if (TPP.view === "cover") return "cover";
         if (TPP.view === "reader") {
-          const role = location === "front" ? "front" : "back";
+          const role = location === "back" ? "back" : "front";
           return Array.isArray(TPP.readerVisiblePageRoles) &&
             TPP.readerVisiblePageRoles.includes(role)
             ? "reader"
