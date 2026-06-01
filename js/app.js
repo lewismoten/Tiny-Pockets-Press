@@ -2207,6 +2207,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     controlsRoot
       .querySelectorAll('input[type="color"]')
       .forEach(function (input) {
+        if (input.classList.contains("text-swatch-input")) return;
         const anchor = TPP.colorPaletteAnchor(input);
         if (!anchor) return;
         input.classList.add("color-input-native");
@@ -2346,13 +2347,20 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
   TPP.positionColorPopover = function () {
     const popover = document.getElementById("colorPickerPopover");
-    const anchor = document.querySelector(
-      '[data-color-input-id="' + TPP.colorDialogAnchorId + '"]',
-    );
+    const anchor =
+      document.querySelector(
+        '[data-color-anchor-id="' + TPP.colorDialogAnchorId + '"]',
+      ) ||
+      document.querySelector(
+        '[data-color-input-id="' + TPP.colorDialogAnchorId + '"]',
+      );
     if (!popover || !anchor) return;
     const trigger =
-      anchor.parentElement &&
-      anchor.parentElement.querySelector(".color-picker-trigger");
+      anchor.classList.contains("color-picker-trigger") ||
+      anchor.classList.contains("front-cover-text-outline-hit")
+        ? anchor
+        : anchor.parentElement &&
+          anchor.parentElement.querySelector(".color-picker-trigger");
     const rect = (trigger || anchor).getBoundingClientRect();
     popover.hidden = false;
     const popRect = popover.getBoundingClientRect();
@@ -2421,13 +2429,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     popover.hidden = true;
     TPP.colorDialogAnchorId = "";
   };
-  TPP.openColorDialog = function (input) {
+  TPP.openColorDialog = function (input, anchor) {
     const popover = document.getElementById("colorPickerPopover");
     if (!popover || !input) return;
     if (!input.dataset.colorInputId)
       input.dataset.colorInputId = "color-input-" + TPP.uid();
     TPP.colorDialogTargetId = input.dataset.colorInputId;
-    TPP.colorDialogAnchorId = input.dataset.colorInputId;
+    if (anchor) {
+      if (!anchor.dataset.colorAnchorId)
+        anchor.dataset.colorAnchorId = "color-anchor-" + TPP.uid();
+      TPP.colorDialogAnchorId = anchor.dataset.colorAnchorId;
+    } else {
+      TPP.colorDialogAnchorId = input.dataset.colorInputId;
+    }
     TPP.colorDialogValue = TPP.normalizeHexColor(input.value) || "#000000";
     popover.hidden = false;
     TPP.updateColorDialogPreview(TPP.colorDialogValue, true);
@@ -2609,6 +2623,18 @@ document.addEventListener("DOMContentLoaded", async function () {
           '[data-color-input-id="' + colorTrigger.dataset.colorTarget + '"]',
         );
         if (input) TPP.openColorDialog(input);
+        return;
+      }
+      const colorSwatchTrigger = e.target.closest("[data-color-swatch-target]");
+      if (colorSwatchTrigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        const input = controls.querySelector(
+          '[data-color-input-id="' +
+            colorSwatchTrigger.dataset.colorSwatchTarget +
+            '"]',
+        );
+        if (input) TPP.openColorDialog(input, colorSwatchTrigger);
         return;
       }
       const alignCycle = e.target.closest("[data-text-align-cycle]");
@@ -3272,7 +3298,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.addEventListener("mousedown", function (e) {
     const popover = document.getElementById("colorPickerPopover");
     if (!popover || popover.hidden) return;
-    const trigger = e.target.closest(".color-picker-trigger");
+    const trigger = e.target.closest(
+      ".color-picker-trigger, .front-cover-text-outline-hit",
+    );
     if (trigger) return;
     if (!e.target.closest("#colorPickerPopover")) TPP.closeColorDialog();
   });

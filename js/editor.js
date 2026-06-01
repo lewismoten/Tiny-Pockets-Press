@@ -370,20 +370,47 @@ TPP.frontCoverTextRowHtml = function (book, element) {
     '<td><input class="text-y" type="range" min="0" max="100" value="' +
     TPP.esc(String(Number(entry.y) || 0)) +
     '"></td>' +
-    '<td><input class="text-color color-box" type="color" tabindex="-1" aria-label="Text color" value="' +
-    TPP.esc(entry.color || "#ffffff") +
-    '"></td>' +
-    '<td><div class="front-cover-text-outline-cell"><input class="text-outline-color color-box" type="color" tabindex="-1" aria-label="Outline color" value="' +
-    TPP.esc(entry.outlineColor || "#000000") +
-    '"><input class="text-outline-size" type="number" min="0" step=".25" value="' +
-    TPP.esc(String(Math.max(0, Number(entry.outlineSize) || 0))) +
-    '"></div></td>' +
+    "<td>" +
+    TPP.textColorOutlineControlHtml(entry) +
+    "</td>" +
     "</tr>"
+  );
+};
+TPP.textColorOutlineControlHtml = function (entry) {
+  const textColor = entry.color || "#ffffff";
+  const outlineColor = entry.outlineColor || "#000000";
+  const outlineSize = String(Math.max(0, Number(entry.outlineSize) || 0));
+  const textInputId = "text-fill-" + TPP.uid();
+  const outlineInputId = "text-outline-" + TPP.uid();
+  return (
+    '<div class="front-cover-text-outline-cell" style="--text-fill-color:' +
+    TPP.esc(textColor) +
+    ";--text-outline-color:" +
+    TPP.esc(outlineColor) +
+    '"><div class="front-cover-text-outline-pair"><input class="text-color text-swatch-input" data-color-input-id="' +
+    TPP.esc(textInputId) +
+    '" type="color" tabindex="-1" aria-label="Text color" value="' +
+    TPP.esc(textColor) +
+    '"><svg class="front-cover-text-outline-icon" viewBox="0 0 80 24" aria-hidden="true" focusable="false"><rect x="1.5" y="4.5" width="14" height="14" rx="3" class="front-cover-text-outline-fill-swatch"></rect><line x1="15.5" y1="12" x2="30.6" y2="12" class="front-cover-text-outline-fill-line"></line><circle cx="34" cy="12" r="3.4" class="front-cover-text-outline-fill-dot"></circle><path d="M31.3 5.6A7.1 7.1 0 1 1 31.3 18.4" class="front-cover-text-outline-stroke-ring"></path><line x1="42.2" y1="12" x2="64.5" y2="12" class="front-cover-text-outline-stroke-line"></line><rect x="64.5" y="4.5" width="14" height="14" rx="3" class="front-cover-text-outline-stroke-swatch"></rect></svg><button type="button" class="front-cover-text-outline-hit front-cover-text-outline-hit-fill" data-color-swatch-target="' +
+    TPP.esc(textInputId) +
+    '" aria-label="Choose text color" title="' +
+    TPP.esc(textColor) +
+    '"></button><button type="button" class="front-cover-text-outline-hit front-cover-text-outline-hit-outline" data-color-swatch-target="' +
+    TPP.esc(outlineInputId) +
+    '" aria-label="Choose outline color" title="' +
+    TPP.esc(outlineColor) +
+    '"></button><input class="text-outline-color text-swatch-input" data-color-input-id="' +
+    TPP.esc(outlineInputId) +
+    '" type="color" tabindex="-1" aria-label="Outline color" value="' +
+    TPP.esc(outlineColor) +
+    '"></div><input class="text-outline-size" type="number" min="0" step=".25" aria-label="Outline size" value="' +
+    TPP.esc(outlineSize) +
+    '"></div>'
   );
 };
 TPP.frontCoverTextListHtml = function (book, spec) {
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><colgroup><col class="front-cover-col-field"><col class="front-cover-col-size"><col class="front-cover-col-y"><col class="front-cover-col-color"><col class="front-cover-col-outline"></colgroup><thead><tr><th>Field</th><th>Size</th><th>Y</th><th>Clr</th><th>Outl</th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table"><colgroup><col class="front-cover-col-field"><col class="front-cover-col-size"><col class="front-cover-col-y"><col class="front-cover-col-outline"></colgroup><thead><tr><th>Field</th><th>Size</th><th>Y</th><th>Color</th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, spec.location)
       .map(function (element) {
         return TPP.frontCoverTextRowHtml(book, element);
@@ -422,20 +449,15 @@ TPP.backCoverTextRowHtml = function (book, element) {
     '<label><span>W</span><input class="text-width" type="range" min="10" max="100" value="' +
     TPP.esc(String(Number(entry.width) || 100)) +
     '"></label></div></td>' +
-    '<td><input class="text-color color-box" type="color" tabindex="-1" aria-label="Text color" value="' +
-    TPP.esc(entry.color || "#ffffff") +
-    '"></td>' +
-    '<td><div class="front-cover-text-outline-cell"><input class="text-outline-color color-box" type="color" tabindex="-1" aria-label="Outline color" value="' +
-    TPP.esc(entry.outlineColor || "#000000") +
-    '"><input class="text-outline-size" type="number" min="0" step=".25" value="' +
-    TPP.esc(String(Math.max(0, Number(entry.outlineSize) || 0))) +
-    '"></div></td>' +
+    "<td>" +
+    TPP.textColorOutlineControlHtml(entry) +
+    "</td>" +
     "</tr>"
   );
 };
 TPP.backCoverTextListHtml = function (book, spec) {
   return (
-    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-position"><col class="back-cover-col-align"><col class="back-cover-col-color"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Aln/W</th><th>Clr</th><th>Outl</th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-position"><col class="back-cover-col-align"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Aln/W</th><th>Color</th></tr></thead><tbody>' +
     TPP.textElementsForLocation(book, spec.location)
       .map(function (element) {
         return TPP.backCoverTextRowHtml(book, element);
