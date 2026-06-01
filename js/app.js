@@ -342,13 +342,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     const groups = Array.isArray(system && system.extensions)
       ? system.extensions
       : [];
+    const target = String(parentCode || "");
+    const exactMatch =
+      groups.find(function (group) {
+        return group && group.parentCode === target;
+      }) || null;
+    if (exactMatch) return exactMatch;
+    if (TPP.classificationCodeIndex && TPP.classificationCodeIndex[target]) {
+      return null;
+    }
     return (
       groups.find(function (group) {
-        const target = String(parentCode || "");
         return (
           group &&
-          (group.parentCode === target ||
-            group.legacyParentCode === target ||
+          (group.legacyParentCode === target ||
             (Array.isArray(group.legacyParentCodes) &&
               group.legacyParentCodes.includes(target)))
         );
@@ -449,7 +456,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   };
   TPP.setClassificationDialogCode = function (code, extension) {
-    const nextCode = String(code || "");
+    const requestedCode = String(code || "");
+    const resolvedPath = TPP.classificationPathForCode(requestedCode);
+    const resolvedNode = TPP.classificationNodeAtPath(resolvedPath);
+    const nextCode = String(
+      (resolvedNode && resolvedNode.code) || requestedCode || "",
+    );
     const nextExtension = String(extension || "");
     TPP.classificationDialogSelection.code = nextCode;
     const validExtension =
@@ -883,6 +895,24 @@ document.addEventListener("DOMContentLoaded", async function () {
     walk(system && system.categories, []);
     return found;
   };
+  TPP.classificationPathForData = function (data) {
+    const code = String((data && data.code) || "").trim();
+    const shortLabel = String((data && data.shortLabel) || "")
+      .trim()
+      .toUpperCase();
+    const codePath = code ? TPP.classificationPathForCode(code) : [];
+    if (!shortLabel) return codePath;
+    const shortLabelPath = TPP.classificationPathForShortLabel(shortLabel);
+    if (!codePath.length) return shortLabelPath;
+    const codeNode = TPP.classificationNodeAtPath(codePath);
+    if (
+      codeNode &&
+      TPP.classificationShortLabel(codeNode).toUpperCase() === shortLabel
+    ) {
+      return codePath;
+    }
+    return shortLabelPath.length ? shortLabelPath : codePath;
+  };
   TPP.classificationValueData = function (value) {
     const raw = String(value || "").trim();
     if (!raw)
@@ -941,12 +971,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     return String(TPP.bookInfoValue(book, "languageCountry") || "").trim();
   };
   TPP.classificationNodeForData = function (data) {
-    const path =
-      data && data.code && TPP.classificationPathForCode(data.code).length
-        ? TPP.classificationPathForCode(data.code)
-        : data && data.shortLabel
-          ? TPP.classificationPathForShortLabel(data.shortLabel)
-          : [];
+    const path = TPP.classificationPathForData(data);
     return path.length ? TPP.classificationNodeAtPath(path) : null;
   };
   TPP.classificationDisplayString = function (book, value) {
@@ -998,10 +1023,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       };
     const system = TPP.classificationSystem();
     const found = [];
-    const sourcePath =
-      data.code && TPP.classificationPathForCode(data.code).length
-        ? TPP.classificationPathForCode(data.code)
-        : TPP.classificationPathForShortLabel(data.shortLabel || data.code);
+    const sourcePath = TPP.classificationPathForData(data);
     if (sourcePath.length) {
       found.push(
         TPP.classificationBreadcrumbNodes(sourcePath).map(function (crumb) {
@@ -1273,16 +1295,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
     TPP.classificationDialogSearchQuery = "";
     TPP.classificationDialogSearchActiveIndex = -1;
+    TPP.classificationDialogPath = TPP.classificationPathForData(currentData);
+    const resolvedNode = TPP.classificationNodeAtPath(
+      TPP.classificationDialogPath,
+    );
     TPP.setClassificationDialogCode(
-      currentData.code || "",
+      (resolvedNode && resolvedNode.code) || currentData.code || "",
       currentData.extension || "",
     );
-    TPP.classificationDialogPath =
-      currentData.code && TPP.classificationPathForCode(currentData.code).length
-        ? TPP.classificationPathForCode(currentData.code)
-        : TPP.classificationPathForShortLabel(
-            currentData.shortLabel || currentData.code,
-          );
     TPP.renderClassificationDialog();
     if (!dialog.open) dialog.showModal();
     const searchInput = document.getElementById("classificationDialogSearch");
