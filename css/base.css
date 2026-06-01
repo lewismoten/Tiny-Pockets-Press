@@ -1238,6 +1238,26 @@ input[type="checkbox"] {
 .front-cover-text-table col.front-cover-col-outline {
   width: 5.6rem;
 }
+.back-cover-text-table col.back-cover-col-field {
+  width: auto;
+}
+.back-cover-text-table col.back-cover-col-size {
+  width: 3.8rem;
+}
+.back-cover-text-table col.back-cover-col-x,
+.back-cover-text-table col.back-cover-col-y,
+.back-cover-text-table col.back-cover-col-width {
+  width: 6.25rem;
+}
+.back-cover-text-table col.back-cover-col-align {
+  width: 4.2rem;
+}
+.back-cover-text-table col.back-cover-col-color {
+  width: 3.1rem;
+}
+.back-cover-text-table col.back-cover-col-outline {
+  width: 5.6rem;
+}
 .front-cover-text-layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -1270,6 +1290,13 @@ input[type="checkbox"] {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.back-cover-text-table td:nth-child(1) {
+  width: auto;
+  font-weight: 400;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 .front-cover-text-table input {
   margin: 0;
@@ -1380,6 +1407,27 @@ input[type="checkbox"] {
 .front-cover-text-table td:nth-child(1) .drag-handle {
   vertical-align: middle;
 }
+.back-cover-text-field-cell {
+  display: grid;
+  gap: 0.28rem;
+}
+.back-cover-text-field-top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.25rem;
+}
+.back-cover-text-field-top .small {
+  min-width: 0;
+  padding: 0.18rem 0.38rem;
+}
+.back-cover-text-field-top select {
+  min-width: 0;
+}
+.back-cover-text-custom {
+  width: 100%;
+  resize: vertical;
+}
 .front-cover-text-layout #openFrontCoverFieldPicker {
   justify-self: start;
   border-radius: 10px;
@@ -1390,6 +1438,11 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
+}
+.back-cover-text-actions-bar {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 0.55rem;
 }
 .front-cover-trash-drop {
   display: none;

@@ -348,6 +348,72 @@ TPP.frontCoverTextListHtml = function (book, spec) {
     '</tbody></table></div><div class="front-cover-text-actions-bar"><button type="button" class="small" id="openFrontCoverFieldPicker">Add Front Cover Text</button><div id="frontCoverTrashDrop" class="front-cover-trash-drop" aria-hidden="true"><span class="front-cover-trash-icon">🗑</span><span>Drop here to remove</span></div></div>'
   );
 };
+TPP.backCoverTextRowHtml = function (book, element) {
+  const entry = element || {};
+  const fieldKey = entry.fieldKey || entry.part || "custom";
+  const align = entry.align || "center";
+  return (
+    '<tr class="text-element-group back-cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
+    TPP.esc(entry.id || "") +
+    '" data-location="back">' +
+    '<td><div class="back-cover-text-field-cell"><div class="back-cover-text-field-top"><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span><select class="text-field-key">' +
+    TPP.textElementFieldOptionsHtml(fieldKey) +
+    '</select><button type="button" class="small" data-text-action="remove">Remove</button></div>' +
+    (fieldKey === "custom"
+      ? '<textarea class="text-custom back-cover-text-custom" rows="2" placeholder="Custom text">' +
+        TPP.esc(entry.customText || "") +
+        "</textarea>"
+      : "") +
+    "</div></td>" +
+    '<td><input class="text-size" type="number" min="3" step=".5" value="' +
+    TPP.esc(String(Number(entry.size) || 4)) +
+    '"></td>' +
+    '<td><input class="text-x" type="range" min="0" max="100" value="' +
+    TPP.esc(String(Number(entry.x) || 50)) +
+    '"></td>' +
+    '<td><input class="text-y" type="range" min="0" max="100" value="' +
+    TPP.esc(String(Number(entry.y) || 0)) +
+    '"></td>' +
+    '<td><input class="text-width" type="range" min="10" max="100" value="' +
+    TPP.esc(String(Number(entry.width) || 100)) +
+    '"></td>' +
+    '<td><select class="text-align"><option value="left"' +
+    (align === "left" ? " selected" : "") +
+    '>L</option><option value="center"' +
+    (align === "center" ? " selected" : "") +
+    '>C</option><option value="justify"' +
+    (align === "justify" ? " selected" : "") +
+    '>J</option><option value="right"' +
+    (align === "right" ? " selected" : "") +
+    '>R</option><option value="clip"' +
+    (align === "clip" ? " selected" : "") +
+    ">Clip</option></select></td>" +
+    '<td><input class="text-color color-box" type="color" tabindex="-1" aria-label="Text color" value="' +
+    TPP.esc(entry.color || "#ffffff") +
+    '"></td>' +
+    '<td><div class="front-cover-text-outline-cell"><input class="text-outline-color color-box" type="color" tabindex="-1" aria-label="Outline color" value="' +
+    TPP.esc(entry.outlineColor || "#000000") +
+    '"><input class="text-outline-size" type="number" min="0" step=".25" value="' +
+    TPP.esc(String(Math.max(0, Number(entry.outlineSize) || 0))) +
+    '"></div></td>' +
+    "</tr>"
+  );
+};
+TPP.backCoverTextListHtml = function (book, spec) {
+  return (
+    '<div class="book-info-table-wrap"><table class="data-table front-cover-text-table back-cover-text-table"><colgroup><col class="back-cover-col-field"><col class="back-cover-col-size"><col class="back-cover-col-x"><col class="back-cover-col-y"><col class="back-cover-col-width"><col class="back-cover-col-align"><col class="back-cover-col-color"><col class="back-cover-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>X</th><th>Y</th><th>W</th><th>Aln</th><th>Clr</th><th>Outl</th></tr></thead><tbody>' +
+    TPP.textElementsForLocation(book, spec.location)
+      .map(function (element) {
+        return TPP.backCoverTextRowHtml(book, element);
+      })
+      .join("") +
+    '</tbody></table></div><div class="back-cover-text-actions-bar"><button type="button" class="small" data-text-action="add" data-location="' +
+    TPP.esc(spec.location) +
+    '">' +
+    TPP.esc(spec.addLabel) +
+    "</button></div>"
+  );
+};
 TPP.textElementGroupHtml = function (book, spec, element) {
   const entry = element || {};
   const align = entry.align || spec.defaultAlign || "center";
@@ -418,6 +484,7 @@ TPP.textElementGroupHtml = function (book, spec, element) {
 };
 TPP.textElementListHtml = function (book, spec) {
   if (spec.location === "front") return TPP.frontCoverTextListHtml(book, spec);
+  if (spec.location === "back") return TPP.backCoverTextListHtml(book, spec);
   const elements = TPP.textElementsForLocation(book, spec.location);
   return (
     elements
@@ -465,7 +532,9 @@ TPP.renderTextElementControls = function () {
     const node = document.getElementById(spec.containerId);
     if (!node) return;
     node.className =
-      spec.location === "front" ? "front-cover-text-layout" : "cover-text-grid";
+      spec.location === "front" || spec.location === "back"
+        ? "front-cover-text-layout"
+        : "cover-text-grid";
     node.innerHTML = TPP.textElementListHtml(TPP.active, spec);
   });
   const copyright = document.getElementById("copyrightPageItems");
