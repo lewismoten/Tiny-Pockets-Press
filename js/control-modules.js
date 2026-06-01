@@ -16,6 +16,11 @@ TPP.controlModuleRegistry = {
   "image-export-palette-dialog": "controls/image-export-palette-dialog/",
   "about-panel": "controls/about-panel/",
   "data-panel": "controls/data-panel/",
+  "app-view-controls": "controls/app-view-controls/",
+  "editor-range-controls": "controls/editor-range-controls/",
+  "editor-book-info-controls": "controls/editor-book-info-controls/",
+  "editor-cover-text-controls": "controls/editor-cover-text-controls/",
+  "editor-copyright-controls": "controls/editor-copyright-controls/",
 };
 TPP.controlModuleState = TPP.controlModuleState || {};
 TPP.ensureControlModule = async function (id) {

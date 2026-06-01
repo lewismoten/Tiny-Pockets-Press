@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   rangeValueTooltip.hidden = true;
   rangeValueTooltip.setAttribute("aria-hidden", "true");
   document.body.appendChild(rangeValueTooltip);
+  TPP.dragPreviewEl = dragPreview;
   let rangeHoverTooltipTimer = 0;
   TPP.classificationCatalog = null;
   TPP.classificationExtensionsCatalog = null;
@@ -2125,23 +2126,16 @@ document.addEventListener("DOMContentLoaded", async function () {
   TPP.switchView(TPP.view, true);
   TPP.bindSettingsUiPersistence();
 
-  document.querySelectorAll(".tab").forEach(function (button) {
-    button.onclick = function () {
-      TPP.switchView(button.dataset.view);
-    };
+  document.addEventListener("click", async function (event) {
+    const target = event.target;
+    if (!target.closest(".tab") && !target.closest("#toggleBookButtonText")) {
+      return;
+    }
+    const api = await TPP.ensureControlModule("app-view-controls");
+    if (api && typeof api.handleClick === "function") {
+      api.handleClick(event);
+    }
   });
-  const toggleBookButtonText = document.getElementById("toggleBookButtonText");
-  if (toggleBookButtonText) {
-    toggleBookButtonText.onclick = function () {
-      const state = TPP.readSettingsUi();
-      const show = state.showBookButtonText === false;
-      TPP.setBookButtonTextVisibility(show);
-      TPP.writeSettingsUi(
-        Object.assign({}, state, { showBookButtonText: show }),
-      );
-      TPP.saveSettingsUi();
-    };
-  }
 
   const renderCurrentViewPreservingSidebar = function () {
     if (TPP.view === "about") TPP.renderAbout();
@@ -2395,6 +2389,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       16,
     );
   };
+  TPP.editorRenderActionForTarget = editorRenderActionForTarget;
+  TPP.scheduleEditorRender = scheduleEditorRender;
   TPP.normalizeHexColor = function (value) {
     const text = String(value || "").trim();
     const match = text.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -2843,323 +2839,176 @@ document.addEventListener("DOMContentLoaded", async function () {
         );
       });
     };
-    controls.addEventListener("input", function (e) {
-      if (
-        e.target.matches('input[type="range"]') &&
-        TPP.positionRangeValueTooltip
-      ) {
-        TPP.positionRangeValueTooltip(e.target);
-      }
-      const bookInfoEntry = e.target.closest(".book-info-entry");
-      const textElementEntry = e.target.closest(".text-element-group");
-      const copyrightItem = e.target.closest(".copyright-item-group");
-      if (!bookInfoEntry && !textElementEntry && !copyrightItem) return;
-      const draftRenderOptions = { debounce: true, delay: 64 };
-      const renderAction = editorRenderActionForTarget(e.target);
-      const textLocation = textElementEntry
-        ? String(textElementEntry.dataset.location || "").trim()
-        : "";
-      if (textElementEntry && TPP.readSingleTextElementGroup) {
-        if (
-          (e.target.classList.contains("text-color") ||
-            e.target.classList.contains("text-outline-color")) &&
-          TPP.syncTextOutlineColorControl
-        ) {
-          TPP.syncTextOutlineColorControl(e.target);
+    controls.addEventListener("input", async function (e) {
+      if (e.target.matches('input[type="range"]')) {
+        const rangeApi = await TPP.ensureControlModule("editor-range-controls");
+        if (rangeApi && typeof rangeApi.handleInput === "function") {
+          rangeApi.handleInput(e);
         }
-        TPP.readSingleTextElementGroup(TPP.active, textElementEntry);
-        if (TPP.syncLegacyTextFieldsFromElements) {
-          TPP.syncLegacyTextFieldsFromElements(TPP.active);
-        }
-        if (TPP.scheduleDraftSave) {
-          TPP.scheduleDraftSave(TPP.bookId(TPP.active), 180);
-        } else {
-          TPP.save("draft", TPP.bookId(TPP.active));
-          TPP.scheduleRevisionCommit(TPP.bookId(TPP.active));
-        }
-      } else if (copyrightItem && TPP.readSingleCopyrightItemGroup) {
-        TPP.readSingleCopyrightItemGroup(TPP.active, copyrightItem);
-        if (TPP.scheduleDraftSave) {
-          TPP.scheduleDraftSave(TPP.bookId(TPP.active), 180);
-        } else {
-          TPP.save("draft", TPP.bookId(TPP.active));
-          TPP.scheduleRevisionCommit(TPP.bookId(TPP.active));
-        }
-      } else {
-        TPP.sync("draft");
       }
-      if (bookInfoEntry) {
-        scheduleEditorRender("preserve", draftRenderOptions);
-        return;
-      }
-      if (textElementEntry || copyrightItem) {
-        if (
-          e.target.classList.contains("text-field-key") ||
-          e.target.classList.contains("copyright-field-key")
-        ) {
-          TPP.renderTextElementControls();
-        }
-        if (TPP.patchVisibleCoverTextPreview(textLocation)) {
-          if (TPP.renderColorPalettes) TPP.renderColorPalettes();
-          return;
-        }
-        scheduleEditorRender(renderAction, draftRenderOptions);
-        return;
-      }
-      if (
-        e.target.classList.contains("book-info-custom-label") ||
-        e.target.classList.contains("book-info-value") ||
-        e.target.classList.contains("text-field-key") ||
-        e.target.classList.contains("copyright-field-key")
-      ) {
-        TPP.renderTextElementControls();
-      }
-      scheduleEditorRender("full", draftRenderOptions);
-    });
-    controls.addEventListener("change", function (e) {
-      if (
-        e.target.matches('input[type="range"]') &&
-        TPP.positionRangeValueTooltip
-      ) {
-        TPP.positionRangeValueTooltip(e.target);
-      }
-      const bookInfoEntry = e.target.closest(".book-info-entry");
-      const textElementEntry = e.target.closest(".text-element-group");
-      const copyrightItem = e.target.closest(".copyright-item-group");
-      if (!bookInfoEntry && !textElementEntry && !copyrightItem) return;
-      const renderAction = editorRenderActionForTarget(e.target);
-      const textLocation = textElementEntry
-        ? String(textElementEntry.dataset.location || "").trim()
-        : "";
-      if (textElementEntry && TPP.readSingleTextElementGroup) {
-        if (
-          (e.target.classList.contains("text-color") ||
-            e.target.classList.contains("text-outline-color")) &&
-          TPP.syncTextOutlineColorControl
-        ) {
-          TPP.syncTextOutlineColorControl(e.target);
-        }
-        TPP.readSingleTextElementGroup(TPP.active, textElementEntry);
-        if (TPP.syncLegacyTextFieldsFromElements) {
-          TPP.syncLegacyTextFieldsFromElements(TPP.active);
-        }
-        TPP.save("commit", TPP.bookId(TPP.active));
-      } else if (copyrightItem && TPP.readSingleCopyrightItemGroup) {
-        TPP.readSingleCopyrightItemGroup(TPP.active, copyrightItem);
-        TPP.save("commit", TPP.bookId(TPP.active));
-      } else {
-        TPP.sync("commit");
-      }
-      if (bookInfoEntry) {
-        scheduleEditorRender("preserve");
-        return;
-      }
-      if (textElementEntry || copyrightItem) {
-        if (
-          e.target.classList.contains("text-field-key") ||
-          e.target.classList.contains("copyright-field-key")
-        ) {
-          TPP.renderTextElementControls();
-        }
-        if (TPP.patchVisibleCoverTextPreview(textLocation)) {
-          if (TPP.renderColorPalettes) TPP.renderColorPalettes();
-          return;
-        }
-        scheduleEditorRender(renderAction);
-        return;
-      }
-      if (
-        e.target.classList.contains("book-info-custom-label") ||
-        e.target.classList.contains("book-info-value") ||
-        e.target.classList.contains("text-field-key") ||
-        e.target.classList.contains("copyright-field-key")
-      ) {
-        TPP.renderTextElementControls();
-      }
-      scheduleEditorRender("full");
-    });
-    controls.addEventListener("click", function (e) {
-      const bookInfoPickerButton = e.target.closest("[data-book-info-picker]");
-      if (bookInfoPickerButton) {
-        TPP.sync("nosave");
-        TPP.openBookInfoPickerDialog(
-          bookInfoPickerButton.dataset.bookInfoPickerKind,
-          bookInfoPickerButton.dataset.bookInfoPicker,
+      if (e.target.closest(".text-element-group")) {
+        const textApi = await TPP.ensureControlModule(
+          "editor-cover-text-controls",
         );
-        return;
+        if (textApi && typeof textApi.handleInput === "function") {
+          return textApi.handleInput(e);
+        }
       }
-      const classificationButton = e.target.closest(
-        "[data-book-info-classification]",
-      );
-      if (classificationButton) {
-        TPP.sync("nosave");
-        TPP.openClassificationDialog(
-          classificationButton.dataset.bookInfoClassification,
+      if (e.target.closest(".copyright-item-group")) {
+        const copyrightApi = await TPP.ensureControlModule(
+          "editor-copyright-controls",
         );
+        if (copyrightApi && typeof copyrightApi.handleInput === "function") {
+          return copyrightApi.handleInput(e);
+        }
+      }
+      if (e.target.closest(".book-info-entry")) {
+        const bookInfoApi = await TPP.ensureControlModule(
+          "editor-book-info-controls",
+        );
+        if (bookInfoApi && typeof bookInfoApi.handleInput === "function") {
+          return bookInfoApi.handleInput(e);
+        }
+      }
+    });
+    controls.addEventListener("change", async function (e) {
+      if (e.target.matches('input[type="range"]')) {
+        const rangeApi = await TPP.ensureControlModule("editor-range-controls");
+        if (rangeApi && typeof rangeApi.handleChange === "function") {
+          rangeApi.handleChange(e);
+        }
+      }
+      if (e.target.closest(".text-element-group")) {
+        const textApi = await TPP.ensureControlModule(
+          "editor-cover-text-controls",
+        );
+        if (textApi && typeof textApi.handleChange === "function") {
+          return textApi.handleChange(e);
+        }
+      }
+      if (e.target.closest(".copyright-item-group")) {
+        const copyrightApi = await TPP.ensureControlModule(
+          "editor-copyright-controls",
+        );
+        if (copyrightApi && typeof copyrightApi.handleChange === "function") {
+          return copyrightApi.handleChange(e);
+        }
+      }
+      if (e.target.closest(".book-info-entry")) {
+        const bookInfoApi = await TPP.ensureControlModule(
+          "editor-book-info-controls",
+        );
+        if (bookInfoApi && typeof bookInfoApi.handleChange === "function") {
+          return bookInfoApi.handleChange(e);
+        }
+      }
+    });
+    controls.addEventListener("click", async function (e) {
+      if (
+        e.target.closest(".rotation-step-cycle") ||
+        e.target.matches('input[type="range"]')
+      ) {
+        const rangeApi = await TPP.ensureControlModule("editor-range-controls");
+        if (rangeApi && typeof rangeApi.handleClick === "function") {
+          const handled = rangeApi.handleClick(e);
+          if (handled) return;
+        }
+      }
+      if (
+        e.target.closest(".color-picker-trigger") ||
+        e.target.closest("[data-color-swatch-target]") ||
+        e.target.closest("[data-text-align-cycle]") ||
+        e.target.closest("[data-custom-text-edit]") ||
+        e.target.closest("[data-text-action]") ||
+        e.target.closest("#openFrontCoverFieldPicker")
+      ) {
+        const textApi = await TPP.ensureControlModule(
+          "editor-cover-text-controls",
+        );
+        if (textApi && typeof textApi.handleClick === "function") {
+          const handled = textApi.handleClick(e, controls);
+          if (handled) return;
+        }
+      }
+      if (
+        e.target.closest("[data-book-info-picker]") ||
+        e.target.closest("[data-book-info-classification]") ||
+        e.target.closest("[data-book-info-action]") ||
+        e.target.closest("#bookInfoAddButton")
+      ) {
+        const bookInfoApi = await TPP.ensureControlModule(
+          "editor-book-info-controls",
+        );
+        if (bookInfoApi && typeof bookInfoApi.handleClick === "function") {
+          const handled = bookInfoApi.handleClick(e);
+          if (handled) return;
+        }
+      }
+      if (e.target.closest("[data-copyright-action]")) {
+        const copyrightApi = await TPP.ensureControlModule(
+          "editor-copyright-controls",
+        );
+        if (copyrightApi && typeof copyrightApi.handleClick === "function") {
+          return copyrightApi.handleClick(e);
+        }
+      }
+    });
+    controls.addEventListener("focusin", async function (e) {
+      if (!e.target.matches('input[type="range"]')) return;
+      const api = await TPP.ensureControlModule("editor-range-controls");
+      if (api && typeof api.handleFocusIn === "function") {
+        api.handleFocusIn(e);
+      }
+    });
+    controls.addEventListener("pointerdown", async function (e) {
+      if (e.target.matches('input[type="range"]')) {
+        const rangeApi = await TPP.ensureControlModule("editor-range-controls");
+        if (rangeApi && typeof rangeApi.handlePointerDown === "function") {
+          rangeApi.handlePointerDown(e);
+        }
         return;
       }
-      const rotationStepButton = e.target.closest(".rotation-step-cycle");
-      if (rotationStepButton && TPP.cycleRotationStep) {
-        e.preventDefault();
-        TPP.cycleRotationStep(rotationStepButton);
-        return;
-      }
-      const colorTrigger = e.target.closest(".color-picker-trigger");
-      if (colorTrigger) {
+      if (e.target.closest(".color-picker-trigger")) {
         e.preventDefault();
         e.stopPropagation();
-        const input = controls.querySelector(
-          '[data-color-input-id="' + colorTrigger.dataset.colorTarget + '"]',
+        const textApi = await TPP.ensureControlModule(
+          "editor-cover-text-controls",
         );
-        if (input) TPP.openColorDialog(input);
-        return;
-      }
-      const colorSwatchTrigger = e.target.closest("[data-color-swatch-target]");
-      if (colorSwatchTrigger) {
-        e.preventDefault();
-        e.stopPropagation();
-        const input = controls.querySelector(
-          '[data-color-input-id="' +
-            colorSwatchTrigger.dataset.colorSwatchTarget +
-            '"]',
-        );
-        if (input) TPP.openColorDialog(input, colorSwatchTrigger);
-        return;
-      }
-      const alignCycle = e.target.closest("[data-text-align-cycle]");
-      if (alignCycle) {
-        e.preventDefault();
-        const hiddenInput = alignCycle
-          .closest(".text-element-group")
-          ?.querySelector(".text-align");
-        if (!hiddenInput || !TPP.nextTextAlignMode || !TPP.textAlignMeta) {
-          return;
+        if (textApi && typeof textApi.handleMouseDown === "function") {
+          const handled = textApi.handleMouseDown(e);
+          if (handled) return;
         }
-        const nextMode = TPP.nextTextAlignMode(hiddenInput.value || "");
-        const meta = TPP.textAlignMeta(nextMode);
-        hiddenInput.value = nextMode;
-        alignCycle.dataset.textAlignCycle = nextMode;
-        alignCycle.setAttribute("aria-label", meta.label);
-        alignCycle.setAttribute("title", meta.label);
-        const image = alignCycle.querySelector("img");
-        if (image) image.setAttribute("src", meta.icon);
-        TPP.sync("commit");
-        renderCurrentViewPreservingSidebar();
-        return;
-      }
-      const customTextEdit = e.target.closest("[data-custom-text-edit]");
-      if (customTextEdit) {
-        e.preventDefault();
-        const group = customTextEdit.closest(".text-element-group");
-        if (group && TPP.openCustomTextDialog) TPP.openCustomTextDialog(group);
-        return;
-      }
-      const textButton = e.target.closest("[data-text-action]");
-      if (textButton) {
-        const action = textButton.dataset.textAction;
-        const group = textButton.closest(".text-element-group");
-        if (action === "add") {
-          TPP.sync("nosave");
-          TPP.openFrontCoverFieldDialog(textButton.dataset.location || "front");
-          return;
-        }
-        TPP.sync("nosave");
-        if (action === "remove" && group)
-          TPP.removeTextElement(TPP.active, group.dataset.textId);
-        TPP.save();
-        TPP.renderAll();
-        return;
-      }
-      const openFrontCoverPicker = e.target.closest(
-        "#openFrontCoverFieldPicker",
-      );
-      if (openFrontCoverPicker) {
-        TPP.sync("nosave");
-        TPP.openFrontCoverFieldDialog();
-        return;
-      }
-      const bookInfoButton = e.target.closest("[data-book-info-action]");
-      if (bookInfoButton) {
-        TPP.sync("nosave");
-        const group = bookInfoButton.closest(".book-info-entry");
-        if (group) TPP.removeBookInfoEntry(TPP.active, group.dataset.entryId);
-        TPP.save();
-        TPP.loadForm();
-        renderCurrentViewPreservingSidebar();
-        return;
-      }
-      const copyrightButton = e.target.closest("[data-copyright-action]");
-      if (copyrightButton) {
-        TPP.sync("nosave");
-        const action = copyrightButton.dataset.copyrightAction;
-        const group = copyrightButton.closest(".copyright-item-group");
-        if (action === "add") TPP.addCopyrightPageItem(TPP.active);
-        if (action === "remove" && group)
-          TPP.removeCopyrightPageItem(TPP.active, group.dataset.itemId);
-        TPP.save();
-        TPP.renderAll();
-        return;
       }
     });
-    controls.addEventListener("focusin", function (e) {
-      if (
-        e.target.matches('input[type="range"]') &&
-        TPP.positionRangeValueTooltip
-      ) {
-        TPP.positionRangeValueTooltip(e.target);
+    controls.addEventListener("pointerover", async function (e) {
+      if (!e.target.matches('input[type="range"]')) return;
+      const api = await TPP.ensureControlModule("editor-range-controls");
+      if (api && typeof api.handlePointerOver === "function") {
+        api.handlePointerOver(e);
       }
     });
-    controls.addEventListener("pointerdown", function (e) {
-      if (
-        e.target.matches('input[type="range"]') &&
-        TPP.positionRangeValueTooltip
-      ) {
-        if (rangeHoverTooltipTimer) {
-          window.clearTimeout(rangeHoverTooltipTimer);
-          rangeHoverTooltipTimer = 0;
-        }
-        TPP.positionRangeValueTooltip(e.target);
+    controls.addEventListener("pointerout", async function (e) {
+      if (!e.target.matches('input[type="range"]')) return;
+      const api = await TPP.ensureControlModule("editor-range-controls");
+      if (api && typeof api.handlePointerOut === "function") {
+        api.handlePointerOut(e);
       }
     });
-    controls.addEventListener("pointerover", function (e) {
-      if (
-        e.target.matches('input[type="range"]') &&
-        TPP.scheduleRangeValueTooltip
-      ) {
-        TPP.scheduleRangeValueTooltip(e.target, 420);
+    controls.addEventListener("focusout", async function (e) {
+      if (!e.target.matches('input[type="range"]')) return;
+      const api = await TPP.ensureControlModule("editor-range-controls");
+      if (api && typeof api.handleFocusOut === "function") {
+        api.handleFocusOut(e);
       }
     });
-    controls.addEventListener("pointerout", function (e) {
-      if (
-        e.target.matches('input[type="range"]') &&
-        TPP.hideRangeValueTooltip
-      ) {
-        TPP.hideRangeValueTooltip();
-      }
-    });
-    controls.addEventListener("focusout", function (e) {
-      if (
-        e.target.matches('input[type="range"]') &&
-        TPP.hideRangeValueTooltip
-      ) {
-        TPP.hideRangeValueTooltip();
-      }
-    });
-    controls.addEventListener("pointerup", function (e) {
-      if (
-        e.target.matches('input[type="range"]') &&
-        TPP.hideRangeValueTooltip
-      ) {
-        window.setTimeout(TPP.hideRangeValueTooltip, 250);
+    controls.addEventListener("pointerup", async function (e) {
+      if (!e.target.matches('input[type="range"]')) return;
+      const api = await TPP.ensureControlModule("editor-range-controls");
+      if (api && typeof api.handlePointerUp === "function") {
+        api.handlePointerUp(e);
       }
     });
     controls.addEventListener("mousedown", function (e) {
-      const colorTrigger = e.target.closest(".color-picker-trigger");
-      if (colorTrigger) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
       const handle = e.target.closest("[data-drag-handle]");
       if (!handle) {
         dragHandleArmedId = "";
@@ -3336,19 +3185,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
   if (TPP.renderColorPalettes) TPP.renderColorPalettes();
-  const bookInfoAddButton = document.getElementById("bookInfoAddButton");
-  if (bookInfoAddButton) {
-    bookInfoAddButton.onclick = function () {
-      const select = document.getElementById("bookInfoAddField");
-      const value = select && select.value;
-      if (!value) return;
-      TPP.sync("nosave");
-      TPP.addBookInfoEntry(TPP.active, value);
-      TPP.save();
-      TPP.loadForm();
-      renderCurrentViewPreservingSidebar();
-    };
-  }
 
   ["coverImageSlot", "backImageSlot", "spineImageSlot"].forEach(function (id) {
     const node = document.getElementById(id);
