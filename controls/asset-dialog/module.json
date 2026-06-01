@@ -1,0 +1,7 @@
+{
+  "id": "asset-dialog",
+  "rootIds": ["assetDialog"],
+  "html": "template.html",
+  "css": "styles.css",
+  "js": "module.js"
+}

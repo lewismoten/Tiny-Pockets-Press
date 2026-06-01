@@ -1,0 +1,7 @@
+.custom-text-dialog-card {
+  width: min(18rem, calc(100vw - 2rem));
+}
+.custom-text-dialog-body {
+  min-height: 6rem;
+  resize: vertical;
+}

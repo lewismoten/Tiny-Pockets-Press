@@ -1776,132 +1776,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       meta: "Open classification picker for full path",
     };
   };
-  TPP.renderBookInfoPickerResults = function (results, activeIndex) {
-    const list = document.getElementById("bookInfoPickerResults");
-    if (!list) return;
-    if (!results.length) {
-      list.hidden = true;
-      list.innerHTML = "";
-      return;
-    }
-    list.hidden = false;
-    list.innerHTML = results
-      .map(function (entry, index) {
-        return (
-          '<button type="button" class="classification-dialog-search-result' +
-          (index === activeIndex ? " is-active" : "") +
-          '" data-book-info-picker-select="' +
-          TPP.esc(entry.value) +
-          '">' +
-          '<span class="classification-dialog-search-result-code">' +
-          TPP.esc(entry.value) +
-          '</span><span class="classification-dialog-search-result-main">' +
-          '<span class="classification-dialog-search-result-label">' +
-          TPP.esc(entry.label) +
-          "</span></span></button>"
-        );
-      })
-      .join("");
-  };
-  TPP.closeBookInfoPickerResults = function () {
-    const list = document.getElementById("bookInfoPickerResults");
-    if (!list) return;
-    list.hidden = true;
-    list.innerHTML = "";
-    TPP.bookInfoPickerState.activeIndex = -1;
-  };
-  TPP.renderBookInfoPickerDialog = function () {
-    const kind = TPP.bookInfoPickerState.kind;
-    const title = document.getElementById("bookInfoPickerDialogTitle");
-    const selection = document.getElementById("bookInfoPickerSelection");
-    const searchInput = document.getElementById("bookInfoPickerSearch");
-    const list = document.getElementById("bookInfoPickerList");
-    const row = document.querySelector(
-      '.book-info-entry[data-entry-id="' +
-        TPP.bookInfoPickerState.entryId +
-        '"]',
-    );
-    const currentValue = TPP.normalizeBookInfoPickerValue(
-      kind,
-      row && row.querySelector(".book-info-value")
-        ? row.querySelector(".book-info-value").value
-        : "",
-    );
-    const summary = TPP.bookInfoPickerSummary(kind, currentValue);
-    const results = TPP.bookInfoPickerResults(
-      kind,
-      TPP.bookInfoPickerState.query,
-      currentValue,
-    );
-    if (title) {
-      title.textContent = "Choose " + TPP.bookInfoPickerKindLabel(kind);
-    }
-    if (selection) {
-      selection.innerHTML =
-        "<strong>" +
-        TPP.esc(summary.title) +
-        '</strong><div class="small">' +
-        TPP.esc(summary.meta) +
-        "</div>";
-    }
-    if (searchInput) searchInput.value = TPP.bookInfoPickerState.query || "";
-    if (list) {
-      list.innerHTML = results.length
-        ? results
-            .map(function (entry) {
-              return (
-                '<div class="classification-option"><div><strong>' +
-                TPP.esc(entry.value) +
-                '</strong> <span class="classification-short-label">' +
-                TPP.esc(entry.label) +
-                '</span></div><div class="toolbar"><button type="button" data-book-info-picker-use="' +
-                TPP.esc(entry.value) +
-                '">Use</button></div></div>'
-              );
-            })
-            .join("")
-        : '<div class="front-cover-field-empty">No matches found.</div>';
-    }
-    TPP.renderBookInfoPickerResults(
-      results,
-      TPP.bookInfoPickerState.activeIndex,
-    );
-  };
-  TPP.openBookInfoPickerDialog = async function (kind, entryId) {
-    const dialog = document.getElementById("bookInfoPickerDialog");
-    if (!dialog || typeof dialog.showModal !== "function") return;
-    const targetKind = kind === "region" ? "region" : "language";
-    await TPP.bookInfoPickerCatalogForKind(targetKind);
-    TPP.bookInfoPickerState.kind = targetKind;
-    TPP.bookInfoPickerState.entryId = String(entryId || "");
-    TPP.bookInfoPickerState.query = "";
-    TPP.bookInfoPickerState.activeIndex = -1;
-    TPP.renderBookInfoPickerDialog();
-    if (!dialog.open) dialog.showModal();
-    const searchInput = document.getElementById("bookInfoPickerSearch");
-    if (searchInput) {
-      window.setTimeout(function () {
-        searchInput.focus();
-        searchInput.select();
-      }, 0);
-    }
-  };
-  TPP.applyBookInfoPickerValue = function (value) {
-    const row = document.querySelector(
-      '.book-info-entry[data-entry-id="' +
-        TPP.bookInfoPickerState.entryId +
-        '"]',
-    );
-    const input = row && row.querySelector(".book-info-value");
-    if (!input) return;
-    input.value = TPP.normalizeBookInfoPickerValue(
-      TPP.bookInfoPickerState.kind,
-      value,
-    );
-    TPP.sync("commit");
-    TPP.loadForm();
-    TPP.renderAll();
-  };
   TPP.renderClassificationDialog = function () {
     const system = TPP.classificationSystem();
     const title = document.getElementById("classificationDialogTitle");
@@ -2279,6 +2153,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (TPP.refreshRotationStepButtons)
       TPP.refreshRotationStepButtons(document);
   };
+  TPP.renderCurrentViewPreservingSidebar = renderCurrentViewPreservingSidebar;
   TPP.patchCoverPreviewSurface = function (location) {
     const side = location === "back" ? "back" : "front";
     const preview = document.getElementById("coverPreview");
@@ -2855,60 +2730,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (outlineButton && outlineColor)
       outlineButton.setAttribute("title", outlineColor);
   };
-  TPP.renderFrontCoverFieldDialog = function (location) {
-    const list = document.getElementById("frontCoverFieldDialogList");
-    const title = document.getElementById("frontCoverFieldDialogTitle");
-    const note = document.getElementById("frontCoverFieldDialogNote");
-    if (!list) return;
-    const targetLocation =
-      location === "back" || location === "front"
-        ? location
-        : TPP.frontCoverFieldDialogLocation || "front";
-    TPP.frontCoverFieldDialogLocation = targetLocation;
-    if (title) {
-      title.textContent =
-        targetLocation === "back"
-          ? "Add Back Cover Text"
-          : "Add Front Cover Text";
-    }
-    if (note) {
-      note.textContent =
-        targetLocation === "back"
-          ? "Choose another field from Book Info to place on the back cover."
-          : "Choose another field from Book Info to place on the front cover.";
-    }
-    const options = TPP.textElementFieldPickerOptions(
-      TPP.active,
-      targetLocation,
-    );
-    list.innerHTML = options.length
-      ? options
-          .map(function (option) {
-            const preview = TPP.bookInfoFieldValue(TPP.active, option.value, {
-              location: targetLocation,
-            });
-            return (
-              '<button type="button" class="front-cover-field-option" data-cover-text-field="' +
-              TPP.esc(option.value) +
-              '"><span><strong>' +
-              TPP.esc(option.label) +
-              "</strong><p>" +
-              TPP.esc(preview || "Empty value") +
-              "</p></span><span>Add</span></button>"
-            );
-          })
-          .join("")
-      : '<div class="front-cover-field-empty">All current Book Info fields are already on the ' +
-        TPP.esc(targetLocation === "back" ? "back" : "front") +
-        " cover.</div>";
-  };
-  TPP.openFrontCoverFieldDialog = function (location) {
-    const dialog = document.getElementById("frontCoverFieldDialog");
-    if (!dialog || typeof dialog.showModal !== "function") return;
-    TPP.renderFrontCoverFieldDialog(location);
-    if (!dialog.open) dialog.showModal();
-  };
-
   TPP.fields.forEach(function (id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -3508,67 +3329,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     });
   }
-  const frontCoverFieldDialog = document.getElementById(
-    "frontCoverFieldDialog",
-  );
-  if (frontCoverFieldDialog) {
-    frontCoverFieldDialog.addEventListener("click", function (e) {
-      const card = e.target.closest(".modal-card");
-      if (
-        e.target === frontCoverFieldDialog &&
-        !card &&
-        frontCoverFieldDialog.open
-      ) {
-        frontCoverFieldDialog.close("cancel");
-        return;
-      }
-      const closeButton = e.target.closest("[data-action='cancel']");
-      if (closeButton && frontCoverFieldDialog.open) {
-        frontCoverFieldDialog.close("cancel");
-        return;
-      }
-      const option = e.target.closest("[data-cover-text-field]");
-      if (!option) return;
-      TPP.sync("nosave");
-      TPP.addTextElement(
-        TPP.active,
-        TPP.frontCoverFieldDialogLocation || "front",
-        option.dataset.coverTextField,
-      );
-      TPP.save();
-      if (frontCoverFieldDialog.open) frontCoverFieldDialog.close("selected");
-      TPP.loadForm();
-      renderCurrentViewPreservingSidebar();
-    });
-  }
-  const bookInfoPickerDialog = document.getElementById("bookInfoPickerDialog");
-  if (bookInfoPickerDialog) {
-    bookInfoPickerDialog.addEventListener("click", function (e) {
-      const card = e.target.closest(".modal-card");
-      if (
-        e.target === bookInfoPickerDialog &&
-        !card &&
-        bookInfoPickerDialog.open
-      ) {
-        bookInfoPickerDialog.close("cancel");
-        return;
-      }
-      const closeButton = e.target.closest(
-        "[data-action='cancel-book-info-picker']",
-      );
-      if (closeButton && bookInfoPickerDialog.open) {
-        bookInfoPickerDialog.close("cancel");
-        return;
-      }
-      const selectButton = e.target.closest("[data-book-info-picker-use]");
-      if (selectButton) {
-        TPP.applyBookInfoPickerValue(
-          selectButton.dataset.bookInfoPickerUse || "",
-        );
-        if (bookInfoPickerDialog.open) bookInfoPickerDialog.close("selected");
-      }
-    });
-  }
   const classificationDialog = document.getElementById("classificationDialog");
   if (classificationDialog) {
     classificationDialog.addEventListener("click", function (e) {
@@ -3698,22 +3458,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
   document.addEventListener("input", function (e) {
-    const bookInfoPickerSearch = e.target.closest("#bookInfoPickerSearch");
-    if (bookInfoPickerSearch) {
-      TPP.bookInfoPickerState.query = bookInfoPickerSearch.value || "";
-      const results = TPP.bookInfoPickerResults(
-        TPP.bookInfoPickerState.kind,
-        TPP.bookInfoPickerState.query,
-        document.querySelector(
-          '.book-info-entry[data-entry-id="' +
-            TPP.bookInfoPickerState.entryId +
-            '"] .book-info-value',
-        )?.value || "",
-      );
-      TPP.bookInfoPickerState.activeIndex = results.length ? 0 : -1;
-      TPP.renderBookInfoPickerResults(results, 0);
-      return;
-    }
     const profileSelect = e.target.closest("#classificationDialogProfile");
     if (profileSelect) {
       TPP.setClassificationProfile(profileSelect.value || "home");
@@ -3731,22 +3475,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.renderClassificationSearchResults(results, 0);
   });
   document.addEventListener("focusin", function (e) {
-    const bookInfoPickerSearch = e.target.closest("#bookInfoPickerSearch");
-    if (bookInfoPickerSearch) {
-      const results = TPP.bookInfoPickerResults(
-        TPP.bookInfoPickerState.kind,
-        bookInfoPickerSearch.value,
-        document.querySelector(
-          '.book-info-entry[data-entry-id="' +
-            TPP.bookInfoPickerState.entryId +
-            '"] .book-info-value',
-        )?.value || "",
-      );
-      if (!results.length) return;
-      TPP.bookInfoPickerState.activeIndex = 0;
-      TPP.renderBookInfoPickerResults(results, 0);
-      return;
-    }
     const searchInput = e.target.closest("#classificationDialogSearch");
     if (!searchInput) return;
     const results = TPP.searchClassificationIndex(searchInput.value, 8);
@@ -3755,40 +3483,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     TPP.renderClassificationSearchResults(results, 0);
   });
   document.addEventListener("click", function (e) {
-    const bookInfoPickerSearch = e.target.closest("#bookInfoPickerSearch");
-    if (bookInfoPickerSearch) {
-      const results = TPP.bookInfoPickerResults(
-        TPP.bookInfoPickerState.kind,
-        bookInfoPickerSearch.value,
-        document.querySelector(
-          '.book-info-entry[data-entry-id="' +
-            TPP.bookInfoPickerState.entryId +
-            '"] .book-info-value',
-        )?.value || "",
-      );
-      if (results.length) {
-        const activeIndex = Number(TPP.bookInfoPickerState.activeIndex);
-        TPP.renderBookInfoPickerResults(
-          results,
-          activeIndex >= 0 ? activeIndex : 0,
-        );
-      }
-      return;
-    }
-    const bookInfoPickerResult = e.target.closest(
-      "[data-book-info-picker-select]",
-    );
-    if (bookInfoPickerResult) {
-      TPP.applyBookInfoPickerValue(
-        bookInfoPickerResult.dataset.bookInfoPickerSelect || "",
-      );
-      const dialog = document.getElementById("bookInfoPickerDialog");
-      if (dialog && dialog.open) dialog.close("selected");
-      return;
-    }
-    if (!e.target.closest(".book-info-picker-search-wrap")) {
-      TPP.closeBookInfoPickerResults();
-    }
     const searchInput = e.target.closest("#classificationDialogSearch");
     if (searchInput) {
       const results = TPP.searchClassificationIndex(searchInput.value, 8);
@@ -3813,53 +3507,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
   document.addEventListener("keydown", function (e) {
-    const bookInfoPickerSearch = e.target.closest("#bookInfoPickerSearch");
-    if (bookInfoPickerSearch) {
-      const results = TPP.bookInfoPickerResults(
-        TPP.bookInfoPickerState.kind,
-        bookInfoPickerSearch.value,
-        document.querySelector(
-          '.book-info-entry[data-entry-id="' +
-            TPP.bookInfoPickerState.entryId +
-            '"] .book-info-value',
-        )?.value || "",
-      );
-      if (!results.length) {
-        if (e.key === "Escape") TPP.closeBookInfoPickerResults();
-        return;
-      }
-      const currentIndex = Number(TPP.bookInfoPickerState.activeIndex || 0);
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        const nextIndex = Math.min(currentIndex + 1, results.length - 1);
-        TPP.bookInfoPickerState.activeIndex = nextIndex;
-        TPP.renderBookInfoPickerResults(results, nextIndex);
-        return;
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        const nextIndex = Math.max(currentIndex - 1, 0);
-        TPP.bookInfoPickerState.activeIndex = nextIndex;
-        TPP.renderBookInfoPickerResults(results, nextIndex);
-        return;
-      }
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const nextIndex = Math.min(
-          Math.max(currentIndex, 0),
-          results.length - 1,
-        );
-        TPP.applyBookInfoPickerValue(results[nextIndex].value);
-        const dialog = document.getElementById("bookInfoPickerDialog");
-        if (dialog && dialog.open) dialog.close("selected");
-        return;
-      }
-      if (e.key === "Escape") {
-        e.preventDefault();
-        TPP.closeBookInfoPickerResults();
-      }
-      return;
-    }
     const searchInput = e.target.closest("#classificationDialogSearch");
     if (!searchInput) return;
     const results = TPP.searchClassificationIndex(searchInput.value, 8);
@@ -3894,15 +3541,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
   document.addEventListener("focusout", function (e) {
-    const pickerWrap = e.target.closest(".book-info-picker-search-wrap");
-    if (pickerWrap) {
-      window.setTimeout(function () {
-        if (!pickerWrap.contains(document.activeElement)) {
-          TPP.closeBookInfoPickerResults();
-        }
-      }, 0);
-      return;
-    }
     const wrap = e.target.closest(".classification-search-wrap");
     if (!wrap) return;
     window.setTimeout(function () {
@@ -4553,53 +4191,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     reader.readAsText(file);
   };
 
-  const assetDialog = document.getElementById("assetDialog");
-  const assetUploadButton = document.getElementById("assetUploadButton");
-  const assetUploadInput = document.getElementById("assetUploadInput");
-  const assetClearButton = document.getElementById("assetClearButton");
-  if (assetDialog) {
-    assetDialog.addEventListener("close", function () {
-      TPP.assetDialogTarget = null;
-    });
-    assetDialog.addEventListener("click", function (e) {
-      const card = e.target.closest(".modal-card");
-      if (e.target === assetDialog && !card && assetDialog.open) {
-        assetDialog.close();
-        return;
-      }
-    });
-    assetDialog.addEventListener("click", function (e) {
-      const useButton = e.target.closest("[data-asset-use]");
-      if (useButton) {
-        TPP.assignAssetToCurrentTarget(useButton.dataset.assetUse || "");
-        return;
-      }
-      const deleteButton = e.target.closest("[data-asset-delete]");
-      if (deleteButton) {
-        TPP.deleteAsset(deleteButton.dataset.assetDelete || "");
-        return;
-      }
-      const closeButton = e.target.closest("[data-action='close']");
-      if (closeButton && assetDialog.open) assetDialog.close();
-    });
-  }
-  if (assetUploadButton && assetUploadInput) {
-    assetUploadButton.onclick = function () {
-      assetUploadInput.value = "";
-      assetUploadInput.click();
-    };
-    assetUploadInput.onchange = function (e) {
-      TPP.file(e, function (data, file) {
-        TPP.uploadAssetToCurrentTarget(data, file);
-        assetUploadInput.value = "";
-      });
-    };
-  }
-  if (assetClearButton) {
-    assetClearButton.onclick = function () {
-      TPP.assignAssetToCurrentTarget("");
-    };
-  }
   const dataPanel = document.getElementById("dataPanel");
   const dataSidebar = document.getElementById("dataSidebar");
   const dataImageDialog = document.getElementById("dataImageDialog");
@@ -4678,79 +4269,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
       const closeButton = e.target.closest("[data-action='close']");
       if (closeButton && dataTextDialog.open) dataTextDialog.close();
-    });
-  }
-  const customTextDialog = document.getElementById("customTextDialog");
-  const customTextDialogBody = document.getElementById("customTextDialogBody");
-  const customTextDialogTitle = document.getElementById(
-    "customTextDialogTitle",
-  );
-  TPP.openCustomTextDialog = function (group) {
-    if (
-      !group ||
-      !customTextDialog ||
-      !customTextDialogBody ||
-      typeof customTextDialog.showModal !== "function"
-    ) {
-      return;
-    }
-    TPP.customTextDialogTargetId = group.dataset.textId || "";
-    if (customTextDialogTitle)
-      customTextDialogTitle.textContent = "Edit Custom Text";
-    const valueInput = group.querySelector(".back-cover-text-custom-value");
-    customTextDialogBody.value = (valueInput && valueInput.value) || "";
-    if (!customTextDialog.open) customTextDialog.showModal();
-    setTimeout(function () {
-      customTextDialogBody.focus();
-      customTextDialogBody.select();
-    }, 0);
-  };
-  TPP.applyCustomTextDialog = function () {
-    if (!customTextDialogBody || !TPP.customTextDialogTargetId) return;
-    const group = document.querySelector(
-      '.text-element-group[data-text-id="' +
-        TPP.customTextDialogTargetId +
-        '"]',
-    );
-    if (!group) return;
-    const valueInput = group.querySelector(".back-cover-text-custom-value");
-    const label = group.querySelector(".back-cover-text-field-label");
-    const nextValue = customTextDialogBody.value || "";
-    if (valueInput) valueInput.value = nextValue;
-    if (label) label.textContent = nextValue.trim() || "Custom text";
-    if (TPP.readSingleTextElementGroup) {
-      TPP.readSingleTextElementGroup(TPP.active, group);
-      if (TPP.syncLegacyTextFieldsFromElements) {
-        TPP.syncLegacyTextFieldsFromElements(TPP.active);
-      }
-    }
-    TPP.save("commit", TPP.bookId(TPP.active));
-    const location = String(group.dataset.location || "").trim();
-    TPP.renderTextElementControls();
-    if (TPP.patchVisibleCoverTextPreview(location)) {
-      if (TPP.renderColorPalettes) TPP.renderColorPalettes();
-      return;
-    }
-    renderCurrentViewPreservingSidebar();
-  };
-  if (customTextDialog) {
-    customTextDialog.addEventListener("click", function (e) {
-      const card = e.target.closest(".modal-card");
-      if (e.target === customTextDialog && !card && customTextDialog.open) {
-        customTextDialog.close("cancel");
-        return;
-      }
-      const actionButton = e.target.closest("[data-action]");
-      if (!actionButton) return;
-      const action = actionButton.dataset.action || "";
-      if (action === "cancel" && customTextDialog.open) {
-        customTextDialog.close("cancel");
-        return;
-      }
-      if (action === "save" && customTextDialog.open) {
-        TPP.applyCustomTextDialog();
-        customTextDialog.close("save");
-      }
     });
   }
   const imageExportDialog = document.getElementById("imageExportDialog");
@@ -5674,79 +5192,6 @@ TPP.assetCardHtml = function (file, currentId) {
     "</article>"
   );
 };
-TPP.renderAssetDialog = function () {
-  const dialog = document.getElementById("assetDialog");
-  const title = document.getElementById("assetDialogTitle");
-  const text = document.getElementById("assetDialogText");
-  const list = document.getElementById("assetDialogList");
-  const clearButton = document.getElementById("assetClearButton");
-  if (!dialog || !title || !text || !list) return;
-  const target = TPP.assetDialogTarget;
-  const spec = target ? TPP.assetTargetSpec(target.type, target.key) : null;
-  const currentId = target ? TPP.assetTargetValue(target.type, target.key) : "";
-  title.textContent = spec ? spec.label : "Choose Image";
-  text.textContent = spec
-    ? "Reuse an existing image, upload a new one, or remove the current assignment."
-    : "";
-  if (clearButton) clearButton.disabled = !currentId;
-  const files = TPP.filePickerAssets
-    ? TPP.filePickerAssets(TPP.active)
-    : TPP.active && Array.isArray(TPP.active.files)
-      ? TPP.active.files
-      : [];
-  list.innerHTML = files.length
-    ? files
-        .map(function (file) {
-          return TPP.assetCardHtml(file, currentId);
-        })
-        .join("")
-    : '<div class="asset-empty">No images have been uploaded for this book yet.</div>';
-};
-TPP.openAssetDialog = function (targetType, targetKey) {
-  const dialog = document.getElementById("assetDialog");
-  if (!dialog || typeof dialog.showModal !== "function") return;
-  TPP.sync("nosave");
-  TPP.assetDialogTarget = { type: targetType, key: targetKey };
-  TPP.renderAssetDialog();
-  if (!dialog.open) dialog.showModal();
-};
-TPP.commitAssetChange = function () {
-  TPP.save("commit", TPP.active && TPP.bookId(TPP.active));
-  TPP.loadForm();
-  TPP.renderAll();
-  if (
-    document.getElementById("assetDialog") &&
-    document.getElementById("assetDialog").open
-  )
-    TPP.renderAssetDialog();
-};
-TPP.closeAssetDialog = function () {
-  const dialog = document.getElementById("assetDialog");
-  if (dialog && dialog.open) dialog.close();
-};
-TPP.assignAssetToCurrentTarget = function (fileId) {
-  const target = TPP.assetDialogTarget;
-  if (!target || !TPP.active) return;
-  if (!TPP.setAssetTargetValue(target.type, target.key, fileId)) return;
-  TPP.commitAssetChange();
-  TPP.closeAssetDialog();
-};
-TPP.uploadAssetToCurrentTarget = function (data, file) {
-  if (!TPP.active) return;
-  const fileId = TPP.upsertFileAsset(
-    TPP.active,
-    data,
-    file && file.type,
-    file && file.name,
-  );
-  TPP.assignAssetToCurrentTarget(fileId);
-};
-TPP.deleteAsset = function (fileId) {
-  if (!TPP.active || !fileId) return;
-  if (!TPP.removeFileAsset(TPP.active, fileId)) return;
-  TPP.commitAssetChange();
-};
-
 TPP.importConflictStamp = function (book) {
   const date = new Date(TPP.bookUpdatedAt(book));
   if (Number.isNaN(date.getTime()))
@@ -5800,59 +5245,6 @@ TPP.importConflictPreview = function (book) {
     "</article>"
   );
 };
-TPP.resolveImportConflict = function (incoming, existing) {
-  const dialog = document.getElementById("importConflictDialog");
-  const text = document.getElementById("importConflictText");
-  const books = document.getElementById("importConflictBooks");
-  if (!dialog || !text || !books || typeof dialog.showModal !== "function")
-    return Promise.resolve("cancel");
-  text.textContent =
-    'A book with id "' +
-    (TPP.bookId(incoming) || "") +
-    '" already exists. Choose how to handle this import.';
-  books.innerHTML =
-    '<div><div class="about-meta-label">Current Library Book</div>' +
-    TPP.importConflictPreview(existing) +
-    "</div>" +
-    '<div><div class="about-meta-label">Incoming Import</div>' +
-    TPP.importConflictPreview(incoming) +
-    "</div>";
-  return new Promise(function (resolve) {
-    const handlers = [];
-    const cleanup = function () {
-      handlers.forEach(function (entry) {
-        entry.button.removeEventListener("click", entry.handler);
-      });
-      dialog.removeEventListener("cancel", cancelHandler);
-      dialog.removeEventListener("close", closeHandler);
-    };
-    const finish = function (action) {
-      cleanup();
-      if (dialog.open) dialog.close();
-      resolve(action || "cancel");
-    };
-    Array.from(dialog.querySelectorAll("[data-action]")).forEach(
-      function (button) {
-        const handler = function () {
-          finish(button.dataset.action);
-        };
-        handlers.push({ button: button, handler: handler });
-        button.addEventListener("click", handler);
-      },
-    );
-    const cancelHandler = function (event) {
-      event.preventDefault();
-      finish("cancel");
-    };
-    const closeHandler = function () {
-      finish("cancel");
-    };
-    dialog.addEventListener("cancel", cancelHandler);
-    dialog.addEventListener("close", closeHandler);
-    dialog.showModal();
-  });
-};
-
 TPP.validViews = function () {
   return [
     "editor",

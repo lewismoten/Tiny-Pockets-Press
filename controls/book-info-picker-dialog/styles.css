@@ -1,0 +1,5 @@
+/* Book info picker reuses the classification dialog styles. */
+.front-cover-field-empty {
+  color: var(--muted);
+  font-style: italic;
+}

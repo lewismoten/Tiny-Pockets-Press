@@ -1,0 +1,101 @@
+window.TPP = window.TPP || {};
+
+TPP.controlModuleRegistry = {
+  "asset-dialog": "controls/asset-dialog/",
+  "cover-text-field-dialog": "controls/cover-text-field-dialog/",
+  "book-info-picker-dialog": "controls/book-info-picker-dialog/",
+  "custom-text-dialog": "controls/custom-text-dialog/",
+  "import-conflict-dialog": "controls/import-conflict-dialog/",
+};
+TPP.controlModuleState = TPP.controlModuleState || {};
+TPP.ensureControlModule = async function (id) {
+  const moduleId = String(id || "").trim();
+  const basePath = TPP.controlModuleRegistry[moduleId];
+  if (!basePath) throw new Error("Unknown control module: " + moduleId);
+  const state =
+    TPP.controlModuleState[moduleId] || (TPP.controlModuleState[moduleId] = {});
+  if (state.api) return state.api;
+  if (state.promise) return state.promise;
+  state.promise = (async function () {
+    const manifestUrl = new URL(basePath + "module.json", window.location.href);
+    const manifestResponse = await fetch(manifestUrl.href);
+    if (!manifestResponse.ok) {
+      throw new Error(
+        "Unable to load control module manifest: " + manifestUrl.href,
+      );
+    }
+    const manifest = await manifestResponse.json();
+    manifest.id = manifest.id || moduleId;
+    manifest.basePath = manifestUrl.href.replace(/module\.json(?:\?.*)?$/, "");
+    if (manifest.css) {
+      const href = new URL(manifest.css, manifest.basePath).href;
+      const linkId = "control-module-css-" + manifest.id;
+      if (!document.getElementById(linkId)) {
+        const link = document.createElement("link");
+        link.id = linkId;
+        link.rel = "stylesheet";
+        link.href = href;
+        document.head.appendChild(link);
+      }
+    }
+    const rootIds = Array.isArray(manifest.rootIds) ? manifest.rootIds : [];
+    const needsMarkup =
+      !rootIds.length ||
+      rootIds.some(function (rootId) {
+        return !document.getElementById(rootId);
+      });
+    if (manifest.html && needsMarkup) {
+      const htmlUrl = new URL(manifest.html, manifest.basePath);
+      const htmlResponse = await fetch(htmlUrl.href);
+      if (!htmlResponse.ok) {
+        throw new Error(
+          "Unable to load control module markup: " + htmlUrl.href,
+        );
+      }
+      document.body.insertAdjacentHTML("beforeend", await htmlResponse.text());
+    }
+    const moduleUrl = new URL(manifest.js, manifest.basePath);
+    const moduleExports = await import(moduleUrl.href);
+    const api =
+      moduleExports && typeof moduleExports.init === "function"
+        ? await moduleExports.init(TPP, manifest)
+        : {};
+    state.api = api || {};
+    state.manifest = manifest;
+    return state.api;
+  })();
+  return state.promise;
+};
+TPP.openAssetDialog = async function (targetType, targetKey) {
+  const api = await TPP.ensureControlModule("asset-dialog");
+  if (api && typeof api.open === "function") {
+    return api.open(targetType, targetKey);
+  }
+};
+TPP.closeAssetDialog = async function () {
+  const api = await TPP.ensureControlModule("asset-dialog");
+  if (api && typeof api.close === "function") return api.close();
+};
+TPP.renderAssetDialog = async function () {
+  const api = await TPP.ensureControlModule("asset-dialog");
+  if (api && typeof api.render === "function") return api.render();
+};
+TPP.openFrontCoverFieldDialog = async function (location) {
+  const api = await TPP.ensureControlModule("cover-text-field-dialog");
+  if (api && typeof api.open === "function") return api.open(location);
+};
+TPP.openBookInfoPickerDialog = async function (kind, entryId) {
+  const api = await TPP.ensureControlModule("book-info-picker-dialog");
+  if (api && typeof api.open === "function") return api.open(kind, entryId);
+};
+TPP.openCustomTextDialog = async function (group) {
+  const api = await TPP.ensureControlModule("custom-text-dialog");
+  if (api && typeof api.open === "function") return api.open(group);
+};
+TPP.resolveImportConflict = async function (incoming, existing) {
+  const api = await TPP.ensureControlModule("import-conflict-dialog");
+  if (api && typeof api.resolve === "function") {
+    return api.resolve(incoming, existing);
+  }
+  return "cancel";
+};

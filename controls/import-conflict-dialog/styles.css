@@ -1,0 +1,41 @@
+.conflict-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.conflict-book {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+.conflict-book h3 {
+  margin: 0;
+}
+.conflict-cover {
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #f7f1e8;
+  border: 1px solid #ead9ba;
+  padding: 0.9rem;
+}
+.conflict-cover-fallback {
+  width: min(100%, 220px);
+  aspect-ratio: 2/3;
+  border-radius: 14px;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1rem;
+  font-weight: 900;
+}
+.conflict-meta {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}

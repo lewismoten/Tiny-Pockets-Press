@@ -1,0 +1,7 @@
+{
+  "id": "book-info-picker-dialog",
+  "rootIds": ["bookInfoPickerDialog"],
+  "html": "template.html",
+  "css": "styles.css",
+  "js": "module.js"
+}

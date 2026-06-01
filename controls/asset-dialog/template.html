@@ -1,0 +1,17 @@
+<dialog id="assetDialog" class="modal">
+  <form method="dialog" class="modal-card asset-dialog-card">
+    <h2 id="assetDialogTitle">Choose Image</h2>
+    <p id="assetDialogText" class="about-note"></p>
+    <div class="asset-upload-row">
+      <button type="button" id="assetUploadButton" class="primary alt">
+        Upload New Image
+      </button>
+      <input id="assetUploadInput" type="file" accept="image/*" hidden />
+      <button type="button" id="assetClearButton">No Image</button>
+    </div>
+    <div id="assetDialogList" class="asset-dialog-list"></div>
+    <div class="modal-actions">
+      <button type="button" data-action="close">Close</button>
+    </div>
+  </form>
+</dialog>

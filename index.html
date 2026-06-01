@@ -40,6 +40,7 @@
     <script defer src="js/library.js"></script>
     <script defer src="js/editor.js"></script>
     <script defer src="js/export.js"></script>
+    <script defer src="js/control-modules.js"></script>
     <script defer src="js/app.js"></script>
   </head>
   <body>
@@ -764,21 +765,6 @@
       </section>
     </main>
     <dialog id="toast" class="toast" role="status" aria-live="polite"></dialog>
-    <dialog id="importConflictDialog" class="modal">
-      <form method="dialog" class="modal-card">
-        <h2>Import Conflict</h2>
-        <p id="importConflictText" class="about-note"></p>
-        <div id="importConflictBooks" class="conflict-grid"></div>
-        <div class="modal-actions">
-          <button type="button" data-action="merge">Merge</button>
-          <button type="button" data-action="overwrite">Overwrite</button>
-          <button type="button" data-action="copy" class="primary alt">
-            Create Copy
-          </button>
-          <button type="button" data-action="cancel">Cancel</button>
-        </div>
-      </form>
-    </dialog>
     <dialog id="libraryUploadDialog" class="modal">
       <form method="dialog" class="modal-card">
         <h2>Upload Books</h2>
@@ -794,40 +780,6 @@
         /></label>
         <div class="toolbar">
           <button type="button" data-action="cancel">Cancel</button>
-        </div>
-      </form>
-    </dialog>
-    <dialog id="assetDialog" class="modal">
-      <form method="dialog" class="modal-card asset-dialog-card">
-        <h2 id="assetDialogTitle">Choose Image</h2>
-        <p id="assetDialogText" class="about-note"></p>
-        <div class="asset-upload-row">
-          <button type="button" id="assetUploadButton" class="primary alt">
-            Upload New Image
-          </button>
-          <input id="assetUploadInput" type="file" accept="image/*" hidden />
-          <button type="button" id="assetClearButton">No Image</button>
-        </div>
-        <div id="assetDialogList" class="asset-dialog-list"></div>
-        <div class="modal-actions">
-          <button type="button" data-action="close">Close</button>
-        </div>
-      </form>
-    </dialog>
-    <dialog id="frontCoverFieldDialog" class="modal">
-      <form method="dialog" class="modal-card">
-        <h2 id="frontCoverFieldDialogTitle">Add Front Cover Text</h2>
-        <p id="frontCoverFieldDialogNote" class="about-note">
-          Choose another field from Book Info to place on the front cover.
-        </p>
-        <div
-          id="frontCoverFieldDialogList"
-          class="front-cover-field-dialog-list"
-        ></div>
-        <div class="modal-actions">
-          <button type="button" class="button-cancel" data-action="cancel">
-            Cancel
-          </button>
         </div>
       </form>
     </dialog>
@@ -886,48 +838,6 @@
             <select id="classificationDialogProfile"></select>
           </label>
         </div>
-      </form>
-    </dialog>
-    <dialog id="bookInfoPickerDialog" class="modal">
-      <form method="dialog" class="modal-card classification-dialog-card">
-        <div class="classification-dialog-header">
-          <div>
-            <h2 id="bookInfoPickerDialogTitle">Choose Value</h2>
-            <p class="about-note">
-              Pick a common language or region code. Data loads only when this
-              dialog opens.
-            </p>
-          </div>
-          <button
-            type="button"
-            class="button-cancel"
-            data-action="cancel-book-info-picker"
-          >
-            Close
-          </button>
-        </div>
-        <div
-          id="bookInfoPickerSelection"
-          class="classification-selection book-info-picker-selection"
-        ></div>
-        <div class="classification-search-wrap book-info-picker-search-wrap">
-          <label class="classification-search-label"
-            >Search
-            <input
-              id="bookInfoPickerSearch"
-              type="text"
-              spellcheck="false"
-              autocomplete="off"
-              placeholder="Search by code or name"
-            />
-          </label>
-          <div
-            id="bookInfoPickerResults"
-            class="classification-dialog-search-results"
-            hidden
-          ></div>
-        </div>
-        <div id="bookInfoPickerList" class="classification-dialog-list"></div>
       </form>
     </dialog>
     <div id="colorPickerPopover" class="color-picker-popover" hidden>
@@ -1216,23 +1126,6 @@
         <pre id="dataTextBody" class="data-code"></pre>
         <div class="modal-actions">
           <button type="button" data-action="close">Close</button>
-        </div>
-      </form>
-    </dialog>
-    <dialog id="customTextDialog" class="modal">
-      <form method="dialog" class="modal-card custom-text-dialog-card">
-        <div class="workspace-header">
-          <h2 id="customTextDialogTitle">Edit Custom Text</h2>
-        </div>
-        <textarea
-          id="customTextDialogBody"
-          class="custom-text-dialog-body"
-          rows="10"
-          placeholder="Enter custom text"
-        ></textarea>
-        <div class="modal-actions">
-          <button type="button" data-action="cancel">Cancel</button>
-          <button type="button" data-action="save">Save</button>
         </div>
       </form>
     </dialog>

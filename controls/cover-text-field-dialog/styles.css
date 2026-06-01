@@ -1,0 +1,32 @@
+.front-cover-field-dialog-list {
+  display: grid;
+  gap: 0.55rem;
+  max-height: min(56vh, 24rem);
+  overflow: auto;
+}
+.front-cover-field-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+}
+.front-cover-field-option strong {
+  display: block;
+  margin-bottom: 0.18rem;
+}
+.front-cover-field-option p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.front-cover-field-empty {
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: #faf5ee;
+  color: #7d6d5d;
+}

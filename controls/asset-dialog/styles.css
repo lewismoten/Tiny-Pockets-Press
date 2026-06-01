@@ -1,0 +1,9 @@
+.asset-dialog-card {
+  width: min(56rem, calc(100vw - 2rem));
+}
+.asset-dialog-list {
+  display: grid;
+  gap: 0.8rem;
+  max-height: min(58vh, 30rem);
+  overflow: auto;
+}
