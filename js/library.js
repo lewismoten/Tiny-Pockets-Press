@@ -572,6 +572,80 @@ TPP.dataPrimitiveHtml = function (book, key, value) {
   }
   return '<span class="data-primitive">' + TPP.esc(String(value)) + "</span>";
 };
+TPP.dataEncodedJsonInfo = function (value) {
+  if (typeof value !== "string") return null;
+  const text = value.trim();
+  if (!text || !/^[\[{]/.test(text)) return null;
+  try {
+    const parsed = JSON.parse(text);
+    if (!parsed || typeof parsed !== "object") return null;
+    return {
+      raw: text,
+      parsed: parsed,
+      kind: Array.isArray(parsed) ? "array" : "object",
+      count: Array.isArray(parsed)
+        ? parsed.length
+        : Object.keys(parsed).length,
+    };
+  } catch (_error) {
+    return null;
+  }
+};
+TPP.dataEncodedJsonSummary = function (book, item, info) {
+  if (!info) return "";
+  const entryKey = String((item && item.key) || "").trim();
+  const fallback =
+    (info.kind === "array" ? "JSON array" : "JSON object") +
+    " · " +
+    info.count +
+    " " +
+    (info.kind === "array"
+      ? info.count === 1
+        ? "item"
+        : "items"
+      : info.count === 1
+        ? "key"
+        : "keys");
+  if (entryKey === "classification") return fallback;
+  if (!entryKey || typeof TPP.bookInfoFieldValue !== "function") return fallback;
+  const formatted = String(
+    TPP.bookInfoFieldValue(book, entryKey, {
+      customText: item && item.customText,
+    }) || "",
+  ).trim();
+  return formatted || fallback;
+};
+TPP.dataEncodedJsonComment = function (book, item) {
+  const entryKey = String((item && item.key) || "").trim();
+  if (entryKey !== "classification") return "";
+  const info = TPP.dataEncodedJsonInfo(item && item.value);
+  if (!info || !info.parsed || typeof info.parsed !== "object") return "";
+  return String(info.parsed.title || "").trim();
+};
+TPP.dataEncodedJsonHtml = function (book, item, value) {
+  const info = TPP.dataEncodedJsonInfo(value);
+  if (!info) return "";
+  const summary = TPP.dataEncodedJsonSummary(book, item, info);
+  const comment = TPP.dataEncodedJsonComment(book, item);
+  return (
+    '<details class="data-encoded-json">' +
+    '<summary><span class="data-encoded-json-summary">' +
+    TPP.esc(summary) +
+    (comment
+      ? '<span class="data-encoded-json-comment">// ' +
+        TPP.esc(comment) +
+        "</span>"
+      : "") +
+    '</span><span class="data-encoded-json-meta">' +
+    TPP.esc(
+      (info.kind === "array" ? "Array" : "Object") + " · " + String(info.count),
+    ) +
+    "</span></summary>" +
+    '<div class="data-code data-code-json data-encoded-json-tree">' +
+    TPP.dataJsonTreeHtml(info.parsed, 0, "") +
+    "</div></details>"
+  );
+};
 TPP.dataColorValue = function (value) {
   if (typeof value !== "string") return "";
   const text = value.trim();
@@ -1072,6 +1146,42 @@ TPP.dataArrayHtml = function (book, key, list, compact) {
     return TPP.dataTextElementsTable(book, list);
   if (String(key || "") === "imageElements")
     return TPP.dataImageElementsTable(book, list);
+  if (String(key || "") === "bookInfo")
+    return (
+      '<table class="data-table"><thead><tr><th>#</th><th>' +
+      TPP.dataKeyLabelHtml("bookInfo", "id") +
+      "</th><th>" +
+      TPP.dataKeyLabelHtml("bookInfo", "key") +
+      "</th><th>" +
+      TPP.dataKeyLabelHtml("bookInfo", "value") +
+      "</th><th>" +
+      TPP.dataKeyLabelHtml("bookInfo", "customLabel") +
+      "</th></tr></thead><tbody>" +
+      list
+        .map(function (item, index) {
+          const encodedJson = TPP.dataEncodedJsonHtml(
+            book,
+            item,
+            item && item.value,
+          );
+          return (
+            "<tr><td>" +
+            (index + 1) +
+            "</td><td>" +
+            TPP.dataValueHtml(book, "id", item && item.id, true) +
+            "</td><td>" +
+            TPP.dataValueHtml(book, "key", item && item.key, true) +
+            "</td><td>" +
+            (encodedJson ||
+              TPP.dataValueHtml(book, "value", item && item.value, true)) +
+            "</td><td>" +
+            TPP.dataValueHtml(book, "customLabel", item && item.customLabel, true) +
+            "</td></tr>"
+          );
+        })
+        .join("") +
+      "</tbody></table>"
+    );
   const context = String(key || "");
   const allObjects = list.every(function (item) {
     return item && typeof item === "object" && !Array.isArray(item);
