@@ -6,7 +6,34 @@ export async function init(TPP) {
 
   const addChapter = function () {
     TPP.sync();
-    TPP.active.chapters.push({
+    const chapters = Array.isArray(TPP.active.chapters) ? TPP.active.chapters : [];
+    const selectedIndex = Math.max(
+      0,
+      Math.min(Number(TPP.currentChapter) || 0, Math.max(0, chapters.length - 1)),
+    );
+    const selectedChapter = chapters[selectedIndex] || null;
+    const selectedLevel = Math.max(
+      0,
+      Math.min(5, Number(selectedChapter && selectedChapter.level) || 0),
+    );
+    const selectedRange = chapters.length
+      ? TPP.chapterBlockRange(chapters, selectedIndex)
+      : { end: 0 };
+    const hasChildren = selectedRange.end > selectedIndex + 1;
+    const previousSibling =
+      chapters[selectedIndex - 1] &&
+      Math.max(0, Number(chapters[selectedIndex - 1].level) || 0) ===
+        selectedLevel;
+    const nextSibling =
+      chapters[selectedRange.end] &&
+      Math.max(0, Number(chapters[selectedRange.end].level) || 0) ===
+        selectedLevel;
+    const addAsChild =
+      selectedLevel < 5 &&
+      (Boolean(previousSibling) || Boolean(nextSibling) || hasChildren);
+    const insertAt = chapters.length ? selectedRange.end : 0;
+    const newLevel = addAsChild ? selectedLevel + 1 : selectedLevel;
+    const newChapter = {
       id: TPP.internalId("c"),
       title: "New Chapter",
       tocTitle: "",
@@ -16,18 +43,19 @@ export async function init(TPP) {
       imagePlacement: "none",
       imageZoom: 70,
       imageRotate: 0,
-      level: 0,
-      isSubsection: false,
+      level: newLevel,
+      isSubsection: newLevel > 0,
       isMetadata: false,
       includeInToc: true,
-    });
+    };
+    chapters.splice(insertAt, 0, newChapter);
     if (TPP.migrateImageElements) {
       TPP.migrateImageElements(TPP.active, TPP.fallbackBook());
     }
     if (TPP.syncLegacyImageFieldsFromElements) {
       TPP.syncLegacyImageFieldsFromElements(TPP.active);
     }
-    TPP.currentChapter = TPP.active.chapters.length - 1;
+    TPP.currentChapter = addAsChild ? selectedIndex : insertAt;
     TPP.save("draft", TPP.bookId(TPP.active));
     TPP.renderAll();
   };
