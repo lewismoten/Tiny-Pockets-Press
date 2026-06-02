@@ -9,10 +9,7 @@ export async function init(TPP) {
       const saveButton = event.target.closest("#saveBook");
       if (!saveButton) return false;
       event.preventDefault();
-      TPP.sync();
-      TPP.buildPages();
-      await TPP.captureCover();
-      TPP.toast("Saved.");
+      await TPP.saveActiveBook();
       return true;
     },
   };

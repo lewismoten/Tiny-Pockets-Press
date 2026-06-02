@@ -551,59 +551,6 @@ TPP.openImageExportDialog = async function () {
   }
 };
 
-TPP.importConflictStamp = function (book) {
-  const date = new Date(TPP.bookUpdatedAt(book));
-  if (Number.isNaN(date.getTime()))
-    return TPP.bookUpdatedAt(book)
-      ? String(TPP.bookUpdatedAt(book))
-      : "Unknown";
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-};
-TPP.importConflictPreview = function (book) {
-  const cover =
-    book && book.coverPreview
-      ? '<img src="' +
-        TPP.esc(book.coverPreview) +
-        '" alt="' +
-        TPP.esc((book && book.title) || "Book cover") +
-        '" style="display:block;max-width:100%;height:auto;border-radius:14px;box-shadow:0 14px 30px rgb(0 0 0/.18)">'
-      : '<div class="conflict-cover-fallback" style="background:linear-gradient(to bottom,' +
-        TPP.esc((book && book.coverBg1) || "#7b1f2a") +
-        "," +
-        TPP.esc((book && book.coverBg2) || "#251d1d") +
-        ')">' +
-        TPP.esc((book && book.title) || "Untitled") +
-        "</div>";
-  return (
-    '<article class="conflict-book">' +
-    "<h3>" +
-    TPP.esc((book && book.title) || "Untitled") +
-    "</h3>" +
-    '<div class="conflict-cover">' +
-    cover +
-    "</div>" +
-    '<div class="conflict-meta">' +
-    "<div><strong>ID:</strong> " +
-    TPP.esc(TPP.bookId(book) || "—") +
-    "</div>" +
-    "<div><strong>Revision:</strong> " +
-    TPP.esc(String(TPP.bookRevision(book) || 1)) +
-    "." +
-    TPP.esc(String(TPP.bookSubrevision(book) || 0)) +
-    "</div>" +
-    "<div><strong>Modified:</strong> " +
-    TPP.esc(TPP.importConflictStamp(book)) +
-    "</div>" +
-    "</div>" +
-    "</article>"
-  );
-};
 TPP.validViews = function () {
   return [
     "editor",
