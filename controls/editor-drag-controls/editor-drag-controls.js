@@ -149,7 +149,7 @@ export async function init(TPP) {
         if (dragging) dragging.classList.remove("is-dragging");
         TPP.sync("nosave");
         TPP.removeTextElement(TPP.active, dragState.itemId);
-        TPP.save();
+        TPP.save("draft", TPP.bookId(TPP.active));
         setTextTrashVisibility(dragState.location, false);
         if (TPP.renderTextElementControls) TPP.renderTextElementControls();
         TPP.renderCurrentViewPreservingSidebar();
@@ -182,13 +182,13 @@ export async function init(TPP) {
           markerTargetId,
           markerBefore,
         );
-        TPP.save();
+        TPP.save("draft", TPP.bookId(TPP.active));
         pendingTextReorderRefresh = true;
         setTextTrashVisibility(dragState.location, false);
         dragState = null;
         return true;
       }
-      TPP.sync("commit");
+      TPP.sync("draft");
       TPP.renderAll();
       setTextTrashVisibility(dragState.location, false);
       dragState = null;

@@ -28,7 +28,7 @@ export async function init(TPP) {
       TPP.syncLegacyImageFieldsFromElements(TPP.active);
     }
     TPP.currentChapter = TPP.active.chapters.length - 1;
-    TPP.save();
+    TPP.save("draft", TPP.bookId(TPP.active));
     TPP.renderAll();
   };
 
@@ -64,7 +64,7 @@ export async function init(TPP) {
       if (!editor) return false;
       const card = event.target.closest(".chapter-card");
       if (!card) return false;
-      TPP.sync("commit");
+      TPP.sync("draft");
       TPP.renderAll();
       return true;
     },
@@ -124,7 +124,7 @@ export async function init(TPP) {
           removeIndex,
           TPP.active.chapters.length - 1,
         );
-        TPP.save();
+        TPP.save("draft", TPP.bookId(TPP.active));
         TPP.renderAll();
         return true;
       }

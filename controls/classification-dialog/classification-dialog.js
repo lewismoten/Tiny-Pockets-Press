@@ -150,7 +150,7 @@ export async function init(TPP) {
         TPP.classificationDialogSelection.code = "";
         TPP.classificationDialogSelection.extension = "";
         TPP.classificationDialogExtensionPath = [];
-        TPP.sync("commit");
+        TPP.sync("draft");
         TPP.loadForm();
         TPP.renderAll();
         if (classificationDialog.open) classificationDialog.close("cleared");

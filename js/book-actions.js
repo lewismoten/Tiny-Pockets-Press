@@ -92,7 +92,11 @@ TPP.prepareBrowserPrint = function () {
 TPP.exportBookDownload = function (book) {
   if (!book) return;
   TPP.markBookExported(book);
-  TPP.save();
+  if (TPP.active && TPP.bookId(book) === TPP.bookId(TPP.active)) {
+    TPP.save("draft", TPP.bookId(book));
+  } else {
+    TPP.save();
+  }
   TPP.download(TPP.bookExportName(book), {
     type: "tiny-pockets-book",
     schemaVersion: TPP.SCHEMA_VERSION,

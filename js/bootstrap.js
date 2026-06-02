@@ -137,6 +137,7 @@ TPP.bootstrapApp = async function () {
   TPP.view = TPP.initialView();
   if (!window.location.hash) history.replaceState(null, "", "#" + TPP.view);
   TPP.loadForm();
+  if (TPP.renderSaveStateIndicator) TPP.renderSaveStateIndicator();
   TPP.restoreSettingsUi();
   TPP.switchView(TPP.view, true);
   TPP.bindSettingsUiPersistence();

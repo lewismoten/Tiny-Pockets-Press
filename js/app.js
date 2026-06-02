@@ -106,7 +106,7 @@ TPP.initializeRuntimeUi = function () {
         TPP.applyCoverImageFieldDraft &&
         TPP.applyCoverImageFieldDraft(id, el)
       ) {
-        TPP.save("commit", TPP.bookId(TPP.active));
+        TPP.save("draft", TPP.bookId(TPP.active));
         const imageSpec = TPP.coverImageFieldSpec(id);
         if (imageSpec && TPP.patchVisibleCoverTextPreview(imageSpec.location)) {
           if (TPP.renderColorPalettes) TPP.renderColorPalettes();
@@ -125,7 +125,7 @@ TPP.initializeRuntimeUi = function () {
       if (id === "pageSize")
         document.querySelector(".customSize").hidden =
           document.getElementById("pageSize").value !== "custom";
-      TPP.sync("commit");
+      TPP.sync("draft");
       TPP.renderAll();
     };
   });

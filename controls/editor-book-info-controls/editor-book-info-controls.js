@@ -15,7 +15,7 @@ export async function init(TPP) {
     handleChange(event) {
       const entry = event.target.closest(".book-info-entry");
       if (!entry) return false;
-      TPP.sync("commit");
+      TPP.sync("draft");
       TPP.scheduleEditorRender("preserve");
       return true;
     },
@@ -46,7 +46,7 @@ export async function init(TPP) {
         TPP.sync("nosave");
         const group = actionButton.closest(".book-info-entry");
         if (group) TPP.removeBookInfoEntry(TPP.active, group.dataset.entryId);
-        TPP.save();
+        TPP.save("draft", TPP.bookId(TPP.active));
         TPP.loadForm();
         TPP.renderCurrentViewPreservingSidebar();
         return true;
@@ -59,7 +59,7 @@ export async function init(TPP) {
         if (!value) return true;
         TPP.sync("nosave");
         TPP.addBookInfoEntry(TPP.active, value);
-        TPP.save();
+        TPP.save("draft", TPP.bookId(TPP.active));
         TPP.loadForm();
         TPP.renderCurrentViewPreservingSidebar();
         return true;

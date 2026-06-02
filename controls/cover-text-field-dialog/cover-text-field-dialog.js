@@ -87,7 +87,7 @@ export async function init(TPP) {
         TPP.frontCoverFieldDialogLocation || "front",
         option.dataset.coverTextField,
       );
-      TPP.save();
+      TPP.save("draft", TPP.bookId(TPP.active));
       if (dialog.open) dialog.close("selected");
       TPP.loadForm();
       if (typeof TPP.renderCurrentViewPreservingSidebar === "function") {

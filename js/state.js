@@ -1,9 +1,11 @@
 window.TPP = window.TPP || {};
 TPP.SCHEMA_VERSION = 18;
 TPP.LIB = "tinyPocketsPressV61";
+TPP.DRAFTS = "tinyPocketsPressDraftsV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI_STORAGE_KEY = "tinyPocketsPressUiV61";
 TPP.library = [];
+TPP.bookDrafts = {};
 TPP.active = null;
 TPP.view = "editor";
 TPP.currentChapter = 0;
@@ -2416,6 +2418,39 @@ TPP.bookRevisionLabel = function (book) {
   const subrevision = TPP.bookSubrevision(book);
   return subrevision ? revision + "." + subrevision : String(revision);
 };
+TPP.findLibraryBookById = function (bookId) {
+  const id = String(bookId || "").trim();
+  if (!id) return null;
+  return (
+    TPP.library.find(function (book) {
+      return TPP.bookId(book) === id;
+    }) || null
+  );
+};
+TPP.findDraftBookById = function (bookId) {
+  const id = String(bookId || "").trim();
+  if (!id) return null;
+  return TPP.bookDrafts[id] || null;
+};
+TPP.hasDraftBook = function (bookId) {
+  return !!TPP.findDraftBookById(bookId);
+};
+TPP.workingBookForId = function (bookId) {
+  const id = String(bookId || "").trim();
+  if (!id) return null;
+  const source = TPP.findDraftBookById(id) || TPP.findLibraryBookById(id);
+  return source ? TPP.norm(TPP.clone(source)) : null;
+};
+TPP.persistLibraryStore = function () {
+  localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
+};
+TPP.persistDraftStore = function () {
+  localStorage.setItem(TPP.DRAFTS, JSON.stringify(TPP.bookDrafts));
+};
+TPP.persistAllBookStores = function () {
+  TPP.persistLibraryStore();
+  TPP.persistDraftStore();
+};
 TPP.compactBookMeta = function (book) {
   if (!book || !book.meta || typeof book.meta !== "object") return;
   const meta = book.meta;
@@ -3805,6 +3840,13 @@ TPP.load = async function () {
   } catch {
     TPP.library = [];
   }
+  try {
+    const parsedDrafts = JSON.parse(localStorage.getItem(TPP.DRAFTS) || "{}");
+    TPP.bookDrafts =
+      parsedDrafts && typeof parsedDrafts === "object" ? parsedDrafts : {};
+  } catch {
+    TPP.bookDrafts = {};
+  }
   if (!TPP.library.length) {
     let sample = null;
     try {
@@ -3818,19 +3860,33 @@ TPP.load = async function () {
     TPP.save();
   }
   TPP.library = TPP.library.map(TPP.norm);
+  const validIds = new Set(
+    TPP.library.map(function (book) {
+      return TPP.bookId(book);
+    }),
+  );
+  TPP.bookDrafts = Object.fromEntries(
+    Object.entries(TPP.bookDrafts || {})
+      .filter(function (entry) {
+        return validIds.has(String(entry[0] || "").trim());
+      })
+      .map(function (entry) {
+        return [entry[0], TPP.norm(entry[1])];
+      }),
+  );
   TPP.bookFingerprints = {};
   TPP.bookDraftFingerprints = {};
   TPP.library.forEach(function (book) {
     const fingerprint = TPP.bookFingerprint(book);
     const bookId = TPP.bookId(book);
     TPP.bookFingerprints[bookId] = fingerprint;
-    TPP.bookDraftFingerprints[bookId] = fingerprint;
+    TPP.bookDraftFingerprints[bookId] = TPP.hasDraftBook(bookId)
+      ? TPP.bookFingerprint(TPP.bookDrafts[bookId])
+      : fingerprint;
   });
   const activeId = localStorage.getItem(TPP.ACTIVE);
   TPP.active =
-    TPP.library.find(function (book) {
-      return TPP.bookId(book) === activeId;
-    }) || TPP.library[0];
+    TPP.workingBookForId(activeId) || TPP.workingBookForId(TPP.bookId(TPP.library[0]));
 };
 TPP.loadStaleKeyLookup = async function () {
   if (
@@ -3913,14 +3969,13 @@ TPP.scheduleDraftSave = function (bookId, delay) {
   TPP.setBookSaveUiState(bookId, {
     dirty: true,
     pending: true,
-    saving: true,
+    saving: false,
     error: false,
   });
   TPP.bookDraftSaveTimers[bookId] = setTimeout(
     function () {
       delete TPP.bookDraftSaveTimers[bookId];
       TPP.save("draft", bookId);
-      TPP.scheduleRevisionCommit(bookId);
     },
     Math.max(80, Number(delay) || 180),
   );
@@ -3930,11 +3985,12 @@ TPP.scheduleRevisionCommit = function (bookId, delay) {
   TPP.clearRevisionTimer(bookId);
   TPP.bookRevisionTimers[bookId] = setTimeout(
     function () {
-      const book = TPP.library.find(function (entry) {
-        return TPP.bookId(entry) === bookId;
+      TPP.setBookSaveUiState(bookId, {
+        dirty: true,
+        pending: false,
+        saving: false,
+        error: false,
       });
-      if (!book) return;
-      TPP.save("commit", bookId);
     },
     Math.max(100, Number(delay) || 900),
   );
@@ -3946,52 +4002,82 @@ TPP.save = function (mode, bookId) {
     : TPP.library.map(function (book) {
         return TPP.bookId(book);
       });
-  targetIds.forEach(function (id) {
-    TPP.setBookSaveUiState(id, {
-      saving: true,
-      error: false,
-    });
-  });
-  TPP.library.forEach(function (book) {
-    const meta = TPP.bookMeta(book);
-    const currentId = TPP.bookId(book);
-    if (!targetIds.includes(currentId)) return;
-    TPP.hydrateBookDates(book);
-    const previous = TPP.bookFingerprints[currentId];
-    const priorDraft = TPP.bookDraftFingerprints[currentId];
-    const current = TPP.bookFingerprint(book);
+  try {
     if (mode === "draft") {
-      if (priorDraft !== current) {
-        if (previous !== undefined && current !== previous) {
-          meta.subrevision = TPP.bookSubrevision(book) + 1;
-          meta.updatedAt = TPP.nowIso();
+      targetIds.forEach(function (id) {
+        const currentBook =
+          TPP.active && TPP.bookId(TPP.active) === id
+            ? TPP.active
+            : TPP.findDraftBookById(id) || TPP.findLibraryBookById(id);
+        if (!currentBook) return;
+        const current = TPP.bookFingerprint(currentBook);
+        const baseline =
+          TPP.bookFingerprints[id] ??
+          TPP.bookFingerprint(TPP.findLibraryBookById(id) || currentBook);
+        if (current === baseline) {
+          delete TPP.bookDrafts[id];
         } else {
-          meta.subrevision = 0;
+          TPP.bookDrafts[id] = TPP.norm(TPP.clone(currentBook));
         }
-      }
-      TPP.bookDraftFingerprints[currentId] = current;
-    } else {
-      TPP.clearRevisionTimer(currentId);
-      if (previous !== undefined && current !== previous) {
-        meta.revision = TPP.bookRevision(book) + 1;
+        TPP.bookDraftFingerprints[id] = current;
+      });
+      TPP.persistDraftStore();
+      targetIds.forEach(function (id) {
+        TPP.setBookSaveUiState(id, {
+          dirty: TPP.hasDraftBook(id),
+          pending: false,
+          saving: false,
+          error: false,
+        });
+      });
+      return;
+    }
+    targetIds.forEach(function (id) {
+      TPP.setBookSaveUiState(id, {
+        saving: true,
+        error: false,
+      });
+      TPP.clearDraftSaveTimer(id);
+      TPP.clearRevisionTimer(id);
+      const workingBook =
+        bookId && TPP.active && TPP.bookId(TPP.active) === id
+          ? TPP.active
+          : TPP.findDraftBookById(id) ||
+            TPP.findLibraryBookById(id) ||
+            null;
+      if (!workingBook) return;
+      const committed = TPP.findLibraryBookById(id);
+      const nextBook = TPP.norm(TPP.clone(workingBook));
+      const meta = TPP.bookMeta(nextBook);
+      TPP.hydrateBookDates(nextBook);
+      const previous =
+        TPP.bookFingerprints[id] ??
+        TPP.bookFingerprint(committed || nextBook);
+      const current = TPP.bookFingerprint(nextBook);
+      if (!committed) {
+        meta.revision = Math.max(1, TPP.bookRevision(nextBook));
+        meta.subrevision = 0;
+      } else if (current !== previous) {
+        meta.revision = TPP.bookRevision(committed) + 1;
         meta.subrevision = 0;
         meta.updatedAt = TPP.nowIso();
-      } else if (meta.subrevision) {
+      } else {
+        meta.revision = TPP.bookRevision(committed);
         meta.subrevision = 0;
+        meta.updatedAt = TPP.bookUpdatedAt(committed) || meta.updatedAt;
       }
-      TPP.bookFingerprints[currentId] = current;
-      TPP.bookDraftFingerprints[currentId] = current;
-    }
-    TPP.compactBookMeta(book);
-  });
-  if (mode !== "draft") {
-    targetIds.forEach(function (id) {
-      TPP.clearDraftSaveTimer(id);
-    });
-  }
-  try {
-    localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
-    targetIds.forEach(function (id) {
+      TPP.compactBookMeta(nextBook);
+      const index = TPP.library.findIndex(function (entry) {
+        return TPP.bookId(entry) === id;
+      });
+      if (index >= 0) TPP.library[index] = nextBook;
+      else TPP.library.push(nextBook);
+      delete TPP.bookDrafts[id];
+      TPP.bookFingerprints[id] = current;
+      TPP.bookDraftFingerprints[id] = current;
+      if (TPP.active && TPP.bookId(TPP.active) === id) {
+        TPP.active = TPP.norm(TPP.clone(nextBook));
+      }
       TPP.setBookSaveUiState(id, {
         dirty: false,
         pending: false,
@@ -3999,6 +4085,7 @@ TPP.save = function (mode, bookId) {
         error: false,
       });
     });
+    TPP.persistAllBookStores();
   } catch (error) {
     targetIds.forEach(function (id) {
       TPP.setBookSaveUiState(id, {
@@ -4014,11 +4101,30 @@ TPP.save = function (mode, bookId) {
 TPP.persistDerivedBookMeta = function (book) {
   if (!book) return;
   TPP.compactBookMeta(book);
-  localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
+  const bookId = TPP.bookId(book);
+  if (TPP.active && TPP.bookId(TPP.active) === bookId) {
+    TPP.bookDrafts[bookId] = TPP.norm(TPP.clone(TPP.active));
+    TPP.persistDraftStore();
+    TPP.setBookSaveUiState(bookId, {
+      dirty: true,
+      pending: false,
+      saving: false,
+      error: false,
+    });
+    return;
+  }
+  TPP.persistLibraryStore();
 };
 TPP.setActive = function (book) {
-  TPP.active = book;
-  localStorage.setItem(TPP.ACTIVE, TPP.bookId(book));
+  const bookId = TPP.bookId(book);
+  TPP.active = TPP.workingBookForId(bookId) || TPP.norm(TPP.clone(book));
+  localStorage.setItem(TPP.ACTIVE, bookId);
+  TPP.setBookSaveUiState(bookId, {
+    dirty: TPP.hasDraftBook(bookId),
+    pending: false,
+    saving: false,
+    error: false,
+  });
   TPP.loadForm();
   TPP.renderSaveStateIndicator();
   if (TPP.restoreReaderUi)

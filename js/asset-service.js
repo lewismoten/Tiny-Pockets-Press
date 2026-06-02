@@ -183,7 +183,7 @@ TPP.assetCardHtml = function (file, currentId) {
 };
 
 TPP.commitAssetChange = function () {
-  TPP.save("commit", TPP.active && TPP.bookId(TPP.active));
+  TPP.save("draft", TPP.active && TPP.bookId(TPP.active));
   TPP.loadForm();
   TPP.renderAll();
   const dialog = document.getElementById("assetDialog");

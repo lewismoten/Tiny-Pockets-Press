@@ -125,7 +125,7 @@ export async function init(TPP) {
       TPP.bookInfoPickerState.kind,
       value,
     );
-    TPP.sync("commit");
+    TPP.sync("draft");
     TPP.loadForm();
     TPP.renderAll();
   };

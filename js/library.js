@@ -1557,7 +1557,7 @@ TPP.removeStaleDataEntry = function (id) {
   const entry = TPP.dataStaleStore && TPP.dataStaleStore[id];
   if (!entry || !TPP.active) return;
   if (TPP.deleteDataPath(TPP.active, entry.path)) {
-    TPP.save("commit", TPP.bookId(TPP.active));
+    TPP.save("draft", TPP.bookId(TPP.active));
     TPP.renderAll();
     TPP.toast("Removed " + entry.label);
   }
@@ -1572,7 +1572,7 @@ TPP.removeAllStaleDataEntries = function () {
     if (TPP.deleteDataPath(TPP.active, entry.path)) removed++;
   });
   if (!removed) return;
-  TPP.save("commit", TPP.bookId(TPP.active));
+  TPP.save("draft", TPP.bookId(TPP.active));
   TPP.renderAll();
   TPP.toast("Removed " + removed + " stale key" + (removed === 1 ? "" : "s"));
 };
@@ -1581,37 +1581,43 @@ TPP.renderLibrary = function () {
     document.getElementById("librarySearch")?.value || ""
   ).toLowerCase();
   const books = TPP.library.filter(function (book) {
-    return !q || TPP.bookText(book).includes(q);
+    const candidate = TPP.findDraftBookById(TPP.bookId(book)) || book;
+    return !q || TPP.bookText(candidate).includes(q);
   });
   document.getElementById("libraryGrid").innerHTML = books
     .map(function (book) {
-      const size = TPP.sizes[book.pageSize] || {
-        w: book.customW || 1,
-        h: book.customH || 1,
+      const draft = TPP.findDraftBookById(TPP.bookId(book));
+      const displayBook = draft || book;
+      const size = TPP.sizes[displayBook.pageSize] || {
+        w: displayBook.customW || 1,
+        h: displayBook.customH || 1,
       };
-      const pages = TPP.bookPageCount(book) || "—";
-      const modified = TPP.relativeDateTime(TPP.bookUpdatedAt(book));
+      const pages = TPP.bookPageCount(displayBook) || "—";
+      const modified = TPP.relativeDateTime(TPP.bookUpdatedAt(displayBook));
       return (
         '<article class="library-card ' +
         (TPP.active && TPP.bookId(TPP.active) === TPP.bookId(book)
           ? "active"
           : "") +
+        (draft ? " has-draft" : "") +
         '" data-id="' +
         TPP.bookId(book) +
         '">' +
         '<div class="library-cover" style="' +
-        (book.coverPreview
-          ? "background-image:url(" + book.coverPreview + ")"
+        (displayBook.coverPreview
+          ? "background-image:url(" + displayBook.coverPreview + ")"
           : "background:linear-gradient(to bottom," +
-            book.coverBg1 +
+            displayBook.coverBg1 +
             "," +
-            book.coverBg2 +
+            displayBook.coverBg2 +
             ")") +
-        '"></div>' +
+        '">' +
+        (draft ? '<span class="library-draft-badge">Draft</span>' : "") +
+        "</div>" +
         '<div class="library-card-body"><h3>' +
-        TPP.esc(book.title) +
+        TPP.esc(displayBook.title) +
         "</h3><p>" +
-        TPP.esc(book.author) +
+        TPP.esc(displayBook.author) +
         "</p><p>" +
         pages +
         " pages · " +
@@ -1620,6 +1626,7 @@ TPP.renderLibrary = function () {
         Number(size.h).toFixed(2) +
         ' in</p><p class="library-meta">Modified ' +
         TPP.esc(modified.label || "—") +
+        (draft ? " · Draft in progress" : "") +
         '</p><div class="toolbar"><button data-act="edit">Edit</button><button data-act="about">About</button><button data-act="view">View</button><button data-act="dup">Duplicate</button><button data-act="export">Export</button></div></div></article>'
       );
     })
@@ -2193,7 +2200,7 @@ TPP.captureCover = async function () {
     TPP.setCoverPreviewAsset(TPP.active, canvas.toDataURL("image/jpeg", 0.9));
     TPP.bookMeta(TPP.active).pageCount = TPP.lastPages.length;
     wrap.remove();
-    TPP.save();
+    TPP.save("commit", TPP.bookId(TPP.active));
     return true;
   } catch (error) {
     console.warn(error);

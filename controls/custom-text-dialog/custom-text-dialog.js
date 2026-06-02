@@ -25,7 +25,7 @@ export async function init(TPP) {
         TPP.syncLegacyTextFieldsFromElements(TPP.active);
       }
     }
-    TPP.save("commit", TPP.bookId(TPP.active));
+    TPP.save("draft", TPP.bookId(TPP.active));
     const location = String(group.dataset.location || "").trim();
     TPP.renderTextElementControls();
     if (TPP.patchVisibleCoverTextPreview(location)) {

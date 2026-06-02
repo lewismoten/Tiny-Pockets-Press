@@ -1923,7 +1923,7 @@ TPP.applyClassificationValue = function () {
     TPP.classificationDialogTargetEntryId,
   );
   input.value = entry ? String(entry.value || "") : rawValue;
-  TPP.sync("commit");
+  TPP.sync("draft");
   TPP.loadForm();
   TPP.renderAll();
 };

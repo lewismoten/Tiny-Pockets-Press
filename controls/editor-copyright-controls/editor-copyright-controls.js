@@ -26,7 +26,7 @@ export async function init(TPP) {
       return true;
     }
 
-    TPP.save("commit", TPP.bookId(TPP.active));
+    TPP.save("draft", TPP.bookId(TPP.active));
     if (event.target.classList.contains("copyright-field-key")) {
       TPP.renderTextElementControls();
     }
@@ -51,7 +51,7 @@ export async function init(TPP) {
       if (action === "remove" && group) {
         TPP.removeCopyrightPageItem(TPP.active, group.dataset.itemId);
       }
-      TPP.save();
+      TPP.save("draft", TPP.bookId(TPP.active));
       TPP.renderAll();
       return true;
     },

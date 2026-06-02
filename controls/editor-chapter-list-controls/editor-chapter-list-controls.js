@@ -38,7 +38,7 @@ export async function init(TPP) {
           (TPP.active.chapters[index].level || 0) - 1,
         );
       }
-      TPP.save();
+      TPP.save("draft", TPP.bookId(TPP.active));
       TPP.renderAll();
       return true;
     },

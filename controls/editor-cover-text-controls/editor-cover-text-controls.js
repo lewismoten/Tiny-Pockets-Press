@@ -41,7 +41,7 @@ export async function init(TPP) {
       return true;
     }
 
-    TPP.save("commit", TPP.bookId(TPP.active));
+    TPP.save("draft", TPP.bookId(TPP.active));
     if (event.target.classList.contains("text-field-key")) {
       TPP.renderTextElementControls();
     }
@@ -104,7 +104,7 @@ export async function init(TPP) {
         alignCycle.setAttribute("title", meta.label);
         const image = alignCycle.querySelector("img");
         if (image) image.setAttribute("src", meta.icon);
-        TPP.sync("commit");
+        TPP.sync("draft");
         TPP.renderCurrentViewPreservingSidebar();
         return true;
       }
@@ -130,7 +130,7 @@ export async function init(TPP) {
         if (action === "remove" && group) {
           TPP.removeTextElement(TPP.active, group.dataset.textId);
         }
-        TPP.save();
+        TPP.save("draft", TPP.bookId(TPP.active));
         TPP.renderAll();
         return true;
       }
