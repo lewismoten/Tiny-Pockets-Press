@@ -160,11 +160,17 @@ export async function init(TPP) {
       if (main === "read") {
         event.preventDefault();
         const pages = TPP.buildPages();
-        const title = TPP.active.chapters[TPP.currentChapter].title;
+        const chapter = TPP.active.chapters[TPP.currentChapter];
         TPP.readerIndex = Math.max(
           0,
           pages.findIndex(function (p) {
-            return p.html.includes(TPP.esc(title));
+            return (
+              chapter &&
+              chapter.id &&
+              p &&
+              p.chapterId &&
+              p.chapterId === chapter.id
+            );
           }),
         );
         TPP.switchView("reader");

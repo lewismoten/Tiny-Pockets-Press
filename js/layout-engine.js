@@ -392,6 +392,13 @@ TPP.buildPages = function () {
   settings.chapters.forEach(function (chapter, index) {
     const startPage = pages.length + 1;
     const chapterStartIndex = pages.length;
+    const chapterMeta = {
+      chapterId: chapter && chapter.id ? chapter.id : "",
+      chapterTitle: chapter.title || "Chapter " + (index + 1),
+    };
+    const makeChapterPage = function (type, html, extra) {
+      makePage(type, html, Object.assign({}, chapterMeta, extra || {}));
+    };
     let heading =
       '<div class="chapter-heading">' + TPP.esc(chapter.title || "") + "</div>";
 
@@ -399,12 +406,10 @@ TPP.buildPages = function () {
       const meta = TPP.parseChapterMetadata(chapter);
       if (meta && meta.type === "blank") {
         for (let i = 0; i < meta.pages; i++) {
-          makePage("chapter-blank", i === 0 ? heading : "", {
-            chapterTitle: chapter.title || "Chapter " + (index + 1),
-          });
+          makeChapterPage("chapter-blank", i === 0 ? heading : "");
         }
       } else {
-        makePage(
+        makeChapterPage(
           "text",
           heading +
             '<div class="story-text"><p>Invalid metadata JSON.</p></div>',
@@ -456,7 +461,7 @@ TPP.buildPages = function () {
         ) || 0) +
         'deg)"><figcaption class="caption"></figcaption></figure>';
       if (chapterPlacement === "own") {
-        makePage("chapter-image", heading + imageHtml);
+        makeChapterPage("chapter-image", heading + imageHtml);
         heading = "";
       } else heading += imageHtml;
     }
@@ -471,14 +476,14 @@ TPP.buildPages = function () {
         ) {
           qrHtml = pending + qrHtml;
         } else if (pending) {
-          makePage("text", pending);
+          makeChapterPage("text", pending);
         }
         pending = "";
         TPP.appendQrCaptionPages(
           pages,
           settings,
           maxHeight,
-          makePage,
+          makeChapterPage,
           qrHtml,
           block.caption,
         );
@@ -489,7 +494,7 @@ TPP.buildPages = function () {
         pending += block.html;
         return;
       }
-      if (pending) makePage("text", pending);
+      if (pending) makeChapterPage("text", pending);
       pending = "";
       const blockHeight = TPP.measureBlock(block.html, settings);
       if (blockHeight <= maxHeight) {
@@ -497,11 +502,11 @@ TPP.buildPages = function () {
       } else if (block.type === "html") {
         TPP.splitHtmlText(block.html, settings, maxHeight).forEach(
           function (part) {
-            makePage("text", part);
+            makeChapterPage("text", part);
           },
         );
       } else {
-        makePage(
+        makeChapterPage(
           "text",
           '<div class="story-text smallfit">' + block.html + "</div>",
         );
@@ -534,15 +539,15 @@ TPP.buildPages = function () {
         if (fittedLast) {
           last.html = fittedLast;
         } else {
-          if (pending) makePage("text", pending);
+          if (pending) makeChapterPage("text", pending);
           pending = preferred;
         }
       } else {
-        if (pending) makePage("text", pending);
+        if (pending) makeChapterPage("text", pending);
         pending = preferred;
       }
     }
-    if (pending) makePage("text", pending);
+    if (pending) makeChapterPage("text", pending);
 
     if (chapter.includeInToc !== false) {
       toc.push({
