@@ -588,8 +588,6 @@ TPP.BOOK_INFO_DEFAULT_FIELDS = [
   "title",
   "author",
   "publisher",
-  "language",
-  "region",
   "pubDate",
   "copyright",
 ];
@@ -889,7 +887,7 @@ TPP.bookInfoFieldSpec = function (key) {
         "Revised Edition",
       ],
     },
-    custom: { input: "textarea", rows: 3 },
+    custom: { input: "text" },
   };
   return specs[key] || { input: "text" };
 };

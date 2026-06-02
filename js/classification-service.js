@@ -81,13 +81,12 @@ TPP.bookInfoPickerSummary = function (kind, value) {
   if (!normalized) {
     return {
       title: "Choose " + TPP.bookInfoPickerKindLabel(kind).toLowerCase(),
-      meta:
-        "No " + TPP.bookInfoPickerKindLabel(kind).toLowerCase() + " selected",
+      meta: "",
     };
   }
   return {
     title: TPP.bookInfoPickerDisplayName(kind, normalized) || normalized,
-    meta: normalized,
+    meta: "",
   };
 };
 TPP.bookInfoPickerCatalogForKind = async function (kind) {

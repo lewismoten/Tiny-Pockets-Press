@@ -44,18 +44,25 @@ TPP.bookInfoFieldInputHtml = function (entry) {
       '">' +
       '<span class="book-info-classification-title">' +
       TPP.esc(summary.title || "Choose option") +
-      '</span><span class="book-info-classification-meta">' +
-      TPP.esc(summary.meta || "No selection") +
-      "</span></button></div>"
+      "</span>" +
+      (summary.meta
+        ? '<span class="book-info-classification-meta">' +
+          TPP.esc(summary.meta) +
+          "</span>"
+        : "") +
+      "</button></div>"
     );
   }
   if (spec.input === "classification") {
-    const summary = TPP.classificationSummary
-      ? TPP.classificationSummary(value, {
-          book: TPP.active,
-          entryId: entry.id || "",
-        })
-      : value;
+    const summaryTitle =
+      value && TPP.classificationDisplayString
+        ? TPP.classificationDisplayString(
+            TPP.active,
+            TPP.classificationValueData
+              ? TPP.classificationValueData(value)
+              : value,
+          )
+        : "";
     return (
       '<div class="book-info-classification-picker">' +
       '<input class="book-info-value" type="hidden" value="' +
@@ -65,9 +72,7 @@ TPP.bookInfoFieldInputHtml = function (entry) {
       TPP.esc(entry.id || "") +
       '">' +
       '<span class="book-info-classification-title">' +
-      TPP.esc(summary.title || "Choose classification") +
-      '</span><span class="book-info-classification-meta">' +
-      TPP.esc(summary.meta || "No classification selected") +
+      TPP.esc(summaryTitle || "Choose classification") +
       "</span></button></div>"
     );
   }
