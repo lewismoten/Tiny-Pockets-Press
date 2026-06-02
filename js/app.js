@@ -15,6 +15,18 @@ TPP.initializeRuntimeUi = function () {
   } else if (typeof TPP.initializeUiState === "function") {
     TPP.initializeUiState();
   }
+  if (typeof TPP.primeSvgAssets === "function") {
+    TPP.primeSvgAssets([
+      "svg-loading",
+      "svg-broken",
+      "align-left",
+      "align-center",
+      "align-justify",
+      "align-right",
+      "align-clip",
+      "text-outline-control",
+    ]);
+  }
   TPP.bookInfoPickerCatalogs = {
     language: null,
     region: null,

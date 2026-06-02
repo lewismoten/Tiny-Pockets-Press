@@ -243,11 +243,11 @@ TPP.textAlignMeta = function (mode) {
     .trim()
     .toLowerCase();
   const lookup = {
-    left: { label: "Align left", icon: "assets/align-left.svg" },
-    center: { label: "Align center", icon: "assets/align-center.svg" },
-    justify: { label: "Align justify", icon: "assets/align-justify.svg" },
-    right: { label: "Align right", icon: "assets/align-right.svg" },
-    clip: { label: "Clip text", icon: "assets/align-clip.svg" },
+    left: { label: "Align left", iconId: "align-left" },
+    center: { label: "Align center", iconId: "align-center" },
+    justify: { label: "Align justify", iconId: "align-justify" },
+    right: { label: "Align right", iconId: "align-right" },
+    clip: { label: "Clip text", iconId: "align-clip" },
   };
   return lookup[normalized] || lookup.center;
 };
@@ -264,6 +264,28 @@ TPP.textAlignCycleButtonHtml = function (mode) {
     .trim()
     .toLowerCase();
   const meta = TPP.textAlignMeta(current);
+  const iconMarkup =
+    typeof TPP.renderSvgAsset === "function"
+      ? TPP.renderSvgAsset(
+          meta.iconId,
+          { stroke: "#5a4d40", accent: "#b0572d" },
+          {
+            class: "text-align-cycle-icon",
+            "aria-hidden": "true",
+            focusable: "false",
+          },
+        )
+      : '<img src="' +
+        TPP.esc(
+          {
+            "align-left": "assets/align-left.svg",
+            "align-center": "assets/align-center.svg",
+            "align-justify": "assets/align-justify.svg",
+            "align-right": "assets/align-right.svg",
+            "align-clip": "assets/align-clip.svg",
+          }[meta.iconId] || "",
+        ) +
+        '" alt="" aria-hidden="true">';
   return (
     '<input class="text-align" type="hidden" value="' +
     TPP.esc(current) +
@@ -275,9 +297,7 @@ TPP.textAlignCycleButtonHtml = function (mode) {
     '" title="' +
     TPP.esc(meta.label) +
     '">' +
-    '<img src="' +
-    TPP.esc(meta.icon) +
-    '" alt="" aria-hidden="true">' +
+    iconMarkup +
     "</button>"
   );
 };
@@ -418,6 +438,18 @@ TPP.textColorOutlineControlHtml = function (entry) {
   );
   const textInputId = "text-fill-" + TPP.uid();
   const outlineInputId = "text-outline-" + TPP.uid();
+  const outlineIcon =
+    typeof TPP.renderSvgAsset === "function"
+      ? TPP.renderSvgAsset(
+          "text-outline-control",
+          {},
+          {
+            class: "front-cover-text-outline-icon",
+            "aria-hidden": "true",
+            focusable: "false",
+          },
+        )
+      : '<svg class="front-cover-text-outline-icon" viewBox="0 0 80 24" aria-hidden="true" focusable="false"><rect x="1.5" y="4.5" width="14" height="14" rx="3" class="front-cover-text-outline-fill-swatch"></rect><line x1="15.5" y1="12" x2="30.6" y2="12" class="front-cover-text-outline-fill-line"></line><circle cx="34" cy="12" r="3.4" class="front-cover-text-outline-fill-dot"></circle><path d="M31.3 5.6A7.1 7.1 0 1 1 31.3 18.4" class="front-cover-text-outline-stroke-ring"></path><line x1="42.2" y1="12" x2="64.5" y2="12" class="front-cover-text-outline-stroke-line"></line><rect x="64.5" y="4.5" width="14" height="14" rx="3" class="front-cover-text-outline-stroke-swatch"></rect></svg>';
   return (
     '<div class="front-cover-text-outline-cell" style="--text-fill-color:' +
     TPP.esc(textColor) +
@@ -427,7 +459,9 @@ TPP.textColorOutlineControlHtml = function (entry) {
     TPP.esc(textInputId) +
     '" type="color" tabindex="-1" aria-label="Text color" value="' +
     TPP.esc(textColor) +
-    '"><svg class="front-cover-text-outline-icon" viewBox="0 0 80 24" aria-hidden="true" focusable="false"><rect x="1.5" y="4.5" width="14" height="14" rx="3" class="front-cover-text-outline-fill-swatch"></rect><line x1="15.5" y1="12" x2="30.6" y2="12" class="front-cover-text-outline-fill-line"></line><circle cx="34" cy="12" r="3.4" class="front-cover-text-outline-fill-dot"></circle><path d="M31.3 5.6A7.1 7.1 0 1 1 31.3 18.4" class="front-cover-text-outline-stroke-ring"></path><line x1="42.2" y1="12" x2="64.5" y2="12" class="front-cover-text-outline-stroke-line"></line><rect x="64.5" y="4.5" width="14" height="14" rx="3" class="front-cover-text-outline-stroke-swatch"></rect></svg><button type="button" class="front-cover-text-outline-hit front-cover-text-outline-hit-fill" data-color-swatch-target="' +
+    '">' +
+    outlineIcon +
+    '<button type="button" class="front-cover-text-outline-hit front-cover-text-outline-hit-fill" data-color-swatch-target="' +
     TPP.esc(textInputId) +
     '" aria-label="Choose text color" title="' +
     TPP.esc(textColor) +

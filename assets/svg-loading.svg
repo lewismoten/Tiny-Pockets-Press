@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect
+    x="4"
+    y="4"
+    width="40"
+    height="40"
+    rx="10"
+    fill="#f7f2ea"
+    stroke="#d8cfc4"
+    stroke-width="2"
+  />
+  <circle
+    cx="24"
+    cy="24"
+    r="7"
+    stroke="#b9aa98"
+    stroke-width="4"
+    stroke-linecap="round"
+    stroke-dasharray="10 10"
+  />
+</svg>
