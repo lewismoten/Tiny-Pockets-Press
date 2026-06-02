@@ -13,6 +13,14 @@ TPP.initializeUiState = function () {
 
   let rangeHoverTooltipTimer = 0;
   let activeRangeTooltipInput = null;
+  let hoveredRangeTooltipInput = null;
+
+  const eventRangeInput = function (event) {
+    const target = event && event.target;
+    return target && target.matches && target.matches('input[type="range"]')
+      ? target
+      : null;
+  };
 
   TPP.rotationSnapSteps = [1, 5, 15, 45, 90];
 
@@ -67,7 +75,7 @@ TPP.initializeUiState = function () {
     const rect = input.getBoundingClientRect();
     const tipRect = rangeValueTooltip.getBoundingClientRect();
     const left = rect.left + rect.width / 2 - tipRect.width / 2;
-    const top = rect.top + window.scrollY - tipRect.height - 8;
+    const top = rect.top - tipRect.height - 8;
     rangeValueTooltip.style.left =
       Math.round(
         Math.max(8, Math.min(window.innerWidth - tipRect.width - 8, left)),
@@ -87,10 +95,12 @@ TPP.initializeUiState = function () {
 
   TPP.scheduleRangeValueTooltip = function (input, delay) {
     if (!input || !TPP.positionRangeValueTooltip) return;
+    hoveredRangeTooltipInput = input;
     if (rangeHoverTooltipTimer) window.clearTimeout(rangeHoverTooltipTimer);
     rangeHoverTooltipTimer = window.setTimeout(
       function () {
         rangeHoverTooltipTimer = 0;
+        if (hoveredRangeTooltipInput !== input) return;
         TPP.positionRangeValueTooltip(input);
       },
       Math.max(0, Number(delay) || 0),
@@ -163,6 +173,71 @@ TPP.initializeUiState = function () {
       });
   };
 
+  document.addEventListener(
+    "input",
+    function (event) {
+      const input = eventRangeInput(event);
+      if (!input || typeof TPP.positionRangeValueTooltip !== "function") return;
+      TPP.positionRangeValueTooltip(input);
+    },
+    true,
+  );
+  document.addEventListener(
+    "change",
+    function (event) {
+      const input = eventRangeInput(event);
+      if (!input || typeof TPP.positionRangeValueTooltip !== "function") return;
+      TPP.positionRangeValueTooltip(input);
+    },
+    true,
+  );
+  document.addEventListener(
+    "focusin",
+    function (event) {
+      const input = eventRangeInput(event);
+      if (!input || typeof TPP.positionRangeValueTooltip !== "function") return;
+      TPP.positionRangeValueTooltip(input);
+    },
+    true,
+  );
+  document.addEventListener(
+    "focusout",
+    function (event) {
+      const input = eventRangeInput(event);
+      if (!input || typeof TPP.hideRangeValueTooltip !== "function") return;
+      if (activeRangeTooltipInput === input) TPP.hideRangeValueTooltip();
+    },
+    true,
+  );
+  document.addEventListener(
+    "pointerdown",
+    function (event) {
+      const input = eventRangeInput(event);
+      if (!input || typeof TPP.positionRangeValueTooltip !== "function") return;
+      TPP.hideRangeValueTooltip();
+      TPP.positionRangeValueTooltip(input);
+    },
+    true,
+  );
+  document.addEventListener(
+    "pointerover",
+    function (event) {
+      const input = eventRangeInput(event);
+      if (!input || typeof TPP.scheduleRangeValueTooltip !== "function") return;
+      TPP.scheduleRangeValueTooltip(input, 420);
+    },
+    true,
+  );
+  document.addEventListener(
+    "pointerout",
+    function (event) {
+      const input = eventRangeInput(event);
+      if (!input || typeof TPP.hideRangeValueTooltip !== "function") return;
+      if (hoveredRangeTooltipInput === input) hoveredRangeTooltipInput = null;
+      if (activeRangeTooltipInput === input) TPP.hideRangeValueTooltip();
+    },
+    true,
+  );
   document.addEventListener(
     "pointerup",
     function () {

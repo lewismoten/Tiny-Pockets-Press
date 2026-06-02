@@ -311,6 +311,38 @@ TPP.finiteNumberOr = function (value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 };
+TPP.rangeInputHtml = function (options) {
+  const config = options || {};
+  const attrs = [
+    'type="range"',
+    'class="' + TPP.esc(String(config.className || "").trim()) + '"',
+    'min="' + TPP.esc(String(config.min ?? 0)) + '"',
+    'max="' + TPP.esc(String(config.max ?? 100)) + '"',
+    'value="' + TPP.esc(String(config.value ?? 0)) + '"',
+  ];
+  if (config.step != null) {
+    attrs.push('step="' + TPP.esc(String(config.step)) + '"');
+  }
+  if (config.unit) {
+    attrs.push('data-range-unit="' + TPP.esc(String(config.unit)) + '"');
+  }
+  if (config.id) {
+    attrs.push('id="' + TPP.esc(String(config.id)) + '"');
+  }
+  if (config.label) {
+    attrs.push('aria-label="' + TPP.esc(String(config.label)) + '"');
+  }
+  return "<input " + attrs.join(" ") + ">";
+};
+TPP.labeledRangeControlHtml = function (options) {
+  const config = options || {};
+  return (
+    "<label>" +
+    (config.label ? "<span>" + TPP.esc(String(config.label)) + "</span>" : "") +
+    TPP.rangeInputHtml(config) +
+    "</label>"
+  );
+};
 TPP.textElementFieldPickerOptions = function (book, location) {
   const used = new Set(
     TPP.textElementsForLocation(book, location || "front").map(
@@ -374,15 +406,28 @@ TPP.coverTextRowHtml = function (book, spec, element) {
     TPP.coverTextContentCellHtml(book, entry) +
     "<td>" +
     (location === "spine"
-      ? '<div class="cover-text-size-stack"><label><span>Sz</span><input class="text-size" type="range" min="' +
-        TPP.esc(String(TPP.finiteNumberOr(spec && spec.minSize, 3))) +
-        '" max="24" step=".25" data-range-unit="pt" value="' +
-        TPP.esc(String(sizeValue)) +
-        '"></label><label class="rotation-range-label"><span>Rot</span><span class="rotation-range-control"><input id="' +
-        TPP.esc(rotationInputId) +
-        '" class="text-rotate" type="range" min="-180" max="180" step="1" data-range-unit="°" value="' +
-        TPP.esc(String(rotationValue)) +
-        '"><button type="button" class="rotation-step-cycle" data-rotation-step-cycle="' +
+      ? '<div class="cover-text-size-stack">' +
+        TPP.labeledRangeControlHtml({
+          label: "Sz",
+          className: "text-size",
+          min: TPP.finiteNumberOr(spec && spec.minSize, 3),
+          max: 24,
+          step: 0.25,
+          unit: "pt",
+          value: sizeValue,
+        }) +
+        '<label class="rotation-range-label"><span>Rot</span><span class="rotation-range-control">' +
+        TPP.rangeInputHtml({
+          id: rotationInputId,
+          label: "Rotation",
+          className: "text-rotate",
+          min: -180,
+          max: 180,
+          step: 1,
+          unit: "°",
+          value: rotationValue,
+        }) +
+        '<button type="button" class="rotation-step-cycle" data-rotation-step-cycle="' +
         TPP.esc(rotationInputId) +
         '" aria-label="Rotation step 1 degrees" title="Rotation step 1 degrees"><span aria-hidden="true">⟳</span><span>1°</span></button></span></label></div>'
       : '<input class="text-size" type="number" min="' +
@@ -391,16 +436,39 @@ TPP.coverTextRowHtml = function (book, spec, element) {
         TPP.esc(String(sizeValue)) +
         '">') +
     "</td>" +
-    '<td><div class="back-cover-slider-stack"><label><span>X</span><input class="text-x" type="range" min="0" max="100" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.x, 50))) +
-    '"></label><label><span>Y</span><input class="text-y" type="range" min="0" max="100" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.y, 0))) +
-    '"></label></div></td>' +
+    '<td><div class="back-cover-slider-stack">' +
+    TPP.labeledRangeControlHtml({
+      label: "X",
+      className: "text-x",
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: "%",
+      value: TPP.finiteNumberOr(entry.x, 50),
+    }) +
+    TPP.labeledRangeControlHtml({
+      label: "Y",
+      className: "text-y",
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: "%",
+      value: TPP.finiteNumberOr(entry.y, 0),
+    }) +
+    "</div></td>" +
     '<td><div class="back-cover-align-stack">' +
     TPP.textAlignCycleButtonHtml(entry.align || "center") +
-    '<label><input class="text-width" type="range" min="10" max="100" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.width, 100))) +
-    '"></label></div></td>' +
+    "<label>" +
+    TPP.rangeInputHtml({
+      label: "Width",
+      className: "text-width",
+      min: 10,
+      max: 100,
+      step: 1,
+      unit: "%",
+      value: TPP.finiteNumberOr(entry.width, 100),
+    }) +
+    "</label></div></td>" +
     "<td>" +
     TPP.textColorOutlineControlHtml(entry) +
     "</td>" +
@@ -532,16 +600,40 @@ TPP.textElementGroupHtml = function (book, spec, element) {
     '" step=".5" value="' +
     TPP.esc(String(TPP.finiteNumberOr(entry.size, spec.minSize))) +
     '"></label>' +
-    '<label>Y <input class="text-y" type="range" min="0" max="100" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.y, 0))) +
-    '"></label>' +
+    '<label>Y ' +
+    TPP.rangeInputHtml({
+      label: "Y",
+      className: "text-y",
+      min: 0,
+      max: 100,
+      step: 1,
+      unit: "%",
+      value: TPP.finiteNumberOr(entry.y, 0),
+    }) +
+    "</label>" +
     "</div>" +
     (spec.supportsX
-      ? '<div class="two"><label>X <input class="text-x" type="range" min="0" max="100" value="' +
-        TPP.esc(String(TPP.finiteNumberOr(entry.x, 50))) +
-        '"></label><label>Width <input class="text-width" type="range" min="10" max="100" value="' +
-        TPP.esc(String(TPP.finiteNumberOr(entry.width, 100))) +
-        '"></label></div>'
+      ? '<div class="two"><label>X ' +
+        TPP.rangeInputHtml({
+          label: "X",
+          className: "text-x",
+          min: 0,
+          max: 100,
+          step: 1,
+          unit: "%",
+          value: TPP.finiteNumberOr(entry.x, 50),
+        }) +
+        "</label><label>Width " +
+        TPP.rangeInputHtml({
+          label: "Width",
+          className: "text-width",
+          min: 10,
+          max: 100,
+          step: 1,
+          unit: "%",
+          value: TPP.finiteNumberOr(entry.width, 100),
+        }) +
+        "</label></div>"
       : "") +
     (spec.supportsAlign
       ? '<div class="two"><label>Align<select class="text-align"><option value="left"' +
@@ -1182,9 +1274,17 @@ TPP.renderChapterEditor = function () {
     '>Own Page</option></select></label><label>Image Zoom %<input class="chapter-image-zoom" type="number" min="10" max="100" value="' +
     (chapter.imageZoom || chapter.imageWidth || 70) +
     '"></label></div>' +
-    '<label class="rotation-range-label">Image Rotate <span class="rotation-range-control"><input class="chapter-image-rotate" type="range" min="-180" max="180" step="1" value="' +
-    (Number(chapter.imageRotate) || 0) +
-    '"><button type="button" class="rotation-step-cycle" aria-label="Rotation step 1 degrees" title="Rotation step 1 degrees"><span aria-hidden="true">⟳</span><span>1°</span></button></span></label>' +
+    '<label class="rotation-range-label">Image Rotate <span class="rotation-range-control">' +
+    TPP.rangeInputHtml({
+      label: "Image rotate",
+      className: "chapter-image-rotate",
+      min: -180,
+      max: 180,
+      step: 1,
+      unit: "°",
+      value: Number(chapter.imageRotate) || 0,
+    }) +
+    '<button type="button" class="rotation-step-cycle" aria-label="Rotation step 1 degrees" title="Rotation step 1 degrees"><span aria-hidden="true">⟳</span><span>1°</span></button></span></label>' +
     TPP.assetFieldHtml(
       "Chapter Image",
       "chapter",
