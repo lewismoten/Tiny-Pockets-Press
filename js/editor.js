@@ -449,7 +449,7 @@ TPP.textColorOutlineControlHtml = function (entry) {
             focusable: "false",
           },
         )
-      : '<svg class="front-cover-text-outline-icon" viewBox="0 0 80 24" aria-hidden="true" focusable="false"><rect x="1.5" y="4.5" width="14" height="14" rx="3" class="front-cover-text-outline-fill-swatch"></rect><line x1="15.5" y1="12" x2="30.6" y2="12" class="front-cover-text-outline-fill-line"></line><circle cx="34" cy="12" r="3.4" class="front-cover-text-outline-fill-dot"></circle><path d="M31.3 5.6A7.1 7.1 0 1 1 31.3 18.4" class="front-cover-text-outline-stroke-ring"></path><line x1="42.2" y1="12" x2="64.5" y2="12" class="front-cover-text-outline-stroke-line"></line><rect x="64.5" y="4.5" width="14" height="14" rx="3" class="front-cover-text-outline-stroke-swatch"></rect></svg>';
+      : '<img class="front-cover-text-outline-icon" src="assets/text-outline-control.svg" alt="" aria-hidden="true">';
   return (
     '<div class="front-cover-text-outline-cell" style="--text-fill-color:' +
     TPP.esc(textColor) +
