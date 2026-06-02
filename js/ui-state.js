@@ -14,6 +14,7 @@ TPP.initializeUiState = function () {
   let rangeHoverTooltipTimer = 0;
   let activeRangeTooltipInput = null;
   let hoveredRangeTooltipInput = null;
+  TPP.rotationStepState = TPP.rotationStepState || {};
 
   const eventRangeInput = function (event) {
     const target = event && event.target;
@@ -118,6 +119,9 @@ TPP.initializeUiState = function () {
   };
 
   TPP.rotationStepForInput = function (input) {
+    const key = String(input?.dataset?.rotationStepKey || "").trim();
+    const saved = key ? Number(TPP.rotationStepState[key]) : NaN;
+    if (TPP.rotationSnapSteps.includes(saved)) return saved;
     const step = Number(input && input.step);
     return TPP.rotationSnapSteps.includes(step) ? step : 1;
   };
@@ -132,6 +136,7 @@ TPP.initializeUiState = function () {
   TPP.updateRotationStepButton = function (button, input) {
     if (!button || !input) return;
     const step = TPP.rotationStepForInput(input);
+    input.step = String(step);
     const label = button.querySelector("span:last-child");
     if (label) label.textContent = step + "°";
     const title = "Rotation step " + step + " degrees";
@@ -157,6 +162,8 @@ TPP.initializeUiState = function () {
     const current = TPP.rotationStepForInput(input);
     const list = TPP.rotationSnapSteps;
     const next = list[(list.indexOf(current) + 1 + list.length) % list.length];
+    const key = String(input.dataset.rotationStepKey || "").trim();
+    if (key) TPP.rotationStepState[key] = next;
     input.step = String(next);
     TPP.snapRotationInput(input);
     TPP.updateRotationStepButton(button, input);
@@ -173,6 +180,19 @@ TPP.initializeUiState = function () {
       });
   };
 
+  document.addEventListener(
+    "click",
+    function (event) {
+      const button =
+        event.target &&
+        event.target.closest &&
+        event.target.closest(".rotation-step-cycle");
+      if (!button || typeof TPP.cycleRotationStep !== "function") return;
+      event.preventDefault();
+      TPP.cycleRotationStep(button);
+    },
+    true,
+  );
   document.addEventListener(
     "input",
     function (event) {

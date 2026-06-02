@@ -329,6 +329,13 @@ TPP.rangeInputHtml = function (options) {
   if (config.id) {
     attrs.push('id="' + TPP.esc(String(config.id)) + '"');
   }
+  if (config.rotationStepKey) {
+    attrs.push(
+      'data-rotation-step-key="' +
+        TPP.esc(String(config.rotationStepKey)) +
+        '"',
+    );
+  }
   if (config.label) {
     attrs.push('aria-label="' + TPP.esc(String(config.label)) + '"');
   }
@@ -397,6 +404,8 @@ TPP.coverTextRowHtml = function (book, spec, element) {
   const rotationValue = TPP.textRotationDegrees(entry.rotate);
   const rotationInputId =
     location === "spine" ? "text-rotate-" + TPP.uid() : "";
+  const rotationStepKey =
+    location === "spine" && entry.id ? "text-rotate:" + entry.id : "";
   return (
     '<tr class="text-element-group cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
     TPP.esc(entry.id || "") +
@@ -419,6 +428,7 @@ TPP.coverTextRowHtml = function (book, spec, element) {
         '<label class="rotation-range-label"><span>Rot</span><span class="rotation-range-control">' +
         TPP.rangeInputHtml({
           id: rotationInputId,
+          rotationStepKey: rotationStepKey,
           label: "Rotation",
           className: "text-rotate",
           min: -180,
@@ -1277,6 +1287,7 @@ TPP.renderChapterEditor = function () {
     '<label class="rotation-range-label">Image Rotate <span class="rotation-range-control">' +
     TPP.rangeInputHtml({
       label: "Image rotate",
+      rotationStepKey: "chapter-image-rotate:" + chapter.id,
       className: "chapter-image-rotate",
       min: -180,
       max: 180,
