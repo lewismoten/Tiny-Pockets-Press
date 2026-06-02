@@ -1410,10 +1410,17 @@ TPP.classificationStorageValue = function (payload) {
   return JSON.stringify(data);
 };
 TPP.classificationAuthorMark = function (book) {
-  const author = String(TPP.bookInfoValue(book, "author") || "").trim();
-  if (!author) return "";
-  const source = author.split(/\s+/).filter(Boolean).slice(-1)[0] || author;
-  const letters = source.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  const entries =
+    typeof TPP.authorEntriesFromValue === "function"
+      ? TPP.authorEntriesFromValue(TPP.bookInfoValue(book, "author"))
+      : [];
+  const first = entries[0];
+  const source = first
+    ? String(first.last || first.display || first.first || "").trim()
+    : String(TPP.bookInfoValue(book, "author") || "").trim();
+  if (!source) return "";
+  const fallbackToken = source.split(/\s+/).filter(Boolean).slice(-1)[0] || source;
+  const letters = fallbackToken.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
   return letters ? (letters + "XXX").slice(0, 3) : "";
 };
 TPP.classificationYear = function (book) {

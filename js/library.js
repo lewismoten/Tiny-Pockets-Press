@@ -1703,8 +1703,7 @@ TPP.renderAbout = async function () {
     '<div class="about-meta-grid">' +
     [
       TPP.aboutMetaItem("Title", book.title),
-      TPP.aboutMetaItem("Author", book.author),
-      TPP.aboutMetaItem("Author Spine Name", book.spineAuthor),
+      TPP.aboutMetaItem("Author", TPP.bookInfoFieldValue(book, "author")),
       TPP.aboutMetaItem("Publishing Date", TPP.date(book.pubDate)),
       TPP.aboutMetaItem("Publisher", book.publisher),
       TPP.aboutMetaItem("Copyright", book.copyright),

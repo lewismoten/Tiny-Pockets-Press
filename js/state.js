@@ -562,7 +562,6 @@ TPP.defaultStaleKeyLookup = [
 TPP.BOOK_INFO_FIELDS = [
   "title",
   "author",
-  "spineAuthor",
   "pubDate",
   "publisher",
   "language",
@@ -857,7 +856,6 @@ TPP.bookInfoFieldSpec = function (key) {
   const specs = {
     title: { input: "text" },
     author: { input: "authors" },
-    spineAuthor: { input: "text" },
     pubDate: { input: "date" },
     publisher: { input: "text" },
     language: { input: "picker", picker: "language" },
@@ -958,16 +956,39 @@ TPP.authorEntriesValue = function (entries) {
   const normalized = TPP.authorEntriesFromValue(entries);
   return normalized.length ? JSON.stringify(normalized) : "";
 };
+TPP.authorInitialsText = function (value) {
+  return String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(function (part) {
+      return part.charAt(0).toUpperCase() + ".";
+    })
+    .join(" ");
+};
 TPP.authorEntryName = function (entry, options) {
   const config = options && typeof options === "object" ? options : {};
   const item = TPP.normalizeAuthorEntry(entry);
   if (item.display) return item.display;
-  const direct = [item.prefix, item.first, item.middle, item.last, item.suffix]
+  const givenNames = [item.first, item.middle].filter(Boolean);
+  const givenText = config.initials
+    ? givenNames
+        .map(function (part) {
+          return TPP.authorInitialsText(part);
+        })
+        .filter(Boolean)
+        .join(" ")
+    : givenNames.join(" ");
+  const direct = [item.prefix, givenText, item.last, item.suffix]
     .filter(Boolean)
     .join(" ")
     .trim();
   if (!config.inverted || !item.last) return direct;
-  return [item.last + ",", [item.prefix, item.first, item.middle].filter(Boolean).join(" "), item.suffix]
+  return [
+    item.last + ",",
+    [item.prefix, givenText].filter(Boolean).join(" "),
+    item.suffix,
+  ]
     .filter(Boolean)
     .join(" ")
     .trim();
@@ -976,16 +997,22 @@ TPP.authorListText = function (entries, options) {
   const config = options && typeof options === "object" ? options : {};
   const list = TPP.authorEntriesFromValue(entries);
   if (!list.length) return "";
-  const names = list.map(function (entry, index) {
+  const invertAll = config.inverted === "all";
+  const invertFirst =
+    config.inverted === true || config.inverted === "first";
+  const names = list
+    .map(function (entry, index) {
     const name = TPP.authorEntryName(entry, {
-      inverted: Boolean(config.inverted && index === 0),
+        inverted: invertAll || (invertFirst && index === 0),
+        initials: Boolean(config.initials),
     });
     if (!name) return "";
     if (config.includeRoles && entry.role && entry.role !== "author") {
       return name + " (" + TPP.authorRoleLabel(entry.role).toLowerCase() + ")";
     }
     return name;
-  }).filter(Boolean);
+    })
+    .filter(Boolean);
   if (!names.length) return "";
   if (names.length === 1) return names[0];
   if (names.length === 2) return names[0] + " & " + names[1];
@@ -1005,6 +1032,113 @@ TPP.authorCompactSummary = function (entries) {
   if (names.length === 1) return names[0];
   if (names.length === 2) return names[0] + " & " + names[1];
   return names[0] + " … " + names[names.length - 1] + " (" + names.length + ")";
+};
+TPP.parseAuthorFieldVariant = function (fieldKey) {
+  const raw = String(fieldKey || "").trim();
+  if (!raw || !raw.startsWith("author")) return null;
+  const parts = raw.split(":");
+  if (parts[0] !== "author") return null;
+  if (parts[1] === "role") {
+    return {
+      role: String(parts[2] || "").trim().toLowerCase(),
+      format: String(parts[3] || "default").trim().toLowerCase(),
+    };
+  }
+  return {
+    role: "",
+    format: String(parts[1] || "default").trim().toLowerCase(),
+  };
+};
+TPP.authorRolePluralLabel = function (role) {
+  const normalized = String(role || "").trim().toLowerCase();
+  const labels = {
+    author: "Authors",
+    illustrator: "Illustrators",
+    editor: "Editors",
+    translator: "Translators",
+    contributor: "Contributors",
+  };
+  return labels[normalized] || "Contributors";
+};
+TPP.authorFieldVariantDescriptors = function (entries) {
+  const list = TPP.authorEntriesFromValue(entries);
+  const descriptors = [
+    { key: "author", role: "", format: "default" },
+    { key: "author:inverted", role: "", format: "inverted" },
+    {
+      key: "author:inverted-initials",
+      role: "",
+      format: "inverted-initials",
+    },
+  ];
+  const roles = Array.from(
+    new Set(
+      list
+        .map(function (entry) {
+          return String((entry && entry.role) || "author")
+            .trim()
+            .toLowerCase();
+        })
+        .filter(Boolean),
+    ),
+  );
+  roles.forEach(function (role) {
+    descriptors.push({
+      key: "author:role:" + role,
+      role: role,
+      format: "default",
+    });
+    descriptors.push({
+      key: "author:role:" + role + ":inverted",
+      role: role,
+      format: "inverted",
+    });
+    descriptors.push({
+      key: "author:role:" + role + ":inverted-initials",
+      role: role,
+      format: "inverted-initials",
+    });
+  });
+  return descriptors;
+};
+TPP.authorFieldVariantLabel = function (fieldKey) {
+  const variant = TPP.parseAuthorFieldVariant(fieldKey);
+  if (!variant) return "Author";
+  const base = variant.role
+    ? TPP.authorRolePluralLabel(variant.role)
+    : "Author";
+  if (variant.format === "inverted") return base + " (Last, First)";
+  if (variant.format === "inverted-initials") return base + " (Last, F.)";
+  return base;
+};
+TPP.authorFieldVariantValue = function (book, fieldKey, options) {
+  const variant = TPP.parseAuthorFieldVariant(fieldKey);
+  if (!variant) return "";
+  let list = TPP.authorEntriesFromValue(TPP.bookInfoValue(book, "author"));
+  if (variant.role) {
+    list = list.filter(function (entry) {
+      return String((entry && entry.role) || "author").trim().toLowerCase() ===
+        variant.role;
+    });
+  }
+  if (!list.length) return "";
+  if (variant.format === "inverted") {
+    return TPP.authorListText(list, {
+      inverted: "all",
+      includeRoles: false,
+    });
+  }
+  if (variant.format === "inverted-initials") {
+    return TPP.authorListText(list, {
+      inverted: "all",
+      initials: true,
+      includeRoles: false,
+    });
+  }
+  if (options && options.location === "spine" && !variant.role) {
+    return TPP.authorCompactSummary(list);
+  }
+  return TPP.authorListText(list, { includeRoles: false });
 };
 TPP.normalizeBookInfoEntries = function (book) {
   const source = book && book.bookInfo;
@@ -1114,6 +1248,7 @@ TPP.normalizeBookInfoEntries = function (book) {
   const defaults = TPP.bookInfoDefaults();
   const byKey = new Map();
   entries.forEach(function (entry) {
+    if (entry.key === "spineAuthor") return;
     if (entry.key === "custom") return;
     if (!byKey.has(entry.key)) byKey.set(entry.key, entry);
   });
@@ -3875,10 +4010,12 @@ TPP.bookInfoFieldLabel = function (fieldKey, book) {
       ? "Classification (" + format.label + ")"
       : "Classification";
   }
+  if (String(fieldKey || "").startsWith("author:")) {
+    return TPP.authorFieldVariantLabel(fieldKey);
+  }
   const labels = {
     title: "Title",
     author: "Author",
-    spineAuthor: "Author Spine Name",
     pubDate: "Publishing Date",
     publisher: "Publisher",
     language: "Language",
@@ -3912,6 +4049,7 @@ TPP.bookInfoFieldOptions = function (book, options) {
   const includeInlineCustom = options && options.includeInlineCustom;
   const includeClassificationFormats =
     options && options.includeClassificationFormats;
+  const includeAuthorFormats = options && options.includeAuthorFormats;
   const list = TPP.bookInfo(book).flatMap(function (entry) {
     if (!entry) return [];
     if (
@@ -3926,6 +4064,16 @@ TPP.bookInfoFieldOptions = function (book, options) {
             "classification:" + String(format.id || "").trim(),
             book,
           ),
+        };
+      });
+    }
+    if (includeAuthorFormats && entry.key === "author") {
+      return TPP.authorFieldVariantDescriptors(entry.value).map(function (
+        descriptor,
+      ) {
+        return {
+          value: descriptor.key,
+          label: TPP.bookInfoFieldLabel(descriptor.key, book),
         };
       });
     }
@@ -3989,6 +4137,9 @@ TPP.bookInfoFieldValue = function (book, fieldKey, options) {
     }
     return rawValue;
   }
+  if (String(fieldKey || "").startsWith("author:")) {
+    return TPP.authorFieldVariantValue(book, fieldKey, options);
+  }
   if (fieldKey === "series")
     return [
       TPP.bookInfoValue(book, "seriesName"),
@@ -3998,13 +4149,9 @@ TPP.bookInfoFieldValue = function (book, fieldKey, options) {
       .join(" ");
   if (fieldKey === "author")
     return options && options.location === "spine"
-      ? String(
-          TPP.bookInfoValue(book, "spineAuthor") ||
-            TPP.authorCompactSummary(TPP.bookInfoValue(book, "author")) ||
-            "",
-        )
+      ? String(TPP.authorCompactSummary(TPP.bookInfoValue(book, "author")) || "")
       : TPP.authorListText(TPP.bookInfoValue(book, "author"), {
-          includeRoles: true,
+          includeRoles: false,
         });
   if (fieldKey === "pubDate")
     return TPP.formatBookDate(

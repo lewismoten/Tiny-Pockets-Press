@@ -17,8 +17,10 @@ TPP.settings = function () {
       : TPP.sizes[book.pageSize] || TPP.sizes.one;
   return Object.assign({}, book, {
     title: TPP.bookInfoValue(book, "title"),
-    author: TPP.bookInfoValue(book, "author"),
-    spineAuthor: TPP.bookInfoValue(book, "spineAuthor"),
+    author: TPP.bookInfoFieldValue(book, "author"),
+    spineAuthor: TPP.bookInfoFieldValue(book, "author", {
+      location: "spine",
+    }),
     pubDate: TPP.bookInfoValue(book, "pubDate"),
     publisher: TPP.bookInfoValue(book, "publisher"),
     cityPublished: TPP.bookInfoValue(book, "cityPublished"),

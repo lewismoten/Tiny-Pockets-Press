@@ -254,6 +254,19 @@ TPP.bookInfoReferenceFieldKeys = function (book, entryOrId) {
         .filter(Boolean),
     );
   }
+  if (entry.key === "author") {
+    const keys = new Set(
+      TPP.authorFieldVariantDescriptors(entry.value).map(function (descriptor) {
+        return descriptor.key;
+      }),
+    );
+    (TPP.AUTHOR_ROLE_OPTIONS || []).forEach(function (role) {
+      keys.add("author:role:" + role);
+      keys.add("author:role:" + role + ":inverted");
+      keys.add("author:role:" + role + ":inverted-initials");
+    });
+    return Array.from(keys);
+  }
   return [String(entry.key || "").trim()].filter(Boolean);
 };
 TPP.bookInfoUsageReferences = function (book, entryOrId) {
@@ -531,6 +544,7 @@ TPP.textElementFieldPickerOptions = function (book, location) {
   );
   return TPP.bookInfoFieldOptions(book, {
     includeClassificationFormats: true,
+    includeAuthorFormats: true,
   }).filter(function (option) {
     return option && option.value && !used.has(option.value);
   });
@@ -542,6 +556,7 @@ TPP.textElementFieldOptionsHtml = function (selected) {
   const options = TPP.bookInfoFieldOptions(TPP.active, {
     includeInlineCustom: true,
     includeClassificationFormats: true,
+    includeAuthorFormats: true,
   });
   if (
     selected &&
