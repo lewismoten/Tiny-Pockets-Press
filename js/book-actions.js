@@ -129,7 +129,6 @@ TPP.createNewBook = function () {
       imageId: "",
       imageElementId: "",
       level: 0,
-      isSubsection: false,
       isMetadata: false,
       includeInToc: true,
     },

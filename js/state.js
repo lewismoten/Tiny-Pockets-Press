@@ -4654,7 +4654,6 @@ TPP.norm = function (book) {
         imageId: "",
         imageElementId: "",
         level: 0,
-        isSubsection: false,
         isMetadata: false,
         includeInToc: true,
         tocTitle: "",
@@ -4663,6 +4662,7 @@ TPP.norm = function (book) {
     );
     TPP.migrateChapterInlineImage(out, normalized);
     delete normalized.imageRotate;
+    delete normalized.isSubsection;
     return normalized;
   });
   TPP.migrateTextElements(out, base);

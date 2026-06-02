@@ -1393,7 +1393,6 @@ TPP.readChapterFromEditor = function () {
       ),
     );
     chapter.level = Math.max(0, Number(chapter.level) || 0);
-    chapter.isSubsection = chapter.level > 0;
     chapter.isMetadata = card.querySelector(".chapter-metadata").checked;
     chapter.includeInToc = card.querySelector(".chapter-toc").checked;
     chapter.tocTitle = card.querySelector(".chapter-toc-title").value;
@@ -1621,7 +1620,6 @@ TPP.moveChapterBlock = function (chapters, sourceIndex, targetIndex, position, l
         0,
         Math.min(5, nextRootLevel + levelOffsets[index]),
       );
-      chapter.isSubsection = chapter.level > 0;
     });
     const updated = list.slice();
     updated.splice(source.start, block.length, ...block);
@@ -1652,7 +1650,6 @@ TPP.moveChapterBlock = function (chapters, sourceIndex, targetIndex, position, l
   );
   block.forEach(function (chapter, index) {
     chapter.level = Math.max(0, Math.min(5, nextRootLevel + levelOffsets[index]));
-    chapter.isSubsection = chapter.level > 0;
   });
   remaining.splice(insertIndex, 0, ...block);
   const currentIndex = selectedId

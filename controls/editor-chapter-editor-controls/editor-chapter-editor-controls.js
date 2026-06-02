@@ -41,7 +41,6 @@ export async function init(TPP) {
       imageId: "",
       imageElementId: "",
       level: newLevel,
-      isSubsection: newLevel > 0,
       isMetadata: false,
       includeInToc: true,
     };
