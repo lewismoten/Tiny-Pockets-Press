@@ -13,6 +13,7 @@ TPP.bookFingerprints = {};
 TPP.bookDraftFingerprints = {};
 TPP.bookRevisionTimers = {};
 TPP.bookDraftSaveTimers = {};
+TPP.bookSaveUiState = {};
 TPP.staleKeyLookup = [];
 TPP.defaultStaleKeyLookup = [
   {
@@ -3862,9 +3863,59 @@ TPP.clearDraftSaveTimer = function (bookId) {
   clearTimeout(TPP.bookDraftSaveTimers[bookId]);
   delete TPP.bookDraftSaveTimers[bookId];
 };
+TPP.getBookSaveUiState = function (bookId) {
+  const key = String(bookId || "").trim();
+  return (
+    TPP.bookSaveUiState[key] || {
+      dirty: false,
+      pending: false,
+      saving: false,
+      error: false,
+    }
+  );
+};
+TPP.renderSaveStateIndicator = function () {
+  const button = document.getElementById("saveBook");
+  if (!button) return;
+  const bookId = TPP.active ? TPP.bookId(TPP.active) : "";
+  const state = TPP.getBookSaveUiState(bookId);
+  button.classList.toggle("is-dirty", !!state.dirty);
+  button.classList.toggle("is-saving", !!state.saving);
+  button.classList.toggle("is-error", !!state.error);
+  const note = button.querySelector(".book-toolbar-save-note");
+  if (note) {
+    note.hidden = true;
+    note.textContent = "";
+  }
+  button.setAttribute(
+    "title",
+    state.error
+      ? "Save failed"
+      : state.saving
+        ? "Saving changes"
+        : state.dirty
+          ? "Unsaved changes"
+          : "Save",
+  );
+};
+TPP.setBookSaveUiState = function (bookId, patch) {
+  const key = String(bookId || "").trim();
+  if (!key) return;
+  const next = Object.assign({}, TPP.getBookSaveUiState(key), patch || {});
+  TPP.bookSaveUiState[key] = next;
+  if (TPP.active && TPP.bookId(TPP.active) === key) {
+    TPP.renderSaveStateIndicator();
+  }
+};
 TPP.scheduleDraftSave = function (bookId, delay) {
   if (!bookId) return;
   TPP.clearDraftSaveTimer(bookId);
+  TPP.setBookSaveUiState(bookId, {
+    dirty: true,
+    pending: true,
+    saving: true,
+    error: false,
+  });
   TPP.bookDraftSaveTimers[bookId] = setTimeout(
     function () {
       delete TPP.bookDraftSaveTimers[bookId];
@@ -3895,6 +3946,12 @@ TPP.save = function (mode, bookId) {
     : TPP.library.map(function (book) {
         return TPP.bookId(book);
       });
+  targetIds.forEach(function (id) {
+    TPP.setBookSaveUiState(id, {
+      saving: true,
+      error: false,
+    });
+  });
   TPP.library.forEach(function (book) {
     const meta = TPP.bookMeta(book);
     const currentId = TPP.bookId(book);
@@ -3932,7 +3989,27 @@ TPP.save = function (mode, bookId) {
       TPP.clearDraftSaveTimer(id);
     });
   }
-  localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
+  try {
+    localStorage.setItem(TPP.LIB, JSON.stringify(TPP.library));
+    targetIds.forEach(function (id) {
+      TPP.setBookSaveUiState(id, {
+        dirty: false,
+        pending: false,
+        saving: false,
+        error: false,
+      });
+    });
+  } catch (error) {
+    targetIds.forEach(function (id) {
+      TPP.setBookSaveUiState(id, {
+        dirty: true,
+        pending: false,
+        saving: false,
+        error: true,
+      });
+    });
+    throw error;
+  }
 };
 TPP.persistDerivedBookMeta = function (book) {
   if (!book) return;
@@ -3943,6 +4020,7 @@ TPP.setActive = function (book) {
   TPP.active = book;
   localStorage.setItem(TPP.ACTIVE, TPP.bookId(book));
   TPP.loadForm();
+  TPP.renderSaveStateIndicator();
   if (TPP.restoreReaderUi)
     TPP.restoreReaderUi(TPP.readSettingsUi ? TPP.readSettingsUi() : {});
   TPP.renderAll();

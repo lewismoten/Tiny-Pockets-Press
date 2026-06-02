@@ -133,12 +133,54 @@ body {
   flex: 0 0 auto;
   display: block;
   object-fit: contain;
+  transform-origin: 50% 50%;
 }
 .book-toolbar-label {
   line-height: 1.1;
 }
+#saveBook {
+  position: relative;
+}
+.book-toolbar-save-note {
+  display: none !important;
+}
+#saveBook.is-saving .book-toolbar-icon {
+  animation: toolbar-save-spin 1s linear infinite;
+}
+#saveBook.is-dirty {
+  box-shadow:
+    inset 0 -2px 0 #b0572d,
+    inset 0 0 0 1px rgba(176, 87, 45, 0.12);
+}
+#saveBook.is-dirty:not(.is-saving)::after {
+  content: "";
+  position: absolute;
+  top: 0.38rem;
+  right: 0.42rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: #b0572d;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.82);
+}
+#saveBook.is-error {
+  box-shadow:
+    inset 0 -2px 0 #a33636,
+    inset 0 0 0 1px rgba(163, 54, 54, 0.28);
+}
+@keyframes toolbar-save-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 body.book-icons-only #bookChromeBar .book-toolbar-label {
   display: none;
+}
+body.book-icons-only #saveBook .book-toolbar-save-note {
+  display: none !important;
 }
 body.book-icons-only #bookChromeBar .book-toolbar-button {
   min-width: 2.2rem;

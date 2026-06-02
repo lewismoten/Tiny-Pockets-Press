@@ -2194,7 +2194,17 @@ TPP.captureCover = async function () {
     TPP.bookMeta(TPP.active).pageCount = TPP.lastPages.length;
     wrap.remove();
     TPP.save();
+    return true;
   } catch (error) {
     console.warn(error);
+    if (TPP.active && TPP.setBookSaveUiState) {
+      TPP.setBookSaveUiState(TPP.bookId(TPP.active), {
+        dirty: true,
+        pending: false,
+        saving: false,
+        error: true,
+      });
+    }
+    return false;
   }
 };

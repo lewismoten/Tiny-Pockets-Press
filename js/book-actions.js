@@ -57,10 +57,16 @@ TPP.importConflictPreview = function (book) {
 };
 
 TPP.saveActiveBook = async function () {
+  if (TPP.active) {
+    TPP.setBookSaveUiState(TPP.bookId(TPP.active), {
+      saving: true,
+      error: false,
+    });
+  }
   TPP.sync();
   TPP.buildPages();
-  await TPP.captureCover();
-  TPP.toast("Saved.");
+  const saved = await TPP.captureCover();
+  TPP.toast(saved === false ? "Save failed." : "Saved.");
 };
 
 TPP.prepareBrowserPrint = function () {
