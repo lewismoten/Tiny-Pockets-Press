@@ -392,6 +392,7 @@ TPP.buildPages = function () {
   settings.chapters.forEach(function (chapter, index) {
     const startPage = pages.length + 1;
     const chapterStartIndex = pages.length;
+    const chapterSettings = TPP.chapterSettingsInfo(settings);
     const chapterMeta = {
       chapterId: chapter && chapter.id ? chapter.id : "",
       chapterTitle: chapter.title || "Chapter " + (index + 1),
@@ -433,7 +434,7 @@ TPP.buildPages = function () {
     );
     const chapterPlacement =
       (chapterImageElement && chapterImageElement.placement) ||
-      chapter.imagePlacement;
+      chapterSettings.imagePlacement;
     if (chapterImage && chapterPlacement !== "none") {
       const imageHtml =
         '<figure class="figure image-figure"><img src="' +
@@ -445,8 +446,7 @@ TPP.buildPages = function () {
             10,
             Number(
               (chapterImageElement && chapterImageElement.zoom) ||
-                chapter.imageZoom ||
-                chapter.imageWidth,
+                chapterSettings.imageZoom,
             ) || 70,
           ),
         ) +
@@ -455,10 +455,7 @@ TPP.buildPages = function () {
         "%," +
         (Number(chapterImageElement && chapterImageElement.y) || 0) +
         "%) rotate(" +
-        (Number(
-          (chapterImageElement && chapterImageElement.rotate) ||
-            chapter.imageRotate,
-        ) || 0) +
+        (Number(chapterImageElement && chapterImageElement.rotate) || 0) +
         'deg)"><figcaption class="caption"></figcaption></figure>';
       if (chapterPlacement === "own") {
         makeChapterPage("chapter-image", heading + imageHtml);

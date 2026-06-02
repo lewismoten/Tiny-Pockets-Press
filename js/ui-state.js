@@ -31,7 +31,6 @@ TPP.initializeUiState = function () {
     if (explicit) return explicit;
     const id = String(input.id || "").trim();
     if (
-      input.classList.contains("chapter-image-rotate") ||
       /(?:^|)(Rotate)$/.test(id) ||
       /ImgRotate$/.test(id)
     ) {

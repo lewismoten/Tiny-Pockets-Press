@@ -1379,21 +1379,19 @@ TPP.readChapterFromEditor = function () {
   const index = Number(card.dataset.index);
   const chapter = copy[index];
   if (chapter) {
+    const chapterSettings = TPP.chapterSettingsInfo(TPP.active);
     chapter.title = card.querySelector(".chapter-title").value;
     chapter.text = card.querySelector(".chapter-text").value;
-    chapter.imagePlacement = card.querySelector(
+    chapterSettings.imagePlacement = card.querySelector(
       ".chapter-image-placement",
     ).value;
-    chapter.imageZoom = Math.min(
+    chapterSettings.imageZoom = Math.min(
       100,
       Math.max(
         10,
         Number(card.querySelector(".chapter-image-zoom").value) || 70,
       ),
     );
-    delete chapter.imageWidth;
-    chapter.imageRotate =
-      Number(card.querySelector(".chapter-image-rotate").value) || 0;
     chapter.level = Math.max(0, Number(chapter.level) || 0);
     chapter.isSubsection = chapter.level > 0;
     chapter.isMetadata = card.querySelector(".chapter-metadata").checked;
@@ -1765,6 +1763,7 @@ TPP.metadataPreview = function (text) {
 TPP.renderChapterEditor = function () {
   const chapter =
     TPP.active.chapters[TPP.currentChapter] || TPP.active.chapters[0];
+  const chapterSettings = TPP.chapterSettingsInfo(TPP.active);
   if (!chapter) {
     document.getElementById("chapterEditor").innerHTML = "";
     return;
@@ -1801,26 +1800,14 @@ TPP.renderChapterEditor = function () {
       : TPP.previewWithBreaks(chapter.text || "")) +
     "</div></div></div>" +
     '<div class="two"><label>Image Placement<select class="chapter-image-placement"><option value="none" ' +
-    (chapter.imagePlacement === "none" ? "selected" : "") +
+    (chapterSettings.imagePlacement === "none" ? "selected" : "") +
     '>No Image</option><option value="below" ' +
-    (chapter.imagePlacement === "below" ? "selected" : "") +
+    (chapterSettings.imagePlacement === "below" ? "selected" : "") +
     '>Below Title</option><option value="own" ' +
-    (chapter.imagePlacement === "own" ? "selected" : "") +
+    (chapterSettings.imagePlacement === "own" ? "selected" : "") +
     '>Own Page</option></select></label><label>Image Zoom %<input class="chapter-image-zoom" type="number" min="10" max="100" value="' +
-    (chapter.imageZoom || chapter.imageWidth || 70) +
+    (chapterSettings.imageZoom || 70) +
     '"></label></div>' +
-    '<label class="rotation-range-label">Image Rotate <span class="rotation-range-control">' +
-    TPP.rangeInputHtml({
-      label: "Image rotate",
-      rotationStepKey: "chapter-image-rotate:" + chapter.id,
-      className: "chapter-image-rotate",
-      min: -180,
-      max: 180,
-      step: 1,
-      unit: "°",
-      value: Number(chapter.imageRotate) || 0,
-    }) +
-    '<button type="button" class="rotation-step-cycle" aria-label="Rotation step 1 degrees" title="Rotation step 1 degrees"><span aria-hidden="true">⟳</span><span>1°</span></button></span></label>' +
     TPP.assetFieldHtml(
       "Chapter Image",
       "chapter",

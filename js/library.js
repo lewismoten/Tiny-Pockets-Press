@@ -762,7 +762,12 @@ TPP.dataSchemaKeys = function (context) {
       "reverseOrnamentsBySide",
     ]);
   if (context === "chapterSettings")
-    return new Set(["chapterEndOrnament", "chapterEndCentered"]);
+    return new Set([
+      "chapterEndOrnament",
+      "chapterEndCentered",
+      "imagePlacement",
+      "imageZoom",
+    ]);
   if (context === "copyrightPage")
     return new Set(["enabled", "title", "dateFormat", "items"]);
   if (context === "coverFront")
@@ -800,10 +805,7 @@ TPP.dataSchemaKeys = function (context) {
       "text",
       "imageId",
       "imageElementId",
-      "imagePlacement",
-      "imageZoom",
       "imageWidth",
-      "imageRotate",
       "level",
       "isSubsection",
       "isMetadata",

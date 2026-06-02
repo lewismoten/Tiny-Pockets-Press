@@ -639,7 +639,12 @@ TPP.PAGE_NUMBER_FIELDS = [
   "ornamentBySide",
   "reverseOrnamentsBySide",
 ];
-TPP.CHAPTER_SETTINGS_FIELDS = ["chapterEndOrnament", "chapterEndCentered"];
+TPP.CHAPTER_SETTINGS_FIELDS = [
+  "chapterEndOrnament",
+  "chapterEndCentered",
+  "imagePlacement",
+  "imageZoom",
+];
 TPP.PRINTING_FIELDS = [
   "signatureSize",
   "spineMode",
@@ -1772,6 +1777,47 @@ TPP.compactChapterSettingsInfo = function (book) {
     ) {
       delete book[field];
     }
+  });
+};
+TPP.migrateChapterImageSettingsToChapterSettings = function (book) {
+  if (!book || typeof book !== "object") return;
+  const chapterSettings = TPP.chapterSettingsInfo(book);
+  const chapters = Array.isArray(book.chapters) ? book.chapters : [];
+  const firstWithSettings = chapters.find(function (chapter) {
+    return (
+      chapter &&
+      (typeof chapter.imagePlacement === "string" ||
+        chapter.imageZoom != null ||
+        chapter.imageWidth != null)
+    );
+  });
+  if (
+    firstWithSettings &&
+    (chapterSettings.imagePlacement == null ||
+      chapterSettings.imagePlacement === "none")
+  ) {
+    chapterSettings.imagePlacement =
+      firstWithSettings.imagePlacement || chapterSettings.imagePlacement || "none";
+  }
+  if (
+    firstWithSettings &&
+    (chapterSettings.imageZoom == null || Number(chapterSettings.imageZoom) === 70)
+  ) {
+    chapterSettings.imageZoom = Math.min(
+      100,
+      Math.max(
+        10,
+        Number(
+          firstWithSettings.imageZoom || firstWithSettings.imageWidth,
+        ) || Number(chapterSettings.imageZoom) || 70,
+      ),
+    );
+  }
+  chapters.forEach(function (chapter) {
+    if (!chapter) return;
+    delete chapter.imagePlacement;
+    delete chapter.imageZoom;
+    delete chapter.imageWidth;
   });
 };
 TPP.printingInfo = function (book) {
@@ -3888,6 +3934,7 @@ TPP.ensureChapterImageElements = function (book) {
     function (chapter) {
       if (!chapter) return;
       let element = TPP.findChapterImageElement(book, chapter);
+      const chapterSettings = TPP.chapterSettingsInfo(book);
       if (!element) {
         element = {
           id: TPP.internalId("i"),
@@ -3898,10 +3945,10 @@ TPP.ensureChapterImageElements = function (book) {
           y: 0,
           zoom: Math.min(
             100,
-            Math.max(10, Number(chapter.imageZoom || chapter.imageWidth) || 70),
+            Math.max(10, Number(chapterSettings.imageZoom) || 70),
           ),
-          rotate: Number(chapter.imageRotate) || 0,
-          placement: chapter.imagePlacement || "none",
+          rotate: 0,
+          placement: chapterSettings.imagePlacement || "none",
         };
         book.imageElements.push(element);
       }
@@ -3967,14 +4014,14 @@ TPP.syncLegacyImageFieldsFromElements = function (book) {
     function (chapter) {
       const element = TPP.findChapterImageElement(book, chapter);
       if (!element) return;
+      const chapterSettings = TPP.chapterSettingsInfo(book);
       chapter.imageElementId = element.id || "";
       chapter.imageId = element.fileId || "";
-      chapter.imagePlacement = element.placement || "none";
-      chapter.imageZoom = Math.min(
+      chapterSettings.imagePlacement = element.placement || "none";
+      chapterSettings.imageZoom = Math.min(
         100,
         Math.max(10, Number(element.zoom) || 70),
       );
-      chapter.imageRotate = Number(element.rotate) || 0;
     },
   );
 };
@@ -4018,13 +4065,13 @@ TPP.syncImageElementsFromLegacyFields = function (book) {
     function (chapter) {
       const element = TPP.findChapterImageElement(book, chapter);
       if (!element) return;
+      const chapterSettings = TPP.chapterSettingsInfo(book);
       element.fileId = chapter.imageId || element.fileId || "";
       element.zoom = Math.min(
         100,
-        Math.max(10, Number(chapter.imageZoom || chapter.imageWidth) || 70),
+        Math.max(10, Number(chapterSettings.imageZoom) || 70),
       );
-      element.rotate = Number(chapter.imageRotate) || 0;
-      element.placement = chapter.imagePlacement || "none";
+      element.placement = chapterSettings.imagePlacement || "none";
       chapter.imageElementId = element.id || "";
     },
   );
@@ -4593,6 +4640,7 @@ TPP.norm = function (book) {
     base.text && base.text.mediaCaptionSize,
   );
   TPP.migrateCoverTextSettings(out, base);
+  TPP.migrateChapterImageSettingsToChapterSettings(out);
   out.chapters =
     Array.isArray(out.chapters) && out.chapters.length
       ? out.chapters
@@ -4605,9 +4653,6 @@ TPP.norm = function (book) {
         text: "",
         imageId: "",
         imageElementId: "",
-        imagePlacement: "none",
-        imageZoom: 70,
-        imageRotate: 0,
         level: 0,
         isSubsection: false,
         isMetadata: false,
@@ -4617,11 +4662,7 @@ TPP.norm = function (book) {
       chapter,
     );
     TPP.migrateChapterInlineImage(out, normalized);
-    normalized.imageZoom = Math.min(
-      100,
-      Math.max(10, Number(normalized.imageZoom || normalized.imageWidth) || 70),
-    );
-    delete normalized.imageWidth;
+    delete normalized.imageRotate;
     return normalized;
   });
   TPP.migrateTextElements(out, base);
