@@ -445,6 +445,88 @@ TPP.dataImageElementsTable = function (book, list) {
     "</tbody></table>"
   );
 };
+TPP.dataCompactCodeHtml = function (value, title) {
+  const text = String(value || "").trim();
+  if (!text) return '<span class="data-empty">—</span>';
+  return (
+    '<span class="data-compact-code"' +
+    (title ? ' title="' + TPP.esc(title) + '"' : "") +
+    ">" +
+    TPP.esc(text) +
+    "</span>"
+  );
+};
+TPP.dataTextElementsTable = function (book, list) {
+  return (
+    '<table class="data-table data-table-compact data-text-elements-table"><thead><tr><th>#</th><th>Loc</th><th>Part</th><th>Field</th><th>Size</th><th>X</th><th>Y</th><th>W</th><th>Align</th><th>Color</th><th>Outline</th><th>Rot</th></tr></thead><tbody>' +
+    list
+      .map(function (item, index) {
+        const rotation =
+          typeof TPP.textRotationDegrees === "function"
+            ? TPP.textRotationDegrees(item && item.rotate)
+            : Number(item && item.rotate) || 0;
+        const outlineLabel =
+          TPP.dataValueHtml(book, "outlineColor", item.outlineColor, true) +
+          '<div class="data-inline-meta">' +
+          TPP.esc(String(Number(item.outlineSize) || 0)) +
+          " px</div>";
+        const fieldLabel = item.fieldKey
+          ? TPP.bookInfoFieldLabel(item.fieldKey, book)
+          : "";
+        const refCell =
+          (fieldLabel
+            ? '<div class="data-inline-meta">' + TPP.esc(fieldLabel) + "</div>"
+            : "") +
+          TPP.dataCompactCodeHtml(item.fieldKey, String(item.fieldKey || "")) +
+          (item.id
+            ? '<div class="data-inline-meta">' +
+              TPP.dataCompactCodeHtml(
+                item.id,
+                "Element id: " + String(item.id || ""),
+              ) +
+              "</div>"
+            : "");
+        return (
+          "<tr><td>" +
+          (index + 1) +
+          "</td>" +
+          "<td>" +
+          TPP.dataCompactCodeHtml(item.location, String(item.location || "")) +
+          "</td>" +
+          "<td>" +
+          TPP.dataCompactCodeHtml(item.part, String(item.part || "")) +
+          "</td>" +
+          "<td>" + refCell + "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "size", item.size, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "x", item.x, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "y", item.y, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "width", item.width, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "align", item.align, true) +
+          "</td>" +
+          "<td>" +
+          TPP.dataValueHtml(book, "color", item.color, true) +
+          "</td>" +
+          "<td>" +
+          outlineLabel +
+          "</td>" +
+          "<td>" +
+          TPP.dataPrimitiveHtml(book, "rotate", rotation) +
+          "</td></tr>"
+        );
+      })
+      .join("") +
+    "</tbody></table>"
+  );
+};
 TPP.dataPrimitiveHtml = function (book, key, value) {
   const file = TPP.dataFileHtml(book, key, value);
   if (file) return file;
@@ -986,6 +1068,8 @@ TPP.dataValueHtml = function (book, key, value, compact) {
 TPP.dataArrayHtml = function (book, key, list, compact) {
   if (!list.length) return '<div class="data-empty">[]</div>';
   if (TPP.dataFileArray(list)) return TPP.dataFilesTable(book, list);
+  if (String(key || "") === "textElements")
+    return TPP.dataTextElementsTable(book, list);
   if (String(key || "") === "imageElements")
     return TPP.dataImageElementsTable(book, list);
   const context = String(key || "");

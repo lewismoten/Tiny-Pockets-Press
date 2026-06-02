@@ -975,6 +975,39 @@ input[type="checkbox"] {
   text-transform: uppercase;
   color: #67594b;
 }
+.data-table-compact {
+  font-size: 0.82rem;
+}
+.data-table-compact th,
+.data-table-compact td {
+  padding: 0.38rem 0.42rem;
+}
+.data-text-elements-table th,
+.data-text-elements-table td {
+  white-space: nowrap;
+}
+.data-text-elements-table td:nth-child(4) {
+  white-space: normal;
+  min-width: 10.5rem;
+}
+.data-compact-code {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.08rem 0.32rem;
+  border-radius: 999px;
+  background: #f3ede4;
+  color: #5b5147;
+  font: 600 0.72rem/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+.data-inline-meta {
+  margin-top: 0.16rem;
+  font-size: 0.72rem;
+  color: #85796d;
+  line-height: 1.2;
+}
 .book-info-table-wrap {
   margin-bottom: 0.5rem;
   overflow-x: auto;
