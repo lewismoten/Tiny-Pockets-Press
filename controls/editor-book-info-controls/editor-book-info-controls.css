@@ -1,0 +1,23 @@
+.book-info-remove-dialog-card {
+  max-width: min(30rem, calc(100vw - 2rem));
+}
+.book-info-remove-dialog-usage {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #ead9ba;
+  border-radius: 14px;
+  background: #fffaf2;
+}
+.book-info-remove-dialog-usage strong {
+  font-size: 0.84rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #7a6755;
+}
+.book-info-remove-dialog-usage ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.22rem;
+}

@@ -205,6 +205,91 @@ TPP.removeBookInfoEntry = function (book, id) {
     return entry && entry.id !== id;
   });
 };
+TPP.bookInfoReferenceFieldKeys = function (book, entryOrId) {
+  const entry =
+    typeof entryOrId === "string"
+      ? TPP.bookInfoEntryById(book, entryOrId)
+      : entryOrId;
+  if (!entry) return [];
+  if (entry.key === "custom") {
+    return ["custom:" + String(entry.id || "").trim()];
+  }
+  if (entry.key === "classification") {
+    const formats =
+      typeof TPP.classificationFormats === "function"
+        ? TPP.classificationFormats()
+        : [];
+    return ["classification"].concat(
+      formats
+        .map(function (format) {
+          return "classification:" + String((format && format.id) || "").trim();
+        })
+        .filter(Boolean),
+    );
+  }
+  return [String(entry.key || "").trim()].filter(Boolean);
+};
+TPP.bookInfoUsageReferences = function (book, entryOrId) {
+  const entry =
+    typeof entryOrId === "string"
+      ? TPP.bookInfoEntryById(book, entryOrId)
+      : entryOrId;
+  const targetKeys = new Set(TPP.bookInfoReferenceFieldKeys(book, entry));
+  if (!entry || !targetKeys.size) return [];
+  const locationLabels = {
+    front: "Front cover",
+    back: "Back cover",
+    spine: "Spine",
+  };
+  const references = [];
+  ["front", "back", "spine"].forEach(function (location) {
+    TPP.textElementsForLocation(book, location).forEach(function (item, index) {
+      const fieldKey = String((item && item.fieldKey) || item?.part || "").trim();
+      if (!targetKeys.has(fieldKey)) return;
+      references.push({
+        kind: "text",
+        location: location,
+        label:
+          (locationLabels[location] || location) + " text " + String(index + 1),
+      });
+    });
+  });
+  const copyrightItems = TPP.copyrightPageInfo(book).items || [];
+  copyrightItems.forEach(function (item, index) {
+    const fieldKey = String((item && item.fieldKey) || "").trim();
+    if (!targetKeys.has(fieldKey)) return;
+    references.push({
+      kind: "copyright",
+      location: "copyright",
+      label: "Copyright page line " + String(index + 1),
+    });
+  });
+  return references;
+};
+TPP.removeBookInfoReferences = function (book, entryOrId) {
+  if (!book) return 0;
+  const targetKeys = new Set(TPP.bookInfoReferenceFieldKeys(book, entryOrId));
+  if (!targetKeys.size) return 0;
+  let removed = 0;
+  if (Array.isArray(book.textElements)) {
+    const before = book.textElements.length;
+    book.textElements = book.textElements.filter(function (item) {
+      const fieldKey = String((item && item.fieldKey) || item?.part || "").trim();
+      return !targetKeys.has(fieldKey);
+    });
+    removed += before - book.textElements.length;
+  }
+  const copyrightInfo = TPP.copyrightPageInfo(book);
+  if (Array.isArray(copyrightInfo.items)) {
+    const before = copyrightInfo.items.length;
+    copyrightInfo.items = copyrightInfo.items.filter(function (item) {
+      const fieldKey = String((item && item.fieldKey) || "").trim();
+      return !targetKeys.has(fieldKey);
+    });
+    removed += before - copyrightInfo.items.length;
+  }
+  return removed;
+};
 
 TPP.textElementEditorConfigs = {
   front: {
