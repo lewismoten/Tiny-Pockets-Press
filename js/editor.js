@@ -259,6 +259,17 @@ TPP.nextTextAlignMode = function (mode) {
   const index = list.indexOf(current);
   return list[(index + 1 + list.length) % list.length];
 };
+TPP.textAlignIconPath = function (iconId) {
+  return (
+    {
+      "align-left": "assets/align-left.svg",
+      "align-center": "assets/align-center.svg",
+      "align-justify": "assets/align-justify.svg",
+      "align-right": "assets/align-right.svg",
+      "align-clip": "assets/align-clip.svg",
+    }[iconId] || ""
+  );
+};
 TPP.textAlignCycleButtonHtml = function (mode) {
   const current = String(mode || "center")
     .trim()
@@ -276,15 +287,7 @@ TPP.textAlignCycleButtonHtml = function (mode) {
           },
         )
       : '<img src="' +
-        TPP.esc(
-          {
-            "align-left": "assets/align-left.svg",
-            "align-center": "assets/align-center.svg",
-            "align-justify": "assets/align-justify.svg",
-            "align-right": "assets/align-right.svg",
-            "align-clip": "assets/align-clip.svg",
-          }[meta.iconId] || "",
-        ) +
+        TPP.esc(TPP.textAlignIconPath(meta.iconId)) +
         '" alt="" aria-hidden="true">';
   return (
     '<input class="text-align" type="hidden" value="' +
@@ -300,6 +303,43 @@ TPP.textAlignCycleButtonHtml = function (mode) {
     iconMarkup +
     "</button>"
   );
+};
+TPP.updateTextAlignCycleButton = function (button, mode) {
+  if (!button || !TPP.textAlignMeta) return;
+  const nextMode = String(mode || "center")
+    .trim()
+    .toLowerCase();
+  const meta = TPP.textAlignMeta(nextMode);
+  button.dataset.textAlignCycle = nextMode;
+  button.setAttribute("aria-label", meta.label);
+  button.setAttribute("title", meta.label);
+  if (typeof TPP.renderSvgAsset === "function") {
+    button.innerHTML = TPP.renderSvgAsset(
+      meta.iconId,
+      { stroke: "#5a4d40", accent: "#b0572d" },
+      {
+        class: "text-align-cycle-icon",
+        "aria-hidden": "true",
+        focusable: "false",
+      },
+    );
+    return;
+  }
+  const image = button.querySelector("img");
+  if (image) image.setAttribute("src", TPP.textAlignIconPath(meta.iconId));
+};
+TPP.cycleTextAlignButton = function (button) {
+  const hiddenInput = button
+    ?.closest(".text-element-group")
+    ?.querySelector(".text-align");
+  if (!hiddenInput || !TPP.nextTextAlignMode) return;
+  const nextMode = TPP.nextTextAlignMode(hiddenInput.value || "");
+  hiddenInput.value = nextMode;
+  if (TPP.updateTextAlignCycleButton) {
+    TPP.updateTextAlignCycleButton(button, nextMode);
+  }
+  hiddenInput.dispatchEvent(new Event("input", { bubbles: true }));
+  hiddenInput.dispatchEvent(new Event("change", { bubbles: true }));
 };
 TPP.textRotationDegrees = function (value) {
   if (value === true) return 90;

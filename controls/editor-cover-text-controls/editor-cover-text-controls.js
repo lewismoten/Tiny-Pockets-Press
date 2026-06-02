@@ -90,22 +90,9 @@ export async function init(TPP) {
       const alignCycle = event.target.closest("[data-text-align-cycle]");
       if (alignCycle) {
         event.preventDefault();
-        const hiddenInput = alignCycle
-          .closest(".text-element-group")
-          ?.querySelector(".text-align");
-        if (!hiddenInput || !TPP.nextTextAlignMode || !TPP.textAlignMeta) {
-          return true;
+        if (typeof TPP.cycleTextAlignButton === "function") {
+          TPP.cycleTextAlignButton(alignCycle);
         }
-        const nextMode = TPP.nextTextAlignMode(hiddenInput.value || "");
-        const meta = TPP.textAlignMeta(nextMode);
-        hiddenInput.value = nextMode;
-        alignCycle.dataset.textAlignCycle = nextMode;
-        alignCycle.setAttribute("aria-label", meta.label);
-        alignCycle.setAttribute("title", meta.label);
-        const image = alignCycle.querySelector("img");
-        if (image) image.setAttribute("src", meta.icon);
-        TPP.sync("draft");
-        TPP.renderCurrentViewPreservingSidebar();
         return true;
       }
 

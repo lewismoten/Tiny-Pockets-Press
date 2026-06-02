@@ -183,12 +183,26 @@ TPP.initializeUiState = function () {
   document.addEventListener(
     "click",
     function (event) {
+      const alignButton =
+        event.target &&
+        event.target.closest &&
+        event.target.closest("[data-text-align-cycle]");
+      if (
+        alignButton &&
+        typeof TPP.cycleTextAlignButton === "function"
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        TPP.cycleTextAlignButton(alignButton);
+        return;
+      }
       const button =
         event.target &&
         event.target.closest &&
         event.target.closest(".rotation-step-cycle");
       if (!button || typeof TPP.cycleRotationStep !== "function") return;
       event.preventDefault();
+      event.stopPropagation();
       TPP.cycleRotationStep(button);
     },
     true,
