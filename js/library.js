@@ -1657,14 +1657,28 @@ TPP.renderDataSidebar = function (tabs, activeId) {
     tabs.find(function (tab) {
       return tab.id === activeId;
     }) || tabs[0];
+  const rawJsonTab =
+    tabs.find(function (tab) {
+      return tab && tab.id === "raw-json";
+    }) || null;
   const primaryTabs = tabs.filter(function (tab) {
-    return !tab.bottom;
+    return !tab.bottom && tab.id !== "raw-json";
   });
   const bottomTabs = tabs.filter(function (tab) {
-    return tab.bottom;
+    return tab.bottom && tab.id !== "raw-json";
   });
   sidebar.innerHTML =
-    '<div class="data-sidebar-head"><h2>Book Data</h2><p>Inspect structured sections of the current book.</p></div>' +
+    '<div class="data-sidebar-head"><div class="data-sidebar-head-row"><h2>Book Data</h2>' +
+    (rawJsonTab
+      ? '<button type="button" class="data-sidebar-link data-sidebar-link-inline' +
+        (active && rawJsonTab.id === active.id ? " active" : "") +
+        '" data-data-tab="' +
+        TPP.esc(rawJsonTab.id) +
+        '">' +
+        TPP.esc(rawJsonTab.label) +
+        "</button>"
+      : "") +
+    '</div><p>Inspect structured sections of the current book.</p></div>' +
     '<nav class="data-sidebar-nav" aria-label="Data sections">' +
     primaryTabs
       .map(function (tab) {
