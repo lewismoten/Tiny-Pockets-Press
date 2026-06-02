@@ -1484,6 +1484,9 @@ input[type="range"]::-moz-range-thumb {
   margin: 0;
   width: 100%;
 }
+.back-cover-slider-stack label + label {
+  margin-top: 0.2rem;
+}
 .back-cover-slider-stack span {
   font-size: 0.64rem;
   font-weight: 900;
