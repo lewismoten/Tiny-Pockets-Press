@@ -56,7 +56,7 @@ export async function init(TPP) {
       document.querySelectorAll("#bookInfoAuthorDialogList .book-info-author-item"),
     ).map(function (item) {
       return TPP.normalizeAuthorEntry({
-        id: TPP.uid(),
+        id: TPP.internalId("a"),
         display: item.querySelector(".book-info-author-display")?.value || "",
         role: item.querySelector(".book-info-author-role")?.value || "author",
         prefix: item.querySelector(".book-info-author-prefix")?.value || "",

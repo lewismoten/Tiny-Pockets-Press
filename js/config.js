@@ -7,6 +7,30 @@ TPP.uid = function () {
     Math.random().toString(36).slice(2, 8)
   );
 };
+TPP._internalIdSeq = 0;
+TPP.internalId = function (prefix) {
+  const head = String(prefix || "x")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z]/g, "")
+    .slice(0, 1) || "x";
+  TPP._internalIdSeq = (TPP._internalIdSeq + 1) % (36 * 36);
+  const timePart = Date.now().toString(36).slice(-4).padStart(4, "0");
+  const seqPart = TPP._internalIdSeq.toString(36).padStart(2, "0");
+  return head + timePart + seqPart;
+};
+TPP.isCompactInternalId = function (value, prefix) {
+  const text = String(value || "").trim().toLowerCase();
+  const head = String(prefix || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z]/g, "")
+    .slice(0, 1);
+  const pattern = head
+    ? new RegExp("^" + head + "[0-9a-z]{6}$")
+    : /^[a-z][0-9a-z]{6}$/;
+  return pattern.test(text);
+};
 TPP.fonts = [
   ["'Courier New', monospace", "Courier New"],
   ["Georgia, serif", "Georgia"],

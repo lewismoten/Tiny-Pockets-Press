@@ -804,7 +804,7 @@ TPP.defaultBookInfoValueForKey = function (key) {
   return "";
 };
 TPP.bookInfoEntryId = function (key, suffix) {
-  return "book-info-" + String(key || "entry") + (suffix ? "-" + suffix : "");
+  return TPP.internalId("k");
 };
 TPP.bookInfoDefaults = function () {
   return [
@@ -912,7 +912,7 @@ TPP.authorRoleLabel = function (role) {
 TPP.normalizeAuthorEntry = function (entry) {
   const source = entry && typeof entry === "object" ? entry : {};
   return {
-    id: String(source.id || TPP.uid()),
+    id: String(source.id || TPP.internalId("a")),
     display: String(source.display || source.literal || "").trim(),
     prefix: String(source.prefix || "").trim(),
     first: String(source.first || "").trim(),
@@ -1315,7 +1315,7 @@ TPP.setBookInfoValue = function (book, key, value) {
   if (entry) entry.value = String(value || "");
   else {
     TPP.bookInfo(book).push({
-      id: TPP.bookInfoEntryId(key, TPP.uid()),
+      id: TPP.bookInfoEntryId(key),
       key: key,
       value: String(value || ""),
       customLabel: "",
@@ -1383,7 +1383,7 @@ TPP.copyrightPageInfo = function (book) {
         .map(function (item) {
           if (!item) return null;
           return {
-            id: item.id || TPP.uid(),
+            id: item.id || TPP.internalId("p"),
             fieldKey: item.fieldKey || item.part || "copyright",
             customText: String(item.customText || ""),
           };
@@ -3083,7 +3083,7 @@ TPP.upsertFileAsset = function (book, data, type, name, options) {
     );
   });
   if (existing) return existing.id;
-  const id = TPP.uid();
+  const id = TPP.internalId("f");
   book.files.push({
     id: id,
     type: assetType,
@@ -3193,7 +3193,7 @@ TPP.normalizeFiles = function (book) {
   book.files = book.files.reduce(function (list, file) {
     if (!file || !file.data) return list;
     const normalized = {
-      id: file.id || TPP.uid(),
+      id: file.id || TPP.internalId("f"),
       type:
         file.type ||
         (String(file.data).match(/^data:([^;,]+)/) || [])[1] ||
@@ -3232,6 +3232,305 @@ TPP.normalizeFiles = function (book) {
         chapter.imageId = idMap[chapter.imageId];
     },
   );
+};
+TPP.internalIdMapValue = function (map, value) {
+  const text = String(value || "").trim();
+  return text && map && map[text] ? map[text] : text;
+};
+TPP.internalIdAnyMapValue = function (maps, value) {
+  const text = String(value || "").trim();
+  if (!text || !maps) return text;
+  const collections = [
+    maps.bookInfo,
+    maps.authors,
+    maps.copyright,
+    maps.chapters,
+    maps.files,
+    maps.imageElements,
+    maps.textElements,
+  ];
+  for (let i = 0; i < collections.length; i++) {
+    if (collections[i] && collections[i][text]) return collections[i][text];
+  }
+  return text;
+};
+TPP.compactInternalIds = function (book) {
+  if (!book || typeof book !== "object") {
+    return { changed: false };
+  }
+  const maps = {
+    changed: false,
+    bookInfo: {},
+    authors: {},
+    copyright: {},
+    chapters: {},
+    files: {},
+    imageElements: {},
+    textElements: {},
+  };
+  const remapId = function (collection, current, prefix) {
+    const text = String(current || "").trim();
+    if (!text) {
+      maps.changed = true;
+      return TPP.internalId(prefix);
+    }
+    if (TPP.isCompactInternalId(text, prefix)) return text;
+    const existing = maps[collection][text];
+    if (existing) return existing;
+    const next = TPP.internalId(prefix);
+    maps[collection][text] = next;
+    maps.changed = true;
+    return next;
+  };
+  TPP.bookInfo(book).forEach(function (entry) {
+    if (!entry) return;
+    entry.id = remapId("bookInfo", entry.id, "k");
+    if (entry.key === "author") {
+      const authors = TPP.authorEntriesFromValue(entry.value);
+      const changedAuthors = authors.map(function (author) {
+        const next = Object.assign({}, author);
+        next.id = remapId("authors", author && author.id, "a");
+        return next;
+      });
+      entry.value = TPP.authorEntriesValue(changedAuthors);
+    }
+  });
+  TPP.textElementsForLocation(book, "front")
+    .concat(TPP.textElementsForLocation(book, "back"))
+    .concat(TPP.textElementsForLocation(book, "spine"))
+    .forEach(function (entry) {
+      if (!entry) return;
+      entry.id = remapId("textElements", entry.id, "t");
+      const part = String(entry.part || "").trim();
+      if (
+        part &&
+        entry.location !== "chapter" &&
+        !["title", "author", "series", "publisher", "custom", "cover"].includes(
+          part,
+        ) &&
+        !TPP.isCompactInternalId(part, "s")
+      ) {
+        entry.part = TPP.internalId("s");
+        maps.changed = true;
+      }
+      const fieldKey = String(entry.fieldKey || "").trim();
+      if (fieldKey.startsWith("custom:")) {
+        const customId = fieldKey.slice("custom:".length);
+        const nextId = TPP.internalIdMapValue(maps.bookInfo, customId);
+        if (nextId && nextId !== customId) {
+          entry.fieldKey = "custom:" + nextId;
+          maps.changed = true;
+        }
+      }
+    });
+  const copyrightItems = TPP.copyrightPageInfo(book).items || [];
+  copyrightItems.forEach(function (item) {
+    if (!item) return;
+    item.id = remapId("copyright", item.id, "p");
+    const fieldKey = String(item.fieldKey || "").trim();
+    if (fieldKey.startsWith("custom:")) {
+      const customId = fieldKey.slice("custom:".length);
+      const nextId = TPP.internalIdMapValue(maps.bookInfo, customId);
+      if (nextId && nextId !== customId) {
+        item.fieldKey = "custom:" + nextId;
+        maps.changed = true;
+      }
+    }
+  });
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
+    if (!chapter) return;
+    chapter.id = remapId("chapters", chapter.id, "c");
+  });
+  (Array.isArray(book.files) ? book.files : []).forEach(function (file) {
+    if (!file) return;
+    file.id = remapId("files", file.id, "f");
+  });
+  ["coverImageId", "backImageId", "spineImageId"].forEach(function (key) {
+    if (!book[key]) return;
+    const nextId = TPP.internalIdMapValue(maps.files, book[key]);
+    if (nextId && nextId !== book[key]) {
+      book[key] = nextId;
+      maps.changed = true;
+    }
+  });
+  const meta = TPP.bookMeta ? TPP.bookMeta(book) : book.meta;
+  if (meta && meta.coverPreviewImageId) {
+    const nextPreviewId = TPP.internalIdMapValue(
+      maps.files,
+      meta.coverPreviewImageId,
+    );
+    if (nextPreviewId && nextPreviewId !== meta.coverPreviewImageId) {
+      meta.coverPreviewImageId = nextPreviewId;
+      maps.changed = true;
+    }
+  }
+  (Array.isArray(book.imageElements) ? book.imageElements : []).forEach(
+    function (element) {
+      if (!element) return;
+      element.id = remapId("imageElements", element.id, "i");
+      if (element.fileId) {
+        const nextFileId = TPP.internalIdMapValue(maps.files, element.fileId);
+        if (nextFileId && nextFileId !== element.fileId) {
+          element.fileId = nextFileId;
+          maps.changed = true;
+        }
+      }
+      if (element.location === "chapter" && element.part) {
+        const nextPart = TPP.internalIdMapValue(maps.chapters, element.part);
+        if (nextPart && nextPart !== element.part) {
+          element.part = nextPart;
+          maps.changed = true;
+        }
+      }
+    },
+  );
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
+    if (!chapter) return;
+    if (chapter.imageId) {
+      const nextImageId = TPP.internalIdMapValue(maps.files, chapter.imageId);
+      if (nextImageId && nextImageId !== chapter.imageId) {
+        chapter.imageId = nextImageId;
+        maps.changed = true;
+      }
+    }
+    if (chapter.imageElementId) {
+      const nextElementId = TPP.internalIdMapValue(
+        maps.imageElements,
+        chapter.imageElementId,
+      );
+      if (nextElementId && nextElementId !== chapter.imageElementId) {
+        chapter.imageElementId = nextElementId;
+        maps.changed = true;
+      }
+    }
+  });
+  const coverFront = TPP.coverFrontInfo(book);
+  const backCover = TPP.backCoverInfo(book);
+  const spine = TPP.spineInfo(book);
+  [coverFront, backCover, spine].forEach(function (section) {
+    if (!section || !section.imageElementId) return;
+    const nextElementId = TPP.internalIdMapValue(
+      maps.imageElements,
+      section.imageElementId,
+    );
+    if (nextElementId && nextElementId !== section.imageElementId) {
+      section.imageElementId = nextElementId;
+      maps.changed = true;
+    }
+  });
+  Object.defineProperty(book, "__internalIdMaps", {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: maps,
+  });
+  return maps;
+};
+TPP.rewriteInternalIdsInValue = function (value, maps, keyHint) {
+  const key = String(keyHint || "");
+  if (Array.isArray(value)) {
+    return value.map(function (entry) {
+      return TPP.rewriteInternalIdsInValue(entry, maps, "");
+    });
+  }
+  if (!value || typeof value !== "object") {
+    if (typeof value !== "string") return value;
+    if (key === "id") {
+      return TPP.internalIdAnyMapValue(maps, value);
+    }
+    if (key === "fieldKey" && value.startsWith("custom:")) {
+      return (
+        "custom:" +
+        TPP.internalIdMapValue(maps.bookInfo, value.slice("custom:".length))
+      );
+    }
+    if (
+      key === "fileId" ||
+      key === "imageId" ||
+      key === "coverImageId" ||
+      key === "backImageId" ||
+      key === "spineImageId" ||
+      key === "coverPreviewImageId"
+    ) {
+      return TPP.internalIdMapValue(maps.files, value);
+    }
+    if (key === "imageElementId") {
+      return TPP.internalIdMapValue(maps.imageElements, value);
+    }
+    if (key === "part") {
+      return TPP.internalIdMapValue(maps.chapters, value);
+    }
+    return value;
+  }
+  const clone = {};
+  const keys = Object.keys(value);
+  const looksLikeBookInfoEntry = "key" in value && "value" in value;
+  const looksLikeFile = "data" in value && "type" in value;
+  const looksLikeImageElement =
+    "location" in value && "fileId" in value && "zoom" in value;
+  const looksLikeTextElement =
+    "location" in value && "fieldKey" in value && "size" in value;
+  const looksLikeChapter =
+    "title" in value && "text" in value && "includeInToc" in value;
+  const looksLikeAuthor =
+    "role" in value || "display" in value || "first" in value || "last" in value;
+  const looksLikeCopyrightItem = "fieldKey" in value && "customText" in value;
+  keys.forEach(function (entryKey) {
+    let nextValue = value[entryKey];
+    if (entryKey === "id" && typeof nextValue === "string") {
+      if (looksLikeBookInfoEntry) {
+        nextValue = TPP.internalIdMapValue(maps.bookInfo, nextValue);
+      } else if (looksLikeFile) {
+        nextValue = TPP.internalIdMapValue(maps.files, nextValue);
+      } else if (looksLikeImageElement) {
+        nextValue = TPP.internalIdMapValue(maps.imageElements, nextValue);
+      } else if (looksLikeTextElement) {
+        nextValue = TPP.internalIdMapValue(maps.textElements, nextValue);
+      } else if (looksLikeChapter) {
+        nextValue = TPP.internalIdMapValue(maps.chapters, nextValue);
+      } else if (looksLikeAuthor) {
+        nextValue = TPP.internalIdMapValue(maps.authors, nextValue);
+      } else if (looksLikeCopyrightItem) {
+        nextValue = TPP.internalIdMapValue(maps.copyright, nextValue);
+      }
+    } else {
+      nextValue = TPP.rewriteInternalIdsInValue(nextValue, maps, entryKey);
+    }
+    clone[entryKey] = nextValue;
+  });
+  return clone;
+};
+TPP.rewriteDraftHistoryInternalIds = function (entries, maps) {
+  if (!Array.isArray(entries) || !maps) return entries;
+  return entries.map(function (historyEntry) {
+    const changes = Array.isArray(historyEntry) ? historyEntry : [];
+    return changes.map(function (change) {
+      if (!change || typeof change !== "object") return change;
+      if (
+        !("before" in change) ||
+        change.op === "delete" ||
+        String(change.before || "") === ""
+      ) {
+        return Object.assign({}, change);
+      }
+      let decoded = null;
+      try {
+        decoded = TPP.decodeHistoryValue(change.before);
+      } catch (_error) {
+        return Object.assign({}, change);
+      }
+      const pathParts = TPP.parseHistoryPath(change.path || "");
+      const keyHint =
+        typeof pathParts[pathParts.length - 1] === "string"
+          ? pathParts[pathParts.length - 1]
+          : "";
+      return Object.assign({}, change, {
+        before: TPP.encodeHistoryValue(
+          TPP.rewriteInternalIdsInValue(decoded, maps, keyHint),
+        ),
+      });
+    });
+  });
 };
 TPP.esc = function (value) {
   return String(value ?? "").replace(/[&<>"']/g, function (ch) {
@@ -3583,7 +3882,7 @@ TPP.ensureChapterImageElements = function (book) {
       let element = TPP.findChapterImageElement(book, chapter);
       if (!element) {
         element = {
-          id: TPP.uid(),
+          id: TPP.internalId("i"),
           location: "chapter",
           part: chapter.id,
           fileId: chapter.imageId || "",
@@ -3598,7 +3897,7 @@ TPP.ensureChapterImageElements = function (book) {
         };
         book.imageElements.push(element);
       }
-      if (!element.id) element.id = TPP.uid();
+      if (!element.id) element.id = TPP.internalId("i");
       element.location = "chapter";
       element.part = chapter.id;
       chapter.imageElementId = element.id;
@@ -4293,7 +4592,7 @@ TPP.norm = function (book) {
   out.chapters = out.chapters.map(function (chapter, index) {
     const normalized = Object.assign(
       {
-        id: TPP.uid(),
+        id: TPP.internalId("c"),
         title: "Chapter " + (index + 1),
         text: "",
         imageId: "",
@@ -4323,6 +4622,7 @@ TPP.norm = function (book) {
   TPP.syncLegacyImageFieldsFromElements(out);
   TPP.hydrateBookDates(out);
   TPP.normalizeFiles(out);
+  TPP.compactInternalIds(out);
   TPP.syncCoverPreviewAsset(out);
   const fileIds = new Set(
     out.files.map(function (file) {
@@ -4379,7 +4679,18 @@ TPP.load = async function () {
     TPP.library = [TPP.norm(sample)];
     TPP.save();
   }
-  TPP.library = TPP.library.map(TPP.norm);
+  const internalIdMapsByBook = {};
+  let migratedInternalIds = false;
+  TPP.library = TPP.library.map(function (book) {
+    const normalized = TPP.norm(book);
+    const bookId = TPP.bookId(normalized);
+    const maps = normalized.__internalIdMaps;
+    if (bookId && maps) {
+      internalIdMapsByBook[bookId] = maps;
+      if (maps.changed) migratedInternalIds = true;
+    }
+    return normalized;
+  });
   const validIds = new Set(
     TPP.library.map(function (book) {
       return TPP.bookId(book);
@@ -4391,7 +4702,14 @@ TPP.load = async function () {
         return validIds.has(String(entry[0] || "").trim());
       })
       .map(function (entry) {
-        return [entry[0], TPP.norm(entry[1])];
+        const normalized = TPP.norm(entry[1]);
+        const bookId = TPP.bookId(normalized) || String(entry[0] || "").trim();
+        const maps = normalized.__internalIdMaps;
+        if (bookId && maps) {
+          internalIdMapsByBook[bookId] = maps;
+          if (maps.changed) migratedInternalIds = true;
+        }
+        return [entry[0], normalized];
       }),
   );
   TPP.bookDraftHistory = Object.fromEntries(
@@ -4400,33 +4718,48 @@ TPP.load = async function () {
         return validIds.has(String(entry[0] || "").trim());
       })
       .map(function (entry) {
+        const bookId = String(entry[0] || "").trim();
+        const maps = internalIdMapsByBook[bookId] || null;
+        const historyEntries = (Array.isArray(entry[1]) ? entry[1] : [])
+          .map(function (historyEntry) {
+            const changes = Array.isArray(historyEntry)
+              ? historyEntry
+              : Array.isArray(historyEntry && historyEntry.changes)
+                ? historyEntry.changes
+                : null;
+            if (!changes) return null;
+            return changes
+              .map(function (change) {
+                if (!change || !change.path) return null;
+                return {
+                  path: String(change.path || ""),
+                  op: change.op === "delete" ? "delete" : "set",
+                  before: String(change.before || ""),
+                };
+              })
+              .filter(Boolean)
+              .slice(-200);
+          })
+          .filter(Boolean)
+          .slice(-50);
+        const rewritten = maps
+          ? TPP.rewriteDraftHistoryInternalIds(historyEntries, maps)
+          : historyEntries;
+        if (
+          maps &&
+          JSON.stringify(rewritten) !== JSON.stringify(historyEntries)
+        ) {
+          migratedInternalIds = true;
+        }
         return [
           entry[0],
-          (Array.isArray(entry[1]) ? entry[1] : [])
-            .map(function (historyEntry) {
-              const changes = Array.isArray(historyEntry)
-                ? historyEntry
-                : Array.isArray(historyEntry && historyEntry.changes)
-                  ? historyEntry.changes
-                  : null;
-              if (!changes) return null;
-              return changes
-                .map(function (change) {
-                  if (!change || !change.path) return null;
-                  return {
-                    path: String(change.path || ""),
-                    op: change.op === "delete" ? "delete" : "set",
-                    before: String(change.before || ""),
-                  };
-                })
-                .filter(Boolean)
-                .slice(-200);
-            })
-            .filter(Boolean)
-            .slice(-50),
+          rewritten,
         ];
       }),
   );
+  if (migratedInternalIds) {
+    TPP.persistAllBookStores();
+  }
   const activeId = localStorage.getItem(TPP.ACTIVE);
   TPP.active =
     TPP.workingBookForId(activeId) || TPP.workingBookForId(TPP.bookId(TPP.library[0]));

@@ -122,7 +122,7 @@ TPP.createNewBook = function () {
   book.title = "Untitled Tiny Book";
   book.chapters = [
     {
-      id: TPP.uid(),
+      id: TPP.internalId("c"),
       title: "New Chapter",
       tocTitle: "",
       text: "",

@@ -216,7 +216,7 @@ TPP.addBookInfoEntry = function (book, key) {
     return TPP.bookInfoEntry(book, key);
   }
   const entry = {
-    id: TPP.bookInfoEntryId(key, TPP.uid()),
+    id: TPP.bookInfoEntryId(key),
     key: key,
     value:
       (TPP.defaultBookInfoValueForKey && TPP.defaultBookInfoValueForKey(key)) ||
@@ -1012,7 +1012,10 @@ TPP.readSingleCopyrightItemGroup = function (book, group) {
     return item && item.id === group.dataset.itemId;
   });
   const next = {
-    id: (existing && existing.id) || group.dataset.itemId || TPP.uid(),
+    id:
+      (existing && existing.id) ||
+      group.dataset.itemId ||
+      TPP.internalId("p"),
     fieldKey: group.querySelector(".copyright-field-key")?.value || "copyright",
     customText: group.querySelector(".copyright-custom")?.value || "",
   };
@@ -1158,9 +1161,9 @@ TPP.addTextElement = function (book, location, fieldKey) {
   const existing = TPP.textElementsForLocation(book, location);
   const lastElement = existing.length ? existing[existing.length - 1] : null;
   const element = {
-    id: TPP.uid(),
+    id: TPP.internalId("t"),
     location: location,
-    part: "slot-" + TPP.uid(),
+    part: TPP.internalId("s"),
     fieldKey: fieldKey || "title",
     enabled: true,
     size:
@@ -1255,7 +1258,11 @@ TPP.removeTextElement = function (book, id) {
 TPP.addCopyrightPageItem = function (book) {
   const info = TPP.copyrightPageInfo(book);
   info.items = Array.isArray(info.items) ? info.items : [];
-  info.items.push({ id: TPP.uid(), fieldKey: "copyright", customText: "" });
+  info.items.push({
+    id: TPP.internalId("p"),
+    fieldKey: "copyright",
+    customText: "",
+  });
 };
 TPP.moveCopyrightPageItem = function (book, id, direction) {
   const items = TPP.copyrightPageInfo(book).items || [];

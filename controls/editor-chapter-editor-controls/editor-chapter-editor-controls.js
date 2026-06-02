@@ -7,7 +7,7 @@ export async function init(TPP) {
   const addChapter = function () {
     TPP.sync();
     TPP.active.chapters.push({
-      id: TPP.uid(),
+      id: TPP.internalId("c"),
       title: "New Chapter",
       tocTitle: "",
       text: "",
