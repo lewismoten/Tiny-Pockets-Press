@@ -1178,16 +1178,16 @@ input[type="range"]::-moz-range-thumb {
   width: auto;
 }
 .cover-text-table col.cover-text-col-size {
-  width: 5.7rem;
+  width: 4.45rem;
 }
 .cover-text-table col.cover-text-col-position {
   width: 5.8rem;
 }
 .cover-text-table col.cover-text-col-align {
-  width: 5.2rem;
+  width: 4.3rem;
 }
 .cover-text-table col.cover-text-col-outline {
-  width: 4.7rem;
+  width: 4.4rem;
 }
 .cover-text-layout {
   display: grid;
@@ -1250,7 +1250,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .cover-text-size-stack input[type="range"] {
   width: 100%;
-  max-width: 4.2rem;
+  max-width: 3.5rem;
   margin: 0;
 }
 .cover-text-size-stack .rotation-range-control {
@@ -1302,10 +1302,10 @@ input[type="range"]::-moz-range-thumb {
   border: 1px solid #cfc6bc;
   border-radius: 8px;
   background: #fff;
-  overflow: hidden;
+  overflow: visible;
   min-width: 0;
   width: 100%;
-  max-width: 4.9rem;
+  max-width: 4.5rem;
   margin-inline: auto;
 }
 .front-cover-text-outline-pair {
@@ -1387,7 +1387,7 @@ input[type="range"]::-moz-range-thumb {
   flex: 1 1 auto;
   min-width: 0;
   width: 100%;
-  max-width: 3.25rem;
+  max-width: 2.9rem;
   border: 0;
   padding: 0;
   border-radius: 0;
@@ -1396,6 +1396,7 @@ input[type="range"]::-moz-range-thumb {
   outline: none;
   box-shadow: none;
   align-self: center;
+  overflow: visible;
 }
 .front-cover-text-actions {
   display: flex;
@@ -1483,8 +1484,17 @@ input[type="range"]::-moz-range-thumb {
 }
 .back-cover-align-stack {
   display: grid;
-  gap: 0.2rem;
+  gap: 0.08rem;
   justify-items: center;
+  width: 100%;
+  padding: 0.07rem 0.12rem;
+  border: 1px solid #cfc6bc;
+  border-radius: 8px;
+  background: #fff;
+  min-width: 0;
+  max-width: 3.75rem;
+  margin-inline: auto;
+  overflow: visible;
 }
 .back-cover-align-stack label {
   display: grid;
@@ -1494,24 +1504,29 @@ input[type="range"]::-moz-range-thumb {
 }
 .back-cover-align-stack input[type="range"] {
   width: 100%;
-  max-width: 3.2rem;
+  max-width: 2.45rem;
   margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
 }
 .text-align-cycle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.34rem;
+  height: 1.34rem;
   padding: 0;
   border: 1px solid #cfc6bc;
-  border-radius: 8px;
+  border-radius: 5px;
   background: #fff;
 }
 .text-align-cycle img,
 .text-align-cycle svg {
-  width: 1rem;
-  height: 1rem;
+  width: 1.08rem;
+  height: 1.08rem;
   display: block;
 }
 .cover-text-actions-bar {

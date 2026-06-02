@@ -537,13 +537,7 @@ TPP.coverTextContentCellHtml = function (book, element) {
         ? customPreview
         : TPP.bookInfoFieldLabel(fieldKey, book),
     ) +
-    "</span>" +
-    (fieldKey === "custom"
-      ? '<button type="button" class="small back-cover-text-edit-button" data-custom-text-edit="1" aria-label="Edit custom text" title="Edit custom text">✎</button><input class="text-custom back-cover-text-custom-value" type="hidden" value="' +
-        TPP.esc(entry.customText || "") +
-        '">'
-      : "") +
-    "</div></div></td>"
+    "</span></div></div></td>"
   );
 };
 TPP.textColorOutlineControlHtml = function (entry) {
