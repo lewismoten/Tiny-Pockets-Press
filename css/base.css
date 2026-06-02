@@ -271,7 +271,8 @@ body.book-chrome-hidden #bookChromeBar {
   border-right: 1px solid var(--line);
 }
 .controls,
-.data-sidebar {
+.data-sidebar,
+.chapter-sidebar-shell {
   height: 100%;
   min-height: 0;
   overflow: auto;
@@ -403,25 +404,145 @@ input[type="checkbox"] {
   border: 1px solid #ead9ba;
   margin-bottom: 1rem;
 }
+.chapter-sidebar-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  margin-bottom: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fffdf8;
+}
+.chapter-sidebar-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.chapter-sidebar-head h3 {
+  margin: 0;
+}
+.chapter-sidebar-head p {
+  margin: 0.18rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
 .chapter-list {
   display: grid;
   gap: 0.35rem;
   margin-bottom: 1rem;
 }
+.chapter-sidebar-list {
+  margin-bottom: 0;
+}
 .chapter-pill {
+  --indent-offset: calc(var(--level, 0) * 1.35rem);
+  position: relative;
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0.4rem;
-  align-items: center;
+  align-items: stretch;
   text-align: left;
   border-radius: 12px;
   border: 1px solid var(--line);
-  padding: 0.5rem 0.65rem;
+  padding: 0.35rem 0.5rem;
+  width: calc(100% - var(--indent-offset));
+  margin-left: var(--indent-offset);
+  box-sizing: border-box;
   background: #fff;
+  cursor: grab;
+}
+.chapter-pill::after {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  left: calc(0.55rem + var(--indent-offset));
+  width: 0;
+  border-left: 1px solid rgb(216 188 140 / 0.65);
+  opacity: 0;
+  pointer-events: none;
+}
+.chapter-pill.subchapter::after {
+  opacity: 1;
+}
+.chapter-pill.dragging {
+  opacity: 0.8;
+}
+.chapter-pill.drop-before::before,
+.chapter-pill.drop-after::after {
+  content: "";
+  position: absolute;
+  left: calc(0.65rem + (var(--drop-level, 0) * 1.2rem));
+  right: 0.65rem;
+  height: 0;
+  border-top: 3px solid #d7851c;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.chapter-pill.drop-before::before {
+  top: -3px;
+}
+.chapter-pill.drop-after::after {
+  bottom: -3px;
 }
 .chapter-pill .indent {
   display: inline-block;
-  width: calc(var(--level) * 1.2rem);
+  width: 0.25rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #efd8ac, #dbc18f);
+  opacity: 0.82;
+  margin-left: var(--indent-offset);
+}
+.chapter-pill-main {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0.18rem 0 0.18rem calc(var(--indent-offset) * 0.45);
+  text-align: left;
+  color: inherit;
+}
+.chapter-pill-index {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #8d7d6c;
+}
+.chapter-pill-text {
+  min-width: 0;
+  display: grid;
+  gap: 0.12rem;
+}
+.chapter-pill-title {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.chapter-pill-badges {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.chapter-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: #f7e6c0;
+  color: #6a4d18;
+}
+.chapter-pill-badge.muted {
+  background: #ece5dc;
+  color: #6b6258;
 }
 .chapter-card {
   background: #fff;
@@ -2037,9 +2158,14 @@ input[type="range"]::-moz-range-thumb {
     overflow: visible;
     border-right: 0;
   }
-  .controls {
+  .controls,
+  .chapter-sidebar-shell {
     height: auto;
     overflow: visible;
+  }
+  .chapter-sidebar-head {
+    align-items: stretch;
+    flex-direction: column;
   }
   .editor-grid,
   .conflict-grid,

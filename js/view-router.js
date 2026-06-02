@@ -29,9 +29,11 @@ TPP.renderSidebarMode = function () {
   const controls = document.querySelector(".controls");
   const settings = document.querySelector(".settings");
   const dataSidebar = document.getElementById("dataSidebar");
+  const chapterSidebar = document.getElementById("chapterSidebarMount");
   const bookChromeBar = document.getElementById("bookChromeBar");
   const bookActionsBar = document.getElementById("bookActionsBar");
   const bookTabsBar = document.getElementById("bookTabsBar");
+  const editorMode = TPP.view === "editor";
   const dataMode = TPP.view === "data";
   const softwareMode = TPP.view === "software";
   const libraryMode = TPP.view === "library";
@@ -39,7 +41,9 @@ TPP.renderSidebarMode = function () {
   if (body) body.classList.toggle("book-chrome-hidden", hideBookChrome);
   if (appShell) appShell.classList.toggle("no-sidebar", hideBookChrome);
   if (settings) settings.hidden = hideBookChrome;
-  if (controls) controls.hidden = dataMode || softwareMode || libraryMode;
+  if (controls)
+    controls.hidden = editorMode || dataMode || softwareMode || libraryMode;
+  if (chapterSidebar) chapterSidebar.hidden = !editorMode;
   if (dataSidebar) dataSidebar.hidden = !dataMode;
   if (bookChromeBar) bookChromeBar.hidden = hideBookChrome;
   if (bookTabsBar) bookTabsBar.hidden = hideBookChrome;
@@ -66,6 +70,7 @@ TPP.switchView = function (view, fromHash) {
 
 TPP.renderAll = function () {
   TPP.renderSidebarMode();
+  if (TPP.renderChapterSidebar) TPP.renderChapterSidebar();
   if (TPP.view === "editor") {
     if (TPP.renderTextElementControls) TPP.renderTextElementControls();
     TPP.renderChapterList();

@@ -1394,33 +1394,242 @@ TPP.readChapterFromEditor = function () {
     delete chapter.imageWidth;
     chapter.imageRotate =
       Number(card.querySelector(".chapter-image-rotate").value) || 0;
-    chapter.level = Number(card.querySelector(".chapter-level").value) || 0;
-    chapter.isSubsection = card.querySelector(".chapter-subsection").checked;
+    chapter.level = Math.max(0, Number(chapter.level) || 0);
+    chapter.isSubsection = chapter.level > 0;
     chapter.isMetadata = card.querySelector(".chapter-metadata").checked;
     chapter.includeInToc = card.querySelector(".chapter-toc").checked;
     chapter.tocTitle = card.querySelector(".chapter-toc-title").value;
   }
   return copy;
 };
+TPP.chapterBlockRange = function (chapters, startIndex) {
+  const list = Array.isArray(chapters) ? chapters : [];
+  const start = Math.max(0, Math.min(Number(startIndex) || 0, list.length));
+  const rootLevel = Math.max(0, Number(list[start] && list[start].level) || 0);
+  let end = start + 1;
+  while (end < list.length) {
+    const level = Math.max(0, Number(list[end] && list[end].level) || 0);
+    if (level <= rootLevel) break;
+    end += 1;
+  }
+  return {
+    start: start,
+    end: end,
+    rootLevel: rootLevel,
+  };
+};
+TPP.chapterDropLevelFromEvent = function (list, event, row, position) {
+  if (!list || !event) return 0;
+  if (row) {
+    const rowLevel = Math.max(0, Number(row.dataset.level) || 0);
+    const rect = row.getBoundingClientRect();
+    const relativeIndent = Math.max(
+      0,
+      Math.floor((event.clientX - rect.left - 34) / 28),
+    );
+    const requested =
+      rowLevel +
+      relativeIndent +
+      (position === "after" && relativeIndent > 0 ? 1 : 0);
+    return Math.max(
+      0,
+      Math.min(position === "before" ? rowLevel : 5, requested),
+    );
+  }
+  const rect = list.getBoundingClientRect();
+  const indent = Math.floor((event.clientX - rect.left - 26) / 28);
+  return Math.max(0, Math.min(5, indent));
+};
+TPP.chapterMaxLevelAtInsert = function (chapters, insertIndex) {
+  if (!Array.isArray(chapters) || insertIndex <= 0) return 0;
+  return Math.min(
+    5,
+    Math.max(0, Number(chapters[insertIndex - 1] && chapters[insertIndex - 1].level) || 0) + 1,
+  );
+};
+TPP.chapterAllowedDropLevel = function (
+  chapters,
+  sourceIndex,
+  targetIndex,
+  position,
+  requestedLevel,
+) {
+  const list = Array.isArray(chapters) ? chapters.slice() : [];
+  if (!list.length) return 0;
+  const source = TPP.chapterBlockRange(list, sourceIndex);
+  const remaining = list.slice(0, source.start).concat(list.slice(source.end));
+  let adjustedTarget = Number(targetIndex) || 0;
+  if (adjustedTarget > source.start) adjustedTarget -= source.end - source.start;
+  adjustedTarget = Math.max(0, Math.min(adjustedTarget, remaining.length - 1));
+  const targetRange = TPP.chapterBlockRange(remaining, adjustedTarget);
+  const insertIndex =
+    position === "before" ? targetRange.start : targetRange.end;
+  const maxLevel = TPP.chapterMaxLevelAtInsert(remaining, insertIndex);
+  return Math.max(0, Math.min(maxLevel, Math.max(0, Number(requestedLevel) || 0)));
+};
+TPP.clearChapterDropState = function () {
+  TPP.chapterDragState = null;
+};
+TPP.applyChapterDropState = function () {
+  const list = document.getElementById("chapterList");
+  if (!list) return;
+  const rows = list.querySelectorAll("[data-i]");
+  const state = TPP.chapterDragState || null;
+  rows.forEach(function (row) {
+    const index = Number(row.dataset.i);
+    row.classList.remove("drop-before", "drop-after", "dragging");
+    row.style.setProperty("--drop-level", "0");
+    if (!state) return;
+    if (index === state.sourceIndex) row.classList.add("dragging");
+    if (index === state.targetIndex) {
+      row.classList.add(
+        state.position === "before" ? "drop-before" : "drop-after",
+      );
+      row.style.setProperty(
+        "--drop-level",
+        String(Math.max(0, Number(state.level) || 0)),
+      );
+    }
+  });
+};
+TPP.moveChapterBlock = function (chapters, sourceIndex, targetIndex, position, level) {
+  const list = Array.isArray(chapters) ? chapters.slice() : [];
+  if (!list.length) return null;
+  const source = TPP.chapterBlockRange(list, sourceIndex);
+  const selectedId =
+    list[TPP.currentChapter] && list[TPP.currentChapter].id
+      ? list[TPP.currentChapter].id
+      : "";
+  const block = list.slice(source.start, source.end).map(function (chapter) {
+    return Object.assign({}, chapter);
+  });
+  const rootLevel = source.rootLevel;
+  const levelOffsets = block.map(function (chapter) {
+    return Math.max(0, Number(chapter && chapter.level) || 0) - rootLevel;
+  });
+  if (targetIndex >= source.start && targetIndex < source.end) {
+    const maxRootLevel = TPP.chapterMaxLevelAtInsert(list, source.start);
+    const nextRootLevel = Math.max(
+      0,
+      Math.min(maxRootLevel, Math.max(0, Number(level) || 0)),
+    );
+    if (nextRootLevel === rootLevel) return null;
+    block.forEach(function (chapter, index) {
+      chapter.level = Math.max(
+        0,
+        Math.min(5, nextRootLevel + levelOffsets[index]),
+      );
+      chapter.isSubsection = chapter.level > 0;
+    });
+    const updated = list.slice();
+    updated.splice(source.start, block.length, ...block);
+    const currentIndex = selectedId
+      ? updated.findIndex(function (chapter) {
+          return chapter && chapter.id === selectedId;
+        })
+      : -1;
+    return {
+      chapters: updated,
+      currentChapter:
+        currentIndex >= 0
+          ? currentIndex
+          : Math.max(0, Math.min(source.start, updated.length - 1)),
+    };
+  }
+  const remaining = list.slice(0, source.start).concat(list.slice(source.end));
+  let adjustedTarget = Number(targetIndex) || 0;
+  if (adjustedTarget > source.start) adjustedTarget -= source.end - source.start;
+  adjustedTarget = Math.max(0, Math.min(adjustedTarget, remaining.length - 1));
+  const targetRange = TPP.chapterBlockRange(remaining, adjustedTarget);
+  let insertIndex = position === "before" ? targetRange.start : targetRange.end;
+  insertIndex = Math.max(0, Math.min(insertIndex, remaining.length));
+  const maxRootLevel = TPP.chapterMaxLevelAtInsert(remaining, insertIndex);
+  const nextRootLevel = Math.max(
+    0,
+    Math.min(maxRootLevel, Math.max(0, Number(level) || 0)),
+  );
+  block.forEach(function (chapter, index) {
+    chapter.level = Math.max(0, Math.min(5, nextRootLevel + levelOffsets[index]));
+    chapter.isSubsection = chapter.level > 0;
+  });
+  remaining.splice(insertIndex, 0, ...block);
+  const currentIndex = selectedId
+    ? remaining.findIndex(function (chapter) {
+        return chapter && chapter.id === selectedId;
+      })
+    : -1;
+  return {
+    chapters: remaining,
+    currentChapter:
+      currentIndex >= 0 ? currentIndex : Math.max(0, Math.min(insertIndex, remaining.length - 1)),
+  };
+};
+TPP.renderChapterSidebar = function () {
+  const mount = document.getElementById("chapterSidebarMount");
+  if (!mount) return;
+  if (TPP.view !== "editor") {
+    mount.innerHTML = "";
+    mount.hidden = true;
+    return;
+  }
+  mount.hidden = false;
+  mount.innerHTML =
+    '<section class="chapter-sidebar-panel"><div class="chapter-sidebar-head"><div><h3>Chapters</h3><p>Drag to reorder or indent. Nested chapters move with their parent.</p></div><button id="addChapter" class="primary small">Add</button></div><div id="chapterList" class="chapter-list chapter-sidebar-list"></div></section>';
+  TPP.renderChapterList();
+};
+TPP.chapterOutlineNumber = function (chapters, index) {
+  const list = Array.isArray(chapters) ? chapters : [];
+  const targetIndex = Math.max(0, Number(index) || 0);
+  const counters = [];
+  for (let i = 0; i <= targetIndex && i < list.length; i += 1) {
+    const level = Math.max(0, Math.min(5, Number(list[i] && list[i].level) || 0));
+    counters[level] = (counters[level] || 0) + 1;
+    counters.length = level + 1;
+  }
+  return counters.join(".");
+};
 TPP.renderChapterList = function () {
-  document.getElementById("chapterList").innerHTML = TPP.active.chapters
+  const list = document.getElementById("chapterList");
+  if (!list) return;
+  list.innerHTML = TPP.active.chapters
     .map(function (chapter, index) {
+      const active = index === TPP.currentChapter;
+      const outlineNumber = TPP.chapterOutlineNumber(TPP.active.chapters, index);
+      const badges = [
+        chapter && chapter.isMetadata ? '<span class="chapter-pill-badge">Meta</span>' : "",
+        chapter && chapter.includeInToc === false
+          ? '<span class="chapter-pill-badge muted">No TOC</span>'
+          : "",
+      ]
+        .filter(Boolean)
+        .join("");
       return (
         '<div class="chapter-pill ' +
-        (index === TPP.currentChapter ? "active" : "") +
+        (active ? "active " : "") +
+        ((chapter.level || 0) > 0 ? "subchapter " : "") +
         '" data-i="' +
         index +
-        '" style="--level:' +
+        '" data-level="' +
+        (chapter.level || 0) +
+        '" draggable="true" style="--level:' +
         (chapter.level || 0) +
         '">' +
-        '<span class="indent"></span><button class="small" data-act="select">' +
-        (index + 1) +
-        ". " +
+        '<span class="indent"></span><div class="chapter-pill-main" data-act="select" role="button" tabindex="0" title="' +
         TPP.esc(chapter.title || "Untitled") +
-        '</button><button class="small" data-act="up">↑</button><button class="small" data-act="down">↓</button><button class="small" data-act="outdent">←</button><button class="small" data-act="indent">→</button></div>'
+        '">' +
+        '<span class="chapter-pill-index">' +
+        TPP.esc(outlineNumber) +
+        '.</span><span class="chapter-pill-text"><span class="chapter-pill-title">' +
+        TPP.esc(chapter.title || "Untitled") +
+        "</span>" +
+        (badges
+          ? '<span class="chapter-pill-badges">' + badges + "</span>"
+          : "") +
+        "</span></div></div>"
       );
     })
     .join("");
+  TPP.applyChapterDropState();
 };
 TPP.previewWithBreaks = function (text) {
   const settings = TPP.active || TPP.fallbackBook();
@@ -1467,11 +1676,6 @@ TPP.renderChapterEditor = function () {
     '<label>TOC Name <input class="chapter-toc-title" placeholder="Optional shorter table of contents name" value="' +
     TPP.esc(chapter.tocTitle || "") +
     '"></label>' +
-    '<div class="two"><label>Level <input class="chapter-level" type="number" min="0" max="6" value="' +
-    (chapter.level || 0) +
-    '"></label><label><input class="chapter-subsection" type="checkbox" ' +
-    (chapter.isSubsection ? "checked" : "") +
-    "> Sub-section</label></div>" +
     '<label><input class="chapter-metadata" type="checkbox" ' +
     (chapter.isMetadata ? "checked" : "") +
     "> Content is metadata JSON</label>" +

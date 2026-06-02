@@ -88,6 +88,42 @@ TPP.bindTopLevelEventRouters = function () {
     }
   });
 
+  document.addEventListener("dragstart", async function (event) {
+    const target = event.target;
+    if (!target.closest("#chapterList")) return;
+    const api = await TPP.ensureControlModule("editor-chapter-list-controls");
+    if (api && typeof api.handleDragStart === "function") {
+      api.handleDragStart(event);
+    }
+  });
+
+  document.addEventListener("dragover", async function (event) {
+    const target = event.target;
+    if (!target.closest("#chapterList")) return;
+    const api = await TPP.ensureControlModule("editor-chapter-list-controls");
+    if (api && typeof api.handleDragOver === "function") {
+      api.handleDragOver(event);
+    }
+  });
+
+  document.addEventListener("drop", async function (event) {
+    const target = event.target;
+    if (!target.closest("#chapterList")) return;
+    const api = await TPP.ensureControlModule("editor-chapter-list-controls");
+    if (api && typeof api.handleDrop === "function") {
+      api.handleDrop(event);
+    }
+  });
+
+  document.addEventListener("dragend", async function (event) {
+    const target = event.target;
+    if (!target.closest("#chapterList")) return;
+    const api = await TPP.ensureControlModule("editor-chapter-list-controls");
+    if (api && typeof api.handleDragEnd === "function") {
+      api.handleDragEnd();
+    }
+  });
+
   document.addEventListener("input", async function (event) {
     const target = event.target;
     if (target.closest("#chapterEditor")) {
