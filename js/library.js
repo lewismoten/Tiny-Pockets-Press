@@ -1870,16 +1870,32 @@ TPP.aboutCitationYear = function (book) {
   return match ? match[1] : "";
 };
 TPP.aboutCitationAuthor = function (book) {
-  return String((book && book.author) || "").trim();
+  return TPP.authorListText
+    ? TPP.authorListText(book && book.author, { includeRoles: false })
+    : String((book && book.author) || "").trim();
 };
 TPP.aboutCitationInvertedAuthor = function (book) {
-  const name = TPP.aboutCitationAuthor(book);
-  if (!name) return "";
-  if (name.includes(",")) return name;
-  const parts = name.split(/\s+/).filter(Boolean);
-  if (parts.length < 2) return name;
-  const last = parts.pop();
-  return last + ", " + parts.join(" ");
+  if (!TPP.authorEntriesFromValue || !TPP.authorEntryName) {
+    const name = TPP.aboutCitationAuthor(book);
+    if (!name) return "";
+    if (name.includes(",")) return name;
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length < 2) return name;
+    const last = parts.pop();
+    return last + ", " + parts.join(" ");
+  }
+  const entries = TPP.authorEntriesFromValue(book && book.author);
+  if (!entries.length) return "";
+  const first = TPP.authorEntryName(entries[0], { inverted: true });
+  const rest = entries
+    .slice(1)
+    .map(function (entry) {
+      return TPP.authorEntryName(entry);
+    })
+    .filter(Boolean);
+  if (!rest.length) return first;
+  if (rest.length === 1) return first + ", and " + rest[0];
+  return first + ", " + rest.slice(0, -1).join(", ") + ", and " + rest[rest.length - 1];
 };
 TPP.aboutCitationText = function (book, format) {
   const citationFormat = String(format || "plain")

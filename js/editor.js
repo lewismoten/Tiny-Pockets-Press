@@ -21,6 +21,28 @@ TPP.bookInfoAddableOptions = function (book) {
 TPP.bookInfoFieldInputHtml = function (entry) {
   const spec = TPP.bookInfoFieldSpec(entry.key);
   const value = String(entry.value || "");
+  if (spec.input === "authors") {
+    const summary = TPP.authorCompactSummary
+      ? TPP.authorCompactSummary(value)
+      : "Edit authors";
+    const fullText = TPP.authorListText
+      ? TPP.authorListText(value, { includeRoles: true })
+      : "";
+    return (
+      '<div class="book-info-classification-picker">' +
+      '<input class="book-info-value" type="hidden" value="' +
+      TPP.esc(value) +
+      '">' +
+      '<button type="button" class="book-info-classification-button" data-book-info-authors="' +
+      TPP.esc(entry.id || "") +
+      '" title="' +
+      TPP.esc(fullText || summary) +
+      '">' +
+      '<span class="book-info-classification-title">' +
+      TPP.esc(summary || "Edit authors") +
+      "</span></button></div>"
+    );
+  }
   if (spec.input === "picker") {
     const pickerKind = String(spec.picker || entry.key || "").trim();
     const summary =

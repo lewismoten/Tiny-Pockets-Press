@@ -3,6 +3,104 @@ let initialized = false;
 export async function init(TPP) {
   if (initialized) return {};
   initialized = true;
+  let authorDialogTargetEntryId = "";
+
+  const authorDialogEntries = function () {
+    const dialog = document.getElementById("bookInfoAuthorDialog");
+    return Array.isArray(dialog && dialog._authorEntries) ? dialog._authorEntries : [];
+  };
+  const setAuthorDialogEntries = function (entries) {
+    const dialog = document.getElementById("bookInfoAuthorDialog");
+    if (dialog) dialog._authorEntries = TPP.authorEntriesFromValue(entries);
+  };
+  const renderAuthorDialog = function () {
+    const list = document.getElementById("bookInfoAuthorDialogList");
+    if (!list) return;
+    const entries = authorDialogEntries();
+    list.innerHTML = entries
+      .map(function (entry, index) {
+        return (
+          '<section class="book-info-author-item" data-author-index="' +
+          index +
+          '"><div class="book-info-author-item-top"><label>Display / Organization<input class="book-info-author-display" value="' +
+          TPP.esc(entry.display || "") +
+          '" placeholder="Optional literal name"></label><label>Role<select class="book-info-author-role">' +
+          TPP.AUTHOR_ROLE_OPTIONS.map(function (role) {
+            return (
+              '<option value="' +
+              TPP.esc(role) +
+              '"' +
+              (entry.role === role ? " selected" : "") +
+              ">" +
+              TPP.esc(TPP.authorRoleLabel(role)) +
+              "</option>"
+            );
+          }).join("") +
+          '</select></label><div class="book-info-author-item-actions"><button type="button" data-author-move="-1" aria-label="Move author up">↑</button><button type="button" data-author-move="1" aria-label="Move author down">↓</button><button type="button" data-author-remove="1" aria-label="Remove author">Remove</button></div></div><div class="book-info-author-item-names"><label>Prefix<input class="book-info-author-prefix" value="' +
+          TPP.esc(entry.prefix || "") +
+          '"></label><label>First<input class="book-info-author-first" value="' +
+          TPP.esc(entry.first || "") +
+          '"></label><label>Middle<input class="book-info-author-middle" value="' +
+          TPP.esc(entry.middle || "") +
+          '"></label><label>Last<input class="book-info-author-last" value="' +
+          TPP.esc(entry.last || "") +
+          '"></label><label>Suffix<input class="book-info-author-suffix" value="' +
+          TPP.esc(entry.suffix || "") +
+          '"></label></div></section>'
+        );
+      })
+      .join("");
+  };
+  const readAuthorDialog = function () {
+    const entries = Array.from(
+      document.querySelectorAll("#bookInfoAuthorDialogList .book-info-author-item"),
+    ).map(function (item) {
+      return TPP.normalizeAuthorEntry({
+        id: TPP.uid(),
+        display: item.querySelector(".book-info-author-display")?.value || "",
+        role: item.querySelector(".book-info-author-role")?.value || "author",
+        prefix: item.querySelector(".book-info-author-prefix")?.value || "",
+        first: item.querySelector(".book-info-author-first")?.value || "",
+        middle: item.querySelector(".book-info-author-middle")?.value || "",
+        last: item.querySelector(".book-info-author-last")?.value || "",
+        suffix: item.querySelector(".book-info-author-suffix")?.value || "",
+      });
+    }).filter(function (entry) {
+      return (
+        entry.display ||
+        entry.first ||
+        entry.middle ||
+        entry.last ||
+        entry.prefix ||
+        entry.suffix
+      );
+    });
+    setAuthorDialogEntries(entries);
+    return entries;
+  };
+  const openAuthorDialog = function (entryId) {
+    const dialog = document.getElementById("bookInfoAuthorDialog");
+    const entry = TPP.bookInfoEntryById(TPP.active, entryId);
+    if (!dialog || !entry || typeof dialog.showModal !== "function") return;
+    authorDialogTargetEntryId = entryId;
+    setAuthorDialogEntries(entry.value || "");
+    renderAuthorDialog();
+    dialog.showModal();
+  };
+  const saveAuthorDialog = function () {
+    const row = document.querySelector(
+      '.book-info-entry[data-entry-id="' + authorDialogTargetEntryId + '"]',
+    );
+    const input = row && row.querySelector(".book-info-value");
+    const dialog = document.getElementById("bookInfoAuthorDialog");
+    if (!input) return;
+    const value = TPP.authorEntriesValue(readAuthorDialog());
+    input.value = value;
+    TPP.sync("draft");
+    TPP.loadForm();
+    TPP.renderCurrentViewPreservingSidebar();
+    if (dialog && dialog.open) dialog.close("save");
+  };
 
   const confirmRemoval = function (label, references) {
     const dialog = document.getElementById("bookInfoRemoveDialog");
@@ -74,6 +172,65 @@ export async function init(TPP) {
     });
   };
 
+  const authorDialog = document.getElementById("bookInfoAuthorDialog");
+  if (authorDialog) {
+    authorDialog.addEventListener("click", function (e) {
+      const card = e.target.closest(".modal-card");
+      if (e.target === authorDialog && !card && authorDialog.open) {
+        authorDialog.close("cancel");
+        return;
+      }
+      const action = e.target.closest("[data-author-action]")?.dataset.authorAction;
+      if (action === "cancel" && authorDialog.open) {
+        authorDialog.close("cancel");
+        return;
+      }
+      if (action === "save" && authorDialog.open) {
+        saveAuthorDialog();
+        return;
+      }
+      if (e.target.closest("#bookInfoAuthorDialogAdd")) {
+        readAuthorDialog();
+        const next = authorDialogEntries();
+        next.push(
+          TPP.normalizeAuthorEntry({
+            role: next.length ? "contributor" : "author",
+          }),
+        );
+        setAuthorDialogEntries(next);
+        renderAuthorDialog();
+        return;
+      }
+      const authorItem = e.target.closest(".book-info-author-item");
+      if (!authorItem) return;
+      const index = Math.max(
+        0,
+        Number(authorItem.dataset.authorIndex) || 0,
+      );
+      if (e.target.closest("[data-author-remove]")) {
+        readAuthorDialog();
+        const next = authorDialogEntries();
+        next.splice(index, 1);
+        setAuthorDialogEntries(next);
+        renderAuthorDialog();
+        return;
+      }
+      const move = Number(
+        e.target.closest("[data-author-move]")?.dataset.authorMove,
+      );
+      if (move) {
+        readAuthorDialog();
+        const next = authorDialogEntries();
+        const swapIndex = index + move;
+        if (swapIndex < 0 || swapIndex >= next.length) return;
+        const item = next.splice(index, 1)[0];
+        next.splice(swapIndex, 0, item);
+        setAuthorDialogEntries(next);
+        renderAuthorDialog();
+      }
+    });
+  }
+
   return {
     handleInput(event) {
       const entry = event.target.closest(".book-info-entry");
@@ -108,6 +265,13 @@ export async function init(TPP) {
         TPP.openClassificationDialog(
           classificationButton.dataset.bookInfoClassification,
         );
+        return true;
+      }
+
+      const authorButton = event.target.closest("[data-book-info-authors]");
+      if (authorButton) {
+        TPP.sync("nosave");
+        openAuthorDialog(authorButton.dataset.bookInfoAuthors);
         return true;
       }
 

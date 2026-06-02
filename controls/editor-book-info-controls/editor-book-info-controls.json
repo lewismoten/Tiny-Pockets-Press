@@ -2,6 +2,6 @@
   "id": "editor-book-info-controls",
   "html": "editor-book-info-controls.html",
   "css": "editor-book-info-controls.css",
-  "rootIds": ["bookInfoRemoveDialog"],
+  "rootIds": ["bookInfoRemoveDialog", "bookInfoAuthorDialog"],
   "js": "editor-book-info-controls.js"
 }

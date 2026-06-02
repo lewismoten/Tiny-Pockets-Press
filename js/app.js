@@ -225,6 +225,7 @@ TPP.initializeRuntimeUi = function () {
       if (
         e.target.closest("[data-book-info-picker]") ||
         e.target.closest("[data-book-info-classification]") ||
+        e.target.closest("[data-book-info-authors]") ||
         e.target.closest("[data-book-info-action]") ||
         e.target.closest("#bookInfoAddButton")
       ) {

@@ -16,3 +16,23 @@
     </div>
   </form>
 </dialog>
+<dialog id="bookInfoAuthorDialog" class="modal">
+  <form method="dialog" class="modal-card book-info-author-dialog-card">
+    <h2>Authors</h2>
+    <p class="about-note">
+      Author order matters. The first named contributor is usually the primary voice
+      readers and catalog users notice first, while the last position can also carry
+      special weight in multi-contributor works. Keep authors in intentional order.
+    </p>
+    <div id="bookInfoAuthorDialogList" class="book-info-author-list"></div>
+    <div class="book-info-author-dialog-actions">
+      <button type="button" id="bookInfoAuthorDialogAdd">Add Person</button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="button-cancel" data-author-action="cancel">
+        Cancel
+      </button>
+      <button type="button" data-author-action="save">Save Authors</button>
+    </div>
+  </form>
+</dialog>
