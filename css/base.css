@@ -55,6 +55,33 @@ body {
   border-radius: 12px;
   padding: 0.5rem 0.72rem;
 }
+.book-toolbar-group {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.28rem;
+  padding-inline: 0.18rem;
+  position: relative;
+}
+.book-toolbar-group::after {
+  content: "";
+  position: absolute;
+  right: -0.5rem;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  width: 1px;
+  background: var(--line);
+}
+.book-toolbar-group:last-of-type::after {
+  display: none;
+}
+.book-toolbar-group-preview .book-toolbar-button {
+  background: #ffcc66;
+  color: #3c2b12;
+}
+.book-toolbar-group-export .book-toolbar-button {
+  background: #bde3ff;
+  color: #173246;
+}
 .book-toolbar-split {
   display: inline-flex;
   align-items: stretch;
@@ -89,7 +116,7 @@ body {
   border-bottom-left-radius: 0 !important;
   border-top-right-radius: 12px !important;
   border-bottom-right-radius: 12px !important;
-  filter: brightness(0.96);
+  filter: brightness(0.94) saturate(0.95);
 }
 .book-toolbar-split-side::before {
   content: "";
@@ -120,6 +147,9 @@ body.book-icons-only #bookChromeBar .book-toolbar-button {
 }
 body.book-icons-only .book-toolbar-split > .book-toolbar-button:first-child {
   min-width: 2.2rem;
+}
+body.book-icons-only .book-toolbar-group {
+  gap: 0.18rem;
 }
 #bookTabsBar,
 #bookActionsBar {
