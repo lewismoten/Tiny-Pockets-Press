@@ -2707,6 +2707,14 @@ TPP.draftHistoryEntries = function (bookId) {
   const id = String(bookId || "").trim();
   return Array.isArray(TPP.bookDraftHistory[id]) ? TPP.bookDraftHistory[id] : [];
 };
+TPP.bookForDraftComparison = function (book) {
+  const copy = TPP.clone(book || {});
+  if (copy && copy.meta && typeof copy.meta === "object") {
+    delete copy.meta.updatedAt;
+    delete copy.meta.subrevision;
+  }
+  return copy;
+};
 TPP.booksDiffer = function (previous, current) {
   return TPP.collectDraftHistoryChanges(previous, current, []).length > 0;
 };
@@ -4890,13 +4898,43 @@ TPP.save = function (mode, bookId) {
             : existingDraft || committed;
         if (!currentBook) return;
         const priorSource = existingDraft || committed;
-        if (priorSource && TPP.booksDiffer(priorSource, currentBook)) {
-          TPP.pushDraftHistoryEntry(id, priorSource, currentBook);
+        const priorComparable = priorSource
+          ? TPP.bookForDraftComparison(priorSource)
+          : null;
+        const currentComparable = TPP.bookForDraftComparison(currentBook);
+        const committedComparable = committed
+          ? TPP.bookForDraftComparison(committed)
+          : null;
+        const draftChangedNow =
+          !!priorComparable &&
+          TPP.booksDiffer(priorComparable, currentComparable);
+        const hasDraftChanges =
+          !committedComparable ||
+          TPP.booksDiffer(committedComparable, currentComparable);
+        if (draftChangedNow) {
+          TPP.pushDraftHistoryEntry(id, priorComparable, currentComparable);
         }
-        if (committed && !TPP.booksDiffer(committed, currentBook)) {
+        if (committed && !hasDraftChanges) {
           delete TPP.bookDrafts[id];
           TPP.clearDraftHistory(id);
         } else {
+          if (draftChangedNow || !existingDraft) {
+            const meta = TPP.bookMeta(currentBook);
+            meta.updatedAt = TPP.nowIso();
+            if (committed) {
+              meta.revision = TPP.bookRevision(committed);
+              meta.subrevision = Math.max(
+                1,
+                existingDraft ? TPP.bookSubrevision(existingDraft) + 1 : 1,
+              );
+            } else {
+              meta.revision = Math.max(1, TPP.bookRevision(currentBook));
+              meta.subrevision = Math.max(
+                1,
+                existingDraft ? TPP.bookSubrevision(existingDraft) + 1 : 1,
+              );
+            }
+          }
           TPP.bookDrafts[id] = TPP.norm(TPP.clone(currentBook));
         }
       });
