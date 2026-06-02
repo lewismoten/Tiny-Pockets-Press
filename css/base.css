@@ -64,12 +64,32 @@ body {
 }
 .book-toolbar-split > .book-toolbar-button {
   border-radius: 0;
+  position: relative;
+}
+.book-toolbar-split > .book-toolbar-button:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+.book-toolbar-split > .book-toolbar-button:first-child::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0.38rem;
+  bottom: 0.38rem;
+  width: 1px;
+  background: rgba(35, 31, 32, 0.14);
 }
 .book-toolbar-split-side {
   padding-inline: 0.58rem !important;
   min-inline-size: 2.2rem;
   justify-content: center;
-  position: relative;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+  filter: brightness(0.96);
 }
 .book-toolbar-split-side::before {
   content: "";
@@ -78,7 +98,7 @@ body {
   top: 0.38rem;
   bottom: 0.38rem;
   width: 1px;
-  background: rgba(35, 31, 32, 0.16);
+  background: rgba(255, 255, 255, 0.18);
 }
 .book-toolbar-icon {
   inline-size: 1rem;
