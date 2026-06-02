@@ -413,7 +413,9 @@ TPP.textElementFieldPickerOptions = function (book, location) {
       },
     ),
   );
-  return TPP.bookInfoFieldOptions(book).filter(function (option) {
+  return TPP.bookInfoFieldOptions(book, {
+    includeClassificationFormats: true,
+  }).filter(function (option) {
     return option && option.value && !used.has(option.value);
   });
 };
@@ -423,6 +425,7 @@ TPP.frontCoverFieldPickerOptions = function (book) {
 TPP.textElementFieldOptionsHtml = function (selected) {
   const options = TPP.bookInfoFieldOptions(TPP.active, {
     includeInlineCustom: true,
+    includeClassificationFormats: true,
   });
   if (
     selected &&

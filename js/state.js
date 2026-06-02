@@ -3750,6 +3750,18 @@ TPP.bookInfoFieldLabel = function (fieldKey, book) {
     });
     return (entry && entry.customLabel) || "Custom Field";
   }
+  if (String(fieldKey || "").startsWith("classification:")) {
+    const formatId = String(fieldKey).slice("classification:".length);
+    const format =
+      typeof TPP.classificationFormats === "function"
+        ? TPP.classificationFormats().find(function (entry) {
+            return entry && entry.id === formatId;
+          })
+        : null;
+    return format && format.label
+      ? "Classification (" + format.label + ")"
+      : "Classification";
+  }
   const labels = {
     title: "Title",
     author: "Author",
@@ -3785,11 +3797,31 @@ TPP.bookInfoFieldRef = function (entry) {
 };
 TPP.bookInfoFieldOptions = function (book, options) {
   const includeInlineCustom = options && options.includeInlineCustom;
-  const list = TPP.bookInfo(book).map(function (entry) {
-    return {
-      value: TPP.bookInfoFieldRef(entry),
-      label: TPP.bookInfoFieldLabel(TPP.bookInfoFieldRef(entry), book),
-    };
+  const includeClassificationFormats =
+    options && options.includeClassificationFormats;
+  const list = TPP.bookInfo(book).flatMap(function (entry) {
+    if (!entry) return [];
+    if (
+      includeClassificationFormats &&
+      entry.key === "classification" &&
+      typeof TPP.classificationFormats === "function"
+    ) {
+      return TPP.classificationFormats().map(function (format) {
+        return {
+          value: "classification:" + String(format.id || "").trim(),
+          label: TPP.bookInfoFieldLabel(
+            "classification:" + String(format.id || "").trim(),
+            book,
+          ),
+        };
+      });
+    }
+    return [
+      {
+        value: TPP.bookInfoFieldRef(entry),
+        label: TPP.bookInfoFieldLabel(TPP.bookInfoFieldRef(entry), book),
+      },
+    ];
   });
   if (includeInlineCustom) {
     list.push({ value: "custom", label: "Custom Text" });
@@ -3825,6 +3857,24 @@ TPP.bookInfoFieldValue = function (book, fieldKey, options) {
       return item && item.id === id;
     });
     return String((entry && entry.value) || "");
+  }
+  if (String(fieldKey || "").startsWith("classification:")) {
+    const formatId = String(fieldKey).slice("classification:".length).trim();
+    const rawValue = String(TPP.bookInfoValue(book, "classification") || "");
+    if (!rawValue) return "";
+    if (
+      typeof TPP.classificationValueData === "function" &&
+      typeof TPP.classificationDisplayString === "function"
+    ) {
+      const data = TPP.classificationValueData(rawValue);
+      return TPP.classificationDisplayString(
+        book,
+        Object.assign({}, data, {
+          formatId: formatId || data.formatId || "",
+        }),
+      );
+    }
+    return rawValue;
   }
   if (fieldKey === "series")
     return [
