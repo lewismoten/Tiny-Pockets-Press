@@ -1217,23 +1217,23 @@ TPP.dataPrintingObject = function (book) {
 TPP.dataTabs = function (book, stale) {
   const tabs = [
     {
-      id: "top",
-      label: "Top-Level",
-      html: TPP.dataObjectHtml(
+      id: "book-info",
+      label: "Book Info",
+      html: TPP.dataArrayHtml(
         book,
-        TPP.dataTopLevelObject(book),
+        "bookInfo",
+        Array.isArray(book.bookInfo) ? book.bookInfo : [],
         false,
-        "root",
       ),
     },
     {
-      id: "meta",
-      label: "Meta",
-      html: TPP.dataObjectHtml(
+      id: "chapters",
+      label: "Chapters",
+      html: TPP.dataArrayHtml(
         book,
-        book && book.meta ? book.meta : {},
+        "chapters",
+        Array.isArray(book.chapters) ? book.chapters : [],
         false,
-        "meta",
       ),
     },
     {
@@ -1262,23 +1262,13 @@ TPP.dataTabs = function (book, stale) {
       ),
     },
     {
-      id: "page-numbers",
-      label: "Page Numbers",
+      id: "toc",
+      label: "Contents / TOC",
       html: TPP.dataObjectHtml(
         book,
-        book && book.pageNumbers ? book.pageNumbers : {},
+        book && book.toc ? book.toc : {},
         false,
-        "pageNumbers",
-      ),
-    },
-    {
-      id: "chapter-settings",
-      label: "Chapter Settings",
-      html: TPP.dataObjectHtml(
-        book,
-        book && book.chapterSettings ? book.chapterSettings : {},
-        false,
-        "chapterSettings",
+        "toc",
       ),
     },
     {
@@ -1302,16 +1292,6 @@ TPP.dataTabs = function (book, stale) {
       ),
     },
     {
-      id: "back-cover",
-      label: "Back Cover",
-      html: TPP.dataObjectHtml(
-        book,
-        book && book.backCover ? book.backCover : {},
-        false,
-        "backCover",
-      ),
-    },
-    {
       id: "spine",
       label: "Spine",
       html: TPP.dataObjectHtml(
@@ -1322,23 +1302,63 @@ TPP.dataTabs = function (book, stale) {
       ),
     },
     {
-      id: "book-info",
-      label: "Book Info",
+      id: "back-cover",
+      label: "Back Cover",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.backCover ? book.backCover : {},
+        false,
+        "backCover",
+      ),
+    },
+    {
+      id: "text-elements",
+      label: "Text Elements",
       html: TPP.dataArrayHtml(
         book,
-        "bookInfo",
-        Array.isArray(book.bookInfo) ? book.bookInfo : [],
+        "textElements",
+        Array.isArray(book.textElements) ? book.textElements : [],
         false,
       ),
     },
     {
-      id: "toc",
-      label: "Contents / TOC",
+      id: "image-elements",
+      label: "Image Elements",
+      html: TPP.dataArrayHtml(
+        book,
+        "imageElements",
+        Array.isArray(book.imageElements) ? book.imageElements : [],
+        false,
+      ),
+    },
+    {
+      id: "files",
+      label: "Files",
+      html: TPP.dataArrayHtml(
+        book,
+        "files",
+        Array.isArray(book.files) ? book.files : [],
+        false,
+      ),
+    },
+    {
+      id: "page-numbers",
+      label: "Page Numbers",
       html: TPP.dataObjectHtml(
         book,
-        book && book.toc ? book.toc : {},
+        book && book.pageNumbers ? book.pageNumbers : {},
         false,
-        "toc",
+        "pageNumbers",
+      ),
+    },
+    {
+      id: "chapter-settings",
+      label: "Chapter Settings",
+      html: TPP.dataObjectHtml(
+        book,
+        book && book.chapterSettings ? book.chapterSettings : {},
+        false,
+        "chapterSettings",
       ),
     },
     {
@@ -1354,43 +1374,23 @@ TPP.dataTabs = function (book, stale) {
       ),
     },
     {
-      id: "files",
-      label: "Files",
-      html: TPP.dataArrayHtml(
+      id: "meta",
+      label: "Meta",
+      html: TPP.dataObjectHtml(
         book,
-        "files",
-        Array.isArray(book.files) ? book.files : [],
+        book && book.meta ? book.meta : {},
         false,
+        "meta",
       ),
     },
     {
-      id: "text-elements",
-      label: "Text Elements",
-      html: TPP.dataArrayHtml(
+      id: "top",
+      label: "Top-Level",
+      html: TPP.dataObjectHtml(
         book,
-        "textElements",
-        Array.isArray(book.textElements) ? book.textElements : [],
+        TPP.dataTopLevelObject(book),
         false,
-      ),
-    },
-    {
-      id: "chapters",
-      label: "Chapters",
-      html: TPP.dataArrayHtml(
-        book,
-        "chapters",
-        Array.isArray(book.chapters) ? book.chapters : [],
-        false,
-      ),
-    },
-    {
-      id: "image-elements",
-      label: "Image Elements",
-      html: TPP.dataArrayHtml(
-        book,
-        "imageElements",
-        Array.isArray(book.imageElements) ? book.imageElements : [],
-        false,
+        "root",
       ),
     },
     {
@@ -1406,6 +1406,7 @@ TPP.dataTabs = function (book, stale) {
       label: "Stale Keys",
       html: TPP.dataStaleReportHtml(stale),
       count: stale.length,
+      bottom: true,
     });
   return tabs;
 };
