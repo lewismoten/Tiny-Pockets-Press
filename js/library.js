@@ -699,17 +699,18 @@ TPP.dataSchemaKeys = function (context) {
   if (context === "page")
     return new Set([
       "pageSize",
-      "sheetSize",
       "customW",
       "customH",
       "margin",
       "gutterMargin",
+      "sheetSize",
       "paperPreset",
       "texture",
       "pageBg",
     ]);
   if (context === "printing")
     return new Set([
+      "sheetSize",
       "signatureSize",
       "spineMode",
       "paperThickness",
@@ -1436,10 +1437,19 @@ TPP.dataTopLevelObject = function (book) {
 TPP.dataPageObject = function (book) {
   const copy = Object.assign({}, (book && book.page) || {});
   delete copy.signatureSize;
+  delete copy.sheetSize;
   return copy;
 };
 TPP.dataPrintingObject = function (book) {
-  return Object.assign({}, (book && book.printSetup) || {});
+  return Object.assign(
+    {
+      sheetSize:
+        (book && book.page && book.page.sheetSize) ||
+        (book && book.sheetSize) ||
+        "",
+    },
+    (book && book.printSetup) || {},
+  );
 };
 TPP.dataTabs = function (book, stale) {
   const tabs = [
@@ -1661,14 +1671,41 @@ TPP.renderDataSidebar = function (tabs, activeId) {
     tabs.find(function (tab) {
       return tab && tab.id === "raw-json";
     }) || null;
+  const staleTab =
+    tabs.find(function (tab) {
+      return tab && tab.id === "stale";
+    }) || null;
   const primaryTabs = tabs.filter(function (tab) {
-    return !tab.bottom && tab.id !== "raw-json";
+    return !tab.bottom && tab.id !== "raw-json" && tab.id !== "stale";
   });
   const bottomTabs = tabs.filter(function (tab) {
-    return tab.bottom && tab.id !== "raw-json";
+    return tab.bottom && tab.id !== "raw-json" && tab.id !== "stale";
   });
   sidebar.innerHTML =
-    '<div class="data-sidebar-head"><div class="data-sidebar-head-row"><h2>Book Data</h2>' +
+    '<div class="data-sidebar-head"><div class="data-sidebar-head-row"><h2>Book Data</h2><div class="data-sidebar-head-actions">' +
+    (staleTab
+      ? '<button type="button" class="data-sidebar-link data-sidebar-link-inline data-sidebar-link-warning' +
+        (active && staleTab.id === active.id ? " active" : "") +
+        '" data-data-tab="' +
+        TPP.esc(staleTab.id) +
+        '" title="' +
+        TPP.esc(
+          staleTab.count
+            ? staleTab.count +
+                " stale key" +
+                (staleTab.count === 1 ? "" : "s") +
+                " found"
+            : staleTab.label,
+        ) +
+        '">' +
+        '<img src="assets/data-stale-warning.svg" alt=\"\" class="data-sidebar-link-icon" aria-hidden="true">' +
+        TPP.esc(
+          staleTab.count
+            ? staleTab.label + " (" + staleTab.count + ")"
+            : staleTab.label,
+        ) +
+        "</button>"
+      : "") +
     (rawJsonTab
       ? '<button type="button" class="data-sidebar-link data-sidebar-link-inline' +
         (active && rawJsonTab.id === active.id ? " active" : "") +
@@ -1678,6 +1715,7 @@ TPP.renderDataSidebar = function (tabs, activeId) {
         TPP.esc(rawJsonTab.label) +
         "</button>"
       : "") +
+    "</div>" +
     '</div><p>Inspect structured sections of the current book.</p></div>' +
     '<nav class="data-sidebar-nav" aria-label="Data sections">' +
     primaryTabs
