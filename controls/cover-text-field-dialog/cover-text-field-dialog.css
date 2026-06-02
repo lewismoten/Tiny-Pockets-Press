@@ -30,3 +30,34 @@
   background: #faf5ee;
   color: #7d6d5d;
 }
+.front-cover-field-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid #ead9ba;
+}
+.front-cover-field-custom {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 8rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.32rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+.front-cover-field-custom input {
+  width: 100%;
+  min-width: 0;
+}
+.front-cover-field-custom button {
+  white-space: nowrap;
+}
+.front-cover-field-dialog-actions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}

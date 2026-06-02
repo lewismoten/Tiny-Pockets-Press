@@ -8,10 +8,29 @@
       id="frontCoverFieldDialogList"
       class="front-cover-field-dialog-list"
     ></div>
-    <div class="modal-actions">
-      <button type="button" class="button-cancel" data-action="cancel">
-        Cancel
-      </button>
+    <div class="front-cover-field-footer">
+      <section class="front-cover-field-custom" aria-label="Add custom field">
+        <input
+          id="frontCoverFieldDialogCustomName"
+          type="text"
+          maxlength="80"
+          placeholder="Field"
+          aria-label="Custom field name"
+        />
+        <input
+          id="frontCoverFieldDialogCustomValue"
+          type="text"
+          maxlength="240"
+          placeholder="Value"
+          aria-label="Custom field value"
+        />
+        <button type="button" id="frontCoverFieldDialogCustomAdd">Add</button>
+      </section>
+      <div class="modal-actions front-cover-field-dialog-actions">
+        <button type="button" class="button-cancel" data-action="cancel">
+          Cancel
+        </button>
+      </div>
     </div>
   </form>
 </dialog>

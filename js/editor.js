@@ -185,15 +185,19 @@ TPP.readBookInfoControls = function (book) {
 TPP.addBookInfoEntry = function (book, key) {
   if (!book || !key) return;
   if (key === "__custom_book_info__") key = "custom";
-  if (key !== "custom" && TPP.bookInfoEntry(book, key)) return;
-  TPP.bookInfo(book).push({
+  if (key !== "custom" && TPP.bookInfoEntry(book, key)) {
+    return TPP.bookInfoEntry(book, key);
+  }
+  const entry = {
     id: TPP.bookInfoEntryId(key, TPP.uid()),
     key: key,
     value:
       (TPP.defaultBookInfoValueForKey && TPP.defaultBookInfoValueForKey(key)) ||
       "",
     customLabel: key === "custom" ? "Custom Field" : "",
-  });
+  };
+  TPP.bookInfo(book).push(entry);
+  return entry;
 };
 TPP.removeBookInfoEntry = function (book, id) {
   if (!book) return;
