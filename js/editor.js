@@ -1774,12 +1774,12 @@ TPP.renderChapterEditor = function () {
     TPP.currentChapter +
     '">' +
     '<div class="toolbar"><button data-main="remove">Remove</button><button data-main="read">Read From Here</button></div>' +
-    '<label>Chapter Title <input class="chapter-title" value="' +
+    '<div class="two"><label>Chapter Title <input class="chapter-title" value="' +
     TPP.esc(chapter.title) +
     '"></label>' +
     '<label>TOC Name <input class="chapter-toc-title" placeholder="Optional shorter table of contents name" value="' +
     TPP.esc(chapter.tocTitle || "") +
-    '"></label>' +
+    '"></label></div>' +
     '<label><input class="chapter-metadata" type="checkbox" ' +
     (chapter.isMetadata ? "checked" : "") +
     "> Content is metadata JSON</label>" +
