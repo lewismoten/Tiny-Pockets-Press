@@ -827,6 +827,11 @@ input[type="checkbox"] {
   color: #b8ad9f;
   margin: 0 0.45rem;
 }
+.json-summary-note {
+  margin-left: 0.5rem;
+  color: #d4c5b3;
+  font-style: italic;
+}
 .json-punct {
   color: #f7f0e7;
 }

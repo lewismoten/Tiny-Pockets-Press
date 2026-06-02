@@ -1275,6 +1275,31 @@ TPP.dataJsonPrimitiveHtml = function (value) {
     return TPP.dataJsonTokenHtml("boolean", String(value));
   return TPP.dataJsonTokenHtml("string", JSON.stringify(String(value)));
 };
+TPP.dataJsonNodeSummary = function (value, label) {
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    (("first" in value ||
+      "last" in value ||
+      "display" in value ||
+      "role" in value) &&
+      typeof TPP.authorEntryName === "function")
+  ) {
+    const name = String(TPP.authorEntryName(value) || "").trim();
+    const role =
+      value.role &&
+      value.role !== "author" &&
+      typeof TPP.authorRoleLabel === "function"
+        ? String(TPP.authorRoleLabel(value.role) || "").trim()
+        : "";
+    const text = [name, role].filter(Boolean).join(" · ");
+    if (text) {
+      return '<span class="json-summary-note">' + TPP.esc(text) + "</span>";
+    }
+  }
+  return "";
+};
 TPP.dataJsonTreeHtml = function (value, depth, label) {
   const level = Number(depth) || 0;
   if (Array.isArray(value)) {
@@ -1302,7 +1327,9 @@ TPP.dataJsonTreeHtml = function (value, depth, label) {
         : "") +
       '<span class="json-punct">[</span><span class="json-meta">' +
       value.length +
-      ' items</span><span class="json-punct">]</span></summary>' +
+      ' items</span><span class="json-punct">]</span>' +
+      TPP.dataJsonNodeSummary(value, label) +
+      "</summary>" +
       '<div class="json-children">' +
       value
         .map(function (entry, index) {
@@ -1338,7 +1365,9 @@ TPP.dataJsonTreeHtml = function (value, depth, label) {
         : "") +
       '<span class="json-punct">{</span><span class="json-meta">' +
       entries.length +
-      ' keys</span><span class="json-punct">}</span></summary>' +
+      ' keys</span><span class="json-punct">}</span>' +
+      TPP.dataJsonNodeSummary(value, label) +
+      "</summary>" +
       '<div class="json-children">' +
       entries
         .map(function (entry) {
