@@ -1,4 +1,5 @@
 window.TPP = window.TPP || {};
+TPP.Reader = TPP.Reader || {};
 
 TPP.readerVisiblePageRoles = [];
 
@@ -218,3 +219,39 @@ TPP.readerGoNextImpl = function () {
   TPP.readerIndex = TPP.readerNormalizeIndex(next, pages, mode, settings);
   TPP.renderReader();
 };
+
+Object.assign(TPP.Reader, {
+  currentMode: TPP.readerCurrentMode,
+  uiState: TPP.readerUiState,
+  restoreUi: TPP.restoreReaderUi,
+  duplexSheets: TPP.readerDuplexSheets,
+  duplexSheetPages: TPP.readerDuplexSheetPages,
+  pageToDuplexSheet: TPP.readerPageToDuplexSheet,
+  normalizeIndex: TPP.readerNormalizeIndex,
+  progressText: TPP.readerProgressText,
+  syncProgress: TPP.syncReaderProgress,
+  nav: TPP.readerNav,
+  goToDuplexNeighbor: TPP.readerGoToDuplexNeighbor,
+  goPrev: TPP.readerGoPrevImpl,
+  goNext: TPP.readerGoNextImpl,
+});
+
+Object.defineProperty(TPP.Reader, "index", {
+  get() {
+    return TPP.readerIndex;
+  },
+  set(value) {
+    TPP.readerIndex = value;
+  },
+  configurable: true,
+});
+
+Object.defineProperty(TPP.Reader, "visiblePageRoles", {
+  get() {
+    return TPP.readerVisiblePageRoles;
+  },
+  set(value) {
+    TPP.readerVisiblePageRoles = value;
+  },
+  configurable: true,
+});

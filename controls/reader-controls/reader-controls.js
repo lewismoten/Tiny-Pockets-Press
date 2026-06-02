@@ -9,13 +9,21 @@ export async function init(TPP) {
       const prev = event.target.closest("#readerStagePrev");
       if (prev) {
         event.preventDefault();
-        TPP.readerGoPrevImpl();
+        if (TPP.Reader && typeof TPP.Reader.goPrev === "function") {
+          TPP.Reader.goPrev();
+        } else {
+          TPP.readerGoPrevImpl();
+        }
         return true;
       }
       const next = event.target.closest("#readerStageNext");
       if (next) {
         event.preventDefault();
-        TPP.readerGoNextImpl();
+        if (TPP.Reader && typeof TPP.Reader.goNext === "function") {
+          TPP.Reader.goNext();
+        } else {
+          TPP.readerGoNextImpl();
+        }
         return true;
       }
       return false;
@@ -23,7 +31,13 @@ export async function init(TPP) {
     handleChange(event) {
       const jump = event.target.closest("#readerJump");
       if (jump) {
-        TPP.readerIndex = Number(document.getElementById("readerJump").value);
+        if (TPP.Reader) {
+          TPP.Reader.index = Number(
+            document.getElementById("readerJump").value,
+          );
+        } else {
+          TPP.readerIndex = Number(document.getElementById("readerJump").value);
+        }
         TPP.renderReader();
         return true;
       }
@@ -38,14 +52,30 @@ export async function init(TPP) {
       const scrub = event.target.closest("#readerScrub");
       if (!scrub) return false;
       const pages = TPP.buildPages();
-      const mode = TPP.readerCurrentMode();
+      const mode =
+        TPP.Reader && typeof TPP.Reader.currentMode === "function"
+          ? TPP.Reader.currentMode()
+          : TPP.readerCurrentMode();
       const settings = TPP.settings();
-      TPP.readerIndex = TPP.readerNormalizeIndex(
-        Number(document.getElementById("readerScrub").value),
-        pages,
-        mode,
-        settings,
-      );
+      const nextIndex =
+        TPP.Reader && typeof TPP.Reader.normalizeIndex === "function"
+          ? TPP.Reader.normalizeIndex(
+              Number(document.getElementById("readerScrub").value),
+              pages,
+              mode,
+              settings,
+            )
+          : TPP.readerNormalizeIndex(
+              Number(document.getElementById("readerScrub").value),
+              pages,
+              mode,
+              settings,
+            );
+      if (TPP.Reader) {
+        TPP.Reader.index = nextIndex;
+      } else {
+        TPP.readerIndex = nextIndex;
+      }
       TPP.renderReader();
       return true;
     },

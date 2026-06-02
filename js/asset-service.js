@@ -1,4 +1,5 @@
 window.TPP = window.TPP || {};
+TPP.Assets = TPP.Assets || {};
 
 TPP.assetDialogTarget = null;
 
@@ -213,3 +214,29 @@ TPP.deleteAsset = function (fileId) {
   if (!TPP.removeFileAsset(TPP.active, fileId)) return;
   TPP.commitAssetChange();
 };
+
+Object.assign(TPP.Assets, {
+  name: TPP.assetName,
+  previewHtml: TPP.assetPreviewHtml,
+  fieldHtml: TPP.assetFieldHtml,
+  targetSpec: TPP.assetTargetSpec,
+  targetValue: TPP.assetTargetValue,
+  setTargetValue: TPP.setAssetTargetValue,
+  slotHtml: TPP.assetSlotHtml,
+  refreshSlots: TPP.refreshAssetSlots,
+  cardHtml: TPP.assetCardHtml,
+  commitChange: TPP.commitAssetChange,
+  assignToCurrentTarget: TPP.assignAssetToCurrentTarget,
+  uploadToCurrentTarget: TPP.uploadAssetToCurrentTarget,
+  delete: TPP.deleteAsset,
+});
+
+Object.defineProperty(TPP.Assets, "dialogTarget", {
+  get() {
+    return TPP.assetDialogTarget;
+  },
+  set(value) {
+    TPP.assetDialogTarget = value;
+  },
+  configurable: true,
+});

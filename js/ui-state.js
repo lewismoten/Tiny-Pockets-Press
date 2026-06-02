@@ -1,4 +1,5 @@
 window.TPP = window.TPP || {};
+TPP.UI = TPP.UI || {};
 
 TPP.initializeUiState = function () {
   if (TPP.uiStateInitialized) return;
@@ -159,3 +160,19 @@ TPP.initializeUiState = function () {
       });
   };
 };
+
+Object.assign(TPP.UI, {
+  initialize: TPP.initializeUiState,
+  rangeValueUnit: TPP.rangeValueUnit,
+  rangeValueText: TPP.rangeValueText,
+  positionRangeValueTooltip: TPP.positionRangeValueTooltip,
+  hideRangeValueTooltip: TPP.hideRangeValueTooltip,
+  scheduleRangeValueTooltip: TPP.scheduleRangeValueTooltip,
+  refreshRangeInputTitles: TPP.refreshRangeInputTitles,
+  rotationStepForInput: TPP.rotationStepForInput,
+  rotationStepButtonInput: TPP.rotationStepButtonInput,
+  updateRotationStepButton: TPP.updateRotationStepButton,
+  snapRotationInput: TPP.snapRotationInput,
+  cycleRotationStep: TPP.cycleRotationStep,
+  refreshRotationStepButtons: TPP.refreshRotationStepButtons,
+});

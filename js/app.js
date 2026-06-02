@@ -10,7 +10,11 @@ TPP.initializeRuntimeUi = function () {
     '<span class="drag-preview-handle">⋮⋮</span><span class="drag-preview-label"></span>';
   document.body.appendChild(dragPreview);
   TPP.dragPreviewEl = dragPreview;
-  if (typeof TPP.initializeUiState === "function") TPP.initializeUiState();
+  if (TPP.UI && typeof TPP.UI.initialize === "function") {
+    TPP.UI.initialize();
+  } else if (typeof TPP.initializeUiState === "function") {
+    TPP.initializeUiState();
+  }
   TPP.bookInfoPickerCatalogs = {
     language: null,
     region: null,
@@ -27,12 +31,18 @@ TPP.initializeRuntimeUi = function () {
   };
   TPP.readerGoPrev = async function () {
     await TPP.ensureControlModule("reader-controls");
+    if (TPP.Reader && typeof TPP.Reader.goPrev === "function") {
+      return TPP.Reader.goPrev();
+    }
     if (typeof TPP.readerGoPrevImpl === "function") {
       return TPP.readerGoPrevImpl();
     }
   };
   TPP.readerGoNext = async function () {
     await TPP.ensureControlModule("reader-controls");
+    if (TPP.Reader && typeof TPP.Reader.goNext === "function") {
+      return TPP.Reader.goNext();
+    }
     if (typeof TPP.readerGoNextImpl === "function") {
       return TPP.readerGoNextImpl();
     }
@@ -436,13 +446,13 @@ TPP.toast = function (message) {
 };
 TPP.readSettingsUi = function () {
   try {
-    return JSON.parse(localStorage.getItem(TPP.UI) || "{}");
+    return JSON.parse(localStorage.getItem(TPP.UI_STORAGE_KEY) || "{}");
   } catch {
     return {};
   }
 };
 TPP.writeSettingsUi = function (state) {
-  localStorage.setItem(TPP.UI, JSON.stringify(state || {}));
+  localStorage.setItem(TPP.UI_STORAGE_KEY, JSON.stringify(state || {}));
 };
 TPP.imageExportUi = function () {
   const state = TPP.readSettingsUi();

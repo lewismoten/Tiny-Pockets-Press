@@ -1,4 +1,6 @@
 window.TPP = window.TPP || {};
+TPP.UI = TPP.UI || {};
+TPP.UI.Views = TPP.UI.Views || {};
 
 TPP.validViews = function () {
   return [
@@ -78,3 +80,11 @@ TPP.renderAll = function () {
   if (TPP.view === "library") TPP.renderLibrary();
   if (TPP.renderColorPalettes) TPP.renderColorPalettes();
 };
+
+Object.assign(TPP.UI.Views, {
+  valid: TPP.validViews,
+  initial: TPP.initialView,
+  renderSidebarMode: TPP.renderSidebarMode,
+  switchView: TPP.switchView,
+  renderAll: TPP.renderAll,
+});

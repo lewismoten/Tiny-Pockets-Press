@@ -88,8 +88,21 @@ export async function init(TPP) {
     }
     window.addEventListener("beforeunload", TPP.saveSettingsUi);
     window.addEventListener("hashchange", function () {
-      const view = TPP.initialView();
-      if (view !== TPP.view) TPP.switchView(view, true);
+      const view =
+        TPP.UI && TPP.UI.Views && typeof TPP.UI.Views.initial === "function"
+          ? TPP.UI.Views.initial()
+          : TPP.initialView();
+      if (view !== TPP.view) {
+        if (
+          TPP.UI &&
+          TPP.UI.Views &&
+          typeof TPP.UI.Views.switchView === "function"
+        ) {
+          TPP.UI.Views.switchView(view, true);
+        } else {
+          TPP.switchView(view, true);
+        }
+      }
     });
   };
 

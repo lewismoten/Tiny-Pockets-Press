@@ -14,56 +14,94 @@ export async function init(TPP) {
 
   return {
     handleInput(event) {
-      if (!isRange(event.target) || !TPP.positionRangeValueTooltip)
+      if (
+        !isRange(event.target) ||
+        !TPP.UI ||
+        typeof TPP.UI.positionRangeValueTooltip !== "function"
+      )
         return false;
-      TPP.positionRangeValueTooltip(event.target);
+      TPP.UI.positionRangeValueTooltip(event.target);
       return true;
     },
     handleChange(event) {
-      if (!isRange(event.target) || !TPP.positionRangeValueTooltip)
+      if (
+        !isRange(event.target) ||
+        !TPP.UI ||
+        typeof TPP.UI.positionRangeValueTooltip !== "function"
+      )
         return false;
-      TPP.positionRangeValueTooltip(event.target);
+      TPP.UI.positionRangeValueTooltip(event.target);
       return true;
     },
     handleFocusIn(event) {
-      if (!isRange(event.target) || !TPP.positionRangeValueTooltip)
+      if (
+        !isRange(event.target) ||
+        !TPP.UI ||
+        typeof TPP.UI.positionRangeValueTooltip !== "function"
+      )
         return false;
-      TPP.positionRangeValueTooltip(event.target);
+      TPP.UI.positionRangeValueTooltip(event.target);
       return true;
     },
     handlePointerDown(event) {
-      if (!isRange(event.target) || !TPP.positionRangeValueTooltip)
+      if (
+        !isRange(event.target) ||
+        !TPP.UI ||
+        typeof TPP.UI.positionRangeValueTooltip !== "function"
+      )
         return false;
-      if (TPP.hideRangeValueTooltip) TPP.hideRangeValueTooltip();
-      TPP.positionRangeValueTooltip(event.target);
+      if (typeof TPP.UI.hideRangeValueTooltip === "function") {
+        TPP.UI.hideRangeValueTooltip();
+      }
+      TPP.UI.positionRangeValueTooltip(event.target);
       return true;
     },
     handlePointerOver(event) {
-      if (!isRange(event.target) || !TPP.scheduleRangeValueTooltip)
+      if (
+        !isRange(event.target) ||
+        !TPP.UI ||
+        typeof TPP.UI.scheduleRangeValueTooltip !== "function"
+      )
         return false;
-      TPP.scheduleRangeValueTooltip(event.target, 420);
+      TPP.UI.scheduleRangeValueTooltip(event.target, 420);
       return true;
     },
     handlePointerOut(event) {
-      if (!isRange(event.target) || !TPP.hideRangeValueTooltip) return false;
-      TPP.hideRangeValueTooltip();
+      if (
+        !isRange(event.target) ||
+        !TPP.UI ||
+        typeof TPP.UI.hideRangeValueTooltip !== "function"
+      )
+        return false;
+      TPP.UI.hideRangeValueTooltip();
       return true;
     },
     handleFocusOut(event) {
-      if (!isRange(event.target) || !TPP.hideRangeValueTooltip) return false;
-      TPP.hideRangeValueTooltip();
+      if (
+        !isRange(event.target) ||
+        !TPP.UI ||
+        typeof TPP.UI.hideRangeValueTooltip !== "function"
+      )
+        return false;
+      TPP.UI.hideRangeValueTooltip();
       return true;
     },
     handlePointerUp(event) {
-      if (!isRange(event.target) || !TPP.hideRangeValueTooltip) return false;
-      window.setTimeout(TPP.hideRangeValueTooltip, 250);
+      if (
+        !isRange(event.target) ||
+        !TPP.UI ||
+        typeof TPP.UI.hideRangeValueTooltip !== "function"
+      )
+        return false;
+      window.setTimeout(TPP.UI.hideRangeValueTooltip, 250);
       return true;
     },
     handleClick(event) {
       const button = event.target.closest(".rotation-step-cycle");
-      if (!button || !TPP.cycleRotationStep) return false;
+      if (!button || !TPP.UI || typeof TPP.UI.cycleRotationStep !== "function")
+        return false;
       event.preventDefault();
-      TPP.cycleRotationStep(button);
+      TPP.UI.cycleRotationStep(button);
       return true;
     },
   };

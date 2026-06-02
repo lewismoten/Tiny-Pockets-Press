@@ -1,4 +1,5 @@
 window.TPP = window.TPP || {};
+TPP.Classification = TPP.Classification || {};
 
 TPP.classificationCatalog = null;
 TPP.classificationExtensionsCatalog = null;
@@ -1926,3 +1927,38 @@ TPP.applyClassificationValue = function () {
   TPP.loadForm();
   TPP.renderAll();
 };
+
+Object.assign(TPP.Classification, {
+  defaultFormatId: TPP.defaultClassificationFormatId,
+  system: TPP.classificationSystem,
+  formats: TPP.classificationFormats,
+  profiles: TPP.classificationProfiles,
+  profile: TPP.classificationProfile,
+  setProfile: TPP.setClassificationProfile,
+  hiddenCodes: TPP.classificationHiddenCodes,
+  showHiddenCategories: TPP.classificationShowHiddenCategories,
+  loadSystems: TPP.loadClassificationSystems,
+  loadExtensions: TPP.loadClassificationExtensions,
+  search: TPP.searchClassificationIndex,
+  searchText: TPP.classificationSearchText,
+  pathForCode: TPP.classificationPathForCode,
+  pathForData: TPP.classificationPathForData,
+  nodeAtPath: TPP.classificationNodeAtPath,
+  extensionNodeAtPath: TPP.classificationExtensionNodeAtPath,
+  extensionOptions: TPP.classificationExtensionOptions,
+  valueData: TPP.classificationValueData,
+  storageValue: TPP.classificationStorageValue,
+  summary: TPP.classificationSummary,
+  computeSummary: TPP.computeClassificationSummary,
+  formattedCode: TPP.classificationFormattedCode,
+  displayString: TPP.classificationDisplayString,
+  fallbackDisplayString: TPP.classificationFallbackDisplayString,
+  referenceDetails: TPP.classificationReferenceDetails,
+  renderDialog: TPP.renderClassificationDialog,
+  renderSearchResults: TPP.renderClassificationSearchResults,
+  renderSeeAlso: TPP.renderClassificationSeeAlso,
+  closeSearchResults: TPP.closeClassificationSearchResults,
+  applySearchSelection: TPP.applyClassificationSearchSelection,
+  applyValue: TPP.applyClassificationValue,
+  openDialog: TPP.openClassificationDialog,
+});

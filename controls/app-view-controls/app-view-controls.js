@@ -9,7 +9,15 @@ export async function init(TPP) {
       const tab = event.target.closest(".tab");
       if (tab && tab.dataset.view) {
         event.preventDefault();
-        TPP.switchView(tab.dataset.view);
+        if (
+          TPP.UI &&
+          TPP.UI.Views &&
+          typeof TPP.UI.Views.switchView === "function"
+        ) {
+          TPP.UI.Views.switchView(tab.dataset.view);
+        } else {
+          TPP.switchView(tab.dataset.view);
+        }
         return true;
       }
 

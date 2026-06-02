@@ -16,10 +16,17 @@ export async function init(TPP) {
     const list = document.getElementById("assetDialogList");
     const clearButton = document.getElementById("assetClearButton");
     if (!dialog || !title || !text || !list) return;
-    const target = TPP.assetDialogTarget;
-    const spec = target ? TPP.assetTargetSpec(target.type, target.key) : null;
+    const target = TPP.Assets ? TPP.Assets.dialogTarget : TPP.assetDialogTarget;
+    const spec =
+      target && TPP.Assets && typeof TPP.Assets.targetSpec === "function"
+        ? TPP.Assets.targetSpec(target.type, target.key)
+        : target
+          ? TPP.assetTargetSpec(target.type, target.key)
+          : null;
     const currentId = target
-      ? TPP.assetTargetValue(target.type, target.key)
+      ? TPP.Assets && typeof TPP.Assets.targetValue === "function"
+        ? TPP.Assets.targetValue(target.type, target.key)
+        : TPP.assetTargetValue(target.type, target.key)
       : "";
     title.textContent = spec ? spec.label : "Choose Image";
     text.textContent = spec
@@ -34,7 +41,9 @@ export async function init(TPP) {
     list.innerHTML = files.length
       ? files
           .map(function (file) {
-            return TPP.assetCardHtml(file, currentId);
+            return TPP.Assets && typeof TPP.Assets.cardHtml === "function"
+              ? TPP.Assets.cardHtml(file, currentId)
+              : TPP.assetCardHtml(file, currentId);
           })
           .join("")
       : '<div class="asset-empty">No images have been uploaded for this book yet.</div>';
@@ -43,7 +52,11 @@ export async function init(TPP) {
     const dialog = document.getElementById("assetDialog");
     if (!dialog || typeof dialog.showModal !== "function") return;
     TPP.sync("nosave");
-    TPP.assetDialogTarget = { type: targetType, key: targetKey };
+    if (TPP.Assets) {
+      TPP.Assets.dialogTarget = { type: targetType, key: targetKey };
+    } else {
+      TPP.assetDialogTarget = { type: targetType, key: targetKey };
+    }
     TPP._renderAssetDialog();
     if (!dialog.open) dialog.showModal();
   };
@@ -57,7 +70,8 @@ export async function init(TPP) {
   const clearButton = document.getElementById("assetClearButton");
   if (dialog) {
     dialog.addEventListener("close", function () {
-      TPP.assetDialogTarget = null;
+      if (TPP.Assets) TPP.Assets.dialogTarget = null;
+      else TPP.assetDialogTarget = null;
     });
     dialog.addEventListener("click", function (e) {
       const card = e.target.closest(".modal-card");
@@ -67,12 +81,23 @@ export async function init(TPP) {
       }
       const useButton = e.target.closest("[data-asset-use]");
       if (useButton) {
-        TPP.assignAssetToCurrentTarget(useButton.dataset.assetUse || "");
+        if (
+          TPP.Assets &&
+          typeof TPP.Assets.assignToCurrentTarget === "function"
+        ) {
+          TPP.Assets.assignToCurrentTarget(useButton.dataset.assetUse || "");
+        } else {
+          TPP.assignAssetToCurrentTarget(useButton.dataset.assetUse || "");
+        }
         return;
       }
       const deleteButton = e.target.closest("[data-asset-delete]");
       if (deleteButton) {
-        TPP.deleteAsset(deleteButton.dataset.assetDelete || "");
+        if (TPP.Assets && typeof TPP.Assets.delete === "function") {
+          TPP.Assets.delete(deleteButton.dataset.assetDelete || "");
+        } else {
+          TPP.deleteAsset(deleteButton.dataset.assetDelete || "");
+        }
         return;
       }
       const closeButton = e.target.closest("[data-action='close']");
@@ -86,14 +111,28 @@ export async function init(TPP) {
     };
     uploadInput.onchange = function (e) {
       TPP.file(e, function (data, file) {
-        TPP.uploadAssetToCurrentTarget(data, file);
+        if (
+          TPP.Assets &&
+          typeof TPP.Assets.uploadToCurrentTarget === "function"
+        ) {
+          TPP.Assets.uploadToCurrentTarget(data, file);
+        } else {
+          TPP.uploadAssetToCurrentTarget(data, file);
+        }
         uploadInput.value = "";
       });
     };
   }
   if (clearButton) {
     clearButton.onclick = function () {
-      TPP.assignAssetToCurrentTarget("");
+      if (
+        TPP.Assets &&
+        typeof TPP.Assets.assignToCurrentTarget === "function"
+      ) {
+        TPP.Assets.assignToCurrentTarget("");
+      } else {
+        TPP.assignAssetToCurrentTarget("");
+      }
     };
   }
   return {
