@@ -1470,17 +1470,76 @@ TPP.chapterAllowedDropLevel = function (
 TPP.clearChapterDropState = function () {
   TPP.chapterDragState = null;
 };
+TPP.chapterParentInfoAt = function (chapters, index) {
+  const list = Array.isArray(chapters) ? chapters : [];
+  const current = list[index];
+  const level = Math.max(0, Number(current && current.level) || 0);
+  if (!current || level <= 0) return null;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = list[i];
+    const candidateLevel = Math.max(
+      0,
+      Number(candidate && candidate.level) || 0,
+    );
+    if (candidateLevel === level - 1) {
+      return {
+        index: i,
+        title: String((candidate && candidate.title) || "Untitled"),
+      };
+    }
+  }
+  return null;
+};
+TPP.chapterDragPreviewInfo = function () {
+  const state = TPP.chapterDragState || null;
+  if (!state || !TPP.active || !Array.isArray(TPP.active.chapters)) return null;
+  const sourceChapter = TPP.active.chapters[state.sourceIndex];
+  if (!sourceChapter || !sourceChapter.id) return null;
+  const result = TPP.moveChapterBlock(
+    TPP.active.chapters,
+    state.sourceIndex,
+    state.targetIndex,
+    state.position,
+    state.level,
+  );
+  const chapters = result && Array.isArray(result.chapters)
+    ? result.chapters
+    : TPP.active.chapters;
+  const nextIndex = chapters.findIndex(function (chapter) {
+    return chapter && chapter.id === sourceChapter.id;
+  });
+  if (nextIndex < 0) return null;
+  const number = TPP.chapterOutlineNumber(chapters, nextIndex);
+  const parent = TPP.chapterParentInfoAt(chapters, nextIndex);
+  return {
+    chapter: chapters[nextIndex],
+    nextIndex: nextIndex,
+    level: Math.max(0, Number(chapters[nextIndex] && chapters[nextIndex].level) || 0),
+    number: number,
+    label: parent ? "Under " + parent.title : "Top level",
+  };
+};
 TPP.applyChapterDropState = function () {
   const list = document.getElementById("chapterList");
   if (!list) return;
+  list.querySelectorAll(".chapter-drag-preview-ghost").forEach(function (node) {
+    node.remove();
+  });
   const rows = list.querySelectorAll("[data-i]");
   const state = TPP.chapterDragState || null;
+  const preview = TPP.chapterDragPreviewInfo();
   rows.forEach(function (row) {
     const index = Number(row.dataset.i);
-    row.classList.remove("drop-before", "drop-after", "dragging");
+    row.classList.remove(
+      "drop-before",
+      "drop-after",
+      "dragging",
+      "chapter-drag-source-placeholder",
+    );
     row.style.setProperty("--drop-level", "0");
     if (!state) return;
-    if (index === state.sourceIndex) row.classList.add("dragging");
+    if (index === state.sourceIndex)
+      row.classList.add("dragging", "chapter-drag-source-placeholder");
     if (index === state.targetIndex) {
       row.classList.add(
         state.position === "before" ? "drop-before" : "drop-after",
@@ -1491,6 +1550,51 @@ TPP.applyChapterDropState = function () {
       );
     }
   });
+  if (!state || !preview) return;
+  const sourceRow = list.querySelector('[data-i="' + String(state.sourceIndex) + '"]');
+  const targetRow = list.querySelector('[data-i="' + String(state.targetIndex) + '"]');
+  if (!sourceRow || !targetRow) return;
+  const ghost = sourceRow.cloneNode(true);
+  ghost.classList.remove(
+    "active",
+    "dragging",
+    "drop-before",
+    "drop-after",
+    "chapter-drag-source-placeholder",
+  );
+  if ((preview.level || 0) > 0) ghost.classList.add("subchapter");
+  else ghost.classList.remove("subchapter");
+  ghost.classList.add("chapter-drag-preview-ghost");
+  ghost.removeAttribute("draggable");
+  ghost.removeAttribute("data-i");
+  ghost.setAttribute("aria-hidden", "true");
+  ghost.dataset.level = String(preview.level || 0);
+  ghost.style.setProperty("--level", String(preview.level || 0));
+  ghost.style.setProperty("--drop-level", "0");
+  const numberEl = ghost.querySelector(".chapter-pill-index");
+  if (numberEl) numberEl.textContent = String(preview.number) + ".";
+  const titleEl = ghost.querySelector(".chapter-pill-title");
+  if (titleEl) titleEl.textContent = String(
+    (preview.chapter && preview.chapter.title) || "Untitled",
+  );
+  const badgesEl = ghost.querySelector(".chapter-pill-badges");
+  if (badgesEl) {
+    badgesEl.innerHTML = '<span class="chapter-pill-badge preview-badge">' +
+      TPP.esc(preview.label) +
+      "</span>";
+  } else {
+    const textEl = ghost.querySelector(".chapter-pill-text");
+    if (textEl) {
+      textEl.insertAdjacentHTML(
+        "beforeend",
+        '<span class="chapter-pill-badges"><span class="chapter-pill-badge preview-badge">' +
+          TPP.esc(preview.label) +
+          "</span></span>",
+      );
+    }
+  }
+  if (state.position === "before") targetRow.before(ghost);
+  else targetRow.after(ghost);
 };
 TPP.moveChapterBlock = function (chapters, sourceIndex, targetIndex, position, level) {
   const list = Array.isArray(chapters) ? chapters.slice() : [];

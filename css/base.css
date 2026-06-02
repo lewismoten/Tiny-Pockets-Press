@@ -469,6 +469,15 @@ input[type="checkbox"] {
 .chapter-pill.dragging {
   opacity: 0.8;
 }
+.chapter-pill.chapter-drag-source-placeholder {
+  opacity: 0.22;
+  background: #f6efe5;
+  border-style: dashed;
+}
+.chapter-pill.chapter-drag-source-placeholder .chapter-pill-main,
+.chapter-pill.chapter-drag-source-placeholder .indent {
+  opacity: 0.12;
+}
 .chapter-pill.drop-before::before,
 .chapter-pill.drop-after::after {
   content: "";
@@ -485,6 +494,17 @@ input[type="checkbox"] {
 }
 .chapter-pill.drop-after::after {
   bottom: -3px;
+}
+.chapter-drag-preview-ghost {
+  opacity: 0.78;
+  border-style: dashed;
+  background: #fff7ea;
+  cursor: grabbing;
+  pointer-events: none;
+}
+.chapter-pill-badge.preview-badge {
+  background: #ffe7bc;
+  color: #6f4d15;
 }
 .chapter-pill .indent {
   display: inline-block;
