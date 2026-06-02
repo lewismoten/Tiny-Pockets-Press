@@ -1392,10 +1392,14 @@ TPP.dataJsonTreeHtml = function (value, depth, label) {
 TPP.dataRawJsonHtml = function (book) {
   return (
     '<article class="data-card">' +
-    '<div class="data-raw-toolbar"><button type="button" class="primary alt" data-copy-json="1">Copy JSON</button></div>' +
+    '<div class="data-raw-toolbar">' +
+    '<button type="button" class="primary alt" data-json-expand-all="1">Expand All</button>' +
+    '<button type="button" class="primary alt" data-json-collapse-all="1">Collapse All</button>' +
+    '<button type="button" class="primary alt" data-copy-json="1">Copy</button>' +
+    '</div>' +
     '<details class="data-raw-details" open>' +
     "<summary>Raw JSON</summary>" +
-    '<div class="data-code data-code-json">' +
+    '<div class="data-code data-code-json" data-json-tree="raw">' +
     TPP.dataJsonTreeHtml(book, 0, "") +
     "</div>" +
     "</details>" +

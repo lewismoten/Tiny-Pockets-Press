@@ -42,6 +42,26 @@ export async function init(TPP) {
           });
         return;
       }
+      const expandAll = e.target.closest("[data-json-expand-all]");
+      if (expandAll) {
+        const tree = dataPanel.querySelector('[data-json-tree="raw"]');
+        if (tree) {
+          tree.querySelectorAll("details.json-node").forEach(function (node) {
+            node.open = true;
+          });
+        }
+        return;
+      }
+      const collapseAll = e.target.closest("[data-json-collapse-all]");
+      if (collapseAll) {
+        const tree = dataPanel.querySelector('[data-json-tree="raw"]');
+        if (tree) {
+          tree.querySelectorAll("details.json-node").forEach(function (node) {
+            node.open = false;
+          });
+        }
+        return;
+      }
       const remove = e.target.closest("[data-stale-remove]");
       if (remove) {
         TPP.removeStaleDataEntry(remove.dataset.staleRemove || "");
