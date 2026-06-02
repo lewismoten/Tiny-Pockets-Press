@@ -441,6 +441,7 @@ TPP.coverTextRowHtml = function (book, spec, element) {
     entry.size,
     location === "front" ? 4.2 : TPP.finiteNumberOr(spec && spec.minSize, 4),
   );
+  const sizeMin = TPP.finiteNumberOr(spec && spec.minSize, 3);
   const rotationValue = TPP.textRotationDegrees(entry.rotate);
   const rotationInputId =
     location === "spine" ? "text-rotate-" + TPP.uid() : "";
@@ -454,37 +455,34 @@ TPP.coverTextRowHtml = function (book, spec, element) {
     '">' +
     TPP.coverTextContentCellHtml(book, entry) +
     "<td>" +
-    (location === "spine"
-      ? '<div class="cover-text-size-stack">' +
-        TPP.labeledRangeControlHtml({
-          label: "Sz",
-          className: "text-size",
-          min: TPP.finiteNumberOr(spec && spec.minSize, 3),
-          max: 24,
-          step: 0.25,
-          unit: "pt",
-          value: sizeValue,
-        }) +
-        '<label class="rotation-range-label"><span>Rot</span><span class="rotation-range-control">' +
-        TPP.rangeInputHtml({
-          id: rotationInputId,
-          rotationStepKey: rotationStepKey,
-          label: "Rotation",
-          className: "text-rotate",
-          min: -180,
-          max: 180,
-          step: 1,
-          unit: "°",
-          value: rotationValue,
-        }) +
-        '<button type="button" class="rotation-step-cycle" data-rotation-step-cycle="' +
-        TPP.esc(rotationInputId) +
-        '" aria-label="Rotation step 1 degrees" title="Rotation step 1 degrees"><span aria-hidden="true">⟳</span><span>1°</span></button></span></label></div>'
-      : '<input class="text-size" type="number" min="' +
-        TPP.esc(String(TPP.finiteNumberOr(spec && spec.minSize, 3))) +
-        '" step=".5" value="' +
-        TPP.esc(String(sizeValue)) +
-        '">') +
+    ('<div class="cover-text-size-stack">' +
+      TPP.labeledRangeControlHtml({
+        label: "Sz",
+        className: "text-size",
+        min: sizeMin,
+        max: 24,
+        step: 0.25,
+        unit: "pt",
+        value: sizeValue,
+      }) +
+      (location === "spine"
+        ? '<label class="rotation-range-label"><span>Rot</span><span class="rotation-range-control">' +
+          TPP.rangeInputHtml({
+            id: rotationInputId,
+            rotationStepKey: rotationStepKey,
+            label: "Rotation",
+            className: "text-rotate",
+            min: -180,
+            max: 180,
+            step: 1,
+            unit: "°",
+            value: rotationValue,
+          }) +
+          '<button type="button" class="rotation-step-cycle" data-rotation-step-cycle="' +
+          TPP.esc(rotationInputId) +
+          '" aria-label="Rotation step 1 degrees" title="Rotation step 1 degrees"><span aria-hidden="true">⟳</span><span>1°</span></button></span></label>'
+        : "") +
+      "</div>") +
     "</td>" +
     '<td><div class="back-cover-slider-stack">' +
     TPP.labeledRangeControlHtml({
@@ -591,9 +589,17 @@ TPP.textColorOutlineControlHtml = function (entry) {
     TPP.esc(outlineInputId) +
     '" type="color" tabindex="-1" aria-label="Outline color" value="' +
     TPP.esc(outlineColor) +
-    '"></div><input class="text-outline-size" type="number" min="0" step=".25" aria-label="Outline size" value="' +
-    TPP.esc(outlineSize) +
-    '"></div>'
+    '"></div>' +
+    TPP.rangeInputHtml({
+      label: "Outline size",
+      className: "text-outline-size",
+      min: 0,
+      max: 12,
+      step: 0.25,
+      unit: "px",
+      value: outlineSize,
+    }) +
+    "</div>"
   );
 };
 TPP.coverTextListHtml = function (book, spec) {
@@ -645,11 +651,17 @@ TPP.textElementGroupHtml = function (book, spec, element) {
         "</textarea></label>"
       : "") +
     '<div class="two">' +
-    '<label>Size <input class="text-size" type="number" min="' +
-    spec.minSize +
-    '" step=".5" value="' +
-    TPP.esc(String(TPP.finiteNumberOr(entry.size, spec.minSize))) +
-    '"></label>' +
+    "<label>Size " +
+    TPP.rangeInputHtml({
+      label: "Size",
+      className: "text-size",
+      min: spec.minSize,
+      max: 24,
+      step: 0.25,
+      unit: "pt",
+      value: TPP.finiteNumberOr(entry.size, spec.minSize),
+    }) +
+    "</label>" +
     '<label>Y ' +
     TPP.rangeInputHtml({
       label: "Y",
@@ -709,9 +721,17 @@ TPP.textElementGroupHtml = function (book, spec, element) {
     '"></label><label>Outline <input class="text-outline-color color-box" type="color" value="' +
     TPP.esc(entry.outlineColor || "#000000") +
     '"></label></div>' +
-    '<label>Outline px <input class="text-outline-size" type="number" min="0" step=".25" value="' +
-    TPP.esc(String(Math.max(0, TPP.finiteNumberOr(entry.outlineSize, 0)))) +
-    '"></label>' +
+    "<label>Outline " +
+    TPP.rangeInputHtml({
+      label: "Outline size",
+      className: "text-outline-size",
+      min: 0,
+      max: 12,
+      step: 0.25,
+      unit: "px",
+      value: Math.max(0, TPP.finiteNumberOr(entry.outlineSize, 0)),
+    }) +
+    "</label>" +
     "</section>"
   );
 };

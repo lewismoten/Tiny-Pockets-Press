@@ -1384,28 +1384,18 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 0 0 2px rgb(255 204 102 / 0.22);
 }
 .front-cover-text-outline-cell .text-outline-size {
-  flex: 0 1 2rem;
+  flex: 1 1 auto;
   min-width: 0;
-  width: 2rem;
-  max-width: 2rem;
+  width: 100%;
+  max-width: 3.25rem;
   border: 0;
-  padding: 0.08rem 0.05rem;
+  padding: 0;
   border-radius: 0;
   background: transparent;
   color: var(--ink);
   outline: none;
   box-shadow: none;
-  text-align: right;
-  font-size: 0.76rem;
-  line-height: 1.2;
-  appearance: textfield;
-  -moz-appearance: textfield;
-  font-variant-numeric: tabular-nums;
-}
-.front-cover-text-outline-cell .text-outline-size::-webkit-outer-spin-button,
-.front-cover-text-outline-cell .text-outline-size::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  align-self: center;
 }
 .front-cover-text-actions {
   display: flex;
