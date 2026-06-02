@@ -6,6 +6,20 @@ export async function init(TPP) {
 
   return {
     handleClick(event) {
+      const openInterior = event.target.closest("#openInteriorView");
+      if (openInterior) {
+        event.preventDefault();
+        if (
+          TPP.UI &&
+          TPP.UI.Views &&
+          typeof TPP.UI.Views.switchView === "function"
+        ) {
+          TPP.UI.Views.switchView("interior");
+        } else {
+          TPP.switchView("interior");
+        }
+        return true;
+      }
       const interior = event.target.closest("#exportInteriorPdf");
       if (interior) {
         event.preventDefault();
@@ -22,6 +36,20 @@ export async function init(TPP) {
       if (images) {
         event.preventDefault();
         TPP.openImageExportDialog();
+        return true;
+      }
+      const openCover = event.target.closest("#openCoverView");
+      if (openCover) {
+        event.preventDefault();
+        if (
+          TPP.UI &&
+          TPP.UI.Views &&
+          typeof TPP.UI.Views.switchView === "function"
+        ) {
+          TPP.UI.Views.switchView("cover");
+        } else {
+          TPP.switchView("cover");
+        }
         return true;
       }
       const cover = event.target.closest("#exportCoverPdf");

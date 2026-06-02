@@ -55,6 +55,27 @@ body {
   border-radius: 12px;
   padding: 0.5rem 0.72rem;
 }
+.book-toolbar-split {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.12rem;
+}
+.book-toolbar-split > .book-toolbar-button {
+  border-radius: 0;
+}
+.book-toolbar-split > .book-toolbar-button:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+.book-toolbar-split > .book-toolbar-button:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+.book-toolbar-split-side {
+  padding-inline: 0.58rem !important;
+  min-inline-size: 2.2rem;
+  justify-content: center;
+}
 .book-toolbar-icon {
   inline-size: 1rem;
   block-size: 1rem;
@@ -72,6 +93,9 @@ body.book-icons-only #bookChromeBar .book-toolbar-button {
   min-width: 2.2rem;
   justify-content: center;
   padding-inline: 0.58rem;
+}
+body.book-icons-only .book-toolbar-split > .book-toolbar-button:first-child {
+  min-width: 2.2rem;
 }
 #bookTabsBar,
 #bookActionsBar {

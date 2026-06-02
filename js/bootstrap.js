@@ -63,9 +63,11 @@ TPP.bindTopLevelEventRouters = function () {
       return;
     }
     if (
+      target.closest("#openInteriorView") ||
       target.closest("#exportInteriorPdf") ||
       target.closest("#exportReadablePdf") ||
       target.closest("#exportImagesZip") ||
+      target.closest("#openCoverView") ||
       target.closest("#exportCoverPdf") ||
       target.closest("#printBrowser")
     ) {

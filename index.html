@@ -136,15 +136,30 @@
           />
           <span class="book-toolbar-label">Save</span>
         </button>
-        <button id="exportInteriorPdf" class="primary book-toolbar-button">
-          <img
-            class="book-toolbar-icon"
-            src="assets/toolbar-interior-pdf.svg"
-            alt=""
-            aria-hidden="true"
-          />
-          <span class="book-toolbar-label">Interior PDF</span>
-        </button>
+        <div class="book-toolbar-split">
+          <button id="openInteriorView" class="primary book-toolbar-button">
+            <img
+              class="book-toolbar-icon"
+              src="assets/toolbar-text-block.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="book-toolbar-label">Text Block</span>
+          </button>
+          <button
+            id="exportInteriorPdf"
+            class="primary book-toolbar-button book-toolbar-split-side"
+            aria-label="Download Text Block PDF"
+            title="Download Text Block PDF"
+          >
+            <img
+              class="book-toolbar-icon"
+              src="assets/toolbar-download.svg"
+              alt=""
+              aria-hidden="true"
+            />
+          </button>
+        </div>
         <button id="exportReadablePdf" class="primary alt book-toolbar-button">
           <img
             class="book-toolbar-icon"
@@ -163,15 +178,30 @@
           />
           <span class="book-toolbar-label">Page Export</span>
         </button>
-        <button id="exportCoverPdf" class="primary alt book-toolbar-button">
-          <img
-            class="book-toolbar-icon"
-            src="assets/toolbar-cover-pdf.svg"
-            alt=""
-            aria-hidden="true"
-          />
-          <span class="book-toolbar-label">Cover PDF</span>
-        </button>
+        <div class="book-toolbar-split">
+          <button id="openCoverView" class="primary alt book-toolbar-button">
+            <img
+              class="book-toolbar-icon"
+              src="assets/toolbar-cover.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="book-toolbar-label">Cover</span>
+          </button>
+          <button
+            id="exportCoverPdf"
+            class="primary alt book-toolbar-button book-toolbar-split-side"
+            aria-label="Download Cover PDF"
+            title="Download Cover PDF"
+          >
+            <img
+              class="book-toolbar-icon"
+              src="assets/toolbar-download.svg"
+              alt=""
+              aria-hidden="true"
+            />
+          </button>
+        </div>
         <button id="printBrowser" class="book-toolbar-button">
           <img
             class="book-toolbar-icon"
