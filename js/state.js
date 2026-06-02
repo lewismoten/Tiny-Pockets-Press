@@ -2,10 +2,12 @@ window.TPP = window.TPP || {};
 TPP.SCHEMA_VERSION = 18;
 TPP.LIB = "tinyPocketsPressV61";
 TPP.DRAFTS = "tinyPocketsPressDraftsV61";
+TPP.DRAFT_HISTORY = "tinyPocketsPressDraftHistoryV61";
 TPP.ACTIVE = "tinyPocketsPressActiveV61";
 TPP.UI_STORAGE_KEY = "tinyPocketsPressUiV61";
 TPP.library = [];
 TPP.bookDrafts = {};
+TPP.bookDraftHistory = {};
 TPP.active = null;
 TPP.view = "editor";
 TPP.currentChapter = 0;
@@ -2447,9 +2449,108 @@ TPP.persistLibraryStore = function () {
 TPP.persistDraftStore = function () {
   localStorage.setItem(TPP.DRAFTS, JSON.stringify(TPP.bookDrafts));
 };
+TPP.persistDraftHistoryStore = function () {
+  localStorage.setItem(TPP.DRAFT_HISTORY, JSON.stringify(TPP.bookDraftHistory));
+};
 TPP.persistAllBookStores = function () {
   TPP.persistLibraryStore();
   TPP.persistDraftStore();
+  TPP.persistDraftHistoryStore();
+};
+TPP.draftHistoryEntries = function (bookId) {
+  const id = String(bookId || "").trim();
+  return Array.isArray(TPP.bookDraftHistory[id]) ? TPP.bookDraftHistory[id] : [];
+};
+TPP.pushDraftHistoryEntry = function (bookId, book) {
+  const id = String(bookId || "").trim();
+  if (!id || !book) return;
+  const nextFingerprint = TPP.bookFingerprint(book);
+  const stack = TPP.draftHistoryEntries(id).slice();
+  const last = stack[stack.length - 1];
+  if (last && last.fingerprint === nextFingerprint) return;
+  stack.push({
+    fingerprint: nextFingerprint,
+    book: TPP.norm(TPP.clone(book)),
+    at: TPP.nowIso(),
+  });
+  TPP.bookDraftHistory[id] = stack.slice(-60);
+};
+TPP.clearDraftHistory = function (bookId) {
+  const id = String(bookId || "").trim();
+  if (!id) return;
+  delete TPP.bookDraftHistory[id];
+};
+TPP.renderDraftUndoState = function () {
+  const activeId = TPP.active ? TPP.bookId(TPP.active) : "";
+  const undoButton = document.getElementById("undoDraft");
+  const revertButton = document.getElementById("revertDraft");
+  const canUndo = !!activeId && TPP.draftHistoryEntries(activeId).length > 0;
+  const canRevert = !!activeId && TPP.hasDraftBook(activeId);
+  if (undoButton) {
+    undoButton.disabled = !canUndo;
+    undoButton.title = canUndo ? "Undo last draft change" : "No draft changes to undo";
+  }
+  if (revertButton) {
+    revertButton.disabled = !canRevert;
+    revertButton.title = canRevert ? "Revert entire draft" : "No draft to revert";
+  }
+};
+TPP.restoreBookFromSnapshot = function (bookId, snapshot) {
+  const id = String(bookId || "").trim();
+  const source = snapshot ? TPP.norm(TPP.clone(snapshot)) : null;
+  if (!id || !source) return false;
+  TPP.bookDrafts[id] = source;
+  TPP.bookDraftFingerprints[id] = TPP.bookFingerprint(source);
+  if (TPP.active && TPP.bookId(TPP.active) === id) {
+    TPP.active = TPP.norm(TPP.clone(source));
+    TPP.loadForm();
+  }
+  TPP.persistDraftStore();
+  TPP.setBookSaveUiState(id, {
+    dirty: true,
+    pending: false,
+    saving: false,
+    error: false,
+  });
+  TPP.renderDraftUndoState();
+  TPP.renderAll();
+  return true;
+};
+TPP.undoDraftStep = function (bookId) {
+  const id = String(bookId || "").trim();
+  const stack = TPP.draftHistoryEntries(id).slice();
+  if (!id || !stack.length) return false;
+  const entry = stack.pop();
+  if (!entry || !entry.book) return false;
+  if (stack.length) TPP.bookDraftHistory[id] = stack;
+  else delete TPP.bookDraftHistory[id];
+  TPP.persistDraftHistoryStore();
+  return TPP.restoreBookFromSnapshot(id, entry.book);
+};
+TPP.revertDraftBook = function (bookId) {
+  const id = String(bookId || "").trim();
+  if (!id || !TPP.hasDraftBook(id)) return false;
+  delete TPP.bookDrafts[id];
+  TPP.clearDraftHistory(id);
+  TPP.bookDraftFingerprints[id] = TPP.bookFingerprints[id] || "";
+  if (TPP.active && TPP.bookId(TPP.active) === id) {
+    const committed = TPP.findLibraryBookById(id);
+    if (committed) {
+      TPP.active = TPP.norm(TPP.clone(committed));
+      TPP.loadForm();
+    }
+  }
+  TPP.persistDraftStore();
+  TPP.persistDraftHistoryStore();
+  TPP.setBookSaveUiState(id, {
+    dirty: false,
+    pending: false,
+    saving: false,
+    error: false,
+  });
+  TPP.renderDraftUndoState();
+  TPP.renderAll();
+  return true;
 };
 TPP.compactBookMeta = function (book) {
   if (!book || !book.meta || typeof book.meta !== "object") return;
@@ -3847,6 +3948,15 @@ TPP.load = async function () {
   } catch {
     TPP.bookDrafts = {};
   }
+  try {
+    const parsedHistory = JSON.parse(
+      localStorage.getItem(TPP.DRAFT_HISTORY) || "{}",
+    );
+    TPP.bookDraftHistory =
+      parsedHistory && typeof parsedHistory === "object" ? parsedHistory : {};
+  } catch {
+    TPP.bookDraftHistory = {};
+  }
   if (!TPP.library.length) {
     let sample = null;
     try {
@@ -3872,6 +3982,28 @@ TPP.load = async function () {
       })
       .map(function (entry) {
         return [entry[0], TPP.norm(entry[1])];
+      }),
+  );
+  TPP.bookDraftHistory = Object.fromEntries(
+    Object.entries(TPP.bookDraftHistory || {})
+      .filter(function (entry) {
+        return validIds.has(String(entry[0] || "").trim());
+      })
+      .map(function (entry) {
+        return [
+          entry[0],
+          (Array.isArray(entry[1]) ? entry[1] : [])
+            .map(function (historyEntry) {
+              if (!historyEntry || !historyEntry.book) return null;
+              return {
+                fingerprint: String(historyEntry.fingerprint || ""),
+                at: String(historyEntry.at || ""),
+                book: TPP.norm(historyEntry.book),
+              };
+            })
+            .filter(Boolean)
+            .slice(-60),
+        ];
       }),
   );
   TPP.bookFingerprints = {};
@@ -3930,7 +4062,7 @@ TPP.getBookSaveUiState = function (bookId) {
     }
   );
 };
-TPP.renderSaveStateIndicator = function () {
+  TPP.renderSaveStateIndicator = function () {
   const button = document.getElementById("saveBook");
   if (!button) return;
   const bookId = TPP.active ? TPP.bookId(TPP.active) : "";
@@ -3953,6 +4085,7 @@ TPP.renderSaveStateIndicator = function () {
           ? "Unsaved changes"
           : "Save",
   );
+  TPP.renderDraftUndoState();
 };
 TPP.setBookSaveUiState = function (bookId, patch) {
   const key = String(bookId || "").trim();
@@ -4005,23 +4138,34 @@ TPP.save = function (mode, bookId) {
   try {
     if (mode === "draft") {
       targetIds.forEach(function (id) {
+        const existingDraft = TPP.findDraftBookById(id);
+        const committed = TPP.findLibraryBookById(id);
         const currentBook =
           TPP.active && TPP.bookId(TPP.active) === id
             ? TPP.active
-            : TPP.findDraftBookById(id) || TPP.findLibraryBookById(id);
+            : existingDraft || committed;
         if (!currentBook) return;
         const current = TPP.bookFingerprint(currentBook);
         const baseline =
           TPP.bookFingerprints[id] ??
-          TPP.bookFingerprint(TPP.findLibraryBookById(id) || currentBook);
+          TPP.bookFingerprint(committed || currentBook);
+        const priorSource = existingDraft || committed;
+        const priorFingerprint = priorSource
+          ? TPP.bookFingerprint(priorSource)
+          : "";
+        if (priorSource && current !== priorFingerprint) {
+          TPP.pushDraftHistoryEntry(id, priorSource);
+        }
         if (current === baseline) {
           delete TPP.bookDrafts[id];
+          TPP.clearDraftHistory(id);
         } else {
           TPP.bookDrafts[id] = TPP.norm(TPP.clone(currentBook));
         }
         TPP.bookDraftFingerprints[id] = current;
       });
       TPP.persistDraftStore();
+      TPP.persistDraftHistoryStore();
       targetIds.forEach(function (id) {
         TPP.setBookSaveUiState(id, {
           dirty: TPP.hasDraftBook(id),
@@ -4073,6 +4217,7 @@ TPP.save = function (mode, bookId) {
       if (index >= 0) TPP.library[index] = nextBook;
       else TPP.library.push(nextBook);
       delete TPP.bookDrafts[id];
+      TPP.clearDraftHistory(id);
       TPP.bookFingerprints[id] = current;
       TPP.bookDraftFingerprints[id] = current;
       if (TPP.active && TPP.bookId(TPP.active) === id) {

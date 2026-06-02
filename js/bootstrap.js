@@ -57,7 +57,11 @@ TPP.bindTopLevelEventRouters = function () {
       if (api && typeof api.handleClick === "function") api.handleClick(event);
       return;
     }
-    if (target.closest("#saveBook")) {
+    if (
+      target.closest("#undoDraft") ||
+      target.closest("#revertDraft") ||
+      target.closest("#saveBook")
+    ) {
       const api = await TPP.ensureControlModule("book-save-controls");
       if (api && typeof api.handleClick === "function") api.handleClick(event);
       return;
