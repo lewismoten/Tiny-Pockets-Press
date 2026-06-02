@@ -390,6 +390,21 @@ TPP.labeledRangeControlHtml = function (options) {
     "</label>"
   );
 };
+TPP.rangeResetLabelHtml = function (label, targetId, value) {
+  return (
+    '<button type="button" class="range-reset-label" data-range-reset-target="' +
+    TPP.esc(String(targetId || "")) +
+    '" data-range-reset-value="' +
+    TPP.esc(String(value ?? 50)) +
+    '" aria-label="Reset ' +
+    TPP.esc(String(label || "")) +
+    ' to center" title="Reset ' +
+    TPP.esc(String(label || "")) +
+    ' to center">' +
+    TPP.esc(String(label || "")) +
+    "</button>"
+  );
+};
 TPP.textElementFieldPickerOptions = function (book, location) {
   const used = new Set(
     TPP.textElementsForLocation(book, location || "front").map(
@@ -447,6 +462,8 @@ TPP.coverTextRowHtml = function (book, spec, element) {
     location === "spine" ? "text-rotate-" + TPP.uid() : "";
   const rotationStepKey =
     location === "spine" && entry.id ? "text-rotate:" + entry.id : "";
+  const textXInputId = "text-x-" + TPP.uid();
+  const textYInputId = "text-y-" + TPP.uid();
   return (
     '<tr class="text-element-group cover-text-row" draggable="true" data-drag-kind="text-element" data-text-id="' +
     TPP.esc(entry.id || "") +
@@ -484,8 +501,10 @@ TPP.coverTextRowHtml = function (book, spec, element) {
         : "") +
       "</div>") +
     "</td>" +
-    '<td><div class="back-cover-slider-stack">' +
-    TPP.labeledRangeControlHtml({
+    '<td><div class="back-cover-slider-stack"><label>' +
+    TPP.rangeResetLabelHtml("X", textXInputId, 50) +
+    TPP.rangeInputHtml({
+      id: textXInputId,
       label: "X",
       className: "text-x",
       min: 0,
@@ -494,7 +513,10 @@ TPP.coverTextRowHtml = function (book, spec, element) {
       unit: "%",
       value: TPP.finiteNumberOr(entry.x, 50),
     }) +
-    TPP.labeledRangeControlHtml({
+    "</label><label>" +
+    TPP.rangeResetLabelHtml("Y", textYInputId, 50) +
+    TPP.rangeInputHtml({
+      id: textYInputId,
       label: "Y",
       className: "text-y",
       min: 0,

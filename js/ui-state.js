@@ -196,6 +196,29 @@ TPP.initializeUiState = function () {
         TPP.cycleTextAlignButton(alignButton);
         return;
       }
+      const rangeResetButton =
+        event.target &&
+        event.target.closest &&
+        event.target.closest("[data-range-reset-target]");
+      if (rangeResetButton) {
+        const targetId = String(
+          rangeResetButton.dataset.rangeResetTarget || "",
+        ).trim();
+        const input = targetId ? document.getElementById(targetId) : null;
+        if (input) {
+          event.preventDefault();
+          event.stopPropagation();
+          input.value = String(
+            Number(rangeResetButton.dataset.rangeResetValue) || 50,
+          );
+          if (typeof TPP.positionRangeValueTooltip === "function") {
+            TPP.positionRangeValueTooltip(input);
+          }
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        return;
+      }
       const button =
         event.target &&
         event.target.closest &&
