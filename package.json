@@ -6,7 +6,7 @@
   "author": "Lewis Moten",
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
-    "check": "node --check js/config.js && node --check js/state.js && node --check js/markdown-media.js && node --check js/layout-engine.js && node --check js/render-page.js && node --check js/imposition.js && node --check js/library.js && node --check js/editor.js && node --check js/export.js && node --check js/classification-service.js && node --check js/color-service.js && node --check js/asset-service.js && node --check js/book-actions.js && node --check js/reader-state.js && node --check js/cover-preview-patching.js && node --check js/editor-render-scheduler.js && node --check js/app.js && node --check js/bootstrap.js && npm run check:classification",
+    "check": "node --check js/config.js && node --check js/state.js && node --check js/markdown-media.js && node --check js/layout-engine.js && node --check js/render-page.js && node --check js/imposition.js && node --check js/library.js && node --check js/editor.js && node --check js/export.js && node --check js/classification-service.js && node --check js/color-service.js && node --check js/asset-service.js && node --check js/book-actions.js && node --check js/reader-state.js && node --check js/view-router.js && node --check js/cover-preview-patching.js && node --check js/editor-render-scheduler.js && node --check js/app.js && node --check js/bootstrap.js && npm run check:classification",
     "check:classification": "node scripts/validate-classifications.js",
     "format": "prettier --write \"css/**/*.css\" \"js/**/*.js\" \"data/**/*.json\" \"*.json\" \"*.html\"",
     "format:check": "prettier --check \"css/**/*.css\" \"js/**/*.js\" \"data/**/*.json\" \"*.json\" \"*.html\"",
