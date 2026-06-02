@@ -39,7 +39,6 @@ export async function init(TPP) {
       tocTitle: "",
       text: "",
       imageId: "",
-      imageElementId: "",
       level: newLevel,
       isMetadata: false,
       includeInToc: true,

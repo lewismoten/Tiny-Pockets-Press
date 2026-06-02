@@ -804,7 +804,6 @@ TPP.dataSchemaKeys = function (context) {
       "title",
       "text",
       "imageId",
-      "imageElementId",
       "imageWidth",
       "level",
       "isMetadata",

@@ -3447,16 +3447,6 @@ TPP.compactInternalIds = function (book) {
         maps.changed = true;
       }
     }
-    if (chapter.imageElementId) {
-      const nextElementId = TPP.internalIdMapValue(
-        maps.imageElements,
-        chapter.imageElementId,
-      );
-      if (nextElementId && nextElementId !== chapter.imageElementId) {
-        chapter.imageElementId = nextElementId;
-        maps.changed = true;
-      }
-    }
   });
   const coverFront = TPP.coverFrontInfo(book);
   const backCover = TPP.backCoverInfo(book);
@@ -3869,13 +3859,6 @@ TPP.findImageElement = function (book, location, part) {
 };
 TPP.findChapterImageElement = function (book, chapter) {
   if (!book || !chapter) return null;
-  const list = Array.isArray(book.imageElements) ? book.imageElements : [];
-  if (chapter.imageElementId) {
-    const byId = list.find(function (entry) {
-      return entry && entry.id === chapter.imageElementId;
-    });
-    if (byId) return byId;
-  }
   return TPP.findImageElement(book, "chapter", chapter.id);
 };
 TPP.defaultImageElements = function (book, base) {
@@ -3955,7 +3938,6 @@ TPP.ensureChapterImageElements = function (book) {
       if (!element.id) element.id = TPP.internalId("i");
       element.location = "chapter";
       element.part = chapter.id;
-      chapter.imageElementId = element.id;
     },
   );
   const chapterIds = new Set(
@@ -4015,7 +3997,6 @@ TPP.syncLegacyImageFieldsFromElements = function (book) {
       const element = TPP.findChapterImageElement(book, chapter);
       if (!element) return;
       const chapterSettings = TPP.chapterSettingsInfo(book);
-      chapter.imageElementId = element.id || "";
       chapter.imageId = element.fileId || "";
       chapterSettings.imagePlacement = element.placement || "none";
       chapterSettings.imageZoom = Math.min(
@@ -4072,7 +4053,6 @@ TPP.syncImageElementsFromLegacyFields = function (book) {
         Math.max(10, Number(chapterSettings.imageZoom) || 70),
       );
       element.placement = chapterSettings.imagePlacement || "none";
-      chapter.imageElementId = element.id || "";
     },
   );
 };
@@ -4652,7 +4632,6 @@ TPP.norm = function (book) {
         title: "Chapter " + (index + 1),
         text: "",
         imageId: "",
-        imageElementId: "",
         level: 0,
         isMetadata: false,
         includeInToc: true,
@@ -4663,6 +4642,7 @@ TPP.norm = function (book) {
     TPP.migrateChapterInlineImage(out, normalized);
     delete normalized.imageRotate;
     delete normalized.isSubsection;
+    delete normalized.imageElementId;
     return normalized;
   });
   TPP.migrateTextElements(out, base);

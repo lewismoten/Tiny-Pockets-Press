@@ -399,7 +399,6 @@ TPP.fallbackBook = function () {
         title: "Santa’s Little OSHA Violation",
         text: "A jolly “Ho-ho-ho” came from behind, followed by “Hidey ho, neighbor!”\\n\\n“Hello Santa,” little Timmy replied.\\n\\n“Why the long face?” Santa asked.\\n\\nTimmy showed him a block of wood. “I’m building a pinewood derby car, but I have no tools.”\\n\\nSanta put his hands on his waist and made grunting sounds, followed by the order: “Never give up. Never surrender!”\\n\\nSanta went into his bag and grabbed a few presents, handing them over. Timmy quickly ripped open the packages, finding a chainsaw, angle grinder, nail gun, industrial CNC router, plasma cutter, and a flame thrower, while Santa shouted, “More power!”",
         imageId: "",
-        imageElementId: "",
         level: 0,
         isMetadata: false,
         includeInToc: true,
