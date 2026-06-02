@@ -47,38 +47,9 @@ export async function init(TPP) {
     TPP._renderAssetDialog();
     if (!dialog.open) dialog.showModal();
   };
-  TPP.commitAssetChange = function () {
-    TPP.save("commit", TPP.active && TPP.bookId(TPP.active));
-    TPP.loadForm();
-    TPP.renderAll();
-    const dialog = document.getElementById("assetDialog");
-    if (dialog && dialog.open) TPP._renderAssetDialog();
-  };
   TPP._closeAssetDialog = function () {
     const dialog = document.getElementById("assetDialog");
     if (dialog && dialog.open) dialog.close();
-  };
-  TPP.assignAssetToCurrentTarget = function (fileId) {
-    const target = TPP.assetDialogTarget;
-    if (!target || !TPP.active) return;
-    if (!TPP.setAssetTargetValue(target.type, target.key, fileId)) return;
-    TPP.commitAssetChange();
-    TPP._closeAssetDialog();
-  };
-  TPP.uploadAssetToCurrentTarget = function (data, file) {
-    if (!TPP.active) return;
-    const fileId = TPP.upsertFileAsset(
-      TPP.active,
-      data,
-      file && file.type,
-      file && file.name,
-    );
-    TPP.assignAssetToCurrentTarget(fileId);
-  };
-  TPP.deleteAsset = function (fileId) {
-    if (!TPP.active || !fileId) return;
-    if (!TPP.removeFileAsset(TPP.active, fileId)) return;
-    TPP.commitAssetChange();
   };
   const dialog = document.getElementById("assetDialog");
   const uploadButton = document.getElementById("assetUploadButton");
