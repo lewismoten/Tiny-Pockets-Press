@@ -975,6 +975,31 @@ input[type="checkbox"] {
   text-transform: uppercase;
   color: #67594b;
 }
+.data-book-info-table {
+  table-layout: fixed;
+}
+.data-book-info-col-index {
+  width: 2.4rem;
+}
+.data-book-info-col-id {
+  width: 5.6rem;
+}
+.data-book-info-col-key {
+  width: 8.5rem;
+}
+.data-book-info-col-value {
+  width: auto;
+}
+.data-book-info-col-label {
+  width: 7.5rem;
+}
+.data-book-info-value-cell {
+  max-width: 0;
+  min-width: 0;
+}
+.data-book-info-value-cell > * {
+  max-width: 100%;
+}
 .data-table-compact {
   font-size: 0.82rem;
 }
@@ -1724,6 +1749,20 @@ input[type="range"]::-moz-range-thumb {
 }
 .data-encoded-json-tree {
   margin-top: 0.35rem;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.data-encoded-json-tree .data-code-json {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.data-encoded-json-tree .json-line,
+.data-encoded-json-tree .json-node summary,
+.data-encoded-json-tree .json-token.string {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .data-file-meta {
   display: inline-flex;

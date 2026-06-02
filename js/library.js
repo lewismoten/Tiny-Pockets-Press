@@ -1148,7 +1148,7 @@ TPP.dataArrayHtml = function (book, key, list, compact) {
     return TPP.dataImageElementsTable(book, list);
   if (String(key || "") === "bookInfo")
     return (
-      '<table class="data-table"><thead><tr><th>#</th><th>' +
+      '<table class="data-table data-book-info-table"><colgroup><col class="data-book-info-col-index"><col class="data-book-info-col-id"><col class="data-book-info-col-key"><col class="data-book-info-col-value"><col class="data-book-info-col-label"></colgroup><thead><tr><th>#</th><th>' +
       TPP.dataKeyLabelHtml("bookInfo", "id") +
       "</th><th>" +
       TPP.dataKeyLabelHtml("bookInfo", "key") +
@@ -1171,7 +1171,7 @@ TPP.dataArrayHtml = function (book, key, list, compact) {
             TPP.dataValueHtml(book, "id", item && item.id, true) +
             "</td><td>" +
             TPP.dataValueHtml(book, "key", item && item.key, true) +
-            "</td><td>" +
+            '</td><td class="data-book-info-value-cell">' +
             (encodedJson ||
               TPP.dataValueHtml(book, "value", item && item.value, true)) +
             "</td><td>" +
