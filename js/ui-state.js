@@ -12,6 +12,7 @@ TPP.initializeUiState = function () {
   document.body.appendChild(rangeValueTooltip);
 
   let rangeHoverTooltipTimer = 0;
+  let activeRangeTooltipInput = null;
 
   TPP.rotationSnapSteps = [1, 5, 15, 45, 90];
 
@@ -57,6 +58,7 @@ TPP.initializeUiState = function () {
 
   TPP.positionRangeValueTooltip = function (input) {
     if (!input || !rangeValueTooltip) return;
+    activeRangeTooltipInput = input;
     const text = TPP.rangeValueText(input);
     input.title = text;
     input.setAttribute("aria-valuetext", text);
@@ -79,6 +81,7 @@ TPP.initializeUiState = function () {
       window.clearTimeout(rangeHoverTooltipTimer);
       rangeHoverTooltipTimer = 0;
     }
+    activeRangeTooltipInput = null;
     rangeValueTooltip.hidden = true;
   };
 
@@ -159,6 +162,45 @@ TPP.initializeUiState = function () {
         if (input) TPP.updateRotationStepButton(button, input);
       });
   };
+
+  document.addEventListener(
+    "pointerup",
+    function () {
+      if (typeof TPP.hideRangeValueTooltip === "function") {
+        window.setTimeout(TPP.hideRangeValueTooltip, 120);
+      }
+    },
+    true,
+  );
+  document.addEventListener(
+    "pointercancel",
+    function () {
+      if (typeof TPP.hideRangeValueTooltip === "function") {
+        TPP.hideRangeValueTooltip();
+      }
+    },
+    true,
+  );
+  document.addEventListener(
+    "scroll",
+    function () {
+      if (!activeRangeTooltipInput) return;
+      if (typeof TPP.hideRangeValueTooltip === "function") {
+        TPP.hideRangeValueTooltip();
+      }
+    },
+    true,
+  );
+  window.addEventListener(
+    "resize",
+    function () {
+      if (!activeRangeTooltipInput) return;
+      if (typeof TPP.hideRangeValueTooltip === "function") {
+        TPP.hideRangeValueTooltip();
+      }
+    },
+    true,
+  );
 };
 
 Object.assign(TPP.UI, {
