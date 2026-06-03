@@ -496,7 +496,9 @@ TPP.dataTextElementsTable = function (book, list) {
           "<td>" +
           TPP.dataCompactCodeHtml(item.part, String(item.part || "")) +
           "</td>" +
-          "<td>" + refCell + "</td>" +
+          "<td>" +
+          refCell +
+          "</td>" +
           "<td>" +
           TPP.dataValueHtml(book, "size", item.size, true) +
           "</td>" +
@@ -583,9 +585,7 @@ TPP.dataEncodedJsonInfo = function (value) {
       raw: text,
       parsed: parsed,
       kind: Array.isArray(parsed) ? "array" : "object",
-      count: Array.isArray(parsed)
-        ? parsed.length
-        : Object.keys(parsed).length,
+      count: Array.isArray(parsed) ? parsed.length : Object.keys(parsed).length,
     };
   } catch (_error) {
     return null;
@@ -607,7 +607,8 @@ TPP.dataEncodedJsonSummary = function (book, item, info) {
         ? "key"
         : "keys");
   if (entryKey === "classification") return fallback;
-  if (!entryKey || typeof TPP.bookInfoFieldValue !== "function") return fallback;
+  if (!entryKey || typeof TPP.bookInfoFieldValue !== "function")
+    return fallback;
   const formatted = String(
     TPP.bookInfoFieldValue(book, entryKey, {
       customText: item && item.customText,
@@ -768,8 +769,7 @@ TPP.dataSchemaKeys = function (context) {
       "imagePlacement",
       "imageZoom",
     ]);
-  if (context === "copyrightPage")
-    return new Set(["enabled", "title", "dateFormat", "items"]);
+  if (context === "copyrightPage") return new Set(["enabled", "title"]);
   if (context === "coverFront")
     return new Set([
       "imageElementId",
@@ -1176,7 +1176,12 @@ TPP.dataArrayHtml = function (book, key, list, compact) {
             (encodedJson ||
               TPP.dataValueHtml(book, "value", item && item.value, true)) +
             "</td><td>" +
-            TPP.dataValueHtml(book, "customLabel", item && item.customLabel, true) +
+            TPP.dataValueHtml(
+              book,
+              "customLabel",
+              item && item.customLabel,
+              true,
+            ) +
             "</td></tr>"
           );
         })
@@ -1281,11 +1286,11 @@ TPP.dataJsonNodeSummary = function (value, label) {
     value &&
     typeof value === "object" &&
     !Array.isArray(value) &&
-    (("first" in value ||
+    ("first" in value ||
       "last" in value ||
       "display" in value ||
       "role" in value) &&
-      typeof TPP.authorEntryName === "function")
+    typeof TPP.authorEntryName === "function"
   ) {
     const name = String(TPP.authorEntryName(value) || "").trim();
     const role =
@@ -1397,7 +1402,7 @@ TPP.dataRawJsonHtml = function (book) {
     '<button type="button" class="primary alt" data-json-expand-all="1">Expand All</button>' +
     '<button type="button" class="primary alt" data-json-collapse-all="1">Collapse All</button>' +
     '<button type="button" class="primary alt" data-copy-json="1">Copy</button>' +
-    '</div>' +
+    "</div>" +
     '<details class="data-raw-details" open>' +
     "<summary>Raw JSON</summary>" +
     '<div class="data-code data-code-json" data-json-tree="raw">' +
@@ -1716,7 +1721,7 @@ TPP.renderDataSidebar = function (tabs, activeId) {
         "</button>"
       : "") +
     "</div>" +
-    '</div><p>Inspect structured sections of the current book.</p></div>' +
+    "</div><p>Inspect structured sections of the current book.</p></div>" +
     '<nav class="data-sidebar-nav" aria-label="Data sections">' +
     primaryTabs
       .map(function (tab) {
@@ -2174,7 +2179,13 @@ TPP.aboutCitationInvertedAuthor = function (book) {
     .filter(Boolean);
   if (!rest.length) return first;
   if (rest.length === 1) return first + ", and " + rest[0];
-  return first + ", " + rest.slice(0, -1).join(", ") + ", and " + rest[rest.length - 1];
+  return (
+    first +
+    ", " +
+    rest.slice(0, -1).join(", ") +
+    ", and " +
+    rest[rest.length - 1]
+  );
 };
 TPP.aboutCitationText = function (book, format) {
   const citationFormat = String(format || "plain")

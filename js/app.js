@@ -146,14 +146,6 @@ TPP.initializeRuntimeUi = function () {
           return textApi.handleInput(e);
         }
       }
-      if (e.target.closest(".copyright-item-group")) {
-        const copyrightApi = await TPP.ensureControlModule(
-          "editor-copyright-controls",
-        );
-        if (copyrightApi && typeof copyrightApi.handleInput === "function") {
-          return copyrightApi.handleInput(e);
-        }
-      }
       if (e.target.closest(".book-info-entry")) {
         const bookInfoApi = await TPP.ensureControlModule(
           "editor-book-info-controls",
@@ -176,14 +168,6 @@ TPP.initializeRuntimeUi = function () {
         );
         if (textApi && typeof textApi.handleChange === "function") {
           return textApi.handleChange(e);
-        }
-      }
-      if (e.target.closest(".copyright-item-group")) {
-        const copyrightApi = await TPP.ensureControlModule(
-          "editor-copyright-controls",
-        );
-        if (copyrightApi && typeof copyrightApi.handleChange === "function") {
-          return copyrightApi.handleChange(e);
         }
       }
       if (e.target.closest(".book-info-entry")) {
@@ -235,14 +219,6 @@ TPP.initializeRuntimeUi = function () {
         if (bookInfoApi && typeof bookInfoApi.handleClick === "function") {
           const handled = bookInfoApi.handleClick(e);
           if (handled) return;
-        }
-      }
-      if (e.target.closest("[data-copyright-action]")) {
-        const copyrightApi = await TPP.ensureControlModule(
-          "editor-copyright-controls",
-        );
-        if (copyrightApi && typeof copyrightApi.handleClick === "function") {
-          return copyrightApi.handleClick(e);
         }
       }
     });

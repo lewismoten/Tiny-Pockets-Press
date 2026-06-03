@@ -9,18 +9,21 @@ TPP.uid = function () {
 };
 TPP._internalIdSeq = 0;
 TPP.internalId = function (prefix) {
-  const head = String(prefix || "x")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z]/g, "")
-    .slice(0, 1) || "x";
+  const head =
+    String(prefix || "x")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z]/g, "")
+      .slice(0, 1) || "x";
   TPP._internalIdSeq = (TPP._internalIdSeq + 1) % (36 * 36);
   const timePart = Date.now().toString(36).slice(-4).padStart(4, "0");
   const seqPart = TPP._internalIdSeq.toString(36).padStart(2, "0");
   return head + timePart + seqPart;
 };
 TPP.isCompactInternalId = function (value, prefix) {
-  const text = String(value || "").trim().toLowerCase();
+  const text = String(value || "")
+    .trim()
+    .toLowerCase();
   const head = String(prefix || "")
     .trim()
     .toLowerCase()
@@ -67,7 +70,6 @@ TPP.sheets = {
 TPP.fields = [
   "copyrightPageEnabled",
   "copyrightPageTitle",
-  "copyrightDateFormat",
   "includeToc",
   "tocIndentStep",
   "pageSize",
@@ -197,11 +199,7 @@ TPP.fields = [
   "duplexBackSides",
 ];
 TPP.styleFields = TPP.fields.filter(function (x) {
-  return ![
-    "copyrightPageEnabled",
-    "copyrightPageTitle",
-    "copyrightDateFormat",
-  ].includes(x);
+  return !["copyrightPageEnabled", "copyrightPageTitle"].includes(x);
 });
 TPP.fallbackBook = function () {
   const stamp = new Date().toISOString();
@@ -318,17 +316,6 @@ TPP.fallbackBook = function () {
     copyrightPage: {
       enabled: true,
       title: "Copyright",
-      dateFormat: "year",
-      items: [
-        { id: TPP.uid(), fieldKey: "publisher" },
-        { id: TPP.uid(), fieldKey: "cityPublished" },
-        { id: TPP.uid(), fieldKey: "pubDate" },
-        { id: TPP.uid(), fieldKey: "copyright" },
-        { id: TPP.uid(), fieldKey: "isbn" },
-        { id: TPP.uid(), fieldKey: "isbn13" },
-        { id: TPP.uid(), fieldKey: "edition" },
-        { id: TPP.uid(), fieldKey: "website" },
-      ],
     },
     meta: {
       id: TPP.uid(),

@@ -40,8 +40,6 @@ TPP.settings = function () {
     printing: TPP.bookInfoValue(book, "printing"),
     copyrightPageEnabled: TPP.copyrightPageInfo(book).enabled,
     copyrightPageTitle: TPP.copyrightPageInfo(book).title,
-    copyrightDateFormat: TPP.copyrightPageInfo(book).dateFormat,
-    copyrightPageItems: TPP.copyrightPageInfo(book).items,
     pageSize: TPP.pageInfo(book).pageSize,
     sheetSize: TPP.pageInfo(book).sheetSize,
     signatureSize: TPP.pageInfo(book).signatureSize,
@@ -354,19 +352,23 @@ TPP.buildPages = function () {
       "</div>",
   );
   if (settings.copyrightPageEnabled) {
-    const copyrightLines = (
-      Array.isArray(settings.copyrightPageItems)
-        ? settings.copyrightPageItems
-        : []
-    )
-      .map(function (item) {
-        return TPP.copyrightPageItemText(settings, item, {
-          dateFormat: settings.copyrightDateFormat || "year",
-        });
-      })
-      .filter(Boolean)
-      .map(function (line) {
-        return "<p>" + TPP.esc(line) + "</p>";
+    const copyrightLines = TPP.textElementsForLocation(settings, "copyright")
+      .map(function (item, index) {
+        const line = TPP.copyrightPageItemText(settings, item);
+        if (!line) return "";
+        return (
+          '<div class="cover-el imprint-line imprint-line-' +
+          String(index) +
+          '" style="' +
+          TPP.textBoxStyle(item, {
+            centerX: 50,
+            defaultColor: "var(--page-text)",
+            disableOutline: true,
+          }) +
+          '">' +
+          TPP.esc(line) +
+          "</div>"
+        );
       })
       .join("");
     makePage(

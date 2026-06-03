@@ -590,11 +590,7 @@ TPP.BOOK_INFO_DEFAULT_FIELDS = [
   "pubDate",
   "copyright",
 ];
-TPP.COPYRIGHT_PAGE_FIELDS = [
-  "copyrightPageEnabled",
-  "copyrightPageTitle",
-  "copyrightDateFormat",
-];
+TPP.COPYRIGHT_PAGE_FIELDS = ["copyrightPageEnabled", "copyrightPageTitle"];
 TPP.TOC_FIELDS = [
   "includeToc",
   "tocNumberType",
@@ -924,8 +920,14 @@ TPP.normalizeAuthorEntry = function (entry) {
     middle: String(source.middle || "").trim(),
     last: String(source.last || "").trim(),
     suffix: String(source.suffix || "").trim(),
-    role: TPP.AUTHOR_ROLE_OPTIONS.includes(String(source.role || "").trim().toLowerCase())
-      ? String(source.role || "").trim().toLowerCase()
+    role: TPP.AUTHOR_ROLE_OPTIONS.includes(
+      String(source.role || "")
+        .trim()
+        .toLowerCase(),
+    )
+      ? String(source.role || "")
+          .trim()
+          .toLowerCase()
       : "author",
   };
 };
@@ -1003,27 +1005,26 @@ TPP.authorListText = function (entries, options) {
   const list = TPP.authorEntriesFromValue(entries);
   if (!list.length) return "";
   const invertAll = config.inverted === "all";
-  const invertFirst =
-    config.inverted === true || config.inverted === "first";
+  const invertFirst = config.inverted === true || config.inverted === "first";
   const names = list
     .map(function (entry, index) {
-    const name = TPP.authorEntryName(entry, {
+      const name = TPP.authorEntryName(entry, {
         inverted: invertAll || (invertFirst && index === 0),
         initials: Boolean(config.initials),
-    });
-    if (!name) return "";
-    if (config.includeRoles && entry.role && entry.role !== "author") {
-      return name + " (" + TPP.authorRoleLabel(entry.role).toLowerCase() + ")";
-    }
-    return name;
+      });
+      if (!name) return "";
+      if (config.includeRoles && entry.role && entry.role !== "author") {
+        return (
+          name + " (" + TPP.authorRoleLabel(entry.role).toLowerCase() + ")"
+        );
+      }
+      return name;
     })
     .filter(Boolean);
   if (!names.length) return "";
   if (names.length === 1) return names[0];
   if (names.length === 2) return names[0] + " & " + names[1];
-  return (
-    names.slice(0, -1).join(", ") + ", & " + names[names.length - 1]
-  );
+  return names.slice(0, -1).join(", ") + ", & " + names[names.length - 1];
 };
 TPP.authorCompactSummary = function (entries) {
   const list = TPP.authorEntriesFromValue(entries);
@@ -1045,17 +1046,25 @@ TPP.parseAuthorFieldVariant = function (fieldKey) {
   if (parts[0] !== "author") return null;
   if (parts[1] === "role") {
     return {
-      role: String(parts[2] || "").trim().toLowerCase(),
-      format: String(parts[3] || "default").trim().toLowerCase(),
+      role: String(parts[2] || "")
+        .trim()
+        .toLowerCase(),
+      format: String(parts[3] || "default")
+        .trim()
+        .toLowerCase(),
     };
   }
   return {
     role: "",
-    format: String(parts[1] || "default").trim().toLowerCase(),
+    format: String(parts[1] || "default")
+      .trim()
+      .toLowerCase(),
   };
 };
 TPP.authorRolePluralLabel = function (role) {
-  const normalized = String(role || "").trim().toLowerCase();
+  const normalized = String(role || "")
+    .trim()
+    .toLowerCase();
   const labels = {
     author: "Authors",
     illustrator: "Illustrators",
@@ -1122,8 +1131,11 @@ TPP.authorFieldVariantValue = function (book, fieldKey, options) {
   let list = TPP.authorEntriesFromValue(TPP.bookInfoValue(book, "author"));
   if (variant.role) {
     list = list.filter(function (entry) {
-      return String((entry && entry.role) || "author").trim().toLowerCase() ===
-        variant.role;
+      return (
+        String((entry && entry.role) || "author")
+          .trim()
+          .toLowerCase() === variant.role
+      );
     });
   }
   if (!list.length) return "";
@@ -1383,18 +1395,8 @@ TPP.copyrightPageInfo = function (book) {
   if (!book || typeof book !== "object") return {};
   const fallback = (TPP.fallbackBook && TPP.fallbackBook().copyrightPage) || {};
   const current = Object.assign({}, fallback, book.copyrightPage || {});
-  current.items = Array.isArray(current.items)
-    ? current.items
-        .map(function (item) {
-          if (!item) return null;
-          return {
-            id: item.id || TPP.internalId("p"),
-            fieldKey: item.fieldKey || item.part || "copyright",
-            customText: String(item.customText || ""),
-          };
-        })
-        .filter(Boolean)
-    : [];
+  delete current.items;
+  delete current.dateFormat;
   book.copyrightPage = current;
   return book.copyrightPage;
 };
@@ -1403,7 +1405,6 @@ TPP.attachCopyrightPageAccessors = function (book) {
   const map = {
     copyrightPageEnabled: "enabled",
     copyrightPageTitle: "title",
-    copyrightDateFormat: "dateFormat",
   };
   Object.keys(map).forEach(function (field) {
     const existing = Object.getOwnPropertyDescriptor(book, field);
@@ -1434,8 +1435,6 @@ TPP.syncCopyrightPageFromLegacyFields = function (book) {
   if ("copyrightPageEnabled" in book)
     info.enabled = book.copyrightPageEnabled !== false;
   if ("copyrightPageTitle" in book) info.title = book.copyrightPageTitle || "";
-  if ("copyrightDateFormat" in book)
-    info.dateFormat = book.copyrightDateFormat || "year";
 };
 TPP.compactCopyrightPageInfo = function (book) {
   if (!book || !book.copyrightPage || typeof book.copyrightPage !== "object")
@@ -1797,19 +1796,22 @@ TPP.migrateChapterImageSettingsToChapterSettings = function (book) {
       chapterSettings.imagePlacement === "none")
   ) {
     chapterSettings.imagePlacement =
-      firstWithSettings.imagePlacement || chapterSettings.imagePlacement || "none";
+      firstWithSettings.imagePlacement ||
+      chapterSettings.imagePlacement ||
+      "none";
   }
   if (
     firstWithSettings &&
-    (chapterSettings.imageZoom == null || Number(chapterSettings.imageZoom) === 70)
+    (chapterSettings.imageZoom == null ||
+      Number(chapterSettings.imageZoom) === 70)
   ) {
     chapterSettings.imageZoom = Math.min(
       100,
       Math.max(
         10,
-        Number(
-          firstWithSettings.imageZoom || firstWithSettings.imageWidth,
-        ) || Number(chapterSettings.imageZoom) || 70,
+        Number(firstWithSettings.imageZoom || firstWithSettings.imageWidth) ||
+          Number(chapterSettings.imageZoom) ||
+          70,
       ),
     );
   }
@@ -2751,7 +2753,9 @@ TPP.persistAllBookStores = function () {
 };
 TPP.draftHistoryEntries = function (bookId) {
   const id = String(bookId || "").trim();
-  return Array.isArray(TPP.bookDraftHistory[id]) ? TPP.bookDraftHistory[id] : [];
+  return Array.isArray(TPP.bookDraftHistory[id])
+    ? TPP.bookDraftHistory[id]
+    : [];
 };
 TPP.bookForDraftComparison = function (book) {
   const copy = TPP.clone(book || {});
@@ -2854,8 +2858,7 @@ TPP.collectDraftHistoryChanges = function (previous, current, basePath, out) {
   if (previous === current) return changes;
   const prevIsArray = Array.isArray(previous);
   const currIsArray = Array.isArray(current);
-  const prevIsObject =
-    previous && typeof previous === "object" && !prevIsArray;
+  const prevIsObject = previous && typeof previous === "object" && !prevIsArray;
   const currIsObject = current && typeof current === "object" && !currIsArray;
   if (prevIsArray || currIsArray) {
     const prevArray = prevIsArray ? previous : [];
@@ -2865,9 +2868,15 @@ TPP.collectDraftHistoryChanges = function (previous, current, basePath, out) {
       sameLength &&
       prevArray.every(function (entry, index) {
         const next = currArray[index];
-        if (!entry || !next || typeof entry !== "object" || typeof next !== "object")
+        if (
+          !entry ||
+          !next ||
+          typeof entry !== "object" ||
+          typeof next !== "object"
+        )
           return entry === next;
-        if ("id" in entry || "id" in next) return entry && next && entry.id === next.id;
+        if ("id" in entry || "id" in next)
+          return entry && next && entry.id === next.id;
         return true;
       });
     if (!sameLength || !sameObjectShape) {
@@ -2875,7 +2884,8 @@ TPP.collectDraftHistoryChanges = function (previous, current, basePath, out) {
         changes.push({
           path: pathText,
           op: previous === undefined ? "delete" : "set",
-          before: previous === undefined ? "" : TPP.encodeHistoryValue(previous),
+          before:
+            previous === undefined ? "" : TPP.encodeHistoryValue(previous),
         });
       }
       return changes;
@@ -2936,11 +2946,15 @@ TPP.renderDraftUndoState = function () {
   const canRevert = !!activeId && TPP.hasDraftBook(activeId);
   if (undoButton) {
     undoButton.disabled = !canUndo;
-    undoButton.title = canUndo ? "Undo last draft change" : "No draft changes to undo";
+    undoButton.title = canUndo
+      ? "Undo last draft change"
+      : "No draft changes to undo";
   }
   if (revertButton) {
     revertButton.disabled = !canRevert;
-    revertButton.title = canRevert ? "Revert entire draft" : "No draft to revert";
+    revertButton.title = canRevert
+      ? "Revert entire draft"
+      : "No draft to revert";
   }
 };
 TPP.undoDraftStep = function (bookId) {
@@ -2962,7 +2976,11 @@ TPP.undoDraftStep = function (bookId) {
       if (change.op === "delete") {
         TPP.deleteValueAtPath(target, change.path);
       } else {
-        TPP.setValueAtPath(target, change.path, TPP.decodeHistoryValue(change.before));
+        TPP.setValueAtPath(
+          target,
+          change.path,
+          TPP.decodeHistoryValue(change.before),
+        );
       }
     });
   TPP.syncLegacyImageFieldsFromElements(target);
@@ -3349,10 +3367,8 @@ TPP.compactInternalIds = function (book) {
       entry.value = TPP.authorEntriesValue(changedAuthors);
     }
   });
-  TPP.textElementsForLocation(book, "front")
-    .concat(TPP.textElementsForLocation(book, "back"))
-    .concat(TPP.textElementsForLocation(book, "spine"))
-    .forEach(function (entry) {
+  (Array.isArray(book.textElements) ? book.textElements : []).forEach(
+    function (entry) {
       if (!entry) return;
       entry.id = remapId("textElements", entry.id, "t");
       const part = String(entry.part || "").trim();
@@ -3376,25 +3392,14 @@ TPP.compactInternalIds = function (book) {
           maps.changed = true;
         }
       }
-    });
-  const copyrightItems = TPP.copyrightPageInfo(book).items || [];
-  copyrightItems.forEach(function (item) {
-    if (!item) return;
-    item.id = remapId("copyright", item.id, "p");
-    const fieldKey = String(item.fieldKey || "").trim();
-    if (fieldKey.startsWith("custom:")) {
-      const customId = fieldKey.slice("custom:".length);
-      const nextId = TPP.internalIdMapValue(maps.bookInfo, customId);
-      if (nextId && nextId !== customId) {
-        item.fieldKey = "custom:" + nextId;
-        maps.changed = true;
-      }
-    }
-  });
-  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
-    if (!chapter) return;
-    chapter.id = remapId("chapters", chapter.id, "c");
-  });
+    },
+  );
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(
+    function (chapter) {
+      if (!chapter) return;
+      chapter.id = remapId("chapters", chapter.id, "c");
+    },
+  );
   (Array.isArray(book.files) ? book.files : []).forEach(function (file) {
     if (!file) return;
     file.id = remapId("files", file.id, "f");
@@ -3438,16 +3443,18 @@ TPP.compactInternalIds = function (book) {
       }
     },
   );
-  (Array.isArray(book.chapters) ? book.chapters : []).forEach(function (chapter) {
-    if (!chapter) return;
-    if (chapter.imageId) {
-      const nextImageId = TPP.internalIdMapValue(maps.files, chapter.imageId);
-      if (nextImageId && nextImageId !== chapter.imageId) {
-        chapter.imageId = nextImageId;
-        maps.changed = true;
+  (Array.isArray(book.chapters) ? book.chapters : []).forEach(
+    function (chapter) {
+      if (!chapter) return;
+      if (chapter.imageId) {
+        const nextImageId = TPP.internalIdMapValue(maps.files, chapter.imageId);
+        if (nextImageId && nextImageId !== chapter.imageId) {
+          chapter.imageId = nextImageId;
+          maps.changed = true;
+        }
       }
-    }
-  });
+    },
+  );
   const coverFront = TPP.coverFrontInfo(book);
   const backCover = TPP.backCoverInfo(book);
   const spine = TPP.spineInfo(book);
@@ -3517,7 +3524,10 @@ TPP.rewriteInternalIdsInValue = function (value, maps, keyHint) {
   const looksLikeChapter =
     "title" in value && "text" in value && "includeInToc" in value;
   const looksLikeAuthor =
-    "role" in value || "display" in value || "first" in value || "last" in value;
+    "role" in value ||
+    "display" in value ||
+    "first" in value ||
+    "last" in value;
   const looksLikeCopyrightItem = "fieldKey" in value && "customText" in value;
   keys.forEach(function (entryKey) {
     let nextValue = value[entryKey];
@@ -4291,7 +4301,192 @@ TPP.defaultTextElements = function (book, base) {
           : Boolean(sourceSpine.authorRotate),
       customText: "",
     },
+    {
+      id: "copyright-publisher",
+      location: "copyright",
+      part: "publisher",
+      enabled: true,
+      fieldKey: "publisher",
+      size: 4,
+      x: 50,
+      y: 18,
+      width: 100,
+      align: "center",
+      color: "",
+      outlineColor: "",
+      outlineSize: 0,
+      rotate: 0,
+      customText: "",
+    },
+    {
+      id: "copyright-city",
+      location: "copyright",
+      part: "cityPublished",
+      enabled: true,
+      fieldKey: "cityPublished",
+      size: 4,
+      x: 50,
+      y: 26,
+      width: 100,
+      align: "center",
+      color: "",
+      outlineColor: "",
+      outlineSize: 0,
+      rotate: 0,
+      customText: "",
+    },
+    {
+      id: "copyright-pubdate",
+      location: "copyright",
+      part: "pubDate-year",
+      enabled: true,
+      fieldKey: "pubDate:year",
+      size: 4,
+      x: 50,
+      y: 34,
+      width: 100,
+      align: "center",
+      color: "",
+      outlineColor: "",
+      outlineSize: 0,
+      rotate: 0,
+      customText: "",
+    },
+    {
+      id: "copyright-copyright",
+      location: "copyright",
+      part: "copyright",
+      enabled: true,
+      fieldKey: "copyright",
+      size: 4,
+      x: 50,
+      y: 42,
+      width: 100,
+      align: "center",
+      color: "",
+      outlineColor: "",
+      outlineSize: 0,
+      rotate: 0,
+      customText: "",
+    },
+    {
+      id: "copyright-isbn",
+      location: "copyright",
+      part: "isbn",
+      enabled: true,
+      fieldKey: "isbn",
+      size: 4,
+      x: 50,
+      y: 50,
+      width: 100,
+      align: "center",
+      color: "",
+      outlineColor: "",
+      outlineSize: 0,
+      rotate: 0,
+      customText: "",
+    },
+    {
+      id: "copyright-isbn13",
+      location: "copyright",
+      part: "isbn13",
+      enabled: true,
+      fieldKey: "isbn13",
+      size: 4,
+      x: 50,
+      y: 58,
+      width: 100,
+      align: "center",
+      color: "",
+      outlineColor: "",
+      outlineSize: 0,
+      rotate: 0,
+      customText: "",
+    },
+    {
+      id: "copyright-edition",
+      location: "copyright",
+      part: "edition",
+      enabled: true,
+      fieldKey: "edition",
+      size: 4,
+      x: 50,
+      y: 66,
+      width: 100,
+      align: "center",
+      color: "",
+      outlineColor: "",
+      outlineSize: 0,
+      rotate: 0,
+      customText: "",
+    },
+    {
+      id: "copyright-website",
+      location: "copyright",
+      part: "website",
+      enabled: true,
+      fieldKey: "website",
+      size: 4,
+      x: 50,
+      y: 74,
+      width: 100,
+      align: "center",
+      color: "",
+      outlineColor: "",
+      outlineSize: 0,
+      rotate: 0,
+      customText: "",
+    },
   ];
+};
+TPP.migrateCopyrightPageItemsToTextElements = function (book) {
+  if (!book || typeof book !== "object") return;
+  const copyrightPage = book.copyrightPage || {};
+  const legacyItems = Array.isArray(copyrightPage.items)
+    ? copyrightPage.items
+    : [];
+  book.textElements = Array.isArray(book.textElements) ? book.textElements : [];
+  const existingCopyright = TPP.textElementsForLocation(book, "copyright");
+  if (!existingCopyright.length && legacyItems.length) {
+    const legacyDateFormat = String(copyrightPage.dateFormat || "year").trim();
+    legacyItems.forEach(function (item, index) {
+      if (!item) return;
+      let fieldKey = String(item.fieldKey || item.part || "copyright").trim();
+      if (fieldKey === "pubDate") {
+        const mode =
+          legacyDateFormat === "year-month" ||
+          legacyDateFormat === "year-month-day"
+            ? legacyDateFormat
+            : "year";
+        fieldKey = "pubDate:" + mode;
+      }
+      book.textElements.push({
+        id: item.id || TPP.internalId("t"),
+        location: "copyright",
+        part:
+          fieldKey === "custom"
+            ? TPP.internalId("s")
+            : "copyright-" + String(index + 1),
+        fieldKey: fieldKey,
+        enabled: true,
+        size: 4,
+        x: 50,
+        y: 18 + index * 8,
+        width: 100,
+        align: "center",
+        color: "",
+        outlineColor: "",
+        outlineSize: 0,
+        rotate: 0,
+        customText: String(item.customText || ""),
+      });
+    });
+  }
+  if (book.copyrightPage && typeof book.copyrightPage === "object") {
+    delete book.copyrightPage.items;
+    delete book.copyrightPage.dateFormat;
+  }
+  delete book.copyrightDateFormat;
 };
 TPP.migrateTextElements = function (book, base) {
   const defaults = TPP.defaultTextElements(book, base);
@@ -4347,6 +4542,9 @@ TPP.bookInfoFieldLabel = function (fieldKey, book) {
   if (String(fieldKey || "").startsWith("author:")) {
     return TPP.authorFieldVariantLabel(fieldKey);
   }
+  if (String(fieldKey || "").startsWith("pubDate:")) {
+    return TPP.pubDateFieldVariantLabel(fieldKey);
+  }
   const labels = {
     title: "Title",
     author: "Author",
@@ -4384,6 +4582,7 @@ TPP.bookInfoFieldOptions = function (book, options) {
   const includeClassificationFormats =
     options && options.includeClassificationFormats;
   const includeAuthorFormats = options && options.includeAuthorFormats;
+  const includeDateFormats = options && options.includeDateFormats;
   const list = TPP.bookInfo(book).flatMap(function (entry) {
     if (!entry) return [];
     if (
@@ -4402,9 +4601,17 @@ TPP.bookInfoFieldOptions = function (book, options) {
       });
     }
     if (includeAuthorFormats && entry.key === "author") {
-      return TPP.authorFieldVariantDescriptors(entry.value).map(function (
-        descriptor,
-      ) {
+      return TPP.authorFieldVariantDescriptors(entry.value).map(
+        function (descriptor) {
+          return {
+            value: descriptor.key,
+            label: TPP.bookInfoFieldLabel(descriptor.key, book),
+          };
+        },
+      );
+    }
+    if (includeDateFormats && entry.key === "pubDate") {
+      return TPP.pubDateFieldVariantDescriptors().map(function (descriptor) {
         return {
           value: descriptor.key,
           label: TPP.bookInfoFieldLabel(descriptor.key, book),
@@ -4444,6 +4651,38 @@ TPP.formatBookDate = function (value, mode) {
     day: "numeric",
   });
 };
+TPP.pubDateFieldVariantDescriptors = function () {
+  return [
+    { key: "pubDate:year", mode: "year", label: "Publishing Date (Year)" },
+    {
+      key: "pubDate:year-month",
+      mode: "year-month",
+      label: "Publishing Date (Year + Month)",
+    },
+    {
+      key: "pubDate:year-month-day",
+      mode: "year-month-day",
+      label: "Publishing Date (Full Date)",
+    },
+  ];
+};
+TPP.pubDateFieldVariantLabel = function (fieldKey) {
+  const key = String(fieldKey || "").trim();
+  const match = TPP.pubDateFieldVariantDescriptors().find(function (entry) {
+    return entry.key === key;
+  });
+  return (match && match.label) || "Publishing Date";
+};
+TPP.pubDateFieldVariantValue = function (book, fieldKey) {
+  const key = String(fieldKey || "").trim();
+  const match = TPP.pubDateFieldVariantDescriptors().find(function (entry) {
+    return entry.key === key;
+  });
+  return TPP.formatBookDate(
+    TPP.bookInfoValue(book, "pubDate"),
+    (match && match.mode) || "year-month-day",
+  );
+};
 TPP.bookInfoFieldValue = function (book, fieldKey, options) {
   const dateFormat = (options && options.dateFormat) || "year-month-day";
   if (String(fieldKey || "").startsWith("custom:")) {
@@ -4474,6 +4713,9 @@ TPP.bookInfoFieldValue = function (book, fieldKey, options) {
   if (String(fieldKey || "").startsWith("author:")) {
     return TPP.authorFieldVariantValue(book, fieldKey, options);
   }
+  if (String(fieldKey || "").startsWith("pubDate:")) {
+    return TPP.pubDateFieldVariantValue(book, fieldKey);
+  }
   if (fieldKey === "series")
     return [
       TPP.bookInfoValue(book, "seriesName"),
@@ -4483,7 +4725,9 @@ TPP.bookInfoFieldValue = function (book, fieldKey, options) {
       .join(" ");
   if (fieldKey === "author")
     return options && options.location === "spine"
-      ? String(TPP.authorCompactSummary(TPP.bookInfoValue(book, "author")) || "")
+      ? String(
+          TPP.authorCompactSummary(TPP.bookInfoValue(book, "author")) || "",
+        )
       : TPP.authorListText(TPP.bookInfoValue(book, "author"), {
           includeRoles: false,
         });
@@ -4645,6 +4889,7 @@ TPP.norm = function (book) {
     delete normalized.imageElementId;
     return normalized;
   });
+  TPP.migrateCopyrightPageItemsToTextElements(out);
   TPP.migrateTextElements(out, base);
   TPP.migrateImageElements(out, base);
   TPP.syncLegacyTextFieldsFromElements(out);
@@ -4780,10 +5025,7 @@ TPP.load = async function () {
         ) {
           migratedInternalIds = true;
         }
-        return [
-          entry[0],
-          rewritten,
-        ];
+        return [entry[0], rewritten];
       }),
   );
   if (migratedInternalIds) {
@@ -4791,7 +5033,8 @@ TPP.load = async function () {
   }
   const activeId = localStorage.getItem(TPP.ACTIVE);
   TPP.active =
-    TPP.workingBookForId(activeId) || TPP.workingBookForId(TPP.bookId(TPP.library[0]));
+    TPP.workingBookForId(activeId) ||
+    TPP.workingBookForId(TPP.bookId(TPP.library[0]));
 };
 TPP.loadStaleKeyLookup = async function () {
   if (
@@ -4835,7 +5078,7 @@ TPP.getBookSaveUiState = function (bookId) {
     }
   );
 };
-  TPP.renderSaveStateIndicator = function () {
+TPP.renderSaveStateIndicator = function () {
   const button = document.getElementById("saveBook");
   if (!button) return;
   const bookId = TPP.active ? TPP.bookId(TPP.active) : "";
@@ -4981,9 +5224,7 @@ TPP.save = function (mode, bookId) {
       const workingBook =
         bookId && TPP.active && TPP.bookId(TPP.active) === id
           ? TPP.active
-          : TPP.findDraftBookById(id) ||
-            TPP.findLibraryBookById(id) ||
-            null;
+          : TPP.findDraftBookById(id) || TPP.findLibraryBookById(id) || null;
       if (!workingBook) return;
       const committed = TPP.findLibraryBookById(id);
       const nextBook = TPP.norm(TPP.clone(workingBook));

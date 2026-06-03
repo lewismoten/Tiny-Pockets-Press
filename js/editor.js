@@ -267,6 +267,11 @@ TPP.bookInfoReferenceFieldKeys = function (book, entryOrId) {
     });
     return Array.from(keys);
   }
+  if (entry.key === "pubDate") {
+    return TPP.pubDateFieldVariantDescriptors().map(function (descriptor) {
+      return descriptor.key;
+    });
+  }
   return [String(entry.key || "").trim()].filter(Boolean);
 };
 TPP.bookInfoUsageReferences = function (book, entryOrId) {
@@ -280,11 +285,14 @@ TPP.bookInfoUsageReferences = function (book, entryOrId) {
     front: "Front cover",
     back: "Back cover",
     spine: "Spine",
+    copyright: "Copyright page",
   };
   const references = [];
-  ["front", "back", "spine"].forEach(function (location) {
+  ["front", "back", "spine", "copyright"].forEach(function (location) {
     TPP.textElementsForLocation(book, location).forEach(function (item, index) {
-      const fieldKey = String((item && item.fieldKey) || item?.part || "").trim();
+      const fieldKey = String(
+        (item && item.fieldKey) || item?.part || "",
+      ).trim();
       if (!targetKeys.has(fieldKey)) return;
       references.push({
         kind: "text",
@@ -292,16 +300,6 @@ TPP.bookInfoUsageReferences = function (book, entryOrId) {
         label:
           (locationLabels[location] || location) + " text " + String(index + 1),
       });
-    });
-  });
-  const copyrightItems = TPP.copyrightPageInfo(book).items || [];
-  copyrightItems.forEach(function (item, index) {
-    const fieldKey = String((item && item.fieldKey) || "").trim();
-    if (!targetKeys.has(fieldKey)) return;
-    references.push({
-      kind: "copyright",
-      location: "copyright",
-      label: "Copyright page line " + String(index + 1),
     });
   });
   return references;
@@ -314,19 +312,12 @@ TPP.removeBookInfoReferences = function (book, entryOrId) {
   if (Array.isArray(book.textElements)) {
     const before = book.textElements.length;
     book.textElements = book.textElements.filter(function (item) {
-      const fieldKey = String((item && item.fieldKey) || item?.part || "").trim();
+      const fieldKey = String(
+        (item && item.fieldKey) || item?.part || "",
+      ).trim();
       return !targetKeys.has(fieldKey);
     });
     removed += before - book.textElements.length;
-  }
-  const copyrightInfo = TPP.copyrightPageInfo(book);
-  if (Array.isArray(copyrightInfo.items)) {
-    const before = copyrightInfo.items.length;
-    copyrightInfo.items = copyrightInfo.items.filter(function (item) {
-      const fieldKey = String((item && item.fieldKey) || "").trim();
-      return !targetKeys.has(fieldKey);
-    });
-    removed += before - copyrightInfo.items.length;
   }
   return removed;
 };
@@ -364,6 +355,18 @@ TPP.textElementEditorConfigs = {
     supportsAlign: true,
     supportsRotate: true,
     defaultAlign: "left",
+  },
+  copyright: {
+    containerId: "copyrightPageItems",
+    location: "copyright",
+    addLabel: "Add Copyright Text",
+    minSize: 3,
+    supportsX: true,
+    supportsWidth: true,
+    supportsAlign: true,
+    supportsRotate: false,
+    supportsColor: false,
+    defaultAlign: "center",
   },
 };
 TPP.textAlignModes = ["left", "center", "justify", "right", "clip"];
@@ -545,6 +548,7 @@ TPP.textElementFieldPickerOptions = function (book, location) {
   return TPP.bookInfoFieldOptions(book, {
     includeClassificationFormats: true,
     includeAuthorFormats: true,
+    includeDateFormats: true,
   }).filter(function (option) {
     return option && option.value && !used.has(option.value);
   });
@@ -557,6 +561,7 @@ TPP.textElementFieldOptionsHtml = function (selected) {
     includeInlineCustom: true,
     includeClassificationFormats: true,
     includeAuthorFormats: true,
+    includeDateFormats: true,
   });
   if (
     selected &&
@@ -586,6 +591,7 @@ TPP.textElementFieldOptionsHtml = function (selected) {
 TPP.coverTextRowHtml = function (book, spec, element) {
   const entry = element || {};
   const location = spec && spec.location ? spec.location : "front";
+  const supportsColor = spec.supportsColor !== false;
   const sizeValue = TPP.finiteNumberOr(
     entry.size,
     location === "front" ? 4.2 : TPP.finiteNumberOr(spec && spec.minSize, 4),
@@ -673,9 +679,9 @@ TPP.coverTextRowHtml = function (book, spec, element) {
       value: TPP.finiteNumberOr(entry.width, 100),
     }) +
     "</label></div></td>" +
-    "<td>" +
-    TPP.textColorOutlineControlHtml(entry) +
-    "</td>" +
+    (supportsColor
+      ? "<td>" + TPP.textColorOutlineControlHtml(entry) + "</td>"
+      : "") +
     "</tr>"
   );
 };
@@ -755,14 +761,30 @@ TPP.textColorOutlineControlHtml = function (entry) {
 TPP.coverTextListHtml = function (book, spec) {
   const location = spec && spec.location ? spec.location : "front";
   const addLabel = spec.addLabel || "Add Text";
+  const supportsColor = spec.supportsColor !== false;
   const trashIdMap = {
     front: "frontCoverTrashDrop",
     back: "backCoverTrashDrop",
     spine: "spineTextTrashDrop",
+    copyright: "copyrightTextTrashDrop",
   };
   const trashId = trashIdMap[location] || "frontCoverTrashDrop";
+  const colgroup =
+    '<colgroup><col class="cover-text-col-field"><col class="cover-text-col-size"><col class="cover-text-col-position"><col class="cover-text-col-align">' +
+    (supportsColor ? '<col class="cover-text-col-outline">' : "") +
+    "</colgroup>";
+  const headings =
+    "<tr><th>Content</th><th>Sz</th><th>Pos</th><th>Width</th>" +
+    (supportsColor ? "<th>Color</th>" : "") +
+    "</tr>";
   return (
-    '<div class="book-info-table-wrap"><table class="data-table cover-text-table"><colgroup><col class="cover-text-col-field"><col class="cover-text-col-size"><col class="cover-text-col-position"><col class="cover-text-col-align"><col class="cover-text-col-outline"></colgroup><thead><tr><th>Content</th><th>Sz</th><th>Pos</th><th>Width</th><th>Color</th></tr></thead><tbody>' +
+    '<div class="book-info-table-wrap"><table class="data-table cover-text-table' +
+    (supportsColor ? "" : " cover-text-table--plain") +
+    '">' +
+    colgroup +
+    "<thead>" +
+    headings +
+    "</thead><tbody>" +
     TPP.textElementsForLocation(book, location)
       .map(function (element) {
         return TPP.coverTextRowHtml(book, spec, element);
@@ -812,7 +834,7 @@ TPP.textElementGroupHtml = function (book, spec, element) {
       value: TPP.finiteNumberOr(entry.size, spec.minSize),
     }) +
     "</label>" +
-    '<label>Y ' +
+    "<label>Y " +
     TPP.rangeInputHtml({
       label: "Y",
       className: "text-y",
@@ -889,7 +911,8 @@ TPP.textElementListHtml = function (book, spec) {
   if (
     spec.location === "front" ||
     spec.location === "back" ||
-    spec.location === "spine"
+    spec.location === "spine" ||
+    spec.location === "copyright"
   )
     return TPP.coverTextListHtml(book, spec);
   const elements = TPP.textElementsForLocation(book, spec.location);
@@ -906,32 +929,6 @@ TPP.textElementListHtml = function (book, spec) {
     "</button>"
   );
 };
-TPP.copyrightPageItemsHtml = function (book) {
-  const items = TPP.copyrightPageInfo(book).items || [];
-  return (
-    items
-      .map(function (item) {
-        const fieldKey = item.fieldKey || "copyright";
-        return (
-          '<section class="cover-text-group copyright-item-group" draggable="true" data-drag-kind="copyright-item" data-item-id="' +
-          TPP.esc(item.id || "") +
-          '"><div class="toolbar"><strong><span class="drag-handle" data-drag-handle="1" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span>' +
-          TPP.esc(TPP.bookInfoFieldLabel(fieldKey, book)) +
-          '</strong><span><button type="button" class="small" data-copyright-action="remove">Remove</button></span></div><label>Field<select class="copyright-field-key">' +
-          TPP.textElementFieldOptionsHtml(fieldKey) +
-          "</select></label>" +
-          (fieldKey === "custom"
-            ? '<label>Custom Text<textarea class="copyright-custom" rows="3">' +
-              TPP.esc(item.customText || "") +
-              "</textarea></label>"
-            : "") +
-          "</section>"
-        );
-      })
-      .join("") +
-    '<button type="button" class="small" data-copyright-action="add">Add Copyright Line</button>'
-  );
-};
 TPP.renderTextElementControls = function () {
   if (TPP.renderBookInfoControls) TPP.renderBookInfoControls();
   Object.keys(TPP.textElementEditorConfigs).forEach(function (key) {
@@ -941,16 +938,12 @@ TPP.renderTextElementControls = function () {
     node.className =
       spec.location === "front" ||
       spec.location === "back" ||
-      spec.location === "spine"
+      spec.location === "spine" ||
+      spec.location === "copyright"
         ? "cover-text-layout"
         : "cover-text-grid";
     node.innerHTML = TPP.textElementListHtml(TPP.active, spec);
   });
-  const copyright = document.getElementById("copyrightPageItems");
-  if (copyright) {
-    copyright.className = "cover-text-grid";
-    copyright.innerHTML = TPP.copyrightPageItemsHtml(TPP.active);
-  }
   if (TPP.refreshRangeInputTitles) TPP.refreshRangeInputTitles(document);
   if (TPP.refreshRotationStepButtons) TPP.refreshRotationStepButtons(document);
 };
@@ -1004,28 +997,6 @@ TPP.readSingleTextElementGroup = function (book, group) {
     TPP.finiteNumberOr(group.querySelector(".text-outline-size")?.value, 0),
   );
 };
-TPP.readSingleCopyrightItemGroup = function (book, group) {
-  if (!book || !group) return;
-  const info = TPP.copyrightPageInfo(book);
-  info.items = Array.isArray(info.items) ? info.items : [];
-  const existing = info.items.find(function (item) {
-    return item && item.id === group.dataset.itemId;
-  });
-  const next = {
-    id:
-      (existing && existing.id) ||
-      group.dataset.itemId ||
-      TPP.internalId("p"),
-    fieldKey: group.querySelector(".copyright-field-key")?.value || "copyright",
-    customText: group.querySelector(".copyright-custom")?.value || "",
-  };
-  if (!existing) {
-    info.items.push(next);
-    return;
-  }
-  existing.fieldKey = next.fieldKey;
-  existing.customText = next.customText;
-};
 TPP.readTextElementControls = function (book) {
   const groups = Array.from(document.querySelectorAll(".text-element-group"));
   if (!groups.length || !book) return;
@@ -1058,15 +1029,6 @@ TPP.readTextElementControls = function (book) {
         return entry && !seen.has(entry.id);
       }),
     );
-  }
-  const copyrightItems = Array.from(
-    document.querySelectorAll(".copyright-item-group"),
-  );
-  if (copyrightItems.length) {
-    TPP.copyrightPageInfo(book).items = [];
-    copyrightItems.forEach(function (group) {
-      TPP.readSingleCopyrightItemGroup(book, group);
-    });
   }
   if (TPP.syncLegacyTextFieldsFromElements)
     TPP.syncLegacyTextFieldsFromElements(book);
@@ -1255,32 +1217,6 @@ TPP.removeTextElement = function (book, id) {
     return entry && entry.id !== id;
   });
 };
-TPP.addCopyrightPageItem = function (book) {
-  const info = TPP.copyrightPageInfo(book);
-  info.items = Array.isArray(info.items) ? info.items : [];
-  info.items.push({
-    id: TPP.internalId("p"),
-    fieldKey: "copyright",
-    customText: "",
-  });
-};
-TPP.moveCopyrightPageItem = function (book, id, direction) {
-  const items = TPP.copyrightPageInfo(book).items || [];
-  const index = items.findIndex(function (item) {
-    return item && item.id === id;
-  });
-  if (index < 0) return;
-  const next = index + direction;
-  if (next < 0 || next >= items.length) return;
-  [items[index], items[next]] = [items[next], items[index]];
-};
-TPP.removeCopyrightPageItem = function (book, id) {
-  const info = TPP.copyrightPageInfo(book);
-  info.items = (info.items || []).filter(function (item) {
-    return item && item.id !== id;
-  });
-};
-
 TPP.populate = function () {
   document.getElementById("fontFamily").innerHTML = TPP.fonts
     .map(function (pair) {
@@ -1441,7 +1377,10 @@ TPP.chapterMaxLevelAtInsert = function (chapters, insertIndex) {
   if (!Array.isArray(chapters) || insertIndex <= 0) return 0;
   return Math.min(
     5,
-    Math.max(0, Number(chapters[insertIndex - 1] && chapters[insertIndex - 1].level) || 0) + 1,
+    Math.max(
+      0,
+      Number(chapters[insertIndex - 1] && chapters[insertIndex - 1].level) || 0,
+    ) + 1,
   );
 };
 TPP.chapterAllowedDropLevel = function (
@@ -1456,13 +1395,17 @@ TPP.chapterAllowedDropLevel = function (
   const source = TPP.chapterBlockRange(list, sourceIndex);
   const remaining = list.slice(0, source.start).concat(list.slice(source.end));
   let adjustedTarget = Number(targetIndex) || 0;
-  if (adjustedTarget > source.start) adjustedTarget -= source.end - source.start;
+  if (adjustedTarget > source.start)
+    adjustedTarget -= source.end - source.start;
   adjustedTarget = Math.max(0, Math.min(adjustedTarget, remaining.length - 1));
   const targetRange = TPP.chapterBlockRange(remaining, adjustedTarget);
   const insertIndex =
     position === "before" ? targetRange.start : targetRange.end;
   const maxLevel = TPP.chapterMaxLevelAtInsert(remaining, insertIndex);
-  return Math.max(0, Math.min(maxLevel, Math.max(0, Number(requestedLevel) || 0)));
+  return Math.max(
+    0,
+    Math.min(maxLevel, Math.max(0, Number(requestedLevel) || 0)),
+  );
 };
 TPP.clearChapterDropState = function () {
   TPP.chapterDragState = null;
@@ -1499,9 +1442,10 @@ TPP.chapterDragPreviewInfo = function () {
     state.position,
     state.level,
   );
-  const chapters = result && Array.isArray(result.chapters)
-    ? result.chapters
-    : TPP.active.chapters;
+  const chapters =
+    result && Array.isArray(result.chapters)
+      ? result.chapters
+      : TPP.active.chapters;
   const nextIndex = chapters.findIndex(function (chapter) {
     return chapter && chapter.id === sourceChapter.id;
   });
@@ -1511,7 +1455,10 @@ TPP.chapterDragPreviewInfo = function () {
   return {
     chapter: chapters[nextIndex],
     nextIndex: nextIndex,
-    level: Math.max(0, Number(chapters[nextIndex] && chapters[nextIndex].level) || 0),
+    level: Math.max(
+      0,
+      Number(chapters[nextIndex] && chapters[nextIndex].level) || 0,
+    ),
     number: number,
     label: parent ? "Under " + parent.title : "Top level",
   };
@@ -1548,8 +1495,12 @@ TPP.applyChapterDropState = function () {
     }
   });
   if (!state || !preview) return;
-  const sourceRow = list.querySelector('[data-i="' + String(state.sourceIndex) + '"]');
-  const targetRow = list.querySelector('[data-i="' + String(state.targetIndex) + '"]');
+  const sourceRow = list.querySelector(
+    '[data-i="' + String(state.sourceIndex) + '"]',
+  );
+  const targetRow = list.querySelector(
+    '[data-i="' + String(state.targetIndex) + '"]',
+  );
   if (!sourceRow || !targetRow) return;
   const ghost = sourceRow.cloneNode(true);
   ghost.classList.remove(
@@ -1571,12 +1522,14 @@ TPP.applyChapterDropState = function () {
   const numberEl = ghost.querySelector(".chapter-pill-index");
   if (numberEl) numberEl.textContent = String(preview.number) + ".";
   const titleEl = ghost.querySelector(".chapter-pill-title");
-  if (titleEl) titleEl.textContent = String(
-    (preview.chapter && preview.chapter.title) || "Untitled",
-  );
+  if (titleEl)
+    titleEl.textContent = String(
+      (preview.chapter && preview.chapter.title) || "Untitled",
+    );
   const badgesEl = ghost.querySelector(".chapter-pill-badges");
   if (badgesEl) {
-    badgesEl.innerHTML = '<span class="chapter-pill-badge preview-badge">' +
+    badgesEl.innerHTML =
+      '<span class="chapter-pill-badge preview-badge">' +
       TPP.esc(preview.label) +
       "</span>";
   } else {
@@ -1593,7 +1546,13 @@ TPP.applyChapterDropState = function () {
   if (state.position === "before") targetRow.before(ghost);
   else targetRow.after(ghost);
 };
-TPP.moveChapterBlock = function (chapters, sourceIndex, targetIndex, position, level) {
+TPP.moveChapterBlock = function (
+  chapters,
+  sourceIndex,
+  targetIndex,
+  position,
+  level,
+) {
   const list = Array.isArray(chapters) ? chapters.slice() : [];
   if (!list.length) return null;
   const source = TPP.chapterBlockRange(list, sourceIndex);
@@ -1638,7 +1597,8 @@ TPP.moveChapterBlock = function (chapters, sourceIndex, targetIndex, position, l
   }
   const remaining = list.slice(0, source.start).concat(list.slice(source.end));
   let adjustedTarget = Number(targetIndex) || 0;
-  if (adjustedTarget > source.start) adjustedTarget -= source.end - source.start;
+  if (adjustedTarget > source.start)
+    adjustedTarget -= source.end - source.start;
   adjustedTarget = Math.max(0, Math.min(adjustedTarget, remaining.length - 1));
   const targetRange = TPP.chapterBlockRange(remaining, adjustedTarget);
   let insertIndex = position === "before" ? targetRange.start : targetRange.end;
@@ -1649,7 +1609,10 @@ TPP.moveChapterBlock = function (chapters, sourceIndex, targetIndex, position, l
     Math.min(maxRootLevel, Math.max(0, Number(level) || 0)),
   );
   block.forEach(function (chapter, index) {
-    chapter.level = Math.max(0, Math.min(5, nextRootLevel + levelOffsets[index]));
+    chapter.level = Math.max(
+      0,
+      Math.min(5, nextRootLevel + levelOffsets[index]),
+    );
   });
   remaining.splice(insertIndex, 0, ...block);
   const currentIndex = selectedId
@@ -1660,7 +1623,9 @@ TPP.moveChapterBlock = function (chapters, sourceIndex, targetIndex, position, l
   return {
     chapters: remaining,
     currentChapter:
-      currentIndex >= 0 ? currentIndex : Math.max(0, Math.min(insertIndex, remaining.length - 1)),
+      currentIndex >= 0
+        ? currentIndex
+        : Math.max(0, Math.min(insertIndex, remaining.length - 1)),
   };
 };
 TPP.renderChapterSidebar = function () {
@@ -1681,7 +1646,10 @@ TPP.chapterOutlineNumber = function (chapters, index) {
   const targetIndex = Math.max(0, Number(index) || 0);
   const counters = [];
   for (let i = 0; i <= targetIndex && i < list.length; i += 1) {
-    const level = Math.max(0, Math.min(5, Number(list[i] && list[i].level) || 0));
+    const level = Math.max(
+      0,
+      Math.min(5, Number(list[i] && list[i].level) || 0),
+    );
     counters[level] = (counters[level] || 0) + 1;
     counters.length = level + 1;
   }
@@ -1693,9 +1661,14 @@ TPP.renderChapterList = function () {
   list.innerHTML = TPP.active.chapters
     .map(function (chapter, index) {
       const active = index === TPP.currentChapter;
-      const outlineNumber = TPP.chapterOutlineNumber(TPP.active.chapters, index);
+      const outlineNumber = TPP.chapterOutlineNumber(
+        TPP.active.chapters,
+        index,
+      );
       const badges = [
-        chapter && chapter.isMetadata ? '<span class="chapter-pill-badge">Meta</span>' : "",
+        chapter && chapter.isMetadata
+          ? '<span class="chapter-pill-badge">Meta</span>'
+          : "",
         chapter && chapter.includeInToc === false
           ? '<span class="chapter-pill-badge muted">No TOC</span>'
           : "",

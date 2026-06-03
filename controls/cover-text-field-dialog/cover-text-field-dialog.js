@@ -4,7 +4,9 @@ export async function init(TPP) {
   if (initialized) return { open: TPP._openCoverTextFieldDialog };
   initialized = true;
   const addCustomFieldToTextList = function () {
-    const nameInput = document.getElementById("frontCoverFieldDialogCustomName");
+    const nameInput = document.getElementById(
+      "frontCoverFieldDialogCustomName",
+    );
     const valueInput = document.getElementById(
       "frontCoverFieldDialogCustomValue",
     );
@@ -39,13 +41,18 @@ export async function init(TPP) {
     const list = document.getElementById("frontCoverFieldDialogList");
     const title = document.getElementById("frontCoverFieldDialogTitle");
     const note = document.getElementById("frontCoverFieldDialogNote");
-    const nameInput = document.getElementById("frontCoverFieldDialogCustomName");
+    const nameInput = document.getElementById(
+      "frontCoverFieldDialogCustomName",
+    );
     const valueInput = document.getElementById(
       "frontCoverFieldDialogCustomValue",
     );
     if (!list) return;
     const targetLocation =
-      location === "back" || location === "front" || location === "spine"
+      location === "back" ||
+      location === "front" ||
+      location === "spine" ||
+      location === "copyright"
         ? location
         : TPP.frontCoverFieldDialogLocation || "front";
     TPP.frontCoverFieldDialogLocation = targetLocation;
@@ -55,7 +62,9 @@ export async function init(TPP) {
           ? "Add Back Cover Text"
           : targetLocation === "spine"
             ? "Add Spine Text"
-            : "Add Front Cover Text";
+            : targetLocation === "copyright"
+              ? "Add Copyright Text"
+              : "Add Front Cover Text";
     }
     if (note) {
       note.textContent =
@@ -63,7 +72,9 @@ export async function init(TPP) {
           ? "Choose another field from Book Info to place on the back cover."
           : targetLocation === "spine"
             ? "Choose another field from Book Info to place on the spine."
-            : "Choose another field from Book Info to place on the front cover.";
+            : targetLocation === "copyright"
+              ? "Choose another field from Book Info to place on the copyright page."
+              : "Choose another field from Book Info to place on the front cover.";
     }
     const options = TPP.textElementFieldPickerOptions(
       TPP.active,
@@ -92,7 +103,9 @@ export async function init(TPP) {
             ? "back cover"
             : targetLocation === "spine"
               ? "spine"
-              : "front cover",
+              : targetLocation === "copyright"
+                ? "copyright page"
+                : "front cover",
         ) +
         ".</div>";
     if (nameInput) nameInput.value = "";

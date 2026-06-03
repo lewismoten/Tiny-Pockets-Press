@@ -40,6 +40,7 @@ TPP.textRotationDegrees =
   };
 TPP.textBoxStyle = function (element, options) {
   const entry = element || {};
+  const config = options || {};
   const centerX = Number(options && options.centerX);
   const x = TPP.finiteNumberOr(entry.x, centerX);
   const y = TPP.finiteNumberOr(entry.y, 0);
@@ -53,6 +54,12 @@ TPP.textBoxStyle = function (element, options) {
   const clip = entry.align === "clip";
   const rotateDegrees = TPP.textRotationDegrees(entry.rotate);
   const rotate = rotateDegrees ? " rotate(" + rotateDegrees + "deg)" : "";
+  const defaultColor = String(config.defaultColor || "#ffffff");
+  const disableOutline = config.disableOutline === true;
+  const outlineColor = disableOutline
+    ? "transparent"
+    : entry.outlineColor || "#000000";
+  const outlineSize = disableOutline ? 0 : entry.outlineSize;
   return [
     "left:" + (Number.isFinite(x) ? x : 50) + "%",
     "top:" + y + "%",
@@ -60,10 +67,10 @@ TPP.textBoxStyle = function (element, options) {
     "transform:translateX(-50%)" + rotate,
     "text-align:" + (clip ? "left" : align),
     "text-align-last:" + (clip ? "left" : align),
-    "color:" + (entry.color || "#ffffff"),
+    "color:" + (entry.color || defaultColor),
     "font-size:" + (Number(entry.size) || 4) + "pt",
-    "-webkit-text-stroke-width:" + TPP.strokeWidth(entry.outlineSize),
-    "-webkit-text-stroke-color:" + (entry.outlineColor || "#000000"),
+    "-webkit-text-stroke-width:" + TPP.strokeWidth(outlineSize),
+    "-webkit-text-stroke-color:" + outlineColor,
     "white-space:" + (clip ? "nowrap" : "normal"),
     "overflow:" + (clip ? "hidden" : "visible"),
     "text-overflow:" + (clip ? "clip" : "initial"),
