@@ -32,6 +32,12 @@ export async function init(TPP) {
         TPP.exportReadablePdf();
         return true;
       }
+      const epub = event.target.closest("#exportEpub");
+      if (epub) {
+        event.preventDefault();
+        TPP.exportEpub();
+        return true;
+      }
       const images = event.target.closest("#exportImagesZip");
       if (images) {
         event.preventDefault();

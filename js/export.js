@@ -132,6 +132,480 @@ TPP.exportReadablePdf = async function () {
   pdf.save(name);
   TPP.showProgress(100, "eBook PDF complete");
 };
+TPP.epubEscape = function (value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+};
+TPP.epubFileStem = function (value) {
+  return (
+    String(value || "tiny-book")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "tiny-book"
+  );
+};
+TPP.epubNowIso = function () {
+  return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+};
+TPP.epubMediaType = function (file) {
+  const type = String((file && file.type) || "").trim().toLowerCase();
+  if (type) return type;
+  const name = String((file && file.name) || "").toLowerCase();
+  if (/\.jpe?g$/.test(name)) return "image/jpeg";
+  if (/\.png$/.test(name)) return "image/png";
+  if (/\.gif$/.test(name)) return "image/gif";
+  if (/\.webp$/.test(name)) return "image/webp";
+  if (/\.svg$/.test(name)) return "image/svg+xml";
+  if (/^data:image\/svg\+xml/i.test(String((file && file.data) || "")))
+    return "image/svg+xml";
+  if (/^data:image\/png/i.test(String((file && file.data) || "")))
+    return "image/png";
+  if (/^data:image\/jpe?g/i.test(String((file && file.data) || "")))
+    return "image/jpeg";
+  if (/^data:image\/gif/i.test(String((file && file.data) || "")))
+    return "image/gif";
+  if (/^data:image\/webp/i.test(String((file && file.data) || "")))
+    return "image/webp";
+  return "application/octet-stream";
+};
+TPP.epubExtensionForMime = function (mime) {
+  const type = String(mime || "").toLowerCase();
+  if (type === "image/jpeg") return "jpg";
+  if (type === "image/png") return "png";
+  if (type === "image/gif") return "gif";
+  if (type === "image/webp") return "webp";
+  if (type === "image/svg+xml") return "svg";
+  return "bin";
+};
+TPP.epubArrayBufferFromData = async function (value) {
+  if (!value) return new ArrayBuffer(0);
+  const response = await fetch(String(value));
+  return await response.arrayBuffer();
+};
+TPP.epubChapterHref = function (index) {
+  return "text/chapter-" + String(index + 1).padStart(3, "0") + ".xhtml";
+};
+TPP.epubStylesheet = function () {
+  return [
+    "body {",
+    "  margin: 0;",
+    "  padding: 0;",
+    "  font-family: Georgia, serif;",
+    "  line-height: 1.5;",
+    "  color: #111;",
+    "  background: #fff;",
+    "}",
+    "main {",
+    "  max-width: 42rem;",
+    "  margin: 0 auto;",
+    "  padding: 1.5rem 1.25rem 2rem;",
+    "}",
+    "h1, h2, h3 {",
+    "  line-height: 1.2;",
+    "  margin: 0 0 0.85rem;",
+    "}",
+    "h1 { font-size: 1.8rem; }",
+    "h2 { font-size: 1.45rem; }",
+    "p { margin: 0 0 0.95rem; }",
+    ".title-page { text-align: center; padding-top: 10vh; }",
+    ".title-page .cover { margin: 0 auto 1.5rem; }",
+    ".title-page img { max-width: 100%; max-height: 60vh; }",
+    ".meta, .imprint, .toc-note { color: #444; }",
+    ".meta p, .imprint p { margin: 0.25rem 0; }",
+    ".story-text { margin: 0 0 1rem; }",
+    ".story-text > :last-child { margin-bottom: 0; }",
+    "figure { margin: 1rem 0 1.25rem; text-align: center; }",
+    "img { max-width: 100%; height: auto; }",
+    "figcaption {",
+    "  margin-top: 0.45rem;",
+    "  font-size: 0.92rem;",
+    "  color: #555;",
+    "}",
+    "nav ol { padding-left: 1.25rem; }",
+    "nav li { margin: 0.35rem 0; }",
+    "a { color: #0b4ea2; text-decoration: none; }",
+    ".external-link { word-break: break-word; }",
+  ].join("\n");
+};
+TPP.epubXhtmlSafeHtml = function (html) {
+  return String(html || "")
+    .replace(/<br(\s*)>/gi, "<br$1 />")
+    .replace(/<hr(\s*)>/gi, "<hr$1 />")
+    .replace(/<img([^>]*)>/gi, function (match, attrs) {
+      return /\/\s*>$/.test(match) ? match : "<img" + attrs + " />";
+    });
+};
+TPP.epubWrapXhtml = function (title, body) {
+  return (
+    '<?xml version="1.0" encoding="utf-8"?>\n' +
+    '<!DOCTYPE html>\n' +
+    '<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="en" lang="en">\n' +
+    "<head>\n" +
+    '  <meta charset="utf-8" />\n' +
+    "  <title>" +
+    TPP.epubEscape(title || "") +
+    "</title>\n" +
+    '  <link rel="stylesheet" type="text/css" href="../styles/book.css" />\n' +
+    "</head>\n" +
+    "<body>\n" +
+    "<main>\n" +
+    TPP.epubXhtmlSafeHtml(body) +
+    "\n</main>\n" +
+    "</body>\n" +
+    "</html>\n"
+  );
+};
+TPP.epubFlushMarkdownBuffer = function (buffer, out) {
+  if (!buffer.length) return;
+  const markdown = buffer.join("\n");
+  if (markdown.trim()) {
+    out.push('<div class="story-text">' + TPP.safeMarkdown(markdown) + "</div>");
+  }
+  buffer.length = 0;
+};
+TPP.epubChapterContentHtml = function (chapter, settings) {
+  const parts = [];
+  const buffer = [];
+  TPP.extractLines((chapter && chapter.text) || "").forEach(function (item) {
+    if (item.type === "text") {
+      buffer.push(item.text);
+      return;
+    }
+    TPP.epubFlushMarkdownBuffer(buffer, parts);
+    const caption = String(item.caption || "").trim();
+    if (item.type === "imageUrl" && settings.imageUrlMode === "image") {
+      parts.push(
+        '<figure class="external-link"><img src="' +
+          TPP.epubEscape(item.url) +
+          '" alt="' +
+          TPP.epubEscape(caption || "Chapter image") +
+          '" />' +
+          (caption
+            ? "<figcaption>" + TPP.epubEscape(caption) + "</figcaption>"
+            : "") +
+          "</figure>",
+      );
+      return;
+    }
+    parts.push(
+      '<div class="story-text external-link"><p><a href="' +
+        TPP.epubEscape(item.url) +
+        '">' +
+        TPP.epubEscape(item.url) +
+        "</a></p>" +
+        (caption ? "<p>" + TPP.epubEscape(caption) + "</p>" : "") +
+        "</div>",
+    );
+  });
+  TPP.epubFlushMarkdownBuffer(buffer, parts);
+  return parts.join("\n");
+};
+TPP.epubTitlePageBody = function (settings, coverHref) {
+  const series = [settings.seriesName, settings.number].filter(Boolean).join(" ");
+  const lines = [];
+  if (settings.author) lines.push("<p>By " + TPP.epubEscape(settings.author) + "</p>");
+  if (series) lines.push("<p>" + TPP.epubEscape(series) + "</p>");
+  if (settings.publisher)
+    lines.push("<p>Published by " + TPP.epubEscape(settings.publisher) + "</p>");
+  if (settings.pubDate)
+    lines.push("<p>" + TPP.epubEscape(TPP.formatBookDate(settings.pubDate)) + "</p>");
+  return (
+    '<section class="title-page">' +
+    (coverHref
+      ? '<div class="cover"><img src="../' +
+        TPP.epubEscape(coverHref) +
+        '" alt="' +
+        TPP.epubEscape(settings.title || "Cover") +
+        '" /></div>'
+      : "") +
+    "<h1>" +
+    TPP.epubEscape(settings.title || "Untitled") +
+    "</h1>" +
+    (lines.length ? '<div class="meta">' + lines.join("") + "</div>" : "") +
+    "</section>"
+  );
+};
+TPP.epubCopyrightBody = function (settings) {
+  const lines = TPP.textElementsForLocation(settings, "copyright")
+    .map(function (item) {
+      return TPP.copyrightPageItemText(settings, item);
+    })
+    .filter(Boolean);
+  return (
+    "<section>" +
+    "<h1>" +
+    TPP.epubEscape(settings.copyrightPageTitle || "Copyright") +
+    "</h1>" +
+    '<div class="imprint">' +
+    lines
+      .map(function (line) {
+        return "<p>" + TPP.epubEscape(line) + "</p>";
+      })
+      .join("") +
+    "</div>" +
+    "</section>"
+  );
+};
+TPP.epubNavBody = function (items) {
+  return (
+    "<section>" +
+    "<h1>Contents</h1>" +
+    (items.length
+      ? '<nav epub:type="toc" id="toc"><ol>' +
+        items
+          .map(function (item) {
+            return (
+              "<li><a href=\"" +
+              TPP.epubEscape(item.href) +
+              "\">" +
+              TPP.epubEscape(item.label) +
+              "</a></li>"
+            );
+          })
+          .join("") +
+        "</ol></nav>"
+      : '<p class="toc-note">No table of contents entries available.</p>') +
+    "</section>"
+  );
+};
+TPP.epubPackageDocument = function (metadata, manifest, spine) {
+  return (
+    '<?xml version="1.0" encoding="utf-8"?>\n' +
+    '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid">\n' +
+    '  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n' +
+    "    <dc:identifier id=\"bookid\">" +
+    TPP.epubEscape(metadata.identifier) +
+    "</dc:identifier>\n" +
+    "    <dc:title>" +
+    TPP.epubEscape(metadata.title) +
+    "</dc:title>\n" +
+    "    <dc:language>en</dc:language>\n" +
+    (metadata.creator
+      ? "    <dc:creator>" +
+        TPP.epubEscape(metadata.creator) +
+        "</dc:creator>\n"
+      : "") +
+    (metadata.publisher
+      ? "    <dc:publisher>" +
+        TPP.epubEscape(metadata.publisher) +
+        "</dc:publisher>\n"
+      : "") +
+    (metadata.date
+      ? "    <dc:date>" + TPP.epubEscape(metadata.date) + "</dc:date>\n"
+      : "") +
+    '    <meta property="dcterms:modified">' +
+    TPP.epubEscape(metadata.modified) +
+    "</meta>\n" +
+    "  </metadata>\n" +
+    "  <manifest>\n" +
+    manifest.join("\n") +
+    "\n  </manifest>\n" +
+    "  <spine>\n" +
+    spine.join("\n") +
+    "\n  </spine>\n" +
+    "</package>\n"
+  );
+};
+TPP.exportEpub = async function () {
+  TPP.sync();
+  const settings = TPP.settings();
+  if (!window.JSZip) {
+    alert("EPUB export library failed to load.");
+    return;
+  }
+  const zip = new JSZip();
+  const manifest = [];
+  const spine = [];
+  const tocItems = [];
+  const imageRefs = Object.create(null);
+  const stem = TPP.epubFileStem(settings.title || "tiny-book");
+  const identifier =
+    "urn:tpp:" +
+    (TPP.bookId(settings) || stem) +
+    ":" +
+    TPP.hashString(JSON.stringify({ title: settings.title, updatedAt: TPP.bookUpdatedAt(settings) }));
+  const addManifestItem = function (id, href, mediaType, properties) {
+    manifest.push(
+      '    <item id="' +
+        TPP.epubEscape(id) +
+        '" href="' +
+        TPP.epubEscape(href) +
+        '" media-type="' +
+        TPP.epubEscape(mediaType) +
+        '"' +
+        (properties ? ' properties="' + TPP.epubEscape(properties) + '"' : "") +
+        " />",
+    );
+  };
+  const addSpineItem = function (id) {
+    spine.push('    <itemref idref="' + TPP.epubEscape(id) + '" />');
+  };
+  const addDocument = function (id, href, title, body, properties) {
+    zip.file("EPUB/" + href, TPP.epubWrapXhtml(title, body));
+    addManifestItem(id, href, "application/xhtml+xml", properties);
+    addSpineItem(id);
+  };
+  const ensureImage = async function (fileId, prefix) {
+    const id = String(fileId || "").trim();
+    if (!id) return null;
+    if (imageRefs[id]) return imageRefs[id];
+    const file = TPP.fileAsset(settings, id);
+    if (!file || !file.data) return null;
+    const mime = TPP.epubMediaType(file);
+    const ext = TPP.epubExtensionForMime(mime);
+    const href =
+      "images/" +
+      TPP.epubFileStem(prefix || file.name || id || "image") +
+      "-" +
+      Object.keys(imageRefs).length +
+      "." +
+      ext;
+    const bytes = await TPP.epubArrayBufferFromData(file.data);
+    const ref = {
+      id: "img-" + Object.keys(imageRefs).length,
+      href: href,
+      mime: mime,
+      title: file.name || prefix || "Image",
+    };
+    zip.file("EPUB/" + href, bytes);
+    addManifestItem(ref.id, href, mime, "");
+    imageRefs[id] = ref;
+    return ref;
+  };
+  const chapterImageMarkup = function (imageRef, chapter) {
+    if (!imageRef) return "";
+    return (
+      '<figure><img src="../' +
+      TPP.epubEscape(imageRef.href) +
+      '" alt="' +
+      TPP.epubEscape((chapter && chapter.title) || "Chapter image") +
+      '" /></figure>'
+    );
+  };
+
+  TPP.showProgress(5, "Preparing EPUB package...");
+  zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
+  zip.file(
+    "META-INF/container.xml",
+    '<?xml version="1.0" encoding="utf-8"?>\n' +
+      '<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">\n' +
+      "  <rootfiles>\n" +
+      '    <rootfile full-path="EPUB/package.opf" media-type="application/oebps-package+xml"/>\n' +
+      "  </rootfiles>\n" +
+      "</container>\n",
+  );
+  zip.file("EPUB/styles/book.css", TPP.epubStylesheet());
+  addManifestItem("css", "styles/book.css", "text/css", "");
+
+  const frontImageElement = TPP.findImageElement(settings, "front", "cover");
+  const coverImage = await ensureImage(
+    frontImageElement && frontImageElement.fileId,
+    "cover",
+  );
+  if (coverImage) {
+    manifest[manifest.length - 1] = manifest[manifest.length - 1].replace(
+      " />",
+      ' properties="cover-image" />',
+    );
+  }
+
+  addDocument(
+    "title-page",
+    "text/title.xhtml",
+    settings.title || "Title",
+    TPP.epubTitlePageBody(settings, coverImage && coverImage.href),
+    "",
+  );
+  tocItems.push({ href: "title.xhtml", label: settings.title || "Title Page" });
+
+  if (settings.copyrightPageEnabled) {
+    addDocument(
+      "copyright-page",
+      "text/copyright.xhtml",
+      settings.copyrightPageTitle || "Copyright",
+      TPP.epubCopyrightBody(settings),
+      "",
+    );
+  }
+
+  const chapterList = Array.isArray(settings.chapters) ? settings.chapters : [];
+  for (let i = 0; i < chapterList.length; i++) {
+    const chapter = chapterList[i];
+    if (!chapter || chapter.isMetadata) continue;
+    TPP.showProgress(
+      15 + Math.round((i / Math.max(1, chapterList.length)) * 60),
+      "Building EPUB chapter " + (i + 1) + " of " + chapterList.length + "...",
+    );
+    const chapterTitle = chapter.title || "Chapter " + (i + 1);
+    const chapterImageElement = TPP.findChapterImageElement(settings, chapter);
+    const chapterImage = await ensureImage(
+      chapterImageElement && chapterImageElement.fileId,
+      "chapter-" + (i + 1),
+    );
+    const body =
+      "<section>" +
+      "<h2>" +
+      TPP.epubEscape(chapterTitle) +
+      "</h2>" +
+      chapterImageMarkup(chapterImage, chapter) +
+      TPP.epubChapterContentHtml(chapter, settings) +
+      "</section>";
+    addDocument(
+      "chapter-" + String(i + 1),
+      TPP.epubChapterHref(i),
+      chapterTitle,
+      body,
+      "",
+    );
+    if (chapter.includeInToc !== false) {
+      tocItems.push({
+        href: TPP.epubChapterHref(i).replace(/^text\//, ""),
+        label: chapter.tocTitle || chapterTitle,
+      });
+    }
+  }
+
+  zip.file(
+    "EPUB/text/nav.xhtml",
+    TPP.epubWrapXhtml("Contents", TPP.epubNavBody(tocItems)),
+  );
+  addManifestItem("nav", "text/nav.xhtml", "application/xhtml+xml", "nav");
+  spine.splice(1, 0, '    <itemref idref="nav" />');
+
+  TPP.showProgress(82, "Assembling EPUB package...");
+  zip.file(
+    "EPUB/package.opf",
+    TPP.epubPackageDocument(
+      {
+        identifier: identifier,
+        title: settings.title || "Untitled",
+        creator: settings.author || "",
+        publisher: settings.publisher || "",
+        date: settings.pubDate || "",
+        modified: TPP.epubNowIso(),
+      },
+      manifest,
+      spine,
+    ),
+  );
+
+  const blob = await zip.generateAsync(
+    { type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" },
+    function (meta) {
+      TPP.showProgress(
+        82 + Math.round(meta.percent * 0.18),
+        "Compressing EPUB package...",
+      );
+    },
+  );
+  TPP.downloadBlob(stem + ".epub", blob);
+  TPP.showProgress(100, "EPUB complete");
+};
 TPP.imageExportOptions = function (options) {
   const source = options || {};
   const requestedFormat = ["png", "gif", "jpeg", "webp"].includes(source.format)
