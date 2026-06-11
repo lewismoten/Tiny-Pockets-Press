@@ -36,7 +36,9 @@
             "religion",
             "spirituality",
             "philosophy",
-            "jewish holidays"
+            "jewish holidays",
+            "born-again christians",
+            "moorish science"
           ],
           "scopeNote": "Use for works chiefly about abrahamic traditions within religion, including the Bible, scriptural traditions, Christianity, Judaism, and Islam."
         },
@@ -80,7 +82,10 @@
             "religions",
             "religion",
             "spirituality",
-            "philosophy"
+            "philosophy",
+            "wicca",
+            "paganists",
+            "paganism"
           ],
           "scopeNote": "Use for works chiefly about indigenous & folk religions within religion."
         },
@@ -90,7 +95,13 @@
           "label": "Comparative Religion",
           "sort": 4,
           "keywords": ["comparative", "religion", "spirituality", "philosophy"],
-          "includes": ["comparative", "religion", "spirituality", "philosophy"],
+          "includes": [
+            "comparative",
+            "religion",
+            "spirituality",
+            "philosophy",
+            "joke religions"
+          ],
           "scopeNote": "Use for works chiefly about comparative religion within religion."
         }
       ]
@@ -193,7 +204,9 @@
             "religion",
             "spirituality",
             "philosophy",
-            "spiritual"
+            "spiritual",
+            "witchcraft",
+            "wicca"
           ],
           "scopeNote": "Use for works chiefly about mysticism & esoteric practice within spiritual practice."
         }
@@ -349,7 +362,11 @@
             "spirituality",
             "philosophy",
             "myth",
-            "thought"
+            "thought",
+            "assassination theories",
+            "secret nefarious undertakings",
+            "ufo's",
+            "ufos"
           ],
           "scopeNote": "Use for works chiefly about meaning & life questions within myth & thought."
         },
@@ -2114,7 +2131,9 @@
                 "magazines",
                 "magazine culture",
                 "periodicals",
-                "serials"
+                "serials",
+                "supermarket tabloids",
+                "supermarket tablids"
               ],
               "scopeNote": "Use for works chiefly about magazines within serials & periodicals.",
               "sort": 42
@@ -2134,11 +2153,29 @@
                 "reviews",
                 "literary reviews",
                 "academic journals",
-                "serials"
+                "serials",
+                "reviewing"
               ],
               "scopeNote": "Use for works chiefly about journals, reviews, and recurring review publications within serials & periodicals.",
               "seeAlso": ["213"],
               "sort": 43
+            },
+            {
+              "extension": "44",
+              "shortLabel": "ZIN",
+              "label": "Zines & Fanzines",
+              "keywords": ["zines", "fanzines", "small press", "xerography"],
+              "includes": [
+                "zines",
+                "fanzines",
+                "small press",
+                "xerography",
+                "xerogrpahy debt",
+                "mail art network"
+              ],
+              "scopeNote": "Use for works chiefly about zines, fanzines, photocopied small-press culture, xerography, and adjacent mail-art publishing networks within serials & periodicals.",
+              "seeAlso": ["194", "023"],
+              "sort": 44
             }
           ],
           "allowAssign": true,
@@ -2147,7 +2184,9 @@
             "periodicals",
             "magazines",
             "newspapers",
-            "journals"
+            "journals",
+            "zines",
+            "fanzines"
           ],
           "scopeNote": "Use for general works on serial publications, including newspapers, magazines, journals, and other recurring periodicals within indexes & catalogs.",
           "sort": 4
