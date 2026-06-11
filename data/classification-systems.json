@@ -752,7 +752,14 @@
               "label": "Linguistics",
               "keywords": ["linguistics", "language", "literature", "study"],
               "sort": 161,
-              "includes": ["linguistics", "language", "literature", "study"],
+              "includes": [
+                "linguistics",
+                "language",
+                "literature",
+                "study",
+                "harlem slang",
+                "hella"
+              ],
               "scopeNote": "Use for works chiefly about linguistics within language study."
             },
             {
@@ -824,7 +831,8 @@
                 "language",
                 "literature",
                 "literary",
-                "study"
+                "study",
+                "depressing russian literature"
               ],
               "scopeNote": "Use for works chiefly about criticism within literary study."
             },
@@ -891,7 +899,8 @@
                 "language",
                 "literature",
                 "literary",
-                "study"
+                "study",
+                "beatniks playing ping-pong"
               ],
               "scopeNote": "Use for works chiefly about traditions & movements within literary study."
             }
@@ -1140,7 +1149,8 @@
                 "biography",
                 "personal",
                 "life",
-                "stories"
+                "stories",
+                "anna"
               ],
               "scopeNote": "Use for works chiefly about memoir within personal life stories."
             },
@@ -1220,7 +1230,13 @@
                 "biography",
                 "memoir",
                 "life",
-                "stories"
+                "stories",
+                "boring revelation",
+                "bragging about my grandfather",
+                "drinking puke",
+                "ghost from the past",
+                "gratuitous self-priase",
+                "dumpster days"
               ],
               "scopeNote": "Use for works chiefly about personal essays within personal life stories."
             }
@@ -1255,7 +1271,8 @@
                 "biography",
                 "memoir",
                 "collected",
-                "lives"
+                "lives",
+                "ed sanders"
               ],
               "scopeNote": "Use for works chiefly about artists & writers within collected lives."
             },
@@ -1284,7 +1301,11 @@
                 "biography",
                 "memoir",
                 "collected",
-                "lives"
+                "lives",
+                "eldridge cleaver",
+                "emma goldman",
+                "fidel castro",
+                "jimmy carter"
               ],
               "scopeNote": "Use for works chiefly about leaders, activists, movement figures, and community organizers within collected lives, including civil rights and identity-based justice leadership."
             },
@@ -1307,7 +1328,9 @@
                 "biography",
                 "memoir",
                 "collected",
-                "lives"
+                "lives",
+                "gregory pincus",
+                "john glenn"
               ],
               "scopeNote": "Use for works chiefly about scientists & inventors within collected lives."
             },
@@ -1330,7 +1353,12 @@
                 "biography",
                 "memoir",
                 "collected",
-                "lives"
+                "lives",
+                "bobby vinton",
+                "dr. ruth",
+                "diamanda galas",
+                "donny osmond",
+                "julia child"
               ],
               "scopeNote": "Use for works chiefly about entertainers & athletes within collected lives."
             }
@@ -1421,7 +1449,8 @@
                 "biography",
                 "memoir",
                 "family",
-                "histories"
+                "histories",
+                "bragging about my grandfather"
               ],
               "scopeNote": "Use for works chiefly about community memory, collective identity, diaspora memory, neighborhood history, and shared cultural remembrance within family & community histories.",
               "seeAlso": ["234", "272", "273"]
@@ -1779,7 +1808,8 @@
                 "disability studies",
                 "migration",
                 "diaspora",
-                "community identity"
+                "community identity",
+                "hicks pretending to be yuppies"
               ],
               "scopeNote": "Use for works chiefly about sociology within social studies, including race and ethnicity, gender, sexuality, LGBTQ+ studies, disability studies, migration, diaspora, and community identity as matters of social life and structure.",
               "seeAlso": ["233", "273", "282", "283"]
@@ -1829,7 +1859,8 @@
                 "food culture",
                 "foodways",
                 "culinary history",
-                "comics culture"
+                "comics culture",
+                "beatniks playing ping-pong"
               ],
               "scopeNote": "Use for cultural studies topics, including race and ethnicity, gender, LGBTQ+ studies, disability culture, migration and diaspora, Indigenous studies, community identity, foodways, everyday media culture, and comics or graphic storytelling as cultural forms."
             },
@@ -1981,7 +2012,8 @@
                 "censorship",
                 "book bans",
                 "intellectual freedom law",
-                "first amendment"
+                "first amendment",
+                "harassed by cops"
               ],
               "scopeNote": "Use for justice, rights, civil liberties, civil rights, racial justice, disability rights, Indigenous rights, migration justice, LGBTQ+ rights, FOIA, and nonfiction works on crime or criminal cases when the emphasis is legal, social, documentary, or access-to-information related.",
               "seeAlso": ["134", "262", "284", "274", "272", "273", "234"]
@@ -2156,7 +2188,10 @@
                 "migration",
                 "diaspora",
                 "ethnic communities",
-                "indigenous regions"
+                "indigenous regions",
+                "buffalo",
+                "devil's kitchen",
+                "devil's tower"
               ],
               "scopeNote": "Use for works chiefly about regional studies within geography & place, including migration, diaspora communities, ethnic settlement, and Indigenous regional identity when the emphasis is place.",
               "seeAlso": ["263", "272", "273", "234"]
@@ -2452,7 +2487,8 @@
                 "comics",
                 "graphic novels",
                 "sequential art",
-                "illustration"
+                "illustration",
+                "dumpstered waffle cones cover"
               ],
               "scopeNote": "Use for works chiefly about graphic design, comics form, sequential art, illustration, lettering, and the visual craft of graphic storytelling. Class literary works themselves with fiction or short forms as appropriate."
             },
@@ -2501,7 +2537,18 @@
               "label": "Music",
               "keywords": ["music", "art", "performing", "arts"],
               "sort": 381,
-              "includes": ["music", "art", "performing", "arts"],
+              "includes": [
+                "music",
+                "art",
+                "performing",
+                "arts",
+                "black flag",
+                "bob dylan",
+                "bobby vinton",
+                "diamanda galas",
+                "donny osmond",
+                "incompetent promoters"
+              ],
               "scopeNote": "Use for works chiefly about music within performing arts.",
               "seeAlsoExtensions": ["660.1", "680.1"]
             },
@@ -2577,7 +2624,8 @@
                 "performing",
                 "video production",
                 "youtube",
-                "screen storytelling"
+                "screen storytelling",
+                "cantina scene from star wars"
               ],
               "scopeNote": "Use for works chiefly about film & screen arts within performing arts, including video production, screen storytelling, and moving-image performance practices."
             }
@@ -2930,7 +2978,8 @@
                 "science",
                 "nature",
                 "physical",
-                "sciences"
+                "sciences",
+                "john glenn"
               ],
               "scopeNote": "Use for works chiefly about astronomy & space within physical sciences."
             }
@@ -4013,7 +4062,8 @@
                 "classification systems",
                 "shelfmarks",
                 "dewey decimal classification",
-                "information organization"
+                "information organization",
+                "afro-american press"
               ],
               "scopeNote": "Use for works chiefly about indexes, catalogs, metadata, serials, periodicals, tagging systems, classification systems, and information organization within reference."
             },
@@ -4070,7 +4120,10 @@
                 "food culture",
                 "canning",
                 "preserving",
-                "fermentation"
+                "fermentation",
+                "bourbon",
+                "decaf",
+                "free pizza"
               ],
               "scopeNote": "Use for cooking and food practice, including baking, nutrition, food history, food culture, canning, preserving, and fermentation when the book is chiefly practical or culinary.",
               "seeAlso": ["273", "623"]
@@ -4209,7 +4262,8 @@
                 "place",
                 "reporting",
                 "reporters",
-                "local media"
+                "local media",
+                "greyhound nightmares"
               ],
               "scopeNote": "Use for works chiefly about travel writing within travel & place."
             },
@@ -4278,7 +4332,8 @@
                 "reference",
                 "practical",
                 "travel",
-                "place"
+                "place",
+                "coffee spots in st. paul"
               ],
               "scopeNote": "Use for works chiefly about cultural guidebooks within travel & place."
             }
@@ -4346,7 +4401,8 @@
                 "mental health",
                 "therapy",
                 "counseling",
-                "emotional wellbeing"
+                "emotional wellbeing",
+                "body lice"
               ],
               "scopeNote": "Use for health, wellness, medicine, first aid, caregiving, elder care, disability, access needs, aging, nursing, public-health guides, and mental health when the emphasis is practical support, personal use, or general medical reference.",
               "seeAlso": ["283", "643", "642", "272", "282"]
@@ -4427,7 +4483,8 @@
                 "gender affirmation",
                 "family caregiving",
                 "care relationships",
-                "support at home"
+                "support at home",
+                "dr. ruth"
               ],
               "scopeNote": "Use for relationships and family life, including family caregiving, LGBTQ+ relationships, gender-affirming family and interpersonal life, chosen family, care relationships, and home support when the primary emphasis is interpersonal or domestic rather than medical.",
               "seeAlso": ["641", "272"]
@@ -4549,7 +4606,8 @@
             "fitness",
             "camping",
             "hiking",
-            "outdoor recreation"
+            "outdoor recreation",
+            "fireworks"
           ],
           "scopeNote": "Use for recreation, including sports, athletics, fitness, camping, hiking, and outdoor recreation when the emphasis is leisure, training, or participation.",
           "seeAlso": ["641"]

@@ -35,7 +35,8 @@
             "islam",
             "religion",
             "spirituality",
-            "philosophy"
+            "philosophy",
+            "jewish holidays"
           ],
           "scopeNote": "Use for works chiefly about abrahamic traditions within religion, including the Bible, scriptural traditions, Christianity, Judaism, and Islam."
         },
@@ -849,7 +850,8 @@
                 "ethnic identity",
                 "communities",
                 "identity",
-                "sociology"
+                "sociology",
+                "african american communities"
               ],
               "scopeNote": "Use for works chiefly about race, ethnicity, racial identity, ethnic identity, and the social formation of communities within sociology.",
               "seeAlso": ["273", "282"]
@@ -1068,7 +1070,8 @@
             "experimental audio",
             "audio restoration",
             "audacity",
-            "sound collage"
+            "sound collage",
+            "crackly am radio"
           ],
           "scopeNote": "Use for works chiefly about experimental audio, sound collage, restoration, and creative audio practice within media arts.",
           "sort": 2
@@ -2090,7 +2093,10 @@
                 "newsprint",
                 "press",
                 "serials",
-                "periodicals"
+                "periodicals",
+                "african american press",
+                "afro-american press",
+                "black press"
               ],
               "scopeNote": "Use for works chiefly about newspapers within serials & periodicals.",
               "sort": 41
@@ -2267,7 +2273,8 @@
             "anxiety",
             "depression",
             "therapy",
-            "counseling"
+            "counseling",
+            "acne-related suicide"
           ],
           "scopeNote": "Use for works chiefly about mental health, therapy, counseling, and emotional wellbeing within health & wellness.",
           "sort": 1
@@ -2314,7 +2321,13 @@
               "shortLabel": "BOG",
               "label": "Board Games",
               "keywords": ["board games"],
-              "includes": ["board", "games", "board games", "tabletop"],
+              "includes": [
+                "board",
+                "games",
+                "board games",
+                "tabletop",
+                "chess"
+              ],
               "scopeNote": "Use for works chiefly about board games within tabletop games.",
               "sort": 12
             }
