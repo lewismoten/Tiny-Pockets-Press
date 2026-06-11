@@ -561,11 +561,15 @@ TPP.defaultStaleKeyLookup = [
 ];
 TPP.BOOK_INFO_FIELDS = [
   "title",
+  "subtitle",
   "author",
   "pubDate",
   "publisher",
   "language",
   "region",
+  "subject",
+  "description",
+  "keywords",
   "classification",
   "cityPublished",
   "copyright",
@@ -808,59 +812,29 @@ TPP.bookInfoEntryId = function (key, suffix) {
   return TPP.internalId("k");
 };
 TPP.bookInfoDefaults = function () {
-  return [
-    {
-      id: TPP.bookInfoEntryId("title"),
-      key: "title",
-      value: "",
+  return TPP.BOOK_INFO_DEFAULT_FIELDS.map(function (key) {
+    return {
+      id: TPP.bookInfoEntryId(key),
+      key: key,
+      value:
+        (TPP.defaultBookInfoValueForKey && TPP.defaultBookInfoValueForKey(key)) ||
+        "",
       customLabel: "",
-    },
-    {
-      id: TPP.bookInfoEntryId("author"),
-      key: "author",
-      value: "",
-      customLabel: "",
-    },
-    {
-      id: TPP.bookInfoEntryId("publisher"),
-      key: "publisher",
-      value: "",
-      customLabel: "",
-    },
-    {
-      id: TPP.bookInfoEntryId("language"),
-      key: "language",
-      value: TPP.defaultBookInfoValueForKey("language"),
-      customLabel: "",
-    },
-    {
-      id: TPP.bookInfoEntryId("region"),
-      key: "region",
-      value: TPP.defaultBookInfoValueForKey("region"),
-      customLabel: "",
-    },
-    {
-      id: TPP.bookInfoEntryId("pubDate"),
-      key: "pubDate",
-      value: "",
-      customLabel: "",
-    },
-    {
-      id: TPP.bookInfoEntryId("copyright"),
-      key: "copyright",
-      value: "",
-      customLabel: "",
-    },
-  ];
+    };
+  });
 };
 TPP.bookInfoFieldSpec = function (key) {
   const specs = {
     title: { input: "text" },
+    subtitle: { input: "text" },
     author: { input: "authors" },
     pubDate: { input: "date" },
     publisher: { input: "text" },
     language: { input: "picker", picker: "language" },
     region: { input: "picker", picker: "region" },
+    subject: { input: "text" },
+    description: { input: "textarea", rows: 4 },
+    keywords: { input: "textarea", rows: 2 },
     classification: { input: "classification" },
     cityPublished: { input: "text" },
     copyright: { input: "text" },
@@ -4547,11 +4521,15 @@ TPP.bookInfoFieldLabel = function (fieldKey, book) {
   }
   const labels = {
     title: "Title",
+    subtitle: "Subtitle",
     author: "Author",
     pubDate: "Publishing Date",
     publisher: "Publisher",
     language: "Language",
     region: "Region",
+    subject: "Subject",
+    description: "Description",
+    keywords: "Keywords",
     classification: "Classification",
     cityPublished: "City Published",
     copyright: "Copyright",
