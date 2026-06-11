@@ -1,5 +1,52 @@
 window.TPP = window.TPP || {};
 
+TPP.pdfMetadata = function (book, options) {
+  const source = book || {};
+  const exportKind = String((options && options.kind) || "").trim();
+  const title = String(source.title || "Untitled").trim() || "Untitled";
+  const author = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "author")
+      : source.author || "",
+  ).trim();
+  const publisher = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "publisher")
+      : source.publisher || "",
+  ).trim();
+  const pubDate = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "pubDate")
+      : source.pubDate || "",
+  ).trim();
+  const classification = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "classification")
+      : source.classification || "",
+  ).trim();
+  const pieces = [classification, publisher, pubDate].filter(Boolean);
+  if (exportKind) pieces.unshift(exportKind + " export");
+  return {
+    title: title,
+    author: author,
+    subject: pieces.join(" · "),
+    keywords: [title, author, publisher, classification]
+      .filter(Boolean)
+      .join(", "),
+    creator: "Tiny Pockets Press",
+    producer: "Tiny Pockets Press",
+  };
+};
+TPP.applyPdfMetadata = function (pdf, book, options) {
+  if (!pdf || typeof pdf.setProperties !== "function") return;
+  const metadata = TPP.pdfMetadata(book, options);
+  pdf.setProperties(metadata);
+  if (typeof pdf.setCreationDate === "function") {
+    try {
+      pdf.setCreationDate(new Date());
+    } catch (_error) {}
+  }
+};
 TPP.waitForImages = async function (root) {
   const images = Array.from(root.querySelectorAll("img"));
   await Promise.all(
@@ -33,6 +80,7 @@ TPP.exportPdfFrom = async function (which) {
     format: [settings.sheet.w, settings.sheet.h],
     compress: true,
   });
+  TPP.applyPdfMetadata(pdf, settings, { kind: which + " pdf" });
   const sheets = Array.from(container.querySelectorAll("[data-pdf-page]"));
   for (let i = 0; i < sheets.length; i++) {
     TPP.showProgress(
@@ -85,6 +133,7 @@ TPP.exportReadablePdf = async function () {
     format: [settings.page.w, settings.page.h],
     compress: true,
   });
+  TPP.applyPdfMetadata(pdf, settings, { kind: "ebook pdf" });
   const mount = document.createElement("div");
   mount.style.cssText =
     "position:fixed;left:-9999px;top:0;pointer-events:none;";
