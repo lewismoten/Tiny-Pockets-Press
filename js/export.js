@@ -2474,6 +2474,7 @@ TPP.imageExportPaletteIdsDefault = [
   "ansi16",
   "xterm256",
   "ega16",
+  "c64",
   "atari400base",
   "atari400",
   "cga0",

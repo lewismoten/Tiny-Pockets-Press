@@ -97,6 +97,11 @@
       "file": "data/palettes/ega16.json"
     },
     {
+      "id": "c64",
+      "name": "Commodore 64",
+      "file": "data/palettes/c64.json"
+    },
+    {
       "id": "atari400base",
       "name": "Atari 400",
       "file": "data/palettes/atari400base.json"
