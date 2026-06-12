@@ -348,6 +348,8 @@ TPP.openImageExportDialog = async function () {
   const paletteWrap = document.getElementById("imageExportDialogPaletteWrap");
   const frameDelay = document.getElementById("imageExportFrameDelay");
   const threshold = document.getElementById("imageExportDialogThreshold");
+  const dither = document.getElementById("imageExportDialogDither");
+  const ditherWrap = document.getElementById("imageExportDialogDitherWrap");
   const thresholdWrap = document.getElementById(
     "imageExportDialogThresholdWrap",
   );
@@ -368,6 +370,8 @@ TPP.openImageExportDialog = async function () {
     !paletteWrap ||
     !frameDelay ||
     !threshold ||
+    !dither ||
+    !ditherWrap ||
     !thresholdWrap ||
     !thresholdValue ||
     typeof dialog.showModal !== "function"
@@ -397,6 +401,7 @@ TPP.openImageExportDialog = async function () {
     ui.palette || (ui.colorDepth === "websafe" ? "websafe" : "websafe");
   frameDelay.value = TPP.imageExportFrameDelaySeconds(ui.frameDelay || 300);
   threshold.value = Math.max(0, Math.min(255, Number(ui.threshold) || 128));
+  dither.value = ui.dithering === "none" ? "threshold" : ui.dithering || "threshold";
   qualityValue.textContent = quality.value + "%";
   thresholdValue.textContent = threshold.value;
   preset.value = dpiPreset;
@@ -465,6 +470,7 @@ TPP.imageExportUi = function () {
       threshold: 128,
       frameDelay: 300,
       palette: "websafe",
+      dithering: "threshold",
     },
     state.imageExport || {},
   );
@@ -482,6 +488,7 @@ TPP.writeImageExportUi = function (patch) {
       threshold: 128,
       frameDelay: 300,
       palette: "websafe",
+      dithering: "threshold",
     },
     state.imageExport || {},
     patch || {},
@@ -672,6 +679,7 @@ TPP.renderImageExportPreview = async function () {
   const quality = document.getElementById("imageExportDialogQuality");
   const palette = document.getElementById("imageExportDialogPalette");
   const threshold = document.getElementById("imageExportDialogThreshold");
+  const dither = document.getElementById("imageExportDialogDither");
   const dpi = document.getElementById("imageExportDialogDpi");
   const thresholdValue = document.getElementById(
     "imageExportDialogThresholdValue",
@@ -686,6 +694,7 @@ TPP.renderImageExportPreview = async function () {
     !quality ||
     !palette ||
     !threshold ||
+    !dither ||
     !thresholdValue ||
     !dpi ||
     !TPP.renderImageExportPreviewCanvas
@@ -726,6 +735,7 @@ TPP.renderImageExportPreview = async function () {
     colorDepth: colorDepth.value || "color24",
     palette: palette.value || "websafe",
     threshold: Number(threshold.value) || 128,
+    dithering: dither.value || "threshold",
   });
   await TPP.ensureImageExportPaletteForOptionsLoaded(exportOptions);
   thresholdValue.textContent = String(exportOptions.threshold);
@@ -741,11 +751,12 @@ TPP.renderImageExportPreview = async function () {
       format: "png",
       quality: 100,
     });
-    const afterCanvas = TPP.exportCanvasForDepth(
+    const afterCanvas = await TPP.exportCanvasForDepth(
       baseCanvas,
       exportOptions.colorDepth,
       exportOptions.threshold,
       exportOptions.palette,
+      exportOptions,
     );
     const afterBlob = await TPP.exportBlobForCanvas(afterCanvas, exportOptions);
     if (TPP.imageExportPreviewToken !== token) return;

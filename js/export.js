@@ -2396,6 +2396,12 @@ TPP.imageExportOptions = function (options) {
     ? source.colorDepth
     : "color24";
   const colorDepth = requestedDepth === "websafe" ? "indexed" : requestedDepth;
+  const rawDithering = String(source.dithering || "").trim().toLowerCase();
+  const normalizedDithering =
+    rawDithering === "none" ? "threshold" : rawDithering;
+  const dithering = TPP.imageExportDitherIds().includes(normalizedDithering)
+    ? normalizedDithering
+    : "threshold";
   return {
     dpi: TPP.dpi(source.dpi),
     format:
@@ -2405,6 +2411,7 @@ TPP.imageExportOptions = function (options) {
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
     colorDepth: colorDepth,
     threshold: Math.max(0, Math.min(255, Number(source.threshold) || 128)),
+    dithering: dithering,
     frameDelay: Math.max(
       1000,
       Math.min(10000, Number(source.frameDelay) || 1000),
@@ -2416,6 +2423,25 @@ TPP.imageExportOptions = function (options) {
           ? String(source.palette)
           : "websafe",
   };
+};
+TPP.imageExportDitherIds = function () {
+  return [
+    "threshold",
+    "none",
+    "bayer2",
+    "bayer4",
+    "bayer8",
+    "floyd-steinberg",
+    "jarvis-judice-ninke",
+    "stucki",
+    "burkes",
+    "sierra",
+    "atkinson",
+    "halftone",
+    "blue-noise",
+    "random",
+    "pattern",
+  ];
 };
 TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION = 1;
 TPP.IMAGE_EXPORT_PALETTE_ITEM_SCHEMA_VERSION = 1;
@@ -2647,6 +2673,25 @@ TPP.canvasRgba = function (canvas) {
   readCtx.drawImage(canvas, 0, 0);
   return readCtx.getImageData(0, 0, canvas.width, canvas.height).data;
 };
+TPP.imageExportDitherLib = null;
+TPP.imageExportDitherPromise = null;
+TPP.loadImageExportDither = function () {
+  if (TPP.imageExportDitherLib) return Promise.resolve(TPP.imageExportDitherLib);
+  if (!TPP.imageExportDitherPromise) {
+    TPP.imageExportDitherPromise = import("/js/image-export-dither.js")
+      .then(function (module) {
+        const api =
+          module && typeof module.init === "function" ? module.init(TPP) : module;
+        TPP.imageExportDitherLib = api || {};
+        return TPP.imageExportDitherLib;
+      })
+      .catch(function (error) {
+        TPP.imageExportDitherPromise = null;
+        throw error;
+      });
+  }
+  return TPP.imageExportDitherPromise;
+};
 TPP.gifPaletteForExport = function (rgba, exportOptions, lib, transparent) {
   const reserve = transparent ? 1 : 0;
   if (exportOptions.colorDepth === "mono1")
@@ -2708,13 +2753,15 @@ TPP.gifFrameFromRgba = function (
     dispose: 1,
   };
 };
-TPP.exportCanvasForDepth = function (
+TPP.exportCanvasForDepth = async function (
   canvas,
   colorDepth,
   threshold,
   paletteName,
+  options,
 ) {
   if (!canvas || colorDepth === "color24") return canvas;
+  const config = options || {};
   const out = document.createElement("canvas");
   out.width = canvas.width;
   out.height = canvas.height;
@@ -2723,6 +2770,20 @@ TPP.exportCanvasForDepth = function (
   const image = ctx.getImageData(0, 0, out.width, out.height);
   const data = image.data;
   const monoThreshold = Math.max(0, Math.min(255, Number(threshold) || 128));
+  const applyMonoDither =
+    colorDepth === "mono1" &&
+    !["threshold", "none"].includes(String(config.dithering || "threshold"));
+  if (applyMonoDither) {
+    const ditherLib = await TPP.loadImageExportDither();
+    if (ditherLib && typeof ditherLib.applyMonoDither === "function") {
+      ditherLib.applyMonoDither(data, out.width, out.height, {
+        algorithm: String(config.dithering || "threshold"),
+        threshold: monoThreshold,
+      });
+      ctx.putImageData(image, 0, 0);
+      return out;
+    }
+  }
   for (let i = 0; i < data.length; i += 4) {
     const gray = Math.round(
       data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114,
@@ -3080,11 +3141,12 @@ TPP.exportImagesZip = async function (options) {
         shell,
         TPP.html2canvasOptions({ scale: scale }),
       );
-      const exportCanvas = TPP.exportCanvasForDepth(
+      const exportCanvas = await TPP.exportCanvasForDepth(
         canvas,
         exportOptions.colorDepth,
         exportOptions.threshold,
         exportOptions.palette,
+        exportOptions,
       );
       TPP.showProgress(
         5 + Math.round(((i + 0.5) / pages.length) * 80),
@@ -3178,11 +3240,12 @@ TPP.exportAnimatedGif = async function (options) {
         shell,
         TPP.html2canvasOptions({ scale: scale }),
       );
-      const exportCanvas = TPP.exportCanvasForDepth(
+      const exportCanvas = await TPP.exportCanvasForDepth(
         canvas,
         exportOptions.colorDepth,
         exportOptions.threshold,
         exportOptions.palette,
+        exportOptions,
       );
       TPP.showProgress(
         5 + Math.round(((i + 0.5) / pages.length) * 80),
@@ -3258,11 +3321,12 @@ TPP.exportMp4 = async function (options) {
       settings,
       scale,
     );
-    const firstCanvas = TPP.exportCanvasForDepth(
+    const firstCanvas = await TPP.exportCanvasForDepth(
       probeCanvas,
       exportOptions.colorDepth,
       exportOptions.threshold,
       exportOptions.palette,
+      exportOptions,
     );
     const firstOpaqueCanvas = TPP.opaqueCanvas(firstCanvas, "#ffffff");
     const width = firstOpaqueCanvas.width;
@@ -3319,11 +3383,12 @@ TPP.exportMp4 = async function (options) {
                 scale,
               );
               return TPP.opaqueCanvas(
-                TPP.exportCanvasForDepth(
+                await TPP.exportCanvasForDepth(
                   canvas,
                   exportOptions.colorDepth,
                   exportOptions.threshold,
                   exportOptions.palette,
+                  exportOptions,
                 ),
                 "#ffffff",
               );

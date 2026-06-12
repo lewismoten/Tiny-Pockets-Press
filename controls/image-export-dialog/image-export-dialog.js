@@ -67,6 +67,10 @@ export async function init(TPP) {
   const imageExportThreshold = document.getElementById(
     "imageExportDialogThreshold",
   );
+  const imageExportDitherWrap = document.getElementById(
+    "imageExportDialogDitherWrap",
+  );
+  const imageExportDither = document.getElementById("imageExportDialogDither");
   const imageExportThresholdValue = document.getElementById(
     "imageExportDialogThresholdValue",
   );
@@ -124,6 +128,8 @@ export async function init(TPP) {
     !imageExportPaletteLch ||
     !imageExportThresholdWrap ||
     !imageExportThreshold ||
+    !imageExportDitherWrap ||
+    !imageExportDither ||
     !imageExportThresholdValue ||
     !imageExportEstimate ||
     !imageExportPreviewPrev ||
@@ -167,6 +173,7 @@ export async function init(TPP) {
             0,
             Math.min(255, Number(imageExportThreshold.value) || 128),
           ),
+          dithering: imageExportDither.value || "threshold",
           frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
         },
         nextPatch,
@@ -443,6 +450,8 @@ export async function init(TPP) {
     const mono = imageExportColorDepth.value === "mono1";
     imageExportThreshold.disabled = !mono;
     imageExportThresholdWrap.classList.toggle("is-disabled", !mono);
+    imageExportDither.disabled = !mono;
+    imageExportDitherWrap.classList.toggle("is-disabled", !mono);
     imageExportQualityValue.textContent =
       Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) + "%";
     imageExportThresholdValue.textContent = String(
@@ -527,6 +536,11 @@ export async function init(TPP) {
     schedulePreview();
   });
   imageExportThreshold.addEventListener("input", function () {
+    syncFormatUi();
+    saveImageExportUi();
+    schedulePreview();
+  });
+  imageExportDither.addEventListener("change", function () {
     syncFormatUi();
     saveImageExportUi();
     schedulePreview();
@@ -654,6 +668,7 @@ export async function init(TPP) {
         0,
         Math.min(255, Number(imageExportThreshold.value) || 128),
       );
+      const dithering = imageExportDither.value || "threshold";
       imageExportDpi.value = dpi;
       imageExportPreset.value = presetValues.includes(String(dpi))
         ? String(dpi)
@@ -669,6 +684,7 @@ export async function init(TPP) {
         colorDepth: colorDepth,
         palette: palette,
         threshold: threshold,
+        dithering: dithering,
         frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
       });
       stopPlayback();
@@ -680,6 +696,7 @@ export async function init(TPP) {
         colorDepth: colorDepth,
         palette: palette,
         threshold: threshold,
+        dithering: dithering,
         frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
       };
       if (button.dataset.action === "export-animated-gif") {
