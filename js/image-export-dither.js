@@ -451,9 +451,10 @@ export function init(TPP) {
     }
     return distance;
   };
-  const selectVariedCharsetPatterns = function (stats, limit) {
+  const selectVariedCharsetPatterns = function (stats, limit, bias) {
     const entries = Array.isArray(stats) ? stats.slice() : [];
     const maxPatterns = Math.max(1, Math.min(Number(limit) || 256, entries.length));
+    const normalizedBias = clampByte(bias == null ? 128 : bias) / 255;
     if (entries.length <= maxPatterns) {
       return entries
         .sort(function (a, b) {
@@ -501,7 +502,12 @@ export function init(TPP) {
     used.add(enriched[0].key);
     while (selected.length < maxPatterns) {
       const progress = selected.length / maxPatterns;
-      const varietyWeight = Math.max(0.35, 0.85 - progress * 0.7);
+      const accuracyFocus = normalizedBias;
+      const varietyFocus = 1 - accuracyFocus;
+      const varietyPhase = progress < varietyFocus;
+      const varietyWeight = varietyPhase
+        ? 0.85 - accuracyFocus * 0.35
+        : 0.2 + varietyFocus * 0.25;
       const utilityWeight = 1 - varietyWeight;
       let bestCandidate = null;
       let bestScore = -Infinity;
@@ -757,9 +763,16 @@ export function init(TPP) {
       }
     }
   };
-  const applyPaletteCustomCharset = function (data, width, height, palette) {
+  const applyPaletteCustomCharset = function (
+    data,
+    width,
+    height,
+    palette,
+    options,
+  ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(4, palette.length));
+    const config = options || {};
     const cellFits = [];
     const patternStats = new Map();
     for (let cellY = 0; cellY < height; cellY += cellSize) {
@@ -809,6 +822,7 @@ export function init(TPP) {
     const charset = selectVariedCharsetPatterns(
       Array.from(patternStats.values()),
       256,
+      config.selectionBias,
     );
     const charsetByKey = new Map(
       charset.map(function (mask) {
@@ -856,14 +870,15 @@ export function init(TPP) {
     if (!sourceCtx) return null;
     const image = sourceCtx.getImageData(0, 0, canvas.width, canvas.height);
     const data = new Uint8ClampedArray(image.data);
+    const config = options || {};
     const charset = applyPaletteCustomCharset(
       data,
       canvas.width,
       canvas.height,
       paletteColors,
+      config,
     );
     const patterns = Array.isArray(charset) ? charset : [];
-    const config = options || {};
     const cellSize = Math.max(8, Number(config.cellSize) || 8);
     const cols = 16;
     const rows = 16;
@@ -1089,8 +1104,8 @@ export function init(TPP) {
         "full",
       );
     },
-    "c64-custom-charset": function (data, width, height, palette) {
-      applyPaletteCustomCharset(data, width, height, palette);
+    "c64-custom-charset": function (data, width, height, palette, options) {
+      applyPaletteCustomCharset(data, width, height, palette, options);
     },
   };
   const ditherers = {
@@ -1273,7 +1288,7 @@ export function init(TPP) {
     const apply =
       paletteDitherers[algorithm === "none" ? "threshold" : algorithm] ||
       paletteDitherers.threshold;
-    apply(data, width, height, palette);
+    apply(data, width, height, palette, config);
   };
 
   return {

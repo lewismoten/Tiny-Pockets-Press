@@ -2800,6 +2800,7 @@ TPP.exportCanvasForDepth = async function (
     if (ditherLib && typeof ditherLib.applyPaletteDither === "function") {
       ditherLib.applyPaletteDither(data, out.width, out.height, indexedPalette, {
         algorithm: String(config.dithering || "threshold"),
+        threshold: monoThreshold,
       });
       ctx.putImageData(image, 0, 0);
       return out;

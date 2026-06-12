@@ -64,6 +64,9 @@ export async function init(TPP) {
   const imageExportThresholdWrap = document.getElementById(
     "imageExportDialogThresholdWrap",
   );
+  const imageExportThresholdLabel = document.getElementById(
+    "imageExportDialogThresholdLabel",
+  );
   const imageExportThreshold = document.getElementById(
     "imageExportDialogThreshold",
   );
@@ -145,6 +148,7 @@ export async function init(TPP) {
     !imageExportPaletteHsv ||
     !imageExportPaletteLch ||
     !imageExportThresholdWrap ||
+    !imageExportThresholdLabel ||
     !imageExportThreshold ||
     !imageExportDitherWrap ||
     !imageExportDither ||
@@ -478,6 +482,7 @@ export async function init(TPP) {
     imageExportPaletteWrap.classList.toggle("is-disabled", !indexedOnly);
     const mono = imageExportColorDepth.value === "mono1";
     const indexed = imageExportColorDepth.value === "indexed";
+    const customCharset = customCharsetMode();
     indexedOnlyDitherOptions.forEach(function (option) {
       option.disabled = !indexed;
     });
@@ -489,8 +494,11 @@ export async function init(TPP) {
     ) {
       imageExportDither.value = "threshold";
     }
-    imageExportThreshold.disabled = !mono;
-    imageExportThresholdWrap.classList.toggle("is-disabled", !mono);
+    imageExportThreshold.disabled = !(mono || customCharset);
+    imageExportThresholdWrap.classList.toggle(
+      "is-disabled",
+      !(mono || customCharset),
+    );
     imageExportDither.disabled = !(mono || indexed);
     imageExportDitherWrap.classList.toggle("is-disabled", !(mono || indexed));
     imageExportCharsetPreview.disabled = !customCharsetMode();
@@ -501,9 +509,18 @@ export async function init(TPP) {
     renderCharsetPreviewIcon();
     imageExportQualityValue.textContent =
       Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) + "%";
-    imageExportThresholdValue.textContent = String(
-      Math.max(0, Math.min(255, Number(imageExportThreshold.value) || 128)),
+    const thresholdValue = Math.max(
+      0,
+      Math.min(255, Number(imageExportThreshold.value) || 128),
     );
+    if (customCharset) {
+      imageExportThresholdLabel.textContent = "Variety \u2194 Accuracy";
+      imageExportThresholdValue.textContent =
+        Math.round((thresholdValue / 255) * 100) + "% accuracy";
+    } else {
+      imageExportThresholdLabel.textContent = "1-bit Threshold / Bias";
+      imageExportThresholdValue.textContent = String(thresholdValue);
+    }
     syncPalettePreview();
   };
   const ensureSelectedPalette = async function () {
@@ -646,6 +663,7 @@ export async function init(TPP) {
       {
         cellSize: 8,
         cols: 16,
+        selectionBias: exportOptions.threshold,
         checkerboardPreview: Boolean(
           TPP.imageExportCharsetPreviewCheckerboard,
         ),
