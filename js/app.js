@@ -751,14 +751,25 @@ TPP.renderImageExportPreview = async function () {
     if (TPP.imageExportPreviewToken !== token) return;
     const beforeSrc = beforeBlob ? URL.createObjectURL(beforeBlob) : "";
     const afterSrc = afterBlob ? URL.createObjectURL(afterBlob) : "";
-    const baseName = (
-      (settings.title || "tiny-book") +
-      "-page-" +
-      (TPP.imageExportPreviewIndex + 1)
-    )
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+    const beforeName =
+      typeof TPP.exportPageFileName === "function"
+        ? TPP.exportPageFileName(settings, TPP.imageExportPreviewIndex + 1, {
+            extension: "png",
+            qualifiers: ["before"],
+            totalPages: pages.length,
+          })
+        : "tiny-book-page-" + String(TPP.imageExportPreviewIndex + 1) + "-before.png";
+    const afterName =
+      typeof TPP.exportPageFileName === "function"
+        ? TPP.exportPageFileName(settings, TPP.imageExportPreviewIndex + 1, {
+            format: exportOptions.format,
+            qualifiers: ["after"],
+            totalPages: pages.length,
+          })
+        : "tiny-book-page-" +
+          String(TPP.imageExportPreviewIndex + 1) +
+          "-after." +
+          (exportOptions.format === "jpeg" ? "jpg" : exportOptions.format);
     stage.innerHTML =
       '<div class="image-export-compare">' +
       '<img draggable="false" src="' +
@@ -787,15 +798,12 @@ TPP.renderImageExportPreview = async function () {
       before: {
         src: beforeSrc,
         blob: beforeBlob,
-        name: baseName + "-before.png",
+        name: beforeName,
       },
       after: {
         src: afterSrc,
         blob: afterBlob,
-        name:
-          baseName +
-          "-after." +
-          (exportOptions.format === "jpeg" ? "jpg" : exportOptions.format),
+        name: afterName,
       },
     });
     TPP.bindImageExportPreviewDrag();

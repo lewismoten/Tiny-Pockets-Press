@@ -191,6 +191,119 @@ TPP.zipCommentText = function (book) {
   pushPart("Rights", copyright);
   return parts.join(" | ");
 };
+TPP.exportFilenameExtension = function (format) {
+  const value = String(format || "").trim().toLowerCase();
+  if (value === "jpeg") return "jpg";
+  return value || "bin";
+};
+TPP.exportFilenameSlug = function (value, fallback) {
+  const ascii = String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return ascii || String(fallback || "untitled");
+};
+TPP.exportFilenameSegment = function (value, fallback, maxLength) {
+  const slug = TPP.exportFilenameSlug(value, fallback);
+  const limit = Math.max(8, Number(maxLength) || 32);
+  if (slug.length <= limit) return slug;
+  return slug.slice(0, limit).replace(/-+$/g, "") || String(fallback || "item");
+};
+TPP.exportFilenameDate = function (book) {
+  const source = book || {};
+  const raw = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "pubDate")
+      : source.pubDate || "",
+  ).trim();
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}$/.test(raw)) return raw;
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+};
+TPP.exportBookStem = function (book, options) {
+  const source = book || {};
+  const config = options || {};
+  const maxSegments = Math.max(1, Number(config.maxSegments) || 2);
+  const includeDate = config.includeDate !== false;
+  const includeAuthor = Boolean(config.includeAuthor);
+  const includeClassification = Boolean(config.includeClassification);
+  const title = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "title")
+      : source.title || "",
+  ).trim();
+  const subtitle = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subtitle")
+      : source.subtitle || "",
+  ).trim();
+  const author = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "author")
+      : source.author || "",
+  ).trim();
+  const classification = TPP.exportClassificationText(source);
+  const segments = [];
+  const pushSegment = function (value, fallback, maxLength) {
+    if (!value && !fallback) return;
+    segments.push(TPP.exportFilenameSegment(value, fallback, maxLength));
+  };
+  if (includeDate) pushSegment(TPP.exportFilenameDate(source), "", 10);
+  pushSegment(title + (subtitle ? " " + subtitle : ""), "tiny-book", 52);
+  if (includeAuthor) pushSegment(author, "", 24);
+  if (includeClassification) pushSegment(classification, "", 18);
+  return segments.filter(Boolean).slice(0, maxSegments).join("-") || "tiny-book";
+};
+TPP.exportFileName = function (book, options) {
+  const config = options || {};
+  const extension = TPP.exportFilenameExtension(config.extension || config.format);
+  const stem = TPP.exportBookStem(book, config);
+  const qualifiers = []
+    .concat(config.kind ? [config.kind] : [])
+    .concat(Array.isArray(config.qualifiers) ? config.qualifiers : [])
+    .filter(Boolean)
+    .map(function (part) {
+      return TPP.exportFilenameSegment(part, "", 24);
+    })
+    .filter(Boolean);
+  const name = [stem].concat(qualifiers).join("-");
+  return name + "." + extension;
+};
+TPP.exportPageFileName = function (book, pageIndex, options) {
+  const config = options || {};
+  const extension = TPP.exportFilenameExtension(config.extension || config.format);
+  const stem = TPP.exportBookStem(
+    book,
+    Object.assign({}, config, {
+      maxSegments: 2,
+      includeAuthor: false,
+      includeClassification: false,
+    }),
+  );
+  const totalPages = Math.max(
+    1,
+    Number(config.totalPages || config.pageCount || pageIndex) || 1,
+  );
+  const pageDigits = Math.max(1, String(Math.floor(totalPages)).length);
+  const pageToken =
+    "p" +
+    String(Math.max(1, Number(pageIndex) || 1)).padStart(pageDigits, "0");
+  const qualifiers = []
+    .concat(Array.isArray(config.qualifiers) ? config.qualifiers : [])
+    .filter(Boolean)
+    .map(function (part) {
+      return TPP.exportFilenameSegment(part, "", 20);
+    })
+    .filter(Boolean);
+  return [stem, pageToken].concat(qualifiers).join("-") + "." + extension;
+};
 TPP.zipManifestMetadata = function (book, pages, options) {
   const source = book || {};
   const metadata = TPP.epubMetadata(source);
@@ -235,11 +348,10 @@ TPP.zipManifestMetadata = function (book, pages, options) {
     generatedAt: metadata.modified,
     files: Array.from({ length: pageCount }, function (_unused, index) {
       return {
-        name:
-          "page-" +
-          String(index + 1).padStart(4, "0") +
-          "." +
-          (format === "jpeg" ? "jpg" : format),
+        name: TPP.exportPageFileName(source, index + 1, {
+          format: format,
+          totalPages: pageCount,
+        }),
         role: "page-image",
       };
     }),
@@ -622,11 +734,10 @@ TPP.exportPdfFrom = async function (which) {
     el.style.marginBottom = oldMargin;
     await new Promise(requestAnimationFrame);
   }
-  const name =
-    (settings.title || "tiny-book").toLowerCase().replace(/[^a-z0-9]+/g, "-") +
-    "-" +
-    which +
-    ".pdf";
+  const name = TPP.exportFileName(settings, {
+    extension: "pdf",
+    kind: which,
+  });
   pdf.save(name);
   TPP.showProgress(100, "PDF complete");
 };
@@ -682,9 +793,10 @@ TPP.exportReadablePdf = async function () {
   } finally {
     mount.remove();
   }
-  const name =
-    (settings.title || "tiny-book").toLowerCase().replace(/[^a-z0-9]+/g, "-") +
-    "-ebook.pdf";
+  const name = TPP.exportFileName(settings, {
+    extension: "pdf",
+    kind: "ebook",
+  });
   pdf.save(name);
   TPP.showProgress(100, "eBook PDF complete");
 };
@@ -1097,7 +1209,7 @@ TPP.exportEpub = async function () {
   const spine = [];
   const tocItems = [];
   const imageRefs = Object.create(null);
-  const stem = TPP.epubFileStem(settings.title || "tiny-book");
+  const stem = TPP.exportBookStem(settings);
   const identifier =
     "urn:tpp:" +
     (TPP.bookId(settings) || stem) +
@@ -1930,8 +2042,10 @@ TPP.exportImagesZip = async function (options) {
         exportOptions.palette,
       );
       const blob = await TPP.exportBlobForCanvas(exportCanvas, exportOptions);
-      const pageName =
-        "page-" + String(i + 1).padStart(4, "0") + "." + extension;
+      const pageName = TPP.exportPageFileName(settings, i + 1, {
+        format: extension,
+        totalPages: pages.length,
+      });
       zip.file(pageName, blob);
       shell.remove();
       await new Promise(requestAnimationFrame);
@@ -1952,15 +2066,11 @@ TPP.exportImagesZip = async function (options) {
         );
       },
     );
-    const name =
-      (settings.title || "tiny-book")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-") +
-      "-pages-" +
-      targetDpi +
-      "dpi-" +
-      exportOptions.format +
-      ".zip";
+    const name = TPP.exportFileName(settings, {
+      extension: "zip",
+      kind: exportOptions.format,
+      qualifiers: [targetDpi + "dpi"],
+    });
     TPP.downloadBlob(name, blob);
   } finally {
     mount.remove();
@@ -2047,10 +2157,10 @@ TPP.exportAnimatedGif = async function (options) {
     gif.finish();
     const bytes = gif.bytesView ? gif.bytesView() : new Uint8Array(gif.bytes());
     const blob = new Blob([bytes], { type: "image/gif" });
-    const name =
-      (settings.title || "tiny-book")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-") + "-pages-animated.gif";
+    const name = TPP.exportFileName(settings, {
+      extension: "gif",
+      kind: "pages-animated",
+    });
     TPP.downloadBlob(name, blob);
   } finally {
     mount.remove();
@@ -2176,10 +2286,11 @@ TPP.exportMp4 = async function (options) {
       throw new Error("MP4 export completed without a downloadable buffer.");
     }
     const blob = new Blob([target.buffer], { type: "video/mp4" });
-    const name =
-      (settings.title || "tiny-book")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-") + "-pages.mp4";
+    const name = TPP.exportFileName(settings, {
+      extension: "mp4",
+      kind: "pages",
+      qualifiers: ["video"],
+    });
     TPP.downloadBlob(name, blob);
   } finally {
     mount.remove();
