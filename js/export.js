@@ -3635,15 +3635,9 @@ TPP.d64CreateBamSector = function (freeMap, diskName) {
   sector[0] = 18;
   sector[1] = 1;
   sector[2] = 0x41;
-  const nameBytes = TPP.d64EncodeFileName(diskName || "TINYBOOK", 16);
-  sector.set(nameBytes, 3);
-  sector[19] = 0xA0;
-  sector[20] = 0xA0;
-  sector[21] = 0xA0;
-  sector[22] = 0xA0;
-  sector[23] = 0x00;
+  sector[3] = 0x00;
   for (let track = 1; track <= 35; track += 1) {
-    const trackOffset = 0x18 + (track - 1) * 4;
+    const trackOffset = 0x04 + (track - 1) * 4;
     const sectorCount = TPP.d64TrackSectorCount(track);
     let freeCount = 0;
     const bitmask = [0, 0, 0];
@@ -3663,6 +3657,17 @@ TPP.d64CreateBamSector = function (freeMap, diskName) {
     sector[trackOffset + 2] = bitmask[1];
     sector[trackOffset + 3] = bitmask[2];
   }
+  const nameBytes = TPP.d64EncodeFileName(diskName || "TINYBOOK", 16);
+  sector.set(nameBytes, 0x90);
+  sector[0xa0] = 0xa0;
+  sector[0xa1] = 0xa0;
+  sector[0xa2] = 0x54;
+  sector[0xa3] = 0x50;
+  sector[0xa4] = 0xa0;
+  sector[0xa5] = 0x32;
+  sector[0xa6] = 0x41;
+  sector[0xa7] = 0xa0;
+  sector[0xa8] = 0xa0;
   return sector;
 };
 TPP.d64CreateDirectorySector = function (entries, sectorIndex, totalSectors) {
@@ -3789,6 +3794,7 @@ TPP.buildD64Image = function (files, book) {
   }
   const entriesPerDirectorySector = 8;
   const dirSectors = Math.max(1, Math.ceil(directoryEntries.length / entriesPerDirectorySector));
+  if (dirSectors > TPP.d64TrackSectorCount(18) - 1) return null;
   for (let i = 0; i < dirSectors; i += 1) {
     allocation.directorySectors.push(
       TPP.d64CreateDirectorySector(directoryEntries, i, dirSectors),
