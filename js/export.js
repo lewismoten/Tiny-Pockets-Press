@@ -1689,6 +1689,17 @@ TPP.exportPdfFrom = async function (which) {
       el,
       TPP.html2canvasOptions({ scale: 3 }),
     );
+    TPP.showProgress(
+      5 + Math.round(((i + 0.5) / sheets.length) * 90),
+      "Rendered " +
+        which +
+        " PDF page " +
+        (i + 1) +
+        " of " +
+        sheets.length +
+        "…",
+      { previewCanvas: canvas },
+    );
     if (i) pdf.addPage([settings.sheet.w, settings.sheet.h]);
     pdf.addImage(
       canvas.toDataURL("image/jpeg", 0.95),
@@ -1750,6 +1761,11 @@ TPP.exportReadablePdf = async function () {
       const canvas = await html2canvas(
         shell,
         TPP.html2canvasOptions({ scale: 3 }),
+      );
+      TPP.showProgress(
+        5 + Math.round(((i + 0.5) / pages.length) * 90),
+        "Rendered eBook PDF page " + (i + 1) + " of " + pages.length + "...",
+        { previewCanvas: canvas },
       );
       if (i) pdf.addPage([settings.page.w, settings.page.h]);
       pdf.addImage(
@@ -2250,7 +2266,7 @@ TPP.exportEpub = async function () {
     );
   };
 
-  TPP.showProgress(5, "Preparing EPUB package...");
+  TPP.showProgress(5, "Preparing EPUB package...", { clearPreview: true });
   zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
   zip.file(
     "META-INF/container.xml",
@@ -2299,10 +2315,14 @@ TPP.exportEpub = async function () {
   for (let i = 0; i < chapterList.length; i++) {
     const chapter = chapterList[i];
     if (!chapter || chapter.isMetadata) continue;
-    TPP.showProgress(
-      15 + Math.round((i / Math.max(1, chapterList.length)) * 60),
-      "Building EPUB chapter " + (i + 1) + " of " + chapterList.length + "...",
-    );
+      TPP.showProgress(
+        15 + Math.round((i / Math.max(1, chapterList.length)) * 60),
+        "Building EPUB chapter " + (i + 1) + " of " + chapterList.length + "...",
+        {
+          previewDataUrl:
+            coverImage && coverImage.data ? String(coverImage.data) : undefined,
+        },
+      );
     const chapterTitle = chapter.title || "Chapter " + (i + 1);
     const chapterImageElement = TPP.findChapterImageElement(settings, chapter);
     const chapterImage = await ensureImage(
@@ -3056,6 +3076,11 @@ TPP.exportImagesZip = async function (options) {
         exportOptions.threshold,
         exportOptions.palette,
       );
+      TPP.showProgress(
+        5 + Math.round(((i + 0.5) / pages.length) * 80),
+        "Rendered page image " + (i + 1) + " of " + pages.length + "...",
+        { previewCanvas: exportCanvas },
+      );
       const blob = await TPP.exportBlobForCanvas(
         exportCanvas,
         Object.assign({}, exportOptions, {
@@ -3148,6 +3173,11 @@ TPP.exportAnimatedGif = async function (options) {
         exportOptions.colorDepth,
         exportOptions.threshold,
         exportOptions.palette,
+      );
+      TPP.showProgress(
+        5 + Math.round(((i + 0.5) / pages.length) * 80),
+        "Rendered GIF frame " + (i + 1) + " of " + pages.length + "...",
+        { previewCanvas: exportCanvas },
       );
       const rgba = TPP.canvasRgba(exportCanvas);
       const frame = TPP.gifFrameFromRgba(
@@ -3288,6 +3318,11 @@ TPP.exportMp4 = async function (options) {
                 "#ffffff",
               );
             })();
+      TPP.showProgress(
+        5 + Math.round(((i + 0.5) / pages.length) * 80),
+        "Rendered MP4 frame " + (i + 1) + " of " + pages.length + "...",
+        { previewCanvas: pageCanvas },
+      );
       videoCtx.clearRect(0, 0, width, height);
       videoCtx.drawImage(pageCanvas, 0, 0, width, height);
       const sample = new mediabunny.VideoSample(videoCanvas, {

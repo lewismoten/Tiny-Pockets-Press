@@ -5513,16 +5513,55 @@ TPP.downloadBlob = function (name, blob) {
   link.click();
   URL.revokeObjectURL(url);
 };
-TPP.showProgress = function (pct, msg) {
+TPP.progressPreviewDataUrlFromCanvas = function (canvas, maxSize) {
+  if (!canvas || !canvas.width || !canvas.height) return "";
+  const limit = Math.max(24, Number(maxSize) || 48);
+  const scale = Math.min(1, limit / Math.max(canvas.width, canvas.height));
+  const thumb = document.createElement("canvas");
+  thumb.width = Math.max(1, Math.round(canvas.width * scale));
+  thumb.height = Math.max(1, Math.round(canvas.height * scale));
+  const ctx = thumb.getContext("2d");
+  if (!ctx) return "";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, thumb.width, thumb.height);
+  ctx.drawImage(canvas, 0, 0, thumb.width, thumb.height);
+  try {
+    return thumb.toDataURL("image/jpeg", 0.72);
+  } catch (_error) {
+    return "";
+  }
+};
+TPP.showProgress = function (pct, msg, options) {
   const wrap = document.getElementById("progress");
   const bar = document.getElementById("progressBar");
   const text = document.getElementById("progressText");
+  const preview = document.getElementById("progressPreview");
   if (!wrap || !bar || !text) return;
+  const config = options || {};
   wrap.hidden = false;
   bar.style.width = Math.max(2, Math.min(100, pct)) + "%";
   text.textContent = msg || "Rendering…";
+  if (preview) {
+    if (config.clearPreview) {
+      preview.hidden = true;
+      preview.removeAttribute("src");
+    } else if (config.previewDataUrl) {
+      preview.src = String(config.previewDataUrl);
+      preview.hidden = false;
+    } else if (config.previewCanvas) {
+      const dataUrl = TPP.progressPreviewDataUrlFromCanvas(config.previewCanvas);
+      if (dataUrl) {
+        preview.src = dataUrl;
+        preview.hidden = false;
+      }
+    }
+  }
   if (pct >= 100)
     setTimeout(function () {
+      if (preview) {
+        preview.hidden = true;
+        preview.removeAttribute("src");
+      }
       wrap.hidden = true;
     }, 800);
 };
