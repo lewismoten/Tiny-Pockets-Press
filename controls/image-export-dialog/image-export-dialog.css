@@ -205,11 +205,13 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  z-index: 0;
 }
 .image-export-compare-after {
   position: absolute;
   inset: 0;
   clip-path: inset(0 0 0 50%);
+  z-index: 1;
 }
 .image-export-compare-divider {
   position: absolute;
@@ -221,6 +223,7 @@
   box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35);
   transform: translateX(-50%);
   pointer-events: none;
+  z-index: 3;
 }
 .image-export-compare-label {
   position: absolute;
@@ -235,6 +238,7 @@
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  z-index: 4;
 }
 .image-export-compare-label.before {
   left: 0.65rem;
