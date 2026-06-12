@@ -2,6 +2,7 @@ window.TPP = window.TPP || {};
 
 TPP.generatorInfo = function () {
   const name = "Tiny Pockets Press";
+  const pdfEngineName = "jsPDF";
   const fallbackSiteUrl = "https://tinypocketspress.local";
   let siteUrl = fallbackSiteUrl;
   if (
@@ -21,6 +22,9 @@ TPP.generatorInfo = function () {
     domain: domain,
     namespaceUrl: siteUrl.replace(/\/+$/g, "") + "/ns/1.0/",
     exportLabel: name + " Export",
+    pdfEngineName: pdfEngineName,
+    pdfCreator: name,
+    pdfProducer: name + " via " + pdfEngineName,
   };
 };
 TPP.html2canvasOptions = function (options) {
@@ -1605,8 +1609,8 @@ TPP.pdfMetadata = function (book, options) {
     author: author,
     subject: subject,
     keywords: keywords,
-    creator: generator.name,
-    producer: generator.name,
+    creator: generator.pdfCreator || generator.name,
+    producer: generator.pdfProducer || generator.name,
   };
 };
 TPP.applyPdfMetadata = function (pdf, book, options) {
