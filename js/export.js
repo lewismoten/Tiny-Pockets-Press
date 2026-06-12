@@ -148,6 +148,221 @@ TPP.writeGifCommentExtension = function (gif, text) {
   }
   stream.writeByte(0x00);
 };
+TPP.pngTextEncoder = new TextEncoder();
+TPP.pngUint32Bytes = function (value) {
+  const out = new Uint8Array(4);
+  const normalized = Number(value) >>> 0;
+  out[0] = (normalized >>> 24) & 0xff;
+  out[1] = (normalized >>> 16) & 0xff;
+  out[2] = (normalized >>> 8) & 0xff;
+  out[3] = normalized & 0xff;
+  return out;
+};
+TPP.pngCrcTable = null;
+TPP.pngCrc32 = function (bytes) {
+  if (!TPP.pngCrcTable) {
+    TPP.pngCrcTable = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let j = 0; j < 8; j++) {
+        c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      }
+      TPP.pngCrcTable[i] = c >>> 0;
+    }
+  }
+  let crc = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) {
+    crc = TPP.pngCrcTable[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+};
+TPP.pngChunkBytes = function (type, data) {
+  const typeBytes = TPP.pngTextEncoder.encode(String(type || "").slice(0, 4));
+  const payload = data instanceof Uint8Array ? data : new Uint8Array(0);
+  const chunk = new Uint8Array(12 + payload.length);
+  chunk.set(TPP.pngUint32Bytes(payload.length), 0);
+  chunk.set(typeBytes, 4);
+  chunk.set(payload, 8);
+  const crcInput = new Uint8Array(typeBytes.length + payload.length);
+  crcInput.set(typeBytes, 0);
+  crcInput.set(payload, typeBytes.length);
+  chunk.set(TPP.pngUint32Bytes(TPP.pngCrc32(crcInput)), 8 + payload.length);
+  return chunk;
+};
+TPP.pngTextEntries = function (book, options) {
+  const source = book || {};
+  const config = options || {};
+  const title = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "title")
+      : source.title || "",
+  ).trim();
+  const subtitle = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subtitle")
+      : source.subtitle || "",
+  ).trim();
+  const author = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "author")
+      : source.author || "",
+  ).trim();
+  const publisher = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "publisher")
+      : source.publisher || "",
+  ).trim();
+  const pubDate = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "pubDate")
+      : source.pubDate || "",
+  ).trim();
+  const language = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "language")
+      : source.language || "",
+  ).trim();
+  const subject = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subject")
+      : source.subject || "",
+  ).trim();
+  const description = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "description")
+      : source.description || "",
+  ).trim();
+  const keywords = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "keywords")
+      : source.keywords || "",
+  ).trim();
+  const classification = TPP.exportClassificationText(source);
+  const copyright = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "copyright")
+      : source.copyright || "",
+  ).trim();
+  const pageIndex = Math.max(0, Number(config.pageIndex) || 0);
+  const totalPages = Math.max(0, Number(config.totalPages) || 0);
+  const commentParts = [
+    publisher ? "Publisher: " + publisher : "",
+    classification ? "Classification: " + classification : "",
+    totalPages > 0 && pageIndex > 0
+      ? "Page: " + pageIndex + " of " + totalPages
+      : pageIndex > 0
+        ? "Page: " + pageIndex
+        : "",
+    keywords ? "Keywords: " + keywords : "",
+    copyright ? "Rights: " + copyright : "",
+  ].filter(Boolean);
+  return [
+    {
+      keyword: "Title",
+      value: title ? title + (subtitle ? ": " + subtitle : "") : "",
+    },
+    { keyword: "Author", value: author },
+    { keyword: "Description", value: description },
+    { keyword: "Subject", value: subject },
+    { keyword: "Publisher", value: publisher },
+    { keyword: "Creation Time", value: pubDate },
+    { keyword: "Language", value: language },
+    { keyword: "Keywords", value: keywords },
+    { keyword: "Copyright", value: copyright },
+    { keyword: "Software", value: "Tiny Pockets Press" },
+    { keyword: "Comment", value: commentParts.join(" | ") },
+  ].filter(function (entry) {
+    return String(entry.value || "").trim();
+  });
+};
+TPP.pngITXtChunk = function (keyword, value) {
+  const keywordBytes = TPP.pngTextEncoder.encode(String(keyword || "").trim());
+  const valueBytes = TPP.pngTextEncoder.encode(String(value || "").trim());
+  const payload = new Uint8Array(
+    keywordBytes.length + 1 + 1 + 1 + 1 + valueBytes.length,
+  );
+  let offset = 0;
+  payload.set(keywordBytes, offset);
+  offset += keywordBytes.length;
+  payload[offset++] = 0x00;
+  payload[offset++] = 0x00;
+  payload[offset++] = 0x00;
+  payload[offset++] = 0x00;
+  payload.set(valueBytes, offset);
+  return TPP.pngChunkBytes("iTXt", payload);
+};
+TPP.pngTTextLatin1 = function (value) {
+  return String(value || "")
+    .replace(/[^\x00-\xff]/g, "?")
+    .trim();
+};
+TPP.pngTTextChunk = function (keyword, value) {
+  const keywordBytes = TPP.pngTextEncoder.encode(String(keyword || "").trim());
+  const valueBytes = TPP.pngTextEncoder.encode(TPP.pngTTextLatin1(value));
+  const payload = new Uint8Array(keywordBytes.length + 1 + valueBytes.length);
+  let offset = 0;
+  payload.set(keywordBytes, offset);
+  offset += keywordBytes.length;
+  payload[offset++] = 0x00;
+  payload.set(valueBytes, offset);
+  return TPP.pngChunkBytes("tEXt", payload);
+};
+TPP.insertPngMetadata = function (bytes, entries) {
+  if (!(bytes instanceof Uint8Array) || bytes.length < 12) return bytes;
+  const normalizedEntries = Array.isArray(entries) ? entries : [];
+  const textChunks = [];
+  normalizedEntries.forEach(function (entry) {
+    if (!entry || !String(entry.value || "").trim()) return;
+    textChunks.push(TPP.pngITXtChunk(entry.keyword, entry.value));
+    if (["Title", "Author", "Description", "Comment", "Copyright"].includes(entry.keyword)) {
+      textChunks.push(TPP.pngTTextChunk(entry.keyword, entry.value));
+    }
+  });
+  if (!textChunks.length) return bytes;
+  let offset = 8;
+  while (offset + 12 <= bytes.length) {
+    const length =
+      ((bytes[offset] << 24) >>> 0) +
+      ((bytes[offset + 1] << 16) >>> 0) +
+      ((bytes[offset + 2] << 8) >>> 0) +
+      (bytes[offset + 3] >>> 0);
+    const type = String.fromCharCode(
+      bytes[offset + 4],
+      bytes[offset + 5],
+      bytes[offset + 6],
+      bytes[offset + 7],
+    );
+    offset += 12 + length;
+    if (type === "IHDR") break;
+  }
+  while (offset + 12 <= bytes.length) {
+    const length =
+      ((bytes[offset] << 24) >>> 0) +
+      ((bytes[offset + 1] << 16) >>> 0) +
+      ((bytes[offset + 2] << 8) >>> 0) +
+      (bytes[offset + 3] >>> 0);
+    const type = String.fromCharCode(
+      bytes[offset + 4],
+      bytes[offset + 5],
+      bytes[offset + 6],
+      bytes[offset + 7],
+    );
+    if (type === "PLTE" || type === "IDAT") break;
+    offset += 12 + length;
+  }
+  const insertBytesLength = textChunks.reduce(function (sum, chunk) {
+    return sum + chunk.length;
+  }, 0);
+  const out = new Uint8Array(bytes.length + insertBytesLength);
+  out.set(bytes.subarray(0, offset), 0);
+  let cursor = offset;
+  textChunks.forEach(function (chunk) {
+    out.set(chunk, cursor);
+    cursor += chunk.length;
+  });
+  out.set(bytes.subarray(offset), cursor);
+  return out;
+};
 TPP.gifCommentExtensionBytes = function (text) {
   const message = String(text || "").trim();
   if (!message) return new Uint8Array(0);
@@ -2058,8 +2273,29 @@ TPP.exportBlobForCanvas = function (canvas, options) {
         : "image/png";
   return new Promise(function (resolve) {
     canvas.toBlob(
-      function (blob) {
-        resolve(blob || null);
+      async function (blob) {
+        if (!blob) {
+          resolve(null);
+          return;
+        }
+        if (exportOptions.format !== "png") {
+          resolve(blob);
+          return;
+        }
+        try {
+          const bytes = new Uint8Array(await blob.arrayBuffer());
+          const sourceBook = options && options.book ? options.book : TPP.settings();
+          const metadataBytes = TPP.insertPngMetadata(
+            bytes,
+            TPP.pngTextEntries(sourceBook, {
+              pageIndex: options && options.pageIndex,
+              totalPages: options && options.totalPages,
+            }),
+          );
+          resolve(new Blob([metadataBytes], { type: "image/png" }));
+        } catch (_error) {
+          resolve(blob);
+        }
       },
       mime,
       exportOptions.format === "png"
