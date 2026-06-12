@@ -3863,7 +3863,13 @@ TPP.exportImagesD64 = async function (options) {
     try {
       const shell = TPP.createExportRenderShell(settings);
       mount.appendChild(shell);
-      const d64Files = [];
+      const d64Files = [
+        {
+          name: "BOOK.PRG",
+          type: 0x82,
+          data: TPP.exportD64BootProgramBytes(),
+        },
+      ];
       for (let i = 0; i < pages.length; i += 1) {
         TPP.throwIfProgressCancelled(progressOp);
         TPP.showProgress(
@@ -3903,11 +3909,6 @@ TPP.exportImagesD64 = async function (options) {
           });
         }
       }
-      d64Files.push({
-        name: "BOOK.PRG",
-        type: 0x82,
-        data: TPP.exportD64BootProgramBytes(),
-      });
       d64Files.push({
         name: "FILE_ID.DIZ",
         type: 0x81,
