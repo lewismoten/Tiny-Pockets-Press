@@ -828,6 +828,22 @@ export async function init(TPP) {
       checkerboard,
     );
   };
+  const warmedCharsetPreviewSheet = function () {
+    if (TPP.imageExportCharsetIconSheet && TPP.imageExportCharsetIconSheet.canvas) {
+      return TPP.imageExportCharsetIconSheet;
+    }
+    if (TPP.imageExportCharsetPreviewSheet && TPP.imageExportCharsetPreviewSheet.canvas) {
+      return TPP.imageExportCharsetPreviewSheet;
+    }
+    if (
+      TPP.imageExportCharsetPreviewCache &&
+      TPP.imageExportCharsetPreviewCache.sheet &&
+      TPP.imageExportCharsetPreviewCache.sheet.canvas
+    ) {
+      return TPP.imageExportCharsetPreviewCache.sheet;
+    }
+    return null;
+  };
   const refreshCharsetPreviewIcon = async function () {
     const token = (TPP.imageExportCharsetIconToken || 0) + 1;
     TPP.imageExportCharsetIconToken = token;
@@ -838,12 +854,42 @@ export async function init(TPP) {
       return;
     }
     try {
-      const previousCheckerboard = Boolean(
-        TPP.imageExportCharsetPreviewCheckerboard,
+      const settings = TPP.settings();
+      const exportOptions = buildCurrentExportOptions();
+      const pages = TPP.buildPages();
+      const pageIndex = Math.max(
+        0,
+        Math.min(Number(TPP.imageExportPreviewIndex) || 0, pages.length - 1),
       );
-      TPP.imageExportCharsetPreviewCheckerboard = false;
-      const sheet = await buildCharsetPreview();
-      TPP.imageExportCharsetPreviewCheckerboard = previousCheckerboard;
+      const cacheKey = charsetPreviewCacheKey(exportOptions, pageIndex, false);
+      let sheet =
+        TPP.imageExportCharsetPreviewCache &&
+        TPP.imageExportCharsetPreviewCache.key === cacheKey
+          ? TPP.imageExportCharsetPreviewCache.sheet || null
+          : null;
+      if (!sheet) {
+        const scale = typeof TPP.imageExportRenderScale === "function"
+          ? TPP.imageExportRenderScale(settings, exportOptions)
+          : Math.max(1, TPP.dpi(exportOptions.dpi) / 96);
+        const previewCacheKey = typeof TPP.imageExportPreviewCacheKey === "function"
+          ? TPP.imageExportPreviewCacheKey(settings, pageIndex, scale)
+          : "";
+        const baseCanvas =
+          TPP.imageExportPreviewRenderCache &&
+          TPP.imageExportPreviewRenderCache.key === previewCacheKey
+            ? TPP.imageExportPreviewRenderCache.canvas
+            : null;
+        if (baseCanvas) {
+          sheet = buildCharsetPreviewFromCanvas(
+            typeof TPP.fitCanvasToExportTarget === "function"
+              ? TPP.fitCanvasToExportTarget(baseCanvas, exportOptions)
+              : baseCanvas,
+            exportOptions,
+            pageIndex,
+            false,
+          );
+        }
+      }
       if (TPP.imageExportCharsetIconToken !== token) return;
       TPP.imageExportCharsetIconSheet = sheet || null;
       renderCharsetPreviewIcon();
@@ -870,6 +916,7 @@ export async function init(TPP) {
       false,
     );
     TPP.imageExportCharsetIconSheet = sheet || null;
+    TPP.imageExportCharsetPreviewSheet = sheet || null;
     renderCharsetPreviewIcon();
     return sheet;
   };
@@ -905,14 +952,20 @@ export async function init(TPP) {
     imageExportCharsetPreview.disabled = true;
     imageExportCharsetPreview.classList.add("is-disabled");
     try {
+      const warmedSheet = !TPP.imageExportCharsetPreviewCheckerboard
+        ? warmedCharsetPreviewSheet()
+        : null;
       if (
-        !TPP.imageExportCharsetPreviewCheckerboard &&
-        TPP.imageExportCharsetIconSheet &&
-        presentCharsetPreviewSheet(TPP.imageExportCharsetIconSheet)
+        warmedSheet &&
+        presentCharsetPreviewSheet(warmedSheet)
       ) {
         return;
       }
       const sheet = await buildCharsetPreview();
+      if (!TPP.imageExportCharsetPreviewCheckerboard) {
+        TPP.imageExportCharsetIconSheet = sheet || null;
+        renderCharsetPreviewIcon();
+      }
       if (!presentCharsetPreviewSheet(sheet)) {
         TPP.toast("Unable to build custom charset preview.");
         return;

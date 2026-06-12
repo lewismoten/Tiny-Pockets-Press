@@ -1036,6 +1036,11 @@ TPP.renderImageExportPreview = async function () {
   const customCharsetPreview =
     exportOptions.colorDepth === "indexed" &&
     exportOptions.dithering === "c64-custom-charset";
+  const previewCacheKey = TPP.imageExportPreviewCacheKey(
+    settings,
+    TPP.imageExportPreviewIndex,
+    previewScale,
+  );
   const beforeName =
     typeof TPP.exportPageFileName === "function"
       ? TPP.exportPageFileName(settings, TPP.imageExportPreviewIndex + 1, {
@@ -1118,11 +1123,6 @@ TPP.renderImageExportPreview = async function () {
   }
   TPP.setImageExportPreviewDownloadButtonsDisabled(true, true);
   try {
-    const previewCacheKey = TPP.imageExportPreviewCacheKey(
-      settings,
-      TPP.imageExportPreviewIndex,
-      previewScale,
-    );
     let baseCanvas =
       TPP.imageExportPreviewRenderCache &&
       TPP.imageExportPreviewRenderCache.key === previewCacheKey
@@ -1143,16 +1143,6 @@ TPP.renderImageExportPreview = async function () {
     const beforeCanvas = typeof TPP.fitCanvasToExportTarget === "function"
       ? TPP.fitCanvasToExportTarget(baseCanvas, exportOptions)
       : baseCanvas;
-    if (
-      customCharsetPreview &&
-      typeof TPP.primeImageExportCharsetPreview === "function"
-    ) {
-      TPP.primeImageExportCharsetPreview(
-        beforeCanvas,
-        exportOptions,
-        TPP.imageExportPreviewIndex,
-      );
-    }
     const afterCanvas = await TPP.exportCanvasForDepth(
       beforeCanvas,
       exportOptions.colorDepth,
@@ -1160,6 +1150,16 @@ TPP.renderImageExportPreview = async function () {
       exportOptions.palette,
       exportOptions,
     );
+    if (
+      customCharsetPreview &&
+      typeof TPP.primeImageExportCharsetPreview === "function"
+    ) {
+      TPP.primeImageExportCharsetPreview(
+        afterCanvas,
+        exportOptions,
+        TPP.imageExportPreviewIndex,
+      );
+    }
     const beforeEntry = {
       previewSrc:
         cachedBefore.previewSrc || TPP.previewDataUrl(beforeCanvas, "png", 1),
