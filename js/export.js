@@ -265,6 +265,7 @@ TPP.pngTextEntries = function (book, options) {
     { keyword: "Software", value: "Tiny Pockets Press" },
     { keyword: "XML:com.adobe.xmp", value: TPP.pngXmpPacket(book, options) },
     { keyword: "__EXIF__", value: TPP.pngExifBytes(book, options) },
+    { keyword: "__TIME__", value: TPP.pngGeneratedDateInfo(options).pngTime },
     {
       keyword: "Comment",
       value: TPP.condensedMetadataText(
@@ -365,11 +366,60 @@ TPP.pngXmpDateTime = function (value) {
   const second = String(date.getSeconds()).padStart(2, "0");
   return year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":" + second;
 };
+TPP.pngGeneratedDateInfo = function (options) {
+  const config = options || {};
+  const source =
+    config.generatedAt instanceof Date
+      ? new Date(config.generatedAt.getTime())
+      : config.generatedAt
+        ? new Date(config.generatedAt)
+        : new Date();
+  const date = Number.isNaN(source.getTime()) ? new Date() : source;
+  const pad = function (value) {
+    return String(value).padStart(2, "0");
+  };
+  return {
+    xmp:
+      date.getFullYear() +
+      "-" +
+      pad(date.getMonth() + 1) +
+      "-" +
+      pad(date.getDate()) +
+      "T" +
+      pad(date.getHours()) +
+      ":" +
+      pad(date.getMinutes()) +
+      ":" +
+      pad(date.getSeconds()),
+    exif:
+      date.getFullYear() +
+      ":" +
+      pad(date.getMonth() + 1) +
+      ":" +
+      pad(date.getDate()) +
+      " " +
+      pad(date.getHours()) +
+      ":" +
+      pad(date.getMinutes()) +
+      ":" +
+      pad(date.getSeconds()),
+    pngTime: new Uint8Array([
+      (date.getUTCFullYear() >>> 8) & 0xff,
+      date.getUTCFullYear() & 0xff,
+      date.getUTCMonth() + 1,
+      date.getUTCDate(),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+    ]),
+  };
+};
 TPP.pngXmpPacket = function (book, options) {
   const fields = TPP.exportMetadataFields(book, options);
   const languageTag = String(fields.language || "").trim();
   const altLanguage = languageTag || "x-default";
   const xmpDate = TPP.pngXmpDateTime(fields.date);
+  const generated = TPP.pngGeneratedDateInfo(options);
   const keywords = String(fields.keywords || "")
     .split(/[,;\n]+/)
     .map(function (item) {
@@ -457,6 +507,8 @@ TPP.pngXmpPacket = function (book, options) {
   if (xmpDate) {
     lines.push("      <xmp:CreateDate>" + TPP.pngXmlEscape(xmpDate) + "</xmp:CreateDate>");
   }
+  lines.push("      <xmp:ModifyDate>" + TPP.pngXmlEscape(generated.xmp) + "</xmp:ModifyDate>");
+  lines.push("      <xmp:MetadataDate>" + TPP.pngXmlEscape(generated.xmp) + "</xmp:MetadataDate>");
   lines.push("      <xmp:CreatorTool>Tiny Pockets Press</xmp:CreatorTool>");
   if (fields.language) {
     lines.push("      <dc:language><rdf:Bag><rdf:li>" + TPP.pngXmlEscape(fields.language) + "</rdf:li></rdf:Bag></dc:language>");
@@ -514,6 +566,7 @@ TPP.pngExifUserComment = function (value) {
 TPP.pngExifBytes = function (book, options) {
   const fields = TPP.exportMetadataFields(book, options);
   const exifDate = TPP.pngExifDateTime(fields.date);
+  const generated = TPP.pngGeneratedDateInfo(options);
   const comment = TPP.condensedMetadataText(
     [
       { label: "Title", value: fields.title },
@@ -545,10 +598,11 @@ TPP.pngExifBytes = function (book, options) {
   addAscii(ifd0Entries, 0x010e, fields.description || fields.title);
   addAscii(ifd0Entries, 0x013b, fields.author);
   addAscii(ifd0Entries, 0x0131, "Tiny Pockets Press");
-  addAscii(ifd0Entries, 0x0132, exifDate);
+  addAscii(ifd0Entries, 0x0132, generated.exif);
   addAscii(ifd0Entries, 0x8298, fields.rights);
   addBinary(exifEntries, 0x9286, TPP.pngExifUserComment(comment));
   if (exifDate) addAscii(exifEntries, 0x9003, exifDate);
+  addAscii(exifEntries, 0x9004, generated.exif);
   if (exifEntries.length) {
     ifd0Entries.push({ tag: 0x8769, type: 4, count: 1, pointerTo: "exif" });
   }
@@ -637,11 +691,17 @@ TPP.insertPngMetadata = function (bytes, entries) {
   const exifEntry = normalizedEntries.find(function (entry) {
     return entry && entry.keyword === "__EXIF__";
   });
+  const timeEntry = normalizedEntries.find(function (entry) {
+    return entry && entry.keyword === "__TIME__";
+  });
   if (xmpEntry && String(xmpEntry.value || "").trim()) {
     textChunks.unshift(TPP.pngITXtChunk("XML:com.adobe.xmp", xmpEntry.value));
   }
   if (exifEntry && exifEntry.value instanceof Uint8Array && exifEntry.value.length) {
     textChunks.unshift(TPP.pngChunkBytes("eXIf", exifEntry.value));
+  }
+  if (timeEntry && timeEntry.value instanceof Uint8Array && timeEntry.value.length === 7) {
+    textChunks.unshift(TPP.pngChunkBytes("tIME", timeEntry.value));
   }
   if (!textChunks.length) return bytes;
   let offset = 8;
