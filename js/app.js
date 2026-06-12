@@ -1060,6 +1060,50 @@ TPP.renderImageExportPreview = async function () {
         String(TPP.imageExportPreviewIndex + 1) +
         "-after." +
         (exportOptions.format === "jpeg" ? "jpg" : exportOptions.format);
+  const compareStageMarkup = function (beforeSrc, afterSrc, beforeSize, afterSize) {
+    return (
+      '<div class="image-export-compare">' +
+      '<img draggable="false" src="' +
+      TPP.esc(beforeSrc || "") +
+      '" alt="Original preview">' +
+      '<img draggable="false" class="image-export-compare-after" src="' +
+      TPP.esc(afterSrc || beforeSrc || "") +
+      '" alt="Exported preview">' +
+      '<div class="image-export-compare-divider"></div>' +
+      '<div class="image-export-compare-label before">Before<span class="image-export-compare-size">' +
+      TPP.esc(beforeSize || "Preview") +
+      "</span></div>" +
+      '<div class="image-export-compare-label after">After<span class="image-export-compare-size">' +
+      TPP.esc(afterSize || "Preview") +
+      "</span></div>" +
+      "</div>"
+    );
+  };
+  const renderLiveBeforeStage = function (page, settings) {
+    if (!page || typeof TPP.readerMiniPage !== "function") return;
+    const wrap = document.createElement("div");
+    wrap.className = "image-export-live-preview";
+    const shell = TPP.readerMiniPage(page, settings);
+    shell.classList.add("image-export-live-preview-shell");
+    shell.style.width = "100%";
+    shell.style.height = "100%";
+    wrap.appendChild(shell);
+    stage.replaceChildren(wrap);
+  };
+  const renderBeforeStage = async function (beforeEntry) {
+    const beforeSrc = beforeEntry && beforeEntry.src ? beforeEntry.src : "";
+    await TPP.preloadImageExportPreviewSource(beforeSrc);
+    if (TPP.imageExportPreviewToken !== token) {
+      return;
+    }
+    stage.innerHTML = compareStageMarkup(
+      beforeSrc,
+      beforeSrc,
+      TPP.imageExportPreviewSizeLabel(beforeEntry),
+      "Rendering...",
+    );
+    TPP.bindImageExportPreviewDrag();
+  };
   const renderPreviewStage = async function (beforeEntry, afterEntry) {
     const beforeSrc = beforeEntry && beforeEntry.src ? beforeEntry.src : "";
     const afterSrc = afterEntry && afterEntry.src ? afterEntry.src : "";
@@ -1070,22 +1114,12 @@ TPP.renderImageExportPreview = async function () {
     if (TPP.imageExportPreviewToken !== token) {
       return;
     }
-    stage.innerHTML =
-      '<div class="image-export-compare">' +
-      '<img draggable="false" src="' +
-      TPP.esc(beforeSrc) +
-      '" alt="Original preview">' +
-      '<img draggable="false" class="image-export-compare-after" src="' +
-      TPP.esc(afterSrc) +
-      '" alt="Exported preview">' +
-      '<div class="image-export-compare-divider"></div>' +
-      '<div class="image-export-compare-label before">Before<span class="image-export-compare-size">' +
-      TPP.esc(TPP.imageExportPreviewSizeLabel(beforeEntry)) +
-      "</span></div>" +
-      '<div class="image-export-compare-label after">After<span class="image-export-compare-size">' +
-      TPP.esc(TPP.imageExportPreviewSizeLabel(afterEntry)) +
-      "</span></div>" +
-      "</div>";
+    stage.innerHTML = compareStageMarkup(
+      beforeSrc,
+      afterSrc,
+      TPP.imageExportPreviewSizeLabel(beforeEntry),
+      TPP.imageExportPreviewSizeLabel(afterEntry),
+    );
     TPP.setImageExportPreviewLoading(stage, false);
     TPP.setImageExportPreviewDownloads({
       before: {
@@ -1114,6 +1148,18 @@ TPP.renderImageExportPreview = async function () {
       },
     );
     return;
+  }
+  if (!cachedBefore.previewSrc) {
+    renderLiveBeforeStage(
+      pages[TPP.imageExportPreviewIndex],
+      settings,
+    );
+  }
+  if (cachedBefore.previewSrc) {
+    await renderBeforeStage({
+      src: cachedBefore.previewSrc,
+      blob: cachedBefore.blob || null,
+    });
   }
   if (customCharsetPreview) {
     TPP.setImageExportPreviewLoading(stage, true, "Rendering custom charset...");
@@ -1165,6 +1211,20 @@ TPP.renderImageExportPreview = async function () {
         cachedBefore.previewSrc || TPP.previewDataUrl(beforeCanvas, "png", 1),
       blob: cachedBefore.blob || null,
     };
+    if (!cachedAfter.previewSrc) {
+      TPP.setImageExportPreviewResultCache(beforeCacheKey, beforeEntry);
+      if (TPP.imageExportPreviewToken !== token) return;
+      await renderBeforeStage({
+        src: beforeEntry.previewSrc,
+        blob: beforeEntry.blob,
+      });
+      TPP.setImageExportPreviewLoading(
+        stage,
+        true,
+        customCharsetPreview ? "Rendering custom charset..." : "Rendering preview...",
+      );
+      if (TPP.imageExportPreviewToken !== token) return;
+    }
     const afterEntry = {
       previewSrc:
         cachedAfter.previewSrc ||
