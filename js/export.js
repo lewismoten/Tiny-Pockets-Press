@@ -1585,6 +1585,12 @@ TPP.applyPdfMetadata = function (pdf, book, options) {
     } catch (_error) {}
   }
 };
+TPP.pdfExportKindLabel = function (which) {
+  if (which === "interior") return "text block pdf";
+  if (which === "cover") return "cover pdf";
+  if (which === "readable" || which === "ebook") return "ebook pdf";
+  return String(which || "pdf").trim() || "pdf";
+};
 TPP.waitForImages = async function (root) {
   const images = Array.from(root.querySelectorAll("img"));
   await Promise.all(
@@ -1618,7 +1624,9 @@ TPP.exportPdfFrom = async function (which) {
     format: [settings.sheet.w, settings.sheet.h],
     compress: true,
   });
-  TPP.applyPdfMetadata(pdf, settings, { kind: which + " pdf" });
+  TPP.applyPdfMetadata(pdf, settings, {
+    kind: TPP.pdfExportKindLabel(which),
+  });
   const sheets = Array.from(container.querySelectorAll("[data-pdf-page]"));
   for (let i = 0; i < sheets.length; i++) {
     TPP.showProgress(
@@ -1660,6 +1668,9 @@ TPP.exportPdfFrom = async function (which) {
     extension: "pdf",
     kind: which,
   });
+  TPP.applyPdfMetadata(pdf, settings, {
+    kind: TPP.pdfExportKindLabel(which),
+  });
   pdf.save(name);
   TPP.showProgress(100, "PDF complete");
 };
@@ -1673,7 +1684,9 @@ TPP.exportReadablePdf = async function () {
     format: [settings.page.w, settings.page.h],
     compress: true,
   });
-  TPP.applyPdfMetadata(pdf, settings, { kind: "ebook pdf" });
+  TPP.applyPdfMetadata(pdf, settings, {
+    kind: TPP.pdfExportKindLabel("ebook"),
+  });
   const mount = document.createElement("div");
   mount.style.cssText =
     "position:fixed;left:-9999px;top:0;pointer-events:none;";
@@ -1718,6 +1731,9 @@ TPP.exportReadablePdf = async function () {
   const name = TPP.exportFileName(settings, {
     extension: "pdf",
     kind: "ebook",
+  });
+  TPP.applyPdfMetadata(pdf, settings, {
+    kind: TPP.pdfExportKindLabel("ebook"),
   });
   pdf.save(name);
   TPP.showProgress(100, "eBook PDF complete");
