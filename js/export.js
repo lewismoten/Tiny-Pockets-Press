@@ -2441,7 +2441,9 @@ TPP.exportEpub = async function () {
 TPP.imageExportOptions = function (options) {
   const source = options || {};
   const rawThreshold = Number(source.threshold);
-  const requestedFormat = ["png", "gif", "jpeg", "webp"].includes(source.format)
+  const requestedFormat = ["png", "gif", "jpeg", "webp", "seq"].includes(
+    source.format,
+  )
     ? source.format
     : "png";
   const requestedDepth = [
@@ -2453,20 +2455,38 @@ TPP.imageExportOptions = function (options) {
   ].includes(source.colorDepth)
     ? source.colorDepth
     : "color24";
-  const colorDepth = requestedDepth === "websafe" ? "indexed" : requestedDepth;
+  let colorDepth = requestedDepth === "websafe" ? "indexed" : requestedDepth;
+  if (requestedFormat === "seq" && !["mono1", "indexed"].includes(colorDepth)) {
+    colorDepth = "indexed";
+  }
   const rawDithering = String(source.dithering || "").trim().toLowerCase();
   const normalizedDithering =
     rawDithering === "none" ? "threshold" : rawDithering;
-  const dithering = TPP.imageExportDitherIds().includes(normalizedDithering)
+  let dithering = TPP.imageExportDitherIds().includes(normalizedDithering)
     ? normalizedDithering
     : "threshold";
+  if (
+    requestedFormat === "seq" &&
+    ![
+      "c64-petscii",
+      "c64-petscii-full",
+      "c64-custom-charset",
+    ].includes(dithering)
+  ) {
+    dithering = "c64-petscii";
+  }
+  let targetWidth = Math.max(0, Math.round(Number(source.targetWidth) || 0)) || null;
+  let targetHeight = Math.max(0, Math.round(Number(source.targetHeight) || 0)) || null;
+  if (requestedFormat === "seq") {
+    targetWidth = 320;
+    targetHeight = 200;
+  }
   return {
     dpi: TPP.dpi(source.dpi),
-    targetWidth: Math.max(0, Math.round(Number(source.targetWidth) || 0)) || null,
-    targetHeight:
-      Math.max(0, Math.round(Number(source.targetHeight) || 0)) || null,
+    targetWidth: targetWidth,
+    targetHeight: targetHeight,
     format:
-      colorDepth === "indexed" && !["png", "gif"].includes(requestedFormat)
+      colorDepth === "indexed" && !["png", "gif", "seq"].includes(requestedFormat)
         ? "png"
         : requestedFormat,
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
@@ -2481,11 +2501,13 @@ TPP.imageExportOptions = function (options) {
       Math.min(10000, Number(source.frameDelay) || 1000),
     ),
     palette:
-      requestedDepth === "websafe"
-        ? "websafe"
-        : TPP.imageExportPaletteIds().includes(source.palette)
-          ? String(source.palette)
-          : "websafe",
+      requestedFormat === "seq"
+        ? "c64"
+        : requestedDepth === "websafe"
+          ? "websafe"
+          : TPP.imageExportPaletteIds().includes(source.palette)
+            ? String(source.palette)
+            : "websafe",
   };
 };
 TPP.imageExportRenderScale = function (settings, options) {
@@ -2547,7 +2569,171 @@ TPP.imageExportDitherIds = function () {
     "c64-custom-charset",
   ];
 };
-TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION = 1;
+TPP.imageExportSeqOptionsEnabled = function (options) {
+  const config = TPP.imageExportOptions(options || {});
+  return (
+    config.format === "seq" &&
+    config.targetWidth === 320 &&
+    config.targetHeight === 200 &&
+    config.palette === "c64" &&
+    ["mono1", "indexed"].includes(config.colorDepth) &&
+    [
+      "c64-petscii",
+      "c64-petscii-full",
+      "c64-custom-charset",
+    ].includes(config.dithering)
+  );
+};
+TPP.exportSeqStem = function (book) {
+  const stem = TPP.exportBookStem(book, {
+    maxSegments: 1,
+    includeAuthor: false,
+    includeClassification: false,
+  });
+  const clean = String(TPP.exportFilenameSegment(stem, "tinybook", 8) || "tinybook")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+  return (clean || "TINYBOOK").slice(0, 8);
+};
+TPP.exportSeqFileName = function (book) {
+  return TPP.exportSeqStem(book) + ".SEQ";
+};
+TPP.exportSeqPageFileName = function (book, pageIndex) {
+  const stem = TPP.exportSeqStem(book);
+  const pageToken = String(Math.max(1, Number(pageIndex) || 1)).padStart(4, "0");
+  return stem.slice(0, Math.max(1, 8 - pageToken.length)) + pageToken + ".SEQ";
+};
+TPP.imageExportSeqBytesForCanvas = async function (canvas, options) {
+  if (!canvas || !canvas.width || !canvas.height) return null;
+  const exportOptions = TPP.imageExportOptions(options);
+  const palette = TPP.imageExportNamedPalette(exportOptions.palette);
+  const ditherLib = await TPP.loadImageExportDither();
+  if (!ditherLib || typeof ditherLib.buildImageExportSeqScreen !== "function") {
+    return null;
+  }
+  const renderCanvas = canvas;
+  const ctx = renderCanvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  const image = ctx.getImageData(0, 0, renderCanvas.width, renderCanvas.height);
+  return ditherLib.buildImageExportSeqScreen(
+    image.data,
+    renderCanvas.width,
+    renderCanvas.height,
+    palette,
+    exportOptions,
+  );
+};
+TPP.exportImageSeqPage = async function (options, pageIndex) {
+  const progressOp = TPP.beginProgressOperation("SEQ page export");
+  try {
+    await TPP.ensureImageExportPaletteForOptionsLoaded(options);
+    TPP.sync();
+    const settings = TPP.settings();
+    const pages = TPP.buildPages();
+    const index = Math.max(1, Number(pageIndex) || 1);
+    if (!pages.length || index > pages.length) {
+      alert("No pages available to export.");
+      return;
+    }
+    const exportOptions = TPP.imageExportOptions(options);
+    const mount = document.createElement("div");
+    mount.style.cssText =
+      "position:fixed;left:-9999px;top:0;pointer-events:none;";
+    document.body.appendChild(mount);
+    try {
+      const shell = TPP.createExportRenderShell(settings);
+      mount.appendChild(shell);
+      const page = pages[index - 1];
+      const canvas = await TPP.renderExportPageCanvas(shell, page, settings, 1);
+      const exportCanvas = TPP.fitCanvasToExportTarget(canvas, exportOptions);
+      const seqBytes = await TPP.imageExportSeqBytesForCanvas(exportCanvas, exportOptions);
+      if (!seqBytes || !seqBytes.length) {
+        alert("SEQ export failed.");
+        return;
+      }
+      const blob = new Blob([seqBytes], { type: "application/octet-stream" });
+      TPP.downloadBlob(TPP.exportSeqPageFileName(settings, index), blob);
+    } finally {
+      mount.remove();
+    }
+    TPP.finishProgressOperation(progressOp);
+    TPP.showProgress(100, "SEQ page export complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "SEQ page export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
+};
+TPP.exportImagesSeq = async function (options) {
+  const progressOp = TPP.beginProgressOperation("SEQ export");
+  try {
+    await TPP.ensureImageExportPaletteForOptionsLoaded(options);
+    TPP.sync();
+    const settings = TPP.settings();
+    const pages = TPP.buildPages();
+    if (!pages.length) {
+      alert("No pages available to export.");
+      return;
+    }
+    const exportOptions = TPP.imageExportOptions(options);
+    const mount = document.createElement("div");
+    mount.style.cssText =
+      "position:fixed;left:-9999px;top:0;pointer-events:none;";
+    document.body.appendChild(mount);
+    try {
+      const shell = TPP.createExportRenderShell(settings);
+      mount.appendChild(shell);
+      const bytesList = [];
+      for (let i = 0; i < pages.length; i += 1) {
+        TPP.throwIfProgressCancelled(progressOp);
+        TPP.showProgress(
+          5 + Math.round((i / pages.length) * 80),
+          "Rendering SEQ page " + (i + 1) + " of " + pages.length + "...",
+        );
+        const page = pages[i];
+        const canvas = await TPP.renderExportPageCanvas(shell, page, settings, 1);
+        const exportCanvas = TPP.fitCanvasToExportTarget(canvas, exportOptions);
+        const seqBytes = await TPP.imageExportSeqBytesForCanvas(exportCanvas, exportOptions);
+        if (!seqBytes || !seqBytes.length) {
+          alert("SEQ export failed.");
+          return;
+        }
+        bytesList.push(seqBytes);
+      }
+      const totalLength = bytesList.reduce(function (sum, item) {
+        return sum + (item ? item.length : 0);
+      }, 0);
+      const combined = new Uint8Array(totalLength);
+      let offset = 0;
+      bytesList.forEach(function (item) {
+        combined.set(item, offset);
+        offset += item.length;
+      });
+      const blob = new Blob([combined], { type: "application/octet-stream" });
+      TPP.downloadBlob(TPP.exportSeqFileName(settings), blob);
+    } finally {
+      mount.remove();
+    }
+    TPP.finishProgressOperation(progressOp);
+    TPP.showProgress(100, "SEQ export complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "SEQ export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
+};
 TPP.IMAGE_EXPORT_PALETTE_ITEM_SCHEMA_VERSION = 1;
 TPP.IMAGE_EXPORT_PALETTE_CATALOG = "data/palettes.catalog.json";
 TPP.imageExportPaletteById = TPP.imageExportPaletteById || {};
@@ -3158,6 +3344,17 @@ TPP.encodeGifBlob = async function (canvas, options) {
 TPP.exportBlobForCanvas = function (canvas, options) {
   if (!canvas) return Promise.resolve(null);
   const exportOptions = TPP.imageExportOptions(options);
+  if (exportOptions.format === "seq") {
+    return Promise.resolve()
+      .then(function () {
+        return TPP.imageExportSeqBytesForCanvas(canvas, Object.assign({}, options || {}, exportOptions));
+      })
+      .then(function (bytes) {
+        return bytes
+          ? new Blob([bytes], { type: "application/octet-stream" })
+          : null;
+      });
+  }
   if (exportOptions.format === "gif")
     return TPP.encodeGifBlob(canvas, Object.assign({}, options || {}, exportOptions));
   const mime =

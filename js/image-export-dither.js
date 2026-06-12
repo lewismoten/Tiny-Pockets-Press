@@ -401,6 +401,104 @@ export function init(TPP) {
     blocks: hashGlyphCatalog(petsciiGlyphs),
     full: hashGlyphCatalog(petsciiFullGlyphs),
   };
+  const petsciiGlyphCodes = new Uint8Array(
+    petsciiGlyphs.map(function (_mask, index) {
+      if (index < 16) {
+        return 0x20 + index;
+      }
+      const extraCodes = [0x7c, 0x7c, 0x5f, 0x5f, 0x5c, 0x2f, 0x23];
+      return extraCodes[index - 16] || 0x20;
+    }),
+  );
+  const petsciiFullGlyphCodes = new Uint8Array(
+    petsciiGlyphCodes.length + petsciiFullGlyphChars.length,
+  );
+  petsciiFullGlyphCodes.set(petsciiGlyphCodes, 0);
+  for (let i = 0; i < petsciiFullGlyphChars.length; i += 1) {
+    petsciiFullGlyphCodes[ petsciiGlyphCodes.length + i ] =
+      petsciiFullGlyphChars[i].charCodeAt(0) || 0x20;
+  }
+  const selectSeqGlyphCatalog = function (dithering) {
+    if (dithering === "c64-petscii-full" || dithering === "c64-custom-charset") {
+      return {
+        glyphs: petsciiFullGlyphs,
+        codes: petsciiFullGlyphCodes,
+        hash: fixedGlyphCatalogHashes.full,
+      };
+    }
+    return {
+      glyphs: petsciiGlyphs,
+      codes: petsciiGlyphCodes,
+      hash: fixedGlyphCatalogHashes.blocks,
+    };
+  };
+  const buildImageExportSeqScreen = function (
+    data,
+    width,
+    height,
+    palette,
+    options,
+  ) {
+    if (!Array.isArray(palette) || !palette.length) return null;
+    const mode = String((options || {}).dithering || "c64-petscii");
+    const sequence = selectSeqGlyphCatalog(mode);
+    const glyphCatalog = sequence.glyphs;
+    const glyphCodes = sequence.codes;
+    const glyphHash = sequence.hash;
+    const cellSize = 8;
+    const cols = Math.max(1, Math.floor(width / cellSize));
+    const rows = Math.max(1, Math.floor(height / cellSize));
+    const paletteHash = hashPalette(palette);
+    const bytes = new Uint8Array(cols * rows);
+    const colorLimit = Math.max(2, Math.min(6, palette.length));
+    for (let row = 0; row < rows; row += 1) {
+      for (let col = 0; col < cols; col += 1) {
+        const cellX = col * cellSize;
+        const cellY = row * cellSize;
+        const blockWidth = Math.min(cellSize, width - cellX);
+        const blockHeight = Math.min(cellSize, height - cellY);
+        const pixels = extractCellPixels(
+          data,
+          width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+        );
+        const candidates = paletteCellCandidates(
+          pixels,
+          palette,
+          colorLimit,
+        );
+        const fit = bestTwoColorCellFit(
+          pixels,
+          blockWidth,
+          blockHeight,
+          palette,
+          candidates,
+        );
+        let bestIndex = 0;
+        let bestError = Infinity;
+        for (let glyphIndex = 0; glyphIndex < glyphCatalog.length; glyphIndex += 1) {
+          const glyph = glyphCatalog[glyphIndex];
+          const totalError = scoreMaskAgainstCell(
+            glyph,
+            blockWidth,
+            blockHeight,
+            fit.bgErrors,
+            fit.fgErrors,
+          );
+          if (totalError < bestError) {
+            bestError = totalError;
+            bestIndex = glyphIndex;
+          }
+        }
+        bytes[row * cols + col] = glyphCodes[bestIndex] || 0x20;
+      }
+    }
+    return bytes;
+  };
+  TPP.buildImageExportSeqScreen = buildImageExportSeqScreen;
   const paletteCellCandidates = function (pixels, palette, limit) {
     const scored = palette.map(function (swatch, index) {
       let total = 0;
@@ -1356,5 +1454,6 @@ export function init(TPP) {
     applyMonoDither: TPP.applyImageExportMonoDither,
     applyPaletteDither: TPP.applyImageExportPaletteDither,
     buildCustomCharsetSheet: TPP.buildImageExportCustomCharsetSheet,
+    buildImageExportSeqScreen: TPP.buildImageExportSeqScreen,
   };
 }

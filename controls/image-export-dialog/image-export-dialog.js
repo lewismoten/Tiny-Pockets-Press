@@ -467,58 +467,94 @@ export async function init(TPP) {
   };
   const syncFormatUi = function () {
     const indexedOnly = imageExportColorDepth.value === "indexed";
+    const seqFormat = imageExportFormat.value === "seq";
     const indexedOnlyDitherOptions = Array.from(
       imageExportDither.querySelectorAll(
         'option[value="c64-petscii"], option[value="c64-petscii-full"], option[value="c64-custom-charset"]',
       ),
     );
     Array.from(imageExportFormat.options).forEach(function (option) {
-      option.disabled = indexedOnly && !["png", "gif"].includes(option.value);
+      option.disabled = indexedOnly && !["png", "gif", "seq"].includes(option.value);
     });
-    if (indexedOnly && !["png", "gif"].includes(imageExportFormat.value))
+    if (indexedOnly && !["png", "gif", "seq"].includes(imageExportFormat.value))
       imageExportFormat.value = "png";
+    if (seqFormat && imageExportPreset.value !== "320x200") {
+      imageExportPreset.value = "320x200";
+      syncPresetUi();
+    }
     const lossy =
       imageExportFormat.value === "jpeg" || imageExportFormat.value === "webp";
-    const colorDepthApplies = ["png", "gif", "jpeg", "webp"].includes(
+    const colorDepthApplies = ["png", "gif", "jpeg", "webp", "seq"].includes(
       imageExportFormat.value,
     );
     imageExportQuality.disabled = !lossy;
     imageExportQualityWrap.classList.toggle("is-disabled", !lossy);
     imageExportAnimatedGif.disabled = imageExportFormat.value !== "gif";
-    imageExportMp4.disabled = typeof window.VideoEncoder !== "function";
+    imageExportMp4.disabled = seqFormat || typeof window.VideoEncoder !== "function";
     imageExportColorDepth.disabled = !colorDepthApplies;
     imageExportColorDepth.parentElement.classList.toggle(
       "is-disabled",
       !colorDepthApplies,
     );
-    imageExportPalette.disabled = !indexedOnly;
-    imageExportPaletteWrap.classList.toggle("is-disabled", !indexedOnly);
+    if (seqFormat && !["mono1", "indexed"].includes(imageExportColorDepth.value)) {
+      imageExportColorDepth.value = "indexed";
+    }
+    imageExportPalette.value = seqFormat ? "c64" : imageExportPalette.value;
+    imageExportPalette.disabled = !(indexedOnly || seqFormat);
+    imageExportPaletteWrap.classList.toggle(
+      "is-disabled",
+      !(indexedOnly || seqFormat),
+    );
     const mono = imageExportColorDepth.value === "mono1";
     const indexed = imageExportColorDepth.value === "indexed";
     const customCharset = customCharsetMode();
-    indexedOnlyDitherOptions.forEach(function (option) {
-      option.disabled = !indexed;
-    });
-    if (
-      !indexed &&
-      ["c64-petscii", "c64-petscii-full", "c64-custom-charset"].includes(
-        imageExportDither.value,
-      )
-    ) {
-      imageExportDither.value = "threshold";
+    if (seqFormat) {
+      Array.from(imageExportDither.options).forEach(function (option) {
+        option.disabled = ![
+          "c64-petscii",
+          "c64-petscii-full",
+          "c64-custom-charset",
+        ].includes(option.value);
+      });
+      if (
+        ![
+          "c64-petscii",
+          "c64-petscii-full",
+          "c64-custom-charset",
+        ].includes(imageExportDither.value)
+      ) {
+        imageExportDither.value = "c64-petscii";
+      }
+    } else {
+      indexedOnlyDitherOptions.forEach(function (option) {
+        option.disabled = !indexed;
+      });
+      if (
+        !indexed &&
+        ["c64-petscii", "c64-petscii-full", "c64-custom-charset"].includes(
+          imageExportDither.value,
+        )
+      ) {
+        imageExportDither.value = "threshold";
+      }
     }
     imageExportThreshold.disabled = !(mono || customCharset);
     imageExportThresholdWrap.classList.toggle(
       "is-disabled",
       !(mono || customCharset),
     );
-    imageExportDither.disabled = !(mono || indexed);
-    imageExportDitherWrap.classList.toggle("is-disabled", !(mono || indexed));
+    imageExportDither.disabled = !(mono || indexed || seqFormat);
+    imageExportDitherWrap.classList.toggle(
+      "is-disabled",
+      !(mono || indexed || seqFormat),
+    );
     imageExportCharsetPreview.disabled = !customCharsetMode();
     imageExportCharsetPreview.classList.toggle(
       "is-disabled",
       imageExportCharsetPreview.disabled,
     );
+    imageExportPreset.disabled = seqFormat;
+    imageExportPreset.parentElement.classList.toggle("is-disabled", seqFormat);
     renderCharsetPreviewIcon();
     imageExportQualityValue.textContent =
       Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) + "%";
@@ -648,6 +684,24 @@ export async function init(TPP) {
       dithering: imageExportDither.value || "threshold",
     });
   };
+  const seqExportEnabled = function (options) {
+    return (
+      typeof TPP.imageExportSeqOptionsEnabled === "function" &&
+      TPP.imageExportSeqOptionsEnabled(options)
+    );
+  };
+  const updateSeqControls = function () {
+    const enabled = seqExportEnabled(buildCurrentExportOptions());
+    const hasPages = Number(TPP.imageExportPreviewPageCount) > 0;
+    if (imageExportDownloadSeqPage) {
+      imageExportDownloadSeqPage.hidden = !enabled;
+      imageExportDownloadSeqPage.disabled = !enabled || !hasPages;
+    }
+    if (imageExportDownloadSeqAll) {
+      imageExportDownloadSeqAll.hidden = !enabled;
+      imageExportDownloadSeqAll.disabled = !enabled || !hasPages;
+    }
+  };
   const buildCharsetPreview = async function () {
     if (!customCharsetMode()) return null;
     if (
@@ -776,33 +830,39 @@ export async function init(TPP) {
   imageExportPreset.addEventListener("change", function () {
     syncPresetUi();
     saveImageExportUi();
+    updateSeqControls();
     updateEstimate();
     schedulePreview();
   });
   imageExportFormat.addEventListener("change", async function () {
     await refreshFormatUi();
     saveImageExportUi();
+    updateSeqControls();
     schedulePreview();
   });
   imageExportColorDepth.addEventListener("change", async function () {
     await refreshFormatUi();
     saveImageExportUi();
+    updateSeqControls();
     schedulePreview();
   });
   imageExportQuality.addEventListener("input", function () {
     syncFormatUi();
     saveImageExportUi();
+    updateSeqControls();
     schedulePreview();
   });
   imageExportPalette.addEventListener("change", async function () {
     await refreshFormatUi();
     saveImageExportUi();
+    updateSeqControls();
     if (imageExportPaletteDialog.open) openPalettePreview();
     schedulePreview();
   });
   imageExportThreshold.addEventListener("input", function () {
     syncFormatUi();
     saveImageExportUi();
+    updateSeqControls();
     if (typeof TPP.clearImageExportPreviewResultCache === "function") {
       TPP.clearImageExportPreviewResultCache();
     }
@@ -811,6 +871,7 @@ export async function init(TPP) {
   imageExportDither.addEventListener("change", function () {
     syncFormatUi();
     saveImageExportUi();
+    updateSeqControls();
     schedulePreview();
   });
   imageExportFrameDelay.addEventListener("input", function () {
@@ -927,6 +988,16 @@ export async function init(TPP) {
   imageExportDownloadAfter.addEventListener("click", function () {
     TPP.downloadImageExportPreview("after");
   });
+  if (imageExportDownloadSeqPage) {
+    imageExportDownloadSeqPage.addEventListener("click", function () {
+      TPP.exportImageSeqPage(buildCurrentExportOptions(), TPP.imageExportPreviewIndex + 1);
+    });
+  }
+  if (imageExportDownloadSeqAll) {
+    imageExportDownloadSeqAll.addEventListener("click", function () {
+      TPP.exportImagesSeq(buildCurrentExportOptions());
+    });
+  }
   imageExportDialog.addEventListener("click", function (e) {
     const card = e.target.closest(".modal-card");
     if (e.target === imageExportDialog && !card && imageExportDialog.open) {
@@ -1037,5 +1108,7 @@ export async function init(TPP) {
       imageExportCharsetDialog.close();
   });
   syncPlaybackUi();
+  updateSeqControls();
+  TPP.updateImageExportSeqControls = updateSeqControls;
   return {};
 }
