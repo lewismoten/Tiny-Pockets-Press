@@ -191,6 +191,158 @@ TPP.zipCommentText = function (book) {
   pushPart("Rights", copyright);
   return parts.join(" | ");
 };
+TPP.zipManifestMetadata = function (book, pages, options) {
+  const source = book || {};
+  const metadata = TPP.epubMetadata(source);
+  const isbn13 = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "isbn13")
+      : source.isbn13 || "",
+  ).trim();
+  const isbn = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "isbn")
+      : source.isbn || "",
+  ).trim();
+  const keywords = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "keywords")
+      : source.keywords || "",
+  )
+    .split(/[,;\n]+/)
+    .map(function (item) {
+      return String(item || "").trim();
+    })
+    .filter(Boolean);
+  const format = String((options && options.format) || "png").trim().toLowerCase();
+  const pageCount = Array.isArray(pages) ? pages.length : 0;
+  return {
+    identifier: metadata.identifier,
+    title: metadata.title,
+    creator: metadata.creator,
+    publisher: metadata.publisher,
+    date: metadata.date,
+    language: metadata.language || "en",
+    description: metadata.description,
+    subjects: Array.isArray(metadata.subjects) ? metadata.subjects : [],
+    rights: metadata.rights,
+    keywords: keywords,
+    isbn13: isbn13,
+    isbn: isbn,
+    pageCount: pageCount,
+    imageFormat: format,
+    archiveComment: TPP.zipCommentText(source),
+    generatedAt: metadata.modified,
+    files: Array.from({ length: pageCount }, function (_unused, index) {
+      return {
+        name:
+          "page-" +
+          String(index + 1).padStart(4, "0") +
+          "." +
+          (format === "jpeg" ? "jpg" : format),
+        role: "page-image",
+      };
+    }),
+  };
+};
+TPP.zipSchemaOrgManifest = function (book, pages, options) {
+  const metadata = TPP.zipManifestMetadata(book, pages, options);
+  const doc = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    name: metadata.title,
+    encodingFormat: "application/zip",
+    inLanguage: metadata.language,
+    numberOfPages: metadata.pageCount,
+    keywords: metadata.keywords.join(", "),
+    comment: metadata.archiveComment,
+    datePublished: metadata.date || undefined,
+    description: metadata.description || undefined,
+    isbn: metadata.isbn13 || metadata.isbn || undefined,
+    identifier: metadata.identifier || undefined,
+    copyrightNotice: metadata.rights || undefined,
+    author: metadata.creator
+      ? {
+          "@type": "Person",
+          name: metadata.creator,
+        }
+      : undefined,
+    publisher: metadata.publisher
+      ? {
+          "@type": "Organization",
+          name: metadata.publisher,
+        }
+      : undefined,
+    about: metadata.subjects.length
+      ? metadata.subjects.map(function (subject) {
+          return {
+            "@type": "DefinedTerm",
+            name: subject,
+          };
+        })
+      : undefined,
+    hasPart: metadata.files.map(function (file, index) {
+      return {
+        "@type": "ImageObject",
+        name: "Page " + (index + 1),
+        encodingFormat:
+          "image/" + (metadata.imageFormat === "jpg" ? "jpeg" : metadata.imageFormat),
+        contentUrl: file.name,
+      };
+    }),
+  };
+  return JSON.stringify(doc, null, 2) + "\n";
+};
+TPP.zipDublinCoreManifest = function (book, pages, options) {
+  const metadata = TPP.zipManifestMetadata(book, pages, options);
+  const escape = function (value) {
+    if (typeof TPP.epubEscape === "function") return TPP.epubEscape(value);
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  };
+  const lines = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">',
+    "  <dc:title>" + escape(metadata.title || "Untitled") + "</dc:title>",
+  ];
+  if (metadata.creator) {
+    lines.push("  <dc:creator>" + escape(metadata.creator) + "</dc:creator>");
+  }
+  if (metadata.publisher) {
+    lines.push("  <dc:publisher>" + escape(metadata.publisher) + "</dc:publisher>");
+  }
+  if (metadata.date) {
+    lines.push("  <dc:date>" + escape(metadata.date) + "</dc:date>");
+  }
+  if (metadata.language) {
+    lines.push("  <dc:language>" + escape(metadata.language) + "</dc:language>");
+  }
+  if (metadata.description) {
+    lines.push("  <dc:description>" + escape(metadata.description) + "</dc:description>");
+  }
+  metadata.subjects.forEach(function (subject) {
+    lines.push("  <dc:subject>" + escape(subject) + "</dc:subject>");
+  });
+  if (metadata.rights) {
+    lines.push("  <dc:rights>" + escape(metadata.rights) + "</dc:rights>");
+  }
+  if (metadata.identifier) {
+    lines.push("  <dc:identifier>" + escape(metadata.identifier) + "</dc:identifier>");
+  }
+  lines.push("  <dc:format>application/zip</dc:format>");
+  lines.push("  <dc:type>Text</dc:type>");
+  lines.push(
+    "  <dc:relation>" +
+      escape(metadata.pageCount + " page image files in " + metadata.imageFormat.toUpperCase()) +
+      "</dc:relation>",
+  );
+  lines.push("</oai_dc:dc>");
+  return lines.join("\n") + "\n";
+};
 TPP.defaultLanguageCodeMap = {
   ar: "ara",
   de: "deu",
@@ -1729,6 +1881,8 @@ TPP.exportImagesZip = async function (options) {
       shell.remove();
       await new Promise(requestAnimationFrame);
     }
+    zip.file("manifest.jsonld", TPP.zipSchemaOrgManifest(settings, pages, exportOptions));
+    zip.file("metadata.dc.xml", TPP.zipDublinCoreManifest(settings, pages, exportOptions));
     TPP.showProgress(90, "Building ZIP archive...");
     const blob = await zip.generateAsync(
       {
