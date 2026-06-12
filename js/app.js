@@ -753,6 +753,29 @@ TPP.preloadImageExportPreviewSource = function (src) {
     }
   });
 };
+TPP.imageExportPreviewSizeLabel = function (entry) {
+  if (entry && entry.blob) {
+    return TPP.fileBytesLabel
+      ? TPP.fileBytesLabel(entry.blob.size || 0)
+      : String(entry.blob.size || 0);
+  }
+  return "Preview";
+};
+TPP.updateImageExportPreviewStageSizeLabels = function (
+  stage,
+  beforeLabel,
+  afterLabel,
+) {
+  if (!stage) return;
+  const before = stage.querySelector(
+    ".image-export-compare-label.before .image-export-compare-size",
+  );
+  const after = stage.querySelector(
+    ".image-export-compare-label.after .image-export-compare-size",
+  );
+  if (before) before.textContent = beforeLabel || "Preview";
+  if (after) after.textContent = afterLabel || "Preview";
+};
 TPP.cancelImageExportPreviewLoadingTimer = function () {
   if (!TPP.imageExportPreviewLoadingTimer) return;
   clearTimeout(TPP.imageExportPreviewLoadingTimer);
@@ -770,9 +793,16 @@ TPP.downloadImageExportPreview = async function (which) {
   const assets = TPP.imageExportPreviewAssets;
   const entry =
     which === "after" ? assets && assets.after : assets && assets.before;
-  if (!entry || !entry.blob || !entry.name) return;
+  if (!entry || !entry.name || (!entry.blob && !entry.src)) return;
   try {
-    TPP.downloadBlob(entry.name, entry.blob);
+    if (entry.blob) {
+      TPP.downloadBlob(entry.name, entry.blob);
+      return;
+    }
+    const response = await fetch(entry.src);
+    const blob = await response.blob();
+    entry.blob = blob;
+    TPP.downloadBlob(entry.name, blob);
   } catch (_error) {
     TPP.toast("Unable to download preview image.");
   }
@@ -934,16 +964,14 @@ TPP.renderImageExportPreview = async function () {
         String(TPP.imageExportPreviewIndex + 1) +
         "-after." +
         (exportOptions.format === "jpeg" ? "jpg" : exportOptions.format);
-  const renderPreviewStage = async function (beforeBlob, afterBlob) {
-    const beforeSrc = beforeBlob ? URL.createObjectURL(beforeBlob) : "";
-    const afterSrc = afterBlob ? URL.createObjectURL(afterBlob) : "";
+  const renderPreviewStage = async function (beforeEntry, afterEntry) {
+    const beforeSrc = beforeEntry && beforeEntry.src ? beforeEntry.src : "";
+    const afterSrc = afterEntry && afterEntry.src ? afterEntry.src : "";
     await Promise.all([
       TPP.preloadImageExportPreviewSource(beforeSrc),
       TPP.preloadImageExportPreviewSource(afterSrc),
     ]);
     if (TPP.imageExportPreviewToken !== token) {
-      if (beforeSrc) URL.revokeObjectURL(beforeSrc);
-      if (afterSrc) URL.revokeObjectURL(afterSrc);
       return;
     }
     stage.innerHTML =
@@ -956,38 +984,39 @@ TPP.renderImageExportPreview = async function () {
       '" alt="Exported preview">' +
       '<div class="image-export-compare-divider"></div>' +
       '<div class="image-export-compare-label before">Before<span class="image-export-compare-size">' +
-      TPP.esc(
-        TPP.fileBytesLabel
-          ? TPP.fileBytesLabel(beforeBlob ? beforeBlob.size : 0)
-          : String(beforeBlob ? beforeBlob.size : 0),
-      ) +
+      TPP.esc(TPP.imageExportPreviewSizeLabel(beforeEntry)) +
       "</span></div>" +
       '<div class="image-export-compare-label after">After<span class="image-export-compare-size">' +
-      TPP.esc(
-        TPP.fileBytesLabel
-          ? TPP.fileBytesLabel(afterBlob ? afterBlob.size : 0)
-          : String(afterBlob ? afterBlob.size : 0),
-      ) +
+      TPP.esc(TPP.imageExportPreviewSizeLabel(afterEntry)) +
       "</span></div>" +
       "</div>";
     TPP.setImageExportPreviewLoading(stage, false);
     TPP.setImageExportPreviewDownloads({
       before: {
         src: beforeSrc,
-        blob: beforeBlob,
+        blob: beforeEntry ? beforeEntry.blob || null : null,
         name: beforeName,
       },
       after: {
         src: afterSrc,
-        blob: afterBlob,
+        blob: afterEntry ? afterEntry.blob || null : null,
         name: afterName,
       },
     });
     TPP.bindImageExportPreviewDrag();
   };
-  if (cachedBefore.blob && cachedAfter.blob) {
+  if (cachedBefore.previewSrc && cachedAfter.previewSrc) {
     TPP.cancelImageExportPreviewLoadingTimer();
-    await renderPreviewStage(cachedBefore.blob, cachedAfter.blob);
+    await renderPreviewStage(
+      {
+        src: cachedBefore.previewSrc,
+        blob: cachedBefore.blob || null,
+      },
+      {
+        src: cachedAfter.previewSrc,
+        blob: cachedAfter.blob || null,
+      },
+    );
     return;
   }
   TPP.scheduleImageExportPreviewLoading(stage, token, "Rendering preview...");
@@ -1015,36 +1044,68 @@ TPP.renderImageExportPreview = async function () {
       };
     }
     if (TPP.imageExportPreviewToken !== token) return;
-    const beforeBlob =
-      cachedBefore.blob ||
-      (await TPP.exportBlobForCanvas(baseCanvas, {
-        format: "png",
-        quality: 100,
-      }));
-    if (beforeBlob && !cachedBefore.blob) {
-      TPP.setImageExportPreviewResultCache(beforeCacheKey, {
-        blob: beforeBlob,
-      });
-    }
-    let afterBlob = cachedAfter.blob || null;
-    if (!afterBlob) {
-      const afterCanvas = await TPP.exportCanvasForDepth(
-        baseCanvas,
-        exportOptions.colorDepth,
-        exportOptions.threshold,
-        exportOptions.palette,
-        exportOptions,
-      );
-      afterBlob = await TPP.exportBlobForCanvas(afterCanvas, exportOptions);
-      if (afterBlob) {
-        TPP.setImageExportPreviewResultCache(afterCacheKey, {
-          blob: afterBlob,
-        });
-      }
-    }
+    const afterCanvas = await TPP.exportCanvasForDepth(
+      baseCanvas,
+      exportOptions.colorDepth,
+      exportOptions.threshold,
+      exportOptions.palette,
+      exportOptions,
+    );
+    const beforeEntry = {
+      previewSrc: cachedBefore.previewSrc || TPP.previewDataUrl(baseCanvas, "png", 1),
+      blob: cachedBefore.blob || null,
+    };
+    const afterEntry = {
+      previewSrc:
+        cachedAfter.previewSrc ||
+        TPP.previewDataUrl(
+          afterCanvas,
+          exportOptions.format,
+          exportOptions.quality / 100,
+        ),
+      blob: cachedAfter.blob || null,
+    };
+    TPP.setImageExportPreviewResultCache(beforeCacheKey, beforeEntry);
+    TPP.setImageExportPreviewResultCache(afterCacheKey, afterEntry);
     if (TPP.imageExportPreviewToken !== token) return;
     TPP.cancelImageExportPreviewLoadingTimer();
-    await renderPreviewStage(beforeBlob, afterBlob);
+    await renderPreviewStage(
+      { src: beforeEntry.previewSrc, blob: beforeEntry.blob },
+      { src: afterEntry.previewSrc, blob: afterEntry.blob },
+    );
+    window.setTimeout(async function () {
+      if (TPP.imageExportPreviewToken !== token) return;
+      if (!beforeEntry.blob) {
+        beforeEntry.blob = await TPP.exportBlobForCanvas(baseCanvas, {
+          format: "png",
+          quality: 100,
+        });
+        TPP.setImageExportPreviewResultCache(beforeCacheKey, beforeEntry);
+      }
+      if (TPP.imageExportPreviewToken !== token) return;
+      if (!afterEntry.blob) {
+        afterEntry.blob = await TPP.exportBlobForCanvas(afterCanvas, exportOptions);
+        TPP.setImageExportPreviewResultCache(afterCacheKey, afterEntry);
+      }
+      if (TPP.imageExportPreviewToken !== token) return;
+      TPP.setImageExportPreviewDownloads({
+        before: {
+          src: beforeEntry.previewSrc,
+          blob: beforeEntry.blob || null,
+          name: beforeName,
+        },
+        after: {
+          src: afterEntry.previewSrc,
+          blob: afterEntry.blob || null,
+          name: afterName,
+        },
+      });
+      TPP.updateImageExportPreviewStageSizeLabels(
+        stage,
+        TPP.imageExportPreviewSizeLabel(beforeEntry),
+        TPP.imageExportPreviewSizeLabel(afterEntry),
+      );
+    }, 0);
   } catch (_error) {
     if (TPP.imageExportPreviewToken !== token) return;
     TPP.cancelImageExportPreviewLoadingTimer();
