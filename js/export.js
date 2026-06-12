@@ -139,6 +139,58 @@ TPP.writeGifCommentExtension = function (gif, text) {
   }
   stream.writeByte(0x00);
 };
+TPP.zipCommentText = function (book) {
+  const source = book || {};
+  const maxCommentLength = 240;
+  const title = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "title")
+      : source.title || "",
+  ).trim();
+  const subtitle = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subtitle")
+      : source.subtitle || "",
+  ).trim();
+  const author = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "author")
+      : source.author || "",
+  ).trim();
+  const publisher = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "publisher")
+      : source.publisher || "",
+  ).trim();
+  const pubDate = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "pubDate")
+      : source.pubDate || "",
+  ).trim();
+  const classification = TPP.exportClassificationText(source);
+  const copyright = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "copyright")
+      : source.copyright || "",
+  ).trim();
+  const parts = [];
+  const pushPart = function (label, value) {
+    const trimmedValue = String(value || "").trim();
+    if (!trimmedValue) return;
+    const nextPart = label + ": " + trimmedValue;
+    const candidate = parts.concat(nextPart).join(" | ");
+    if (candidate.length <= maxCommentLength) {
+      parts.push(nextPart);
+    }
+  };
+  pushPart("Title", title + (subtitle ? ": " + subtitle : ""));
+  pushPart("Author", author);
+  pushPart("Publisher", publisher);
+  pushPart("Date", pubDate);
+  pushPart("Classification", classification);
+  pushPart("Rights", copyright);
+  return parts.join(" | ");
+};
 TPP.defaultLanguageCodeMap = {
   ar: "ara",
   de: "deu",
@@ -1678,12 +1730,18 @@ TPP.exportImagesZip = async function (options) {
       await new Promise(requestAnimationFrame);
     }
     TPP.showProgress(90, "Building ZIP archive...");
-    const blob = await zip.generateAsync({ type: "blob" }, function (meta) {
-      TPP.showProgress(
-        90 + Math.round(meta.percent * 0.1),
-        "Building ZIP archive...",
-      );
-    });
+    const blob = await zip.generateAsync(
+      {
+        type: "blob",
+        comment: TPP.zipCommentText(settings),
+      },
+      function (meta) {
+        TPP.showProgress(
+          90 + Math.round(meta.percent * 0.1),
+          "Building ZIP archive...",
+        );
+      },
+    );
     const name =
       (settings.title || "tiny-book")
         .toLowerCase()
