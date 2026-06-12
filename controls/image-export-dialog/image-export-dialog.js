@@ -474,23 +474,25 @@ export async function init(TPP) {
   const syncFormatUi = function () {
     const indexedOnly = imageExportColorDepth.value === "indexed";
     const seqFormat = imageExportFormat.value === "seq";
+    const d64Format = imageExportFormat.value === "d64";
+    const c64Format = seqFormat || d64Format;
     const indexedOnlyDitherOptions = Array.from(
       imageExportDither.querySelectorAll(
         'option[value="c64-petscii"], option[value="c64-petscii-full"], option[value="c64-custom-charset"]',
       ),
     );
     Array.from(imageExportFormat.options).forEach(function (option) {
-      option.disabled = indexedOnly && !["png", "gif", "seq"].includes(option.value);
+      option.disabled = indexedOnly && !["png", "gif", "seq", "d64"].includes(option.value);
     });
-    if (indexedOnly && !["png", "gif", "seq"].includes(imageExportFormat.value))
+    if (indexedOnly && !["png", "gif", "seq", "d64"].includes(imageExportFormat.value))
       imageExportFormat.value = "png";
-    if (seqFormat && imageExportPreset.value !== "320x200") {
+    if (c64Format && imageExportPreset.value !== "320x200") {
       imageExportPreset.value = "320x200";
       syncPresetUi();
     }
     const lossy =
       imageExportFormat.value === "jpeg" || imageExportFormat.value === "webp";
-    const colorDepthApplies = ["png", "gif", "jpeg", "webp", "seq"].includes(
+    const colorDepthApplies = ["png", "gif", "jpeg", "webp", "seq", "d64"].includes(
       imageExportFormat.value,
     );
     imageExportQuality.disabled = !lossy;
@@ -502,19 +504,19 @@ export async function init(TPP) {
       "is-disabled",
       !colorDepthApplies,
     );
-    if (seqFormat && !["mono1", "indexed"].includes(imageExportColorDepth.value)) {
+    if (c64Format && !["mono1", "indexed"].includes(imageExportColorDepth.value)) {
       imageExportColorDepth.value = "indexed";
     }
-    imageExportPalette.value = seqFormat ? "c64" : imageExportPalette.value;
-    imageExportPalette.disabled = !(indexedOnly || seqFormat);
+    imageExportPalette.value = c64Format ? "c64" : imageExportPalette.value;
+    imageExportPalette.disabled = !(indexedOnly || c64Format);
     imageExportPaletteWrap.classList.toggle(
       "is-disabled",
-      !(indexedOnly || seqFormat),
+      !(indexedOnly || c64Format),
     );
     const mono = imageExportColorDepth.value === "mono1";
     const indexed = imageExportColorDepth.value === "indexed";
     const customCharset = customCharsetMode();
-    if (seqFormat) {
+    if (c64Format) {
       Array.from(imageExportDither.options).forEach(function (option) {
         option.disabled = ![
           "c64-petscii",
@@ -549,10 +551,10 @@ export async function init(TPP) {
       "is-disabled",
       !(mono || customCharset),
     );
-    imageExportDither.disabled = !(mono || indexed || seqFormat);
+    imageExportDither.disabled = !(mono || indexed || c64Format);
     imageExportDitherWrap.classList.toggle(
       "is-disabled",
-      !(mono || indexed || seqFormat),
+      !(mono || indexed || c64Format),
     );
     imageExportCharsetPreview.disabled = !customCharsetMode();
     imageExportCharsetPreview.classList.toggle(
@@ -1099,6 +1101,8 @@ export async function init(TPP) {
         TPP.exportAnimatedGif(exportOptions);
       } else if (button.dataset.action === "export-mp4") {
         TPP.exportMp4(exportOptions);
+      } else if (format === "d64") {
+        TPP.exportImagesD64(exportOptions);
       } else {
         TPP.exportImagesZip(exportOptions);
       }

@@ -2441,7 +2441,7 @@ TPP.exportEpub = async function () {
 TPP.imageExportOptions = function (options) {
   const source = options || {};
   const rawThreshold = Number(source.threshold);
-  const requestedFormat = ["png", "gif", "jpeg", "webp", "seq"].includes(
+  const requestedFormat = ["png", "gif", "jpeg", "webp", "seq", "d64"].includes(
     source.format,
   )
     ? source.format
@@ -2456,8 +2456,10 @@ TPP.imageExportOptions = function (options) {
     ? source.colorDepth
     : "color24";
   let colorDepth = requestedDepth === "websafe" ? "indexed" : requestedDepth;
-  if (requestedFormat === "seq" && !["mono1", "indexed"].includes(colorDepth)) {
-    colorDepth = "indexed";
+  if (requestedFormat === "seq" || requestedFormat === "d64") {
+    if (!["mono1", "indexed"].includes(colorDepth)) {
+      colorDepth = "indexed";
+    }
   }
   const rawDithering = String(source.dithering || "").trim().toLowerCase();
   const normalizedDithering =
@@ -2477,7 +2479,7 @@ TPP.imageExportOptions = function (options) {
   }
   let targetWidth = Math.max(0, Math.round(Number(source.targetWidth) || 0)) || null;
   let targetHeight = Math.max(0, Math.round(Number(source.targetHeight) || 0)) || null;
-  if (requestedFormat === "seq") {
+  if (requestedFormat === "seq" || requestedFormat === "d64") {
     targetWidth = 320;
     targetHeight = 200;
   }
@@ -2486,7 +2488,7 @@ TPP.imageExportOptions = function (options) {
     targetWidth: targetWidth,
     targetHeight: targetHeight,
     format:
-      colorDepth === "indexed" && !["png", "gif", "seq"].includes(requestedFormat)
+      colorDepth === "indexed" && !["png", "gif", "seq", "d64"].includes(requestedFormat)
         ? "png"
         : requestedFormat,
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
@@ -2501,7 +2503,7 @@ TPP.imageExportOptions = function (options) {
       Math.min(10000, Number(source.frameDelay) || 1000),
     ),
     palette:
-      requestedFormat === "seq"
+      requestedFormat === "seq" || requestedFormat === "d64"
         ? "c64"
         : requestedDepth === "websafe"
           ? "websafe"
@@ -3588,6 +3590,342 @@ TPP.exportImagesZip = async function (options) {
       TPP.finishProgressOperation(progressOp, {
         cancelled: true,
         message: "Page images ZIP export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
+};
+TPP.d64TrackSectorCount = function (track) {
+  if (track >= 1 && track <= 17) return 21;
+  if (track >= 18 && track <= 24) return 19;
+  if (track >= 25 && track <= 30) return 18;
+  if (track >= 31 && track <= 35) return 17;
+  return 0;
+};
+TPP.d64TrackOffset = function (track, sector) {
+  let offset = 0;
+  for (let t = 1; t < track; t += 1) {
+    offset += 256 * TPP.d64TrackSectorCount(t);
+  }
+  return offset + 256 * sector;
+};
+TPP.d64EncodeFileName = function (name, maxLength) {
+  const result = new Uint8Array(maxLength || 16).fill(0xa0);
+  const value = String(name || "").toUpperCase();
+  let index = 0;
+  for (let i = 0; i < value.length && index < result.length; i += 1) {
+    const ch = value[i];
+    const code = value.charCodeAt(i);
+    if ((code >= 65 && code <= 90) || (code >= 48 && code <= 57)) {
+      result[index++] = code;
+    } else if (code === 32) {
+      result[index++] = 0xa0;
+    } else {
+      result[index++] = code;
+    }
+  }
+  return result;
+};
+TPP.d64CreateBamSector = function (freeMap, diskName) {
+  const sector = new Uint8Array(256);
+  sector[0] = 18;
+  sector[1] = 1;
+  sector[2] = 0x41;
+  const nameBytes = TPP.d64EncodeFileName(diskName || "TINYBOOK", 16);
+  sector.set(nameBytes, 3);
+  sector[19] = 0xA0;
+  sector[20] = 0xA0;
+  sector[21] = 0xA0;
+  sector[22] = 0xA0;
+  sector[23] = 0x00;
+  for (let track = 1; track <= 35; track += 1) {
+    const trackOffset = 4 + (track - 1) * 4;
+    const sectorCount = TPP.d64TrackSectorCount(track);
+    let freeCount = 0;
+    const bitmask = [0, 0, 0];
+    for (let sectorIndex = 0; sectorIndex < sectorCount; sectorIndex += 1) {
+      const isFree = Boolean(
+        freeMap[track] && freeMap[track][sectorIndex],
+      );
+      if (isFree) {
+        freeCount += 1;
+        const byteIndex = sectorIndex >> 3;
+        const bitIndex = sectorIndex & 7;
+        bitmask[byteIndex] |= 1 << bitIndex;
+      }
+    }
+    sector[trackOffset] = freeCount;
+    sector[trackOffset + 1] = bitmask[0];
+    sector[trackOffset + 2] = bitmask[1];
+    sector[trackOffset + 3] = bitmask[2];
+  }
+  return sector;
+};
+TPP.d64CreateDirectorySector = function (entries, sectorIndex, totalSectors) {
+  const sector = new Uint8Array(256);
+  if (sectorIndex < totalSectors - 1) {
+    sector[0] = 18;
+    sector[1] = sectorIndex + 2;
+  } else {
+    sector[0] = 0;
+    sector[1] = 0;
+  }
+  for (let entryIndex = 0; entryIndex < 8; entryIndex += 1) {
+    const entry = entries[sectorIndex * 8 + entryIndex];
+    if (!entry) break;
+    sector.set(entry, 2 + entryIndex * 32);
+  }
+  return sector;
+};
+TPP.d64CreateDirectoryEntry = function (filename, type, startTrack, startSector, sectorCount) {
+  const entry = new Uint8Array(32).fill(0);
+  entry[0] = type;
+  entry[1] = startTrack;
+  entry[2] = startSector;
+  entry.set(TPP.d64EncodeFileName(filename, 16), 3);
+  entry[30] = sectorCount & 0xff;
+  entry[31] = (sectorCount >> 8) & 0xff;
+  return entry;
+};
+TPP.d64AllocateSectors = function (count, allocation) {
+  const result = [];
+  for (let track = allocation.track; track <= 35 && result.length < count; track += 1) {
+    if (track === 18) continue;
+    const sectorCount = TPP.d64TrackSectorCount(track);
+    allocation.map[track] = allocation.map[track] || new Array(sectorCount).fill(true);
+    for (let sector = allocation.sector; sector < sectorCount && result.length < count; sector += 1) {
+      if (!allocation.map[track][sector]) continue;
+      allocation.map[track][sector] = false;
+      result.push({ track: track, sector: sector });
+    }
+    allocation.sector = 0;
+  }
+  if (result.length) {
+    const last = result[result.length - 1];
+    allocation.track = last.track;
+    allocation.sector = last.sector + 1;
+    if (allocation.sector >= TPP.d64TrackSectorCount(allocation.track)) {
+      allocation.track += 1;
+      allocation.sector = 0;
+    }
+  }
+  return result;
+};
+TPP.d64WriteFile = function (image, data, allocation) {
+  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data || []);
+  const sectors = Math.max(1, Math.ceil(bytes.length / 254));
+  const blocks = TPP.d64AllocateSectors(sectors, allocation);
+  if (blocks.length < sectors) return null;
+  for (let i = 0; i < sectors; i += 1) {
+    const block = blocks[i];
+    const nextBlock = blocks[i + 1];
+    const offset = TPP.d64TrackOffset(block.track, block.sector);
+    const sector = image.subarray(offset, offset + 256);
+    sector[0] = nextBlock ? nextBlock.track : 0;
+    sector[1] = nextBlock ? nextBlock.sector : 0;
+    const sliceStart = i * 254;
+    const sliceEnd = sliceStart + 254;
+    sector.set(bytes.subarray(sliceStart, sliceEnd), 2);
+  }
+  return {
+    startTrack: blocks[0].track,
+    startSector: blocks[0].sector,
+    sectorCount: sectors,
+  };
+};
+TPP.d64FinalizeImage = function (image, allocation, dirSectors, diskName) {
+  const freeMap = {};
+  for (let track = 1; track <= 35; track += 1) {
+    const sectorCount = TPP.d64TrackSectorCount(track);
+    freeMap[track] = new Array(sectorCount).fill(true);
+  }
+  // Reserve track 18 for BAM and directory.
+  const track18Count = TPP.d64TrackSectorCount(18);
+  for (let sector = 0; sector < track18Count; sector += 1) {
+    freeMap[18][sector] = false;
+  }
+  for (const allocationTrack in allocation.map) {
+    if (!Object.prototype.hasOwnProperty.call(allocation.map, allocationTrack)) continue;
+    const trackIndex = Number(allocationTrack);
+    freeMap[trackIndex] = allocation.map[trackIndex].slice();
+  }
+  for (let sector = dirSectors + 1; sector < track18Count; sector += 1) {
+    freeMap[18][sector] = true;
+  }
+  const bamSector = TPP.d64CreateBamSector(freeMap, diskName);
+  image.set(bamSector, TPP.d64TrackOffset(18, 0));
+  for (let index = 0; index < dirSectors; index += 1) {
+    image.set(allocation.directorySectors[index], TPP.d64TrackOffset(18, 1 + index));
+  }
+};
+TPP.buildD64Image = function (files, book) {
+  const image = new Uint8Array(174848);
+  const allocation = {
+    track: 1,
+    sector: 0,
+    map: {},
+    directorySectors: [],
+  };
+  const directoryEntries = [];
+  for (let i = 0; i < files.length; i += 1) {
+    const file = files[i];
+    const fileRecord = TPP.d64WriteFile(image, file.data, allocation);
+    if (!fileRecord) return null;
+    directoryEntries.push(
+      TPP.d64CreateDirectoryEntry(
+        file.name,
+        file.type,
+        fileRecord.startTrack,
+        fileRecord.startSector,
+        fileRecord.sectorCount,
+      ),
+    );
+  }
+  const dirSectors = Math.max(1, Math.ceil(directoryEntries.length / 8));
+  for (let i = 0; i < dirSectors; i += 1) {
+    allocation.directorySectors.push(
+      TPP.d64CreateDirectorySector(directoryEntries, i, dirSectors),
+    );
+  }
+  TPP.d64FinalizeImage(image, allocation, dirSectors, book && book.title);
+  return image;
+};
+TPP.exportD64FileName = function (book) {
+  return TPP.exportFileName(book, { extension: "d64", kind: "c64" });
+};
+TPP.exportD64PageFileName = function (pageIndex) {
+  return "PAGE" + String(Math.max(1, Number(pageIndex) || 1)).padStart(4, "0") + "DAT";
+};
+TPP.exportD64CharsetPageFileName = function (pageIndex) {
+  return "PAGE" + String(Math.max(1, Number(pageIndex) || 1)).padStart(4, "0") + "CHR";
+};
+TPP.exportD64BootProgramBytes = function () {
+  const message = "BOOK PRG LOADER - PAGE FILES AVAILABLE";
+  const buffer = [];
+  buffer.push(0x00, 0x00);
+  buffer.push(0x0a, 0x00);
+  buffer.push(0x9c);
+  buffer.push(0x20);
+  buffer.push(0x32, 0x30, 0x36, 0x34);
+  buffer.push(0x00);
+  buffer[0] = 0x00;
+  buffer[1] = 0x00;
+  const codeStart = 0x0810;
+  const code = [];
+  code.push(0xa2, 0x00);
+  code.push(0xbd, 0x00, 0x08);
+  code.push(0xf0, 0x07);
+  code.push(0x20, 0xd2, 0xff);
+  code.push(0xe8);
+  code.push(0x4c, 0x12, 0x08);
+  code.push(0x60);
+  const messageOffset = codeStart + code.length;
+  code[3] = messageOffset & 0xff;
+  code[4] = (messageOffset >> 8) & 0xff;
+  for (let i = 0; i < code.length; i += 1) buffer.push(code[i]);
+  for (let i = 0; i < message.length; i += 1) {
+    buffer.push(message.charCodeAt(i));
+  }
+  buffer.push(0x00);
+  const blob = new Uint8Array(buffer.length + 2);
+  blob[0] = 0x01;
+  blob[1] = 0x08;
+  blob.set(buffer, 2);
+  return blob;
+};
+TPP.exportFileIdDizText = function (book) {
+  const title = book && book.title ? String(book.title) : "Tiny book";
+  const author = book && book.by ? String(book.by) : "Unknown author";
+  return (title + " by " + author + "\r\n" + "D64 package generated by Tiny Pockets Press\r\n").toUpperCase();
+};
+TPP.exportImagesD64 = async function (options) {
+  const progressOp = TPP.beginProgressOperation("D64 export");
+  try {
+    await TPP.ensureImageExportPaletteForOptionsLoaded(options);
+    TPP.sync();
+    const settings = TPP.settings();
+    const pages = TPP.buildPages();
+    if (!pages.length) {
+      alert("No pages available to export.");
+      return;
+    }
+    const exportOptions = TPP.imageExportOptions(options);
+    const mount = document.createElement("div");
+    mount.style.cssText =
+      "position:fixed;left:-9999px;top:0;pointer-events:none;";
+    document.body.appendChild(mount);
+    try {
+      const shell = TPP.createExportRenderShell(settings);
+      mount.appendChild(shell);
+      const d64Files = [];
+      for (let i = 0; i < pages.length; i += 1) {
+        TPP.throwIfProgressCancelled(progressOp);
+        TPP.showProgress(
+          5 + Math.round((i / pages.length) * 80),
+          "Rendering page " + (i + 1) + " of " + pages.length + "...",
+        );
+        const page = pages[i];
+        const canvas = await TPP.renderExportPageCanvas(shell, page, settings, 1);
+        const exportCanvas = TPP.fitCanvasToExportTarget(canvas, exportOptions);
+        const seqBytes = await TPP.imageExportSeqBytesForCanvas(exportCanvas, exportOptions);
+        if (!seqBytes || !seqBytes.length) {
+          alert("D64 export failed while generating page data.");
+          return;
+        }
+        d64Files.push({
+          name: TPP.exportD64PageFileName(i + 1),
+          type: 0x81,
+          data: seqBytes,
+        });
+        const sheet = TPP.buildImageExportCustomCharsetSheet(
+          exportCanvas,
+          TPP.imageExportNamedPalette(exportOptions.palette),
+          {
+            cellSize: 8,
+            cols: 16,
+            selectionBias: exportOptions.threshold,
+          },
+        );
+        const chrBytes = sheet && sheet.patterns
+          ? TPP.imageExportCharsetToChrBytes(sheet.patterns)
+          : null;
+        if (chrBytes) {
+          d64Files.push({
+            name: TPP.exportD64CharsetPageFileName(i + 1),
+            type: 0x81,
+            data: chrBytes,
+          });
+        }
+      }
+      d64Files.push({
+        name: "BOOK.PRG",
+        type: 0x82,
+        data: TPP.exportD64BootProgramBytes(),
+      });
+      d64Files.push({
+        name: "FILE_ID.DIZ",
+        type: 0x81,
+        data: new TextEncoder().encode(TPP.exportFileIdDizText(settings)),
+      });
+      const imageBytes = TPP.buildD64Image(d64Files, settings);
+      if (!imageBytes) {
+        alert("Failed to build D64 disk image.");
+        return;
+      }
+      const blob = new Blob([imageBytes], { type: "application/octet-stream" });
+      TPP.downloadBlob(TPP.exportD64FileName(settings), blob);
+    } finally {
+      mount.remove();
+    }
+    TPP.finishProgressOperation(progressOp);
+    TPP.showProgress(100, "Commodore 64 D64 export complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "D64 export canceled.",
       });
       return;
     }
