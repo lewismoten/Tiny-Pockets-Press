@@ -154,6 +154,24 @@
 .book-info-help-export-value {
   color: #35557d;
 }
+.book-info-help-export-item {
+  display: grid;
+  gap: 0.08rem;
+}
+.book-info-help-export-item[hidden] {
+  display: none !important;
+}
+.book-info-help-export-kind {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #577eb3;
+}
+.book-info-help-export-text {
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
 .book-info-help-example {
   color: #476389;
 }

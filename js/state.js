@@ -600,18 +600,22 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "The main name of the book.",
     pdf:
       "Exported to PDF metadata as the core Title value. If a subtitle is present, the PDF Title becomes Title: Subtitle.",
+    epub:
+      "Exported to EPUB metadata as the Title value. If a subtitle is present, the EPUB title becomes Title: Subtitle.",
     example: "Santa's Little OSHA Violation",
   },
   subtitle: {
     description:
       "A secondary line that adds context, tone, or a clarifying phrase to the title.",
     pdf: "Appended to the title in PDF metadata, producing Title: Subtitle.",
+    epub: "Appended to the title in EPUB metadata, producing Title: Subtitle.",
     example: "Pocket-sized catastrophe management for the holidays",
   },
   author: {
     description:
       "The person, collective, or organization responsible for the work. Use this for credited creators and contributors.",
     pdf: "Exported to PDF metadata as the Author value.",
+    epub: "Exported to EPUB metadata as the Creator value.",
     example: "Lewis Moten",
   },
   pubDate: {
@@ -619,33 +623,40 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "The publishing or release date associated with this edition. It helps with citations, export metadata, and edition tracking.",
     pdf:
       "Not exported into a dedicated PDF field, but it can be folded into fallback Subject text when no explicit Subject or Description is provided.",
+    epub: "Exported to EPUB metadata as the Date value.",
     example: "2026-05-24",
   },
   publisher: {
     description:
       "The press, imprint, label, or organization that published the book.",
     pdf: "Can be included in fallback Subject and Keywords metadata.",
+    epub: "Exported to EPUB metadata as the Publisher value.",
     example: "Tiny Pockets Press",
   },
   language: {
     description: "The primary language used in the book's content.",
+    epub:
+      "Exported to EPUB metadata as the Language value. If Region is present, the two are combined into a locale tag such as en-US.",
     example: "en",
   },
   region: {
     description:
       "A regional locale code that refines the language when that matters for cataloging or export metadata.",
+    epub: "Used with Language to build the EPUB language tag, such as en-US.",
     example: "US",
   },
   subject: {
     description:
       "A short human-readable topic or category phrase.",
     pdf: "Exported to PDF metadata as the Subject value when present.",
+    epub: "Exported to EPUB metadata as a Subject value.",
     example: "Holiday satire",
   },
   description: {
     description:
       "A brief summary, blurb, or catalog note explaining what the book is about.",
     pdf: "Used as the PDF Subject fallback when Subject is blank.",
+    epub: "Exported to EPUB metadata as the Description value.",
     example:
       "A tiny handbook of festive corners cut, avoidable accidents, and cheerful workplace dread.",
   },
@@ -654,12 +665,15 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "Search-friendly words or phrases that help describe the book in exports and future discovery tools. Separate terms with commas.",
     pdf:
       "Exported to PDF metadata as Keywords, then merged with core terms like title, author, publisher, subject, and classification.",
+    epub:
+      "Split into individual terms and exported to EPUB metadata as additional Subject entries.",
     example: "zine, holiday, satire, workplace, OSHA",
   },
   classification: {
     description:
       "The shelving or taxonomy code used to place the book within your classification system.",
     pdf: "Can be included in fallback Subject and Keywords metadata.",
+    epub: "Exported to EPUB metadata as an additional Subject entry when present.",
     example: "816.1 Zines / Personal writing",
   },
   cityPublished: {
@@ -670,16 +684,19 @@ TPP.defaultBookInfoFieldHelpCatalog = {
   copyright: {
     description:
       "A short copyright statement for this edition.",
+    epub: "Exported to EPUB metadata as the Rights value.",
     example: "© 2026 Lewis Moten. All rights reserved.",
   },
   isbn: {
     description:
       "A 10-digit International Standard Book Number, usually used for older editions.",
+    epub: "Used as the EPUB package identifier when ISBN-13 is not present.",
     example: "1234567890",
   },
   isbn13: {
     description:
       "A 13-digit International Standard Book Number used by modern publishing workflows and retailers.",
+    epub: "Preferred as the EPUB package identifier when present.",
     example: "9781234567897",
   },
   edition: {

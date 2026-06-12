@@ -462,6 +462,109 @@ TPP.epubNavBody = function (items) {
     "</section>"
   );
 };
+TPP.epubMetadata = function (book) {
+  const source = book || {};
+  const title = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "title")
+      : source.title || "Untitled",
+  ).trim() || "Untitled";
+  const subtitle = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subtitle")
+      : source.subtitle || "",
+  ).trim();
+  const creator = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "author")
+      : source.author || "",
+  ).trim();
+  const publisher = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "publisher")
+      : source.publisher || "",
+  ).trim();
+  const date = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "pubDate")
+      : source.pubDate || "",
+  ).trim();
+  const language = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "language")
+      : source.language || "",
+  ).trim()
+    .toLowerCase();
+  const region = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "region")
+      : source.region || "",
+  ).trim()
+    .toUpperCase();
+  const subject = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subject")
+      : source.subject || "",
+  ).trim();
+  const description = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "description")
+      : source.description || "",
+  ).trim();
+  const classification = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "classification")
+      : source.classification || "",
+  ).trim();
+  const rights = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "copyright")
+      : source.copyright || "",
+  ).trim();
+  const isbn13 = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "isbn13")
+      : source.isbn13 || "",
+  ).trim();
+  const isbn = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "isbn")
+      : source.isbn || "",
+  ).trim();
+  const keywords = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "keywords")
+      : source.keywords || "",
+  )
+    .split(/[,;\n]+/)
+    .map(function (item) {
+      return String(item || "").trim();
+    })
+    .filter(Boolean);
+  const subjects = Array.from(
+    new Set([subject, classification].concat(keywords).filter(Boolean)),
+  );
+  const languageTag = language
+    ? region
+      ? language + "-" + region
+      : language
+    : "en";
+  return {
+    identifier:
+      isbn13 ||
+      isbn ||
+      String(source.meta && source.meta.id ? source.meta.id : TPP.uid()),
+    title: subtitle ? title + ": " + subtitle : title,
+    creator: creator,
+    publisher: publisher,
+    date: date,
+    language: languageTag,
+    description: description,
+    subjects: subjects,
+    rights: rights,
+    modified: TPP.epubNowIso(),
+  };
+};
 TPP.epubPackageDocument = function (metadata, manifest, spine) {
   return (
     '<?xml version="1.0" encoding="utf-8"?>\n' +
@@ -473,7 +576,9 @@ TPP.epubPackageDocument = function (metadata, manifest, spine) {
     "    <dc:title>" +
     TPP.epubEscape(metadata.title) +
     "</dc:title>\n" +
-    "    <dc:language>en</dc:language>\n" +
+    "    <dc:language>" +
+    TPP.epubEscape(metadata.language || "en") +
+    "</dc:language>\n" +
     (metadata.creator
       ? "    <dc:creator>" +
         TPP.epubEscape(metadata.creator) +
@@ -486,6 +591,23 @@ TPP.epubPackageDocument = function (metadata, manifest, spine) {
       : "") +
     (metadata.date
       ? "    <dc:date>" + TPP.epubEscape(metadata.date) + "</dc:date>\n"
+      : "") +
+    (metadata.description
+      ? "    <dc:description>" +
+        TPP.epubEscape(metadata.description) +
+        "</dc:description>\n"
+      : "") +
+    ((Array.isArray(metadata.subjects) ? metadata.subjects : []).length
+      ? (metadata.subjects || [])
+          .map(function (subject) {
+            return (
+              "    <dc:subject>" + TPP.epubEscape(subject) + "</dc:subject>\n"
+            );
+          })
+          .join("")
+      : "") +
+    (metadata.rights
+      ? "    <dc:rights>" + TPP.epubEscape(metadata.rights) + "</dc:rights>\n"
       : "") +
     '    <meta property="dcterms:modified">' +
     TPP.epubEscape(metadata.modified) +
@@ -670,14 +792,7 @@ TPP.exportEpub = async function () {
   zip.file(
     "EPUB/package.opf",
     TPP.epubPackageDocument(
-      {
-        identifier: identifier,
-        title: settings.title || "Untitled",
-        creator: settings.author || "",
-        publisher: settings.publisher || "",
-        date: settings.pubDate || "",
-        modified: TPP.epubNowIso(),
-      },
+      TPP.epubMetadata(settings),
       manifest,
       spine,
     ),
