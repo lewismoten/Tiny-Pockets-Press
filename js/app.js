@@ -1143,6 +1143,16 @@ TPP.renderImageExportPreview = async function () {
     const beforeCanvas = typeof TPP.fitCanvasToExportTarget === "function"
       ? TPP.fitCanvasToExportTarget(baseCanvas, exportOptions)
       : baseCanvas;
+    if (
+      customCharsetPreview &&
+      typeof TPP.primeImageExportCharsetPreview === "function"
+    ) {
+      TPP.primeImageExportCharsetPreview(
+        beforeCanvas,
+        exportOptions,
+        TPP.imageExportPreviewIndex,
+      );
+    }
     const afterCanvas = await TPP.exportCanvasForDepth(
       beforeCanvas,
       exportOptions.colorDepth,

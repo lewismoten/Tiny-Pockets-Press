@@ -747,6 +747,43 @@ export async function init(TPP) {
       checkerboard: Boolean(checkerboard),
     });
   };
+  const cacheCharsetPreviewSheet = function (sheet, exportOptions, pageIndex, checkerboard) {
+    const cacheKey = charsetPreviewCacheKey(
+      exportOptions,
+      pageIndex,
+      checkerboard,
+    );
+    TPP.imageExportCharsetPreviewCache = {
+      key: cacheKey,
+      sheet: sheet || null,
+    };
+    return sheet;
+  };
+  const buildCharsetPreviewFromCanvas = function (canvas, exportOptions, pageIndex, checkerboard) {
+    if (
+      !canvas ||
+      typeof TPP.buildImageExportCustomCharsetSheet !== "function"
+    ) {
+      return null;
+    }
+    const options = exportOptions || buildCurrentExportOptions();
+    const sheet = TPP.buildImageExportCustomCharsetSheet(
+      canvas,
+      TPP.imageExportNamedPalette(options.palette),
+      {
+        cellSize: 8,
+        cols: 16,
+        selectionBias: options.threshold,
+        checkerboardPreview: Boolean(checkerboard),
+      },
+    );
+    return cacheCharsetPreviewSheet(
+      sheet,
+      options,
+      pageIndex,
+      checkerboard,
+    );
+  };
   const buildCharsetPreview = async function () {
     if (!customCharsetMode()) return null;
     if (
@@ -766,11 +803,7 @@ export async function init(TPP) {
       Math.min(Number(TPP.imageExportPreviewIndex) || 0, pages.length - 1),
     );
     const checkerboard = Boolean(TPP.imageExportCharsetPreviewCheckerboard);
-    const cacheKey = charsetPreviewCacheKey(
-      exportOptions,
-      pageIndex,
-      checkerboard,
-    );
+    const cacheKey = charsetPreviewCacheKey(exportOptions, pageIndex, checkerboard);
     if (
       TPP.imageExportCharsetPreviewCache &&
       TPP.imageExportCharsetPreviewCache.key === cacheKey &&
@@ -786,23 +819,14 @@ export async function init(TPP) {
       settings,
       scale,
     );
-    const sheet = TPP.buildImageExportCustomCharsetSheet(
+    return buildCharsetPreviewFromCanvas(
       typeof TPP.fitCanvasToExportTarget === "function"
         ? TPP.fitCanvasToExportTarget(pageCanvas, exportOptions)
         : pageCanvas,
-      TPP.imageExportNamedPalette(exportOptions.palette),
-      {
-        cellSize: 8,
-        cols: 16,
-        selectionBias: exportOptions.threshold,
-        checkerboardPreview: checkerboard,
-      },
+      exportOptions,
+      pageIndex,
+      checkerboard,
     );
-    TPP.imageExportCharsetPreviewCache = {
-      key: cacheKey,
-      sheet: sheet || null,
-    };
-    return sheet;
   };
   const refreshCharsetPreviewIcon = async function () {
     const token = (TPP.imageExportCharsetIconToken || 0) + 1;
@@ -830,37 +854,69 @@ export async function init(TPP) {
     }
   };
   TPP.refreshImageExportCharsetPreviewIcon = refreshCharsetPreviewIcon;
+  TPP.primeImageExportCharsetPreview = function (canvas, exportOptions, pageIndex) {
+    if (
+      !canvas ||
+      !exportOptions ||
+      exportOptions.colorDepth !== "indexed" ||
+      exportOptions.dithering !== "c64-custom-charset"
+    ) {
+      return null;
+    }
+    const sheet = buildCharsetPreviewFromCanvas(
+      canvas,
+      exportOptions,
+      pageIndex,
+      false,
+    );
+    TPP.imageExportCharsetIconSheet = sheet || null;
+    renderCharsetPreviewIcon();
+    return sheet;
+  };
+  const presentCharsetPreviewSheet = function (sheet) {
+    if (!sheet || !sheet.canvas || typeof imageExportCharsetDialog.showModal !== "function") {
+      return false;
+    }
+    const ctx = imageExportCharsetDialogCanvas.getContext("2d");
+    if (!ctx) return false;
+    imageExportCharsetDialogCanvas.width = sheet.canvas.width;
+    imageExportCharsetDialogCanvas.height = sheet.canvas.height;
+    ctx.clearRect(
+      0,
+      0,
+      imageExportCharsetDialogCanvas.width,
+      imageExportCharsetDialogCanvas.height,
+    );
+    ctx.drawImage(sheet.canvas, 0, 0);
+    TPP.imageExportCharsetPreviewSheet = sheet;
+    const pages = TPP.buildPages();
+    imageExportCharsetCurrentPageIndex = Math.max(
+      0,
+      Math.min(Number(TPP.imageExportPreviewIndex) || 0, pages.length - 1),
+    );
+    imageExportCharsetCurrentPageCount = pages.length;
+    imageExportCharsetDialogTitle.textContent = "Custom Charset Preview";
+    if (!imageExportCharsetDialog.open) imageExportCharsetDialog.showModal();
+    return true;
+  };
   const openCharsetPreview = async function () {
     if (typeof imageExportCharsetDialog.showModal !== "function") return;
     if (!customCharsetMode()) return;
     imageExportCharsetPreview.disabled = true;
     imageExportCharsetPreview.classList.add("is-disabled");
     try {
+      if (
+        !TPP.imageExportCharsetPreviewCheckerboard &&
+        TPP.imageExportCharsetIconSheet &&
+        presentCharsetPreviewSheet(TPP.imageExportCharsetIconSheet)
+      ) {
+        return;
+      }
       const sheet = await buildCharsetPreview();
-      if (!sheet || !sheet.canvas) {
+      if (!presentCharsetPreviewSheet(sheet)) {
         TPP.toast("Unable to build custom charset preview.");
         return;
       }
-      const ctx = imageExportCharsetDialogCanvas.getContext("2d");
-      if (!ctx) return;
-      imageExportCharsetDialogCanvas.width = sheet.canvas.width;
-      imageExportCharsetDialogCanvas.height = sheet.canvas.height;
-      ctx.clearRect(
-        0,
-        0,
-        imageExportCharsetDialogCanvas.width,
-        imageExportCharsetDialogCanvas.height,
-      );
-      ctx.drawImage(sheet.canvas, 0, 0);
-      TPP.imageExportCharsetPreviewSheet = sheet;
-      const pages = TPP.buildPages();
-      imageExportCharsetCurrentPageIndex = Math.max(
-        0,
-        Math.min(Number(TPP.imageExportPreviewIndex) || 0, pages.length - 1),
-      );
-      imageExportCharsetCurrentPageCount = pages.length;
-      imageExportCharsetDialogTitle.textContent = "Custom Charset Preview";
-      if (!imageExportCharsetDialog.open) imageExportCharsetDialog.showModal();
     } catch (_error) {
       TPP.toast("Unable to build custom charset preview.");
     } finally {
