@@ -1088,6 +1088,7 @@ export function init(TPP) {
     return {
       canvas: out,
       count: patterns.length,
+      patterns: patterns,
     };
   };
   const paletteDitherers = {

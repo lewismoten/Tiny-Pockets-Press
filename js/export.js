@@ -2569,6 +2569,27 @@ TPP.imageExportDitherIds = function () {
     "c64-custom-charset",
   ];
 };
+TPP.imageExportCharsetToChrBytes = function (patterns) {
+  if (!Array.isArray(patterns)) return null;
+  const buffer = new Uint8Array(2048);
+  let byteOffset = 0;
+  patterns.forEach(function (mask) {
+    if (byteOffset >= 2048) return;
+    if (Array.isArray(mask) || mask instanceof Uint8Array) {
+      for (let row = 0; row < 8 && byteOffset < 2048; row += 1) {
+        let rowByte = 0;
+        for (let col = 0; col < 8; col += 1) {
+          const pixelIndex = row * 8 + col;
+          const pixelValue = mask[pixelIndex] ? 1 : 0;
+          rowByte = (rowByte << 1) | pixelValue;
+        }
+        buffer[byteOffset] = rowByte;
+        byteOffset += 1;
+      }
+    }
+  });
+  return buffer;
+};
 TPP.imageExportSeqOptionsEnabled = function (options) {
   const config = TPP.imageExportOptions(options || {});
   return (
@@ -2602,6 +2623,29 @@ TPP.exportSeqPageFileName = function (book, pageIndex) {
   const stem = TPP.exportSeqStem(book);
   const pageToken = String(Math.max(1, Number(pageIndex) || 1)).padStart(4, "0");
   return stem.slice(0, Math.max(1, 8 - pageToken.length)) + pageToken + ".SEQ";
+};
+TPP.exportCharsetPageFileName = function (pageIndex, totalPages) {
+  const pageNum = Math.max(1, Number(pageIndex) || 1);
+  const totalCount = Math.max(1, Number(totalPages) || 1);
+  let prefix, padLength;
+  if (totalCount <= 9999) {
+    prefix = "PAGE";
+    padLength = 4;
+  } else if (totalCount <= 99999) {
+    prefix = "PAG";
+    padLength = 5;
+  } else if (totalCount <= 999999) {
+    prefix = "PA";
+    padLength = 6;
+  } else if (totalCount <= 9999999) {
+    prefix = "P";
+    padLength = 7;
+  } else {
+    prefix = "";
+    padLength = 8;
+  }
+  const pageToken = String(pageNum).padStart(padLength, "0");
+  return (prefix + pageToken + ".CHR").toUpperCase();
 };
 TPP.imageExportSeqBytesForCanvas = async function (canvas, options) {
   if (!canvas || !canvas.width || !canvas.height) return null;

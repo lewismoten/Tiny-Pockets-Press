@@ -95,6 +95,11 @@ export async function init(TPP) {
   const imageExportCharsetSave = document.getElementById(
     "imageExportCharsetSave",
   );
+  const imageExportCharsetSaveChr = document.getElementById(
+    "imageExportCharsetSaveChr",
+  );
+  let imageExportCharsetCurrentPageIndex = 0;
+  let imageExportCharsetCurrentPageCount = 0;
   const imageExportEstimate = document.getElementById(
     "imageExportDialogEstimate",
   );
@@ -159,6 +164,7 @@ export async function init(TPP) {
     !imageExportCharsetDialogTitle ||
     !imageExportCharsetDialogCanvas ||
     !imageExportCharsetSave ||
+    !imageExportCharsetSaveChr ||
     !imageExportEstimate ||
     !imageExportPreviewPrev ||
     !imageExportPreviewNext ||
@@ -791,6 +797,12 @@ export async function init(TPP) {
       );
       ctx.drawImage(sheet.canvas, 0, 0);
       TPP.imageExportCharsetPreviewSheet = sheet;
+      const pages = TPP.buildPages();
+      imageExportCharsetCurrentPageIndex = Math.max(
+        0,
+        Math.min(Number(TPP.imageExportPreviewIndex) || 0, pages.length - 1),
+      );
+      imageExportCharsetCurrentPageCount = pages.length;
       imageExportCharsetDialogTitle.textContent = "Custom Charset Preview";
       if (!imageExportCharsetDialog.open) imageExportCharsetDialog.showModal();
     } catch (_error) {
@@ -914,6 +926,20 @@ export async function init(TPP) {
       quality: 100,
     });
     TPP.downloadBlob("c64-custom-charset-preview.png", blob);
+  });
+  imageExportCharsetSaveChr.addEventListener("click", function () {
+    const sheet = TPP.imageExportCharsetPreviewSheet;
+    if (!sheet || !sheet.patterns || typeof TPP.imageExportCharsetToChrBytes !== "function"
+      || typeof TPP.exportCharsetPageFileName !== "function")
+      return;
+    const chrBytes = TPP.imageExportCharsetToChrBytes(sheet.patterns);
+    if (!chrBytes) return;
+    const filename = TPP.exportCharsetPageFileName(
+      imageExportCharsetCurrentPageIndex,
+      imageExportCharsetCurrentPageCount,
+    );
+    const blob = new Blob([chrBytes], { type: "application/octet-stream" });
+    TPP.downloadBlob(filename, blob);
   });
   imageExportPaletteDialogCanvas.addEventListener("click", function (event) {
     const layout = TPP.imageExportPaletteDialogLayout;
