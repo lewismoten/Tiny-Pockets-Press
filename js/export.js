@@ -41,6 +41,104 @@ TPP.exportClassificationText = function (book) {
   }
   return String(rawValue || "").trim();
 };
+TPP.gifCommentText = function (book) {
+  const source = book || {};
+  const maxCommentBytes = 240;
+  const title = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "title")
+      : source.title || "",
+  ).trim();
+  const subtitle = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subtitle")
+      : source.subtitle || "",
+  ).trim();
+  const author = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "author")
+      : source.author || "",
+  ).trim();
+  const publisher = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "publisher")
+      : source.publisher || "",
+  ).trim();
+  const pubDate = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "pubDate")
+      : source.pubDate || "",
+  ).trim();
+  const language = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "language")
+      : source.language || "",
+  ).trim();
+  const subject = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subject")
+      : source.subject || "",
+  ).trim();
+  const description = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "description")
+      : source.description || "",
+  ).trim();
+  const keywords = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "keywords")
+      : source.keywords || "",
+  ).trim();
+  const classification = TPP.exportClassificationText(source);
+  const copyright = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "copyright")
+      : source.copyright || "",
+  ).trim();
+  const lines = [];
+  const pushLine = function (label, value) {
+    const trimmedValue = String(value || "").trim();
+    if (!trimmedValue) return;
+    const nextLine = label + ": " + trimmedValue;
+    const candidate = lines.concat(nextLine).join("\n");
+    if (new TextEncoder().encode(candidate).length <= maxCommentBytes) {
+      lines.push(nextLine);
+    }
+  };
+  pushLine("Title", title + (subtitle ? ": " + subtitle : ""));
+  pushLine("Author", author);
+  pushLine("Publisher", publisher);
+  pushLine("Date", pubDate);
+  pushLine("Language", language);
+  pushLine("Subject", subject);
+  pushLine("Classification", classification);
+  pushLine("Keywords", keywords);
+  pushLine("Rights", copyright);
+  if (!lines.length && description) {
+    const truncatedDescription = description.slice(0, maxCommentBytes - 16);
+    pushLine("Description", truncatedDescription);
+  }
+  return lines.join("\n");
+};
+TPP.writeGifCommentExtension = function (gif, text) {
+  const message = String(text || "").trim();
+  if (!gif || !gif.stream || !message) return;
+  const stream = gif.stream;
+  const bytes = new TextEncoder()
+    .encode(message)
+    .filter(function (value) {
+      return value !== 0;
+    });
+  if (!bytes.length) return;
+  stream.writeByte(0x21);
+  stream.writeByte(0xfe);
+  for (let offset = 0; offset < bytes.length; offset += 255) {
+    const size = Math.min(255, bytes.length - offset);
+    stream.writeByte(size);
+    stream.writeBytesView(bytes, offset, size);
+  }
+  stream.writeByte(0x00);
+};
 TPP.defaultLanguageCodeMap = {
   ar: "ara",
   de: "deu",
@@ -1483,11 +1581,14 @@ TPP.encodeGifBlob = async function (canvas, options) {
     lib,
     null,
   );
-  const gif = lib.GIFEncoder();
+  const gif = lib.GIFEncoder({ auto: false });
+  gif.writeHeader();
   gif.writeFrame(frame.index, canvas.width, canvas.height, {
+    first: true,
     palette: frame.palette,
     delay: exportOptions.frameDelay,
   });
+  TPP.writeGifCommentExtension(gif, TPP.gifCommentText(TPP.settings()));
   gif.finish();
   const bytes = gif.bytesView ? gif.bytesView() : new Uint8Array(gif.bytes());
   return new Blob([bytes], { type: "image/gif" });
@@ -1613,7 +1714,8 @@ TPP.exportAnimatedGif = async function (options) {
     Object.assign({}, options || {}, { format: "gif" }),
   );
   const lib = await TPP.loadGifEncoder();
-  const gif = lib.GIFEncoder();
+  const gif = lib.GIFEncoder({ auto: false });
+  gif.writeHeader();
   const mount = document.createElement("div");
   const scale = exportOptions.dpi / 96;
   let previousRgba = null;
@@ -1657,6 +1759,7 @@ TPP.exportAnimatedGif = async function (options) {
         previousRgba,
       );
       gif.writeFrame(frame.index, exportCanvas.width, exportCanvas.height, {
+        first: i === 0,
         palette: frame.palette,
         delay: exportOptions.frameDelay,
         repeat: i === 0 ? 0 : undefined,
@@ -1666,6 +1769,9 @@ TPP.exportAnimatedGif = async function (options) {
           : undefined,
         dispose: frame.transparent ? frame.dispose : undefined,
       });
+      if (i === 0) {
+        TPP.writeGifCommentExtension(gif, TPP.gifCommentText(settings));
+      }
       previousRgba = new Uint8ClampedArray(rgba);
       shell.remove();
       await new Promise(requestAnimationFrame);
