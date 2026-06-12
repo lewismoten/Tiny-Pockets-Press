@@ -136,14 +136,16 @@
 .image-export-live-preview-shell {
   width: 100%;
   height: 100%;
+  position: relative;
   display: grid;
   place-items: center;
-  padding: 0.75rem;
   overflow: hidden;
 }
-.image-export-live-preview-shell .page {
-  width: 100% !important;
-  height: 100% !important;
+.image-export-live-preview-shell > .page {
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%);
+  outline: 0;
 }
 .image-export-preview-loading {
   position: absolute;

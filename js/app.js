@@ -1079,8 +1079,8 @@ TPP.renderImageExportPreview = async function () {
       "</div>"
     );
   };
-  const renderLiveBeforeStage = function (page, settings) {
-    if (!page || typeof TPP.readerMiniPage !== "function") return;
+  const renderLiveBeforeStage = function (page, settings, exportOptions) {
+    if (!page || typeof TPP.pageEl !== "function") return;
     const compare = document.createElement("div");
     compare.className = "image-export-compare image-export-compare-live";
     const beforePane = document.createElement("div");
@@ -1099,16 +1099,23 @@ TPP.renderImageExportPreview = async function () {
     afterLabel.className = "image-export-compare-label after";
     afterLabel.innerHTML =
       'After<span class="image-export-compare-size">Rendering...</span>';
-    const beforeShell = TPP.readerMiniPage(page, settings);
-    beforeShell.classList.add("image-export-live-preview-shell");
-    beforeShell.style.width = "100%";
-    beforeShell.style.height = "100%";
-    const afterShell = TPP.readerMiniPage(page, settings);
-    afterShell.classList.add("image-export-live-preview-shell");
-    afterShell.style.width = "100%";
-    afterShell.style.height = "100%";
-    beforePane.appendChild(beforeShell);
-    afterPane.appendChild(afterShell);
+    const targetPixels = TPP.imageExportPixels(exportOptions || {});
+    const pageWidthPx = Math.max(1, Number(settings.page && settings.page.w) || 1) * 96;
+    const pageHeightPx = Math.max(1, Number(settings.page && settings.page.h) || 1) * 96;
+    const scaleX = Math.max(1, Number(targetPixels.width) || 1) / pageWidthPx;
+    const scaleY = Math.max(1, Number(targetPixels.height) || 1) / pageHeightPx;
+    const createLivePage = function () {
+      const shell = document.createElement("div");
+      shell.className = "image-export-live-preview-shell";
+      const pageEl = TPP.pageEl(page, settings, 0, 0, false, true);
+      pageEl.style.transformOrigin = "center center";
+      pageEl.style.transform =
+        "translate(-50%, -50%) scale(" + scaleX + "," + scaleY + ")";
+      shell.appendChild(pageEl);
+      return shell;
+    };
+    beforePane.appendChild(createLivePage());
+    afterPane.appendChild(createLivePage());
     compare.appendChild(beforePane);
     compare.appendChild(afterPane);
     compare.appendChild(divider);
@@ -1180,6 +1187,7 @@ TPP.renderImageExportPreview = async function () {
     renderLiveBeforeStage(
       pages[TPP.imageExportPreviewIndex],
       settings,
+      exportOptions,
     );
   }
   if (cachedBefore.previewSrc) {
