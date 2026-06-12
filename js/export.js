@@ -3672,8 +3672,9 @@ TPP.d64CreateDirectorySector = function (entries, sectorIndex, totalSectors) {
     sector[0] = 0;
     sector[1] = 0;
   }
-  for (let entryIndex = 0; entryIndex < 8; entryIndex += 1) {
-    const entry = entries[sectorIndex * 8 + entryIndex];
+  const entriesPerSector = 7;
+  for (let entryIndex = 0; entryIndex < entriesPerSector; entryIndex += 1) {
+    const entry = entries[sectorIndex * entriesPerSector + entryIndex];
     if (!entry) break;
     sector.set(entry, 2 + entryIndex * 32);
   }
@@ -3783,7 +3784,8 @@ TPP.buildD64Image = function (files, book) {
       ),
     );
   }
-  const dirSectors = Math.max(1, Math.ceil(directoryEntries.length / 8));
+  const entriesPerDirectorySector = 7;
+  const dirSectors = Math.max(1, Math.ceil(directoryEntries.length / entriesPerDirectorySector));
   for (let i = 0; i < dirSectors; i += 1) {
     allocation.directorySectors.push(
       TPP.d64CreateDirectorySector(directoryEntries, i, dirSectors),
