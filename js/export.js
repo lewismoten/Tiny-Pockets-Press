@@ -3643,7 +3643,7 @@ TPP.d64CreateBamSector = function (freeMap, diskName) {
   sector[22] = 0xA0;
   sector[23] = 0x00;
   for (let track = 1; track <= 35; track += 1) {
-    const trackOffset = 4 + (track - 1) * 4;
+    const trackOffset = 0x18 + (track - 1) * 4;
     const sectorCount = TPP.d64TrackSectorCount(track);
     let freeCount = 0;
     const bitmask = [0, 0, 0];
