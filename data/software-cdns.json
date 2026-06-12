@@ -9,7 +9,8 @@
       "purpose": "Parses Markdown chapter text into HTML before sanitizing and rendering.",
       "license": "MIT",
       "licenseUrl": "https://github.com/markedjs/marked/blob/master/LICENSE.md",
-      "website": "https://marked.js.org/"
+      "website": "https://marked.js.org/",
+      "sourceUrl": "https://github.com/markedjs/marked"
     },
     {
       "id": "dompurify",
@@ -19,7 +20,8 @@
       "purpose": "Sanitizes generated HTML so user-authored Markdown content is safe to inject.",
       "license": "Apache-2.0",
       "licenseUrl": "https://github.com/cure53/DOMPurify/blob/main/LICENSE",
-      "website": "https://github.com/cure53/DOMPurify"
+      "website": "https://github.com/cure53/DOMPurify",
+      "sourceUrl": "https://github.com/cure53/DOMPurify"
     },
     {
       "id": "qrcodejs",
@@ -29,7 +31,8 @@
       "purpose": "Generates QR codes for URL/asset references in page rendering and exports.",
       "license": "MIT",
       "licenseUrl": "https://github.com/davidshimjs/qrcodejs/blob/master/LICENSE",
-      "website": "https://github.com/davidshimjs/qrcodejs"
+      "website": "https://github.com/davidshimjs/qrcodejs",
+      "sourceUrl": "https://github.com/davidshimjs/qrcodejs"
     },
     {
       "id": "html2canvas",
@@ -39,7 +42,8 @@
       "purpose": "Captures rendered DOM pages into bitmap canvases for PDF/image/video export pipelines.",
       "license": "MIT",
       "licenseUrl": "https://github.com/niklasvh/html2canvas/blob/master/LICENSE",
-      "website": "https://html2canvas.hertzen.com/"
+      "website": "https://html2canvas.hertzen.com/",
+      "sourceUrl": "https://github.com/niklasvh/html2canvas"
     },
     {
       "id": "jspdf",
@@ -49,7 +53,8 @@
       "purpose": "Builds interior, cover, and eBook PDF documents from rendered page canvases.",
       "license": "MIT",
       "licenseUrl": "https://github.com/parallax/jsPDF/blob/master/LICENSE",
-      "website": "https://github.com/parallax/jsPDF"
+      "website": "https://github.com/parallax/jsPDF",
+      "sourceUrl": "https://github.com/parallax/jsPDF"
     },
     {
       "id": "jszip",
@@ -59,7 +64,8 @@
       "purpose": "Bundles exported page images into downloadable ZIP archives.",
       "license": "MIT",
       "licenseUrl": "https://github.com/Stuk/jszip/blob/main/LICENSE.markdown",
-      "website": "https://stuk.github.io/jszip/"
+      "website": "https://stuk.github.io/jszip/",
+      "sourceUrl": "https://github.com/Stuk/jszip"
     },
     {
       "id": "gifenc",
@@ -69,7 +75,8 @@
       "purpose": "Encodes GIF frames for preview and animated GIF export.",
       "license": "MIT",
       "licenseUrl": "https://github.com/mattdesl/gifenc/blob/master/LICENSE.md",
-      "website": "https://github.com/mattdesl/gifenc"
+      "website": "https://github.com/mattdesl/gifenc",
+      "sourceUrl": "https://github.com/mattdesl/gifenc"
     },
     {
       "id": "mediabunny",
@@ -79,7 +86,8 @@
       "purpose": "Builds browser-side MP4 exports and embeds supported media metadata tags during video export.",
       "license": "MPL-2.0",
       "licenseUrl": "https://github.com/Vanilagy/mediabunny/blob/main/LICENSE",
-      "website": "https://mediabunny.dev/"
+      "website": "https://mediabunny.dev/",
+      "sourceUrl": "https://github.com/Vanilagy/mediabunny"
     }
   ]
 }

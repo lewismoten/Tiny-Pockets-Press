@@ -113,6 +113,9 @@
   color: var(--muted);
   font-size: 0.9rem;
 }
+.about-license-cell {
+  white-space: nowrap;
+}
 @media (max-width: 1050px) {
   .about-panel {
     grid-template-columns: 1fr;

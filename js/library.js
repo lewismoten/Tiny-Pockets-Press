@@ -2267,6 +2267,7 @@ TPP.defaultSoftwareCdns = [
     license: "MIT",
     licenseUrl: "https://github.com/markedjs/marked/blob/master/LICENSE.md",
     website: "https://marked.js.org/",
+    sourceUrl: "https://github.com/markedjs/marked",
   },
   {
     id: "dompurify",
@@ -2278,6 +2279,7 @@ TPP.defaultSoftwareCdns = [
     license: "Apache-2.0",
     licenseUrl: "https://github.com/cure53/DOMPurify/blob/main/LICENSE",
     website: "https://github.com/cure53/DOMPurify",
+    sourceUrl: "https://github.com/cure53/DOMPurify",
   },
   {
     id: "qrcodejs",
@@ -2289,6 +2291,7 @@ TPP.defaultSoftwareCdns = [
     license: "MIT",
     licenseUrl: "https://github.com/davidshimjs/qrcodejs/blob/master/LICENSE",
     website: "https://github.com/davidshimjs/qrcodejs",
+    sourceUrl: "https://github.com/davidshimjs/qrcodejs",
   },
   {
     id: "html2canvas",
@@ -2300,6 +2303,7 @@ TPP.defaultSoftwareCdns = [
     license: "MIT",
     licenseUrl: "https://github.com/niklasvh/html2canvas/blob/master/LICENSE",
     website: "https://html2canvas.hertzen.com/",
+    sourceUrl: "https://github.com/niklasvh/html2canvas",
   },
   {
     id: "jspdf",
@@ -2311,6 +2315,7 @@ TPP.defaultSoftwareCdns = [
     license: "MIT",
     licenseUrl: "https://github.com/parallax/jsPDF/blob/master/LICENSE",
     website: "https://github.com/parallax/jsPDF",
+    sourceUrl: "https://github.com/parallax/jsPDF",
   },
   {
     id: "jszip",
@@ -2321,6 +2326,7 @@ TPP.defaultSoftwareCdns = [
     license: "MIT",
     licenseUrl: "https://github.com/Stuk/jszip/blob/main/LICENSE.markdown",
     website: "https://stuk.github.io/jszip/",
+    sourceUrl: "https://github.com/Stuk/jszip",
   },
   {
     id: "gifenc",
@@ -2331,6 +2337,7 @@ TPP.defaultSoftwareCdns = [
     license: "MIT",
     licenseUrl: "https://github.com/mattdesl/gifenc/blob/master/LICENSE.md",
     website: "https://github.com/mattdesl/gifenc",
+    sourceUrl: "https://github.com/mattdesl/gifenc",
   },
   {
     id: "mediabunny",
@@ -2342,6 +2349,7 @@ TPP.defaultSoftwareCdns = [
     license: "MPL-2.0",
     licenseUrl: "https://github.com/Vanilagy/mediabunny/blob/main/LICENSE",
     website: "https://mediabunny.dev/",
+    sourceUrl: "https://github.com/Vanilagy/mediabunny",
   },
 ];
 TPP.loadSoftwareMeta = async function () {
@@ -2400,6 +2408,25 @@ TPP.loadSoftwareCdns = async function () {
   TPP.softwareCdnCache = payload;
   return payload;
 };
+TPP.softwareSourceLabel = function (url) {
+  const value = String(url || "").trim();
+  if (!value) return "Source Code";
+  const githubMatch = value.match(
+    /^https?:\/\/github\.com\/([^/]+\/[^/#?]+)(?:[/?#]|$)/i,
+  );
+  if (githubMatch) return githubMatch[1];
+  return "Source Code";
+};
+TPP.softwareWebsiteLabel = function (url) {
+  const value = String(url || "").trim();
+  if (!value) return "Website";
+  try {
+    const parsed = new URL(value);
+    return parsed.host || "Website";
+  } catch (_error) {
+    return value.replace(/^https?:\/\//i, "").replace(/\/+$/, "") || "Website";
+  }
+};
 TPP.renderSoftwareAbout = async function () {
   if (typeof TPP.ensureControlModule === "function") {
     await TPP.ensureControlModule("about-panel");
@@ -2437,8 +2464,23 @@ TPP.renderSoftwareAbout = async function () {
         const site = entry.website
           ? '<a href="' +
             TPP.esc(entry.website) +
-            '" target="_blank" rel="noopener noreferrer">Website</a>'
+            '" target="_blank" rel="noopener noreferrer">' +
+            TPP.esc(TPP.softwareWebsiteLabel(entry.website)) +
+            "</a>"
           : '<span class="about-note">—</span>';
+        const source = entry.sourceUrl
+          ? 'GitHub: <a href="' +
+            TPP.esc(entry.sourceUrl) +
+            '" target="_blank" rel="noopener noreferrer">' +
+            TPP.esc(TPP.softwareSourceLabel(entry.sourceUrl)) +
+            "</a>"
+          : entry.website
+            ? '<a href="' +
+              TPP.esc(entry.website) +
+              '" target="_blank" rel="noopener noreferrer">' +
+              TPP.esc(TPP.softwareSourceLabel(entry.website)) +
+              "</a>"
+            : '<span class="about-note">—</span>';
         const license = entry.licenseUrl
           ? '<a href="' +
             TPP.esc(entry.licenseUrl) +
@@ -2460,11 +2502,14 @@ TPP.renderSoftwareAbout = async function () {
           "<td>" +
           TPP.esc(entry.purpose || "—") +
           "</td>" +
-          "<td>" +
+          '<td class="about-license-cell">' +
           license +
           "</td>" +
           "<td>" +
           site +
+          "</td>" +
+          "<td>" +
+          source +
           "</td>" +
           "</tr>"
         );
@@ -2475,7 +2520,7 @@ TPP.renderSoftwareAbout = async function () {
       "<h3>CDN Packages</h3>" +
       '<div class="table-wrap">' +
       '<table class="data-table">' +
-      "<thead><tr><th>Name</th><th>Version</th><th>CDN Source</th><th>Used For</th><th>License</th><th>Website</th></tr></thead>" +
+      "<thead><tr><th>Name</th><th>Version</th><th>CDN Source</th><th>Used For</th><th>License</th><th>Website</th><th>Source Code</th></tr></thead>" +
       "<tbody>" +
       rows +
       "</tbody>" +
