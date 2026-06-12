@@ -349,13 +349,34 @@ TPP.legacyMetadataText = function (value) {
     .replace(/…/g, "...");
 };
 TPP.pngXmpDateTime = function (value) {
+  const xmpOffset = function (date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "Z";
+    const minutesEast = -date.getTimezoneOffset();
+    if (!Number.isFinite(minutesEast)) return "Z";
+    const sign = minutesEast >= 0 ? "+" : "-";
+    const absolute = Math.abs(minutesEast);
+    const hours = String(Math.floor(absolute / 60)).padStart(2, "0");
+    const minutes = String(absolute % 60).padStart(2, "0");
+    return sign + hours + ":" + minutes;
+  };
   const raw = String(value || "").trim();
   if (!raw) return "";
   if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/.test(raw))
     return raw;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw + "T00:00:00";
-  if (/^\d{4}-\d{2}$/.test(raw)) return raw + "-01T00:00:00";
-  if (/^\d{4}$/.test(raw)) return raw + "-01-01T00:00:00";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const date = new Date(raw + "T00:00:00");
+    return raw + "T00:00:00" + xmpOffset(date);
+  }
+  if (/^\d{4}-\d{2}$/.test(raw)) {
+    const valueWithDay = raw + "-01";
+    const date = new Date(valueWithDay + "T00:00:00");
+    return valueWithDay + "T00:00:00" + xmpOffset(date);
+  }
+  if (/^\d{4}$/.test(raw)) {
+    const valueWithMonthDay = raw + "-01-01";
+    const date = new Date(valueWithMonthDay + "T00:00:00");
+    return valueWithMonthDay + "T00:00:00" + xmpOffset(date);
+  }
   const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return "";
   const year = date.getFullYear();
@@ -364,7 +385,20 @@ TPP.pngXmpDateTime = function (value) {
   const hour = String(date.getHours()).padStart(2, "0");
   const minute = String(date.getMinutes()).padStart(2, "0");
   const second = String(date.getSeconds()).padStart(2, "0");
-  return year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":" + second;
+  return (
+    year +
+    "-" +
+    month +
+    "-" +
+    day +
+    "T" +
+    hour +
+    ":" +
+    minute +
+    ":" +
+    second +
+    xmpOffset(date)
+  );
 };
 TPP.pngGeneratedDateInfo = function (options) {
   const config = options || {};
@@ -378,6 +412,17 @@ TPP.pngGeneratedDateInfo = function (options) {
   const pad = function (value) {
     return String(value).padStart(2, "0");
   };
+  const offsetMinutesEast = -date.getTimezoneOffset();
+  const offset =
+    Number.isFinite(offsetMinutesEast)
+      ? (function () {
+          const sign = offsetMinutesEast >= 0 ? "+" : "-";
+          const absolute = Math.abs(offsetMinutesEast);
+          const hours = String(Math.floor(absolute / 60)).padStart(2, "0");
+          const minutes = String(absolute % 60).padStart(2, "0");
+          return sign + hours + ":" + minutes;
+        })()
+      : "Z";
   return {
     xmp:
       date.getFullYear() +
@@ -390,7 +435,8 @@ TPP.pngGeneratedDateInfo = function (options) {
       ":" +
       pad(date.getMinutes()) +
       ":" +
-      pad(date.getSeconds()),
+      pad(date.getSeconds()) +
+      offset,
     exif:
       date.getFullYear() +
       ":" +
