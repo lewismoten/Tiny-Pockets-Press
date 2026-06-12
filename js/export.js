@@ -891,6 +891,144 @@ TPP.insertJpegMetadata = function (bytes, book, options) {
   out.set(bytes.subarray(offset), cursor);
   return out;
 };
+TPP.webpUint32Bytes = function (value) {
+  const out = new Uint8Array(4);
+  const normalized = Number(value) >>> 0;
+  out[0] = normalized & 0xff;
+  out[1] = (normalized >>> 8) & 0xff;
+  out[2] = (normalized >>> 16) & 0xff;
+  out[3] = (normalized >>> 24) & 0xff;
+  return out;
+};
+TPP.webpUint24Bytes = function (value) {
+  const normalized = Math.max(0, Number(value) || 0);
+  return new Uint8Array([
+    normalized & 0xff,
+    (normalized >>> 8) & 0xff,
+    (normalized >>> 16) & 0xff,
+  ]);
+};
+TPP.webpChunkBytes = function (type, data) {
+  const typeBytes = TPP.pngTextEncoder.encode(String(type || "").slice(0, 4));
+  const payload = data instanceof Uint8Array ? data : new Uint8Array(0);
+  const out = new Uint8Array(8 + payload.length + (payload.length % 2));
+  out.set(typeBytes, 0);
+  out.set(TPP.webpUint32Bytes(payload.length), 4);
+  out.set(payload, 8);
+  return out;
+};
+TPP.webpChunks = function (bytes) {
+  if (!(bytes instanceof Uint8Array) || bytes.length < 12) return [];
+  if (
+    String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== "RIFF" ||
+    String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]) !== "WEBP"
+  ) {
+    return [];
+  }
+  const chunks = [];
+  let offset = 12;
+  while (offset + 8 <= bytes.length) {
+    const type = String.fromCharCode(
+      bytes[offset],
+      bytes[offset + 1],
+      bytes[offset + 2],
+      bytes[offset + 3],
+    );
+    const length =
+      (bytes[offset + 4] >>> 0) +
+      ((bytes[offset + 5] << 8) >>> 0) +
+      ((bytes[offset + 6] << 16) >>> 0) +
+      ((bytes[offset + 7] << 24) >>> 0);
+    const payloadStart = offset + 8;
+    const payloadEnd = payloadStart + length;
+    if (payloadEnd > bytes.length) break;
+    chunks.push({
+      type: type,
+      start: offset,
+      end: payloadEnd + (length % 2),
+      payload: bytes.subarray(payloadStart, payloadEnd),
+    });
+    offset = payloadEnd + (length % 2);
+  }
+  return chunks;
+};
+TPP.canvasHasTransparency = function (canvas) {
+  if (!canvas || !canvas.width || !canvas.height) return false;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx || typeof ctx.getImageData !== "function") return false;
+  try {
+    const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = image && image.data ? image.data : null;
+    if (!data) return false;
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] !== 255) return true;
+    }
+  } catch (_error) {
+    return false;
+  }
+  return false;
+};
+TPP.webpVp8xChunk = function (width, height, flags) {
+  const safeWidth = Math.max(1, Number(width) || 1);
+  const safeHeight = Math.max(1, Number(height) || 1);
+  const payload = new Uint8Array(10);
+  payload[0] = flags & 0x3e;
+  payload.set(TPP.webpUint24Bytes(safeWidth - 1), 4);
+  payload.set(TPP.webpUint24Bytes(safeHeight - 1), 7);
+  return TPP.webpChunkBytes("VP8X", payload);
+};
+TPP.insertWebpMetadata = function (bytes, book, options) {
+  const chunks = TPP.webpChunks(bytes);
+  if (!chunks.length) return bytes;
+  const config = options || {};
+  const exifBytes = TPP.pngExifBytes(book, options);
+  const xmpPacket = TPP.pngXmpPacket(book, options);
+  const xmpBytes = String(xmpPacket || "").trim()
+    ? TPP.pngTextEncoder.encode(xmpPacket)
+    : new Uint8Array(0);
+  const exifChunk =
+    exifBytes instanceof Uint8Array && exifBytes.length
+      ? TPP.webpChunkBytes("EXIF", exifBytes)
+      : new Uint8Array(0);
+  const xmpChunk = xmpBytes.length ? TPP.webpChunkBytes("XMP ", xmpBytes) : new Uint8Array(0);
+  if (!exifChunk.length && !xmpChunk.length) return bytes;
+  let flags = 0;
+  const bodyChunks = [];
+  chunks.forEach(function (chunk) {
+    if (!chunk || !chunk.type) return;
+    if (chunk.type === "VP8X" && chunk.payload.length) {
+      flags |= chunk.payload[0] & 0x3e;
+      return;
+    }
+    if (chunk.type === "EXIF" || chunk.type === "XMP ") return;
+    if (chunk.type === "ICCP") flags |= 0x20;
+    if (chunk.type === "ALPH") flags |= 0x10;
+    if (chunk.type === "ANIM" || chunk.type === "ANMF") flags |= 0x02;
+    bodyChunks.push(bytes.subarray(chunk.start, chunk.end));
+  });
+  if (config.hasAlpha || TPP.canvasHasTransparency(config.canvas)) flags |= 0x10;
+  if (exifChunk.length) flags |= 0x08;
+  if (xmpChunk.length) flags |= 0x04;
+  const outputChunks = [TPP.webpVp8xChunk(config.width, config.height, flags)]
+    .concat(bodyChunks)
+    .concat(exifChunk.length ? [exifChunk] : [])
+    .concat(xmpChunk.length ? [xmpChunk] : []);
+  const riffSize =
+    4 +
+    outputChunks.reduce(function (sum, chunk) {
+      return sum + chunk.length;
+    }, 0);
+  const out = new Uint8Array(8 + riffSize);
+  out.set(TPP.pngTextEncoder.encode("RIFF"), 0);
+  out.set(TPP.webpUint32Bytes(riffSize), 4);
+  out.set(TPP.pngTextEncoder.encode("WEBP"), 8);
+  let offset = 12;
+  outputChunks.forEach(function (chunk) {
+    out.set(chunk, offset);
+    offset += chunk.length;
+  });
+  return out;
+};
 TPP.gifCommentExtensionBytes = function (text) {
   const message = String(text || "").trim();
   if (!message) return new Uint8Array(0);
@@ -2783,6 +2921,19 @@ TPP.exportBlobForCanvas = function (canvas, options) {
               generatedAt: options && options.generatedAt,
             });
             resolve(new Blob([metadataBytes], { type: "image/jpeg" }));
+            return;
+          }
+          if (exportOptions.format === "webp") {
+            const metadataBytes = TPP.insertWebpMetadata(bytes, sourceBook, {
+              pageIndex: options && options.pageIndex,
+              totalPages: options && options.totalPages,
+              generatedAt: options && options.generatedAt,
+              width: canvas.width,
+              height: canvas.height,
+              hasAlpha: TPP.canvasHasTransparency(canvas),
+              canvas: canvas,
+            });
+            resolve(new Blob([metadataBytes], { type: "image/webp" }));
             return;
           }
           resolve(blob);

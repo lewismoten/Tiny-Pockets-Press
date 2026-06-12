@@ -5,6 +5,7 @@
     "epub": "Exported to EPUB metadata as the Title value. If a subtitle is present, the EPUB title becomes Title: Subtitle.",
     "mp4": "Exported to MP4 metadata as the Title tag. If a subtitle is present, the MP4 title becomes Title: Subtitle.",
     "jpeg": "Exported into JPEG metadata as the Title value in XMP and included in compact JPEG comment metadata.",
+    "webp": "Exported into WebP metadata as the Title value in XMP. If a subtitle is present, the WebP title becomes Title: Subtitle.",
     "zip": "Included in the ZIP archive comment and exported into the ZIP manifest files as the Title value. If a subtitle is present, the ZIP title becomes Title: Subtitle.",
     "example": "Santa's Little OSHA Violation"
   },
@@ -14,6 +15,7 @@
     "epub": "Appended to the title in EPUB metadata, producing Title: Subtitle.",
     "mp4": "Appended to the MP4 title tag, producing Title: Subtitle.",
     "jpeg": "Appended to the JPEG title metadata in XMP and compact JPEG comment metadata, producing Title: Subtitle.",
+    "webp": "Appended to the WebP title metadata in XMP, producing Title: Subtitle.",
     "zip": "Appended to the title in the ZIP archive comment and ZIP manifest files, producing Title: Subtitle.",
     "example": "Pocket-sized catastrophe management for the holidays"
   },
@@ -23,6 +25,7 @@
     "epub": "Exported to EPUB metadata as the Creator value.",
     "mp4": "Exported to MP4 metadata as the Artist tag.",
     "jpeg": "Exported into JPEG metadata as the Author/Creator value in EXIF and XMP, and included in compact JPEG comment metadata.",
+    "webp": "Exported into WebP metadata as the Author/Creator value in EXIF and XMP.",
     "zip": "Included in the ZIP archive comment and exported into the ZIP manifest files as the Author value.",
     "example": "Lewis Moten"
   },
@@ -32,6 +35,7 @@
     "epub": "Exported to EPUB metadata as the Date value.",
     "mp4": "Exported to MP4 metadata as the Date tag when the value can be parsed as a real date.",
     "jpeg": "Exported into JPEG metadata as the publication/original date in EXIF and XMP when the value can be parsed. JPEG also carries separate generated/export timestamps.",
+    "webp": "Exported into WebP metadata as the publication/original date in EXIF and XMP when the value can be parsed. WebP also carries separate generated/export timestamps through embedded EXIF/XMP.",
     "zip": "Included in the ZIP archive comment and exported into the ZIP manifest files as the Date value.",
     "example": "2026-05-24"
   },
@@ -41,6 +45,7 @@
     "epub": "Exported to EPUB metadata as the Publisher value.",
     "mp4": "Included in the MP4 Comment tag alongside other catalog notes.",
     "jpeg": "Exported into JPEG metadata as the Publisher value in XMP and included in compact JPEG comment metadata.",
+    "webp": "Exported into WebP metadata as the Publisher value in XMP and included in EXIF/XMP descriptive metadata.",
     "zip": "Included in the ZIP archive comment and exported into the ZIP manifest files as the Publisher value.",
     "example": "Tiny Pockets Press"
   },
@@ -49,6 +54,7 @@
     "epub": "Exported to EPUB metadata as the Language value. If Region is present, the two are combined into a locale tag such as en-US.",
     "mp4": "Exported to MP4 track metadata as a language code. Common 2-letter values such as en are converted to a 3-letter code such as eng.",
     "jpeg": "Exported into JPEG XMP metadata as the language value. If Region is present, the two can be reflected in language-specific XMP text alternatives.",
+    "webp": "Exported into WebP XMP metadata as the language value. If Region is present, the two can be reflected in language-specific XMP text alternatives.",
     "zip": "Exported into the ZIP manifest files as the language value. If Region is present, the two are combined into a locale tag such as en-US.",
     "example": "en"
   },
@@ -56,6 +62,7 @@
     "description": "A regional locale code that refines the language when that matters for cataloging or export metadata.",
     "epub": "Used with Language to build the EPUB language tag, such as en-US.",
     "jpeg": "Used indirectly with Language when metadata readers honor localized XMP text alternatives.",
+    "webp": "Used indirectly with Language when metadata readers honor localized XMP text alternatives.",
     "zip": "Used with Language to build the ZIP manifest language tag, such as en-US.",
     "example": "US"
   },
@@ -65,6 +72,7 @@
     "epub": "Exported to EPUB metadata as a Subject value.",
     "mp4": "Exported to MP4 metadata as the Genre tag.",
     "jpeg": "Exported into JPEG metadata as a subject term in XMP.",
+    "webp": "Exported into WebP metadata as a subject term in XMP.",
     "zip": "Exported into the ZIP manifest files as a subject term.",
     "example": "Holiday satire"
   },
@@ -74,6 +82,7 @@
     "epub": "Exported to EPUB metadata as the Description value.",
     "mp4": "Exported to MP4 metadata as the Description tag.",
     "jpeg": "Exported into JPEG metadata as the Description value in XMP and used as the EXIF image description when present.",
+    "webp": "Exported into WebP metadata as the Description value in XMP and used as the EXIF image description when present.",
     "zip": "Exported into the ZIP manifest files as the description value.",
     "example": "A tiny handbook of festive corners cut, avoidable accidents, and cheerful workplace dread."
   },
@@ -83,6 +92,7 @@
     "epub": "Split into individual terms and exported to EPUB metadata as additional Subject entries.",
     "mp4": "Included in the MP4 Comment tag alongside other catalog notes.",
     "jpeg": "Exported into JPEG metadata as keywords/subject-style terms in XMP and included in compact JPEG comment metadata.",
+    "webp": "Exported into WebP metadata as keywords/subject-style terms in XMP and included in EXIF user comments when space allows.",
     "zip": "Exported into the ZIP manifest files as keywords, and also merged into subject-style terms where appropriate.",
     "example": "zine, holiday, satire, workplace, OSHA"
   },
@@ -92,6 +102,7 @@
     "epub": "Exported to EPUB metadata as an additional Subject entry when present.",
     "mp4": "Included in the MP4 Comment tag alongside other catalog notes.",
     "jpeg": "Exported into JPEG metadata as an additional subject-style term in XMP and included in compact JPEG comment metadata.",
+    "webp": "Exported into WebP metadata as an additional subject-style term in XMP and included in EXIF user comments when space allows.",
     "zip": "Included in the ZIP archive comment and exported into the ZIP manifest files as a subject-style classification term.",
     "example": "816.1 Zines / Personal writing"
   },
@@ -104,6 +115,7 @@
     "epub": "Exported to EPUB metadata as the Rights value.",
     "mp4": "Included in the MP4 Comment tag alongside other catalog notes.",
     "jpeg": "Exported into JPEG metadata as a rights statement in EXIF and XMP, and included in compact JPEG comment metadata.",
+    "webp": "Exported into WebP metadata as a rights statement in EXIF and XMP, and included in EXIF user comments when space allows.",
     "zip": "Included in the ZIP archive comment and exported into the ZIP manifest files as the Rights value.",
     "example": "© 2026 Lewis Moten. All rights reserved."
   },
