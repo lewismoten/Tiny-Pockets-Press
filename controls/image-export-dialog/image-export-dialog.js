@@ -428,7 +428,7 @@ export async function init(TPP) {
     const indexedOnly = imageExportColorDepth.value === "indexed";
     const indexedOnlyDitherOptions = Array.from(
       imageExportDither.querySelectorAll(
-        'option[value="c64-petscii"], option[value="c64-petscii-full"]',
+        'option[value="c64-petscii"], option[value="c64-petscii-full"], option[value="c64-custom-charset"]',
       ),
     );
     Array.from(imageExportFormat.options).forEach(function (option) {
@@ -459,7 +459,9 @@ export async function init(TPP) {
     });
     if (
       !indexed &&
-      ["c64-petscii", "c64-petscii-full"].includes(imageExportDither.value)
+      ["c64-petscii", "c64-petscii-full", "c64-custom-charset"].includes(
+        imageExportDither.value,
+      )
     ) {
       imageExportDither.value = "threshold";
     }

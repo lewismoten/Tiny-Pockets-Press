@@ -2443,6 +2443,7 @@ TPP.imageExportDitherIds = function () {
     "pattern",
     "c64-petscii",
     "c64-petscii-full",
+    "c64-custom-charset",
   ];
 };
 TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION = 1;

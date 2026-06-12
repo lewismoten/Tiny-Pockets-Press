@@ -374,6 +374,130 @@ export function init(TPP) {
     );
     return mask[glyphY * 8 + glyphX];
   };
+  const maskKey = function (mask) {
+    return Array.from(mask || [])
+      .map(function (bit) {
+        return bit ? "1" : "0";
+      })
+      .join("");
+  };
+  const extractCellPixels = function (data, width, cellX, cellY, blockWidth, blockHeight) {
+    const pixels = new Uint8Array(blockWidth * blockHeight * 3);
+    for (let y = 0; y < blockHeight; y += 1) {
+      for (let x = 0; x < blockWidth; x += 1) {
+        const srcOffset = ((cellY + y) * width + (cellX + x)) * 4;
+        const dstOffset = (y * blockWidth + x) * 3;
+        pixels[dstOffset] = data[srcOffset];
+        pixels[dstOffset + 1] = data[srcOffset + 1];
+        pixels[dstOffset + 2] = data[srcOffset + 2];
+      }
+    }
+    return pixels;
+  };
+  const bestTwoColorCellFit = function (
+    pixels,
+    blockWidth,
+    blockHeight,
+    palette,
+    candidates,
+  ) {
+    const cellPixels = blockWidth * blockHeight;
+    let bestMask = new Uint8Array(64);
+    let bestBg = palette[candidates[0]] || palette[0];
+    let bestFg = bestBg;
+    let bestError = Infinity;
+    let bestBgErrors = new Float32Array(cellPixels);
+    let bestFgErrors = new Float32Array(cellPixels);
+    for (let bgIndex = 0; bgIndex < candidates.length; bgIndex += 1) {
+      for (let fgIndex = 0; fgIndex < candidates.length; fgIndex += 1) {
+        const bg = palette[candidates[bgIndex]];
+        const fg = palette[candidates[fgIndex]];
+        const bgErrors = new Float32Array(cellPixels);
+        const fgErrors = new Float32Array(cellPixels);
+        const mask = new Uint8Array(64);
+        let totalError = 0;
+        for (let y = 0; y < blockHeight; y += 1) {
+          for (let x = 0; x < blockWidth; x += 1) {
+            const pixelIndex = y * blockWidth + x;
+            const offset = pixelIndex * 3;
+            const drBg = pixels[offset] - bg[0];
+            const dgBg = pixels[offset + 1] - bg[1];
+            const dbBg = pixels[offset + 2] - bg[2];
+            const drFg = pixels[offset] - fg[0];
+            const dgFg = pixels[offset + 1] - fg[1];
+            const dbFg = pixels[offset + 2] - fg[2];
+            const bgError = drBg * drBg + dgBg * dgBg + dbBg * dbBg;
+            const fgError = drFg * drFg + dgFg * dgFg + dbFg * dbFg;
+            bgErrors[pixelIndex] = bgError;
+            fgErrors[pixelIndex] = fgError;
+            if (fgError < bgError) {
+              mask[y * 8 + x] = 1;
+              totalError += fgError;
+            } else {
+              totalError += bgError;
+            }
+          }
+        }
+        if (totalError < bestError) {
+          bestError = totalError;
+          bestMask = mask;
+          bestBg = bg;
+          bestFg = fg;
+          bestBgErrors = bgErrors;
+          bestFgErrors = fgErrors;
+        }
+      }
+    }
+    return {
+      mask: bestMask,
+      bg: bestBg,
+      fg: bestFg,
+      bgErrors: bestBgErrors,
+      fgErrors: bestFgErrors,
+      error: bestError,
+    };
+  };
+  const scoreMaskAgainstCell = function (
+    mask,
+    blockWidth,
+    blockHeight,
+    bgErrors,
+    fgErrors,
+  ) {
+    let totalError = 0;
+    for (let y = 0; y < blockHeight; y += 1) {
+      for (let x = 0; x < blockWidth; x += 1) {
+        const pixelIndex = y * blockWidth + x;
+        totalError += petsciiMaskBit(mask, x, y, blockWidth, blockHeight)
+          ? fgErrors[pixelIndex]
+          : bgErrors[pixelIndex];
+      }
+    }
+    return totalError;
+  };
+  const paintMaskCell = function (
+    data,
+    width,
+    cellX,
+    cellY,
+    blockWidth,
+    blockHeight,
+    mask,
+    bg,
+    fg,
+  ) {
+    for (let y = 0; y < blockHeight; y += 1) {
+      for (let x = 0; x < blockWidth; x += 1) {
+        const offset = ((cellY + y) * width + (cellX + x)) * 4;
+        const swatch = petsciiMaskBit(mask, x, y, blockWidth, blockHeight)
+          ? fg
+          : bg;
+        data[offset] = swatch[0];
+        data[offset + 1] = swatch[1];
+        data[offset + 2] = swatch[2];
+      }
+    }
+  };
   const applyPalettePetscii = function (data, width, height, palette, glyphs) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(6, palette.length));
@@ -383,86 +507,146 @@ export function init(TPP) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
         const blockHeight = Math.min(cellSize, height - cellY);
-        const pixels = new Uint8Array(blockWidth * blockHeight * 3);
-        for (let y = 0; y < blockHeight; y += 1) {
-          for (let x = 0; x < blockWidth; x += 1) {
-            const srcOffset = ((cellY + y) * width + (cellX + x)) * 4;
-            const dstOffset = (y * blockWidth + x) * 3;
-            pixels[dstOffset] = data[srcOffset];
-            pixels[dstOffset + 1] = data[srcOffset + 1];
-            pixels[dstOffset + 2] = data[srcOffset + 2];
-          }
-        }
+        const pixels = extractCellPixels(
+          data,
+          width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+        );
         const candidates = paletteCellCandidates(pixels, palette, colorLimit);
+        const fit = bestTwoColorCellFit(
+          pixels,
+          blockWidth,
+          blockHeight,
+          palette,
+          candidates,
+        );
         let bestGlyph = glyphCatalog[0];
-        let bestBg = palette[candidates[0]] || palette[0];
-        let bestFg = bestBg;
         let bestError = Infinity;
-        for (let bgIndex = 0; bgIndex < candidates.length; bgIndex += 1) {
-          for (let fgIndex = 0; fgIndex < candidates.length; fgIndex += 1) {
-            const bg = palette[candidates[bgIndex]];
-            const fg = palette[candidates[fgIndex]];
-            const bgErrors = new Float32Array(blockWidth * blockHeight);
-            const fgErrors = new Float32Array(blockWidth * blockHeight);
-            for (let y = 0; y < blockHeight; y += 1) {
-              for (let x = 0; x < blockWidth; x += 1) {
-                const pixelIndex = y * blockWidth + x;
-                const offset = pixelIndex * 3;
-                const drBg = pixels[offset] - bg[0];
-                const dgBg = pixels[offset + 1] - bg[1];
-                const dbBg = pixels[offset + 2] - bg[2];
-                const drFg = pixels[offset] - fg[0];
-                const dgFg = pixels[offset + 1] - fg[1];
-                const dbFg = pixels[offset + 2] - fg[2];
-                bgErrors[pixelIndex] = drBg * drBg + dgBg * dgBg + dbBg * dbBg;
-                fgErrors[pixelIndex] = drFg * drFg + dgFg * dgFg + dbFg * dbFg;
-              }
-            }
-            for (let glyphIndex = 0; glyphIndex < glyphCatalog.length; glyphIndex += 1) {
-              const glyph = glyphCatalog[glyphIndex];
-              let totalError = 0;
-              for (let y = 0; y < blockHeight; y += 1) {
-                for (let x = 0; x < blockWidth; x += 1) {
-                  const pixelIndex = y * blockWidth + x;
-                  totalError += petsciiMaskBit(
-                    glyph,
-                    x,
-                    y,
-                    blockWidth,
-                    blockHeight,
-                  )
-                    ? fgErrors[pixelIndex]
-                    : bgErrors[pixelIndex];
-                }
-              }
-              if (totalError < bestError) {
-                bestError = totalError;
-                bestGlyph = glyph;
-                bestBg = bg;
-                bestFg = fg;
-              }
-            }
+        for (let glyphIndex = 0; glyphIndex < glyphCatalog.length; glyphIndex += 1) {
+          const glyph = glyphCatalog[glyphIndex];
+          const totalError = scoreMaskAgainstCell(
+            glyph,
+            blockWidth,
+            blockHeight,
+            fit.bgErrors,
+            fit.fgErrors,
+          );
+          if (totalError < bestError) {
+            bestError = totalError;
+            bestGlyph = glyph;
           }
         }
-        for (let y = 0; y < blockHeight; y += 1) {
-          for (let x = 0; x < blockWidth; x += 1) {
-            const offset = ((cellY + y) * width + (cellX + x)) * 4;
-            const swatch = petsciiMaskBit(
-              bestGlyph,
-              x,
-              y,
-              blockWidth,
-              blockHeight,
-            )
-              ? bestFg
-              : bestBg;
-            data[offset] = swatch[0];
-            data[offset + 1] = swatch[1];
-            data[offset + 2] = swatch[2];
+        paintMaskCell(
+          data,
+          width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+          bestGlyph,
+          fit.bg,
+          fit.fg,
+        );
+      }
+    }
+  };
+  const applyPaletteCustomCharset = function (data, width, height, palette) {
+    const cellSize = 8;
+    const colorLimit = Math.max(2, Math.min(4, palette.length));
+    const cellFits = [];
+    const patternStats = new Map();
+    for (let cellY = 0; cellY < height; cellY += cellSize) {
+      for (let cellX = 0; cellX < width; cellX += cellSize) {
+        const blockWidth = Math.min(cellSize, width - cellX);
+        const blockHeight = Math.min(cellSize, height - cellY);
+        const pixels = extractCellPixels(
+          data,
+          width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+        );
+        const candidates = paletteCellCandidates(pixels, palette, colorLimit);
+        const fit = bestTwoColorCellFit(
+          pixels,
+          blockWidth,
+          blockHeight,
+          palette,
+          candidates,
+        );
+        const key = maskKey(fit.mask);
+        const stat = patternStats.get(key) || {
+          key: key,
+          mask: fit.mask,
+          count: 0,
+          error: 0,
+        };
+        stat.count += 1;
+        stat.error += fit.error;
+        patternStats.set(key, stat);
+        cellFits.push({
+          x: cellX,
+          y: cellY,
+          width: blockWidth,
+          height: blockHeight,
+          bg: fit.bg,
+          fg: fit.fg,
+          bgErrors: fit.bgErrors,
+          fgErrors: fit.fgErrors,
+          mask: fit.mask,
+          key: key,
+        });
+      }
+    }
+    const charset = Array.from(patternStats.values())
+      .sort(function (a, b) {
+        if (b.count !== a.count) return b.count - a.count;
+        return a.error - b.error;
+      })
+      .slice(0, 256)
+      .map(function (entry) {
+        return entry.mask;
+      });
+    const charsetByKey = new Map(
+      charset.map(function (mask) {
+        return [maskKey(mask), mask];
+      }),
+    );
+    cellFits.forEach(function (fit) {
+      let bestMask = charsetByKey.get(fit.key) || charset[0] || fit.mask;
+      if (!charsetByKey.has(fit.key) && charset.length) {
+        let bestError = Infinity;
+        for (let i = 0; i < charset.length; i += 1) {
+          const candidateMask = charset[i];
+          const totalError = scoreMaskAgainstCell(
+            candidateMask,
+            fit.width,
+            fit.height,
+            fit.bgErrors,
+            fit.fgErrors,
+          );
+          if (totalError < bestError) {
+            bestError = totalError;
+            bestMask = candidateMask;
           }
         }
       }
-    }
+      paintMaskCell(
+        data,
+        width,
+        fit.x,
+        fit.y,
+        fit.width,
+        fit.height,
+        bestMask,
+        fit.bg,
+        fit.fg,
+      );
+    });
   };
   const paletteDitherers = {
     threshold: function (data, width, height, palette) {
@@ -622,6 +806,9 @@ export function init(TPP) {
     },
     "c64-petscii-full": function (data, width, height, palette) {
       applyPalettePetscii(data, width, height, palette, petsciiFullGlyphs);
+    },
+    "c64-custom-charset": function (data, width, height, palette) {
+      applyPaletteCustomCharset(data, width, height, palette);
     },
   };
   const ditherers = {
