@@ -2461,6 +2461,16 @@ TPP.fallbackWebsafePalette = function () {
   });
   return websafe;
 };
+TPP.imageExportGrayscalePalette = function (count) {
+  const size = Math.max(1, Math.min(256, Math.round(Number(count) || 2)));
+  if (size === 1) return [[0, 0, 0]];
+  const palette = [];
+  for (let i = 0; i < size; i++) {
+    const value = Math.round((i / (size - 1)) * 255);
+    palette.push([value, value, value]);
+  }
+  return palette;
+};
 TPP.hexToRgbSwatch = function (value) {
   const hex = String(value || "").trim();
   const match = /^#?([a-fA-F0-9]{6})$/.exec(hex);
