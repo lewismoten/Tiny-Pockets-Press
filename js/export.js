@@ -3,7 +3,12 @@ window.TPP = window.TPP || {};
 TPP.pdfMetadata = function (book, options) {
   const source = book || {};
   const exportKind = String((options && options.kind) || "").trim();
-  const title = String(source.title || "Untitled").trim() || "Untitled";
+  const baseTitle = String(source.title || "Untitled").trim() || "Untitled";
+  const subtitle = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subtitle")
+      : source.subtitle || "",
+  ).trim();
   const author = String(
     typeof TPP.bookInfoFieldValue === "function"
       ? TPP.bookInfoFieldValue(source, "author")
@@ -24,15 +29,50 @@ TPP.pdfMetadata = function (book, options) {
       ? TPP.bookInfoFieldValue(source, "classification")
       : source.classification || "",
   ).trim();
-  const pieces = [classification, publisher, pubDate].filter(Boolean);
-  if (exportKind) pieces.unshift(exportKind + " export");
+  const explicitSubject = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subject")
+      : source.subject || "",
+  ).trim();
+  const description = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "description")
+      : source.description || "",
+  ).trim();
+  const explicitKeywords = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "keywords")
+      : source.keywords || "",
+  ).trim();
+  const title = subtitle ? baseTitle + ": " + subtitle : baseTitle;
+  const derivedSubjectPieces = [classification, publisher, pubDate].filter(
+    Boolean,
+  );
+  if (exportKind) derivedSubjectPieces.unshift(exportKind + " export");
+  const subject = explicitSubject || description || derivedSubjectPieces.join(" · ");
+  const keywords = Array.from(
+    new Set(
+      explicitKeywords
+        .split(/[,;\n]+/)
+        .map(function (item) {
+          return String(item || "").trim();
+        })
+        .concat([
+          baseTitle,
+          subtitle,
+          author,
+          publisher,
+          explicitSubject,
+          classification,
+        ])
+        .filter(Boolean),
+    ),
+  ).join(", ");
   return {
     title: title,
     author: author,
-    subject: pieces.join(" · "),
-    keywords: [title, author, publisher, classification]
-      .filter(Boolean)
-      .join(", "),
+    subject: subject,
+    keywords: keywords,
     creator: "Tiny Pockets Press",
     producer: "Tiny Pockets Press",
   };
