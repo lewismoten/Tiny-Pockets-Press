@@ -1043,7 +1043,8 @@ export async function init(TPP) {
     if (
       button.dataset.action === "export-images" ||
       button.dataset.action === "export-animated-gif" ||
-      button.dataset.action === "export-mp4"
+      button.dataset.action === "export-mp4" ||
+      button.dataset.action === "export-d64"
     ) {
       const targetPixels = presetTargetPixels(imageExportPreset.value || "300");
       const dpi = targetPixels
@@ -1085,7 +1086,7 @@ export async function init(TPP) {
       });
       stopPlayback();
       if (imageExportDialog.open) imageExportDialog.close();
-      const exportOptions = {
+      let exportOptions = {
         dpi: dpi,
         targetWidth: targetPixels ? targetPixels.width : null,
         targetHeight: targetPixels ? targetPixels.height : null,
@@ -1101,9 +1102,12 @@ export async function init(TPP) {
         TPP.exportAnimatedGif(exportOptions);
       } else if (button.dataset.action === "export-mp4") {
         TPP.exportMp4(exportOptions);
-      } else if (format === "d64") {
+      } else if (button.dataset.action === "export-d64") {
         TPP.exportImagesD64(exportOptions);
       } else {
+        if (format === "d64") {
+          exportOptions = Object.assign({}, exportOptions, { format: "png" });
+        }
         TPP.exportImagesZip(exportOptions);
       }
     }
