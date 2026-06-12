@@ -72,14 +72,14 @@
       "website": "https://github.com/mattdesl/gifenc"
     },
     {
-      "id": "mp4-muxer",
-      "name": "mp4-muxer",
-      "version": "5.2.2",
+      "id": "mediabunny",
+      "name": "Mediabunny",
+      "version": "1.46.0",
       "cdn": "unpkg",
-      "purpose": "Muxes encoded video chunks into an MP4 container for export.",
-      "license": "MIT",
-      "licenseUrl": "https://github.com/Vanilagy/mp4-muxer/blob/main/LICENSE",
-      "website": "https://github.com/Vanilagy/mp4-muxer"
+      "purpose": "Builds browser-side MP4 exports and embeds supported media metadata tags during video export.",
+      "license": "MPL-2.0",
+      "licenseUrl": "https://github.com/Vanilagy/mediabunny/blob/main/LICENSE",
+      "website": "https://mediabunny.dev/"
     }
   ]
 }

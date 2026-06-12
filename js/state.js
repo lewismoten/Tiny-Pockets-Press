@@ -602,6 +602,8 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "Exported to PDF metadata as the core Title value. If a subtitle is present, the PDF Title becomes Title: Subtitle.",
     epub:
       "Exported to EPUB metadata as the Title value. If a subtitle is present, the EPUB title becomes Title: Subtitle.",
+    mp4:
+      "Exported to MP4 metadata as the Title tag. If a subtitle is present, the MP4 title becomes Title: Subtitle.",
     example: "Santa's Little OSHA Violation",
   },
   subtitle: {
@@ -609,6 +611,7 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "A secondary line that adds context, tone, or a clarifying phrase to the title.",
     pdf: "Appended to the title in PDF metadata, producing Title: Subtitle.",
     epub: "Appended to the title in EPUB metadata, producing Title: Subtitle.",
+    mp4: "Appended to the MP4 title tag, producing Title: Subtitle.",
     example: "Pocket-sized catastrophe management for the holidays",
   },
   author: {
@@ -616,6 +619,7 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "The person, collective, or organization responsible for the work. Use this for credited creators and contributors.",
     pdf: "Exported to PDF metadata as the Author value.",
     epub: "Exported to EPUB metadata as the Creator value.",
+    mp4: "Exported to MP4 metadata as the Artist tag.",
     example: "Lewis Moten",
   },
   pubDate: {
@@ -624,6 +628,8 @@ TPP.defaultBookInfoFieldHelpCatalog = {
     pdf:
       "Not exported into a dedicated PDF field, but it can be folded into fallback Subject text when no explicit Subject or Description is provided.",
     epub: "Exported to EPUB metadata as the Date value.",
+    mp4:
+      "Exported to MP4 metadata as the Date tag when the value can be parsed as a real date.",
     example: "2026-05-24",
   },
   publisher: {
@@ -631,6 +637,7 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "The press, imprint, label, or organization that published the book.",
     pdf: "Can be included in fallback Subject and Keywords metadata.",
     epub: "Exported to EPUB metadata as the Publisher value.",
+    mp4: "Included in the MP4 Comment tag alongside other catalog notes.",
     example: "Tiny Pockets Press",
   },
   language: {
@@ -650,6 +657,7 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "A short human-readable topic or category phrase.",
     pdf: "Exported to PDF metadata as the Subject value when present.",
     epub: "Exported to EPUB metadata as a Subject value.",
+    mp4: "Exported to MP4 metadata as the Genre tag.",
     example: "Holiday satire",
   },
   description: {
@@ -657,6 +665,7 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "A brief summary, blurb, or catalog note explaining what the book is about.",
     pdf: "Used as the PDF Subject fallback when Subject is blank.",
     epub: "Exported to EPUB metadata as the Description value.",
+    mp4: "Exported to MP4 metadata as the Description tag.",
     example:
       "A tiny handbook of festive corners cut, avoidable accidents, and cheerful workplace dread.",
   },
@@ -667,6 +676,7 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "Exported to PDF metadata as Keywords, then merged with core terms like title, author, publisher, subject, and classification.",
     epub:
       "Split into individual terms and exported to EPUB metadata as additional Subject entries.",
+    mp4: "Included in the MP4 Comment tag alongside other catalog notes.",
     example: "zine, holiday, satire, workplace, OSHA",
   },
   classification: {
@@ -674,6 +684,7 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "The shelving or taxonomy code used to place the book within your classification system.",
     pdf: "Can be included in fallback Subject and Keywords metadata.",
     epub: "Exported to EPUB metadata as an additional Subject entry when present.",
+    mp4: "Included in the MP4 Comment tag alongside other catalog notes.",
     example: "816.1 Zines / Personal writing",
   },
   cityPublished: {
@@ -685,6 +696,7 @@ TPP.defaultBookInfoFieldHelpCatalog = {
     description:
       "A short copyright statement for this edition.",
     epub: "Exported to EPUB metadata as the Rights value.",
+    mp4: "Included in the MP4 Comment tag alongside other catalog notes.",
     example: "© 2026 Lewis Moten. All rights reserved.",
   },
   isbn: {

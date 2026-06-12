@@ -160,6 +160,7 @@ TPP.bookInfoFieldHelp = function (fieldKey, book) {
     description: String(entry.description || "No help text available yet."),
     pdf: String(entry.pdf || "").trim(),
     epub: String(entry.epub || "").trim(),
+    mp4: String(entry.mp4 || "").trim(),
     example: String(entry.example || ""),
   };
 };

@@ -1200,10 +1200,10 @@ TPP.previewDataUrl = function (canvas, format, quality) {
 };
 TPP.gifEncoderLib = null;
 TPP.gifEncoderPromise = null;
-TPP.mp4MuxerLib = null;
-TPP.mp4MuxerPromise = null;
+TPP.mediabunnyLib = null;
+TPP.mediabunnyPromise = null;
 TPP.GIFENC_VERSION = "1.0.3";
-TPP.MP4_MUXER_VERSION = "5.2.2";
+TPP.MEDIABUNNY_VERSION = "1.46.0";
 TPP.loadGifEncoder = function () {
   if (TPP.gifEncoderLib) return Promise.resolve(TPP.gifEncoderLib);
   if (!TPP.gifEncoderPromise) {
@@ -1221,41 +1221,38 @@ TPP.loadGifEncoder = function () {
   }
   return TPP.gifEncoderPromise;
 };
-TPP.loadMp4Muxer = function () {
-  if (TPP.mp4MuxerLib) return Promise.resolve(TPP.mp4MuxerLib);
-  if (!TPP.mp4MuxerPromise) {
-    TPP.mp4MuxerPromise = import(
-      "https://unpkg.com/mp4-muxer@" + TPP.MP4_MUXER_VERSION + "?module"
+TPP.loadMediabunny = function () {
+  if (TPP.mediabunnyLib) return Promise.resolve(TPP.mediabunnyLib);
+  if (!TPP.mediabunnyPromise) {
+    TPP.mediabunnyPromise = import(
+      "https://unpkg.com/mediabunny@" +
+        TPP.MEDIABUNNY_VERSION +
+        "/dist/modules/src/index.js"
     )
       .then(function (lib) {
-        TPP.mp4MuxerLib = lib;
+        TPP.mediabunnyLib = lib;
         return lib;
       })
       .catch(function (error) {
-        TPP.mp4MuxerPromise = null;
+        TPP.mediabunnyPromise = null;
         throw error;
       });
   }
-  return TPP.mp4MuxerPromise;
+  return TPP.mediabunnyPromise;
 };
 TPP.supportedMp4Codec = async function (width, height, bitrate) {
   if (typeof window.VideoEncoder !== "function") return null;
-  const codecs = ["avc1.42001f", "avc1.42E01E", "avc1.640028"];
-  for (let i = 0; i < codecs.length; i++) {
-    try {
-      const config = {
-        codec: codecs[i],
-        width: width,
-        height: height,
-        bitrate: bitrate,
-        framerate: 30,
-        avc: { format: "avc" },
-      };
-      const support = await window.VideoEncoder.isConfigSupported(config);
-      if (support && support.supported) return config;
-    } catch (_error) {}
+  const lib = await TPP.loadMediabunny();
+  if (!lib || typeof lib.getFirstEncodableVideoCodec !== "function") return null;
+  try {
+    return await lib.getFirstEncodableVideoCodec(["avc"], {
+      width: width,
+      height: height,
+      bitrate: bitrate,
+    });
+  } catch (_error) {
+    return null;
   }
-  return null;
 };
 TPP.mp4Bitrate = function (width, height, quality) {
   const pixels =
@@ -1272,6 +1269,83 @@ TPP.opaqueCanvas = function (canvas, background) {
   ctx.fillRect(0, 0, out.width, out.height);
   ctx.drawImage(canvas, 0, 0);
   return out;
+};
+TPP.mp4MetadataDate = function (value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const normalized = /^\d{4}$/.test(raw) ? raw + "-01-01" : raw;
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+TPP.mp4MetadataComment = function (book) {
+  const source = book || {};
+  const publisher = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "publisher")
+      : source.publisher || "",
+  ).trim();
+  const classification = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "classification")
+      : source.classification || "",
+  ).trim();
+  const keywords = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "keywords")
+      : source.keywords || "",
+  ).trim();
+  const copyright = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "copyright")
+      : source.copyright || "",
+  ).trim();
+  const parts = [
+    publisher ? "Publisher: " + publisher : "",
+    classification ? "Classification: " + classification : "",
+    keywords ? "Keywords: " + keywords : "",
+    copyright ? "Rights: " + copyright : "",
+  ].filter(Boolean);
+  return parts.join(" | ");
+};
+TPP.mp4MetadataTags = function (book) {
+  const source = book || {};
+  const baseTitle = String(source.title || "Untitled").trim() || "Untitled";
+  const subtitle = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subtitle")
+      : source.subtitle || "",
+  ).trim();
+  const author = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "author")
+      : source.author || "",
+  ).trim();
+  const description = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "description")
+      : source.description || "",
+  ).trim();
+  const subject = String(
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "subject")
+      : source.subject || "",
+  ).trim();
+  const pubDate = String(
+    typeof TPP.bookInfoFieldValue === "function"
+      ? TPP.bookInfoFieldValue(source, "pubDate")
+      : source.pubDate || "",
+  ).trim();
+  const tags = {};
+  const title = subtitle ? baseTitle + ": " + subtitle : baseTitle;
+  const date = TPP.mp4MetadataDate(pubDate);
+  const comment = TPP.mp4MetadataComment(source);
+  if (title) tags.title = title;
+  if (author) tags.artist = author;
+  if (description) tags.description = description;
+  if (subject) tags.genre = subject;
+  if (date) tags.date = date;
+  if (comment) tags.comment = comment;
+  return tags;
 };
 TPP.encodeGifBlob = async function (canvas, options) {
   if (!canvas) throw new Error("Canvas required");
@@ -1500,7 +1574,7 @@ TPP.exportMp4 = async function (options) {
     return;
   }
   const exportOptions = TPP.imageExportOptions(options);
-  const muxerLib = await TPP.loadMp4Muxer();
+  const mediabunny = await TPP.loadMediabunny();
   const mount = document.createElement("div");
   const scale = exportOptions.dpi / 96;
   mount.style.cssText =
@@ -1531,31 +1605,40 @@ TPP.exportMp4 = async function (options) {
     const width = firstOpaqueCanvas.width;
     const height = firstOpaqueCanvas.height;
     const bitrate = TPP.mp4Bitrate(width, height, exportOptions.quality);
-    const config = await TPP.supportedMp4Codec(width, height, bitrate);
-    if (!config) {
+    const codec = await TPP.supportedMp4Codec(width, height, bitrate);
+    if (!codec) {
       throw new Error("No supported MP4 codec found in this browser.");
     }
-    const target = new muxerLib.ArrayBufferTarget();
-    const muxer = new muxerLib.Muxer({
+    const fps = Math.max(1, Math.round(1000 / Math.max(1, exportOptions.frameDelay)));
+    const target = new mediabunny.BufferTarget();
+    const output = new mediabunny.Output({
+      format: new mediabunny.Mp4OutputFormat(),
       target: target,
-      fastStart: "in-memory",
-      video: {
-        codec: "avc",
-        width: width,
-        height: height,
+    });
+    const videoCanvas = document.createElement("canvas");
+    videoCanvas.width = width;
+    videoCanvas.height = height;
+    const videoCtx = videoCanvas.getContext("2d");
+    if (!videoCtx) throw new Error("Unable to create MP4 export canvas.");
+    const videoSource = new mediabunny.CanvasSource(videoCanvas, {
+      codec: codec,
+      bitrate: bitrate,
+      keyFrameInterval: 2,
+      transform: {
+        frameRate: fps,
+        alpha: "discard",
       },
     });
-    const encoder = new window.VideoEncoder({
-      output: function (chunk, meta) {
-        muxer.addVideoChunk(chunk, meta);
-      },
-      error: function (error) {
-        throw error;
-      },
+    output.addVideoTrack(videoSource, {
+      frameRate: fps,
+      maximumPacketCount: pages.length,
+      hasOnlyKeyPackets: false,
     });
-    encoder.configure(config);
+    const metadataTags = TPP.mp4MetadataTags(settings);
+    if (Object.keys(metadataTags).length) output.setMetadataTags(metadataTags);
+    await output.start();
     let timestamp = 0;
-    const duration = exportOptions.frameDelay * 1000;
+    const duration = Math.max(0.01, exportOptions.frameDelay / 1000);
     for (let i = 0; i < pages.length; i++) {
       TPP.showProgress(
         5 + Math.round((i / pages.length) * 80),
@@ -1592,18 +1675,17 @@ TPP.exportMp4 = async function (options) {
                 "#ffffff",
               );
             })();
-      const frame = new VideoFrame(pageCanvas, {
-        timestamp: timestamp,
-        duration: duration,
-      });
-      encoder.encode(frame, { keyFrame: i === 0 });
-      frame.close();
+      videoCtx.clearRect(0, 0, width, height);
+      videoCtx.drawImage(pageCanvas, 0, 0, width, height);
+      await videoSource.add(timestamp, duration, { keyFrame: i === 0 });
       timestamp += duration;
       await new Promise(requestAnimationFrame);
     }
-    await encoder.flush();
-    encoder.close();
-    muxer.finalize();
+    videoSource.close();
+    await output.finalize();
+    if (!target.buffer) {
+      throw new Error("MP4 export completed without a downloadable buffer.");
+    }
     const blob = new Blob([target.buffer], { type: "video/mp4" });
     const name =
       (settings.title || "tiny-book")

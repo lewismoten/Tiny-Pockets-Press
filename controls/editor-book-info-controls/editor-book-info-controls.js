@@ -19,7 +19,7 @@ export async function init(TPP) {
     '<strong class="book-info-help-title"></strong>' +
     '<div class="book-info-help-description"></div>' +
     '<div class="book-info-help-example" hidden><span class="book-info-help-example-label">Example</span> <span class="book-info-help-example-value"></span></div>' +
-    '<div class="book-info-help-export" hidden><div class="book-info-help-export-label">Export Info</div><div class="book-info-help-export-value"><div class="book-info-help-export-item book-info-help-export-item-pdf" hidden><span class="book-info-help-export-kind">PDF</span><span class="book-info-help-export-text"></span></div><div class="book-info-help-export-item book-info-help-export-item-epub" hidden><span class="book-info-help-export-kind">ePub</span><span class="book-info-help-export-text"></span></div></div></div>';
+    '<div class="book-info-help-export" hidden><div class="book-info-help-export-label">Export Info</div><div class="book-info-help-export-value"><div class="book-info-help-export-item book-info-help-export-item-pdf" hidden><span class="book-info-help-export-kind">PDF</span><span class="book-info-help-export-text"></span></div><div class="book-info-help-export-item book-info-help-export-item-epub" hidden><span class="book-info-help-export-kind">ePub</span><span class="book-info-help-export-text"></span></div><div class="book-info-help-export-item book-info-help-export-item-mp4" hidden><span class="book-info-help-export-kind">MP4</span><span class="book-info-help-export-text"></span></div></div></div>';
   document.body.appendChild(helpPopover);
   const helpTitle = helpPopover.querySelector(".book-info-help-title");
   const helpDescription = helpPopover.querySelector(
@@ -37,6 +37,12 @@ export async function init(TPP) {
   );
   const helpExportEpubValue = helpPopover.querySelector(
     ".book-info-help-export-item-epub .book-info-help-export-text",
+  );
+  const helpExportMp4 = helpPopover.querySelector(
+    ".book-info-help-export-item-mp4",
+  );
+  const helpExportMp4Value = helpPopover.querySelector(
+    ".book-info-help-export-item-mp4 .book-info-help-export-text",
   );
   const helpExample = helpPopover.querySelector(".book-info-help-example");
   const helpExampleValue = helpPopover.querySelector(
@@ -128,7 +134,12 @@ export async function init(TPP) {
         helpExportEpub.hidden = !help.epub;
         if (!help.epub) helpExportEpubValue.textContent = "";
       }
-      helpExport.hidden = !help.pdf && !help.epub;
+      if (helpExportMp4 && helpExportMp4Value) {
+        helpExportMp4Value.textContent = help.mp4 || "";
+        helpExportMp4.hidden = !help.mp4;
+        if (!help.mp4) helpExportMp4Value.textContent = "";
+      }
+      helpExport.hidden = !help.pdf && !help.epub && !help.mp4;
     }
     if (helpExample && helpExampleValue) {
       helpExampleValue.textContent = help.example || "";
