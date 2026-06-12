@@ -18,6 +18,15 @@
   gap: 0.6rem;
   align-items: end;
 }
+.image-export-inline-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: end;
+}
+.image-export-inline-row label {
+  margin-bottom: 0;
+}
 .image-export-palette-row label {
   margin-bottom: 0;
 }
@@ -36,7 +45,19 @@
   image-rendering: pixelated;
 }
 .image-export-charset-preview {
-  justify-self: start;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.35rem;
+  display: grid;
+  place-items: center;
+  align-self: end;
+}
+.image-export-charset-preview canvas {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #000;
+  image-rendering: pixelated;
 }
 .image-export-dialog-preview {
   min-width: 0;

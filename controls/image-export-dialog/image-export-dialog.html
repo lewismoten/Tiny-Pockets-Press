@@ -97,36 +97,44 @@
           />
           <span id="imageExportDialogQualityValue">92%</span>
         </label>
-        <label id="imageExportDialogDitherWrap"
-          >Dithering
-          <select id="imageExportDialogDither">
-            <option value="threshold">Threshold</option>
-            <option value="bayer2">Bayer 2x2</option>
-            <option value="bayer4">Bayer 4x4</option>
-            <option value="bayer8">Bayer 8x8</option>
-            <option value="floyd-steinberg">Floyd-Steinberg</option>
-            <option value="jarvis-judice-ninke">Jarvis Judice &amp; Ninke</option>
-            <option value="stucki">Stucki</option>
-            <option value="burkes">Burkes</option>
-            <option value="sierra">Sierra</option>
-            <option value="atkinson">Atkinson</option>
-            <option value="halftone">Halftone</option>
-            <option value="blue-noise">Blue-noise</option>
-            <option value="random">Random</option>
-            <option value="pattern">Pattern</option>
-            <option value="c64-petscii">C64 PETSCII Blocks</option>
-            <option value="c64-petscii-full">C64 PETSCII Full Charset</option>
-            <option value="c64-custom-charset">C64 Custom Charset</option>
-          </select>
-        </label>
-        <button
-          type="button"
-          id="imageExportCharsetPreview"
-          class="image-export-charset-preview"
-          disabled
-        >
-          Preview Charset
-        </button>
+        <div class="image-export-inline-row">
+          <label id="imageExportDialogDitherWrap"
+            >Dithering
+            <select id="imageExportDialogDither">
+              <option value="threshold">Threshold</option>
+              <option value="bayer2">Bayer 2x2</option>
+              <option value="bayer4">Bayer 4x4</option>
+              <option value="bayer8">Bayer 8x8</option>
+              <option value="floyd-steinberg">Floyd-Steinberg</option>
+              <option value="jarvis-judice-ninke">Jarvis Judice &amp; Ninke</option>
+              <option value="stucki">Stucki</option>
+              <option value="burkes">Burkes</option>
+              <option value="sierra">Sierra</option>
+              <option value="atkinson">Atkinson</option>
+              <option value="halftone">Halftone</option>
+              <option value="blue-noise">Blue-noise</option>
+              <option value="random">Random</option>
+              <option value="pattern">Pattern</option>
+              <option value="c64-petscii">C64 PETSCII Blocks</option>
+              <option value="c64-petscii-full">C64 PETSCII Full Charset</option>
+              <option value="c64-custom-charset">C64 Custom Charset</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            id="imageExportCharsetPreview"
+            class="image-export-charset-preview"
+            aria-label="Preview custom charset"
+            title="Preview custom charset"
+            disabled
+          >
+            <canvas
+              id="imageExportCharsetPreviewIcon"
+              width="20"
+              height="20"
+            ></canvas>
+          </button>
+        </div>
         <label id="imageExportDialogThresholdWrap"
           >1-bit Threshold / Bias
           <input

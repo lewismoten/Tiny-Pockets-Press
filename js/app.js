@@ -914,6 +914,9 @@ TPP.renderImageExportPreview = async function () {
   );
   label.textContent =
     "Preview page " + (TPP.imageExportPreviewIndex + 1) + " of " + pages.length;
+  if (typeof TPP.refreshImageExportCharsetPreviewIcon === "function") {
+    TPP.refreshImageExportCharsetPreviewIcon();
+  }
   const settings = TPP.settings();
   stage.style.setProperty(
     "--image-export-preview-ratio",
