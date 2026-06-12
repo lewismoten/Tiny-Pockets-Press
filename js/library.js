@@ -2359,13 +2359,17 @@ TPP.loadSoftwareMeta = async function () {
     window.location &&
     window.location.protocol === "file:"
   ) {
-    const title = document.title || "";
-    const versionMatch = title.match(/\bv([0-9]+(?:\.[0-9]+)*)\b/i);
+    const versionMeta = document.querySelector(
+      'meta[name="application-version"]',
+    );
     const heading = document.querySelector("header h1");
     const tagline = document.querySelector("header p");
     TPP.softwareMetaCache = {
       name: heading ? heading.textContent.trim() : "tiny-pockets-press",
-      version: versionMatch ? versionMatch[1] : "unknown",
+      version:
+        versionMeta && versionMeta.content
+          ? versionMeta.content.trim()
+          : "unknown",
       author: "Lewis Moten",
       description: tagline
         ? tagline.textContent.trim()
