@@ -653,10 +653,16 @@ TPP.revokeImageExportPreviewAssets = function (assets) {
 TPP.setImageExportPreviewDownloads = function (assets) {
   TPP.revokeImageExportPreviewAssets(TPP.imageExportPreviewAssets);
   TPP.imageExportPreviewAssets = assets || null;
+  TPP.setImageExportPreviewDownloadButtonsDisabled(!(assets && assets.before), !(assets && assets.after));
+};
+TPP.setImageExportPreviewDownloadButtonsDisabled = function (
+  beforeDisabled,
+  afterDisabled,
+) {
   const beforeButton = document.getElementById("imageExportDownloadBefore");
   const afterButton = document.getElementById("imageExportDownloadAfter");
-  if (beforeButton) beforeButton.disabled = !(assets && assets.before);
-  if (afterButton) afterButton.disabled = !(assets && assets.after);
+  if (beforeButton) beforeButton.disabled = !!beforeDisabled;
+  if (afterButton) afterButton.disabled = !!afterDisabled;
 };
 TPP.setImageExportPreviewLoading = function (stage, loading, message) {
   if (!stage) return;
@@ -760,12 +766,22 @@ TPP.renderImageExportPreview = async function () {
     !TPP.renderImageExportPreviewCanvas
   )
     return;
+  const token = (TPP.imageExportPreviewToken || 0) + 1;
+  TPP.imageExportPreviewToken = token;
+  TPP.setImageExportPreviewDownloadButtonsDisabled(true, true);
+  if (!stage.firstElementChild) {
+    stage.innerHTML =
+      '<div class="image-export-preview-empty">Preview unavailable</div>';
+  }
+  TPP.setImageExportPreviewLoading(stage, true, "Rendering preview...");
+  await new Promise(requestAnimationFrame);
   await Promise.resolve();
   TPP.sync("nosave");
   const pages = TPP.buildPages();
   TPP.imageExportPreviewPageCount = pages.length;
   TPP.updateImageExportDuration(pages.length);
   if (!pages.length) {
+    TPP.setImageExportPreviewLoading(stage, false);
     TPP.setImageExportPreviewDownloads(null);
     stage.innerHTML =
       '<div class="image-export-preview-empty">No pages available to preview</div>';
@@ -778,16 +794,6 @@ TPP.renderImageExportPreview = async function () {
   );
   label.textContent =
     "Preview page " + (TPP.imageExportPreviewIndex + 1) + " of " + pages.length;
-  const token = (TPP.imageExportPreviewToken || 0) + 1;
-  TPP.imageExportPreviewToken = token;
-  TPP.setImageExportPreviewDownloads(null);
-  if (stage.querySelector(".image-export-compare")) {
-    TPP.setImageExportPreviewLoading(stage, true, "Rendering preview...");
-  } else {
-    stage.innerHTML =
-      '<div class="image-export-preview-empty">Rendering preview...</div>';
-    TPP.setImageExportPreviewLoading(stage, true, "Rendering preview...");
-  }
   const settings = TPP.settings();
   stage.style.setProperty(
     "--image-export-preview-ratio",
