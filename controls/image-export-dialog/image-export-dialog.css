@@ -171,6 +171,12 @@
 .image-export-dialog-card .is-disabled {
   opacity: 0.55;
 }
+.image-export-dialog-card .modal-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+  filter: saturate(0.2);
+}
 #imageExportDialogQualityWrap,
 #imageExportDialogPaletteWrap,
 #imageExportDialogThresholdWrap {
