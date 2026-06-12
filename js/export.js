@@ -41,6 +41,75 @@ TPP.exportClassificationText = function (book) {
   }
   return String(rawValue || "").trim();
 };
+TPP.defaultLanguageCodeMap = {
+  ar: "ara",
+  de: "deu",
+  en: "eng",
+  es: "spa",
+  fr: "fra",
+  hi: "hin",
+  id: "ind",
+  it: "ita",
+  ja: "jpn",
+  ko: "kor",
+  bn: "ben",
+  pa: "pan",
+  pl: "pol",
+  pt: "por",
+  ru: "rus",
+  ta: "tam",
+  te: "tel",
+  tr: "tur",
+  ur: "urd",
+  vi: "vie",
+  zh: "zho",
+};
+TPP.languageCodeMapDataPath = "data/language-code-map.json";
+TPP.languageCodeMapCache = null;
+TPP.languageCodeMapLoadPromise = null;
+TPP.loadLanguageCodeMap = async function () {
+  if (TPP.languageCodeMapCache) return TPP.languageCodeMapCache;
+  if (TPP.languageCodeMapLoadPromise) return TPP.languageCodeMapLoadPromise;
+  TPP.languageCodeMapLoadPromise = (async function () {
+    if (
+      typeof window !== "undefined" &&
+      window.location &&
+      window.location.protocol === "file:"
+    ) {
+      TPP.languageCodeMapCache = Object.assign({}, TPP.defaultLanguageCodeMap);
+      return TPP.languageCodeMapCache;
+    }
+    try {
+      const response = await fetch(TPP.languageCodeMapDataPath);
+      if (!response.ok) throw new Error("language code map");
+      const data = await response.json();
+      TPP.languageCodeMapCache =
+        data && typeof data === "object"
+          ? Object.assign({}, TPP.defaultLanguageCodeMap, data)
+          : Object.assign({}, TPP.defaultLanguageCodeMap);
+    } catch (_error) {
+      TPP.languageCodeMapCache = Object.assign({}, TPP.defaultLanguageCodeMap);
+    }
+    return TPP.languageCodeMapCache;
+  })();
+  return TPP.languageCodeMapLoadPromise;
+};
+TPP.mp4LanguageCode = async function (book) {
+  const source = book || {};
+  const rawValue =
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "language")
+      : source.language || "";
+  const normalized =
+    typeof TPP.parseLocaleParts === "function"
+      ? TPP.parseLocaleParts(rawValue).language
+      : String(rawValue || "").trim().toLowerCase();
+  const code = String(normalized || "").trim().toLowerCase();
+  if (!code) return "und";
+  const map = await TPP.loadLanguageCodeMap();
+  if (/^[a-z]{3}$/.test(code)) return code;
+  return map[code] || "und";
+};
 
 TPP.pdfMetadata = function (book, options) {
   const source = book || {};
@@ -1679,6 +1748,7 @@ TPP.exportMp4 = async function (options) {
     });
     output.addVideoTrack(videoSource, {
       frameRate: fps,
+      languageCode: await TPP.mp4LanguageCode(settings),
       maximumPacketCount: pages.length,
       hasOnlyKeyPackets: false,
     });

@@ -37,6 +37,7 @@
   "language": {
     "description": "The primary language used in the book's content.",
     "epub": "Exported to EPUB metadata as the Language value. If Region is present, the two are combined into a locale tag such as en-US.",
+    "mp4": "Exported to MP4 track metadata as a language code. Common 2-letter values such as en are converted to a 3-letter code such as eng.",
     "example": "en"
   },
   "region": {
