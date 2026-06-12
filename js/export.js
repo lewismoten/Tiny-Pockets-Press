@@ -9,6 +9,38 @@ TPP.html2canvasOptions = function (options) {
     options || {},
   );
 };
+TPP.exportClassificationText = function (book) {
+  const source = book || {};
+  const rawValue =
+    typeof TPP.bookInfoValue === "function"
+      ? TPP.bookInfoValue(source, "classification")
+      : source.classification || "";
+  if (!rawValue) return "";
+  if (
+    typeof TPP.classificationValueData === "function" &&
+    typeof TPP.classificationDisplayString === "function"
+  ) {
+    try {
+      return String(
+        TPP.classificationDisplayString(
+          source,
+          TPP.classificationValueData(rawValue),
+        ) || "",
+      ).trim();
+    } catch (_error) {}
+  }
+  if (typeof rawValue === "string") return rawValue.trim();
+  if (rawValue && typeof rawValue === "object") {
+    return String(
+      rawValue.title ||
+        rawValue.code ||
+        rawValue.shortLabel ||
+        rawValue.label ||
+        "",
+    ).trim();
+  }
+  return String(rawValue || "").trim();
+};
 
 TPP.pdfMetadata = function (book, options) {
   const source = book || {};
@@ -34,11 +66,7 @@ TPP.pdfMetadata = function (book, options) {
       ? TPP.bookInfoFieldValue(source, "pubDate")
       : source.pubDate || "",
   ).trim();
-  const classification = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "classification")
-      : source.classification || "",
-  ).trim();
+  const classification = TPP.exportClassificationText(source);
   const explicitSubject = String(
     typeof TPP.bookInfoValue === "function"
       ? TPP.bookInfoValue(source, "subject")
@@ -524,11 +552,7 @@ TPP.epubMetadata = function (book) {
       ? TPP.bookInfoValue(source, "description")
       : source.description || "",
   ).trim();
-  const classification = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "classification")
-      : source.classification || "",
-  ).trim();
+  const classification = TPP.exportClassificationText(source);
   const rights = String(
     typeof TPP.bookInfoValue === "function"
       ? TPP.bookInfoValue(source, "copyright")
@@ -1318,11 +1342,7 @@ TPP.mp4MetadataComment = function (book) {
       ? TPP.bookInfoValue(source, "publisher")
       : source.publisher || "",
   ).trim();
-  const classification = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "classification")
-      : source.classification || "",
-  ).trim();
+  const classification = TPP.exportClassificationText(source);
   const keywords = String(
     typeof TPP.bookInfoValue === "function"
       ? TPP.bookInfoValue(source, "keywords")
