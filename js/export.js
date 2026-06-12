@@ -1,5 +1,15 @@
 window.TPP = window.TPP || {};
 
+TPP.html2canvasOptions = function (options) {
+  return Object.assign(
+    {
+      backgroundColor: "#fff",
+      logging: false,
+    },
+    options || {},
+  );
+};
+
 TPP.pdfMetadata = function (book, options) {
   const source = book || {};
   const exportKind = String((options && options.kind) || "").trim();
