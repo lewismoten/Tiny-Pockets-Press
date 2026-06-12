@@ -263,6 +263,8 @@ TPP.pngTextEntries = function (book, options) {
     { keyword: "Keywords", value: fields.keywords },
     { keyword: "Copyright", value: fields.rights },
     { keyword: "Software", value: "Tiny Pockets Press" },
+    { keyword: "XML:com.adobe.xmp", value: TPP.pngXmpPacket(book, options) },
+    { keyword: "__EXIF__", value: TPP.pngExifBytes(book, options) },
     {
       keyword: "Comment",
       value: TPP.condensedMetadataText(
@@ -290,7 +292,7 @@ TPP.pngITXtChunk = function (keyword, value) {
   const keywordBytes = TPP.pngTextEncoder.encode(String(keyword || "").trim());
   const valueBytes = TPP.pngTextEncoder.encode(String(value || "").trim());
   const payload = new Uint8Array(
-    keywordBytes.length + 1 + 1 + 1 + 1 + valueBytes.length,
+    keywordBytes.length + 1 + 1 + 1 + 1 + 1 + valueBytes.length,
   );
   let offset = 0;
   payload.set(keywordBytes, offset);
@@ -299,11 +301,12 @@ TPP.pngITXtChunk = function (keyword, value) {
   payload[offset++] = 0x00;
   payload[offset++] = 0x00;
   payload[offset++] = 0x00;
+  payload[offset++] = 0x00;
   payload.set(valueBytes, offset);
   return TPP.pngChunkBytes("iTXt", payload);
 };
 TPP.pngTTextLatin1 = function (value) {
-  return String(value || "")
+  return TPP.legacyMetadataText(value)
     .replace(/[^\x00-\xff]/g, "?")
     .trim();
 };
@@ -326,17 +329,320 @@ TPP.pngTTextChunk = function (keyword, value) {
   payload.set(valueBytes, offset);
   return TPP.pngChunkBytes("tEXt", payload);
 };
+TPP.pngXmlEscape = function (value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+};
+TPP.legacyMetadataText = function (value) {
+  return String(value || "")
+    .replace(/\u00a9/g, "(C)")
+    .replace(/\u2122/g, "(TM)")
+    .replace(/\u00ae/g, "(R)")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[–—]/g, "-")
+    .replace(/…/g, "...");
+};
+TPP.pngXmpDateTime = function (value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/.test(raw))
+    return raw;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw + "T00:00:00";
+  if (/^\d{4}-\d{2}$/.test(raw)) return raw + "-01T00:00:00";
+  if (/^\d{4}$/.test(raw)) return raw + "-01-01T00:00:00";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  const second = String(date.getSeconds()).padStart(2, "0");
+  return year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":" + second;
+};
+TPP.pngXmpPacket = function (book, options) {
+  const fields = TPP.exportMetadataFields(book, options);
+  const languageTag = String(fields.language || "").trim();
+  const altLanguage = languageTag || "x-default";
+  const xmpDate = TPP.pngXmpDateTime(fields.date);
+  const keywords = String(fields.keywords || "")
+    .split(/[,;\n]+/)
+    .map(function (item) {
+      return String(item || "").trim();
+    })
+    .filter(Boolean);
+  const subjects = Array.from(
+    new Set([fields.subject, fields.classification].concat(keywords).filter(Boolean)),
+  );
+  const lines = [
+    '<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>',
+    '<x:xmpmeta xmlns:x="adobe:ns:meta/">',
+    '  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">',
+    '    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmlns:tpp="https://tinypocketspress.local/ns/1.0/">',
+  ];
+  if (fields.title) {
+    lines.push(
+      "      <dc:title><rdf:Alt>" +
+        "<rdf:li xml:lang=\"x-default\">" +
+        TPP.pngXmlEscape(fields.title) +
+        "</rdf:li>" +
+        (altLanguage !== "x-default"
+          ? "<rdf:li xml:lang=\"" +
+            TPP.pngXmlEscape(altLanguage) +
+            "\">" +
+            TPP.pngXmlEscape(fields.title) +
+            "</rdf:li>"
+          : "") +
+        "</rdf:Alt></dc:title>",
+    );
+  }
+  if (fields.author) {
+    lines.push(
+      "      <dc:creator><rdf:Seq><rdf:li>" +
+        TPP.pngXmlEscape(fields.author) +
+        "</rdf:li></rdf:Seq></dc:creator>",
+    );
+  }
+  if (fields.description) {
+    lines.push(
+      "      <dc:description><rdf:Alt>" +
+        "<rdf:li xml:lang=\"x-default\">" +
+        TPP.pngXmlEscape(fields.description) +
+        "</rdf:li>" +
+        (altLanguage !== "x-default"
+          ? "<rdf:li xml:lang=\"" +
+            TPP.pngXmlEscape(altLanguage) +
+            "\">" +
+            TPP.pngXmlEscape(fields.description) +
+            "</rdf:li>"
+          : "") +
+        "</rdf:Alt></dc:description>",
+    );
+  }
+  if (subjects.length) {
+    lines.push("      <dc:subject><rdf:Bag>");
+    subjects.forEach(function (subject) {
+      lines.push("        <rdf:li>" + TPP.pngXmlEscape(subject) + "</rdf:li>");
+    });
+    lines.push("      </rdf:Bag></dc:subject>");
+  }
+  if (fields.publisher) {
+    lines.push(
+      "      <dc:publisher><rdf:Seq><rdf:li>" +
+        TPP.pngXmlEscape(fields.publisher) +
+        "</rdf:li></rdf:Seq></dc:publisher>",
+    );
+  }
+  if (fields.rights) {
+    lines.push(
+      "      <dc:rights><rdf:Alt>" +
+        "<rdf:li xml:lang=\"x-default\">" +
+        TPP.pngXmlEscape(fields.rights) +
+        "</rdf:li>" +
+        (altLanguage !== "x-default"
+          ? "<rdf:li xml:lang=\"" +
+            TPP.pngXmlEscape(altLanguage) +
+            "\">" +
+            TPP.pngXmlEscape(fields.rights) +
+            "</rdf:li>"
+          : "") +
+        "</rdf:Alt></dc:rights>",
+    );
+  }
+  if (xmpDate) {
+    lines.push("      <xmp:CreateDate>" + TPP.pngXmlEscape(xmpDate) + "</xmp:CreateDate>");
+  }
+  lines.push("      <xmp:CreatorTool>Tiny Pockets Press</xmp:CreatorTool>");
+  if (fields.language) {
+    lines.push("      <dc:language><rdf:Bag><rdf:li>" + TPP.pngXmlEscape(fields.language) + "</rdf:li></rdf:Bag></dc:language>");
+  }
+  if (fields.classification) {
+    lines.push("      <tpp:classification>" + TPP.pngXmlEscape(fields.classification) + "</tpp:classification>");
+  }
+  if (fields.page) {
+    lines.push("      <tpp:page>" + TPP.pngXmlEscape(fields.page) + "</tpp:page>");
+  }
+  lines.push("    </rdf:Description>");
+  lines.push("  </rdf:RDF>");
+  lines.push("</x:xmpmeta>");
+  lines.push('<?xpacket end="w"?>');
+  return lines.join("\n");
+};
+TPP.pngExifDateTime = function (value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^\d{4}:\d{2}:\d{2}( \d{2}:\d{2}:\d{2})?$/.test(raw)) {
+    return raw.length === 10 ? raw + " 00:00:00" : raw;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    return raw.replace(/-/g, ":") + " 00:00:00";
+  }
+  if (/^\d{4}-\d{2}$/.test(raw)) {
+    return raw.replace(/-/g, ":") + ":01 00:00:00";
+  }
+  if (/^\d{4}$/.test(raw)) {
+    return raw + ":01:01 00:00:00";
+  }
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  const second = String(date.getSeconds()).padStart(2, "0");
+  return year + ":" + month + ":" + day + " " + hour + ":" + minute + ":" + second;
+};
+TPP.pngExifAscii = function (value) {
+  return TPP.legacyMetadataText(value).replace(/\0/g, "").trim();
+};
+TPP.pngExifUserComment = function (value) {
+  const text = TPP.legacyMetadataText(value).trim();
+  if (!text) return new Uint8Array(0);
+  const prefix = new Uint8Array([0x41, 0x53, 0x43, 0x49, 0x49, 0x00, 0x00, 0x00]);
+  const body = TPP.pngLatin1Bytes(text);
+  const out = new Uint8Array(prefix.length + body.length);
+  out.set(prefix, 0);
+  out.set(body, prefix.length);
+  return out;
+};
+TPP.pngExifBytes = function (book, options) {
+  const fields = TPP.exportMetadataFields(book, options);
+  const exifDate = TPP.pngExifDateTime(fields.date);
+  const comment = TPP.condensedMetadataText(
+    [
+      { label: "Title", value: fields.title },
+      { label: "Author", value: fields.author },
+      { label: "Publisher", value: fields.publisher },
+      { label: "Classification", value: fields.classification },
+      { label: "Page", value: fields.page },
+      { label: "Keywords", value: fields.keywords },
+      { label: "Rights", value: fields.rights },
+    ],
+    { separator: " | ", maxLength: 240, measure: "chars" },
+  );
+  const ifd0Entries = [];
+  const exifEntries = [];
+  const addAscii = function (entries, tag, value) {
+    const text = TPP.pngExifAscii(value);
+    if (!text) return;
+    entries.push({
+      tag: tag,
+      type: 2,
+      count: text.length + 1,
+      data: TPP.pngTextEncoder.encode(text + "\0"),
+    });
+  };
+  const addBinary = function (entries, tag, data) {
+    if (!(data instanceof Uint8Array) || !data.length) return;
+    entries.push({ tag: tag, type: 7, count: data.length, data: data });
+  };
+  addAscii(ifd0Entries, 0x010e, fields.description || fields.title);
+  addAscii(ifd0Entries, 0x013b, fields.author);
+  addAscii(ifd0Entries, 0x0131, "Tiny Pockets Press");
+  addAscii(ifd0Entries, 0x0132, exifDate);
+  addAscii(ifd0Entries, 0x8298, fields.rights);
+  addBinary(exifEntries, 0x9286, TPP.pngExifUserComment(comment));
+  if (exifDate) addAscii(exifEntries, 0x9003, exifDate);
+  if (exifEntries.length) {
+    ifd0Entries.push({ tag: 0x8769, type: 4, count: 1, pointerTo: "exif" });
+  }
+  if (!ifd0Entries.length) return new Uint8Array(0);
+  const tiffHeaderSize = 8;
+  const ifdSize = function (entries) {
+    return 2 + entries.length * 12 + 4;
+  };
+  const ifd0Offset = 8;
+  const exifIfdOffset = ifd0Entries.some(function (entry) { return entry.pointerTo === "exif"; })
+    ? ifd0Offset + ifdSize(ifd0Entries)
+    : 0;
+  let dataOffset = ifd0Offset + ifdSize(ifd0Entries) + (exifEntries.length ? ifdSize(exifEntries) : 0);
+  const assignOffsets = function (entries, pointerMap) {
+    entries.forEach(function (entry) {
+      if (entry.pointerTo) {
+        entry.valueOffset = pointerMap[entry.pointerTo] || 0;
+        return;
+      }
+      if (entry.count <= 4 && entry.type !== 2 && entry.type !== 7) {
+        entry.valueOffset = null;
+        return;
+      }
+      if (entry.data.length <= 4) {
+        entry.valueOffset = null;
+        return;
+      }
+      entry.valueOffset = dataOffset;
+      dataOffset += entry.data.length;
+      if (dataOffset % 2) dataOffset += 1;
+    });
+  };
+  assignOffsets(ifd0Entries, { exif: exifIfdOffset });
+  assignOffsets(exifEntries, {});
+  const out = new Uint8Array(dataOffset);
+  const dv = new DataView(out.buffer);
+  out[0] = 0x49;
+  out[1] = 0x49;
+  dv.setUint16(2, 42, true);
+  dv.setUint32(4, ifd0Offset, true);
+  const writeIfd = function (offset, entries, nextOffset) {
+    dv.setUint16(offset, entries.length, true);
+    let cursor = offset + 2;
+    entries.forEach(function (entry) {
+      dv.setUint16(cursor, entry.tag, true);
+      dv.setUint16(cursor + 2, entry.type, true);
+      dv.setUint32(cursor + 4, entry.count, true);
+      if (entry.valueOffset != null) {
+        dv.setUint32(cursor + 8, entry.valueOffset, true);
+      } else {
+        const inline = new Uint8Array(4);
+        if (entry.data) inline.set(entry.data.subarray(0, Math.min(4, entry.data.length)), 0);
+        out.set(inline, cursor + 8);
+      }
+      cursor += 12;
+    });
+    dv.setUint32(cursor, nextOffset || 0, true);
+  };
+  writeIfd(ifd0Offset, ifd0Entries, 0);
+  if (exifEntries.length) writeIfd(exifIfdOffset, exifEntries, 0);
+  const writeData = function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.valueOffset == null || !entry.data || entry.data.length <= 4) return;
+      out.set(entry.data, entry.valueOffset);
+    });
+  };
+  writeData(ifd0Entries);
+  writeData(exifEntries);
+  return out;
+};
 TPP.insertPngMetadata = function (bytes, entries) {
   if (!(bytes instanceof Uint8Array) || bytes.length < 12) return bytes;
   const normalizedEntries = Array.isArray(entries) ? entries : [];
   const textChunks = [];
   normalizedEntries.forEach(function (entry) {
     if (!entry || !String(entry.value || "").trim()) return;
+    if (entry.keyword === "XML:com.adobe.xmp" || entry.keyword === "__EXIF__") return;
     textChunks.push(TPP.pngITXtChunk(entry.keyword, entry.value));
     if (["Title", "Author", "Description", "Comment", "Copyright"].includes(entry.keyword)) {
       textChunks.push(TPP.pngTTextChunk(entry.keyword, entry.value));
     }
   });
+  const xmpEntry = normalizedEntries.find(function (entry) {
+    return entry && entry.keyword === "XML:com.adobe.xmp";
+  });
+  const exifEntry = normalizedEntries.find(function (entry) {
+    return entry && entry.keyword === "__EXIF__";
+  });
+  if (xmpEntry && String(xmpEntry.value || "").trim()) {
+    textChunks.unshift(TPP.pngITXtChunk("XML:com.adobe.xmp", xmpEntry.value));
+  }
+  if (exifEntry && exifEntry.value instanceof Uint8Array && exifEntry.value.length) {
+    textChunks.unshift(TPP.pngChunkBytes("eXIf", exifEntry.value));
+  }
   if (!textChunks.length) return bytes;
   let offset = 8;
   while (offset + 12 <= bytes.length) {
