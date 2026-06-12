@@ -2770,15 +2770,32 @@ TPP.exportCanvasForDepth = async function (
   const image = ctx.getImageData(0, 0, out.width, out.height);
   const data = image.data;
   const monoThreshold = Math.max(0, Math.min(255, Number(threshold) || 128));
+  const indexedPalette =
+    colorDepth === "indexed" ? TPP.imageExportNamedPalette(paletteName) : null;
   const applyMonoDither =
     colorDepth === "mono1" &&
     !["threshold", "none"].includes(String(config.dithering || "threshold"));
+  const applyIndexedDither =
+    colorDepth === "indexed" &&
+    !["threshold", "none"].includes(String(config.dithering || "threshold")) &&
+    Array.isArray(indexedPalette) &&
+    indexedPalette.length > 0;
   if (applyMonoDither) {
     const ditherLib = await TPP.loadImageExportDither();
     if (ditherLib && typeof ditherLib.applyMonoDither === "function") {
       ditherLib.applyMonoDither(data, out.width, out.height, {
         algorithm: String(config.dithering || "threshold"),
         threshold: monoThreshold,
+      });
+      ctx.putImageData(image, 0, 0);
+      return out;
+    }
+  }
+  if (applyIndexedDither) {
+    const ditherLib = await TPP.loadImageExportDither();
+    if (ditherLib && typeof ditherLib.applyPaletteDither === "function") {
+      ditherLib.applyPaletteDither(data, out.width, out.height, indexedPalette, {
+        algorithm: String(config.dithering || "threshold"),
       });
       ctx.putImageData(image, 0, 0);
       return out;
@@ -2800,7 +2817,7 @@ TPP.exportCanvasForDepth = async function (
     }
   }
   if (colorDepth === "indexed")
-    TPP.applyIndexedPalette(data, TPP.imageExportNamedPalette(paletteName));
+    TPP.applyIndexedPalette(data, indexedPalette);
   ctx.putImageData(image, 0, 0);
   return out;
 };

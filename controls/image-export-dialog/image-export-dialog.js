@@ -448,10 +448,11 @@ export async function init(TPP) {
     imageExportPalette.disabled = !indexedOnly;
     imageExportPaletteWrap.classList.toggle("is-disabled", !indexedOnly);
     const mono = imageExportColorDepth.value === "mono1";
+    const indexed = imageExportColorDepth.value === "indexed";
     imageExportThreshold.disabled = !mono;
     imageExportThresholdWrap.classList.toggle("is-disabled", !mono);
-    imageExportDither.disabled = !mono;
-    imageExportDitherWrap.classList.toggle("is-disabled", !mono);
+    imageExportDither.disabled = !(mono || indexed);
+    imageExportDitherWrap.classList.toggle("is-disabled", !(mono || indexed));
     imageExportQualityValue.textContent =
       Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) + "%";
     imageExportThresholdValue.textContent = String(
