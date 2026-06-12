@@ -8,6 +8,9 @@ export function init(TPP) {
     };
   }
   initialized = true;
+  TPP.imageExportC64CellCache = TPP.imageExportC64CellCache || new Map();
+  TPP.IMAGE_EXPORT_C64_CELL_CACHE_LIMIT =
+    TPP.IMAGE_EXPORT_C64_CELL_CACHE_LIMIT || 4096;
 
   const clampByte = function (value) {
     return Math.max(0, Math.min(255, Number(value) || 0));
@@ -25,6 +28,56 @@ export function init(TPP) {
   };
   const clampColor = function (value) {
     return Math.max(0, Math.min(255, Number(value) || 0));
+  };
+  const getCachedC64Cell = function (key) {
+    const cacheKey = String(key || "");
+    if (!cacheKey || !TPP.imageExportC64CellCache.has(cacheKey)) return null;
+    const entry = TPP.imageExportC64CellCache.get(cacheKey);
+    TPP.imageExportC64CellCache.delete(cacheKey);
+    TPP.imageExportC64CellCache.set(cacheKey, entry);
+    return entry || null;
+  };
+  const setCachedC64Cell = function (key, value) {
+    const cacheKey = String(key || "");
+    if (!cacheKey || !value) return value || null;
+    if (TPP.imageExportC64CellCache.has(cacheKey)) {
+      TPP.imageExportC64CellCache.delete(cacheKey);
+    }
+    TPP.imageExportC64CellCache.set(cacheKey, value);
+    while (
+      TPP.imageExportC64CellCache.size > TPP.IMAGE_EXPORT_C64_CELL_CACHE_LIMIT
+    ) {
+      const oldest = TPP.imageExportC64CellCache.keys().next();
+      if (oldest && !oldest.done) {
+        TPP.imageExportC64CellCache.delete(oldest.value);
+      } else {
+        break;
+      }
+    }
+    return value;
+  };
+  const hashNumbers = function (values, seed) {
+    let hash = seed == null ? 2166136261 : seed >>> 0;
+    const list = Array.isArray(values) || ArrayBuffer.isView(values) ? values : [];
+    for (let i = 0; i < list.length; i += 1) {
+      hash ^= Number(list[i]) & 255;
+      hash = Math.imul(hash, 16777619) >>> 0;
+    }
+    return hash >>> 0;
+  };
+  const hashPalette = function (palette) {
+    let hash = 2166136261;
+    (Array.isArray(palette) ? palette : []).forEach(function (swatch) {
+      hash = hashNumbers(swatch, hash);
+    });
+    return hash.toString(16);
+  };
+  const hashGlyphCatalog = function (glyphs) {
+    let hash = 2166136261;
+    (Array.isArray(glyphs) ? glyphs : []).forEach(function (glyph) {
+      hash = hashNumbers(glyph, hash);
+    });
+    return hash.toString(16);
   };
   const nearestPaletteColor = function (r, g, b, palette) {
     let best = palette[0] || [0, 0, 0];
@@ -343,6 +396,10 @@ export function init(TPP) {
           });
         }),
     );
+  const fixedGlyphCatalogHashes = {
+    blocks: hashGlyphCatalog(petsciiGlyphs),
+    full: hashGlyphCatalog(petsciiFullGlyphs),
+  };
   const paletteCellCandidates = function (pixels, palette, limit) {
     const scored = palette.map(function (swatch, index) {
       let total = 0;
@@ -394,6 +451,17 @@ export function init(TPP) {
     }
     return pixels;
   };
+  const cellPixelsCacheKey = function (pixels, blockWidth, blockHeight, paletteHash) {
+    return (
+      String(blockWidth || 0) +
+      "x" +
+      String(blockHeight || 0) +
+      "|" +
+      String(paletteHash || "") +
+      "|" +
+      hashNumbers(pixels, 2166136261).toString(16)
+    );
+  };
   const bestTwoColorCellFit = function (
     pixels,
     blockWidth,
@@ -401,6 +469,11 @@ export function init(TPP) {
     palette,
     candidates,
   ) {
+    const paletteHash = hashPalette(palette);
+    const fitCacheKey =
+      "fit|" + cellPixelsCacheKey(pixels, blockWidth, blockHeight, paletteHash);
+    const cachedFit = getCachedC64Cell(fitCacheKey);
+    if (cachedFit) return cachedFit;
     const cellPixels = blockWidth * blockHeight;
     let bestMask = new Uint8Array(64);
     let bestBg = palette[candidates[0]] || palette[0];
@@ -448,14 +521,14 @@ export function init(TPP) {
         }
       }
     }
-    return {
+    return setCachedC64Cell(fitCacheKey, {
       mask: bestMask,
       bg: bestBg,
       fg: bestFg,
       bgErrors: bestBgErrors,
       fgErrors: bestFgErrors,
       error: bestError,
-    };
+    });
   };
   const scoreMaskAgainstCell = function (
     mask,
@@ -498,11 +571,22 @@ export function init(TPP) {
       }
     }
   };
-  const applyPalettePetscii = function (data, width, height, palette, glyphs) {
+  const applyPalettePetscii = function (
+    data,
+    width,
+    height,
+    palette,
+    glyphs,
+    glyphCacheId,
+  ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(6, palette.length));
     const glyphCatalog =
       Array.isArray(glyphs) && glyphs.length ? glyphs : petsciiGlyphs;
+    const paletteHash = hashPalette(palette);
+    const glyphHash =
+      fixedGlyphCatalogHashes[glyphCacheId] ||
+      hashGlyphCatalog(glyphCatalog);
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
@@ -515,6 +599,28 @@ export function init(TPP) {
           blockWidth,
           blockHeight,
         );
+        const cellCacheKey =
+          "glyph|" +
+          String(glyphCacheId || "custom") +
+          "|" +
+          glyphHash +
+          "|" +
+          cellPixelsCacheKey(pixels, blockWidth, blockHeight, paletteHash);
+        const cachedCell = getCachedC64Cell(cellCacheKey);
+        if (cachedCell) {
+          paintMaskCell(
+            data,
+            width,
+            cellX,
+            cellY,
+            blockWidth,
+            blockHeight,
+            cachedCell.mask,
+            cachedCell.bg,
+            cachedCell.fg,
+          );
+          continue;
+        }
         const candidates = paletteCellCandidates(pixels, palette, colorLimit);
         const fit = bestTwoColorCellFit(
           pixels,
@@ -550,6 +656,11 @@ export function init(TPP) {
           fit.bg,
           fit.fg,
         );
+        setCachedC64Cell(cellCacheKey, {
+          mask: bestGlyph,
+          bg: fit.bg,
+          fg: fit.fg,
+        });
       }
     }
   };
@@ -802,10 +913,24 @@ export function init(TPP) {
       ], 64);
     },
     "c64-petscii": function (data, width, height, palette) {
-      applyPalettePetscii(data, width, height, palette, petsciiGlyphs);
+      applyPalettePetscii(
+        data,
+        width,
+        height,
+        palette,
+        petsciiGlyphs,
+        "blocks",
+      );
     },
     "c64-petscii-full": function (data, width, height, palette) {
-      applyPalettePetscii(data, width, height, palette, petsciiFullGlyphs);
+      applyPalettePetscii(
+        data,
+        width,
+        height,
+        palette,
+        petsciiFullGlyphs,
+        "full",
+      );
     },
     "c64-custom-charset": function (data, width, height, palette) {
       applyPaletteCustomCharset(data, width, height, palette);
