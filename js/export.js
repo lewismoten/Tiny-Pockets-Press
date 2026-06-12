@@ -3808,16 +3808,20 @@ TPP.exportD64CharsetPageFileName = function (pageIndex) {
 };
 TPP.exportD64BootProgramBytes = function () {
   const message = "BOOK PRG LOADER - PAGE FILES AVAILABLE";
-  const buffer = [];
-  buffer.push(0x00, 0x00);
-  buffer.push(0x0a, 0x00);
-  buffer.push(0x9c);
-  buffer.push(0x20);
-  buffer.push(0x32, 0x30, 0x36, 0x34);
-  buffer.push(0x00);
-  buffer[0] = 0x00;
-  buffer[1] = 0x00;
+  const basicStart = 0x0801;
   const codeStart = 0x0810;
+  const basicLineNumber = 10;
+  const basicText = [0x9e, 0x20, 0x32, 0x30, 0x36, 0x34];
+  const buffer = [];
+  const nextLineAddress = basicStart + 4 + basicText.length + 1;
+  buffer.push(nextLineAddress & 0xff, (nextLineAddress >> 8) & 0xff);
+  buffer.push(basicLineNumber & 0xff, (basicLineNumber >> 8) & 0xff);
+  buffer.push(...basicText);
+  buffer.push(0x00);
+  buffer.push(0x00, 0x00);
+  while (basicStart + buffer.length < codeStart) {
+    buffer.push(0x00);
+  }
   const code = [];
   code.push(0xa2, 0x00);
   code.push(0xbd, 0x00, 0x08);
