@@ -3667,27 +3667,27 @@ TPP.d64CreateBamSector = function (freeMap, diskName) {
 };
 TPP.d64CreateDirectorySector = function (entries, sectorIndex, totalSectors) {
   const sector = new Uint8Array(256);
+  const entriesPerSector = 8;
+  for (let entryIndex = 0; entryIndex < entriesPerSector; entryIndex += 1) {
+    const entry = entries[sectorIndex * entriesPerSector + entryIndex];
+    if (!entry) break;
+    sector.set(entry, entryIndex * 32);
+  }
   if (sectorIndex < totalSectors - 1) {
     sector[0] = 18;
     sector[1] = sectorIndex + 2;
   } else {
     sector[0] = 0;
-    sector[1] = 0;
-  }
-  const entriesPerSector = 7;
-  for (let entryIndex = 0; entryIndex < entriesPerSector; entryIndex += 1) {
-    const entry = entries[sectorIndex * entriesPerSector + entryIndex];
-    if (!entry) break;
-    sector.set(entry, 2 + entryIndex * 32);
+    sector[1] = 255;
   }
   return sector;
 };
 TPP.d64CreateDirectoryEntry = function (filename, type, startTrack, startSector, sectorCount) {
   const entry = new Uint8Array(32).fill(0);
-  entry[0] = type;
-  entry[1] = startTrack;
-  entry[2] = startSector;
-  entry.set(TPP.d64EncodeFileName(filename, 16), 3);
+  entry[2] = type;
+  entry[3] = startTrack;
+  entry[4] = startSector;
+  entry.set(TPP.d64EncodeFileName(filename, 16), 5);
   entry[30] = sectorCount & 0xff;
   entry[31] = (sectorCount >> 8) & 0xff;
   return entry;
@@ -3726,11 +3726,12 @@ TPP.d64WriteFile = function (image, data, allocation) {
     const nextBlock = blocks[i + 1];
     const offset = TPP.d64TrackOffset(block.track, block.sector);
     const sector = image.subarray(offset, offset + 256);
-    sector[0] = nextBlock ? nextBlock.track : 0;
-    sector[1] = nextBlock ? nextBlock.sector : 0;
     const sliceStart = i * 254;
     const sliceEnd = sliceStart + 254;
-    sector.set(bytes.subarray(sliceStart, sliceEnd), 2);
+    const chunk = bytes.subarray(sliceStart, sliceEnd);
+    sector[0] = nextBlock ? nextBlock.track : 0;
+    sector[1] = nextBlock ? nextBlock.sector : Math.max(1, chunk.length + 1);
+    sector.set(chunk, 2);
   }
   return {
     startTrack: blocks[0].track,
@@ -3786,7 +3787,7 @@ TPP.buildD64Image = function (files, book) {
       ),
     );
   }
-  const entriesPerDirectorySector = 7;
+  const entriesPerDirectorySector = 8;
   const dirSectors = Math.max(1, Math.ceil(directoryEntries.length / entriesPerDirectorySector));
   for (let i = 0; i < dirSectors; i += 1) {
     allocation.directorySectors.push(
