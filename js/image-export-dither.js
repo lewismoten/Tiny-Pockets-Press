@@ -439,6 +439,98 @@ export function init(TPP) {
       })
       .join("");
   };
+  const maskHammingDistance = function (a, b) {
+    const left = a || [];
+    const right = b || [];
+    const length = Math.max(left.length || 0, right.length || 0, 64);
+    let distance = 0;
+    for (let i = 0; i < length; i += 1) {
+      if ((left[i] ? 1 : 0) !== (right[i] ? 1 : 0)) {
+        distance += 1;
+      }
+    }
+    return distance;
+  };
+  const selectVariedCharsetPatterns = function (stats, limit) {
+    const entries = Array.isArray(stats) ? stats.slice() : [];
+    const maxPatterns = Math.max(1, Math.min(Number(limit) || 256, entries.length));
+    if (entries.length <= maxPatterns) {
+      return entries
+        .sort(function (a, b) {
+          if (b.count !== a.count) return b.count - a.count;
+          return a.error - b.error;
+        })
+        .map(function (entry) {
+          return entry.mask;
+        });
+    }
+    const enriched = entries.map(function (entry) {
+      return {
+        key: entry.key,
+        mask: entry.mask,
+        count: entry.count,
+        error: entry.error,
+        averageError: entry.count ? entry.error / entry.count : entry.error,
+      };
+    });
+    const maxCount = enriched.reduce(function (best, entry) {
+      return Math.max(best, entry.count || 0);
+    }, 1);
+    const minAverageError = enriched.reduce(function (best, entry) {
+      return Math.min(best, entry.averageError);
+    }, Infinity);
+    const maxAverageError = enriched.reduce(function (best, entry) {
+      return Math.max(best, entry.averageError);
+    }, 0);
+    const errorRange = Math.max(1e-6, maxAverageError - minAverageError);
+    const utilityScore = function (entry) {
+      const countScore = (entry.count || 0) / maxCount;
+      const errorScore =
+        1 - (entry.averageError - minAverageError) / errorRange;
+      return countScore * 0.7 + errorScore * 0.3;
+    };
+    const selected = [];
+    const used = new Set();
+    enriched.sort(function (a, b) {
+      const utilityDiff = utilityScore(b) - utilityScore(a);
+      if (Math.abs(utilityDiff) > 1e-6) return utilityDiff;
+      if (b.count !== a.count) return b.count - a.count;
+      return a.averageError - b.averageError;
+    });
+    selected.push(enriched[0]);
+    used.add(enriched[0].key);
+    while (selected.length < maxPatterns) {
+      const progress = selected.length / maxPatterns;
+      const varietyWeight = Math.max(0.35, 0.85 - progress * 0.7);
+      const utilityWeight = 1 - varietyWeight;
+      let bestCandidate = null;
+      let bestScore = -Infinity;
+      for (let i = 0; i < enriched.length; i += 1) {
+        const candidate = enriched[i];
+        if (used.has(candidate.key)) continue;
+        let nearestDistance = Infinity;
+        for (let j = 0; j < selected.length; j += 1) {
+          nearestDistance = Math.min(
+            nearestDistance,
+            maskHammingDistance(candidate.mask, selected[j].mask),
+          );
+        }
+        const varietyScore = nearestDistance / 64;
+        const score =
+          varietyScore * varietyWeight + utilityScore(candidate) * utilityWeight;
+        if (score > bestScore) {
+          bestScore = score;
+          bestCandidate = candidate;
+        }
+      }
+      if (!bestCandidate) break;
+      selected.push(bestCandidate);
+      used.add(bestCandidate.key);
+    }
+    return selected.map(function (entry) {
+      return entry.mask;
+    });
+  };
   const extractCellPixels = function (data, width, cellX, cellY, blockWidth, blockHeight) {
     const pixels = new Uint8Array(blockWidth * blockHeight * 3);
     for (let y = 0; y < blockHeight; y += 1) {
@@ -714,15 +806,10 @@ export function init(TPP) {
         });
       }
     }
-    const charset = Array.from(patternStats.values())
-      .sort(function (a, b) {
-        if (b.count !== a.count) return b.count - a.count;
-        return a.error - b.error;
-      })
-      .slice(0, 256)
-      .map(function (entry) {
-        return entry.mask;
-      });
+    const charset = selectVariedCharsetPatterns(
+      Array.from(patternStats.values()),
+      256,
+    );
     const charsetByKey = new Map(
       charset.map(function (mask) {
         return [maskKey(mask), mask];
