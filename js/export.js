@@ -343,6 +343,61 @@ TPP.zipDublinCoreManifest = function (book, pages, options) {
   lines.push("</oai_dc:dc>");
   return lines.join("\n") + "\n";
 };
+TPP.zipFileIdDiz = function (book, pages, options) {
+  const metadata = TPP.zipManifestMetadata(book, pages, options);
+  const maxLines = 10;
+  const maxWidth = 45;
+  const normalize = function (value) {
+    return String(value || "")
+      .replace(/[\r\n\t]+/g, " ")
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/[–—]/g, "-")
+      .replace(/…/g, "...")
+      .replace(/[^\x20-\x7e]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+  const pushWrapped = function (lines, value) {
+    let remaining = normalize(value);
+    while (remaining && lines.length < maxLines) {
+      if (remaining.length <= maxWidth) {
+        lines.push(remaining);
+        return;
+      }
+      let breakAt = remaining.lastIndexOf(" ", maxWidth);
+      if (breakAt < Math.floor(maxWidth * 0.5)) breakAt = maxWidth;
+      lines.push(remaining.slice(0, breakAt).trim());
+      remaining = remaining.slice(breakAt).trim();
+    }
+  };
+  const lines = [];
+  pushWrapped(lines, metadata.title || "Tiny Pockets Press Export");
+  if (metadata.creator) pushWrapped(lines, "By " + metadata.creator);
+  if (metadata.publisher || metadata.date) {
+    pushWrapped(
+      lines,
+      [metadata.publisher, metadata.date].filter(Boolean).join(" | "),
+    );
+  }
+  if (metadata.subjects.length) {
+    pushWrapped(lines, "Topic: " + metadata.subjects[0]);
+  }
+  pushWrapped(
+    lines,
+    metadata.pageCount +
+      " page images in " +
+      metadata.imageFormat.toUpperCase() +
+      " format",
+  );
+  if (metadata.description) {
+    pushWrapped(lines, metadata.description);
+  }
+  if (metadata.rights && lines.length < maxLines) {
+    pushWrapped(lines, metadata.rights);
+  }
+  return lines.slice(0, maxLines).join("\r\n") + "\r\n";
+};
 TPP.defaultLanguageCodeMap = {
   ar: "ara",
   de: "deu",
@@ -1883,6 +1938,7 @@ TPP.exportImagesZip = async function (options) {
     }
     zip.file("manifest.jsonld", TPP.zipSchemaOrgManifest(settings, pages, exportOptions));
     zip.file("metadata.dc.xml", TPP.zipDublinCoreManifest(settings, pages, exportOptions));
+    zip.file("FILE_ID.DIZ", TPP.zipFileIdDiz(settings, pages, exportOptions));
     TPP.showProgress(90, "Building ZIP archive...");
     const blob = await zip.generateAsync(
       {
