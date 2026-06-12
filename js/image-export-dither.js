@@ -451,6 +451,31 @@ export function init(TPP) {
     }
     return distance;
   };
+  const simplifyMask = function (mask, cellSize) {
+    const source = mask || new Uint8Array(64);
+    const block = Math.max(1, Math.min(8, Number(cellSize) || 1));
+    if (block <= 1) return source;
+    const simplified = new Uint8Array(64);
+    for (let y0 = 0; y0 < 8; y0 += block) {
+      for (let x0 = 0; x0 < 8; x0 += block) {
+        let lit = 0;
+        let total = 0;
+        for (let y = y0; y < Math.min(8, y0 + block); y += 1) {
+          for (let x = x0; x < Math.min(8, x0 + block); x += 1) {
+            total += 1;
+            lit += source[y * 8 + x] ? 1 : 0;
+          }
+        }
+        const fill = lit >= total / 2 ? 1 : 0;
+        for (let y = y0; y < Math.min(8, y0 + block); y += 1) {
+          for (let x = x0; x < Math.min(8, x0 + block); x += 1) {
+            simplified[y * 8 + x] = fill;
+          }
+        }
+      }
+    }
+    return simplified;
+  };
   const selectVariedCharsetPatterns = function (stats, limit, bias) {
     const entries = Array.isArray(stats) ? stats.slice() : [];
     const maxPatterns = Math.max(1, Math.min(Number(limit) || 256, entries.length));
@@ -490,25 +515,35 @@ export function init(TPP) {
         1 - (entry.averageError - minAverageError) / errorRange;
       return countScore * 0.7 + errorScore * 0.3;
     };
-    const selected = [];
-    const used = new Set();
-    enriched.sort(function (a, b) {
+    const utilitySorted = enriched.slice().sort(function (a, b) {
       const utilityDiff = utilityScore(b) - utilityScore(a);
       if (Math.abs(utilityDiff) > 1e-6) return utilityDiff;
       if (b.count !== a.count) return b.count - a.count;
       return a.averageError - b.averageError;
     });
-    selected.push(enriched[0]);
-    used.add(enriched[0].key);
-    while (selected.length < maxPatterns) {
-      const progress = selected.length / maxPatterns;
-      const accuracyFocus = normalizedBias;
-      const varietyFocus = 1 - accuracyFocus;
-      const varietyPhase = progress < varietyFocus;
-      const varietyWeight = varietyPhase
-        ? 0.85 - accuracyFocus * 0.35
-        : 0.2 + varietyFocus * 0.25;
-      const utilityWeight = 1 - varietyWeight;
+    const selected = [];
+    const used = new Set();
+    const accuracyQuota = Math.max(
+      0,
+      Math.min(maxPatterns, Math.round(normalizedBias * maxPatterns)),
+    );
+    const varietyQuota = Math.max(0, maxPatterns - accuracyQuota);
+    while (selected.length < accuracyQuota && selected.length < maxPatterns) {
+      const nextAccuracy = utilitySorted.find(function (entry) {
+        return !used.has(entry.key);
+      });
+      if (!nextAccuracy) break;
+      selected.push(nextAccuracy);
+      used.add(nextAccuracy.key);
+    }
+    if (!selected.length && utilitySorted.length) {
+      selected.push(utilitySorted[0]);
+      used.add(utilitySorted[0].key);
+    }
+    while (
+      selected.length < accuracyQuota + varietyQuota &&
+      selected.length < maxPatterns
+    ) {
       let bestCandidate = null;
       let bestScore = -Infinity;
       for (let i = 0; i < enriched.length; i += 1) {
@@ -522,8 +557,7 @@ export function init(TPP) {
           );
         }
         const varietyScore = nearestDistance / 64;
-        const score =
-          varietyScore * varietyWeight + utilityScore(candidate) * utilityWeight;
+        const score = varietyScore * 0.85 + utilityScore(candidate) * 0.15;
         if (score > bestScore) {
           bestScore = score;
           bestCandidate = candidate;
@@ -532,6 +566,16 @@ export function init(TPP) {
       if (!bestCandidate) break;
       selected.push(bestCandidate);
       used.add(bestCandidate.key);
+    }
+    if (selected.length < maxPatterns) {
+      const remaining = utilitySorted
+        .filter(function (entry) {
+          return !used.has(entry.key);
+        });
+      for (let i = 0; i < remaining.length && selected.length < maxPatterns; i += 1) {
+        selected.push(remaining[i]);
+        used.add(remaining[i].key);
+      }
     }
     return selected.map(function (entry) {
       return entry.mask;
@@ -773,6 +817,9 @@ export function init(TPP) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(4, palette.length));
     const config = options || {};
+    const selectionBias = clampByte(
+      config.selectionBias == null ? 128 : config.selectionBias,
+    );
     const cellFits = [];
     const patternStats = new Map();
     for (let cellY = 0; cellY < height; cellY += cellSize) {
@@ -795,16 +842,17 @@ export function init(TPP) {
           palette,
           candidates,
         );
-        const key = maskKey(fit.mask);
-        const stat = patternStats.get(key) || {
-          key: key,
-          mask: fit.mask,
+        const originalMask = fit.mask;
+        const originalKey = maskKey(originalMask);
+        const stat = patternStats.get(originalKey) || {
+          key: originalKey,
+          mask: originalMask,
           count: 0,
           error: 0,
         };
         stat.count += 1;
         stat.error += fit.error;
-        patternStats.set(key, stat);
+        patternStats.set(originalKey, stat);
         cellFits.push({
           x: cellX,
           y: cellY,
@@ -814,15 +862,17 @@ export function init(TPP) {
           fg: fit.fg,
           bgErrors: fit.bgErrors,
           fgErrors: fit.fgErrors,
-          mask: fit.mask,
-          key: key,
+          originalMask: originalMask,
+          originalKey: originalKey,
+          mask: originalMask,
+          key: originalKey,
         });
       }
     }
     const charset = selectVariedCharsetPatterns(
       Array.from(patternStats.values()),
       256,
-      config.selectionBias,
+      selectionBias,
     );
     const charsetByKey = new Map(
       charset.map(function (mask) {
@@ -830,8 +880,19 @@ export function init(TPP) {
       }),
     );
     cellFits.forEach(function (fit) {
-      let bestMask = charsetByKey.get(fit.key) || charset[0] || fit.mask;
-      if (!charsetByKey.has(fit.key) && charset.length) {
+      let bestMask =
+        charsetByKey.get(fit.originalKey) ||
+        charsetByKey.get(fit.key) ||
+        charset[0] ||
+        fit.mask;
+      if (
+        !charsetByKey.has(fit.originalKey) &&
+        charset.length < 256
+      ) {
+        charset.push(fit.originalMask);
+        charsetByKey.set(fit.originalKey, fit.originalMask);
+        bestMask = fit.originalMask;
+      } else if (!charsetByKey.has(fit.originalKey) && charset.length) {
         let bestError = Infinity;
         for (let i = 0; i < charset.length; i += 1) {
           const candidateMask = charset[i];

@@ -400,7 +400,7 @@ TPP.openImageExportDialog = async function () {
   palette.value =
     ui.palette || (ui.colorDepth === "websafe" ? "websafe" : "websafe");
   frameDelay.value = TPP.imageExportFrameDelaySeconds(ui.frameDelay || 300);
-  threshold.value = Math.max(0, Math.min(255, Number(ui.threshold) || 128));
+  threshold.value = TPP.imageExportClampThreshold(ui.threshold);
   dither.value = ui.dithering === "none" ? "threshold" : ui.dithering || "threshold";
   qualityValue.textContent = quality.value + "%";
   thresholdValue.textContent = threshold.value;
@@ -568,6 +568,10 @@ TPP.nextImageExportPreviewIndex = function (step) {
     count
   );
 };
+TPP.imageExportClampThreshold = function (value) {
+  const raw = Number(value);
+  return Math.max(0, Math.min(255, Number.isFinite(raw) ? raw : 128));
+};
 TPP.cancelImageExportPreviewSchedule = function () {
   clearTimeout(TPP.imageExportPreviewTimer);
   TPP.imageExportPreviewTimer = null;
@@ -640,7 +644,7 @@ TPP.imageExportPreviewAfterCacheKey = function (
       dpi: Number(options.dpi) || 300,
       colorDepth: String(options.colorDepth || "color24"),
       palette: String(options.palette || "websafe"),
-      threshold: Number(options.threshold) || 128,
+      threshold: TPP.imageExportClampThreshold(options.threshold),
       dithering: String(options.dithering || "threshold"),
       quality: Number(options.quality) || 92,
     })
@@ -792,6 +796,17 @@ TPP.scheduleImageExportPreviewLoading = function (stage, token, message) {
     TPP.setImageExportPreviewLoading(stage, true, message || "Rendering preview...");
   }, TPP.IMAGE_EXPORT_PREVIEW_SPINNER_DELAY_MS);
 };
+TPP.nextFrame = function () {
+  return new Promise(function (resolve) {
+    if (typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(function () {
+        resolve();
+      });
+      return;
+    }
+    window.setTimeout(resolve, 16);
+  });
+};
 TPP.downloadImageExportPreview = async function (which) {
   const assets = TPP.imageExportPreviewAssets;
   const entry =
@@ -928,11 +943,10 @@ TPP.renderImageExportPreview = async function () {
     quality: Number(quality.value) || 92,
     colorDepth: colorDepth.value || "color24",
     palette: palette.value || "websafe",
-    threshold: Number(threshold.value) || 128,
+    threshold: TPP.imageExportClampThreshold(threshold.value),
     dithering: dither.value || "threshold",
   });
   await TPP.ensureImageExportPaletteForOptionsLoaded(exportOptions);
-  thresholdValue.textContent = String(exportOptions.threshold);
   const previewScale = TPP.imageExportPreviewScale(
     settings,
     exportOptions.dpi,
@@ -951,6 +965,9 @@ TPP.renderImageExportPreview = async function () {
   );
   const cachedBefore = TPP.getImageExportPreviewResultCache(beforeCacheKey) || {};
   const cachedAfter = TPP.getImageExportPreviewResultCache(afterCacheKey) || {};
+  const customCharsetPreview =
+    exportOptions.colorDepth === "indexed" &&
+    exportOptions.dithering === "c64-custom-charset";
   const beforeName =
     typeof TPP.exportPageFileName === "function"
       ? TPP.exportPageFileName(settings, TPP.imageExportPreviewIndex + 1, {
@@ -1025,7 +1042,12 @@ TPP.renderImageExportPreview = async function () {
     );
     return;
   }
-  TPP.scheduleImageExportPreviewLoading(stage, token, "Rendering preview...");
+  if (customCharsetPreview) {
+    TPP.setImageExportPreviewLoading(stage, true, "Rendering custom charset...");
+    await TPP.nextFrame();
+  } else {
+    TPP.scheduleImageExportPreviewLoading(stage, token, "Rendering preview...");
+  }
   TPP.setImageExportPreviewDownloadButtonsDisabled(true, true);
   try {
     const previewCacheKey = TPP.imageExportPreviewCacheKey(

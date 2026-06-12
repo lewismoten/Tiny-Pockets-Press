@@ -173,6 +173,10 @@ export async function init(TPP) {
     return {};
   }
   const presetValues = ["72", "96", "150", "200", "300", "600"];
+  const clampThreshold = function (value) {
+    const raw = Number(value);
+    return Math.max(0, Math.min(255, Number.isFinite(raw) ? raw : 128));
+  };
   const saveImageExportUi = function (patch) {
     const previous = TPP.imageExportUi();
     const dpiValue = TPP.dpi(Number(imageExportDpi.value) || 300);
@@ -197,10 +201,7 @@ export async function init(TPP) {
           ),
           colorDepth: imageExportColorDepth.value || "color24",
           palette: imageExportPalette.value || "websafe",
-          threshold: Math.max(
-            0,
-            Math.min(255, Number(imageExportThreshold.value) || 128),
-          ),
+          threshold: clampThreshold(imageExportThreshold.value),
           dithering: imageExportDither.value || "threshold",
           frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
         },
@@ -509,10 +510,7 @@ export async function init(TPP) {
     renderCharsetPreviewIcon();
     imageExportQualityValue.textContent =
       Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) + "%";
-    const thresholdValue = Math.max(
-      0,
-      Math.min(255, Number(imageExportThreshold.value) || 128),
-    );
+    const thresholdValue = clampThreshold(imageExportThreshold.value);
     if (customCharset) {
       imageExportThresholdLabel.textContent = "Variety \u2194 Accuracy";
       imageExportThresholdValue.textContent =
@@ -629,7 +627,7 @@ export async function init(TPP) {
       quality: Number(imageExportQuality.value) || 92,
       colorDepth: imageExportColorDepth.value || "color24",
       palette: imageExportPalette.value || "websafe",
-      threshold: Number(imageExportThreshold.value) || 128,
+      threshold: clampThreshold(imageExportThreshold.value),
       dithering: imageExportDither.value || "threshold",
     });
   };
@@ -728,7 +726,6 @@ export async function init(TPP) {
   };
   const schedulePreview = function () {
     TPP.scheduleImageExportPreview();
-    refreshCharsetPreviewIcon();
   };
   const syncPlaybackUi = function () {
     imageExportPreviewPlay.textContent = TPP.imageExportPreviewPlaying

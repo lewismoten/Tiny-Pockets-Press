@@ -2383,6 +2383,7 @@ TPP.exportEpub = async function () {
 };
 TPP.imageExportOptions = function (options) {
   const source = options || {};
+  const rawThreshold = Number(source.threshold);
   const requestedFormat = ["png", "gif", "jpeg", "webp"].includes(source.format)
     ? source.format
     : "png";
@@ -2410,7 +2411,10 @@ TPP.imageExportOptions = function (options) {
         : requestedFormat,
     quality: Math.max(1, Math.min(100, Number(source.quality) || 92)),
     colorDepth: colorDepth,
-    threshold: Math.max(0, Math.min(255, Number(source.threshold) || 128)),
+    threshold: Math.max(
+      0,
+      Math.min(255, Number.isFinite(rawThreshold) ? rawThreshold : 128),
+    ),
     dithering: dithering,
     frameDelay: Math.max(
       1000,
@@ -2773,7 +2777,11 @@ TPP.exportCanvasForDepth = async function (
   ctx.drawImage(canvas, 0, 0);
   const image = ctx.getImageData(0, 0, out.width, out.height);
   const data = image.data;
-  const monoThreshold = Math.max(0, Math.min(255, Number(threshold) || 128));
+  const rawThreshold = Number(threshold);
+  const monoThreshold = Math.max(
+    0,
+    Math.min(255, Number.isFinite(rawThreshold) ? rawThreshold : 128),
+  );
   const indexedPalette =
     colorDepth === "indexed" ? TPP.imageExportNamedPalette(paletteName) : null;
   const applyMonoDither =
@@ -2801,6 +2809,7 @@ TPP.exportCanvasForDepth = async function (
       ditherLib.applyPaletteDither(data, out.width, out.height, indexedPalette, {
         algorithm: String(config.dithering || "threshold"),
         threshold: monoThreshold,
+        selectionBias: monoThreshold,
       });
       ctx.putImageData(image, 0, 0);
       return out;
