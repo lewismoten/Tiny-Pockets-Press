@@ -451,6 +451,13 @@ export function init(TPP) {
     const paletteHash = hashPalette(palette);
     const bytes = new Uint8Array(cols * rows);
     const colorLimit = Math.max(2, Math.min(6, palette.length));
+    const globalBackgroundIndex = chooseGlobalBackgroundIndex(
+      data,
+      width,
+      height,
+      palette,
+      { colorLimit: colorLimit },
+    );
     for (let row = 0; row < rows; row += 1) {
       for (let col = 0; col < cols; col += 1) {
         const cellX = col * cellSize;
@@ -476,6 +483,7 @@ export function init(TPP) {
           blockHeight,
           palette,
           candidates,
+          { backgroundIndex: globalBackgroundIndex },
         );
         let bestIndex = 0;
         let bestError = Infinity;
@@ -703,16 +711,76 @@ export function init(TPP) {
       hashNumbers(pixels, 2166136261).toString(16)
     );
   };
+  const chooseGlobalBackgroundIndex = function (
+    data,
+    width,
+    height,
+    palette,
+    options,
+  ) {
+    const config = options || {};
+    const cellSize = 8;
+    const colorLimit = Math.max(
+      2,
+      Math.min(Number(config.colorLimit) || 6, palette.length),
+    );
+    const bgCandidates = Array.isArray(config.backgroundCandidates) &&
+      config.backgroundCandidates.length
+      ? config.backgroundCandidates
+      : palette.map(function (_swatch, index) {
+        return index;
+      });
+    let bestBgIndex = bgCandidates[0] || 0;
+    let bestError = Infinity;
+    for (let candidateIndex = 0; candidateIndex < bgCandidates.length; candidateIndex += 1) {
+      const bgIndex = bgCandidates[candidateIndex];
+      let totalError = 0;
+      for (let cellY = 0; cellY < height; cellY += cellSize) {
+        for (let cellX = 0; cellX < width; cellX += cellSize) {
+          const blockWidth = Math.min(cellSize, width - cellX);
+          const blockHeight = Math.min(cellSize, height - cellY);
+          const pixels = extractCellPixels(
+            data,
+            width,
+            cellX,
+            cellY,
+            blockWidth,
+            blockHeight,
+          );
+          const candidates = paletteCellCandidates(pixels, palette, colorLimit);
+          const fit = bestTwoColorCellFit(
+            pixels,
+            blockWidth,
+            blockHeight,
+            palette,
+            candidates,
+            { backgroundIndex: bgIndex },
+          );
+          totalError += fit.error;
+        }
+      }
+      if (totalError < bestError) {
+        bestError = totalError;
+        bestBgIndex = bgIndex;
+      }
+    }
+    return bestBgIndex;
+  };
   const bestTwoColorCellFit = function (
     pixels,
     blockWidth,
     blockHeight,
     palette,
     candidates,
+    options,
   ) {
+    const config = options || {};
     const paletteHash = hashPalette(palette);
     const fitCacheKey =
-      "fit|" + cellPixelsCacheKey(pixels, blockWidth, blockHeight, paletteHash);
+      "fit|" +
+      cellPixelsCacheKey(pixels, blockWidth, blockHeight, paletteHash) +
+      "|bg:" +
+      (config.backgroundIndex == null ? "*" : String(config.backgroundIndex));
     const cachedFit = getCachedC64Cell(fitCacheKey);
     if (cachedFit) return cachedFit;
     const cellPixels = blockWidth * blockHeight;
@@ -722,9 +790,12 @@ export function init(TPP) {
     let bestError = Infinity;
     let bestBgErrors = new Float32Array(cellPixels);
     let bestFgErrors = new Float32Array(cellPixels);
-    for (let bgIndex = 0; bgIndex < candidates.length; bgIndex += 1) {
+    const backgroundIndexes = config.backgroundIndex == null
+      ? candidates
+      : [config.backgroundIndex];
+    for (let bgIndex = 0; bgIndex < backgroundIndexes.length; bgIndex += 1) {
       for (let fgIndex = 0; fgIndex < candidates.length; fgIndex += 1) {
-        const bg = palette[candidates[bgIndex]];
+        const bg = palette[backgroundIndexes[bgIndex]] || palette[0];
         const fg = palette[candidates[fgIndex]];
         const bgErrors = new Float32Array(cellPixels);
         const fgErrors = new Float32Array(cellPixels);
@@ -828,6 +899,13 @@ export function init(TPP) {
     const glyphHash =
       fixedGlyphCatalogHashes[glyphCacheId] ||
       hashGlyphCatalog(glyphCatalog);
+    const globalBackgroundIndex = chooseGlobalBackgroundIndex(
+      data,
+      width,
+      height,
+      palette,
+      { colorLimit: colorLimit },
+    );
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
@@ -845,6 +923,8 @@ export function init(TPP) {
           String(glyphCacheId || "custom") +
           "|" +
           glyphHash +
+          "|" +
+          String(globalBackgroundIndex) +
           "|" +
           cellPixelsCacheKey(pixels, blockWidth, blockHeight, paletteHash);
         const cachedCell = getCachedC64Cell(cellCacheKey);
@@ -869,6 +949,7 @@ export function init(TPP) {
           blockHeight,
           palette,
           candidates,
+          { backgroundIndex: globalBackgroundIndex },
         );
         let bestGlyph = glyphCatalog[0];
         let bestError = Infinity;
@@ -918,6 +999,13 @@ export function init(TPP) {
     const selectionBias = clampByte(
       config.selectionBias == null ? 128 : config.selectionBias,
     );
+    const globalBackgroundIndex = chooseGlobalBackgroundIndex(
+      data,
+      width,
+      height,
+      palette,
+      { colorLimit: colorLimit },
+    );
     const cellFits = [];
     const patternStats = new Map();
     for (let cellY = 0; cellY < height; cellY += cellSize) {
@@ -939,6 +1027,7 @@ export function init(TPP) {
           blockHeight,
           palette,
           candidates,
+          { backgroundIndex: globalBackgroundIndex },
         );
         const originalMask = fit.mask;
         const originalKey = maskKey(originalMask);
