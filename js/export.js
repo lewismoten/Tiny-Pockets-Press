@@ -1227,7 +1227,7 @@ TPP.loadMediabunny = function () {
     TPP.mediabunnyPromise = import(
       "https://unpkg.com/mediabunny@" +
         TPP.MEDIABUNNY_VERSION +
-        "/dist/modules/src/index.js"
+        "/dist/bundles/mediabunny.mjs"
     )
       .then(function (lib) {
         TPP.mediabunnyLib = lib;
