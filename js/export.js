@@ -3620,6 +3620,8 @@ TPP.d64EncodeFileName = function (name, maxLength) {
     const code = value.charCodeAt(i);
     if ((code >= 65 && code <= 90) || (code >= 48 && code <= 57)) {
       result[index++] = code;
+    } else if (ch === ".") {
+      result[index++] = 0x2e;
     } else if (code === 32) {
       result[index++] = 0xa0;
     } else {
