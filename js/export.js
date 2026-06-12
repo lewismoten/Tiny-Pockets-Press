@@ -1137,7 +1137,7 @@ TPP.exportCanvasForDepth = function (
   const out = document.createElement("canvas");
   out.width = canvas.width;
   out.height = canvas.height;
-  const ctx = out.getContext("2d");
+  const ctx = out.getContext("2d", { willReadFrequently: true });
   ctx.drawImage(canvas, 0, 0);
   const image = ctx.getImageData(0, 0, out.width, out.height);
   const data = image.data;
