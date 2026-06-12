@@ -658,6 +658,22 @@ TPP.setImageExportPreviewDownloads = function (assets) {
   if (beforeButton) beforeButton.disabled = !(assets && assets.before);
   if (afterButton) afterButton.disabled = !(assets && assets.after);
 };
+TPP.setImageExportPreviewLoading = function (stage, loading, message) {
+  if (!stage) return;
+  let overlay = stage.querySelector(".image-export-preview-loading");
+  if (!overlay && loading) {
+    overlay = document.createElement("div");
+    overlay.className = "image-export-preview-loading";
+    overlay.innerHTML =
+      '<div class="image-export-preview-spinner" aria-hidden="true"></div>' +
+      '<div class="image-export-preview-loading-text"></div>';
+    stage.appendChild(overlay);
+  }
+  if (!overlay) return;
+  overlay.hidden = !loading;
+  const text = overlay.querySelector(".image-export-preview-loading-text");
+  if (text) text.textContent = message || "Rendering preview...";
+};
 TPP.downloadImageExportPreview = async function (which) {
   const assets = TPP.imageExportPreviewAssets;
   const entry =
@@ -765,8 +781,13 @@ TPP.renderImageExportPreview = async function () {
   const token = (TPP.imageExportPreviewToken || 0) + 1;
   TPP.imageExportPreviewToken = token;
   TPP.setImageExportPreviewDownloads(null);
-  stage.innerHTML =
-    '<div class="image-export-preview-empty">Rendering preview...</div>';
+  if (stage.querySelector(".image-export-compare")) {
+    TPP.setImageExportPreviewLoading(stage, true, "Rendering preview...");
+  } else {
+    stage.innerHTML =
+      '<div class="image-export-preview-empty">Rendering preview...</div>';
+    TPP.setImageExportPreviewLoading(stage, true, "Rendering preview...");
+  }
   const settings = TPP.settings();
   stage.style.setProperty(
     "--image-export-preview-ratio",
@@ -869,6 +890,7 @@ TPP.renderImageExportPreview = async function () {
       ) +
       "</span></div>" +
       "</div>";
+    TPP.setImageExportPreviewLoading(stage, false);
     TPP.setImageExportPreviewDownloads({
       before: {
         src: beforeSrc,
