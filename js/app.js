@@ -178,6 +178,14 @@ TPP.initializeRuntimeUi = function () {
           return bookInfoApi.handleChange(e);
         }
       }
+      if (e.target.closest("#bookInfoAddField")) {
+        const bookInfoApi = await TPP.ensureControlModule(
+          "editor-book-info-controls",
+        );
+        if (bookInfoApi && typeof bookInfoApi.handleChange === "function") {
+          return bookInfoApi.handleChange(e);
+        }
+      }
     });
     controls.addEventListener("click", async function (e) {
       if (
@@ -211,6 +219,7 @@ TPP.initializeRuntimeUi = function () {
         e.target.closest("[data-book-info-classification]") ||
         e.target.closest("[data-book-info-authors]") ||
         e.target.closest("[data-book-info-action]") ||
+        e.target.closest("[data-book-info-help-toggle]") ||
         e.target.closest("#bookInfoAddButton")
       ) {
         const bookInfoApi = await TPP.ensureControlModule(

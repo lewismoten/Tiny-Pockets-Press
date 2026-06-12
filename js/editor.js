@@ -132,8 +132,67 @@ TPP.bookInfoFieldInputHtml = function (entry) {
     '">'
   );
 };
+TPP.bookInfoFieldHelpKey = function (fieldKey) {
+  const key = String(fieldKey || "").trim();
+  if (!key) return "custom";
+  if (key === "__custom_book_info__") return "custom";
+  if (key.startsWith("custom:")) return "custom";
+  if (key.startsWith("classification:")) return "classification";
+  if (key.startsWith("author:")) return "author";
+  if (key.startsWith("pubDate:")) return "pubDate";
+  return key;
+};
+TPP.bookInfoFieldHelp = function (fieldKey, book) {
+  const helpKey = TPP.bookInfoFieldHelpKey(fieldKey);
+  const catalog =
+    TPP.bookInfoFieldHelpCatalog &&
+    typeof TPP.bookInfoFieldHelpCatalog === "object"
+      ? TPP.bookInfoFieldHelpCatalog
+      : TPP.defaultBookInfoFieldHelpCatalog || {};
+  const entry =
+    catalog[helpKey] && typeof catalog[helpKey] === "object"
+      ? catalog[helpKey]
+      : {};
+  const label = TPP.bookInfoFieldLabel(fieldKey, book);
+  return {
+    key: helpKey,
+    label: label,
+    description: String(entry.description || "No help text available yet."),
+    example: String(entry.example || ""),
+  };
+};
+TPP.bookInfoHelpIconSvg = function () {
+  return (
+    '<svg class="book-info-help-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">' +
+    '<circle cx="10" cy="10" r="8" fill="none" stroke="#1d63c8" stroke-width="1.8"></circle>' +
+    '<circle cx="10" cy="6" r="1.1" fill="#1d63c8"></circle>' +
+    '<path d="M10 8.7v5" stroke="#1d63c8" stroke-width="1.8" stroke-linecap="round"></path>' +
+    "</svg>"
+  );
+};
+TPP.bookInfoFieldHelpButtonHtml = function (fieldKey, options) {
+  const help = TPP.bookInfoFieldHelp(fieldKey, TPP.active);
+  const buttonLabel =
+    (options && options.buttonLabel) ||
+    "About " + String(help.label || "this field");
+  return (
+    '<span class="book-info-help" data-book-info-help="' +
+    TPP.esc(help.key) +
+    '">' +
+    '<button type="button" class="book-info-help-button" data-book-info-help-toggle="' +
+    TPP.esc(help.key) +
+    '" aria-label="' +
+    TPP.esc(buttonLabel) +
+    '" aria-expanded="false" aria-haspopup="true" title="' +
+    TPP.esc(buttonLabel) +
+    '">' +
+    TPP.bookInfoHelpIconSvg() +
+    "</button></span>"
+  );
+};
 TPP.bookInfoEntryEditorHtml = function (entry) {
   const removable = !TPP.BOOK_INFO_DEFAULT_FIELDS.includes(entry.key);
+  const fieldRef = entry.key === "custom" ? "custom:" + entry.id : entry.key;
   return (
     '<tr class="book-info-entry" data-entry-id="' +
     TPP.esc(entry.id || "") +
@@ -141,15 +200,16 @@ TPP.bookInfoEntryEditorHtml = function (entry) {
     TPP.esc(entry.key || "") +
     '">' +
     '<td class="book-info-field-cell">' +
+    '<div class="book-info-field-head">' +
     (entry.key === "custom"
       ? '<input class="book-info-custom-label" value="' +
         TPP.esc(entry.customLabel || "") +
         '" placeholder="Custom field">'
       : '<span class="book-info-field-label">' +
-        TPP.esc(
-          TPP.bookInfoFieldLabel(TPP.bookInfoFieldRef(entry), TPP.active),
-        ) +
+        TPP.esc(TPP.bookInfoFieldLabel(fieldRef, TPP.active)) +
         "</span>") +
+    TPP.bookInfoFieldHelpButtonHtml(fieldRef) +
+    "</div>" +
     "</td>" +
     '<td class="book-info-value-cell">' +
     TPP.bookInfoFieldInputHtml(entry) +
@@ -185,6 +245,17 @@ TPP.renderBookInfoControls = function () {
       })
       .join("");
   }
+  if (TPP.renderBookInfoAddFieldHelp) TPP.renderBookInfoAddFieldHelp();
+};
+TPP.renderBookInfoAddFieldHelp = function () {
+  const select = document.getElementById("bookInfoAddField");
+  const addHelp = document.getElementById("bookInfoAddFieldHelp");
+  if (!addHelp) return;
+  const selectedValue =
+    select && select.value ? select.value : "__custom_book_info__";
+  addHelp.innerHTML = TPP.bookInfoFieldHelpButtonHtml(selectedValue, {
+    buttonLabel: "About the selected addable field",
+  });
 };
 TPP.readBookInfoControls = function (book) {
   if (!book) return;

@@ -4,6 +4,130 @@ export async function init(TPP) {
   if (initialized) return {};
   initialized = true;
   let authorDialogTargetEntryId = "";
+  const helpState = {
+    timer: 0,
+    activeButton: null,
+    pinnedButton: null,
+  };
+  const helpDelayMs = 260;
+  const viewportInset = 12;
+  const helpPopover = document.createElement("div");
+  helpPopover.className = "book-info-help-floating";
+  helpPopover.hidden = true;
+  helpPopover.setAttribute("role", "tooltip");
+  helpPopover.innerHTML =
+    '<strong class="book-info-help-title"></strong>' +
+    '<div class="book-info-help-description"></div>' +
+    '<div class="book-info-help-example" hidden><span class="book-info-help-example-label">Example</span> <span class="book-info-help-example-value"></span></div>';
+  document.body.appendChild(helpPopover);
+  const helpTitle = helpPopover.querySelector(".book-info-help-title");
+  const helpDescription = helpPopover.querySelector(
+    ".book-info-help-description",
+  );
+  const helpExample = helpPopover.querySelector(".book-info-help-example");
+  const helpExampleValue = helpPopover.querySelector(
+    ".book-info-help-example-value",
+  );
+  const clearHelpTimer = function () {
+    if (!helpState.timer) return;
+    clearTimeout(helpState.timer);
+    helpState.timer = 0;
+  };
+  const hideHelpPopover = function () {
+    clearHelpTimer();
+    helpState.activeButton = null;
+    if (!helpState.pinnedButton) {
+      helpPopover.hidden = true;
+      helpPopover.classList.remove("is-visible");
+    }
+  };
+  const setButtonExpanded = function (button, expanded) {
+    if (button) button.setAttribute("aria-expanded", expanded ? "true" : "false");
+  };
+  const closeHelpPopovers = function (exceptWrap) {
+    clearHelpTimer();
+    if (!exceptWrap) helpState.pinnedButton = null;
+    Array.from(document.querySelectorAll(".book-info-help.is-open")).forEach(
+      function (node) {
+        if (exceptWrap && node === exceptWrap) return;
+        node.classList.remove("is-open");
+        const button = node.querySelector("[data-book-info-help-toggle]");
+        setButtonExpanded(button, false);
+      },
+    );
+    if (!exceptWrap) {
+      setButtonExpanded(helpState.pinnedButton, false);
+      helpPopover.hidden = true;
+      helpPopover.classList.remove("is-visible");
+    }
+  };
+  const positionHelpPopover = function (button) {
+    if (!button || helpPopover.hidden) return;
+    const rect = button.getBoundingClientRect();
+    const popRect = helpPopover.getBoundingClientRect();
+    let left = rect.right + 10;
+    if (left + popRect.width > window.innerWidth - viewportInset) {
+      left = rect.left - popRect.width - 10;
+    }
+    if (left < viewportInset) {
+      left = Math.max(
+        viewportInset,
+        Math.min(
+          window.innerWidth - popRect.width - viewportInset,
+          rect.left + rect.width / 2 - popRect.width / 2,
+        ),
+      );
+    }
+    let top = rect.top + rect.height / 2 - popRect.height / 2;
+    top = Math.max(
+      viewportInset,
+      Math.min(window.innerHeight - popRect.height - viewportInset, top),
+    );
+    helpPopover.style.left = Math.round(left) + "px";
+    helpPopover.style.top = Math.round(top) + "px";
+  };
+  const renderHelpPopover = async function (button) {
+    if (!button) return;
+    if (typeof TPP.loadBookInfoFieldHelp === "function") {
+      await TPP.loadBookInfoFieldHelp();
+    }
+    const fieldKey = button.dataset.bookInfoHelpToggle || "";
+    const help = TPP.bookInfoFieldHelp
+      ? TPP.bookInfoFieldHelp(fieldKey, TPP.active)
+      : {
+          label: "Field help",
+          description: "No help text available yet.",
+          example: "",
+        };
+    if (helpTitle) helpTitle.textContent = help.label || "Field help";
+    if (helpDescription)
+      helpDescription.textContent =
+        help.description || "No help text available yet.";
+    if (helpExample && helpExampleValue) {
+      helpExampleValue.textContent = help.example || "";
+      helpExample.hidden = !help.example;
+    }
+    helpPopover.hidden = false;
+    helpPopover.classList.add("is-visible");
+    positionHelpPopover(button);
+  };
+  const scheduleHelpPopover = function (button) {
+    clearHelpTimer();
+    helpState.activeButton = button;
+    helpState.timer = window.setTimeout(function () {
+      helpState.timer = 0;
+      if (!helpState.activeButton || helpState.activeButton !== button) return;
+      renderHelpPopover(button);
+    }, helpDelayMs);
+  };
+  const trackHelpPointer = function (eventTarget) {
+    const button = eventTarget.closest("[data-book-info-help-toggle]");
+    if (!button) return false;
+    if (helpState.pinnedButton && helpState.pinnedButton !== button) return true;
+    if (helpState.pinnedButton === button) return true;
+    scheduleHelpPopover(button);
+    return true;
+  };
 
   const authorDialogEntries = function () {
     const dialog = document.getElementById("bookInfoAuthorDialog");
@@ -230,6 +354,58 @@ export async function init(TPP) {
       }
     });
   }
+  document.addEventListener("click", function (event) {
+    if (event.target.closest(".book-info-help")) return;
+    closeHelpPopovers();
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    closeHelpPopovers();
+  });
+  document.addEventListener("pointerover", function (event) {
+    trackHelpPointer(event.target);
+  });
+  document.addEventListener("focusin", function (event) {
+    trackHelpPointer(event.target);
+  });
+  document.addEventListener("pointerout", function (event) {
+    const button = event.target.closest("[data-book-info-help-toggle]");
+    if (!button) return;
+    const nextTarget = event.relatedTarget;
+    if (
+      nextTarget &&
+      (button.contains(nextTarget) || helpPopover.contains(nextTarget))
+    ) {
+      return;
+    }
+    if (helpState.pinnedButton === button) return;
+    if (helpState.activeButton === button) helpState.activeButton = null;
+    hideHelpPopover();
+  });
+  document.addEventListener("focusout", function (event) {
+    const button = event.target.closest("[data-book-info-help-toggle]");
+    if (!button) return;
+    const nextTarget = event.relatedTarget;
+    if (
+      nextTarget &&
+      (button.contains(nextTarget) || helpPopover.contains(nextTarget))
+    ) {
+      return;
+    }
+    if (helpState.pinnedButton === button) return;
+    if (helpState.activeButton === button) helpState.activeButton = null;
+    hideHelpPopover();
+  });
+  window.addEventListener("scroll", function () {
+    if (helpState.pinnedButton) positionHelpPopover(helpState.pinnedButton);
+    else if (helpState.activeButton && !helpPopover.hidden)
+      positionHelpPopover(helpState.activeButton);
+  });
+  window.addEventListener("resize", function () {
+    if (helpState.pinnedButton) positionHelpPopover(helpState.pinnedButton);
+    else if (helpState.activeButton && !helpPopover.hidden)
+      positionHelpPopover(helpState.activeButton);
+  });
 
   return {
     handleInput(event) {
@@ -240,6 +416,10 @@ export async function init(TPP) {
       return true;
     },
     handleChange(event) {
+      if (event.target.closest("#bookInfoAddField")) {
+        if (TPP.renderBookInfoAddFieldHelp) TPP.renderBookInfoAddFieldHelp();
+        return true;
+      }
       const entry = event.target.closest(".book-info-entry");
       if (!entry) return false;
       TPP.sync("draft");
@@ -247,6 +427,24 @@ export async function init(TPP) {
       return true;
     },
     async handleClick(event) {
+      const helpButton = event.target.closest("[data-book-info-help-toggle]");
+      if (helpButton) {
+        const wrap = helpButton.closest(".book-info-help");
+        if (!wrap) return true;
+        const nextOpen = !wrap.classList.contains("is-open");
+        closeHelpPopovers(nextOpen ? wrap : null);
+        wrap.classList.toggle("is-open", nextOpen);
+        helpState.pinnedButton = nextOpen ? helpButton : null;
+        setButtonExpanded(helpButton, nextOpen);
+        if (nextOpen) {
+          helpState.activeButton = helpButton;
+          await renderHelpPopover(helpButton);
+        } else {
+          hideHelpPopover();
+        }
+        return true;
+      }
+
       const pickerButton = event.target.closest("[data-book-info-picker]");
       if (pickerButton) {
         TPP.sync("nosave");

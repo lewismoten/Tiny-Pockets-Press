@@ -1,0 +1,110 @@
+{
+  "title": {
+    "description": "The main name of the book. This is the primary label readers, catalogs, and exported files use to identify the work.",
+    "example": "Santa's Little OSHA Violation"
+  },
+  "subtitle": {
+    "description": "A secondary line that adds context, tone, or a clarifying phrase to the title.",
+    "example": "Pocket-sized catastrophe management for the holidays"
+  },
+  "author": {
+    "description": "The person, collective, or organization responsible for the work. Use this for credited creators and contributors.",
+    "example": "Lewis Moten"
+  },
+  "pubDate": {
+    "description": "The publishing or release date associated with this edition. It helps with citations, export metadata, and edition tracking.",
+    "example": "2026-05-24"
+  },
+  "publisher": {
+    "description": "The press, imprint, label, or organization that published the book.",
+    "example": "Tiny Pockets Press"
+  },
+  "language": {
+    "description": "The primary language used in the book's content.",
+    "example": "en"
+  },
+  "region": {
+    "description": "A regional locale code that refines the language when that matters for cataloging or export metadata.",
+    "example": "US"
+  },
+  "subject": {
+    "description": "A short human-readable topic or category phrase. This is useful for export metadata when you want a plain-language subject line.",
+    "example": "Holiday satire"
+  },
+  "description": {
+    "description": "A brief summary, blurb, or catalog note explaining what the book is about.",
+    "example": "A tiny handbook of festive corners cut, avoidable accidents, and cheerful workplace dread."
+  },
+  "keywords": {
+    "description": "Search-friendly words or phrases that help describe the book in exports and future discovery tools. Separate terms with commas.",
+    "example": "zine, holiday, satire, workplace, OSHA"
+  },
+  "classification": {
+    "description": "The shelving or taxonomy code used to place the book within your classification system.",
+    "example": "816.1 Zines / Personal writing"
+  },
+  "cityPublished": {
+    "description": "The city associated with publication or release. Useful for formal colophons and bibliographic records.",
+    "example": "Saint Paul"
+  },
+  "copyright": {
+    "description": "A short copyright statement for this edition.",
+    "example": "© 2026 Lewis Moten. All rights reserved."
+  },
+  "isbn": {
+    "description": "A 10-digit International Standard Book Number, usually used for older editions.",
+    "example": "1234567890"
+  },
+  "isbn13": {
+    "description": "A 13-digit International Standard Book Number used by modern publishing workflows and retailers.",
+    "example": "9781234567897"
+  },
+  "edition": {
+    "description": "A note naming the edition or release state of the book.",
+    "example": "Second edition"
+  },
+  "phone": {
+    "description": "A phone number connected to the publisher, imprint, or contact line listed in the book.",
+    "example": "(651) 555-0123"
+  },
+  "website": {
+    "description": "A publisher, author, or project website related to the book.",
+    "example": "https://tinypocketspress.example"
+  },
+  "address": {
+    "description": "A mailing or business address for the publisher, imprint, or contact block.",
+    "example": "123 Little Press Lane\nSaint Paul, MN 55101"
+  },
+  "email": {
+    "description": "An email address for the publisher, author, or contact block.",
+    "example": "hello@tinypocketspress.example"
+  },
+  "copyrightNotice": {
+    "description": "A fuller legal or rights statement that can be placed on the copyright page.",
+    "example": "No part of this publication may be reproduced without prior written permission, except for brief quotations in reviews."
+  },
+  "creditsDisclaimer": {
+    "description": "A note for contributor credits, acknowledgments, content warnings, or disclaimers.",
+    "example": "Names have been changed, rumors remain unverified, and every typo belongs to the editor."
+  },
+  "seriesName": {
+    "description": "The name of the series this book belongs to, if any.",
+    "example": "Pocket Catastrophes"
+  },
+  "number": {
+    "description": "The numbered position of the book within a series or sequence.",
+    "example": "No. 4"
+  },
+  "volume": {
+    "description": "The volume designation for a multi-volume work.",
+    "example": "Vol. 2"
+  },
+  "printing": {
+    "description": "A note describing the printing state of this physical release.",
+    "example": "First Printing"
+  },
+  "custom": {
+    "description": "A flexible field for anything not covered by the built-in book info fields.",
+    "example": "Archive accession: TPP-Z-0042"
+  }
+}

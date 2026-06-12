@@ -59,3 +59,84 @@
   display: flex;
   justify-content: flex-start;
 }
+.book-info-field-head,
+.book-info-add-field-select {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+.book-info-field-head {
+  position: relative;
+}
+.book-info-add-field-select select {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.book-info-help {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.book-info-help-button {
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-top: 0.03rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  line-height: 1;
+  cursor: help;
+}
+.book-info-help-button:hover,
+.book-info-help-button:focus-visible {
+  background: rgba(29, 99, 200, 0.1);
+  outline: none;
+}
+.book-info-help-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  display: block;
+}
+.book-info-help-floating {
+  position: fixed;
+  z-index: 5000;
+  display: grid;
+  gap: 0.35rem;
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #b8d1f4;
+  border-radius: 12px;
+  background: #f8fbff;
+  box-shadow: 0 12px 30px rgba(15, 48, 99, 0.14);
+  color: #1f3551;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 120ms ease,
+    visibility 120ms ease;
+}
+.book-info-help-floating.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+.book-info-help-title {
+  font-size: 0.93rem;
+  color: #153a73;
+}
+.book-info-help-description,
+.book-info-help-example {
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+.book-info-help-example {
+  color: #476389;
+}
+.book-info-help-example-label {
+  font-weight: 700;
+  color: #1d63c8;
+}
