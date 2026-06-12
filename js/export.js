@@ -1620,7 +1620,7 @@ TPP.exportMp4 = async function (options) {
     videoCanvas.height = height;
     const videoCtx = videoCanvas.getContext("2d");
     if (!videoCtx) throw new Error("Unable to create MP4 export canvas.");
-    const videoSource = new mediabunny.CanvasSource(videoCanvas, {
+    const videoSource = new mediabunny.VideoSampleSource({
       codec: codec,
       bitrate: bitrate,
       keyFrameInterval: 2,
@@ -1677,7 +1677,15 @@ TPP.exportMp4 = async function (options) {
             })();
       videoCtx.clearRect(0, 0, width, height);
       videoCtx.drawImage(pageCanvas, 0, 0, width, height);
-      await videoSource.add(timestamp, duration, { keyFrame: i === 0 });
+      const sample = new mediabunny.VideoSample(videoCanvas, {
+        timestamp: timestamp,
+        duration: duration,
+      });
+      try {
+        await videoSource.add(sample, { keyFrame: i === 0 });
+      } finally {
+        sample.close();
+      }
       timestamp += duration;
       await new Promise(requestAnimationFrame);
     }
