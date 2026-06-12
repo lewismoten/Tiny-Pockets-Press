@@ -5531,16 +5531,89 @@ TPP.progressPreviewDataUrlFromCanvas = function (canvas, maxSize) {
     return "";
   }
 };
+TPP.activeProgressOperation = null;
+TPP.progressOperationCounter = 0;
+TPP.hideProgress = function () {
+  const wrap = document.getElementById("progress");
+  const preview = document.getElementById("progressPreview");
+  const cancelButton = document.getElementById("progressCancel");
+  if (preview) {
+    preview.hidden = true;
+    preview.removeAttribute("src");
+  }
+  if (cancelButton) {
+    cancelButton.hidden = true;
+    cancelButton.disabled = false;
+    cancelButton.textContent = "Cancel";
+  }
+  if (wrap) wrap.hidden = true;
+};
+TPP.beginProgressOperation = function (label) {
+  const operation = {
+    id: (TPP.progressOperationCounter || 0) + 1,
+    label: String(label || "Operation"),
+    cancelled: false,
+  };
+  TPP.progressOperationCounter = operation.id;
+  TPP.activeProgressOperation = operation;
+  return operation;
+};
+TPP.cancelProgressOperation = function (operation) {
+  const target = operation || TPP.activeProgressOperation;
+  if (!target || target.cancelled) return;
+  target.cancelled = true;
+  const cancelButton = document.getElementById("progressCancel");
+  if (cancelButton) {
+    cancelButton.disabled = true;
+    cancelButton.hidden = false;
+    cancelButton.textContent = "Cancelling...";
+  }
+};
+TPP.finishProgressOperation = function (operation, options) {
+  const target = operation || TPP.activeProgressOperation;
+  if (target && TPP.activeProgressOperation === target) {
+    TPP.activeProgressOperation = null;
+  }
+  const config = options || {};
+  if (config.cancelled) {
+    TPP.hideProgress();
+    if (config.message) TPP.toast(config.message);
+    return;
+  }
+  const cancelButton = document.getElementById("progressCancel");
+  if (cancelButton) {
+    cancelButton.hidden = true;
+    cancelButton.disabled = false;
+    cancelButton.textContent = "Cancel";
+  }
+};
+TPP.isProgressCancelledError = function (error) {
+  return Boolean(error && error.name === "TPPProgressCancelledError");
+};
+TPP.throwIfProgressCancelled = function (operation) {
+  if (!operation || !operation.cancelled) return;
+  const error = new Error("Operation cancelled.");
+  error.name = "TPPProgressCancelledError";
+  throw error;
+};
 TPP.showProgress = function (pct, msg, options) {
   const wrap = document.getElementById("progress");
   const bar = document.getElementById("progressBar");
   const text = document.getElementById("progressText");
   const preview = document.getElementById("progressPreview");
+  const cancelButton = document.getElementById("progressCancel");
   if (!wrap || !bar || !text) return;
   const config = options || {};
   wrap.hidden = false;
   bar.style.width = Math.max(2, Math.min(100, pct)) + "%";
   text.textContent = msg || "Rendering…";
+  if (cancelButton) {
+    const active = TPP.activeProgressOperation;
+    cancelButton.hidden = !active;
+    cancelButton.disabled = Boolean(active && active.cancelled);
+    cancelButton.textContent =
+      active && active.cancelled ? "Cancelling..." : "Cancel";
+  }
   if (preview) {
     if (config.clearPreview) {
       preview.hidden = true;
@@ -5558,13 +5631,17 @@ TPP.showProgress = function (pct, msg, options) {
   }
   if (pct >= 100)
     setTimeout(function () {
-      if (preview) {
-        preview.hidden = true;
-        preview.removeAttribute("src");
-      }
-      wrap.hidden = true;
+      TPP.hideProgress();
     }, 800);
 };
+window.setTimeout(function () {
+  const cancelButton = document.getElementById("progressCancel");
+  if (!cancelButton || cancelButton.dataset.bound === "true") return;
+  cancelButton.dataset.bound = "true";
+  cancelButton.addEventListener("click", function () {
+    TPP.cancelProgressOperation();
+  });
+}, 0);
 TPP.file = function (event, callback) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;

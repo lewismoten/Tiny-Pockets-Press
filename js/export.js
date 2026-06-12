@@ -1646,6 +1646,8 @@ TPP.waitForImages = async function (root) {
 };
 
 TPP.exportPdfFrom = async function (which) {
+  const progressOp = TPP.beginProgressOperation(which + " PDF export");
+  try {
   TPP.switchView(which);
   if (which === "interior") TPP.renderInterior();
   else TPP.renderCover();
@@ -1667,6 +1669,7 @@ TPP.exportPdfFrom = async function (which) {
   });
   const sheets = Array.from(container.querySelectorAll("[data-pdf-page]"));
   for (let i = 0; i < sheets.length; i++) {
+    TPP.throwIfProgressCancelled(progressOp);
     TPP.showProgress(
       5 + Math.round((i / sheets.length) * 90),
       "Rendering " +
@@ -1684,11 +1687,14 @@ TPP.exportPdfFrom = async function (which) {
     el.style.marginBottom = "0";
     TPP.renderQr(el, settings);
     await TPP.waitForImages(el);
+    TPP.throwIfProgressCancelled(progressOp);
     await new Promise(requestAnimationFrame);
+    TPP.throwIfProgressCancelled(progressOp);
     const canvas = await html2canvas(
       el,
       TPP.html2canvasOptions({ scale: 3 }),
     );
+    TPP.throwIfProgressCancelled(progressOp);
     TPP.showProgress(
       5 + Math.round(((i + 0.5) / sheets.length) * 90),
       "Rendered " +
@@ -1713,6 +1719,7 @@ TPP.exportPdfFrom = async function (which) {
     el.style.marginBottom = oldMargin;
     await new Promise(requestAnimationFrame);
   }
+  TPP.throwIfProgressCancelled(progressOp);
   const name = TPP.exportFileName(settings, {
     extension: "pdf",
     kind: which,
@@ -1721,9 +1728,23 @@ TPP.exportPdfFrom = async function (which) {
     kind: TPP.pdfExportKindLabel(which),
   });
   pdf.save(name);
+  TPP.finishProgressOperation(progressOp);
   TPP.showProgress(100, "PDF complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "PDF export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
 };
 TPP.exportReadablePdf = async function () {
+  const progressOp = TPP.beginProgressOperation("eBook PDF export");
+  try {
   TPP.sync();
   const settings = TPP.settings();
   const pages = TPP.buildPages();
@@ -1742,6 +1763,7 @@ TPP.exportReadablePdf = async function () {
   document.body.appendChild(mount);
   try {
     for (let i = 0; i < pages.length; i++) {
+      TPP.throwIfProgressCancelled(progressOp);
       TPP.showProgress(
         5 + Math.round((i / pages.length) * 90),
         "Rendering eBook PDF page " + (i + 1) + " of " + pages.length + "...",
@@ -1757,11 +1779,14 @@ TPP.exportReadablePdf = async function () {
       mount.appendChild(shell);
       TPP.renderQr(shell, settings);
       await TPP.waitForImages(shell);
+      TPP.throwIfProgressCancelled(progressOp);
       await new Promise(requestAnimationFrame);
+      TPP.throwIfProgressCancelled(progressOp);
       const canvas = await html2canvas(
         shell,
         TPP.html2canvasOptions({ scale: 3 }),
       );
+      TPP.throwIfProgressCancelled(progressOp);
       TPP.showProgress(
         5 + Math.round(((i + 0.5) / pages.length) * 90),
         "Rendered eBook PDF page " + (i + 1) + " of " + pages.length + "...",
@@ -1782,6 +1807,7 @@ TPP.exportReadablePdf = async function () {
   } finally {
     mount.remove();
   }
+  TPP.throwIfProgressCancelled(progressOp);
   const name = TPP.exportFileName(settings, {
     extension: "pdf",
     kind: "ebook",
@@ -1790,7 +1816,19 @@ TPP.exportReadablePdf = async function () {
     kind: TPP.pdfExportKindLabel("ebook"),
   });
   pdf.save(name);
+  TPP.finishProgressOperation(progressOp);
   TPP.showProgress(100, "eBook PDF complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "eBook PDF export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
 };
 TPP.epubEscape = function (value) {
   return String(value || "")
@@ -2266,6 +2304,8 @@ TPP.exportEpub = async function () {
     );
   };
 
+  const progressOp = TPP.beginProgressOperation("EPUB export");
+  try {
   TPP.showProgress(5, "Preparing EPUB package...", { clearPreview: true });
   zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
   zip.file(
@@ -2281,6 +2321,7 @@ TPP.exportEpub = async function () {
   addManifestItem("css", "styles/book.css", "text/css", "");
 
   const frontImageElement = TPP.findImageElement(settings, "front", "cover");
+  TPP.throwIfProgressCancelled(progressOp);
   const coverImage = await ensureImage(
     frontImageElement && frontImageElement.fileId,
     "cover",
@@ -2313,6 +2354,7 @@ TPP.exportEpub = async function () {
 
   const chapterList = Array.isArray(settings.chapters) ? settings.chapters : [];
   for (let i = 0; i < chapterList.length; i++) {
+    TPP.throwIfProgressCancelled(progressOp);
     const chapter = chapterList[i];
     if (!chapter || chapter.isMetadata) continue;
       TPP.showProgress(
@@ -2325,6 +2367,7 @@ TPP.exportEpub = async function () {
       );
     const chapterTitle = chapter.title || "Chapter " + (i + 1);
     const chapterImageElement = TPP.findChapterImageElement(settings, chapter);
+    TPP.throwIfProgressCancelled(progressOp);
     const chapterImage = await ensureImage(
       chapterImageElement && chapterImageElement.fileId,
       "chapter-" + (i + 1),
@@ -2372,14 +2415,28 @@ TPP.exportEpub = async function () {
   const blob = await zip.generateAsync(
     { type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" },
     function (meta) {
+      TPP.throwIfProgressCancelled(progressOp);
       TPP.showProgress(
         82 + Math.round(meta.percent * 0.18),
         "Compressing EPUB package...",
       );
     },
   );
+  TPP.throwIfProgressCancelled(progressOp);
   TPP.downloadBlob(stem + ".epub", blob);
+  TPP.finishProgressOperation(progressOp);
   TPP.showProgress(100, "EPUB complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "EPUB export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
 };
 TPP.imageExportOptions = function (options) {
   const source = options || {};
@@ -3133,6 +3190,8 @@ TPP.previewBlobSize = function (canvas, format, quality) {
   });
 };
 TPP.exportImagesZip = async function (options) {
+  const progressOp = TPP.beginProgressOperation("Page images ZIP export");
+  try {
   await TPP.ensureImageExportPaletteForOptionsLoaded(options);
   TPP.sync();
   const settings = TPP.settings();
@@ -3153,6 +3212,7 @@ TPP.exportImagesZip = async function (options) {
   document.body.appendChild(mount);
   try {
     for (let i = 0; i < pages.length; i++) {
+      TPP.throwIfProgressCancelled(progressOp);
       TPP.showProgress(
         5 + Math.round((i / pages.length) * 80),
         "Rendering page image " + (i + 1) + " of " + pages.length + "...",
@@ -3167,11 +3227,14 @@ TPP.exportImagesZip = async function (options) {
       mount.appendChild(shell);
       TPP.renderQr(shell, settings);
       await TPP.waitForImages(shell);
+      TPP.throwIfProgressCancelled(progressOp);
       await new Promise(requestAnimationFrame);
+      TPP.throwIfProgressCancelled(progressOp);
       const canvas = await html2canvas(
         shell,
         TPP.html2canvasOptions({ scale: scale }),
       );
+      TPP.throwIfProgressCancelled(progressOp);
       const exportCanvas = await TPP.exportCanvasForDepth(
         canvas,
         exportOptions.colorDepth,
@@ -3200,6 +3263,7 @@ TPP.exportImagesZip = async function (options) {
       shell.remove();
       await new Promise(requestAnimationFrame);
     }
+    TPP.throwIfProgressCancelled(progressOp);
     zip.file("manifest.jsonld", TPP.zipSchemaOrgManifest(settings, pages, exportOptions));
     zip.file("metadata.dc.xml", TPP.zipDublinCoreManifest(settings, pages, exportOptions));
     zip.file("FILE_ID.DIZ", TPP.zipFileIdDiz(settings, pages, exportOptions));
@@ -3210,12 +3274,14 @@ TPP.exportImagesZip = async function (options) {
         comment: TPP.zipCommentText(settings),
       },
       function (meta) {
+        TPP.throwIfProgressCancelled(progressOp);
         TPP.showProgress(
           90 + Math.round(meta.percent * 0.1),
           "Building ZIP archive...",
         );
       },
     );
+    TPP.throwIfProgressCancelled(progressOp);
     const name = TPP.exportFileName(settings, {
       extension: "zip",
       kind: exportOptions.format,
@@ -3225,9 +3291,23 @@ TPP.exportImagesZip = async function (options) {
   } finally {
     mount.remove();
   }
+  TPP.finishProgressOperation(progressOp);
   TPP.showProgress(100, "Page images ZIP complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "Page images ZIP export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
 };
 TPP.exportAnimatedGif = async function (options) {
+  const progressOp = TPP.beginProgressOperation("Animated GIF export");
+  try {
   await TPP.ensureImageExportPaletteForOptionsLoaded(
     Object.assign({}, options || {}, { format: "gif" }),
   );
@@ -3252,6 +3332,7 @@ TPP.exportAnimatedGif = async function (options) {
   document.body.appendChild(mount);
   try {
     for (let i = 0; i < pages.length; i++) {
+      TPP.throwIfProgressCancelled(progressOp);
       TPP.showProgress(
         5 + Math.round((i / pages.length) * 80),
         "Rendering GIF frame " + (i + 1) + " of " + pages.length + "...",
@@ -3266,11 +3347,14 @@ TPP.exportAnimatedGif = async function (options) {
       mount.appendChild(shell);
       TPP.renderQr(shell, settings);
       await TPP.waitForImages(shell);
+      TPP.throwIfProgressCancelled(progressOp);
       await new Promise(requestAnimationFrame);
+      TPP.throwIfProgressCancelled(progressOp);
       const canvas = await html2canvas(
         shell,
         TPP.html2canvasOptions({ scale: scale }),
       );
+      TPP.throwIfProgressCancelled(progressOp);
       const exportCanvas = await TPP.exportCanvasForDepth(
         canvas,
         exportOptions.colorDepth,
@@ -3310,6 +3394,7 @@ TPP.exportAnimatedGif = async function (options) {
       shell.remove();
       await new Promise(requestAnimationFrame);
     }
+    TPP.throwIfProgressCancelled(progressOp);
     gif.finish();
     const bytes = gif.bytesView ? gif.bytesView() : new Uint8Array(gif.bytes());
     const blob = new Blob([bytes], { type: "image/gif" });
@@ -3321,9 +3406,23 @@ TPP.exportAnimatedGif = async function (options) {
   } finally {
     mount.remove();
   }
+  TPP.finishProgressOperation(progressOp);
   TPP.showProgress(100, "Animated GIF complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "Animated GIF export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
 };
 TPP.exportMp4 = async function (options) {
+  const progressOp = TPP.beginProgressOperation("MP4 export");
+  try {
   await TPP.ensureImageExportPaletteForOptionsLoaded(options);
   TPP.sync();
   const settings = TPP.settings();
@@ -3399,6 +3498,7 @@ TPP.exportMp4 = async function (options) {
     let timestamp = 0;
     const duration = Math.max(0.01, exportOptions.frameDelay / 1000);
     for (let i = 0; i < pages.length; i++) {
+      TPP.throwIfProgressCancelled(progressOp);
       TPP.showProgress(
         5 + Math.round((i / pages.length) * 80),
         "Rendering MP4 frame " + (i + 1) + " of " + pages.length + "...",
@@ -3413,6 +3513,7 @@ TPP.exportMp4 = async function (options) {
                 settings,
                 scale,
               );
+              TPP.throwIfProgressCancelled(progressOp);
               return TPP.opaqueCanvas(
                 await TPP.exportCanvasForDepth(
                   canvas,
@@ -3443,8 +3544,10 @@ TPP.exportMp4 = async function (options) {
       timestamp += duration;
       await new Promise(requestAnimationFrame);
     }
+    TPP.throwIfProgressCancelled(progressOp);
     videoSource.close();
     await output.finalize();
+    TPP.throwIfProgressCancelled(progressOp);
     if (!target.buffer) {
       throw new Error("MP4 export completed without a downloadable buffer.");
     }
@@ -3458,5 +3561,17 @@ TPP.exportMp4 = async function (options) {
   } finally {
     mount.remove();
   }
+  TPP.finishProgressOperation(progressOp);
   TPP.showProgress(100, "MP4 complete");
+  } catch (error) {
+    if (TPP.isProgressCancelledError(error)) {
+      TPP.finishProgressOperation(progressOp, {
+        cancelled: true,
+        message: "MP4 export canceled.",
+      });
+      return;
+    }
+    TPP.finishProgressOperation(progressOp);
+    throw error;
+  }
 };
