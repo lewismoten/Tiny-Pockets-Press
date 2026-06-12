@@ -4,6 +4,7 @@
     "pdf": "Exported to PDF metadata as the core Title value. If a subtitle is present, the PDF Title becomes Title: Subtitle.",
     "epub": "Exported to EPUB metadata as the Title value. If a subtitle is present, the EPUB title becomes Title: Subtitle.",
     "mp4": "Exported to MP4 metadata as the Title tag. If a subtitle is present, the MP4 title becomes Title: Subtitle.",
+    "zip": "Included in the ZIP archive comment as the Title value. If a subtitle is present, the ZIP title becomes Title: Subtitle.",
     "example": "Santa's Little OSHA Violation"
   },
   "subtitle": {
@@ -11,6 +12,7 @@
     "pdf": "Appended to the title in PDF metadata, producing Title: Subtitle.",
     "epub": "Appended to the title in EPUB metadata, producing Title: Subtitle.",
     "mp4": "Appended to the MP4 title tag, producing Title: Subtitle.",
+    "zip": "Appended to the title in the ZIP archive comment, producing Title: Subtitle.",
     "example": "Pocket-sized catastrophe management for the holidays"
   },
   "author": {
@@ -18,6 +20,7 @@
     "pdf": "Exported to PDF metadata as the Author value.",
     "epub": "Exported to EPUB metadata as the Creator value.",
     "mp4": "Exported to MP4 metadata as the Artist tag.",
+    "zip": "Included in the ZIP archive comment as the Author value.",
     "example": "Lewis Moten"
   },
   "pubDate": {
@@ -25,6 +28,7 @@
     "pdf": "Not exported into a dedicated PDF field, but it can be folded into fallback Subject text when no explicit Subject or Description is provided.",
     "epub": "Exported to EPUB metadata as the Date value.",
     "mp4": "Exported to MP4 metadata as the Date tag when the value can be parsed as a real date.",
+    "zip": "Included in the ZIP archive comment as the Date value.",
     "example": "2026-05-24"
   },
   "publisher": {
@@ -32,6 +36,7 @@
     "pdf": "Can be included in fallback Subject and Keywords metadata.",
     "epub": "Exported to EPUB metadata as the Publisher value.",
     "mp4": "Included in the MP4 Comment tag alongside other catalog notes.",
+    "zip": "Included in the ZIP archive comment as the Publisher value.",
     "example": "Tiny Pockets Press"
   },
   "language": {
@@ -71,6 +76,7 @@
     "pdf": "Can be included in fallback Subject and Keywords metadata.",
     "epub": "Exported to EPUB metadata as an additional Subject entry when present.",
     "mp4": "Included in the MP4 Comment tag alongside other catalog notes.",
+    "zip": "Included in the ZIP archive comment as the Classification value.",
     "example": "816.1 Zines / Personal writing"
   },
   "cityPublished": {
@@ -81,6 +87,7 @@
     "description": "A short copyright statement for this edition.",
     "epub": "Exported to EPUB metadata as the Rights value.",
     "mp4": "Included in the MP4 Comment tag alongside other catalog notes.",
+    "zip": "Included in the ZIP archive comment as the Rights value.",
     "example": "© 2026 Lewis Moten. All rights reserved."
   },
   "isbn": {
