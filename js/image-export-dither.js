@@ -285,6 +285,64 @@ export function init(TPP) {
   petsciiGlyphs.push(makeMask(function (x, y) {
     return (x + y) % 2 === 0;
   }));
+  const rasterizeGlyphMask = function (char) {
+    const source = document.createElement("canvas");
+    source.width = 16;
+    source.height = 16;
+    const ctx = source.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    ctx.clearRect(0, 0, source.width, source.height);
+    ctx.fillStyle = "#000";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font =
+      'bold 14px "C64 Pro Mono", "Pet Me 64", "Courier New", monospace';
+    ctx.fillText(String(char || " "), source.width / 2, source.height / 2 + 0.5);
+    const image = ctx.getImageData(0, 0, source.width, source.height).data;
+    const mask = new Uint8Array(64);
+    let used = 0;
+    for (let y = 0; y < 8; y += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        let alpha = 0;
+        for (let sy = 0; sy < 2; sy += 1) {
+          for (let sx = 0; sx < 2; sx += 1) {
+            const px = x * 2 + sx;
+            const py = y * 2 + sy;
+            alpha += image[(py * source.width + px) * 4 + 3];
+          }
+        }
+        const bit = alpha >= 128 ? 1 : 0;
+        mask[y * 8 + x] = bit;
+        used += bit;
+      }
+    }
+    return used ? mask : null;
+  };
+  const petsciiFullGlyphChars = Array.from(
+    new Set(
+      (
+        " ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+        "0123456789" +
+        "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~" +
+        "+-*/=<>()[]{}#%&@" +
+        ".,:;!?\"'" +
+        "/\\\\|_" +
+        "<>^v" +
+        "oOxX"
+      ).split(""),
+    ),
+  );
+  const petsciiFullGlyphs = petsciiGlyphs
+    .slice()
+    .concat(
+      petsciiFullGlyphChars
+        .map(rasterizeGlyphMask)
+        .filter(function (mask) {
+          return mask && mask.some(function (bit) {
+            return bit;
+          });
+        }),
+    );
   const paletteCellCandidates = function (pixels, palette, limit) {
     const scored = palette.map(function (swatch, index) {
       let total = 0;
@@ -316,9 +374,11 @@ export function init(TPP) {
     );
     return mask[glyphY * 8 + glyphX];
   };
-  const applyPalettePetscii = function (data, width, height, palette) {
+  const applyPalettePetscii = function (data, width, height, palette, glyphs) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(6, palette.length));
+    const glyphCatalog =
+      Array.isArray(glyphs) && glyphs.length ? glyphs : petsciiGlyphs;
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
@@ -334,7 +394,7 @@ export function init(TPP) {
           }
         }
         const candidates = paletteCellCandidates(pixels, palette, colorLimit);
-        let bestGlyph = petsciiGlyphs[0];
+        let bestGlyph = glyphCatalog[0];
         let bestBg = palette[candidates[0]] || palette[0];
         let bestFg = bestBg;
         let bestError = Infinity;
@@ -358,8 +418,8 @@ export function init(TPP) {
                 fgErrors[pixelIndex] = drFg * drFg + dgFg * dgFg + dbFg * dbFg;
               }
             }
-            for (let glyphIndex = 0; glyphIndex < petsciiGlyphs.length; glyphIndex += 1) {
-              const glyph = petsciiGlyphs[glyphIndex];
+            for (let glyphIndex = 0; glyphIndex < glyphCatalog.length; glyphIndex += 1) {
+              const glyph = glyphCatalog[glyphIndex];
               let totalError = 0;
               for (let y = 0; y < blockHeight; y += 1) {
                 for (let x = 0; x < blockWidth; x += 1) {
@@ -558,7 +618,10 @@ export function init(TPP) {
       ], 64);
     },
     "c64-petscii": function (data, width, height, palette) {
-      applyPalettePetscii(data, width, height, palette);
+      applyPalettePetscii(data, width, height, palette, petsciiGlyphs);
+    },
+    "c64-petscii-full": function (data, width, height, palette) {
+      applyPalettePetscii(data, width, height, palette, petsciiFullGlyphs);
     },
   };
   const ditherers = {

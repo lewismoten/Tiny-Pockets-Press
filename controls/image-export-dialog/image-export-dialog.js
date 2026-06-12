@@ -426,8 +426,10 @@ export async function init(TPP) {
   };
   const syncFormatUi = function () {
     const indexedOnly = imageExportColorDepth.value === "indexed";
-    const c64PetsciiOption = imageExportDither.querySelector(
-      'option[value="c64-petscii"]',
+    const indexedOnlyDitherOptions = Array.from(
+      imageExportDither.querySelectorAll(
+        'option[value="c64-petscii"], option[value="c64-petscii-full"]',
+      ),
     );
     Array.from(imageExportFormat.options).forEach(function (option) {
       option.disabled = indexedOnly && !["png", "gif"].includes(option.value);
@@ -452,8 +454,13 @@ export async function init(TPP) {
     imageExportPaletteWrap.classList.toggle("is-disabled", !indexedOnly);
     const mono = imageExportColorDepth.value === "mono1";
     const indexed = imageExportColorDepth.value === "indexed";
-    if (c64PetsciiOption) c64PetsciiOption.disabled = !indexed;
-    if (!indexed && imageExportDither.value === "c64-petscii") {
+    indexedOnlyDitherOptions.forEach(function (option) {
+      option.disabled = !indexed;
+    });
+    if (
+      !indexed &&
+      ["c64-petscii", "c64-petscii-full"].includes(imageExportDither.value)
+    ) {
       imageExportDither.value = "threshold";
     }
     imageExportThreshold.disabled = !mono;

@@ -2442,6 +2442,7 @@ TPP.imageExportDitherIds = function () {
     "random",
     "pattern",
     "c64-petscii",
+    "c64-petscii-full",
   ];
 };
 TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION = 1;
