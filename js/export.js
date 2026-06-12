@@ -141,7 +141,10 @@ TPP.exportPdfFrom = async function (which) {
     TPP.renderQr(el, settings);
     await TPP.waitForImages(el);
     await new Promise(requestAnimationFrame);
-    const canvas = await html2canvas(el, { scale: 3, backgroundColor: "#fff" });
+    const canvas = await html2canvas(
+      el,
+      TPP.html2canvasOptions({ scale: 3 }),
+    );
     if (i) pdf.addPage([settings.sheet.w, settings.sheet.h]);
     pdf.addImage(
       canvas.toDataURL("image/jpeg", 0.95),
@@ -196,10 +199,10 @@ TPP.exportReadablePdf = async function () {
       TPP.renderQr(shell, settings);
       await TPP.waitForImages(shell);
       await new Promise(requestAnimationFrame);
-      const canvas = await html2canvas(shell, {
-        scale: 3,
-        backgroundColor: "#fff",
-      });
+      const canvas = await html2canvas(
+        shell,
+        TPP.html2canvasOptions({ scale: 3 }),
+      );
       if (i) pdf.addPage([settings.page.w, settings.page.h]);
       pdf.addImage(
         canvas.toDataURL("image/jpeg", 0.95),
@@ -1178,13 +1181,34 @@ TPP.renderImageExportPreviewCanvas = async function (page, settings, scale) {
     TPP.renderQr(shell, settings);
     await TPP.waitForImages(shell);
     await new Promise(requestAnimationFrame);
-    return await html2canvas(shell, {
-      scale: Math.max(1, Number(scale) || 1),
-      backgroundColor: "#fff",
-    });
+    return await html2canvas(
+      shell,
+      TPP.html2canvasOptions({ scale: Math.max(1, Number(scale) || 1) }),
+    );
   } finally {
     mount.remove();
   }
+};
+TPP.createExportRenderShell = function (settings) {
+  const shell = document.createElement("div");
+  shell.style.position = "relative";
+  shell.style.width = settings.page.w + "in";
+  shell.style.height = settings.page.h + "in";
+  shell.style.background = "#fff";
+  return shell;
+};
+TPP.renderExportPageCanvas = async function (
+  shell,
+  page,
+  settings,
+  scale,
+) {
+  if (!shell) throw new Error("Render shell required");
+  shell.replaceChildren(TPP.pageEl(page, settings, 0, 0, false, true));
+  TPP.renderQr(shell, settings);
+  await TPP.waitForImages(shell);
+  await new Promise(requestAnimationFrame);
+  return await html2canvas(shell, TPP.html2canvasOptions({ scale: scale }));
 };
 TPP.previewDataUrl = function (canvas, format, quality) {
   const mime =
@@ -1436,10 +1460,10 @@ TPP.exportImagesZip = async function (options) {
       TPP.renderQr(shell, settings);
       await TPP.waitForImages(shell);
       await new Promise(requestAnimationFrame);
-      const canvas = await html2canvas(shell, {
-        scale: scale,
-        backgroundColor: "#fff",
-      });
+      const canvas = await html2canvas(
+        shell,
+        TPP.html2canvasOptions({ scale: scale }),
+      );
       const exportCanvas = TPP.exportCanvasForDepth(
         canvas,
         exportOptions.colorDepth,
@@ -1514,10 +1538,10 @@ TPP.exportAnimatedGif = async function (options) {
       TPP.renderQr(shell, settings);
       await TPP.waitForImages(shell);
       await new Promise(requestAnimationFrame);
-      const canvas = await html2canvas(shell, {
-        scale: scale,
-        backgroundColor: "#fff",
-      });
+      const canvas = await html2canvas(
+        shell,
+        TPP.html2canvasOptions({ scale: scale }),
+      );
       const exportCanvas = TPP.exportCanvasForDepth(
         canvas,
         exportOptions.colorDepth,
@@ -1581,20 +1605,14 @@ TPP.exportMp4 = async function (options) {
     "position:fixed;left:-9999px;top:0;pointer-events:none;";
   document.body.appendChild(mount);
   try {
-    const probeShell = document.createElement("div");
-    probeShell.style.position = "relative";
-    probeShell.style.width = settings.page.w + "in";
-    probeShell.style.height = settings.page.h + "in";
-    probeShell.style.background = "#fff";
-    probeShell.appendChild(TPP.pageEl(pages[0], settings, 0, 0, false, true));
-    mount.appendChild(probeShell);
-    TPP.renderQr(probeShell, settings);
-    await TPP.waitForImages(probeShell);
-    await new Promise(requestAnimationFrame);
-    const probeCanvas = await html2canvas(probeShell, {
-      scale: scale,
-      backgroundColor: "#fff",
-    });
+    const renderShell = TPP.createExportRenderShell(settings);
+    mount.appendChild(renderShell);
+    const probeCanvas = await TPP.renderExportPageCanvas(
+      renderShell,
+      pages[0],
+      settings,
+      scale,
+    );
     const firstCanvas = TPP.exportCanvasForDepth(
       probeCanvas,
       exportOptions.colorDepth,
@@ -1648,23 +1666,12 @@ TPP.exportMp4 = async function (options) {
         i === 0
           ? firstOpaqueCanvas
           : await (async function () {
-              const shell = document.createElement("div");
-              shell.style.position = "relative";
-              shell.style.width = settings.page.w + "in";
-              shell.style.height = settings.page.h + "in";
-              shell.style.background = "#fff";
-              shell.appendChild(
-                TPP.pageEl(pages[i], settings, 0, 0, false, true),
+              const canvas = await TPP.renderExportPageCanvas(
+                renderShell,
+                pages[i],
+                settings,
+                scale,
               );
-              mount.appendChild(shell);
-              TPP.renderQr(shell, settings);
-              await TPP.waitForImages(shell);
-              await new Promise(requestAnimationFrame);
-              const canvas = await html2canvas(shell, {
-                scale: scale,
-                backgroundColor: "#fff",
-              });
-              shell.remove();
               return TPP.opaqueCanvas(
                 TPP.exportCanvasForDepth(
                   canvas,
