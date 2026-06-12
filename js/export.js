@@ -794,6 +794,103 @@ TPP.insertPngMetadata = function (bytes, entries) {
   out.set(bytes.subarray(offset), cursor);
   return out;
 };
+TPP.jpegCommentText = function (book, options) {
+  const fields = TPP.exportMetadataFields(book, options);
+  return TPP.condensedMetadataText(
+    [
+      { label: "Title", value: fields.title },
+      { label: "Author", value: fields.author },
+      { label: "Publisher", value: fields.publisher },
+      { label: "Classification", value: fields.classification },
+      { label: "Page", value: fields.page },
+      { label: "Keywords", value: fields.keywords },
+      { label: "Rights", value: fields.rights },
+    ],
+    {
+      separator: " | ",
+      maxLength: 240,
+      measure: "chars",
+      fallback: {
+        label: "Description",
+        value: fields.description,
+      },
+    },
+  );
+};
+TPP.jpegSegmentBytes = function (marker, payload) {
+  const data = payload instanceof Uint8Array ? payload : new Uint8Array(0);
+  const length = data.length + 2;
+  const out = new Uint8Array(data.length + 4);
+  out[0] = 0xff;
+  out[1] = marker & 0xff;
+  out[2] = (length >>> 8) & 0xff;
+  out[3] = length & 0xff;
+  out.set(data, 4);
+  return out;
+};
+TPP.jpegApp1ExifSegment = function (book, options) {
+  const exifBytes = TPP.pngExifBytes(book, options);
+  if (!(exifBytes instanceof Uint8Array) || !exifBytes.length) return new Uint8Array(0);
+  const prefix = TPP.pngTextEncoder.encode("Exif\0\0");
+  const payload = new Uint8Array(prefix.length + exifBytes.length);
+  payload.set(prefix, 0);
+  payload.set(exifBytes, prefix.length);
+  return TPP.jpegSegmentBytes(0xe1, payload);
+};
+TPP.jpegApp1XmpSegment = function (book, options) {
+  const packet = TPP.pngXmpPacket(book, options);
+  if (!String(packet || "").trim()) return new Uint8Array(0);
+  const prefix = TPP.pngTextEncoder.encode("http://ns.adobe.com/xap/1.0/\0");
+  const body = TPP.pngTextEncoder.encode(packet);
+  const payload = new Uint8Array(prefix.length + body.length);
+  payload.set(prefix, 0);
+  payload.set(body, prefix.length);
+  return TPP.jpegSegmentBytes(0xe1, payload);
+};
+TPP.jpegCommentSegment = function (book, options) {
+  const comment = TPP.legacyMetadataText(TPP.jpegCommentText(book, options));
+  if (!comment) return new Uint8Array(0);
+  return TPP.jpegSegmentBytes(0xfe, TPP.pngLatin1Bytes(comment));
+};
+TPP.insertJpegMetadata = function (bytes, book, options) {
+  if (!(bytes instanceof Uint8Array) || bytes.length < 4) return bytes;
+  if (bytes[0] !== 0xff || bytes[1] !== 0xd8) return bytes;
+  const segments = [
+    TPP.jpegApp1ExifSegment(book, options),
+    TPP.jpegApp1XmpSegment(book, options),
+    TPP.jpegCommentSegment(book, options),
+  ].filter(function (segment) {
+    return segment && segment.length;
+  });
+  if (!segments.length) return bytes;
+  let offset = 2;
+  while (offset + 4 <= bytes.length && bytes[offset] === 0xff) {
+    const marker = bytes[offset + 1];
+    if (
+      !(
+        (marker >= 0xe0 && marker <= 0xef) ||
+        marker === 0xfe
+      )
+    ) {
+      break;
+    }
+    const length = ((bytes[offset + 2] << 8) >>> 0) + (bytes[offset + 3] >>> 0);
+    if (length < 2 || offset + 2 + length > bytes.length) break;
+    offset += 2 + length;
+  }
+  const insertBytesLength = segments.reduce(function (sum, segment) {
+    return sum + segment.length;
+  }, 0);
+  const out = new Uint8Array(bytes.length + insertBytesLength);
+  out.set(bytes.subarray(0, offset), 0);
+  let cursor = offset;
+  segments.forEach(function (segment) {
+    out.set(segment, cursor);
+    cursor += segment.length;
+  });
+  out.set(bytes.subarray(offset), cursor);
+  return out;
+};
 TPP.gifCommentExtensionBytes = function (text) {
   const message = String(text || "").trim();
   if (!message) return new Uint8Array(0);
@@ -2665,21 +2762,30 @@ TPP.exportBlobForCanvas = function (canvas, options) {
           resolve(null);
           return;
         }
-        if (exportOptions.format !== "png") {
-          resolve(blob);
-          return;
-        }
         try {
           const bytes = new Uint8Array(await blob.arrayBuffer());
           const sourceBook = options && options.book ? options.book : TPP.settings();
-          const metadataBytes = TPP.insertPngMetadata(
-            bytes,
-            TPP.pngTextEntries(sourceBook, {
+          if (exportOptions.format === "png") {
+            const metadataBytes = TPP.insertPngMetadata(
+              bytes,
+              TPP.pngTextEntries(sourceBook, {
+                pageIndex: options && options.pageIndex,
+                totalPages: options && options.totalPages,
+              }),
+            );
+            resolve(new Blob([metadataBytes], { type: "image/png" }));
+            return;
+          }
+          if (exportOptions.format === "jpeg") {
+            const metadataBytes = TPP.insertJpegMetadata(bytes, sourceBook, {
               pageIndex: options && options.pageIndex,
               totalPages: options && options.totalPages,
-            }),
-          );
-          resolve(new Blob([metadataBytes], { type: "image/png" }));
+              generatedAt: options && options.generatedAt,
+            });
+            resolve(new Blob([metadataBytes], { type: "image/jpeg" }));
+            return;
+          }
+          resolve(blob);
         } catch (_error) {
           resolve(blob);
         }
