@@ -5,6 +5,7 @@ export function init(TPP) {
     return {
       applyMonoDither: TPP.applyImageExportMonoDither,
       applyPaletteDither: TPP.applyImageExportPaletteDither,
+      buildCustomCharsetSheet: TPP.buildImageExportCustomCharsetSheet,
     };
   }
   initialized = true;
@@ -758,6 +759,75 @@ export function init(TPP) {
         fit.fg,
       );
     });
+    return charset;
+  };
+  TPP.buildImageExportCustomCharsetSheet = function (canvas, palette, options) {
+    if (!canvas || !canvas.width || !canvas.height) return null;
+    const paletteColors =
+      Array.isArray(palette) && palette.length ? palette : [[0, 0, 0]];
+    const sourceCtx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!sourceCtx) return null;
+    const image = sourceCtx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = new Uint8ClampedArray(image.data);
+    const charset = applyPaletteCustomCharset(
+      data,
+      canvas.width,
+      canvas.height,
+      paletteColors,
+    );
+    const patterns = Array.isArray(charset) ? charset : [];
+    const config = options || {};
+    const cellSize = Math.max(8, Number(config.cellSize) || 8);
+    const cols = 16;
+    const rows = 16;
+    const padding = Math.max(0, Number(config.padding) || 0);
+    const gutter = Math.max(0, Number(config.gutter) || 0);
+    const checkerboardPreview = Boolean(config.checkerboardPreview);
+    const out = document.createElement("canvas");
+    out.width =
+      cols * cellSize + padding * 2 + Math.max(0, cols - 1) * gutter;
+    out.height =
+      rows * cellSize + padding * 2 + Math.max(0, rows - 1) * gutter;
+    const ctx = out.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = config.background || "#f8f2e6";
+    ctx.fillRect(0, 0, out.width, out.height);
+    patterns.forEach(function (mask, index) {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      const x0 = padding + col * (cellSize + gutter);
+      const y0 = padding + row * (cellSize + gutter);
+      const darkCell = (row + col) % 2 === 1;
+      const bgColor = checkerboardPreview
+        ? darkCell
+          ? "#d0d0d0"
+          : "#ffffff"
+        : "#ffffff";
+      const fgColor = checkerboardPreview
+        ? darkCell
+          ? "#404040"
+          : "#000000"
+        : "#000000";
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(x0, y0, cellSize, cellSize);
+      const px = cellSize / 8;
+      ctx.fillStyle = fgColor;
+      for (let y = 0; y < 8; y += 1) {
+        for (let x = 0; x < 8; x += 1) {
+          if (!mask[y * 8 + x]) continue;
+          ctx.fillRect(
+            x0 + x * px,
+            y0 + y * px,
+            Math.max(1, Math.ceil(px)),
+            Math.max(1, Math.ceil(px)),
+          );
+        }
+      }
+    });
+    return {
+      canvas: out,
+      count: patterns.length,
+    };
   };
   const paletteDitherers = {
     threshold: function (data, width, height, palette) {
@@ -1122,5 +1192,6 @@ export function init(TPP) {
   return {
     applyMonoDither: TPP.applyImageExportMonoDither,
     applyPaletteDither: TPP.applyImageExportPaletteDither,
+    buildCustomCharsetSheet: TPP.buildImageExportCustomCharsetSheet,
   };
 }

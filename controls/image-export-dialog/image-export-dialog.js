@@ -74,6 +74,21 @@ export async function init(TPP) {
   const imageExportThresholdValue = document.getElementById(
     "imageExportDialogThresholdValue",
   );
+  const imageExportCharsetPreview = document.getElementById(
+    "imageExportCharsetPreview",
+  );
+  const imageExportCharsetDialog = document.getElementById(
+    "imageExportCharsetDialog",
+  );
+  const imageExportCharsetDialogTitle = document.getElementById(
+    "imageExportCharsetDialogTitle",
+  );
+  const imageExportCharsetDialogCanvas = document.getElementById(
+    "imageExportCharsetDialogCanvas",
+  );
+  const imageExportCharsetSave = document.getElementById(
+    "imageExportCharsetSave",
+  );
   const imageExportEstimate = document.getElementById(
     "imageExportDialogEstimate",
   );
@@ -131,6 +146,11 @@ export async function init(TPP) {
     !imageExportDitherWrap ||
     !imageExportDither ||
     !imageExportThresholdValue ||
+    !imageExportCharsetPreview ||
+    !imageExportCharsetDialog ||
+    !imageExportCharsetDialogTitle ||
+    !imageExportCharsetDialogCanvas ||
+    !imageExportCharsetSave ||
     !imageExportEstimate ||
     !imageExportPreviewPrev ||
     !imageExportPreviewNext ||
@@ -469,6 +489,11 @@ export async function init(TPP) {
     imageExportThresholdWrap.classList.toggle("is-disabled", !mono);
     imageExportDither.disabled = !(mono || indexed);
     imageExportDitherWrap.classList.toggle("is-disabled", !(mono || indexed));
+    imageExportCharsetPreview.disabled = !customCharsetMode();
+    imageExportCharsetPreview.classList.toggle(
+      "is-disabled",
+      imageExportCharsetPreview.disabled,
+    );
     imageExportQualityValue.textContent =
       Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) + "%";
     imageExportThresholdValue.textContent = String(
@@ -486,6 +511,12 @@ export async function init(TPP) {
     await ensureSelectedPalette();
     syncFormatUi();
   };
+  const customCharsetMode = function () {
+    return (
+      imageExportColorDepth.value === "indexed" &&
+      imageExportDither.value === "c64-custom-charset"
+    );
+  };
   const updateEstimate = function () {
     const pixels = TPP.imageExportPixels(Number(imageExportDpi.value) || 300);
     imageExportEstimate.textContent =
@@ -497,6 +528,86 @@ export async function init(TPP) {
   };
   TPP.syncImageExportFormatUi = syncFormatUi;
   TPP.updateImageExportEstimate = updateEstimate;
+  const buildCurrentExportOptions = function () {
+    return TPP.imageExportOptions({
+      dpi: Number(imageExportDpi.value) || 300,
+      format: imageExportFormat.value || "png",
+      quality: Number(imageExportQuality.value) || 92,
+      colorDepth: imageExportColorDepth.value || "color24",
+      palette: imageExportPalette.value || "websafe",
+      threshold: Number(imageExportThreshold.value) || 128,
+      dithering: imageExportDither.value || "threshold",
+    });
+  };
+  const buildCharsetPreview = async function () {
+    if (!customCharsetMode()) return null;
+    if (
+      typeof TPP.buildImageExportCustomCharsetSheet !== "function" ||
+      typeof TPP.renderImageExportPreviewCanvas !== "function"
+    ) {
+      return null;
+    }
+    TPP.sync("nosave");
+    const pages = TPP.buildPages();
+    if (!pages.length) return null;
+    const settings = TPP.settings();
+    const exportOptions = buildCurrentExportOptions();
+    await TPP.ensureImageExportPaletteForOptionsLoaded(exportOptions);
+    const pageIndex = Math.max(
+      0,
+      Math.min(Number(TPP.imageExportPreviewIndex) || 0, pages.length - 1),
+    );
+    const scale = Math.max(1, TPP.dpi(exportOptions.dpi) / 96);
+    const pageCanvas = await TPP.renderImageExportPreviewCanvas(
+      pages[pageIndex],
+      settings,
+      scale,
+    );
+    return TPP.buildImageExportCustomCharsetSheet(
+      pageCanvas,
+      TPP.imageExportNamedPalette(exportOptions.palette),
+      {
+        cellSize: 8,
+        cols: 16,
+        checkerboardPreview: Boolean(
+          TPP.imageExportCharsetPreviewCheckerboard,
+        ),
+      },
+    );
+  };
+  const openCharsetPreview = async function () {
+    if (typeof imageExportCharsetDialog.showModal !== "function") return;
+    if (!customCharsetMode()) return;
+    const previousLabel = imageExportCharsetPreview.textContent;
+    imageExportCharsetPreview.disabled = true;
+    imageExportCharsetPreview.textContent = "Building...";
+    try {
+      const sheet = await buildCharsetPreview();
+      if (!sheet || !sheet.canvas) {
+        TPP.toast("Unable to build custom charset preview.");
+        return;
+      }
+      const ctx = imageExportCharsetDialogCanvas.getContext("2d");
+      if (!ctx) return;
+      imageExportCharsetDialogCanvas.width = sheet.canvas.width;
+      imageExportCharsetDialogCanvas.height = sheet.canvas.height;
+      ctx.clearRect(
+        0,
+        0,
+        imageExportCharsetDialogCanvas.width,
+        imageExportCharsetDialogCanvas.height,
+      );
+      ctx.drawImage(sheet.canvas, 0, 0);
+      TPP.imageExportCharsetPreviewSheet = sheet;
+      imageExportCharsetDialogTitle.textContent = "Custom Charset Preview";
+      if (!imageExportCharsetDialog.open) imageExportCharsetDialog.showModal();
+    } catch (_error) {
+      TPP.toast("Unable to build custom charset preview.");
+    } finally {
+      imageExportCharsetPreview.textContent = previousLabel;
+      syncFormatUi();
+    }
+  };
   const schedulePreview = function () {
     TPP.scheduleImageExportPreview();
   };
@@ -583,6 +694,26 @@ export async function init(TPP) {
   });
   imageExportPalettePreview.addEventListener("click", function () {
     openPalettePreview();
+  });
+  imageExportCharsetPreview.addEventListener("click", function () {
+    TPP.imageExportCharsetPreviewCheckerboard = false;
+    openCharsetPreview();
+  });
+  imageExportCharsetDialogCanvas.addEventListener("click", function () {
+    if (!imageExportCharsetDialog.open) return;
+    TPP.imageExportCharsetPreviewCheckerboard =
+      !TPP.imageExportCharsetPreviewCheckerboard;
+    openCharsetPreview();
+  });
+  imageExportCharsetSave.addEventListener("click", async function () {
+    const sheet = TPP.imageExportCharsetPreviewSheet;
+    if (!sheet || !sheet.canvas || typeof TPP.exportBlobForCanvas !== "function")
+      return;
+    const blob = await TPP.exportBlobForCanvas(sheet.canvas, {
+      format: "png",
+      quality: 100,
+    });
+    TPP.downloadBlob("c64-custom-charset-preview.png", blob);
   });
   imageExportPaletteDialogCanvas.addEventListener("click", function (event) {
     const layout = TPP.imageExportPaletteDialogLayout;
@@ -742,6 +873,20 @@ export async function init(TPP) {
     const closeButton = e.target.closest("[data-action='close']");
     if (closeButton && imageExportPaletteDialog.open)
       imageExportPaletteDialog.close();
+  });
+  imageExportCharsetDialog.addEventListener("click", function (e) {
+    const card = e.target.closest(".modal-card");
+    if (
+      e.target === imageExportCharsetDialog &&
+      !card &&
+      imageExportCharsetDialog.open
+    ) {
+      imageExportCharsetDialog.close();
+      return;
+    }
+    const closeButton = e.target.closest("[data-action='close']");
+    if (closeButton && imageExportCharsetDialog.open)
+      imageExportCharsetDialog.close();
   });
   syncPlaybackUi();
   return {};

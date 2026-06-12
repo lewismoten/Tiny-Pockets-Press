@@ -119,6 +119,14 @@
             <option value="c64-custom-charset">C64 Custom Charset</option>
           </select>
         </label>
+        <button
+          type="button"
+          id="imageExportCharsetPreview"
+          class="image-export-charset-preview"
+          disabled
+        >
+          Preview Charset
+        </button>
         <label id="imageExportDialogThresholdWrap"
           >1-bit Threshold / Bias
           <input
@@ -192,6 +200,31 @@
       <button type="button" class="button-cancel" data-action="cancel">
         Cancel
       </button>
+    </div>
+  </form>
+</dialog>
+<dialog id="imageExportCharsetDialog" class="modal">
+  <form method="dialog" class="modal-card image-export-charset-dialog-card">
+    <div class="workspace-header">
+      <h2 id="imageExportCharsetDialogTitle">Custom Charset Preview</h2>
+    </div>
+    <div class="image-export-charset-dialog-layout">
+      <div class="image-export-charset-dialog-stage">
+        <canvas
+          id="imageExportCharsetDialogCanvas"
+          width="128"
+          height="128"
+        ></canvas>
+      </div>
+      <div class="image-export-charset-inspector">
+        <div class="image-export-charset-hint">
+          Click the image to toggle checkerboard preview.
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="imageExportCharsetSave">Save PNG</button>
+      <button type="button" data-action="close">Close</button>
     </div>
   </form>
 </dialog>
