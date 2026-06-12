@@ -1060,9 +1060,20 @@ TPP.renderImageExportPreview = async function () {
         String(TPP.imageExportPreviewIndex + 1) +
         "-after." +
         (exportOptions.format === "jpeg" ? "jpg" : exportOptions.format);
+  const compareStageStyle = function () {
+    return (
+      "width:min(100%," +
+      Math.max(1, Number(exportPixels.width) || 1) +
+      "px);height:min(100%," +
+      Math.max(1, Number(exportPixels.height) || 1) +
+      "px)"
+    );
+  };
   const compareStageMarkup = function (beforeSrc, afterSrc, beforeSize, afterSize) {
     return (
-      '<div class="image-export-compare">' +
+      '<div class="image-export-compare" style="' +
+      compareStageStyle() +
+      '">' +
       '<img draggable="false" src="' +
       TPP.esc(beforeSrc || "") +
       '" alt="Original preview">' +
@@ -1083,6 +1094,7 @@ TPP.renderImageExportPreview = async function () {
     if (!page || typeof TPP.pageEl !== "function") return;
     const compare = document.createElement("div");
     compare.className = "image-export-compare image-export-compare-live";
+    compare.style.cssText = compareStageStyle();
     const beforePane = document.createElement("div");
     beforePane.className = "image-export-compare-pane image-export-compare-pane-before";
     const afterPane = document.createElement("div");
