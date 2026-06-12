@@ -1,5 +1,28 @@
 window.TPP = window.TPP || {};
 
+TPP.generatorInfo = function () {
+  const name = "Tiny Pockets Press";
+  const fallbackSiteUrl = "https://tinypocketspress.local";
+  let siteUrl = fallbackSiteUrl;
+  if (
+    typeof window !== "undefined" &&
+    window.location &&
+    (window.location.protocol === "http:" || window.location.protocol === "https:")
+  ) {
+    siteUrl = window.location.origin;
+  }
+  let domain = "tinypocketspress.local";
+  try {
+    domain = new URL(siteUrl).host || domain;
+  } catch (_error) {}
+  return {
+    name: name,
+    siteUrl: siteUrl,
+    domain: domain,
+    namespaceUrl: siteUrl.replace(/\/+$/g, "") + "/ns/1.0/",
+    exportLabel: name + " Export",
+  };
+};
 TPP.html2canvasOptions = function (options) {
   return Object.assign(
     {
@@ -249,6 +272,7 @@ TPP.pngChunkBytes = function (type, data) {
 };
 TPP.pngTextEntries = function (book, options) {
   const fields = TPP.exportMetadataFields(book, options);
+  const generator = TPP.generatorInfo();
   return [
     {
       keyword: "Title",
@@ -262,7 +286,7 @@ TPP.pngTextEntries = function (book, options) {
     { keyword: "Language", value: fields.language },
     { keyword: "Keywords", value: fields.keywords },
     { keyword: "Copyright", value: fields.rights },
-    { keyword: "Software", value: "Tiny Pockets Press" },
+    { keyword: "Software", value: generator.name },
     { keyword: "XML:com.adobe.xmp", value: TPP.pngXmpPacket(book, options) },
     { keyword: "__EXIF__", value: TPP.pngExifBytes(book, options) },
     { keyword: "__TIME__", value: TPP.pngGeneratedDateInfo(options).pngTime },
@@ -462,6 +486,7 @@ TPP.pngGeneratedDateInfo = function (options) {
 };
 TPP.pngXmpPacket = function (book, options) {
   const fields = TPP.exportMetadataFields(book, options);
+  const generator = TPP.generatorInfo();
   const languageTag = String(fields.language || "").trim();
   const altLanguage = languageTag || "x-default";
   const xmpDate = TPP.pngXmpDateTime(fields.date);
@@ -479,7 +504,9 @@ TPP.pngXmpPacket = function (book, options) {
     '<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>',
     '<x:xmpmeta xmlns:x="adobe:ns:meta/">',
     '  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">',
-    '    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmlns:tpp="https://tinypocketspress.local/ns/1.0/">',
+    '    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmlns:tpp="' +
+      TPP.pngXmlEscape(generator.namespaceUrl) +
+      '">',
   ];
   if (fields.title) {
     lines.push(
@@ -555,7 +582,11 @@ TPP.pngXmpPacket = function (book, options) {
   }
   lines.push("      <xmp:ModifyDate>" + TPP.pngXmlEscape(generated.xmp) + "</xmp:ModifyDate>");
   lines.push("      <xmp:MetadataDate>" + TPP.pngXmlEscape(generated.xmp) + "</xmp:MetadataDate>");
-  lines.push("      <xmp:CreatorTool>Tiny Pockets Press</xmp:CreatorTool>");
+  lines.push(
+    "      <xmp:CreatorTool>" +
+      TPP.pngXmlEscape(generator.name) +
+      "</xmp:CreatorTool>",
+  );
   if (fields.language) {
     lines.push("      <dc:language><rdf:Bag><rdf:li>" + TPP.pngXmlEscape(fields.language) + "</rdf:li></rdf:Bag></dc:language>");
   }
@@ -611,6 +642,7 @@ TPP.pngExifUserComment = function (value) {
 };
 TPP.pngExifBytes = function (book, options) {
   const fields = TPP.exportMetadataFields(book, options);
+  const generator = TPP.generatorInfo();
   const exifDate = TPP.pngExifDateTime(fields.date);
   const generated = TPP.pngGeneratedDateInfo(options);
   const comment = TPP.condensedMetadataText(
@@ -643,7 +675,7 @@ TPP.pngExifBytes = function (book, options) {
   };
   addAscii(ifd0Entries, 0x010e, fields.description || fields.title);
   addAscii(ifd0Entries, 0x013b, fields.author);
-  addAscii(ifd0Entries, 0x0131, "Tiny Pockets Press");
+  addAscii(ifd0Entries, 0x0131, generator.name);
   addAscii(ifd0Entries, 0x0132, generated.exif);
   addAscii(ifd0Entries, 0x8298, fields.rights);
   addBinary(exifEntries, 0x9286, TPP.pngExifUserComment(comment));
@@ -1379,6 +1411,7 @@ TPP.zipDublinCoreManifest = function (book, pages, options) {
 };
 TPP.zipFileIdDiz = function (book, pages, options) {
   const metadata = TPP.zipManifestMetadata(book, pages, options);
+  const generator = TPP.generatorInfo();
   const maxLines = 10;
   const maxWidth = 45;
   const normalize = function (value) {
@@ -1406,7 +1439,7 @@ TPP.zipFileIdDiz = function (book, pages, options) {
     }
   };
   const lines = [];
-  pushWrapped(lines, metadata.title || "Tiny Pockets Press Export");
+  pushWrapped(lines, metadata.title || generator.exportLabel);
   if (metadata.creator) pushWrapped(lines, "By " + metadata.creator);
   if (metadata.publisher || metadata.date) {
     pushWrapped(
@@ -1504,6 +1537,7 @@ TPP.mp4LanguageCode = async function (book) {
 
 TPP.pdfMetadata = function (book, options) {
   const source = book || {};
+  const generator = TPP.generatorInfo();
   const exportKind = String((options && options.kind) || "").trim();
   const baseTitle = String(source.title || "Untitled").trim() || "Untitled";
   const subtitle = String(
@@ -1571,8 +1605,8 @@ TPP.pdfMetadata = function (book, options) {
     author: author,
     subject: subject,
     keywords: keywords,
-    creator: "Tiny Pockets Press",
-    producer: "Tiny Pockets Press",
+    creator: generator.name,
+    producer: generator.name,
   };
 };
 TPP.applyPdfMetadata = function (pdf, book, options) {
