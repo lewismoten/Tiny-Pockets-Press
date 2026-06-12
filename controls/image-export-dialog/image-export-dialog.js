@@ -598,7 +598,6 @@ export async function init(TPP) {
       imageExportThresholdValue.textContent = String(thresholdValue);
     }
     syncPalettePreview();
-    syncPaletteStatus();
   };
   const ensureSelectedPalette = async function () {
     await TPP.ensureImageExportPaletteLoaded(
@@ -735,6 +734,19 @@ export async function init(TPP) {
       imageExportDownloadSeqAll.disabled = !enabled || !hasPages;
     }
   };
+  const charsetPreviewCacheKey = function (exportOptions, pageIndex, checkerboard) {
+    const options = exportOptions || {};
+    return JSON.stringify({
+      pageIndex: Math.max(0, Number(pageIndex) || 0),
+      palette: options.palette || "websafe",
+      dithering: options.dithering || "threshold",
+      threshold: Number(options.threshold) || 0,
+      dpi: Number(options.dpi) || 0,
+      targetWidth: Number(options.targetWidth) || 0,
+      targetHeight: Number(options.targetHeight) || 0,
+      checkerboard: Boolean(checkerboard),
+    });
+  };
   const buildCharsetPreview = async function () {
     if (!customCharsetMode()) return null;
     if (
@@ -753,6 +765,19 @@ export async function init(TPP) {
       0,
       Math.min(Number(TPP.imageExportPreviewIndex) || 0, pages.length - 1),
     );
+    const checkerboard = Boolean(TPP.imageExportCharsetPreviewCheckerboard);
+    const cacheKey = charsetPreviewCacheKey(
+      exportOptions,
+      pageIndex,
+      checkerboard,
+    );
+    if (
+      TPP.imageExportCharsetPreviewCache &&
+      TPP.imageExportCharsetPreviewCache.key === cacheKey &&
+      TPP.imageExportCharsetPreviewCache.sheet
+    ) {
+      return TPP.imageExportCharsetPreviewCache.sheet;
+    }
     const scale = typeof TPP.imageExportRenderScale === "function"
       ? TPP.imageExportRenderScale(settings, exportOptions)
       : Math.max(1, TPP.dpi(exportOptions.dpi) / 96);
@@ -761,7 +786,7 @@ export async function init(TPP) {
       settings,
       scale,
     );
-    return TPP.buildImageExportCustomCharsetSheet(
+    const sheet = TPP.buildImageExportCustomCharsetSheet(
       typeof TPP.fitCanvasToExportTarget === "function"
         ? TPP.fitCanvasToExportTarget(pageCanvas, exportOptions)
         : pageCanvas,
@@ -770,16 +795,20 @@ export async function init(TPP) {
         cellSize: 8,
         cols: 16,
         selectionBias: exportOptions.threshold,
-        checkerboardPreview: Boolean(
-          TPP.imageExportCharsetPreviewCheckerboard,
-        ),
+        checkerboardPreview: checkerboard,
       },
     );
+    TPP.imageExportCharsetPreviewCache = {
+      key: cacheKey,
+      sheet: sheet || null,
+    };
+    return sheet;
   };
   const refreshCharsetPreviewIcon = async function () {
     const token = (TPP.imageExportCharsetIconToken || 0) + 1;
     TPP.imageExportCharsetIconToken = token;
     if (!customCharsetMode()) {
+      TPP.imageExportCharsetPreviewCache = null;
       TPP.imageExportCharsetIconSheet = null;
       renderCharsetPreviewIcon();
       return;
