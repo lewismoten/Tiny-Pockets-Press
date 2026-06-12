@@ -96,18 +96,6 @@
           />
           <span id="imageExportDialogQualityValue">92%</span>
         </label>
-        <label id="imageExportDialogThresholdWrap"
-          >1-bit Threshold / Bias
-          <input
-            id="imageExportDialogThreshold"
-            type="range"
-            min="0"
-            max="255"
-            step="1"
-            value="128"
-          />
-          <span id="imageExportDialogThresholdValue">128</span>
-        </label>
         <label id="imageExportDialogDitherWrap"
           >Dithering
           <select id="imageExportDialogDither">
@@ -126,6 +114,18 @@
             <option value="random">Random</option>
             <option value="pattern">Pattern</option>
           </select>
+        </label>
+        <label id="imageExportDialogThresholdWrap"
+          >1-bit Threshold / Bias
+          <input
+            id="imageExportDialogThreshold"
+            type="range"
+            min="0"
+            max="255"
+            step="1"
+            value="128"
+          />
+          <span id="imageExportDialogThresholdValue">128</span>
         </label>
         <div id="imageExportDialogEstimate" class="image-export-estimate"></div>
       </div>
