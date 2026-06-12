@@ -512,9 +512,11 @@ export async function init(TPP) {
       Math.max(1, Math.min(100, Number(imageExportQuality.value) || 92)) + "%";
     const thresholdValue = clampThreshold(imageExportThreshold.value);
     if (customCharset) {
+      const accuracyPercent = Math.round((thresholdValue / 255) * 100);
+      const varietyPercent = 100 - accuracyPercent;
       imageExportThresholdLabel.textContent = "Variety \u2194 Accuracy";
       imageExportThresholdValue.textContent =
-        Math.round((thresholdValue / 255) * 100) + "% accuracy";
+        varietyPercent + "% variety / " + accuracyPercent + "% accuracy";
     } else {
       imageExportThresholdLabel.textContent = "1-bit Threshold / Bias";
       imageExportThresholdValue.textContent = String(thresholdValue);
