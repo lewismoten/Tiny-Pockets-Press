@@ -41,10 +41,9 @@ TPP.exportClassificationText = function (book) {
   }
   return String(rawValue || "").trim();
 };
-TPP.gifCommentText = function (book, options) {
+TPP.exportMetadataFields = function (book, options) {
   const source = book || {};
   const config = options || {};
-  const maxCommentBytes = 240;
   const title = String(
     typeof TPP.bookInfoValue === "function"
       ? TPP.bookInfoValue(source, "title")
@@ -98,36 +97,95 @@ TPP.gifCommentText = function (book, options) {
   ).trim();
   const pageIndex = Math.max(0, Number(config.pageIndex) || 0);
   const totalPages = Math.max(0, Number(config.totalPages) || 0);
-  const lines = [];
-  const pushLine = function (label, value) {
+  return {
+    title: title ? title + (subtitle ? ": " + subtitle : "") : "",
+    author: author,
+    publisher: publisher,
+    date: pubDate,
+    language: language,
+    subject: subject,
+    classification: classification,
+    page:
+      pageIndex > 0
+        ? totalPages > 0
+          ? pageIndex + " of " + totalPages
+          : String(pageIndex)
+        : "",
+    keywords: keywords,
+    description: description,
+    rights: copyright,
+  };
+};
+TPP.condensedMetadataText = function (items, options) {
+  const config = options || {};
+  const separator = Object.prototype.hasOwnProperty.call(config, "separator")
+    ? String(config.separator)
+    : "\n";
+  const maxLength = Math.max(1, Number(config.maxLength) || 240);
+  const measure =
+    config.measure === "chars"
+      ? function (value) {
+          return String(value || "").length;
+        }
+      : function (value) {
+          return new TextEncoder().encode(String(value || "")).length;
+        };
+  const parts = [];
+  const pushPart = function (label, value) {
     const trimmedValue = String(value || "").trim();
     if (!trimmedValue) return;
-    const nextLine = label + ": " + trimmedValue;
-    const candidate = lines.concat(nextLine).join("\n");
-    if (new TextEncoder().encode(candidate).length <= maxCommentBytes) {
-      lines.push(nextLine);
+    const nextPart = label + ": " + trimmedValue;
+    const candidate = parts.concat(nextPart).join(separator);
+    if (measure(candidate) <= maxLength) {
+      parts.push(nextPart);
     }
   };
-  pushLine("Title", title + (subtitle ? ": " + subtitle : ""));
-  pushLine("Author", author);
-  pushLine("Publisher", publisher);
-  pushLine("Date", pubDate);
-  pushLine("Language", language);
-  pushLine("Subject", subject);
-  pushLine("Classification", classification);
-  if (pageIndex > 0) {
-    pushLine(
-      "Page",
-      totalPages > 0 ? pageIndex + " of " + totalPages : String(pageIndex),
-    );
+  (Array.isArray(items) ? items : []).forEach(function (item) {
+    if (!item) return;
+    pushPart(item.label, item.value);
+  });
+  if (
+    !parts.length &&
+    config.fallback &&
+    config.fallback.label &&
+    String(config.fallback.value || "").trim()
+  ) {
+    const fallbackPrefix = String(config.fallback.label).trim() + ": ";
+    const budget = Math.max(1, maxLength - measure(fallbackPrefix));
+    let fallbackValue = String(config.fallback.value || "").trim();
+    while (fallbackValue && measure(fallbackValue) > budget) {
+      fallbackValue = fallbackValue.slice(0, -1).trimEnd();
+    }
+    if (fallbackValue) {
+      parts.push(fallbackPrefix + fallbackValue);
+    }
   }
-  pushLine("Keywords", keywords);
-  pushLine("Rights", copyright);
-  if (!lines.length && description) {
-    const truncatedDescription = description.slice(0, maxCommentBytes - 16);
-    pushLine("Description", truncatedDescription);
-  }
-  return lines.join("\n");
+  return parts.join(separator);
+};
+TPP.gifCommentText = function (book, options) {
+  const fields = TPP.exportMetadataFields(book, options);
+  return TPP.condensedMetadataText(
+    [
+      { label: "Title", value: fields.title },
+      { label: "Author", value: fields.author },
+      { label: "Publisher", value: fields.publisher },
+      { label: "Date", value: fields.date },
+      { label: "Language", value: fields.language },
+      { label: "Subject", value: fields.subject },
+      { label: "Classification", value: fields.classification },
+      { label: "Page", value: fields.page },
+      { label: "Keywords", value: fields.keywords },
+      { label: "Rights", value: fields.rights },
+    ],
+    {
+      separator: "\n",
+      maxLength: 240,
+      fallback: {
+        label: "Description",
+        value: fields.description,
+      },
+    },
+  );
 };
 TPP.writeGifCommentExtension = function (gif, text) {
   const message = String(text || "").trim();
@@ -190,87 +248,40 @@ TPP.pngChunkBytes = function (type, data) {
   return chunk;
 };
 TPP.pngTextEntries = function (book, options) {
-  const source = book || {};
-  const config = options || {};
-  const title = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "title")
-      : source.title || "",
-  ).trim();
-  const subtitle = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "subtitle")
-      : source.subtitle || "",
-  ).trim();
-  const author = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "author")
-      : source.author || "",
-  ).trim();
-  const publisher = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "publisher")
-      : source.publisher || "",
-  ).trim();
-  const pubDate = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "pubDate")
-      : source.pubDate || "",
-  ).trim();
-  const language = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "language")
-      : source.language || "",
-  ).trim();
-  const subject = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "subject")
-      : source.subject || "",
-  ).trim();
-  const description = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "description")
-      : source.description || "",
-  ).trim();
-  const keywords = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "keywords")
-      : source.keywords || "",
-  ).trim();
-  const classification = TPP.exportClassificationText(source);
-  const copyright = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "copyright")
-      : source.copyright || "",
-  ).trim();
-  const pageIndex = Math.max(0, Number(config.pageIndex) || 0);
-  const totalPages = Math.max(0, Number(config.totalPages) || 0);
-  const commentParts = [
-    publisher ? "Publisher: " + publisher : "",
-    classification ? "Classification: " + classification : "",
-    totalPages > 0 && pageIndex > 0
-      ? "Page: " + pageIndex + " of " + totalPages
-      : pageIndex > 0
-        ? "Page: " + pageIndex
-        : "",
-    keywords ? "Keywords: " + keywords : "",
-    copyright ? "Rights: " + copyright : "",
-  ].filter(Boolean);
+  const fields = TPP.exportMetadataFields(book, options);
   return [
     {
       keyword: "Title",
-      value: title ? title + (subtitle ? ": " + subtitle : "") : "",
+      value: fields.title,
     },
-    { keyword: "Author", value: author },
-    { keyword: "Description", value: description },
-    { keyword: "Subject", value: subject },
-    { keyword: "Publisher", value: publisher },
-    { keyword: "Creation Time", value: pubDate },
-    { keyword: "Language", value: language },
-    { keyword: "Keywords", value: keywords },
-    { keyword: "Copyright", value: copyright },
+    { keyword: "Author", value: fields.author },
+    { keyword: "Description", value: fields.description },
+    { keyword: "Subject", value: fields.subject },
+    { keyword: "Publisher", value: fields.publisher },
+    { keyword: "Creation Time", value: fields.date },
+    { keyword: "Language", value: fields.language },
+    { keyword: "Keywords", value: fields.keywords },
+    { keyword: "Copyright", value: fields.rights },
     { keyword: "Software", value: "Tiny Pockets Press" },
-    { keyword: "Comment", value: commentParts.join(" | ") },
+    {
+      keyword: "Comment",
+      value: TPP.condensedMetadataText(
+        [
+          { label: "Title", value: fields.title },
+          { label: "Author", value: fields.author },
+          { label: "Publisher", value: fields.publisher },
+          { label: "Classification", value: fields.classification },
+          { label: "Page", value: fields.page },
+          { label: "Keywords", value: fields.keywords },
+          { label: "Rights", value: fields.rights },
+        ],
+        {
+          separator: " | ",
+          maxLength: 240,
+          measure: "chars",
+        },
+      ),
+    },
   ].filter(function (entry) {
     return String(entry.value || "").trim();
   });
@@ -296,9 +307,17 @@ TPP.pngTTextLatin1 = function (value) {
     .replace(/[^\x00-\xff]/g, "?")
     .trim();
 };
+TPP.pngLatin1Bytes = function (value) {
+  const text = TPP.pngTTextLatin1(value);
+  const bytes = new Uint8Array(text.length);
+  for (let i = 0; i < text.length; i++) {
+    bytes[i] = text.charCodeAt(i) & 0xff;
+  }
+  return bytes;
+};
 TPP.pngTTextChunk = function (keyword, value) {
   const keywordBytes = TPP.pngTextEncoder.encode(String(keyword || "").trim());
-  const valueBytes = TPP.pngTextEncoder.encode(TPP.pngTTextLatin1(value));
+  const valueBytes = TPP.pngLatin1Bytes(value);
   const payload = new Uint8Array(keywordBytes.length + 1 + valueBytes.length);
   let offset = 0;
   payload.set(keywordBytes, offset);
@@ -430,56 +449,22 @@ TPP.insertGifCommentBeforeImage = function (bytes, text) {
   return out;
 };
 TPP.zipCommentText = function (book) {
-  const source = book || {};
-  const maxCommentLength = 240;
-  const title = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "title")
-      : source.title || "",
-  ).trim();
-  const subtitle = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "subtitle")
-      : source.subtitle || "",
-  ).trim();
-  const author = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "author")
-      : source.author || "",
-  ).trim();
-  const publisher = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "publisher")
-      : source.publisher || "",
-  ).trim();
-  const pubDate = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "pubDate")
-      : source.pubDate || "",
-  ).trim();
-  const classification = TPP.exportClassificationText(source);
-  const copyright = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "copyright")
-      : source.copyright || "",
-  ).trim();
-  const parts = [];
-  const pushPart = function (label, value) {
-    const trimmedValue = String(value || "").trim();
-    if (!trimmedValue) return;
-    const nextPart = label + ": " + trimmedValue;
-    const candidate = parts.concat(nextPart).join(" | ");
-    if (candidate.length <= maxCommentLength) {
-      parts.push(nextPart);
-    }
-  };
-  pushPart("Title", title + (subtitle ? ": " + subtitle : ""));
-  pushPart("Author", author);
-  pushPart("Publisher", publisher);
-  pushPart("Date", pubDate);
-  pushPart("Classification", classification);
-  pushPart("Rights", copyright);
-  return parts.join(" | ");
+  const fields = TPP.exportMetadataFields(book);
+  return TPP.condensedMetadataText(
+    [
+      { label: "Title", value: fields.title },
+      { label: "Author", value: fields.author },
+      { label: "Publisher", value: fields.publisher },
+      { label: "Date", value: fields.date },
+      { label: "Classification", value: fields.classification },
+      { label: "Rights", value: fields.rights },
+    ],
+    {
+      separator: " | ",
+      maxLength: 240,
+      measure: "chars",
+    },
+  );
 };
 TPP.exportFilenameExtension = function (format) {
   const value = String(format || "").trim().toLowerCase();
@@ -2164,30 +2149,20 @@ TPP.mp4MetadataDate = function (value) {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 TPP.mp4MetadataComment = function (book) {
-  const source = book || {};
-  const publisher = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "publisher")
-      : source.publisher || "",
-  ).trim();
-  const classification = TPP.exportClassificationText(source);
-  const keywords = String(
-    typeof TPP.bookInfoValue === "function"
-      ? TPP.bookInfoValue(source, "keywords")
-      : source.keywords || "",
-  ).trim();
-  const copyright = String(
-    typeof TPP.bookInfoFieldValue === "function"
-      ? TPP.bookInfoFieldValue(source, "copyright")
-      : source.copyright || "",
-  ).trim();
-  const parts = [
-    publisher ? "Publisher: " + publisher : "",
-    classification ? "Classification: " + classification : "",
-    keywords ? "Keywords: " + keywords : "",
-    copyright ? "Rights: " + copyright : "",
-  ].filter(Boolean);
-  return parts.join(" | ");
+  const fields = TPP.exportMetadataFields(book);
+  return TPP.condensedMetadataText(
+    [
+      { label: "Publisher", value: fields.publisher },
+      { label: "Classification", value: fields.classification },
+      { label: "Keywords", value: fields.keywords },
+      { label: "Rights", value: fields.rights },
+    ],
+    {
+      separator: " | ",
+      maxLength: 240,
+      measure: "chars",
+    },
+  );
 };
 TPP.mp4MetadataTags = function (book) {
   const source = book || {};
