@@ -414,11 +414,19 @@ TPP.openImageExportDialog = async function () {
   thresholdValue.textContent = threshold.value;
   preset.value = dpiPreset;
   customWrap.hidden = preset.value !== "custom";
+  if (TPP.preloadImageExportPalettes) {
+    await TPP.preloadImageExportPalettes();
+  }
+  await TPP.ensureImageExportPaletteLoaded(palette.value || "websafe");
   await TPP.ensureImageExportPaletteForOptionsLoaded({
     colorDepth: colorDepth.value || "color24",
     palette: palette.value || "websafe",
   });
-  if (TPP.syncImageExportFormatUi) TPP.syncImageExportFormatUi();
+  if (TPP.refreshImageExportFormatUi) {
+    await TPP.refreshImageExportFormatUi();
+  } else if (TPP.syncImageExportFormatUi) {
+    TPP.syncImageExportFormatUi();
+  }
   if (TPP.updateImageExportEstimate) TPP.updateImageExportEstimate();
   TPP.updateImageExportDuration();
   TPP.imageExportPreviewIndex = 0;

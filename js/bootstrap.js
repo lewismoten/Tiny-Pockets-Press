@@ -173,6 +173,9 @@ TPP.bootstrapApp = async function () {
   TPP.populate();
   await TPP.load();
   await TPP.loadStaleKeyLookup();
+  if (typeof TPP.preloadImageExportPalettes === "function") {
+    await TPP.preloadImageExportPalettes();
+  }
   await TPP.ensureControlModule("editor-book-info-controls");
   await TPP.ensureControlModule("settings-ui-controls");
   TPP.bindTopLevelEventRouters();

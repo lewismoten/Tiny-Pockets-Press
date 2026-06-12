@@ -37,6 +37,9 @@ export async function init(TPP) {
   const imageExportPalettePreviewCanvas = document.getElementById(
     "imageExportPalettePreviewCanvas",
   );
+  const imageExportPaletteStatus = document.getElementById(
+    "imageExportPaletteStatus",
+  );
   const imageExportPaletteDialog = document.getElementById(
     "imageExportPaletteDialog",
   );
@@ -144,6 +147,7 @@ export async function init(TPP) {
     !imageExportPalette ||
     !imageExportPalettePreview ||
     !imageExportPalettePreviewCanvas ||
+    !imageExportPaletteStatus ||
     !imageExportPaletteDialog ||
     !imageExportPaletteDialogTitle ||
     !imageExportPaletteDialogCanvas ||
@@ -414,6 +418,27 @@ export async function init(TPP) {
       }
     }
   };
+  const syncPaletteStatus = function () {
+    if (!imageExportPaletteStatus) return;
+    const selectedId = imageExportPalette.value || "websafe";
+    const selectedPalette = TPP.imageExportNamedPalette(selectedId) || [];
+    const loadedIds = Object.keys(TPP.imageExportPaletteById || {}).filter(function (id) {
+      return Array.isArray(TPP.imageExportPaletteById[id]);
+    });
+    const totalIds = typeof TPP.imageExportPaletteIds === "function"
+      ? TPP.imageExportPaletteIds().length
+      : loadedIds.length;
+    imageExportPaletteStatus.textContent =
+      "Palette cache: " +
+      loadedIds.length +
+      "/" +
+      totalIds +
+      " loaded. " +
+      selectedId +
+      ": " +
+      selectedPalette.length +
+      " colors.";
+  };
   const openPalettePreview = async function () {
     if (typeof imageExportPaletteDialog.showModal !== "function") return;
     await ensureSelectedPalette();
@@ -578,14 +603,15 @@ export async function init(TPP) {
       imageExportThresholdValue.textContent = String(thresholdValue);
     }
     syncPalettePreview();
+    syncPaletteStatus();
   };
   const ensureSelectedPalette = async function () {
-    if (imageExportColorDepth.value !== "indexed") return;
     await TPP.ensureImageExportPaletteLoaded(
       imageExportPalette.value || "websafe",
     );
   };
   const refreshFormatUi = async function () {
+    syncFormatUi();
     await ensureSelectedPalette();
     syncFormatUi();
   };
@@ -677,6 +703,7 @@ export async function init(TPP) {
       " pixels per page";
   };
   TPP.syncImageExportFormatUi = syncFormatUi;
+  TPP.refreshImageExportFormatUi = refreshFormatUi;
   TPP.updateImageExportEstimate = updateEstimate;
   const buildCurrentExportOptions = function () {
     const targetPixels = presetTargetPixels(imageExportPreset.value || "300");
