@@ -129,9 +129,30 @@
   color: #153a73;
 }
 .book-info-help-description,
+.book-info-help-export-value,
 .book-info-help-example {
   font-size: 0.82rem;
   line-height: 1.4;
+}
+.book-info-help-export {
+  display: grid;
+  gap: 0.18rem;
+  padding-top: 0.15rem;
+  border-top: 1px solid rgba(29, 99, 200, 0.16);
+}
+.book-info-help-export[hidden],
+.book-info-help-example[hidden] {
+  display: none !important;
+}
+.book-info-help-export-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1d63c8;
+}
+.book-info-help-export-value {
+  color: #35557d;
 }
 .book-info-help-example {
   color: #476389;

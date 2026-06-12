@@ -158,6 +158,7 @@ TPP.bookInfoFieldHelp = function (fieldKey, book) {
     key: helpKey,
     label: label,
     description: String(entry.description || "No help text available yet."),
+    pdf: String(entry.pdf || "").trim(),
     example: String(entry.example || ""),
   };
 };

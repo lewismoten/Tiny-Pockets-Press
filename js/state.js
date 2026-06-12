@@ -597,27 +597,34 @@ TPP.BOOK_INFO_DEFAULT_FIELDS = [
 TPP.defaultBookInfoFieldHelpCatalog = {
   title: {
     description:
-      "The main name of the book. This is the primary label readers, catalogs, and exported files use to identify the work.",
+      "The main name of the book.",
+    pdf:
+      "Exported to PDF metadata as the core Title value. If a subtitle is present, the PDF Title becomes Title: Subtitle.",
     example: "Santa's Little OSHA Violation",
   },
   subtitle: {
     description:
       "A secondary line that adds context, tone, or a clarifying phrase to the title.",
+    pdf: "Appended to the title in PDF metadata, producing Title: Subtitle.",
     example: "Pocket-sized catastrophe management for the holidays",
   },
   author: {
     description:
       "The person, collective, or organization responsible for the work. Use this for credited creators and contributors.",
+    pdf: "Exported to PDF metadata as the Author value.",
     example: "Lewis Moten",
   },
   pubDate: {
     description:
       "The publishing or release date associated with this edition. It helps with citations, export metadata, and edition tracking.",
+    pdf:
+      "Not exported into a dedicated PDF field, but it can be folded into fallback Subject text when no explicit Subject or Description is provided.",
     example: "2026-05-24",
   },
   publisher: {
     description:
       "The press, imprint, label, or organization that published the book.",
+    pdf: "Can be included in fallback Subject and Keywords metadata.",
     example: "Tiny Pockets Press",
   },
   language: {
@@ -631,23 +638,28 @@ TPP.defaultBookInfoFieldHelpCatalog = {
   },
   subject: {
     description:
-      "A short human-readable topic or category phrase. This is useful for export metadata when you want a plain-language subject line.",
+      "A short human-readable topic or category phrase.",
+    pdf: "Exported to PDF metadata as the Subject value when present.",
     example: "Holiday satire",
   },
   description: {
     description:
       "A brief summary, blurb, or catalog note explaining what the book is about.",
+    pdf: "Used as the PDF Subject fallback when Subject is blank.",
     example:
       "A tiny handbook of festive corners cut, avoidable accidents, and cheerful workplace dread.",
   },
   keywords: {
     description:
       "Search-friendly words or phrases that help describe the book in exports and future discovery tools. Separate terms with commas.",
+    pdf:
+      "Exported to PDF metadata as Keywords, then merged with core terms like title, author, publisher, subject, and classification.",
     example: "zine, holiday, satire, workplace, OSHA",
   },
   classification: {
     description:
       "The shelving or taxonomy code used to place the book within your classification system.",
+    pdf: "Can be included in fallback Subject and Keywords metadata.",
     example: "816.1 Zines / Personal writing",
   },
   cityPublished: {
@@ -656,7 +668,8 @@ TPP.defaultBookInfoFieldHelpCatalog = {
     example: "Saint Paul",
   },
   copyright: {
-    description: "A short copyright statement for this edition.",
+    description:
+      "A short copyright statement for this edition.",
     example: "© 2026 Lewis Moten. All rights reserved.",
   },
   isbn: {
@@ -670,7 +683,8 @@ TPP.defaultBookInfoFieldHelpCatalog = {
     example: "9781234567897",
   },
   edition: {
-    description: "A note naming the edition or release state of the book.",
+    description:
+      "A note naming the edition or release state of the book.",
     example: "Second edition",
   },
   phone: {
@@ -679,7 +693,8 @@ TPP.defaultBookInfoFieldHelpCatalog = {
     example: "(651) 555-0123",
   },
   website: {
-    description: "A publisher, author, or project website related to the book.",
+    description:
+      "A publisher, author, or project website related to the book.",
     example: "https://tinypocketspress.example",
   },
   address: {
@@ -705,7 +720,8 @@ TPP.defaultBookInfoFieldHelpCatalog = {
       "Names have been changed, rumors remain unverified, and every typo belongs to the editor.",
   },
   seriesName: {
-    description: "The name of the series this book belongs to, if any.",
+    description:
+      "The name of the series this book belongs to, if any.",
     example: "Pocket Catastrophes",
   },
   number: {
@@ -714,7 +730,8 @@ TPP.defaultBookInfoFieldHelpCatalog = {
     example: "No. 4",
   },
   volume: {
-    description: "The volume designation for a multi-volume work.",
+    description:
+      "The volume designation for a multi-volume work.",
     example: "Vol. 2",
   },
   printing: {

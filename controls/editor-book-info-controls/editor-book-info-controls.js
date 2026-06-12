@@ -18,11 +18,16 @@ export async function init(TPP) {
   helpPopover.innerHTML =
     '<strong class="book-info-help-title"></strong>' +
     '<div class="book-info-help-description"></div>' +
-    '<div class="book-info-help-example" hidden><span class="book-info-help-example-label">Example</span> <span class="book-info-help-example-value"></span></div>';
+    '<div class="book-info-help-example" hidden><span class="book-info-help-example-label">Example</span> <span class="book-info-help-example-value"></span></div>' +
+    '<div class="book-info-help-export" hidden><div class="book-info-help-export-label">Export Info</div><div class="book-info-help-export-value"></div></div>';
   document.body.appendChild(helpPopover);
   const helpTitle = helpPopover.querySelector(".book-info-help-title");
   const helpDescription = helpPopover.querySelector(
     ".book-info-help-description",
+  );
+  const helpExport = helpPopover.querySelector(".book-info-help-export");
+  const helpExportValue = helpPopover.querySelector(
+    ".book-info-help-export-value",
   );
   const helpExample = helpPopover.querySelector(".book-info-help-example");
   const helpExampleValue = helpPopover.querySelector(
@@ -103,6 +108,11 @@ export async function init(TPP) {
     if (helpDescription)
       helpDescription.textContent =
         help.description || "No help text available yet.";
+    if (helpExport && helpExportValue) {
+      helpExportValue.textContent = help.pdf || "";
+      helpExport.hidden = !help.pdf;
+      if (!help.pdf) helpExportValue.textContent = "";
+    }
     if (helpExample && helpExampleValue) {
       helpExampleValue.textContent = help.example || "";
       helpExample.hidden = !help.example;
