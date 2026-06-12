@@ -225,6 +225,26 @@ export async function init(TPP) {
       ),
     );
   };
+  const syncPaletteOptions = function () {
+    const availableIds = typeof TPP.imageExportPaletteIds === "function"
+      ? TPP.imageExportPaletteIds()
+      : ["websafe"];
+    const selected = imageExportPalette.value || "websafe";
+    imageExportPalette.replaceChildren();
+    availableIds.forEach(function (paletteId) {
+      const option = document.createElement("option");
+      option.value = paletteId;
+      option.textContent = typeof TPP.imageExportPaletteDisplayName === "function"
+        ? TPP.imageExportPaletteDisplayName(paletteId)
+        : paletteId;
+      imageExportPalette.appendChild(option);
+    });
+    if (availableIds.includes(selected)) {
+      imageExportPalette.value = selected;
+    } else {
+      imageExportPalette.value = availableIds[0] || "websafe";
+    }
+  };
   const paletteGrid = function (count) {
     const total = Math.max(1, Number(count) || 1);
     const exact = {
@@ -586,8 +606,10 @@ export async function init(TPP) {
     );
   };
   const refreshFormatUi = async function () {
+    syncPaletteOptions();
     syncFormatUi();
     await ensureSelectedPalette();
+    syncPaletteOptions();
     syncFormatUi();
   };
   const customCharsetMode = function () {
@@ -677,6 +699,7 @@ export async function init(TPP) {
       pixels.height +
       " pixels per page";
   };
+  TPP.syncImageExportPaletteOptions = syncPaletteOptions;
   TPP.syncImageExportFormatUi = syncFormatUi;
   TPP.refreshImageExportFormatUi = refreshFormatUi;
   TPP.updateImageExportEstimate = updateEstimate;
