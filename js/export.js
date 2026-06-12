@@ -41,8 +41,9 @@ TPP.exportClassificationText = function (book) {
   }
   return String(rawValue || "").trim();
 };
-TPP.gifCommentText = function (book) {
+TPP.gifCommentText = function (book, options) {
   const source = book || {};
+  const config = options || {};
   const maxCommentBytes = 240;
   const title = String(
     typeof TPP.bookInfoValue === "function"
@@ -95,6 +96,8 @@ TPP.gifCommentText = function (book) {
       ? TPP.bookInfoFieldValue(source, "copyright")
       : source.copyright || "",
   ).trim();
+  const pageIndex = Math.max(0, Number(config.pageIndex) || 0);
+  const totalPages = Math.max(0, Number(config.totalPages) || 0);
   const lines = [];
   const pushLine = function (label, value) {
     const trimmedValue = String(value || "").trim();
@@ -112,6 +115,12 @@ TPP.gifCommentText = function (book) {
   pushLine("Language", language);
   pushLine("Subject", subject);
   pushLine("Classification", classification);
+  if (pageIndex > 0) {
+    pushLine(
+      "Page",
+      totalPages > 0 ? pageIndex + " of " + totalPages : String(pageIndex),
+    );
+  }
   pushLine("Keywords", keywords);
   pushLine("Rights", copyright);
   if (!lines.length && description) {
@@ -138,6 +147,72 @@ TPP.writeGifCommentExtension = function (gif, text) {
     stream.writeBytesView(bytes, offset, size);
   }
   stream.writeByte(0x00);
+};
+TPP.gifCommentExtensionBytes = function (text) {
+  const message = String(text || "").trim();
+  if (!message) return new Uint8Array(0);
+  const payload = new TextEncoder()
+    .encode(message)
+    .filter(function (value) {
+      return value !== 0;
+    });
+  if (!payload.length) return new Uint8Array(0);
+  const parts = [0x21, 0xfe];
+  for (let offset = 0; offset < payload.length; offset += 255) {
+    const size = Math.min(255, payload.length - offset);
+    parts.push(size);
+    for (let i = 0; i < size; i++) {
+      parts.push(payload[offset + i]);
+    }
+  }
+  parts.push(0x00);
+  return new Uint8Array(parts);
+};
+TPP.insertGifCommentBeforeImage = function (bytes, text) {
+  if (!(bytes instanceof Uint8Array) || !bytes.length) return bytes;
+  const commentBytes = TPP.gifCommentExtensionBytes(text);
+  if (!commentBytes.length) return bytes;
+  if (bytes.length < 13) return bytes;
+  let offset = 13;
+  const packed = bytes[10] || 0;
+  if (packed & 0x80) {
+    offset += 3 * (1 << ((packed & 0x07) + 1));
+  }
+  const skipSubBlocks = function (index) {
+    let cursor = index;
+    while (cursor < bytes.length) {
+      const size = bytes[cursor];
+      cursor += 1;
+      if (size === 0) break;
+      cursor += size;
+    }
+    return cursor;
+  };
+  while (offset < bytes.length) {
+    const marker = bytes[offset];
+    if (marker === 0x21) {
+      const label = bytes[offset + 1];
+      if (label === 0xf9) break;
+      if (label === 0xff || label === 0x01) {
+        const blockSize = bytes[offset + 2] || 0;
+        offset += 3 + blockSize;
+        offset = skipSubBlocks(offset);
+        continue;
+      }
+      if (label === 0xfe) {
+        offset += 2;
+        offset = skipSubBlocks(offset);
+        continue;
+      }
+    }
+    if (marker === 0x2c || marker === 0x3b) break;
+    offset += 1;
+  }
+  const out = new Uint8Array(bytes.length + commentBytes.length);
+  out.set(bytes.subarray(0, offset), 0);
+  out.set(commentBytes, offset);
+  out.set(bytes.subarray(offset), offset + commentBytes.length);
+  return out;
 };
 TPP.zipCommentText = function (book) {
   const source = book || {};
@@ -1943,6 +2018,7 @@ TPP.encodeGifBlob = async function (canvas, options) {
   if (!canvas) throw new Error("Canvas required");
   const lib = await TPP.loadGifEncoder();
   const exportOptions = TPP.imageExportOptions(options);
+  const sourceBook = options && options.book ? options.book : TPP.settings();
   const rgba = TPP.canvasRgba(canvas);
   const frame = TPP.gifFrameFromRgba(
     rgba,
@@ -1959,16 +2035,21 @@ TPP.encodeGifBlob = async function (canvas, options) {
     palette: frame.palette,
     delay: exportOptions.frameDelay,
   });
-  TPP.writeGifCommentExtension(gif, TPP.gifCommentText(TPP.settings()));
   gif.finish();
+  const commentText = TPP.gifCommentText(sourceBook, {
+    pageIndex: options && options.pageIndex,
+    totalPages: options && options.totalPages,
+  });
   const bytes = gif.bytesView ? gif.bytesView() : new Uint8Array(gif.bytes());
-  return new Blob([bytes], { type: "image/gif" });
+  return new Blob([TPP.insertGifCommentBeforeImage(bytes, commentText)], {
+    type: "image/gif",
+  });
 };
 TPP.exportBlobForCanvas = function (canvas, options) {
   if (!canvas) return Promise.resolve(null);
   const exportOptions = TPP.imageExportOptions(options);
   if (exportOptions.format === "gif")
-    return TPP.encodeGifBlob(canvas, exportOptions);
+    return TPP.encodeGifBlob(canvas, Object.assign({}, options || {}, exportOptions));
   const mime =
     exportOptions.format === "jpeg"
       ? "image/jpeg"
@@ -2041,7 +2122,14 @@ TPP.exportImagesZip = async function (options) {
         exportOptions.threshold,
         exportOptions.palette,
       );
-      const blob = await TPP.exportBlobForCanvas(exportCanvas, exportOptions);
+      const blob = await TPP.exportBlobForCanvas(
+        exportCanvas,
+        Object.assign({}, exportOptions, {
+          book: settings,
+          pageIndex: i + 1,
+          totalPages: pages.length,
+        }),
+      );
       const pageName = TPP.exportPageFileName(settings, i + 1, {
         format: extension,
         totalPages: pages.length,
