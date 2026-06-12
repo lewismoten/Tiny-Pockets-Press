@@ -1081,14 +1081,41 @@ TPP.renderImageExportPreview = async function () {
   };
   const renderLiveBeforeStage = function (page, settings) {
     if (!page || typeof TPP.readerMiniPage !== "function") return;
-    const wrap = document.createElement("div");
-    wrap.className = "image-export-live-preview";
-    const shell = TPP.readerMiniPage(page, settings);
-    shell.classList.add("image-export-live-preview-shell");
-    shell.style.width = "100%";
-    shell.style.height = "100%";
-    wrap.appendChild(shell);
-    stage.replaceChildren(wrap);
+    const compare = document.createElement("div");
+    compare.className = "image-export-compare image-export-compare-live";
+    const beforePane = document.createElement("div");
+    beforePane.className = "image-export-compare-pane image-export-compare-pane-before";
+    const afterPane = document.createElement("div");
+    afterPane.className = "image-export-compare-pane image-export-compare-after";
+    const divider = document.createElement("div");
+    divider.className = "image-export-compare-divider";
+    const beforeLabel = document.createElement("div");
+    beforeLabel.className = "image-export-compare-label before";
+    beforeLabel.innerHTML =
+      'Before<span class="image-export-compare-size">' +
+      TPP.esc(TPP.imageExportPreviewSizeLabel(null)) +
+      "</span>";
+    const afterLabel = document.createElement("div");
+    afterLabel.className = "image-export-compare-label after";
+    afterLabel.innerHTML =
+      'After<span class="image-export-compare-size">Rendering...</span>';
+    const beforeShell = TPP.readerMiniPage(page, settings);
+    beforeShell.classList.add("image-export-live-preview-shell");
+    beforeShell.style.width = "100%";
+    beforeShell.style.height = "100%";
+    const afterShell = TPP.readerMiniPage(page, settings);
+    afterShell.classList.add("image-export-live-preview-shell");
+    afterShell.style.width = "100%";
+    afterShell.style.height = "100%";
+    beforePane.appendChild(beforeShell);
+    afterPane.appendChild(afterShell);
+    compare.appendChild(beforePane);
+    compare.appendChild(afterPane);
+    compare.appendChild(divider);
+    compare.appendChild(beforeLabel);
+    compare.appendChild(afterLabel);
+    stage.replaceChildren(compare);
+    TPP.bindImageExportPreviewDrag();
   };
   const renderBeforeStage = async function (beforeEntry) {
     const beforeSrc = beforeEntry && beforeEntry.src ? beforeEntry.src : "";
