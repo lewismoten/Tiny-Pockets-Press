@@ -508,6 +508,7 @@ TPP.imageExportPreviewIndex = 0;
 TPP.imageExportPreviewSplit = 50;
 TPP.imageExportPreviewAssets = null;
 TPP.imageExportPreviewPlaying = false;
+TPP.imageExportPreviewRenderCache = null;
 TPP.imageExportFrameDelayMs = function (value) {
   return Math.max(
     1000,
@@ -598,6 +599,49 @@ TPP.scheduleImageExportPreview = function () {
     }
     window.requestAnimationFrame(run);
   }, 180);
+};
+TPP.imageExportPreviewCacheKey = function (settings, pageIndex, scale) {
+  const source = settings || {};
+  return JSON.stringify({
+    bookId: typeof TPP.bookId === "function" ? TPP.bookId(source) : "",
+    updatedAt:
+      typeof TPP.bookUpdatedAt === "function" ? TPP.bookUpdatedAt(source) : "",
+    revision:
+      typeof TPP.bookRevisionLabel === "function"
+        ? TPP.bookRevisionLabel(source)
+        : "",
+    pageIndex: Math.max(0, Number(pageIndex) || 0),
+    pageWidth: Number(source.page && source.page.w) || 0,
+    pageHeight: Number(source.page && source.page.h) || 0,
+    scale: Number(scale) || 1,
+  });
+};
+TPP.imageExportPreviewScale = function (settings, exportDpi, stage) {
+  const source = settings || {};
+  const pageWidthCss = Math.max(1, (Number(source.page && source.page.w) || 1) * 96);
+  const pageHeightCss = Math.max(
+    1,
+    (Number(source.page && source.page.h) || 1) * 96,
+  );
+  const fullScale = Math.max(1, TPP.dpi(exportDpi) / 96);
+  const rect = stage && typeof stage.getBoundingClientRect === "function"
+    ? stage.getBoundingClientRect()
+    : { width: 0, height: 0 };
+  const deviceScale = Math.max(
+    1,
+    Math.min(2, Number(window.devicePixelRatio) || 1),
+  );
+  const widthScale = rect.width
+    ? (rect.width * deviceScale) / pageWidthCss
+    : 1;
+  const heightScale = rect.height
+    ? (rect.height * deviceScale) / pageHeightCss
+    : 1;
+  const fittedScale = Math.max(1, Math.max(widthScale, heightScale));
+  const maxPreviewPixels = 900;
+  const maxDimensionScale =
+    maxPreviewPixels / Math.max(pageWidthCss, pageHeightCss);
+  return Math.max(1, Math.min(fullScale, fittedScale, maxDimensionScale));
 };
 TPP.revokeImageExportPreviewAssets = function (assets) {
   ["before", "after"].forEach(function (key) {
@@ -739,13 +783,33 @@ TPP.renderImageExportPreview = async function () {
   });
   await TPP.ensureImageExportPaletteForOptionsLoaded(exportOptions);
   thresholdValue.textContent = String(exportOptions.threshold);
-  const previewScale = Math.max(1, exportOptions.dpi / 96);
+  const previewScale = TPP.imageExportPreviewScale(
+    settings,
+    exportOptions.dpi,
+    stage,
+  );
   try {
-    const baseCanvas = await TPP.renderImageExportPreviewCanvas(
-      pages[TPP.imageExportPreviewIndex],
+    const previewCacheKey = TPP.imageExportPreviewCacheKey(
       settings,
+      TPP.imageExportPreviewIndex,
       previewScale,
     );
+    let baseCanvas =
+      TPP.imageExportPreviewRenderCache &&
+      TPP.imageExportPreviewRenderCache.key === previewCacheKey
+        ? TPP.imageExportPreviewRenderCache.canvas
+        : null;
+    if (!baseCanvas) {
+      baseCanvas = await TPP.renderImageExportPreviewCanvas(
+        pages[TPP.imageExportPreviewIndex],
+        settings,
+        previewScale,
+      );
+      TPP.imageExportPreviewRenderCache = {
+        key: previewCacheKey,
+        canvas: baseCanvas,
+      };
+    }
     if (TPP.imageExportPreviewToken !== token) return;
     const beforeBlob = await TPP.exportBlobForCanvas(baseCanvas, {
       format: "png",
