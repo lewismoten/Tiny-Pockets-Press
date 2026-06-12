@@ -2462,6 +2462,9 @@ TPP.imageExportOptions = function (options) {
     : "threshold";
   return {
     dpi: TPP.dpi(source.dpi),
+    targetWidth: Math.max(0, Math.round(Number(source.targetWidth) || 0)) || null,
+    targetHeight:
+      Math.max(0, Math.round(Number(source.targetHeight) || 0)) || null,
     format:
       colorDepth === "indexed" && !["png", "gif"].includes(requestedFormat)
         ? "png"
@@ -2484,6 +2487,43 @@ TPP.imageExportOptions = function (options) {
           ? String(source.palette)
           : "websafe",
   };
+};
+TPP.imageExportRenderScale = function (settings, options) {
+  const source = settings || {};
+  const config = options || {};
+  const targetPixels = TPP.imageExportTargetPixels(config);
+  const pageWidthCss = Math.max(1, (Number(source.page && source.page.w) || 1) * 96);
+  const pageHeightCss = Math.max(
+    1,
+    (Number(source.page && source.page.h) || 1) * 96,
+  );
+  if (targetPixels) {
+    return Math.max(
+      1,
+      targetPixels.width / pageWidthCss,
+      targetPixels.height / pageHeightCss,
+    );
+  }
+  return Math.max(1, TPP.dpi(config.dpi) / 96);
+};
+TPP.fitCanvasToExportTarget = function (canvas, options) {
+  const targetPixels = TPP.imageExportTargetPixels(options);
+  if (!canvas || !targetPixels) return canvas;
+  if (
+    canvas.width === targetPixels.width &&
+    canvas.height === targetPixels.height
+  ) {
+    return canvas;
+  }
+  const out = document.createElement("canvas");
+  out.width = targetPixels.width;
+  out.height = targetPixels.height;
+  const ctx = out.getContext("2d");
+  if (!ctx) return canvas;
+  ctx.imageSmoothingEnabled = true;
+  ctx.clearRect(0, 0, out.width, out.height);
+  ctx.drawImage(canvas, 0, 0, out.width, out.height);
+  return out;
 };
 TPP.imageExportDitherIds = function () {
   return [
@@ -3204,7 +3244,7 @@ TPP.exportImagesZip = async function (options) {
   const zip = new JSZip();
   const mount = document.createElement("div");
   const targetDpi = exportOptions.dpi;
-  const scale = targetDpi / 96;
+  const scale = TPP.imageExportRenderScale(settings, exportOptions);
   const extension =
     exportOptions.format === "jpeg" ? "jpg" : exportOptions.format;
   mount.style.cssText =
@@ -3230,9 +3270,12 @@ TPP.exportImagesZip = async function (options) {
       TPP.throwIfProgressCancelled(progressOp);
       await new Promise(requestAnimationFrame);
       TPP.throwIfProgressCancelled(progressOp);
-      const canvas = await html2canvas(
+      const canvas = TPP.fitCanvasToExportTarget(
+        await html2canvas(
         shell,
         TPP.html2canvasOptions({ scale: scale }),
+        ),
+        exportOptions,
       );
       TPP.throwIfProgressCancelled(progressOp);
       const exportCanvas = await TPP.exportCanvasForDepth(
@@ -3285,7 +3328,13 @@ TPP.exportImagesZip = async function (options) {
     const name = TPP.exportFileName(settings, {
       extension: "zip",
       kind: exportOptions.format,
-      qualifiers: [targetDpi + "dpi"],
+      qualifiers: TPP.imageExportTargetPixels(exportOptions)
+        ? [
+            TPP.imageExportTargetPixels(exportOptions).width +
+              "x" +
+              TPP.imageExportTargetPixels(exportOptions).height,
+          ]
+        : [targetDpi + "dpi"],
     });
     TPP.downloadBlob(name, blob);
   } finally {
@@ -3325,7 +3374,7 @@ TPP.exportAnimatedGif = async function (options) {
   const gif = lib.GIFEncoder({ auto: false });
   gif.writeHeader();
   const mount = document.createElement("div");
-  const scale = exportOptions.dpi / 96;
+  const scale = TPP.imageExportRenderScale(settings, exportOptions);
   let previousRgba = null;
   mount.style.cssText =
     "position:fixed;left:-9999px;top:0;pointer-events:none;";
@@ -3350,9 +3399,12 @@ TPP.exportAnimatedGif = async function (options) {
       TPP.throwIfProgressCancelled(progressOp);
       await new Promise(requestAnimationFrame);
       TPP.throwIfProgressCancelled(progressOp);
-      const canvas = await html2canvas(
+      const canvas = TPP.fitCanvasToExportTarget(
+        await html2canvas(
         shell,
         TPP.html2canvasOptions({ scale: scale }),
+        ),
+        exportOptions,
       );
       TPP.throwIfProgressCancelled(progressOp);
       const exportCanvas = await TPP.exportCanvasForDepth(
@@ -3438,18 +3490,21 @@ TPP.exportMp4 = async function (options) {
   const exportOptions = TPP.imageExportOptions(options);
   const mediabunny = await TPP.loadMediabunny();
   const mount = document.createElement("div");
-  const scale = exportOptions.dpi / 96;
+  const scale = TPP.imageExportRenderScale(settings, exportOptions);
   mount.style.cssText =
     "position:fixed;left:-9999px;top:0;pointer-events:none;";
   document.body.appendChild(mount);
   try {
     const renderShell = TPP.createExportRenderShell(settings);
     mount.appendChild(renderShell);
-    const probeCanvas = await TPP.renderExportPageCanvas(
+    const probeCanvas = TPP.fitCanvasToExportTarget(
+      await TPP.renderExportPageCanvas(
       renderShell,
       pages[0],
       settings,
       scale,
+      ),
+      exportOptions,
     );
     const firstCanvas = await TPP.exportCanvasForDepth(
       probeCanvas,
@@ -3516,7 +3571,7 @@ TPP.exportMp4 = async function (options) {
               TPP.throwIfProgressCancelled(progressOp);
               return TPP.opaqueCanvas(
                 await TPP.exportCanvasForDepth(
-                  canvas,
+                  TPP.fitCanvasToExportTarget(canvas, exportOptions),
                   exportOptions.colorDepth,
                   exportOptions.threshold,
                   exportOptions.palette,

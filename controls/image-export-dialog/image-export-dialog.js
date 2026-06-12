@@ -172,15 +172,23 @@ export async function init(TPP) {
   ) {
     return {};
   }
-  const presetValues = ["72", "96", "150", "200", "300", "600"];
+  const presetValues = ["72", "96", "150", "200", "300", "600", "320x200"];
+  const presetTargetPixels = function (value) {
+    return String(value || "") === "320x200"
+      ? { width: 320, height: 200 }
+      : null;
+  };
   const clampThreshold = function (value) {
     const raw = Number(value);
     return Math.max(0, Math.min(255, Number.isFinite(raw) ? raw : 128));
   };
   const saveImageExportUi = function (patch) {
     const previous = TPP.imageExportUi();
-    const dpiValue = TPP.dpi(Number(imageExportDpi.value) || 300);
     const presetValue = imageExportPreset.value || "300";
+    const targetPixels = presetTargetPixels(presetValue);
+    const dpiValue = targetPixels
+      ? 300
+      : TPP.dpi(Number(imageExportDpi.value) || 300);
     const nextPatch = Object.assign({}, patch || {});
     if (!Object.prototype.hasOwnProperty.call(nextPatch, "customDpi")) {
       nextPatch.customDpi =
@@ -194,6 +202,8 @@ export async function init(TPP) {
           dpiPreset: presetValue,
           customDpi: nextPatch.customDpi,
           dpi: dpiValue,
+          targetWidth: targetPixels ? targetPixels.width : null,
+          targetHeight: targetPixels ? targetPixels.height : null,
           format: imageExportFormat.value || "png",
           quality: Math.max(
             1,
@@ -451,7 +461,9 @@ export async function init(TPP) {
   const syncPresetUi = function () {
     const preset = imageExportPreset.value;
     imageExportCustomWrap.hidden = preset !== "custom";
-    if (preset !== "custom") imageExportDpi.value = preset;
+    if (preset !== "custom" && !presetTargetPixels(preset)) {
+      imageExportDpi.value = preset;
+    }
   };
   const syncFormatUi = function () {
     const indexedOnly = imageExportColorDepth.value === "indexed";
@@ -612,7 +624,7 @@ export async function init(TPP) {
     ctx.fillRect(12, 14, 4, 1);
   };
   const updateEstimate = function () {
-    const pixels = TPP.imageExportPixels(Number(imageExportDpi.value) || 300);
+    const pixels = TPP.imageExportPixels(buildCurrentExportOptions());
     imageExportEstimate.textContent =
       "Estimated size: " +
       pixels.width +
@@ -623,8 +635,11 @@ export async function init(TPP) {
   TPP.syncImageExportFormatUi = syncFormatUi;
   TPP.updateImageExportEstimate = updateEstimate;
   const buildCurrentExportOptions = function () {
+    const targetPixels = presetTargetPixels(imageExportPreset.value || "300");
     return TPP.imageExportOptions({
-      dpi: Number(imageExportDpi.value) || 300,
+      dpi: targetPixels ? 300 : Number(imageExportDpi.value) || 300,
+      targetWidth: targetPixels ? targetPixels.width : null,
+      targetHeight: targetPixels ? targetPixels.height : null,
       format: imageExportFormat.value || "png",
       quality: Number(imageExportQuality.value) || 92,
       colorDepth: imageExportColorDepth.value || "color24",
@@ -651,14 +666,18 @@ export async function init(TPP) {
       0,
       Math.min(Number(TPP.imageExportPreviewIndex) || 0, pages.length - 1),
     );
-    const scale = Math.max(1, TPP.dpi(exportOptions.dpi) / 96);
+    const scale = typeof TPP.imageExportRenderScale === "function"
+      ? TPP.imageExportRenderScale(settings, exportOptions)
+      : Math.max(1, TPP.dpi(exportOptions.dpi) / 96);
     const pageCanvas = await TPP.renderImageExportPreviewCanvas(
       pages[pageIndex],
       settings,
       scale,
     );
     return TPP.buildImageExportCustomCharsetSheet(
-      pageCanvas,
+      typeof TPP.fitCanvasToExportTarget === "function"
+        ? TPP.fitCanvasToExportTarget(pageCanvas, exportOptions)
+        : pageCanvas,
       TPP.imageExportNamedPalette(exportOptions.palette),
       {
         cellSize: 8,
@@ -806,6 +825,8 @@ export async function init(TPP) {
     saveImageExportUi({
       dpiPreset: "custom",
       customDpi: TPP.dpi(Number(imageExportDpi.value) || 300),
+      targetWidth: null,
+      targetHeight: null,
     });
     updateEstimate();
     schedulePreview();
@@ -925,7 +946,10 @@ export async function init(TPP) {
       button.dataset.action === "export-animated-gif" ||
       button.dataset.action === "export-mp4"
     ) {
-      const dpi = TPP.dpi(Number(imageExportDpi.value) || 300);
+      const targetPixels = presetTargetPixels(imageExportPreset.value || "300");
+      const dpi = targetPixels
+        ? 300
+        : TPP.dpi(Number(imageExportDpi.value) || 300);
       const format = imageExportFormat.value || "png";
       const quality = Math.max(
         1,
@@ -939,15 +963,19 @@ export async function init(TPP) {
       );
       const dithering = imageExportDither.value || "threshold";
       imageExportDpi.value = dpi;
-      imageExportPreset.value = presetValues.includes(String(dpi))
-        ? String(dpi)
-        : "custom";
+      imageExportPreset.value = targetPixels
+        ? "320x200"
+        : presetValues.includes(String(dpi))
+          ? String(dpi)
+          : "custom";
       syncPresetUi();
       syncFormatUi();
       saveImageExportUi({
         dpiPreset: imageExportPreset.value || "300",
         customDpi: TPP.dpi(Number(imageExportDpi.value) || dpi),
         dpi: dpi,
+        targetWidth: targetPixels ? targetPixels.width : null,
+        targetHeight: targetPixels ? targetPixels.height : null,
         format: format,
         quality: quality,
         colorDepth: colorDepth,
@@ -960,6 +988,8 @@ export async function init(TPP) {
       if (imageExportDialog.open) imageExportDialog.close();
       const exportOptions = {
         dpi: dpi,
+        targetWidth: targetPixels ? targetPixels.width : null,
+        targetHeight: targetPixels ? targetPixels.height : null,
         format: format,
         quality: quality,
         colorDepth: colorDepth,

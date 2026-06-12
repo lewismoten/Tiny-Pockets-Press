@@ -378,9 +378,12 @@ TPP.openImageExportDialog = async function () {
   )
     return;
   const ui = TPP.imageExportUi();
-  const presetValues = ["72", "96", "150", "200", "300", "600"];
+  const presetValues = ["72", "96", "150", "200", "300", "600", "320x200"];
   const dpiPreset =
-    ui.dpiPreset === "custom"
+    ui.dpiPreset === "320x200" ||
+    (Number(ui.targetWidth) === 320 && Number(ui.targetHeight) === 200)
+      ? "320x200"
+      : ui.dpiPreset === "custom"
       ? "custom"
       : presetValues.includes(String(ui.dpiPreset))
         ? String(ui.dpiPreset)
@@ -388,7 +391,12 @@ TPP.openImageExportDialog = async function () {
           ? String(ui.dpi || 300)
           : "custom";
   const customDpi = TPP.dpi(ui.customDpi || ui.dpi || 300);
-  const dpi = dpiPreset === "custom" ? customDpi : TPP.dpi(dpiPreset);
+  const dpi =
+    dpiPreset === "custom"
+      ? customDpi
+      : dpiPreset === "320x200"
+        ? TPP.dpi(ui.dpi || 300)
+        : TPP.dpi(dpiPreset);
   input.value = dpi;
   colorDepth.value =
     ui.colorDepth === "websafe" ? "indexed" : ui.colorDepth || "color24";
@@ -464,6 +472,8 @@ TPP.imageExportUi = function () {
       dpi: 300,
       dpiPreset: "300",
       customDpi: 300,
+      targetWidth: null,
+      targetHeight: null,
       format: "png",
       quality: 92,
       colorDepth: "color24",
@@ -482,6 +492,8 @@ TPP.writeImageExportUi = function (patch) {
       dpi: 300,
       dpiPreset: "300",
       customDpi: 300,
+      targetWidth: null,
+      targetHeight: null,
       format: "png",
       quality: 92,
       colorDepth: "color24",
@@ -495,9 +507,30 @@ TPP.writeImageExportUi = function (patch) {
   );
   TPP.writeSettingsUi(Object.assign({}, state, { imageExport: imageExport }));
 };
-TPP.imageExportPixels = function (dpi) {
+TPP.imageExportTargetPixels = function (options) {
+  const source = options || {};
+  const width = Math.round(Number(source.targetWidth) || 0);
+  const height = Math.round(Number(source.targetHeight) || 0);
+  if (width > 0 && height > 0) {
+    return { width: width, height: height };
+  }
+  return null;
+};
+TPP.imageExportPixels = function (dpiOrOptions) {
   const settings = TPP.settings();
-  const targetDpi = TPP.dpi(dpi);
+  const targetPixels = TPP.imageExportTargetPixels(dpiOrOptions);
+  if (targetPixels) {
+    return {
+      dpi: null,
+      width: targetPixels.width,
+      height: targetPixels.height,
+    };
+  }
+  const source =
+    dpiOrOptions && typeof dpiOrOptions === "object"
+      ? dpiOrOptions.dpi
+      : dpiOrOptions;
+  const targetDpi = TPP.dpi(source);
   return {
     dpi: targetDpi,
     width: Math.round(settings.page.w * targetDpi),
@@ -624,9 +657,20 @@ TPP.imageExportPreviewCacheKey = function (settings, pageIndex, scale) {
     scale: Number(scale) || 1,
   });
 };
-TPP.imageExportPreviewBeforeCacheKey = function (settings, pageIndex, scale) {
+TPP.imageExportPreviewBeforeCacheKey = function (
+  settings,
+  pageIndex,
+  scale,
+  exportOptions,
+) {
+  const options = exportOptions || {};
   return (
-    TPP.imageExportPreviewCacheKey(settings, pageIndex, scale) + "::before::png"
+    TPP.imageExportPreviewCacheKey(settings, pageIndex, scale) +
+    "::before::" +
+    JSON.stringify({
+      targetWidth: Number(options.targetWidth) || 0,
+      targetHeight: Number(options.targetHeight) || 0,
+    })
   );
 };
 TPP.imageExportPreviewAfterCacheKey = function (
@@ -642,6 +686,8 @@ TPP.imageExportPreviewAfterCacheKey = function (
     JSON.stringify({
       format: String(options.format || "png"),
       dpi: Number(options.dpi) || 300,
+      targetWidth: Number(options.targetWidth) || 0,
+      targetHeight: Number(options.targetHeight) || 0,
       colorDepth: String(options.colorDepth || "color24"),
       palette: String(options.palette || "websafe"),
       threshold: TPP.imageExportClampThreshold(options.threshold),
@@ -681,14 +727,22 @@ TPP.setImageExportPreviewResultCache = function (key, value) {
 TPP.clearImageExportPreviewResultCache = function () {
   TPP.imageExportPreviewResultCache.clear();
 };
-TPP.imageExportPreviewScale = function (settings, exportDpi, stage) {
+TPP.imageExportPreviewScale = function (settings, exportOptions, stage) {
   const source = settings || {};
   const pageWidthCss = Math.max(1, (Number(source.page && source.page.w) || 1) * 96);
   const pageHeightCss = Math.max(
     1,
     (Number(source.page && source.page.h) || 1) * 96,
   );
-  const fullScale = Math.max(1, TPP.dpi(exportDpi) / 96);
+  const options = exportOptions || {};
+  const targetPixels = TPP.imageExportTargetPixels(options);
+  const fullScale = targetPixels
+    ? Math.max(
+        1,
+        targetPixels.width / pageWidthCss,
+        targetPixels.height / pageHeightCss,
+      )
+    : Math.max(1, TPP.dpi(options.dpi) / 96);
   const rect = stage && typeof stage.getBoundingClientRect === "function"
     ? stage.getBoundingClientRect()
     : { width: 0, height: 0 };
@@ -878,6 +932,7 @@ TPP.renderImageExportPreview = async function () {
   const colorDepth = document.getElementById("imageExportDialogColorDepth");
   const quality = document.getElementById("imageExportDialogQuality");
   const palette = document.getElementById("imageExportDialogPalette");
+  const preset = document.getElementById("imageExportDialogPreset");
   const threshold = document.getElementById("imageExportDialogThreshold");
   const dither = document.getElementById("imageExportDialogDither");
   const dpi = document.getElementById("imageExportDialogDpi");
@@ -893,6 +948,7 @@ TPP.renderImageExportPreview = async function () {
     !colorDepth ||
     !quality ||
     !palette ||
+    !preset ||
     !threshold ||
     !dither ||
     !thresholdValue ||
@@ -933,12 +989,10 @@ TPP.renderImageExportPreview = async function () {
     TPP.refreshImageExportCharsetPreviewIcon();
   }
   const settings = TPP.settings();
-  stage.style.setProperty(
-    "--image-export-preview-ratio",
-    settings.page.w + " / " + settings.page.h,
-  );
   const exportOptions = TPP.imageExportOptions({
     dpi: Number(dpi.value) || 300,
+    targetWidth: String(preset.value || "") === "320x200" ? 320 : null,
+    targetHeight: String(preset.value || "") === "320x200" ? 200 : null,
     format: format.value || "png",
     quality: Number(quality.value) || 92,
     colorDepth: colorDepth.value || "color24",
@@ -946,16 +1000,22 @@ TPP.renderImageExportPreview = async function () {
     threshold: TPP.imageExportClampThreshold(threshold.value),
     dithering: dither.value || "threshold",
   });
+  const exportPixels = TPP.imageExportPixels(exportOptions);
+  stage.style.setProperty(
+    "--image-export-preview-ratio",
+    exportPixels.width + " / " + exportPixels.height,
+  );
   await TPP.ensureImageExportPaletteForOptionsLoaded(exportOptions);
   const previewScale = TPP.imageExportPreviewScale(
     settings,
-    exportOptions.dpi,
+    exportOptions,
     stage,
   );
   const beforeCacheKey = TPP.imageExportPreviewBeforeCacheKey(
     settings,
     TPP.imageExportPreviewIndex,
     previewScale,
+    exportOptions,
   );
   const afterCacheKey = TPP.imageExportPreviewAfterCacheKey(
     settings,
@@ -1072,15 +1132,19 @@ TPP.renderImageExportPreview = async function () {
       };
     }
     if (TPP.imageExportPreviewToken !== token) return;
+    const beforeCanvas = typeof TPP.fitCanvasToExportTarget === "function"
+      ? TPP.fitCanvasToExportTarget(baseCanvas, exportOptions)
+      : baseCanvas;
     const afterCanvas = await TPP.exportCanvasForDepth(
-      baseCanvas,
+      beforeCanvas,
       exportOptions.colorDepth,
       exportOptions.threshold,
       exportOptions.palette,
       exportOptions,
     );
     const beforeEntry = {
-      previewSrc: cachedBefore.previewSrc || TPP.previewDataUrl(baseCanvas, "png", 1),
+      previewSrc:
+        cachedBefore.previewSrc || TPP.previewDataUrl(beforeCanvas, "png", 1),
       blob: cachedBefore.blob || null,
     };
     const afterEntry = {
@@ -1104,7 +1168,7 @@ TPP.renderImageExportPreview = async function () {
     window.setTimeout(async function () {
       if (TPP.imageExportPreviewToken !== token) return;
       if (!beforeEntry.blob) {
-        beforeEntry.blob = await TPP.exportBlobForCanvas(baseCanvas, {
+        beforeEntry.blob = await TPP.exportBlobForCanvas(beforeCanvas, {
           format: "png",
           quality: 100,
         });
