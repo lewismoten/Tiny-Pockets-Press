@@ -538,6 +538,9 @@ export async function init(TPP) {
   imageExportThreshold.addEventListener("input", function () {
     syncFormatUi();
     saveImageExportUi();
+    if (typeof TPP.clearImageExportPreviewResultCache === "function") {
+      TPP.clearImageExportPreviewResultCache();
+    }
     schedulePreview();
   });
   imageExportDither.addEventListener("change", function () {

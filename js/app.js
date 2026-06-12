@@ -674,6 +674,9 @@ TPP.setImageExportPreviewResultCache = function (key, value) {
   }
   return value;
 };
+TPP.clearImageExportPreviewResultCache = function () {
+  TPP.imageExportPreviewResultCache.clear();
+};
 TPP.imageExportPreviewScale = function (settings, exportDpi, stage) {
   const source = settings || {};
   const pageWidthCss = Math.max(1, (Number(source.page && source.page.w) || 1) * 96);
