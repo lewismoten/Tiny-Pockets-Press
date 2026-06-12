@@ -37,9 +37,6 @@ export async function init(TPP) {
   const imageExportPalettePreviewCanvas = document.getElementById(
     "imageExportPalettePreviewCanvas",
   );
-  const imageExportPaletteStatus = document.getElementById(
-    "imageExportPaletteStatus",
-  );
   const imageExportPaletteDialog = document.getElementById(
     "imageExportPaletteDialog",
   );
@@ -147,7 +144,6 @@ export async function init(TPP) {
     !imageExportPalette ||
     !imageExportPalettePreview ||
     !imageExportPalettePreviewCanvas ||
-    !imageExportPaletteStatus ||
     !imageExportPaletteDialog ||
     !imageExportPaletteDialogTitle ||
     !imageExportPaletteDialogCanvas ||
@@ -417,27 +413,6 @@ export async function init(TPP) {
         ctx.strokeRect(x + 4, y + 4, Math.max(0, w - 8), Math.max(0, h - 8));
       }
     }
-  };
-  const syncPaletteStatus = function () {
-    if (!imageExportPaletteStatus) return;
-    const selectedId = imageExportPalette.value || "websafe";
-    const selectedPalette = TPP.imageExportNamedPalette(selectedId) || [];
-    const loadedIds = Object.keys(TPP.imageExportPaletteById || {}).filter(function (id) {
-      return Array.isArray(TPP.imageExportPaletteById[id]);
-    });
-    const totalIds = typeof TPP.imageExportPaletteIds === "function"
-      ? TPP.imageExportPaletteIds().length
-      : loadedIds.length;
-    imageExportPaletteStatus.textContent =
-      "Palette cache: " +
-      loadedIds.length +
-      "/" +
-      totalIds +
-      " loaded. " +
-      selectedId +
-      ": " +
-      selectedPalette.length +
-      " colors.";
   };
   const openPalettePreview = async function () {
     if (typeof imageExportPaletteDialog.showModal !== "function") return;
