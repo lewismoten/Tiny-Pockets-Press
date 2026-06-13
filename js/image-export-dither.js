@@ -797,10 +797,49 @@ export function init(TPP) {
     }
     return lit / 64;
   };
+  const maskLitCount = function (mask) {
+    const source = mask || [];
+    let lit = 0;
+    for (let i = 0; i < 64; i += 1) {
+      lit += source[i] ? 1 : 0;
+    }
+    return lit;
+  };
   const maskDetailProtection = function (mask) {
     const fill = maskFillRatio(mask);
     const distanceFromHalf = Math.abs(fill - 0.5) * 2;
     return distanceFromHalf;
+  };
+  const clusterMergeSimilarity = function (
+    source,
+    target,
+    originalMaskByKey,
+    similarityBias,
+  ) {
+    const memberKeys = Array.isArray(source && source.members) && source.members.length
+      ? source.members
+      : [source && source.key];
+    let totalScore = 0;
+    let compared = 0;
+    let worstScore = 0;
+    for (let i = 0; i < memberKeys.length; i += 1) {
+      const memberKey = memberKeys[i];
+      const originalMask = originalMaskByKey.get(memberKey) || source.mask;
+      if (
+        Math.abs(maskLitCount(originalMask) - (target.litCount || maskLitCount(target.mask))) > 1
+      ) {
+        return null;
+      }
+      const diffCount = maskHammingDistance(originalMask, target.mask);
+      const shapeScore = maskDifferenceScore(originalMask, target.mask);
+      const similarityScore =
+        diffCount * (1 - similarityBias) + shapeScore * similarityBias;
+      totalScore += similarityScore;
+      worstScore = Math.max(worstScore, similarityScore);
+      compared += 1;
+    }
+    if (!compared) return null;
+    return worstScore * 0.7 + (totalScore / compared) * 0.3;
   };
   const solidGlyphMask = function () {
     const mask = new Uint8Array(64);
@@ -846,6 +885,11 @@ export function init(TPP) {
         });
     }
     const normalizedBias = clampByte(bias == null ? 128 : bias) / 255;
+    const originalMaskByKey = new Map(
+      entries.map(function (entry) {
+        return [entry.key, entry.mask];
+      }),
+    );
     const enriched = entries.map(function (entry) {
       return {
         key: entry.key,
@@ -853,6 +897,7 @@ export function init(TPP) {
         count: entry.count,
         error: entry.error,
         averageError: entry.count ? entry.error / entry.count : entry.error,
+        members: [entry.key],
       };
     });
     const maxCount = enriched.reduce(function (best, entry) {
@@ -876,6 +921,7 @@ export function init(TPP) {
       return Object.assign({}, entry, {
         utility: utilityScore(entry),
         detailProtection: maskDetailProtection(entry.mask),
+        litCount: maskLitCount(entry.mask),
       });
     });
     while (working.length > maxPatterns) {
@@ -891,10 +937,13 @@ export function init(TPP) {
           ) {
             continue;
           }
-          const diffCount = maskHammingDistance(source.mask, target.mask);
-          const shapeScore = maskDifferenceScore(source.mask, target.mask);
-          const similarityScore =
-            diffCount * (1 - similarityBias) + shapeScore * similarityBias;
+          const similarityScore = clusterMergeSimilarity(
+            source,
+            target,
+            originalMaskByKey,
+            similarityBias,
+          );
+          if (similarityScore == null) continue;
           const removalWeight =
             (1 - source.utility) * 6 +
             (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
@@ -927,6 +976,7 @@ export function init(TPP) {
       target.count = (target.count || 0) + absorbedCount;
       target.error = (target.error || 0) + absorbedError;
       target.averageError = target.count ? target.error / target.count : target.error;
+      target.members = (target.members || []).concat(source.members || []);
       target.utility = utilityScore(target);
       working.splice(bestMerge.sourceIndex, 1);
     }
@@ -974,6 +1024,11 @@ export function init(TPP) {
       };
     }
     const normalizedBias = clampByte(bias == null ? 128 : bias) / 255;
+    const originalMaskByKey = new Map(
+      entries.map(function (entry) {
+        return [entry.key, entry.mask];
+      }),
+    );
     const enriched = entries.map(function (entry) {
       return {
         key: entry.key,
@@ -1004,6 +1059,8 @@ export function init(TPP) {
     const working = enriched.map(function (entry) {
       return Object.assign({}, entry, {
         utility: utilityScore(entry),
+        detailProtection: maskDetailProtection(entry.mask),
+        litCount: maskLitCount(entry.mask),
       });
     });
     const mergesNeeded = Math.max(0, working.length - maxPatterns);
@@ -1021,17 +1078,24 @@ export function init(TPP) {
           ) {
             continue;
           }
-          const diffCount = maskHammingDistance(source.mask, target.mask);
-          const shapeScore = maskDifferenceScore(source.mask, target.mask);
-          const similarityScore =
-            diffCount * (1 - similarityBias) + shapeScore * similarityBias;
+          const similarityScore = clusterMergeSimilarity(
+            source,
+            target,
+            originalMaskByKey,
+            similarityBias,
+          );
+          if (similarityScore == null) continue;
           const removalWeight =
             (1 - source.utility) * 6 +
             (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
             (source.averageError - minAverageError) / errorRange;
+          const detailWeight =
+            source.detailProtection * 4 -
+            target.detailProtection * 1.5;
           const mergeScore =
             similarityScore +
             removalWeight -
+            detailWeight -
             target.utility * 2 -
             Math.min(2, ((target.count || 0) / maxCount) * 2);
           if (!bestMerge || mergeScore < bestMerge.score) {
