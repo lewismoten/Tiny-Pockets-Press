@@ -5229,11 +5229,14 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   if (hasCover && loaderProgram) {
     pushLine(3000, 'IF ML=1 THEN RETURN');
     pushLine(3005, 'LT$="INSTALLING LOADER":GOSUB 3500');
+    pushLine(3008, 'NI=0:BP=0:GOSUB 3730');
     pushLine(3010, 'RESTORE');
     pushLine(3020, 'FOR I=0 TO ' + String(loaderProgram.bytes.length - 1));
     pushLine(3022, 'READ B:POKE ' + String(loaderProgram.address) + '+I,B');
+    pushLine(3024, 'IF I<NI THEN 3028');
+    pushLine(3026, 'BP=INT(I*20/' + String(loaderProgram.bytes.length) + '):GOSUB 3730:NI=NI+32');
     pushLine(3028, 'NEXT');
-    pushLine(3030, 'ML=1:RETURN');
+    pushLine(3030, 'BP=20:GOSUB 3730:ML=1:RETURN');
     pushLine(3290, 'IF LEN(F$)>32 THEN F$=LEFT$(F$,32)');
     pushLine(3300, 'POKE ' + String(loaderProgram.filenameLengthAddress) + ',LEN(F$)');
     pushLine(3310, 'FOR I=1 TO LEN(F$):POKE ' + String(loaderProgram.filenameLengthAddress + 1) + '+I-1,ASC(MID$(F$,I,1)):NEXT');
@@ -5251,11 +5254,44 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3424, 'POKE 646,2:PRINT:PRINT "COVER LOAD FAILED";LR:POKE 646,1:RETURN');
     pushLine(3430, 'CV=1:RETURN');
     pushLine(3500, 'POKE 53280,6:POKE 53281,6:POKE 646,7:PRINT CHR$(147)');
-    pushLine(3510, 'PRINT LT$');
-    pushLine(3520, 'PRINT "PRESS ANY KEY TO SKIP"');
+    pushLine(3510, 'PRINT "        TINY POCKETS PRESS"');
+    pushLine(3520, 'POKE 646,3:PRINT "          BOOK FILE READER"');
+    pushLine(3530, 'POKE 646,1:PRINT');
+    pushLine(3540, 'PRINT "   +--------------------------------+"');
+    pushLine(3550, 'PRINT "   !                                !"');
+    pushLine(3560, 'PRINT "   !   ";LT$');
+    pushLine(3570, 'PRINT "   !                                !"');
+    pushLine(3580, 'PRINT "   +--------------------------------+"');
+    pushLine(3590, 'PRINT');
+    pushLine(3600, 'PRINT');
+    pushLine(3610, 'PRINT');
+    pushLine(3620, 'PRINT "         [....................]   0%"');
+    pushLine(3630, 'PRINT');
+    pushLine(3640, 'PRINT "           COMMODORE 64 EDITION"');
+    pushLine(3650, 'PRINT');
+    pushLine(3660, 'PRINT "            PREPARING READER"');
+    pushLine(3670, 'PRINT');
+    pushLine(3680, 'IF LT$<>"INSTALLING LOADER" THEN 3720');
+    pushLine(3690, 'PRINT');
+    pushLine(3700, 'PRINT "         MACHINE LANGUAGE BOOT"');
+    pushLine(3710, 'PRINT');
+    pushLine(3715, 'GOTO 3720');
     pushLine(3720, 'POKE 646,1:RETURN');
+    pushLine(3730, 'POKE 646,7');
+    pushLine(3740, 'PRINT CHR$(19);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);');
+    pushLine(3750, 'B$="["');
+    pushLine(3760, 'FOR K=1 TO 20:IF K<=BP THEN B$=B$+"*":GOTO 3780');
+    pushLine(3770, 'B$=B$+"."');
+    pushLine(3780, 'NEXT');
+    pushLine(3790, 'B$=B$+"]"');
+    pushLine(3795, 'PC=INT(BP*5)');
+    pushLine(3798, 'IF PC=100 THEN P$="100":GOTO 3810');
+    pushLine(3800, 'IF PC<10 THEN P$="  "+MID$(STR$(PC),2):GOTO 3810');
+    pushLine(3805, 'P$=" "+MID$(STR$(PC),2)');
+    pushLine(3810, 'PRINT B$;" ";P$;"%"');
+    pushLine(3815, 'POKE 646,1:RETURN');
     const loaderData = Array.from(loaderProgram.bytes);
-    for (let offset = 0, line = 3800; offset < loaderData.length; offset += 16, line += 10) {
+    for (let offset = 0, line = 3820; offset < loaderData.length; offset += 16, line += 10) {
       pushLine(line, 'DATA ' + loaderData.slice(offset, offset + 16).join(','));
     }
   }
