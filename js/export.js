@@ -4350,6 +4350,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     THEN: 0xa7,
     AND: 0xaf,
     OR: 0xb0,
+    INT: 0xb5,
     CHR$: 0xc7,
     PEEK: 0xc2,
     LEFT$: 0xc8,
@@ -4679,9 +4680,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(2144, 'RETURN');
     pushLine(2200, 'POKE 646,7');
     pushLine(2210, 'PRINT CHR$(19);CHR$(17);CHR$(17);');
-    pushLine(2220, 'FC=0');
-    pushLine(2230, 'FOR J=1 TO BP/2:FC=FC+1:NEXT');
-    pushLine(2240, 'PP=BP-FC*2');
+    pushLine(2220, 'FC=INT(BP/2)');
+    pushLine(2230, 'PP=BP-FC*2');
     pushLine(2260, 'B$="["');
     pushLine(2270, 'FOR K=1 TO 20:IF K<=FC THEN B$=B$+"*":GOTO 2310');
     pushLine(2280, 'IF K<>FC+1 THEN B$=B$+".":GOTO 2310');
@@ -4689,11 +4689,10 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(2300, 'B$=B$+"+"');
     pushLine(2310, 'NEXT');
     pushLine(2320, 'B$=B$+"]"');
-    pushLine(2330, 'PC=FC*5');
-    pushLine(2340, 'IF PP=0 THEN 2360');
-    pushLine(2350, 'PC=PC+2');
-    pushLine(2360, 'PRINT B$;" ";PC;"%   "');
-    pushLine(2370, 'RETURN');
+    pushLine(2330, 'PC=INT(BP*100/40)');
+    pushLine(2340, 'S$=MID$(STR$(PC),2)+"%"');
+    pushLine(2350, 'PRINT B$;" ";S$;"   "');
+    pushLine(2360, 'RETURN');
   }
   pushLine(900, 'POKE 53280,2:POKE 53281,2:POKE 646,7:PRINT');
   pushLine(910, 'PRINT "QUIT TO BASIC (Y/N)?"');
