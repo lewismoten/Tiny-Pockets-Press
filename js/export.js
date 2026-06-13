@@ -5450,6 +5450,55 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     bytes: new Uint8Array(code),
   };
 };
+TPP.buildD64AssetLoaderProgramFile = function () {
+  const loader = TPP.buildD64AssetLoaderProgramBytes();
+  const fileBytes = new Uint8Array(loader.bytes.length + 2);
+  fileBytes[0] = loader.address & 0xff;
+  fileBytes[1] = (loader.address >> 8) & 0xff;
+  fileBytes.set(loader.bytes, 2);
+  return {
+    address: loader.address,
+    bytes: fileBytes,
+  };
+};
+TPP.buildD64LoaderBootstrapBytes = function () {
+  const address = 0xc800;
+  const filename = "LOADER.PRG";
+  const filenameBytes = Array.from(filename, function (char) {
+    return char.charCodeAt(0) & 0xff;
+  });
+  const codeLength = 41;
+  const filenameAddress = address + codeLength;
+  const statusAddress = filenameAddress + filenameBytes.length + 1;
+  const bytes = new Uint8Array([
+    0xa9, filenameBytes.length & 0xff,
+    0xa2, filenameAddress & 0xff,
+    0xa0, (filenameAddress >> 8) & 0xff,
+    0x20, 0xbd, 0xff,
+    0xa9, 0x01,
+    0xa2, 0x08,
+    0xa0, 0x01,
+    0x20, 0xba, 0xff,
+    0xa9, 0x00,
+    0xa2, 0x00,
+    0xa0, 0x00,
+    0x20, 0xd5, 0xff,
+    0x90, 0x06,
+    0xa9, 0x01,
+    0x8d, statusAddress & 0xff, (statusAddress >> 8) & 0xff,
+    0x60,
+    0xa9, 0x00,
+    0x8d, statusAddress & 0xff, (statusAddress >> 8) & 0xff,
+    0x60,
+    ...filenameBytes,
+    0x00,
+  ]);
+  return {
+    address: address,
+    statusAddress: statusAddress,
+    bytes: bytes,
+  };
+};
 TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   const basicStart = 0x0801;
   const tokens = {
@@ -5467,6 +5516,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     STOP: 0x90,
     GOTO: 0x89,
     IF: 0x8b,
+    CLR: 0x9c,
+    LOAD: 0x93,
     "PRINT#": 0x98,
     POKE: 0x97,
     PRINT: 0x99,
@@ -5498,6 +5549,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   const hasToc = Boolean(config.hasToc);
   const hasCover = Boolean(config.hasCover);
   const loaderProgram = TPP.buildD64AssetLoaderProgramBytes();
+  const loaderBootstrap = TPP.buildD64LoaderBootstrapBytes();
   const basicString = function (value) {
     return String(value || "")
       .replace(/[\r\n]+/g, " ")
@@ -5603,7 +5655,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
       body: Array.isArray(body) ? body.slice() : encodeBasicBody(body),
     });
   };
-  pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24):RB=28672');
+  pushLine(5, 'CLR:DIM T$(200),N$(24),V$(24),NC(24),VC(24):RB=28672');
   pushLine(8, 'GOSUB 3000');
   if (hasCover) {
     pushLine(10, 'G$="COV":GOSUB 500:IF LN=0 THEN 20');
@@ -5743,15 +5795,12 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   }
   if (loaderProgram) {
     pushLine(3000, 'IF ML=1 THEN RETURN');
-    pushLine(3005, 'LT$="INSTALLING LOADER":GOSUB 3500');
-    pushLine(3008, 'NI=0:BP=0:GOSUB 3730');
+    pushLine(3005, 'LT$="LOADING ENGINE":GOSUB 3500');
     pushLine(3010, 'RESTORE');
-    pushLine(3020, 'FOR I=0 TO ' + String(loaderProgram.bytes.length - 1));
-    pushLine(3022, 'READ B:POKE ' + String(loaderProgram.address) + '+I,B');
-    pushLine(3024, 'IF I<NI THEN 3028');
-    pushLine(3026, 'BP=INT(I*20/' + String(loaderProgram.bytes.length) + '):GOSUB 3730:NI=NI+32');
-    pushLine(3028, 'NEXT');
-    pushLine(3030, 'BP=20:GOSUB 3730:ML=1:RETURN');
+    pushLine(3020, 'BA=' + String(loaderBootstrap.address) + ':FOR I=0 TO ' + String(loaderBootstrap.bytes.length - 1) + ':READ B:POKE BA+I,B:NEXT');
+    pushLine(3030, 'SYS ' + String(loaderBootstrap.address));
+    pushLine(3040, 'IF PEEK(' + String(loaderBootstrap.statusAddress) + ')<>0 THEN POKE 646,2:PRINT:PRINT "ENGINE LOAD FAILED":POKE 646,1:END');
+    pushLine(3050, 'ML=1:RETURN');
     pushLine(3290, 'IF LEN(F$)>32 THEN F$=LEFT$(F$,32)');
     pushLine(3300, 'POKE ' + String(loaderProgram.filenameLengthAddress) + ',LEN(F$)');
     pushLine(3310, 'FOR I=1 TO LEN(F$):POKE ' + String(loaderProgram.filenameLengthAddress + 1) + '+I-1,ASC(MID$(F$,I,1)):NEXT');
@@ -5787,7 +5836,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3570, 'PRINT "   !                                !"');
     pushLine(3580, 'PRINT "   +--------------------------------+"');
     pushLine(3590, 'PRINT');
-    pushLine(3600, 'IF LT$<>"INSTALLING LOADER" THEN 3660');
+    pushLine(3600, 'IF LT$<>"LOADING ENGINE" THEN 3660');
     pushLine(3610, 'PRINT');
     pushLine(3620, 'PRINT');
     pushLine(3630, 'PRINT "           COMMODORE 64 EDITION"');
@@ -5799,22 +5848,11 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3690, 'PRINT "         PRESS ANY KEY TO SKIP"');
     pushLine(3700, 'PRINT');
     pushLine(3720, 'POKE 646,1:RETURN');
-    pushLine(3730, 'POKE 646,7');
-    pushLine(3740, 'PRINT CHR$(19);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);');
-    pushLine(3750, 'B$="["');
-    pushLine(3760, 'FOR K=1 TO 20:IF K<=BP THEN B$=B$+"*":GOTO 3780');
-    pushLine(3770, 'B$=B$+"."');
-    pushLine(3780, 'NEXT');
-    pushLine(3790, 'B$=B$+"]"');
-    pushLine(3795, 'PC=INT(BP*5)');
-    pushLine(3798, 'IF PC=100 THEN P$="100":GOTO 3810');
-    pushLine(3800, 'IF PC<10 THEN P$="  "+MID$(STR$(PC),2):GOTO 3810');
-    pushLine(3805, 'P$=" "+MID$(STR$(PC),2)');
-    pushLine(3810, 'PRINT B$;" ";P$;"%"');
-    pushLine(3815, 'POKE 646,1:RETURN');
-    const loaderData = Array.from(loaderProgram.bytes);
-    for (let offset = 0, line = 3820; offset < loaderData.length; offset += 16, line += 10) {
-      pushLine(line, 'DATA ' + loaderData.slice(offset, offset + 16).join(','));
+    let dataLine = 4200;
+    for (let offset = 0; offset < loaderBootstrap.bytes.length; offset += 16) {
+      const chunk = Array.from(loaderBootstrap.bytes.slice(offset, offset + 16));
+      pushLine(dataLine, 'DATA ' + chunk.join(','));
+      dataLine += 2;
     }
   }
   pushLine(1900, 'POKE 53280,2:POKE 53281,2:POKE 646,7:PRINT');
@@ -5868,6 +5906,7 @@ TPP.exportImagesD64 = async function (options) {
     const promptRecord = coverRecord && coverRecord.bytes && coverRecord.bytes.length
       ? TPP.buildD64PromptSpriteRecordBytes()
       : null;
+    const loaderFile = TPP.buildD64AssetLoaderProgramFile();
     TPP.throwIfProgressCancelled(progressOp);
     TPP.showProgress(45, "Packing Commodore 64 data...");
     const bookFiles = TPP.exportD64IndexAndData(settings, {
@@ -5888,6 +5927,11 @@ TPP.exportImagesD64 = async function (options) {
         name: "BOOK.IDX",
         type: 0x81,
         data: bookFiles.indexBytes,
+      },
+      {
+        name: "LOADER.PRG",
+        type: 0x82,
+        data: loaderFile.bytes,
       },
       ...bookFiles.dataFiles.map(function (file) {
         return {
