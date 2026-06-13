@@ -4647,7 +4647,8 @@ TPP.exportD64IndexAndData = function (book, options) {
 TPP.buildD64AssetLoaderProgramBytes = function () {
   const coverLayout = TPP.d64BitmapCoverLayout();
   const start = 0xc000;
-  const configBase = 0xc500;
+  const configBase = 0xc900;
+  const promptFallbackBytes = TPP.buildD64PromptSpriteRecordBytes();
   const vars = {
     status: configBase + 0,
     filenameLength: configBase + 1,
@@ -4725,6 +4726,16 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   const bcc = function (name) { emit(0x90); relativeFixup(name); };
   const bcs = function (name) { emit(0xb0); relativeFixup(name); };
   const beq = function (name) { emit(0xf0); relativeFixup(name); };
+  const ldaLabelLo = function (name) {
+    emit(0xa9);
+    fixups.push({ kind: "lo", index: code.length, name: name });
+    emit(0x00);
+  };
+  const ldaLabelHi = function (name) {
+    emit(0xa9);
+    fixups.push({ kind: "hi", index: code.length, name: name });
+    emit(0x00);
+  };
   const andImm = function (value) { emit(0x29, value); };
   const oraImm = function (value) { emit(0x09, value); };
   const cmpAbs = function (value) { emit(0xcd, value & 0xff, (value >> 8) & 0xff); };
@@ -4807,13 +4818,6 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   ldaImm(25);
   staAbs(vars.bandCount);
   label("bandLoop");
-  jsrLabel("scanKey");
-  bcc("bandRead");
-  ldaImm(0x01);
-  staAbs(vars.status);
-  jsrLabel("cleanup");
-  rts();
-  label("bandRead");
   ldaImm(coverLayout.loadBufferAddress & 0xff);
   staAbs(vars.ptrLo);
   ldaImm((coverLayout.loadBufferAddress >> 8) & 0xff);
@@ -4852,9 +4856,11 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrLabel("setPromptFilename");
   jsrLabel("loadPromptFile");
   bcc("promptOpenOk");
+  jsrLabel("loadFallbackPrompt");
   jmpLabel("coverReady");
   label("promptOpenOk");
   jsrLabel("hideSprites");
+  jsrLabel("loadFallbackPrompt");
   label("coverReady");
   jsrLabel("showPrompt");
   jsrLabel("clearKeys");
@@ -5027,9 +5033,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
 
   label("scanKey");
   jsrAbs(KERNAL.scnkey);
-  ldaAbs(0x00c6);
-  beq("noKey");
   jsrAbs(KERNAL.getin);
+  beq("noKey");
   sec();
   rts();
   label("noKey");
@@ -5068,7 +5073,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(vars.ptrHi);
   ldaImm(0x00);
   staAbs(vars.lenLo);
-  ldaAbs(vars.promptRecordCount);
+  ldaImm(0x02);
   staAbs(vars.lenHi);
   jsrLabel("streamSegment");
   bcc("promptReadOk");
@@ -5078,6 +5083,22 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   label("promptReadOk");
   jsrLabel("cleanup");
   clc();
+  rts();
+
+  label("loadFallbackPrompt");
+  ldaImm(promptFallbackBytes.length & 0xff);
+  staAbs(vars.lenLo);
+  ldaImm((promptFallbackBytes.length >> 8) & 0xff);
+  staAbs(vars.lenHi);
+  ldaImm(coverLayout.spriteAddress & 0xff);
+  staAbs(vars.dstLo);
+  ldaImm((coverLayout.spriteAddress >> 8) & 0xff);
+  staAbs(vars.dstHi);
+  ldaLabelLo("promptFallbackData");
+  staAbs(vars.srcLo);
+  ldaLabelHi("promptFallbackData");
+  staAbs(vars.srcHi);
+  jsrLabel("copySegment");
   rts();
 
   label("cleanup");
@@ -5298,11 +5319,25 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   ldaImm(0xff);
   staAbs(0xd015);
   rts();
+  label("promptFallbackData");
+  promptFallbackBytes.forEach(function (value) {
+    emit(value);
+  });
   fixups.forEach(function (fixup) {
     if (fixup.kind === "abs") {
       const target = labels[fixup.name];
       code[fixup.index] = target & 0xff;
       code[fixup.index + 1] = (target >> 8) & 0xff;
+      return;
+    }
+    if (fixup.kind === "lo") {
+      const target = labels[fixup.name];
+      code[fixup.index] = target & 0xff;
+      return;
+    }
+    if (fixup.kind === "hi") {
+      const target = labels[fixup.name];
+      code[fixup.index] = (target >> 8) & 0xff;
       return;
     }
     if (fixup.kind === "rel") {
