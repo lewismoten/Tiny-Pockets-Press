@@ -704,6 +704,91 @@ export function init(TPP) {
     }
     return distance;
   };
+  const maskDifferenceScore = function (a, b) {
+    const left = a || [];
+    const right = b || [];
+    const diffMap = new Uint8Array(64);
+    const diffPositions = [];
+    let minX = 8;
+    let minY = 8;
+    let maxX = -1;
+    let maxY = -1;
+    for (let y = 0; y < 8; y += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        const index = y * 8 + x;
+        if ((left[index] ? 1 : 0) === (right[index] ? 1 : 0)) continue;
+        diffMap[index] = 1;
+        diffPositions.push(index);
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+    if (!diffPositions.length) return 0;
+    let isolationPenalty = 0;
+    let componentPenalty = 0;
+    let components = 0;
+    const visited = new Uint8Array(64);
+    diffPositions.forEach(function (index) {
+      const x = index % 8;
+      const y = Math.floor(index / 8);
+      let diffNeighbors = 0;
+      let litNeighbors = 0;
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          if (!dx && !dy) continue;
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || nx >= 8 || ny < 0 || ny >= 8) continue;
+          const neighborIndex = ny * 8 + nx;
+          if (diffMap[neighborIndex]) diffNeighbors += 1;
+          if ((left[neighborIndex] ? 1 : 0) || (right[neighborIndex] ? 1 : 0)) {
+            litNeighbors += 1;
+          }
+        }
+      }
+      if (!diffNeighbors) {
+        isolationPenalty += 1.75;
+      } else if (diffNeighbors === 1) {
+        isolationPenalty += 0.75;
+      }
+      if (!litNeighbors) {
+        isolationPenalty += 1.25;
+      } else if (litNeighbors <= 2) {
+        isolationPenalty += 0.5;
+      }
+    });
+    for (let i = 0; i < diffPositions.length; i += 1) {
+      const start = diffPositions[i];
+      if (visited[start]) continue;
+      components += 1;
+      const stack = [start];
+      visited[start] = 1;
+      while (stack.length) {
+        const index = stack.pop();
+        const x = index % 8;
+        const y = Math.floor(index / 8);
+        for (let dy = -1; dy <= 1; dy += 1) {
+          for (let dx = -1; dx <= 1; dx += 1) {
+            if (!dx && !dy) continue;
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || nx >= 8 || ny < 0 || ny >= 8) continue;
+            const neighborIndex = ny * 8 + nx;
+            if (!diffMap[neighborIndex] || visited[neighborIndex]) continue;
+            visited[neighborIndex] = 1;
+            stack.push(neighborIndex);
+          }
+        }
+      }
+    }
+    componentPenalty = Math.max(0, components - 1) * 1.5;
+    const spanX = Math.max(1, maxX - minX + 1);
+    const spanY = Math.max(1, maxY - minY + 1);
+    const spreadPenalty = Math.max(0, spanX * spanY - diffPositions.length) / 10;
+    return diffPositions.length + isolationPenalty + componentPenalty + spreadPenalty;
+  };
   const solidGlyphMask = function () {
     const mask = new Uint8Array(64);
     mask.fill(1);
@@ -737,7 +822,6 @@ export function init(TPP) {
   const selectVariedCharsetPatterns = function (stats, limit, bias) {
     const entries = Array.isArray(stats) ? stats.slice() : [];
     const maxPatterns = Math.max(1, Math.min(Number(limit) || 256, entries.length));
-    const normalizedBias = clampByte(bias == null ? 128 : bias) / 255;
     if (entries.length <= maxPatterns) {
       return entries
         .sort(function (a, b) {
@@ -748,6 +832,7 @@ export function init(TPP) {
           return entry.mask;
         });
     }
+    const normalizedBias = clampByte(bias == null ? 128 : bias) / 255;
     const enriched = entries.map(function (entry) {
       return {
         key: entry.key,
@@ -773,74 +858,72 @@ export function init(TPP) {
         1 - (entry.averageError - minAverageError) / errorRange;
       return countScore * 0.85 + errorScore * 0.15;
     };
-    const utilitySorted = enriched.slice().sort(function (a, b) {
-      const utilityDiff = utilityScore(b) - utilityScore(a);
-      if (Math.abs(utilityDiff) > 1e-6) return utilityDiff;
-      if (b.count !== a.count) return b.count - a.count;
-      return a.averageError - b.averageError;
-    });
-    const selected = [];
-    const used = new Set();
-    const accuracyQuota = Math.max(
-      0,
-      Math.min(
-        maxPatterns,
-        Math.round((0.5 + normalizedBias * 0.5) * maxPatterns),
-      ),
-    );
-    const varietyQuota = Math.max(0, maxPatterns - accuracyQuota);
-    while (selected.length < accuracyQuota && selected.length < maxPatterns) {
-      const nextAccuracy = utilitySorted.find(function (entry) {
-        return !used.has(entry.key);
+    const similarityBias = 0.35 + normalizedBias * 0.4;
+    const working = enriched.map(function (entry) {
+      return Object.assign({}, entry, {
+        utility: utilityScore(entry),
       });
-      if (!nextAccuracy) break;
-      selected.push(nextAccuracy);
-      used.add(nextAccuracy.key);
-    }
-    if (!selected.length && utilitySorted.length) {
-      selected.push(utilitySorted[0]);
-      used.add(utilitySorted[0].key);
-    }
-    while (
-      selected.length < accuracyQuota + varietyQuota &&
-      selected.length < maxPatterns
-    ) {
-      let bestCandidate = null;
-      let bestScore = -Infinity;
-      for (let i = 0; i < enriched.length; i += 1) {
-        const candidate = enriched[i];
-        if (used.has(candidate.key)) continue;
-        let nearestDistance = Infinity;
-        for (let j = 0; j < selected.length; j += 1) {
-          nearestDistance = Math.min(
-            nearestDistance,
-            maskHammingDistance(candidate.mask, selected[j].mask),
-          );
-        }
-        const varietyScore = nearestDistance / 64;
-        const score = varietyScore * 0.6 + utilityScore(candidate) * 0.4;
-        if (score > bestScore) {
-          bestScore = score;
-          bestCandidate = candidate;
-        }
-      }
-      if (!bestCandidate) break;
-      selected.push(bestCandidate);
-      used.add(bestCandidate.key);
-    }
-    if (selected.length < maxPatterns) {
-      const remaining = utilitySorted
-        .filter(function (entry) {
-          return !used.has(entry.key);
-        });
-      for (let i = 0; i < remaining.length && selected.length < maxPatterns; i += 1) {
-        selected.push(remaining[i]);
-        used.add(remaining[i].key);
-      }
-    }
-    return selected.map(function (entry) {
-      return entry.mask;
     });
+    while (working.length > maxPatterns) {
+      let bestMerge = null;
+      for (let i = 0; i < working.length; i += 1) {
+        const source = working[i];
+        for (let j = 0; j < working.length; j += 1) {
+          if (i === j) continue;
+          const target = working[j];
+          if (
+            target.utility < source.utility &&
+            !(target.utility === source.utility && (target.count || 0) >= (source.count || 0))
+          ) {
+            continue;
+          }
+          const diffCount = maskHammingDistance(source.mask, target.mask);
+          const shapeScore = maskDifferenceScore(source.mask, target.mask);
+          const similarityScore =
+            diffCount * (1 - similarityBias) + shapeScore * similarityBias;
+          const removalWeight =
+            (1 - source.utility) * 6 +
+            (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
+            (source.averageError - minAverageError) / errorRange;
+          const mergeScore =
+            similarityScore +
+            removalWeight -
+            target.utility * 2 -
+            Math.min(2, ((target.count || 0) / maxCount) * 2);
+          if (!bestMerge || mergeScore < bestMerge.score) {
+            bestMerge = {
+              sourceIndex: i,
+              targetIndex: j,
+              score: mergeScore,
+              similarityScore: similarityScore,
+            };
+          }
+        }
+      }
+      if (!bestMerge) break;
+      const source = working[bestMerge.sourceIndex];
+      const target = working[bestMerge.targetIndex];
+      const absorbedCount = source.count || 0;
+      const absorbedError =
+        (source.error || 0) + bestMerge.similarityScore * absorbedCount;
+      target.count = (target.count || 0) + absorbedCount;
+      target.error = (target.error || 0) + absorbedError;
+      target.averageError = target.count ? target.error / target.count : target.error;
+      target.utility = utilityScore(target);
+      working.splice(bestMerge.sourceIndex, 1);
+    }
+    return working
+      .slice()
+      .sort(function (a, b) {
+        if (b.count !== a.count) return b.count - a.count;
+        const utilityDiff = (b.utility || 0) - (a.utility || 0);
+        if (Math.abs(utilityDiff) > 1e-6) return utilityDiff;
+        return a.averageError - b.averageError;
+      })
+      .slice(0, maxPatterns)
+      .map(function (entry) {
+        return entry.mask;
+      });
   };
   const extractCellPixels = function (data, width, cellX, cellY, blockWidth, blockHeight) {
     const pixels = new Uint8Array(blockWidth * blockHeight * 3);
