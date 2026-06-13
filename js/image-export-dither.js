@@ -789,6 +789,19 @@ export function init(TPP) {
     const spreadPenalty = Math.max(0, spanX * spanY - diffPositions.length) / 10;
     return diffPositions.length + isolationPenalty + componentPenalty + spreadPenalty;
   };
+  const maskFillRatio = function (mask) {
+    const source = mask || [];
+    let lit = 0;
+    for (let i = 0; i < 64; i += 1) {
+      lit += source[i] ? 1 : 0;
+    }
+    return lit / 64;
+  };
+  const maskDetailProtection = function (mask) {
+    const fill = maskFillRatio(mask);
+    const distanceFromHalf = Math.abs(fill - 0.5) * 2;
+    return distanceFromHalf;
+  };
   const solidGlyphMask = function () {
     const mask = new Uint8Array(64);
     mask.fill(1);
@@ -862,6 +875,7 @@ export function init(TPP) {
     const working = enriched.map(function (entry) {
       return Object.assign({}, entry, {
         utility: utilityScore(entry),
+        detailProtection: maskDetailProtection(entry.mask),
       });
     });
     while (working.length > maxPatterns) {
@@ -885,9 +899,13 @@ export function init(TPP) {
             (1 - source.utility) * 6 +
             (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
             (source.averageError - minAverageError) / errorRange;
+          const detailWeight =
+            source.detailProtection * 4 -
+            target.detailProtection * 1.5;
           const mergeScore =
             similarityScore +
             removalWeight -
+            detailWeight -
             target.utility * 2 -
             Math.min(2, ((target.count || 0) / maxCount) * 2);
           if (!bestMerge || mergeScore < bestMerge.score) {
