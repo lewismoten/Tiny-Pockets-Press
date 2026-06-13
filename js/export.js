@@ -4219,10 +4219,26 @@ TPP.d64BuildBitmapPromptSprites = function () {
   });
   return sprites;
 };
+TPP.buildD64PromptSpriteRecordBytes = function () {
+  const spriteBlocks = TPP.d64BuildBitmapPromptSprites();
+  const spriteBytes = new Uint8Array(spriteBlocks.length * 64);
+  spriteBlocks.forEach(function (sprite, index) {
+    spriteBytes.set(sprite, index * 64);
+  });
+  return spriteBytes;
+};
+TPP.buildD64PromptSpriteProgramBytes = function () {
+  const layout = TPP.d64BitmapCoverLayout();
+  const spriteBytes = TPP.buildD64PromptSpriteRecordBytes();
+  const program = new Uint8Array(spriteBytes.length + 2);
+  program[0] = layout.spriteAddress & 0xff;
+  program[1] = (layout.spriteAddress >> 8) & 0xff;
+  program.set(spriteBytes, 2);
+  return program;
+};
 TPP.buildD64CoverRecordBytes = function (coverLayout) {
   if (!coverLayout || !coverLayout.bitmap || !coverLayout.screen) return null;
   const layout = TPP.d64BitmapCoverLayout();
-  const spriteBlocks = TPP.d64BuildBitmapPromptSprites();
   const spritePointerBase = (layout.spriteAddress - (layout.bitmapAddress & 0xc000)) >> 6;
   const screenBytes = new Uint8Array(1024);
   screenBytes.set(coverLayout.screen, 0);
@@ -4234,16 +4250,9 @@ TPP.buildD64CoverRecordBytes = function (coverLayout) {
   screenBytes[0x03fd] = spritePointerBase + 5;
   screenBytes[0x03fe] = spritePointerBase + 6;
   screenBytes[0x03ff] = spritePointerBase + 7;
-  const spriteBytes = new Uint8Array(spriteBlocks.length * 64);
-  spriteBlocks.forEach(function (sprite, index) {
-    spriteBytes.set(sprite, index * 64);
-  });
-  const bytes = new Uint8Array(2 + screenBytes.length + coverLayout.bitmap.length + spriteBytes.length);
-  bytes[0] = layout.loadBufferAddress & 0xff;
-  bytes[1] = (layout.loadBufferAddress >> 8) & 0xff;
-  bytes.set(screenBytes, 2);
-  bytes.set(coverLayout.bitmap, 2 + screenBytes.length);
-  bytes.set(spriteBytes, 2 + screenBytes.length + coverLayout.bitmap.length);
+  const bytes = new Uint8Array(screenBytes.length + coverLayout.bitmap.length);
+  bytes.set(screenBytes, 0);
+  bytes.set(coverLayout.bitmap, screenBytes.length);
   return {
     backgroundIndex: 0,
     bytes: bytes,
@@ -4582,25 +4591,37 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     status: configBase + 0,
     filenameLength: configBase + 1,
     filename: configBase + 2,
-    srcLo: configBase + 34,
-    srcHi: configBase + 35,
-    dstLo: configBase + 36,
-    dstHi: configBase + 37,
-    lenLo: configBase + 38,
-    lenHi: configBase + 39,
-    bandCount: configBase + 40,
-    restoreFb: configBase + 41,
-    restoreFc: configBase + 42,
-    restoreFd: configBase + 43,
-    restoreFe: configBase + 44,
+    fileOpen: configBase + 34,
+    ptrLo: configBase + 35,
+    ptrHi: configBase + 36,
+    lenLo: configBase + 37,
+    lenHi: configBase + 38,
+    bandCount: configBase + 39,
+    restoreFb: configBase + 40,
+    restoreFc: configBase + 41,
+    srcLo: configBase + 42,
+    srcHi: configBase + 43,
+    dstLo: configBase + 44,
+    dstHi: configBase + 45,
+    restoreFd: configBase + 46,
+    restoreFe: configBase + 47,
   };
+  const promptFileName = "0:PROMPT.SPR,P,R";
   const KERNAL = {
     setnam: 0xffbd,
     setlfs: 0xffba,
+    open: 0xffc0,
+    close: 0xffc3,
+    chkin: 0xffc6,
+    clrchn: 0xffcc,
+    chrin: 0xffcf,
     load: 0xffd5,
     scnkey: 0xff9f,
     getin: 0xffe4,
   };
+  const promptFileNameBytes = Array.from(promptFileName, function (char) {
+    return char.charCodeAt(0) & 0xff;
+  });
   const code = [];
   const labels = {};
   const fixups = [];
@@ -4631,7 +4652,6 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   const bne = function (name) { emit(0xd0); relativeFixup(name); };
   const bcc = function (name) { emit(0x90); relativeFixup(name); };
   const beq = function (name) { emit(0xf0); relativeFixup(name); };
-  const bcs = function (name) { emit(0xb0); relativeFixup(name); };
   const andImm = function (value) { emit(0x29, value); };
   const oraImm = function (value) { emit(0x09, value); };
   const cmpAbs = function (value) { emit(0xcd, value & 0xff, (value >> 8) & 0xff); };
@@ -4640,12 +4660,15 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   const sec = function () { emit(0x38); };
   const rts = function () { emit(0x60); };
   const dey = function () { emit(0x88); };
-  const ldaIndY = function (zp) { emit(0xb1, zp); };
+  const pha = function () { emit(0x48); };
+  const pla = function () { emit(0x68); };
   const staIndY = function (zp) { emit(0x91, zp); };
 
   label("start");
   ldaImm(0x02);
   staAbs(vars.status);
+  ldaImm(0x00);
+  staAbs(vars.fileOpen);
   ldaAbs(0x00fb);
   staAbs(vars.restoreFb);
   ldaAbs(0x00fc);
@@ -4654,37 +4677,25 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(vars.restoreFd);
   ldaAbs(0x00fe);
   staAbs(vars.restoreFe);
-  jsrLabel("loadFile");
-  bcc("loadOk");
+  jsrLabel("clearKeys");
+  jsrLabel("openFile");
+  bcc("openOk");
   jsrLabel("cleanup");
   rts();
-  label("loadOk");
-  ldaImm(coverLayout.loadBufferAddress & 0xff);
-  staAbs(vars.srcLo);
-  ldaImm((coverLayout.loadBufferAddress >> 8) & 0xff);
-  staAbs(vars.srcHi);
+  label("openOk");
   ldaImm(coverLayout.screenAddress & 0xff);
-  staAbs(vars.dstLo);
+  staAbs(vars.ptrLo);
   ldaImm((coverLayout.screenAddress >> 8) & 0xff);
-  staAbs(vars.dstHi);
+  staAbs(vars.ptrHi);
   ldaImm(0x00);
   staAbs(vars.lenLo);
   ldaImm(0x04);
   staAbs(vars.lenHi);
-  jsrLabel("copySegment");
-  ldaImm((coverLayout.loadBufferAddress + 1024 + 8000) & 0xff);
-  staAbs(vars.srcLo);
-  ldaImm(((coverLayout.loadBufferAddress + 1024 + 8000) >> 8) & 0xff);
-  staAbs(vars.srcHi);
-  ldaImm(coverLayout.spriteAddress & 0xff);
-  staAbs(vars.dstLo);
-  ldaImm((coverLayout.spriteAddress >> 8) & 0xff);
-  staAbs(vars.dstHi);
-  ldaImm(0x00);
-  staAbs(vars.lenLo);
-  ldaImm(0x02);
-  staAbs(vars.lenHi);
-  jsrLabel("copySegment");
+  jsrLabel("streamSegment");
+  bcc("screenOk");
+  jsrLabel("cleanup");
+  rts();
+  label("screenOk");
   ldaImm(0x00);
   staAbs(0xd015);
   staAbs(0xd010);
@@ -4708,55 +4719,148 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   oraImm(0x20);
   staAbs(0xd011);
   ldaImm(coverLayout.bitmapAddress & 0xff);
+  staAbs(vars.ptrLo);
+  ldaImm((coverLayout.bitmapAddress >> 8) & 0xff);
+  staAbs(vars.ptrHi);
+  ldaImm(0x40);
+  staAbs(vars.lenLo);
+  ldaImm(0x1f);
+  staAbs(vars.lenHi);
+  jsrLabel("zeroSegment");
+  ldaImm(coverLayout.bitmapAddress & 0xff);
   staAbs(vars.dstLo);
   ldaImm((coverLayout.bitmapAddress >> 8) & 0xff);
   staAbs(vars.dstHi);
-  ldaImm((coverLayout.loadBufferAddress + 1024) & 0xff);
-  staAbs(vars.srcLo);
-  ldaImm(((coverLayout.loadBufferAddress + 1024) >> 8) & 0xff);
-  staAbs(vars.srcHi);
   ldaImm(25);
   staAbs(vars.bandCount);
   label("bandLoop");
+  jsrLabel("scanKey");
+  bcc("bandRead");
+  ldaImm(0x01);
+  staAbs(vars.status);
+  jsrLabel("cleanup");
+  rts();
+  label("bandRead");
+  ldaImm(coverLayout.loadBufferAddress & 0xff);
+  staAbs(vars.ptrLo);
+  ldaImm((coverLayout.loadBufferAddress >> 8) & 0xff);
+  staAbs(vars.ptrHi);
+  ldaImm(0x40);
+  staAbs(vars.lenLo);
+  ldaImm(0x01);
+  staAbs(vars.lenHi);
+  jsrLabel("streamSegment");
+  bcc("nextBand");
+  jsrLabel("cleanup");
+  rts();
+  label("nextBand");
+  ldaImm(coverLayout.loadBufferAddress & 0xff);
+  staAbs(vars.srcLo);
+  ldaImm((coverLayout.loadBufferAddress >> 8) & 0xff);
+  staAbs(vars.srcHi);
   ldaImm(0x40);
   staAbs(vars.lenLo);
   ldaImm(0x01);
   staAbs(vars.lenHi);
   jsrLabel("copySegment");
-  jsrLabel("scanKey");
-  bcc("nextBand");
-  ldaImm(0x01);
-  staAbs(vars.status);
-  jsrLabel("cleanup");
-  rts();
-  label("nextBand");
   decAbs(vars.bandCount);
   bne("bandLoop");
   jsrLabel("cleanup");
+  jsrLabel("setPromptFilename");
+  jsrLabel("loadPromptFile");
+  bcc("promptOpenOk");
+  jmpLabel("coverReady");
+  label("promptOpenOk");
   jsrLabel("delayPrompt");
+  label("coverReady");
   jsrLabel("showPrompt");
   ldaImm(0x00);
   staAbs(vars.status);
   rts();
 
-  label("loadFile");
+  label("openFile");
   ldaAbs(vars.filenameLength);
   ldxImm(vars.filename & 0xff);
   ldyImm((vars.filename >> 8) & 0xff);
   jsrAbs(KERNAL.setnam);
-  ldaImm(0x01);
+  ldaImm(0x02);
   ldxImm(0x08);
-  ldyImm(0x00);
+  ldyImm(0x02);
   jsrAbs(KERNAL.setlfs);
-  ldaImm(0x00);
-  ldxImm(coverLayout.loadBufferAddress & 0xff);
-  ldyImm((coverLayout.loadBufferAddress >> 8) & 0xff);
-  jsrAbs(KERNAL.load);
-  bcc("loadDone");
+  jsrAbs(KERNAL.open);
+  bcc("openDone");
   staAbs(vars.status);
   sec();
   rts();
-  label("loadDone");
+  label("openDone");
+  ldaImm(0x01);
+  staAbs(vars.fileOpen);
+  ldxImm(0x02);
+  jsrAbs(KERNAL.chkin);
+  bcc("headerDone");
+  ldaImm(0x03);
+  staAbs(vars.status);
+  sec();
+  rts();
+  label("headerDone");
+  clc();
+  rts();
+
+  label("readByte");
+  ldaImm(0x00);
+  staAbs(0x0090);
+  jsrAbs(KERNAL.chrin);
+  pha();
+  ldaAbs(0x0090);
+  beq("readByteOk");
+  andImm(64);
+  bne("readByteOk");
+  ldaAbs(0x0090);
+  staAbs(vars.status);
+  pla();
+  sec();
+  rts();
+  label("readByteOk");
+  pla();
+  clc();
+  rts();
+
+  label("streamSegment");
+  ldaAbs(vars.ptrLo);
+  staAbs(0x00fb);
+  ldaAbs(vars.ptrHi);
+  staAbs(0x00fc);
+  label("streamLoop");
+  ldaAbs(vars.lenLo);
+  oraImm(0x00);
+  bne("streamByte");
+  ldaAbs(vars.lenHi);
+  beq("streamDone");
+  label("streamByte");
+  jsrLabel("readByte");
+  bcc("haveByte");
+  sec();
+  rts();
+  label("haveByte");
+  ldyImm(0x00);
+  staIndY(0xfb);
+  incAbs(0x00fb);
+  bne("streamPtrOk");
+  incAbs(0x00fc);
+  label("streamPtrOk");
+  sec();
+  ldaAbs(vars.lenLo);
+  sbcImm(0x01);
+  staAbs(vars.lenLo);
+  ldaAbs(vars.lenHi);
+  sbcImm(0x00);
+  staAbs(vars.lenHi);
+  jmpLabel("streamLoop");
+  label("streamDone");
+  ldaAbs(0x00fb);
+  staAbs(vars.ptrLo);
+  ldaAbs(0x00fc);
+  staAbs(vars.ptrHi);
   clc();
   rts();
 
@@ -4777,8 +4881,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   beq("copyDone");
   label("copyByte");
   ldyImm(0x00);
-  ldaIndY(0xfb);
-  staIndY(0xfd);
+  emit(0xb1, 0xfb);
+  emit(0x91, 0xfd);
   incAbs(0x00fb);
   bne("copySrcOk");
   incAbs(0x00fc);
@@ -4796,27 +4900,95 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(vars.lenHi);
   jmpLabel("copyLoop");
   label("copyDone");
-  ldaAbs(0x00fb);
-  staAbs(vars.srcLo);
-  ldaAbs(0x00fc);
-  staAbs(vars.srcHi);
   ldaAbs(0x00fd);
   staAbs(vars.dstLo);
   ldaAbs(0x00fe);
   staAbs(vars.dstHi);
   rts();
 
+  label("zeroSegment");
+  ldaAbs(vars.ptrLo);
+  staAbs(0x00fb);
+  ldaAbs(vars.ptrHi);
+  staAbs(0x00fc);
+  label("zeroLoop");
+  ldaAbs(vars.lenLo);
+  oraImm(0x00);
+  bne("zeroByte");
+  ldaAbs(vars.lenHi);
+  beq("zeroDone");
+  label("zeroByte");
+  ldaImm(0x00);
+  ldyImm(0x00);
+  staIndY(0xfb);
+  incAbs(0x00fb);
+  bne("zeroPtrOk");
+  incAbs(0x00fc);
+  label("zeroPtrOk");
+  sec();
+  ldaAbs(vars.lenLo);
+  sbcImm(0x01);
+  staAbs(vars.lenLo);
+  ldaAbs(vars.lenHi);
+  sbcImm(0x00);
+  staAbs(vars.lenHi);
+  jmpLabel("zeroLoop");
+  label("zeroDone");
+  ldaAbs(0x00fb);
+  staAbs(vars.ptrLo);
+  ldaAbs(0x00fc);
+  staAbs(vars.ptrHi);
+  rts();
+
   label("scanKey");
   jsrAbs(KERNAL.scnkey);
-  jsrAbs(KERNAL.getin);
+  ldaAbs(0x00c6);
   beq("noKey");
+  jsrAbs(KERNAL.getin);
   sec();
   rts();
   label("noKey");
   clc();
   rts();
 
+  label("clearKeys");
+  ldaImm(0x00);
+  staAbs(0x00c6);
+  label("clearGetLoop");
+  jsrAbs(KERNAL.getin);
+  bne("clearGetLoop");
+  rts();
+
+  label("loadPromptFile");
+  ldaAbs(vars.filenameLength);
+  ldxImm(vars.filename & 0xff);
+  ldyImm((vars.filename >> 8) & 0xff);
+  jsrAbs(KERNAL.setnam);
+  ldaImm(0x00);
+  ldxImm(0x08);
+  ldyImm(0x00);
+  jsrAbs(KERNAL.setlfs);
+  ldaImm(0x00);
+  ldxImm(coverLayout.spriteAddress & 0xff);
+  ldyImm((coverLayout.spriteAddress >> 8) & 0xff);
+  jsrAbs(KERNAL.load);
+  bcc("promptLoadOk");
+  staAbs(vars.status);
+  sec();
+  rts();
+  label("promptLoadOk");
+  clc();
+  rts();
+
   label("cleanup");
+  jsrAbs(KERNAL.clrchn);
+  ldaAbs(vars.fileOpen);
+  beq("cleanupDone");
+  ldaImm(0x02);
+  jsrAbs(KERNAL.close);
+  ldaImm(0x00);
+  staAbs(vars.fileOpen);
+  label("cleanupDone");
   ldaAbs(vars.restoreFb);
   staAbs(0x00fb);
   ldaAbs(vars.restoreFc);
@@ -4825,6 +4997,15 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(0x00fd);
   ldaAbs(vars.restoreFe);
   staAbs(0x00fe);
+  rts();
+
+  label("setPromptFilename");
+  ldaImm(promptFileName.length);
+  staAbs(vars.filenameLength);
+  promptFileNameBytes.forEach(function (value, index) {
+    ldaImm(value);
+    staAbs(vars.filename + index);
+  });
   rts();
 
   label("delayPrompt");
@@ -5068,7 +5249,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24)');
   if (hasCover) {
     pushLine(8, 'GOSUB 3000');
-    pushLine(10, 'F$="0:COVER.IMG,P,R":GOSUB 3300:GOSUB 3330:GOSUB 3400');
+    pushLine(10, 'F$="0:COVER.IMG,S,R":GOSUB 3300:GOSUB 3330:GOSUB 3400');
     pushLine(12, 'IF CV=0 THEN 20');
     pushLine(14, 'GET A$:IF A$="" THEN 14');
     pushLine(16, 'GOTO 20');
@@ -5318,6 +5499,10 @@ TPP.exportImagesD64 = async function (options) {
     const bookFiles = TPP.exportD64IndexAndData(settings, {
       pageCount: pages.length,
     });
+    const promptSpriteBytes =
+      coverRecord && coverRecord.bytes && coverRecord.bytes.length
+        ? TPP.buildD64PromptSpriteProgramBytes()
+        : null;
     const d64Files = [
       {
         name: "BOOK.PRG",
@@ -5341,8 +5526,13 @@ TPP.exportImagesD64 = async function (options) {
         ? [
           {
             name: "COVER.IMG",
-            type: 0x82,
+            type: 0x81,
             data: coverRecord.bytes,
+          },
+          {
+            name: "PROMPT.SPR",
+            type: 0x82,
+            data: promptSpriteBytes,
           },
         ]
         : []),
