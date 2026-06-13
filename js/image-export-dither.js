@@ -771,7 +771,7 @@ export function init(TPP) {
       const countScore = (entry.count || 0) / maxCount;
       const errorScore =
         1 - (entry.averageError - minAverageError) / errorRange;
-      return countScore * 0.7 + errorScore * 0.3;
+      return countScore * 0.85 + errorScore * 0.15;
     };
     const utilitySorted = enriched.slice().sort(function (a, b) {
       const utilityDiff = utilityScore(b) - utilityScore(a);
@@ -783,7 +783,10 @@ export function init(TPP) {
     const used = new Set();
     const accuracyQuota = Math.max(
       0,
-      Math.min(maxPatterns, Math.round(normalizedBias * maxPatterns)),
+      Math.min(
+        maxPatterns,
+        Math.round((0.5 + normalizedBias * 0.5) * maxPatterns),
+      ),
     );
     const varietyQuota = Math.max(0, maxPatterns - accuracyQuota);
     while (selected.length < accuracyQuota && selected.length < maxPatterns) {
@@ -815,7 +818,7 @@ export function init(TPP) {
           );
         }
         const varietyScore = nearestDistance / 64;
-        const score = varietyScore * 0.85 + utilityScore(candidate) * 0.15;
+        const score = varietyScore * 0.6 + utilityScore(candidate) * 0.4;
         if (score > bestScore) {
           bestScore = score;
           bestCandidate = candidate;
