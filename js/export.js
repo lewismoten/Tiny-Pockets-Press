@@ -4615,7 +4615,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrAbs(KERNAL.setnam);
   ldaImm(0x01);
   ldxImm(0x08);
-  ldyImm(0x00);
+  ldyImm(0x01);
   jsrAbs(KERNAL.setlfs);
   ldaImm(0x00);
   ldxImm(0x00);
@@ -4872,7 +4872,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24)');
   if (hasCover) {
     pushLine(8, 'GOSUB 3000');
-    pushLine(10, 'F$="0:COVER.IMG,P,R":GOSUB 3300:GOSUB 3330:GOSUB 3400');
+    pushLine(10, 'F$="COVER.IMG":GOSUB 3300:GOSUB 3330:GOSUB 3400');
     pushLine(12, 'IF CV=0 THEN 20');
     pushLine(14, 'GET A$:IF A$="" THEN 14');
     pushLine(16, 'GOTO 20');
@@ -5017,10 +5017,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3300, 'POKE ' + String(loaderProgram.filenameLengthAddress) + ',LEN(F$)');
     pushLine(3310, 'FOR I=1 TO LEN(F$):POKE ' + String(loaderProgram.filenameLengthAddress + 1) + '+I-1,ASC(MID$(F$,I,1)):NEXT');
     pushLine(3320, 'RETURN');
-    pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$=":" THEN 3350');
-    pushLine(3340, 'IF A$="." THEN 3360');
-    pushLine(3342, 'LT$=LT$+A$:NEXT');
-    pushLine(3350, 'LT$="LOADING ":NEXT');
+    pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$="." THEN 3360');
+    pushLine(3340, 'LT$=LT$+A$:NEXT');
     pushLine(3360, 'RETURN');
     pushLine(3400, 'SB=PEEK(56576):SV=PEEK(53272):S1=PEEK(53265):S2=PEEK(53270):SE=PEEK(53269):CV=0:GOSUB 3500');
     pushLine(3405, 'GET A$:IF A$<>"" THEN 3405');
