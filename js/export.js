@@ -3904,17 +3904,87 @@ TPP.exportD64PageFileName = function (pageIndex) {
 TPP.exportD64CharsetPageFileName = function (pageIndex) {
   return "PAGE" + String(Math.max(1, Number(pageIndex) || 1)).padStart(4, "0") + "CHR";
 };
-TPP.exportD64BootProgramBytes = function (book, pageCount) {
+TPP.exportD64TocRecords = function (book) {
+  const settings = book || {};
+  if (!settings || !settings.toc || settings.toc.enabled === false) return [];
+  const chapters = Array.isArray(settings.chapters) ? settings.chapters : [];
+  return chapters.reduce(function (records, chapter, index) {
+    if (!chapter || chapter.includeInToc === false) return records;
+    const baseTitle =
+      (chapter.tocTitle && String(chapter.tocTitle).trim()) ||
+      (chapter.title && String(chapter.title).trim()) ||
+      "CHAPTER " + String(index + 1);
+    const level = Math.max(0, Number(chapter.level) || 0);
+    const title = " ".repeat(level) + baseTitle;
+    records.push({
+      title: title.slice(0, 255),
+      pointer: 0xffff,
+    });
+    return records;
+  }, []);
+};
+TPP.exportD64TocIndexAndData = function (book) {
+  const records = TPP.exportD64TocRecords(book);
+  const datBytes = [];
+  records.forEach(function (record) {
+    const titleBytes = Array.from(String(record.title || "").toUpperCase(), function (char) {
+      return char.charCodeAt(0) & 0xff;
+    });
+    datBytes.push(titleBytes.length & 0xff);
+    datBytes.push.apply(datBytes, titleBytes);
+    datBytes.push(record.pointer & 0xff, (record.pointer >> 8) & 0xff);
+  });
+  const idxBytes = [];
+  if (records.length) {
+    idxBytes.push(0x54, 0x4f, 0x43);
+    idxBytes.push(0x00, 0x00);
+    idxBytes.push(datBytes.length & 0xff, (datBytes.length >> 8) & 0xff);
+  }
+  return {
+    hasToc: records.length > 0,
+    indexBytes: new Uint8Array(idxBytes),
+    dataBytes: new Uint8Array(datBytes),
+    records: records,
+  };
+};
+TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   const basicStart = 0x0801;
   const tokens = {
     END: 0x80,
+    FOR: 0x81,
+    NEXT: 0x82,
+    DIM: 0x86,
+    GOTO: 0x89,
+    GOSUB: 0x8d,
+    RETURN: 0x8e,
+    REM: 0x8f,
     GOTO: 0x89,
     IF: 0x8b,
+    "PRINT#": 0x98,
     PRINT: 0x99,
+    OPEN: 0x9f,
+    CLOSE: 0xa0,
     GET: 0xa1,
+    TO: 0xa4,
     THEN: 0xa7,
+    AND: 0xaf,
+    OR: 0xb0,
     CHR$: 0xc7,
+    LEFT$: 0xc8,
+    MID$: 0xca,
+    LEN: 0xc3,
+    STR$: 0xc4,
+    ASC: 0xc6,
+    "=": 0xb2,
+    ">": 0xb1,
+    "<": 0xb3,
+    "+": 0xaa,
+    "-": 0xab,
+    "*": 0xac,
+    "/": 0xad,
   };
+  const config = options || {};
+  const hasToc = Boolean(config.hasToc);
   const normalizeLineText = function (value) {
     return String(value || "")
       .replace(/\s+/g, " ")
@@ -3947,14 +4017,62 @@ TPP.exportD64BootProgramBytes = function (book, pageCount) {
       return char.charCodeAt(0) & 0xff;
     });
   };
-  const quotedString = function (value) {
-    return [0x22].concat(stringBytes(value), [0x22]);
+  const encodeBasicBody = function (source) {
+    const text = String(source || "");
+    const bytes = [];
+    const orderedTokens = Object.keys(tokens)
+      .sort(function (a, b) {
+        return b.length - a.length;
+      });
+    const isWordChar = function (char) {
+      return /[A-Z0-9$]/.test(char || "");
+    };
+    let inQuote = false;
+    for (let index = 0; index < text.length;) {
+      const char = text[index];
+      if (char === '"') {
+        inQuote = !inQuote;
+        bytes.push(0x22);
+        index += 1;
+        continue;
+      }
+      if (inQuote) {
+        bytes.push(char.charCodeAt(0) & 0xff);
+        index += 1;
+        continue;
+      }
+      const upper = text.slice(index).toUpperCase();
+      let matched = null;
+      for (let tokenIndex = 0; tokenIndex < orderedTokens.length; tokenIndex += 1) {
+        const tokenText = orderedTokens[tokenIndex];
+        if (!upper.startsWith(tokenText)) continue;
+        const prev = index > 0 ? text[index - 1].toUpperCase() : "";
+        const next = text[index + tokenText.length]
+          ? text[index + tokenText.length].toUpperCase()
+          : "";
+        const isOperator = tokenText.length === 1 && !/[A-Z]/.test(tokenText);
+        const boundaryOk =
+          isOperator ||
+          (!isWordChar(prev) && !isWordChar(next));
+        if (!boundaryOk) continue;
+        matched = tokenText;
+        break;
+      }
+      if (matched) {
+        bytes.push(tokens[matched]);
+        index += matched.length;
+      } else {
+        bytes.push(char.charCodeAt(0) & 0xff);
+        index += 1;
+      }
+    }
+    return bytes;
   };
   const basicLines = [];
-  const pushLine = function (lineNumber, bodyBytes) {
+  const pushLine = function (lineNumber, body) {
     basicLines.push({
       number: lineNumber,
-      body: Array.isArray(bodyBytes) ? bodyBytes.slice() : [],
+      body: Array.isArray(body) ? body.slice() : encodeBasicBody(body),
     });
   };
   const titleLines = wrapText(
@@ -3966,90 +4084,107 @@ TPP.exportD64BootProgramBytes = function (book, pageCount) {
     30,
   );
   const totalPages = Math.max(1, Number(pageCount) || 1);
-  pushLine(10, [
-    tokens.PRINT,
-    tokens.CHR$,
-    0x28,
-    0x31,
-    0x34,
-    0x37,
-    0x29,
-  ]);
-  pushLine(20, [tokens.PRINT].concat(quotedString("TINY POCKETS PRESS")));
-  pushLine(30, [tokens.PRINT]);
+  pushLine(5, 'DIM T$(200)');
+  pushLine(10, 'PRINT CHR$(147)');
+  pushLine(20, 'PRINT "TINY POCKETS PRESS"');
+  pushLine(30, 'PRINT');
   let lineNumber = 40;
   titleLines.forEach(function (line) {
-    pushLine(
-      lineNumber,
-      [tokens.PRINT].concat(
-        quotedString((lineNumber === 40 ? "TITLE: " : "       ") + line),
-      ),
-    );
+    pushLine(lineNumber, 'PRINT "' + (lineNumber === 40 ? "TITLE: " : "       ") + line + '"');
     lineNumber += 10;
   });
   authorLines.forEach(function (line, index) {
-    pushLine(
-      lineNumber,
-      [tokens.PRINT].concat(
-        quotedString((index === 0 ? "AUTHOR: " : "        ") + line),
-      ),
-    );
+    pushLine(lineNumber, 'PRINT "' + (index === 0 ? "AUTHOR: " : "        ") + line + '"');
     lineNumber += 10;
   });
-  pushLine(
-    lineNumber,
-    [tokens.PRINT].concat(quotedString("PAGES: " + String(totalPages))),
-  );
+  pushLine(lineNumber, 'PRINT "PAGES: ' + String(totalPages) + '"');
   lineNumber += 10;
-  pushLine(lineNumber, [tokens.PRINT]);
+  pushLine(lineNumber, 'PRINT');
   lineNumber += 10;
-  pushLine(
-    lineNumber,
-    [tokens.PRINT].concat(quotedString("PRESS Q TO QUIT")),
-  );
+  if (hasToc) {
+    pushLine(lineNumber, 'PRINT "PRESS T FOR CONTENTS"');
+    lineNumber += 10;
+  }
+  pushLine(lineNumber, 'PRINT "PRESS Q TO QUIT"');
   lineNumber += 10;
-  pushLine(
-    lineNumber,
-    [tokens.GET, 0x20, 0x41, 0x24, 0x3a, tokens.IF, 0x20, 0x41, 0x24, 0xb2, 0x22, 0x22, tokens.THEN, 0x20]
-      .concat(stringBytes(String(lineNumber))),
-  );
+  const pollLine = lineNumber;
+  pushLine(lineNumber, 'GET A$:IF A$="" THEN ' + String(lineNumber));
   lineNumber += 10;
-  pushLine(
-    lineNumber,
-    [tokens.IF, 0x20, 0x41, 0x24, 0xb2].concat(
-      quotedString("Q"),
-      [tokens.THEN, 0x20],
-      stringBytes("200"),
-    ),
-  );
+  pushLine(lineNumber, 'IF A$="Q" THEN 900');
   lineNumber += 10;
-  pushLine(
-    lineNumber,
-    [tokens.GOTO, 0x20].concat(stringBytes(String(lineNumber - 10))),
-  );
-  pushLine(200, [tokens.PRINT]);
-  pushLine(210, [tokens.PRINT].concat(quotedString("QUIT TO BASIC (Y/N)?")));
-  pushLine(
-    220,
-    [tokens.GET, 0x20, 0x41, 0x24, 0x3a, tokens.IF, 0x20, 0x41, 0x24, 0xb2, 0x22, 0x22, tokens.THEN, 0x20]
-      .concat(stringBytes("220")),
-  );
-  pushLine(
-    230,
-    [tokens.IF, 0x20, 0x41, 0x24, 0xb2].concat(
-      quotedString("Y"),
-      [tokens.THEN, 0x20, tokens.END],
-    ),
-  );
-  pushLine(
-    240,
-    [tokens.IF, 0x20, 0x41, 0x24, 0xb2].concat(
-      quotedString("N"),
-      [tokens.THEN, 0x20],
-      stringBytes("10"),
-    ),
-  );
-  pushLine(250, [tokens.GOTO, 0x20].concat(stringBytes("220")));
+  if (hasToc) {
+    pushLine(lineNumber, 'IF A$="T" THEN 300');
+    lineNumber += 10;
+  }
+  pushLine(lineNumber, 'GOTO ' + String(pollLine));
+  if (hasToc) {
+    pushLine(300, 'GOSUB 600');
+    pushLine(310, 'IF TC=0 THEN PRINT:PRINT "NO TABLE OF CONTENTS.":GOSUB 1000:GOTO 10');
+    pushLine(320, 'PG=0');
+    pushLine(330, 'GOSUB 800');
+    pushLine(340, 'GET A$:IF A$="" THEN 340');
+    pushLine(350, 'IF A$="H" THEN 10');
+    pushLine(360, 'IF A$="N" THEN IF (PG+1)*9<TC THEN PG=PG+1:GOTO 330');
+    pushLine(370, 'IF A$="P" THEN IF PG>0 THEN PG=PG-1:GOTO 330');
+    pushLine(380, 'GOTO 340');
+    pushLine(600, 'IF TL=1 THEN RETURN');
+    pushLine(610, 'TL=1:TC=0');
+    pushLine(620, 'OPEN 2,8,2,"BOOK.IDX,S,R"');
+    pushLine(630, 'GET#2,A$:IF ST<>0 THEN CLOSE 2:RETURN');
+    pushLine(640, 'K$=A$:GET#2,A$:K$=K$+A$:GET#2,A$:K$=K$+A$');
+    pushLine(650, 'GET#2,A$:TP=ASC(A$):GET#2,A$:TP=TP+256*ASC(A$)');
+    pushLine(660, 'GET#2,A$:LN=ASC(A$):GET#2,A$:LN=LN+256*ASC(A$)');
+    pushLine(670, 'CLOSE 2');
+    pushLine(680, 'IF K$<>"TOC" THEN RETURN');
+    pushLine(690, 'OPEN 3,8,3,"BOOK.DAT,S,R"');
+    pushLine(700, 'FOR I=1 TO TP:GET#3,A$:NEXT');
+    pushLine(710, 'RD=0');
+    pushLine(720, 'IF RD>=LN OR TC>=200 THEN CLOSE 3:RETURN');
+    pushLine(730, 'GET#3,A$:IF ST<>0 THEN CLOSE 3:RETURN');
+    pushLine(740, 'LL=ASC(A$):RD=RD+1:IF LL=0 THEN CLOSE 3:RETURN');
+    pushLine(750, 'TC=TC+1:T$(TC)=""');
+    pushLine(760, 'FOR J=1 TO LL:GET#3,A$:T$(TC)=T$(TC)+A$:NEXT');
+    pushLine(770, 'RD=RD+LL');
+    pushLine(780, 'GET#3,A$:GET#3,A$:RD=RD+2');
+    pushLine(790, 'GOTO 720');
+    pushLine(800, 'PRINT CHR$(147)');
+    pushLine(810, 'PRINT "TABLE OF CONTENTS"');
+    pushLine(820, 'PRINT');
+    pushLine(830, 'S=PG*9+1:E=S+8:IF E>TC THEN E=TC');
+    pushLine(840, 'FOR I=S TO E:GOSUB 1100:NEXT');
+    pushLine(850, 'PRINT');
+    pushLine(860, 'PRINT "P/PREV N/NEXT H/HOME"');
+    pushLine(870, 'RETURN');
+    pushLine(1000, 'GET A$:IF A$="" THEN 1000');
+    pushLine(1010, 'RETURN');
+    pushLine(1100, 'X=I-S+1:P$=MID$(STR$(X),2)+". ":L$=T$(I)');
+    pushLine(1110, 'LS=0');
+    pushLine(1120, 'IF MID$(L$,LS+1,1)=" " THEN LS=LS+1:GOTO 1120');
+    pushLine(1130, 'I$=""');
+    pushLine(1140, 'FOR K=1 TO LEN(P$)+LS:I$=I$+" ":NEXT');
+    pushLine(1150, 'W=40-LEN(P$)-LS');
+    pushLine(1160, 'IF LEN(L$)<=W+LS THEN PRINT P$;L$:RETURN');
+    pushLine(1170, 'B=W+LS');
+    pushLine(1180, 'IF MID$(L$,B,1)<>" " AND B>LS+1 THEN B=B-1:GOTO 1180');
+    pushLine(1190, 'IF B<=LS+1 THEN B=W+LS');
+    pushLine(1200, 'PRINT P$;LEFT$(L$,B)');
+    pushLine(1210, 'L$=MID$(L$,B+1)');
+    pushLine(1220, 'P$=I$');
+    pushLine(1230, 'W=40-LEN(P$)');
+    pushLine(1240, 'IF LEN(L$)<=W THEN PRINT P$;L$:RETURN');
+    pushLine(1250, 'B=W');
+    pushLine(1260, 'IF MID$(L$,B,1)<>" " AND B>1 THEN B=B-1:GOTO 1260');
+    pushLine(1270, 'IF B=1 THEN B=W');
+    pushLine(1280, 'PRINT P$;LEFT$(L$,B)');
+    pushLine(1290, 'L$=MID$(L$,B+1)');
+    pushLine(1300, 'GOTO 1230');
+  }
+  pushLine(900, 'PRINT');
+  pushLine(910, 'PRINT "QUIT TO BASIC (Y/N)?"');
+  pushLine(920, 'GET A$:IF A$="" THEN 920');
+  pushLine(930, 'IF A$="Y" THEN END');
+  pushLine(940, 'IF A$="N" THEN 10');
+  pushLine(950, 'GOTO 920');
   const buffer = [];
   let address = basicStart;
   basicLines.forEach(function (line) {
@@ -4091,11 +4226,24 @@ TPP.exportImagesD64 = async function (options) {
     try {
       const shell = TPP.createExportRenderShell(settings);
       mount.appendChild(shell);
+      const tocFiles = TPP.exportD64TocIndexAndData(settings);
       const d64Files = [
         {
           name: "BOOK.PRG",
           type: 0x82,
-          data: TPP.exportD64BootProgramBytes(settings, pages.length),
+          data: TPP.exportD64BootProgramBytes(settings, pages.length, {
+            hasToc: tocFiles.hasToc,
+          }),
+        },
+        {
+          name: "BOOK.IDX",
+          type: 0x81,
+          data: tocFiles.indexBytes,
+        },
+        {
+          name: "BOOK.DAT",
+          type: 0x81,
+          data: tocFiles.dataBytes,
         },
       ];
       for (let i = 0; i < pages.length; i += 1) {
