@@ -2616,6 +2616,185 @@ export function init(TPP) {
       patterns: patterns,
     };
   };
+  TPP.buildC64CustomCharsetLayout = function (canvas, palette, options) {
+    if (!canvas || !canvas.width || !canvas.height) return null;
+    const paletteColors =
+      Array.isArray(palette) && palette.length ? palette : [[0, 0, 0]];
+    const sourceCtx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!sourceCtx) return null;
+    const image = sourceCtx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = new Uint8ClampedArray(image.data);
+    const config = options || {};
+    const cellSize = 8;
+    const colorLimit = Math.max(2, Math.min(4, paletteColors.length));
+    const selectionBias = clampByte(
+      config.selectionBias == null ? 128 : config.selectionBias,
+    );
+    const findPaletteIndex = function (swatch, fallback) {
+      for (let i = 0; i < paletteColors.length; i += 1) {
+        if (paletteColors[i] === swatch) return i;
+      }
+      for (let i = 0; i < paletteColors.length; i += 1) {
+        const candidate = paletteColors[i];
+        if (
+          candidate &&
+          swatch &&
+          candidate[0] === swatch[0] &&
+          candidate[1] === swatch[1] &&
+          candidate[2] === swatch[2]
+        ) {
+          return i;
+        }
+      }
+      return Math.max(0, Math.min(paletteColors.length - 1, Number(fallback) || 0));
+    };
+
+    applyC64BayerPrepass(data, canvas.width, canvas.height, paletteColors);
+    const globalBackgroundIndex = chooseGlobalBackgroundIndex(
+      data,
+      canvas.width,
+      canvas.height,
+      paletteColors,
+      {
+        colorLimit: colorLimit,
+        solidCellThreshold: config.solidCellThreshold,
+      },
+    );
+    const finalBackground = paletteColors[globalBackgroundIndex] || paletteColors[0];
+    const cellFits = [];
+    const patternStats = new Map();
+    let hasSpecialSolidForeground = false;
+    for (let cellY = 0; cellY < canvas.height; cellY += cellSize) {
+      for (let cellX = 0; cellX < canvas.width; cellX += cellSize) {
+        const blockWidth = Math.min(cellSize, canvas.width - cellX);
+        const blockHeight = Math.min(cellSize, canvas.height - cellY);
+        const pixels = extractCellPixels(
+          data,
+          canvas.width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+        );
+        const specialCell = classifySolidPaletteCell(pixels, paletteColors, config);
+        if (specialCell) {
+          const isForegroundSolid = specialCell.colorIndex !== globalBackgroundIndex;
+          hasSpecialSolidForeground = hasSpecialSolidForeground || isForegroundSolid;
+          cellFits.push({
+            x: cellX,
+            y: cellY,
+            width: blockWidth,
+            height: blockHeight,
+            specialSolid: true,
+            solidColorIndex: specialCell.colorIndex,
+          });
+          continue;
+        }
+        const candidates = paletteCellCandidates(pixels, paletteColors, colorLimit);
+        const fit = bestTwoColorCellFit(
+          pixels,
+          blockWidth,
+          blockHeight,
+          paletteColors,
+          candidates,
+          { backgroundIndex: globalBackgroundIndex },
+        );
+        const originalMask = fit.mask;
+        const originalKey = maskKey(originalMask);
+        const stat = patternStats.get(originalKey) || {
+          key: originalKey,
+          mask: originalMask,
+          count: 0,
+          error: 0,
+        };
+        stat.count += 1;
+        stat.error += fit.error;
+        patternStats.set(originalKey, stat);
+        cellFits.push({
+          x: cellX,
+          y: cellY,
+          width: blockWidth,
+          height: blockHeight,
+          bgErrors: fit.bgErrors,
+          fgErrors: fit.fgErrors,
+          originalMask: originalMask,
+          originalKey: originalKey,
+          key: originalKey,
+          fgIndex: findPaletteIndex(fit.fg, globalBackgroundIndex),
+        });
+      }
+    }
+
+    const charset = selectVariedCharsetPatterns(
+      Array.from(patternStats.values()),
+      256,
+      selectionBias,
+    );
+    const solidKey = maskKey(solidGlyphMask());
+    if (hasSpecialSolidForeground) {
+      const deduped = charset.filter(function (mask) {
+        return maskKey(mask) !== solidKey;
+      });
+      deduped.unshift(solidGlyphMask());
+      charset.splice(0, charset.length, ...deduped.slice(0, 256));
+    } else if (!charset.length) {
+      charset.push(new Uint8Array(64));
+    }
+
+    const charsetIndexByKey = new Map();
+    charset.forEach(function (mask, index) {
+      const key = maskKey(mask);
+      if (!charsetIndexByKey.has(key)) charsetIndexByKey.set(key, index);
+    });
+
+    const screen = new Uint8Array(1000);
+    const fgColors = new Uint8Array(1000);
+    cellFits.forEach(function (fit) {
+      const cellIndex = (fit.y / cellSize) * 40 + (fit.x / cellSize);
+      if (fit.specialSolid) {
+        if (fit.solidColorIndex === globalBackgroundIndex) {
+          screen[cellIndex] = 0;
+          fgColors[cellIndex] = globalBackgroundIndex & 0x0f;
+          return;
+        }
+        screen[cellIndex] = charsetIndexByKey.get(solidKey) || 0;
+        fgColors[cellIndex] = fit.solidColorIndex & 0x0f;
+        return;
+      }
+      let bestMask = charset[charsetIndexByKey.get(fit.originalKey) || 0] || null;
+      if (!bestMask && charset.length) {
+        let bestError = Infinity;
+        for (let i = 0; i < charset.length; i += 1) {
+          const candidateMask = charset[i];
+          const totalError = scoreMaskAgainstCell(
+            candidateMask,
+            fit.width,
+            fit.height,
+            fit.bgErrors,
+            fit.fgErrors,
+          );
+          if (totalError < bestError) {
+            bestError = totalError;
+            bestMask = candidateMask;
+          }
+        }
+      }
+      if (!bestMask) bestMask = fit.originalMask || charset[0] || solidGlyphMask();
+      const bestKey = maskKey(bestMask);
+      let glyphIndex = charsetIndexByKey.get(bestKey);
+      if (glyphIndex == null) glyphIndex = 0;
+      screen[cellIndex] = glyphIndex & 0xff;
+      fgColors[cellIndex] = fit.fgIndex & 0x0f;
+    });
+
+    while (charset.length < 256) charset.push(new Uint8Array(64));
+    return {
+      backgroundIndex: globalBackgroundIndex & 0x0f,
+      charset: charset.slice(0, 256),
+      screen: screen,
+      fgColors: fgColors,
+    };
+  };
   const paletteDitherers = {
     threshold: function (data, width, height, palette) {
       for (let y = 0; y < height; y += 1) {
@@ -3021,6 +3200,7 @@ export function init(TPP) {
     applyPaletteDither: TPP.applyImageExportPaletteDither,
     applyPaletteDitherAsync: TPP.applyImageExportPaletteDitherAsync,
     buildCustomCharsetSheet: TPP.buildImageExportCustomCharsetSheet,
+    buildC64CustomCharsetLayout: TPP.buildC64CustomCharsetLayout,
     buildImageExportSeqScreen: TPP.buildImageExportSeqScreen,
   };
 }

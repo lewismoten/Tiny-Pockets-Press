@@ -3999,146 +3999,46 @@ TPP.d64CoverForcedGlyphPatterns = function () {
     ]),
   };
 };
-TPP.buildD64CoverRecordBytes = function (canvas, palette) {
-  if (!canvas || !canvas.width || !canvas.height) return null;
-  const paletteColors =
-    Array.isArray(palette) && palette.length ? palette : [[0, 0, 0]];
-  const width = canvas.width;
-  const height = canvas.height;
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) return null;
-  const rgba = ctx.getImageData(0, 0, width, height).data;
-  const toPaletteIndex = function (r, g, b) {
-    let bestIndex = 0;
-    let bestError = Infinity;
-    for (let i = 0; i < paletteColors.length; i += 1) {
-      const swatch = paletteColors[i];
-      const dr = r - swatch[0];
-      const dg = g - swatch[1];
-      const db = b - swatch[2];
-      const error = dr * dr + dg * dg + db * db;
-      if (error < bestError) {
-        bestError = error;
-        bestIndex = i;
-      }
-    }
-    return bestIndex;
+TPP.d64CoverLayout = function () {
+  return {
+    vicBankRegister: 0x01,
+    screenAddress: 0xb800,
+    charsetAddress: 0xa000,
+    colorAddress: 0xd800,
+    d018: 0xe8,
   };
-  const pixelIndexes = new Uint8Array(width * height);
-  const totals = new Uint32Array(Math.max(16, paletteColors.length));
-  for (let i = 0, p = 0; i < rgba.length; i += 4, p += 1) {
-    const index = toPaletteIndex(rgba[i], rgba[i + 1], rgba[i + 2]);
-    pixelIndexes[p] = index;
-    totals[index] += 1;
+};
+TPP.buildD64CoverRecordBytes = function (coverLayout) {
+  if (!coverLayout || !coverLayout.charset || !coverLayout.screen || !coverLayout.fgColors) {
+    return null;
   }
-  let backgroundIndex = 0;
-  for (let i = 1; i < totals.length; i += 1) {
-    if (totals[i] > totals[backgroundIndex]) backgroundIndex = i;
-  }
-  const forcedGlyphs = TPP.d64CoverForcedGlyphPatterns();
-  const bannerText = "PRESS SPACE";
-  const bannerPatterns = [];
-  const glyphIndexByKey = new Map();
-  const glyphs = [];
-  const addGlyph = function (mask) {
-    const key = Array.from(mask).join("");
-    if (glyphIndexByKey.has(key)) return glyphIndexByKey.get(key);
-    const index = glyphs.length;
-    glyphs.push(mask);
-    glyphIndexByKey.set(key, index);
-    return index;
-  };
-  Object.keys(forcedGlyphs).sort().forEach(function (key) {
-    addGlyph(forcedGlyphs[key]);
-  });
-  const screen = new Uint8Array(1000);
-  const fgColors = new Uint8Array(1000);
-  const bannerRow = 24;
-  const bannerCol = Math.floor((40 - bannerText.length) / 2);
-  const backgroundLuma =
-    (paletteColors[backgroundIndex][0] * 299 +
-      paletteColors[backgroundIndex][1] * 587 +
-      paletteColors[backgroundIndex][2] * 114) /
-    1000;
-  const bannerColor = backgroundLuma < 128 ? 1 : 0;
-  for (let cellY = 0; cellY < 25; cellY += 1) {
-    for (let cellX = 0; cellX < 40; cellX += 1) {
-      const cellIndex = cellY * 40 + cellX;
-      let forcedChar = "";
-      if (
-        cellY === bannerRow &&
-        cellX >= bannerCol &&
-        cellX < bannerCol + bannerText.length
-      ) {
-        forcedChar = bannerText[cellX - bannerCol];
-      }
-      if (forcedChar) {
-        screen[cellIndex] = addGlyph(forcedGlyphs[forcedChar] || forcedGlyphs[" "]);
-        fgColors[cellIndex] = bannerColor;
-        continue;
-      }
-      const mask = new Uint8Array(64);
-      const counts = new Uint16Array(Math.max(16, paletteColors.length));
-      for (let py = 0; py < 8; py += 1) {
-        for (let px = 0; px < 8; px += 1) {
-          const pixelIndex = (cellY * 8 + py) * width + (cellX * 8 + px);
-          const colorIndex = pixelIndexes[pixelIndex];
-          counts[colorIndex] += 1;
-        }
-      }
-      let fgIndex = backgroundIndex;
-      let fgCount = 0;
-      for (let i = 0; i < counts.length; i += 1) {
-        if (i === backgroundIndex) continue;
-        if (counts[i] > fgCount) {
-          fgCount = counts[i];
-          fgIndex = i;
-        }
-      }
-      if (!fgCount) {
-        screen[cellIndex] = addGlyph(forcedGlyphs[" "]);
-        fgColors[cellIndex] = backgroundIndex;
-        continue;
-      }
-      for (let py = 0; py < 8; py += 1) {
-        for (let px = 0; px < 8; px += 1) {
-          const pixelIndex = (cellY * 8 + py) * width + (cellX * 8 + px);
-          const colorIndex = pixelIndexes[pixelIndex];
-          if (colorIndex !== backgroundIndex) mask[py * 8 + px] = 1;
-        }
-      }
-      screen[cellIndex] = addGlyph(mask);
-      fgColors[cellIndex] = fgIndex;
-    }
-  }
-  if (glyphs.length > 256) return null;
-  while (glyphs.length < 256) glyphs.push(new Uint8Array(64));
-  const charsetBytes = TPP.imageExportCharsetToChrBytes(glyphs);
+  const charsetBytes = TPP.imageExportCharsetToChrBytes(coverLayout.charset);
   if (!charsetBytes) return null;
   const colorBytes = new Uint8Array(1000);
-  for (let i = 0; i < 1000; i += 1) colorBytes[i] = fgColors[i] & 0x0f;
+  for (let i = 0; i < 1000; i += 1) colorBytes[i] = coverLayout.fgColors[i] & 0x0f;
+  const layout = TPP.d64CoverLayout();
   const bytes = TPP.buildD64AssetBinBytes(
     [
       {
-        destination: 0x3000,
+        destination: layout.charsetAddress,
         bytes: charsetBytes,
       },
       {
-        destination: 0x0800,
-        bytes: screen,
+        destination: layout.screenAddress,
+        bytes: coverLayout.screen,
       },
       {
-        destination: 0xd800,
+        destination: layout.colorAddress,
         bytes: colorBytes,
       },
     ],
     {
-      backgroundIndex: backgroundIndex & 0x0f,
+      backgroundIndex: coverLayout.backgroundIndex & 0x0f,
     },
   );
   if (!bytes) return null;
   return {
-    backgroundIndex: backgroundIndex & 0x0f,
+    backgroundIndex: coverLayout.backgroundIndex & 0x0f,
     bytes: bytes,
   };
 };
@@ -4195,6 +4095,7 @@ TPP.exportD64CoverData = async function (settings, options) {
   if (!front) return null;
   const palette = TPP.imageExportNamedPalette("c64");
   if (!Array.isArray(palette) || !palette.length) return null;
+  const ditherLib = await TPP.loadImageExportDither();
   const exportOptions = Object.assign(
     {},
     TPP.imageExportOptions(options),
@@ -4227,14 +4128,14 @@ TPP.exportD64CoverData = async function (settings, options) {
     const rendered = await html2canvas(shell, TPP.html2canvasOptions({ scale: 1 }));
     const scaled = TPP.d64CoverScaleCanvas(rendered, 320, 200);
     if (!scaled) return null;
-    const exportCanvas = await TPP.exportCanvasForDepth(
-      scaled,
-      exportOptions.colorDepth,
-      exportOptions.threshold,
-      exportOptions.palette,
-      exportOptions,
-    );
-    return TPP.buildD64CoverRecordBytes(exportCanvas, palette);
+    const buildCoverLayout = ditherLib && typeof ditherLib.buildC64CustomCharsetLayout === "function"
+      ? ditherLib.buildC64CustomCharsetLayout
+      : TPP.buildC64CustomCharsetLayout;
+    const coverLayout = typeof buildCoverLayout === "function"
+      ? buildCoverLayout(scaled, palette, exportOptions)
+      : null;
+    if (!coverLayout) return null;
+    return TPP.buildD64CoverRecordBytes(coverLayout);
   } finally {
     mount.remove();
   }
@@ -4375,6 +4276,7 @@ TPP.exportD64IndexAndData = function (book, options) {
   };
 };
 TPP.buildD64AssetLoaderProgramBytes = function () {
+  const coverLayout = TPP.d64CoverLayout();
   const start = 0xc000;
   const configBase = 0xc300;
   const vars = {
@@ -4401,6 +4303,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     workHi: configBase + 51,
     fileOpen: configBase + 52,
     keyReady: configBase + 53,
+    restoreDd00: configBase + 54,
+    restoreD018: configBase + 55,
   };
   const KERNAL = {
     setnam: 0xffbd,
@@ -4635,9 +4539,18 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(0xd021);
   ldaAbs(0xdd00);
   andImm(0xfc);
-  oraImm(0x03);
+  oraImm(coverLayout.vicBankRegister);
   staAbs(0xdd00);
-  ldaImm(44);
+  ldaImm(coverLayout.d018);
+  staAbs(0xd018);
+  ldaImm(0x00);
+  staAbs(vars.keyReady);
+  label("waitForDismiss");
+  jsrLabel("scanKey");
+  bcc("waitForDismiss");
+  ldaAbs(vars.restoreDd00);
+  staAbs(0xdd00);
+  ldaAbs(vars.restoreD018);
   staAbs(0xd018);
   ldaImm(0x00);
   staAbs(vars.status);
@@ -4700,10 +4613,16 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   pha();
   ldaAbs(0x0090);
   beq("readByteOk");
+  pha();
+  andImm(64);
+  bne("readByteEofOk");
+  pla();
   staAbs(vars.status);
   pla();
   sec();
   rts();
+  label("readByteEofOk");
+  pla();
   label("readByteOk");
   pla();
   clc();
@@ -4847,6 +4766,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     configBase: configBase,
     filenameLengthAddress: vars.filenameLength,
     statusAddress: vars.status,
+    restoreDd00Address: vars.restoreDd00,
+    restoreD018Address: vars.restoreD018,
     backgroundAddress: vars.background,
     segmentCountAddress: vars.segmentCount,
     totalLoAddress: vars.totalLo,
@@ -5015,8 +4936,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(8, 'GOSUB 3000');
     pushLine(10, 'F$="0:COVER.BIN,S,R":GOSUB 3300:GOSUB 3400');
     pushLine(12, 'IF CV=0 THEN 20');
-    pushLine(14, 'GET A$:IF A$="" THEN 14');
-    pushLine(16, 'GOTO 20');
+    pushLine(14, 'GOTO 20');
   }
   pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:CV=0');
   pushLine(30, 'GOSUB 200');
@@ -5159,6 +5079,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3310, 'FOR I=1 TO LEN(F$):POKE ' + String(loaderProgram.filenameLengthAddress + 1) + '+I-1,ASC(MID$(F$,I,1)):NEXT');
     pushLine(3320, 'RETURN');
     pushLine(3400, 'SB=PEEK(56576):SV=PEEK(53272):CV=0:LT$="LOADING COVER":GOSUB 3500');
+    pushLine(3402, 'POKE ' + String(loaderProgram.restoreDd00Address) + ',SB');
+    pushLine(3404, 'POKE ' + String(loaderProgram.restoreD018Address) + ',SV');
     pushLine(3405, 'GET A$:IF A$<>"" THEN 3405');
     pushLine(3410, 'SYS ' + String(loaderProgram.address));
     pushLine(3420, 'LR=PEEK(' + String(loaderProgram.statusAddress) + '):IF LR=0 THEN 3430');
