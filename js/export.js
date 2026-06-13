@@ -4058,6 +4058,24 @@ TPP.d64BitmapPromptGlyphs = function () {
       "     ",
       "     ",
     ]),
+    B: glyph([
+      "XXXX ",
+      "X   X",
+      "X   X",
+      "XXXX ",
+      "X   X",
+      "X   X",
+      "XXXX ",
+    ]),
+    C: glyph([
+      " XXX ",
+      "X   X",
+      "X    ",
+      "X    ",
+      "X    ",
+      "X   X",
+      " XXX ",
+    ]),
     A: glyph([
       " XXX ",
       "X   X",
@@ -4076,6 +4094,15 @@ TPP.d64BitmapPromptGlyphs = function () {
       "X    ",
       "XXXXX",
     ]),
+    H: glyph([
+      "X   X",
+      "X   X",
+      "X   X",
+      "XXXXX",
+      "X   X",
+      "X   X",
+      "X   X",
+    ]),
     K: glyph([
       "X   X",
       "X  X ",
@@ -4083,6 +4110,15 @@ TPP.d64BitmapPromptGlyphs = function () {
       "XX   ",
       "X X  ",
       "X  X ",
+      "X   X",
+    ]),
+    M: glyph([
+      "X   X",
+      "XX XX",
+      "X X X",
+      "X   X",
+      "X   X",
+      "X   X",
       "X   X",
     ]),
     N: glyph([
@@ -4093,6 +4129,15 @@ TPP.d64BitmapPromptGlyphs = function () {
       "X  XX",
       "X  XX",
       "X   X",
+    ]),
+    O: glyph([
+      " XXX ",
+      "X   X",
+      "X   X",
+      "X   X",
+      "X   X",
+      "X   X",
+      " XXX ",
     ]),
     P: glyph([
       "XXXX ",
@@ -4120,6 +4165,24 @@ TPP.d64BitmapPromptGlyphs = function () {
       "    X",
       "    X",
       "XXXX ",
+    ]),
+    T: glyph([
+      "XXXXX",
+      "  X  ",
+      "  X  ",
+      "  X  ",
+      "  X  ",
+      "  X  ",
+      "  X  ",
+    ]),
+    X: glyph([
+      "X   X",
+      "X   X",
+      " X X ",
+      "  X  ",
+      " X X ",
+      "X   X",
+      "X   X",
     ]),
     Y: glyph([
       "X   X",
@@ -4263,15 +4326,101 @@ TPP.buildD64PromptSpriteRecordBytes = function () {
   return spriteBytes;
 };
 TPP.buildD64WordPromptSpriteRecordBytes = function (word, highlightLetter) {
-  const glyphs = TPP.d64BitmapPromptGlyphs();
+  const glyphs = {
+    " ": [
+      "   ",
+      "   ",
+      "   ",
+      "   ",
+      "   ",
+    ],
+    A: [
+      " # ",
+      "# #",
+      "###",
+      "# #",
+      "# #",
+    ],
+    B: [
+      "## ",
+      "# #",
+      "## ",
+      "# #",
+      "## ",
+    ],
+    C: [
+      " ##",
+      "#  ",
+      "#  ",
+      "#  ",
+      " ##",
+    ],
+    E: [
+      "###",
+      "#  ",
+      "## ",
+      "#  ",
+      "###",
+    ],
+    H: [
+      "# #",
+      "# #",
+      "###",
+      "# #",
+      "# #",
+    ],
+    K: [
+      "# #",
+      "# #",
+      "## ",
+      "# #",
+      "# #",
+    ],
+    M: [
+      "# #",
+      "###",
+      "###",
+      "# #",
+      "# #",
+    ],
+    N: [
+      "# #",
+      "###",
+      "###",
+      "###",
+      "# #",
+    ],
+    O: [
+      "###",
+      "# #",
+      "# #",
+      "# #",
+      "###",
+    ],
+    T: [
+      "###",
+      " # ",
+      " # ",
+      " # ",
+      " # ",
+    ],
+    X: [
+      "# #",
+      "# #",
+      " # ",
+      "# #",
+      "# #",
+    ],
+  };
   const text = String(word || "").toUpperCase().slice(0, 4);
   const focus = String(highlightLetter || "").toUpperCase().charAt(0);
-  const glyphWidth = 5;
-  const glyphHeight = 7;
+  const glyphWidth = 3;
+  const glyphHeight = 5;
   const charSpacing = 1;
+  const scaleY = 2;
   const totalWidth = text.length * glyphWidth + Math.max(0, text.length - 1) * charSpacing;
   const offsetX = Math.max(0, Math.floor((24 - totalWidth) / 2));
-  const offsetY = 7;
+  const offsetY = 5;
   const baseMask = new Uint8Array(24 * 21);
   const accentMask = new Uint8Array(24 * 21);
   let cursorX = offsetX;
@@ -4281,11 +4430,15 @@ TPP.buildD64WordPromptSpriteRecordBytes = function (word, highlightLetter) {
     const targetMask = char === focus ? accentMask : baseMask;
     for (let y = 0; y < glyphHeight; y += 1) {
       for (let x = 0; x < glyphWidth; x += 1) {
-        if (!glyph[y * glyphWidth + x]) continue;
+        if ((glyph[y] || "   ").charAt(x) !== "#") continue;
         const px = cursorX + x;
-        const py = offsetY + y;
-        if (px < 0 || px >= 24 || py < 0 || py >= 21) continue;
-        targetMask[py * 24 + px] = 1;
+        const py = offsetY + y * scaleY;
+        if (px < 0 || px >= 24) continue;
+        for (let sy = 0; sy < scaleY; sy += 1) {
+          const nextY = py + sy;
+          if (nextY < 0 || nextY >= 21) continue;
+          targetMask[nextY * 24 + px] = 1;
+        }
       }
     }
     cursorX += glyphWidth + charSpacing;
@@ -6125,20 +6278,21 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(2302, 'GOSUB 2340');
     pushLine(2304, 'GOSUB 2360');
     pushLine(2306, 'POKE 25592,144:POKE 25593,145:POKE 25594,146:POKE 25595,147:POKE 25596,148:POKE 25597,149');
-    pushLine(2308, 'POKE 53248,24:POKE 53249,236');
-    pushLine(2310, 'POKE 53250,24:POKE 53251,236');
-    pushLine(2312, 'POKE 53252,144:POKE 53253,236');
-    pushLine(2314, 'POKE 53254,144:POKE 53255,236');
+    pushLine(2308, 'POKE 53248,8:POKE 53249,236');
+    pushLine(2310, 'POKE 53250,8:POKE 53251,236');
+    pushLine(2312, 'POKE 53252,136:POKE 53253,236');
+    pushLine(2314, 'POKE 53254,136:POKE 53255,236');
     pushLine(2316, 'POKE 53256,8:POKE 53257,236');
     pushLine(2318, 'POKE 53258,8:POKE 53259,236');
     pushLine(2319, 'POKE 53264,48');
-    pushLine(2320, 'DT=KD(1):TP=KR(1):LN=KL(1):GOSUB 620:SK=TP*RS:RL=128:DB=25600:GOSUB 7340');
-    pushLine(2322, 'POKE 53287,1:POKE 53288,7:RETURN');
+    pushLine(2320, 'POKE 53277,63');
+    pushLine(2322, 'DT=KD(1):TP=KR(1):LN=KL(1):GOSUB 620:SK=TP*RS:RL=128:DB=25600:GOSUB 7340');
+    pushLine(2324, 'POKE 53287,1:POKE 53288,7:RETURN');
     pushLine(2340, 'DT=KD(2):TP=KR(2):LN=KL(2):GOSUB 620:SK=TP*RS:RL=128:DB=25728:GOSUB 7340');
     pushLine(2342, 'POKE 53289,1:POKE 53290,3:RETURN');
     pushLine(2360, 'DT=KD(3):TP=KR(3):LN=KL(3):GOSUB 620:SK=TP*RS:RL=128:DB=25856:GOSUB 7340');
     pushLine(2362, 'POKE 53291,1:POKE 53292,5:POKE 53269,63:RETURN');
-    pushLine(2400, 'POKE 53269,0:POKE 53264,0:RETURN');
+    pushLine(2400, 'POKE 53269,0:POKE 53264,0:POKE 53277,0:RETURN');
   }
   pushLine(500, 'TP=0:LN=0:DT=0:NX=0:RI=2');
   pushLine(510, 'GOSUB 650');
