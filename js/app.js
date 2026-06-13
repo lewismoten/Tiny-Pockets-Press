@@ -1130,6 +1130,31 @@ TPP.renderImageExportPreview = async function () {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(progress.canvas, 0, 0);
     }
+    let frame = after.querySelector(".image-export-progress-cell");
+    if (
+      Number.isFinite(progress.cellX) &&
+      Number.isFinite(progress.cellY) &&
+      Number.isFinite(progress.cellWidth) &&
+      Number.isFinite(progress.cellHeight) &&
+      progress.canvas.width &&
+      progress.canvas.height
+    ) {
+      if (!frame) {
+        frame = document.createElement("div");
+        frame.className = "image-export-progress-cell";
+        after.appendChild(frame);
+      }
+      frame.style.left =
+        ((progress.cellX / progress.canvas.width) * 100).toFixed(4) + "%";
+      frame.style.top =
+        ((progress.cellY / progress.canvas.height) * 100).toFixed(4) + "%";
+      frame.style.width =
+        ((progress.cellWidth / progress.canvas.width) * 100).toFixed(4) + "%";
+      frame.style.height =
+        ((progress.cellHeight / progress.canvas.height) * 100).toFixed(4) + "%";
+    } else if (frame) {
+      frame.remove();
+    }
     const afterLabel = stage.querySelector(
       ".image-export-compare-label.after .image-export-compare-size",
     );

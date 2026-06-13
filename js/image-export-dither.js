@@ -848,6 +848,9 @@ export function init(TPP) {
     let processedCells = 0;
     for (let candidateIndex = 0; candidateIndex < bgCandidates.length; candidateIndex += 1) {
       const bgIndex = bgCandidates[candidateIndex];
+      if (config.previewData && palette[bgIndex]) {
+        fillPreviewWithColor(config.previewData, palette[bgIndex]);
+      }
       let totalError = 0;
       for (let cellY = 0; cellY < height; cellY += cellSize) {
         for (let cellX = 0; cellX < width; cellX += cellSize) {
@@ -876,6 +879,10 @@ export function init(TPP) {
             phase: "Background",
             completed: processedCells,
             total: totalCells,
+            cellX: cellX,
+            cellY: cellY,
+            cellWidth: blockWidth,
+            cellHeight: blockHeight,
           });
           if (processedCells % 4 === 0) await yieldToUi();
           await maybeYield();
@@ -889,6 +896,7 @@ export function init(TPP) {
         phase: "Background",
         completed: Math.min(totalCells, processedCells),
         total: totalCells,
+        backgroundIndex: bestBgIndex,
       });
       await yieldToUi();
     }
@@ -1011,6 +1019,14 @@ export function init(TPP) {
       }
     }
   };
+  const fillPreviewWithColor = function (data, color) {
+    if (!data || !color) return;
+    for (let offset = 0; offset < data.length; offset += 4) {
+      data[offset] = color[0];
+      data[offset + 1] = color[1];
+      data[offset + 2] = color[2];
+    }
+  };
   const applyPalettePetscii = function (
     data,
     width,
@@ -1126,6 +1142,7 @@ export function init(TPP) {
   ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(6, palette.length));
+    const originalData = new Uint8ClampedArray(data);
     const glyphCatalog =
       Array.isArray(glyphs) && glyphs.length ? glyphs : petsciiGlyphs;
     const paletteHash = hashPalette(palette);
@@ -1141,19 +1158,21 @@ export function init(TPP) {
       palette,
       {
         colorLimit: colorLimit,
+        previewData: data,
         onProgress: config.onProgress,
         progressIntervalMs: config.progressIntervalMs,
         yieldBudgetMs: config.yieldBudgetMs,
       },
     );
     const totalCells = Math.ceil(height / cellSize) * Math.ceil(width / cellSize);
+    fillPreviewWithColor(data, palette[globalBackgroundIndex] || palette[0] || [0, 0, 0]);
     let processedCells = 0;
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
         const blockHeight = Math.min(cellSize, height - cellY);
         const pixels = extractCellPixels(
-          data,
+          originalData,
           width,
           cellX,
           cellY,
@@ -1230,6 +1249,10 @@ export function init(TPP) {
           phase: "Glyphs",
           completed: processedCells,
           total: totalCells,
+          cellX: cellX,
+          cellY: cellY,
+          cellWidth: blockWidth,
+          cellHeight: blockHeight,
         });
         if (processedCells % 4 === 0) await yieldToUi();
         await maybeYield();
@@ -1369,6 +1392,7 @@ export function init(TPP) {
   ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(4, palette.length));
+    const originalData = new Uint8ClampedArray(data);
     const config = options || {};
     const selectionBias = clampByte(
       config.selectionBias == null ? 128 : config.selectionBias,
@@ -1381,12 +1405,14 @@ export function init(TPP) {
       palette,
       {
         colorLimit: colorLimit,
+        previewData: data,
         onProgress: config.onProgress,
         progressIntervalMs: config.progressIntervalMs,
         yieldBudgetMs: config.yieldBudgetMs,
       },
     );
     const totalCells = Math.ceil(height / cellSize) * Math.ceil(width / cellSize);
+    fillPreviewWithColor(data, palette[globalBackgroundIndex] || palette[0] || [0, 0, 0]);
     const cellFits = [];
     const patternStats = new Map();
     let processedCells = 0;
@@ -1395,7 +1421,7 @@ export function init(TPP) {
         const blockWidth = Math.min(cellSize, width - cellX);
         const blockHeight = Math.min(cellSize, height - cellY);
         const pixels = extractCellPixels(
-          data,
+          originalData,
           width,
           cellX,
           cellY,
@@ -1436,11 +1462,26 @@ export function init(TPP) {
           mask: originalMask,
           key: originalKey,
         });
+        paintMaskCell(
+          data,
+          width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+          fit.mask,
+          fit.bg,
+          fit.fg,
+        );
         processedCells += 1;
         reportProgress(config, {
           phase: "Analyze",
           completed: processedCells,
           total: totalCells,
+          cellX: cellX,
+          cellY: cellY,
+          cellWidth: blockWidth,
+          cellHeight: blockHeight,
         });
         if (processedCells % 4 === 0) await yieldToUi();
         await maybeYield();
@@ -1502,6 +1543,10 @@ export function init(TPP) {
         phase: "Paint",
         completed: index + 1,
         total: cellFits.length,
+        cellX: fit.x,
+        cellY: fit.y,
+        cellWidth: fit.width,
+        cellHeight: fit.height,
       });
       if ((index + 1) % 4 === 0) await yieldToUi();
       await maybeYield();
