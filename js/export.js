@@ -4238,17 +4238,18 @@ TPP.buildD64PromptSpriteProgramBytes = function () {
 };
 TPP.d64DatClassInfo = function (classId) {
   const catalog = {
-    0: { size: 1, name: "1.DAT" },
-    1: { size: 2, name: "2.DAT" },
-    2: { size: 4, name: "4.DAT" },
-    3: { size: 8, name: "8.DAT" },
-    4: { size: 16, name: "16.DAT" },
-    5: { size: 32, name: "32.DAT" },
-    6: { size: 64, name: "64.DAT" },
-    7: { size: 128, name: "128.DAT" },
-    8: { size: 256, name: "256.DAT" },
-    9: { size: 512, name: "512.DAT" },
-    10: { size: 1024, name: "1024.DAT" },
+    0: { size: 0, name: "" },
+    1: { size: 1, name: "1.DAT" },
+    2: { size: 2, name: "2.DAT" },
+    3: { size: 4, name: "4.DAT" },
+    4: { size: 8, name: "8.DAT" },
+    5: { size: 16, name: "16.DAT" },
+    6: { size: 32, name: "32.DAT" },
+    7: { size: 64, name: "64.DAT" },
+    8: { size: 128, name: "128.DAT" },
+    9: { size: 256, name: "256.DAT" },
+    10: { size: 512, name: "512.DAT" },
+    11: { size: 1024, name: "1024.DAT" },
   };
   return catalog[classId] || null;
 };
@@ -4549,11 +4550,10 @@ TPP.exportD64IndexAndData = function (book, options) {
     if (!bytes.length) return;
     sections.push({
       tag: String(tag || "").slice(0, 3).toUpperCase(),
-      classId: 4,
+      classId: 5,
       bytes: bytes.slice(),
     });
   };
-  const homeBytes = [];
   homeRecords.forEach(function (record) {
     const nameBytes = Array.from(String(record.name || ""), function (char) {
       return char.charCodeAt(0) & 0xff;
@@ -4561,13 +4561,14 @@ TPP.exportD64IndexAndData = function (book, options) {
     const valueBytes = Array.from(String(record.value || ""), function (char) {
       return char.charCodeAt(0) & 0xff;
     });
+    const homeBytes = [];
     homeBytes.push(((record.nameColor & 0x0f) << 4) | (record.valueColor & 0x0f));
     homeBytes.push(nameBytes.length & 0xff);
     homeBytes.push.apply(homeBytes, nameBytes);
     homeBytes.push(valueBytes.length & 0xff);
     homeBytes.push.apply(homeBytes, valueBytes);
+    pushSection("HOM", homeBytes);
   });
-  pushSection("HOM", homeBytes);
   const tocBytes = [];
   tocRecords.forEach(function (record) {
     const titleBytes = Array.from(String(record.title || "").toUpperCase(), function (char) {
@@ -4581,14 +4582,14 @@ TPP.exportD64IndexAndData = function (book, options) {
   if (config.coverBytes && config.coverBytes.length) {
     sections.unshift({
       tag: "COV",
-      classId: 9,
+      classId: 10,
       bytes: config.coverBytes.slice(),
     });
   }
   if (config.promptBytes && config.promptBytes.length) {
     sections.push({
       tag: "ANK",
-      classId: 6,
+      classId: 7,
       bytes: config.promptBytes.slice(),
     });
   }
@@ -4598,9 +4599,10 @@ TPP.exportD64IndexAndData = function (book, options) {
     if (!datBuckets[classId]) datBuckets[classId] = [];
     return datBuckets[classId];
   };
+  const actualEntries = [];
   sections.forEach(function (section) {
     const info = TPP.d64DatClassInfo(section.classId);
-    if (!info) return;
+    if (!info || !info.size) return;
     const bucket = ensureBucket(section.classId);
     const recordSize = info.size;
     const startRecord = Math.floor(bucket.length / recordSize);
@@ -4612,14 +4614,62 @@ TPP.exportD64IndexAndData = function (book, options) {
     for (let i = 0; i < paddedLength; i += 1) {
       bucket.push(i < section.bytes.length ? section.bytes[i] : 0x00);
     }
+    actualEntries.push({
+      tag: section.tag,
+      classId: section.classId,
+      startRecord: startRecord,
+      recordCount: recordCount === 256 ? 0x00 : recordCount & 0xff,
+      nextRecord: 0,
+    });
+  });
+  const tagOrder = [];
+  const firstByTag = {};
+  const lastByTag = {};
+  actualEntries.forEach(function (entry, index) {
+    if (!Object.prototype.hasOwnProperty.call(firstByTag, entry.tag)) {
+      tagOrder.push(entry.tag);
+      firstByTag[entry.tag] = index;
+    }
+    if (Object.prototype.hasOwnProperty.call(lastByTag, entry.tag)) {
+      actualEntries[lastByTag[entry.tag]].nextRecord = index + 1;
+    }
+    lastByTag[entry.tag] = index;
+  });
+  const headEntries = tagOrder.map(function (tag) {
+    return {
+      tag: tag,
+      classId: 0,
+      startRecord: 0,
+      recordCount: 0,
+      nextRecord: 0,
+    };
+  });
+  headEntries.push({
+    tag: "TAG",
+    classId: 0,
+    startRecord: 0,
+    recordCount: 0,
+    nextRecord: 0,
+  });
+  const actualBaseRecord = headEntries.length + 1;
+  actualEntries.forEach(function (entry, index) {
+    if (entry.nextRecord) entry.nextRecord = actualBaseRecord + entry.nextRecord - 1;
+  });
+  headEntries.forEach(function (entry) {
+    if (entry.tag === "TAG") return;
+    entry.nextRecord = actualBaseRecord + firstByTag[entry.tag];
+  });
+  headEntries.concat(actualEntries).forEach(function (entry) {
     idxBytes.push(
-      section.tag.charCodeAt(0) & 0xff,
-      section.tag.charCodeAt(1) & 0xff,
-      section.tag.charCodeAt(2) & 0xff,
-      section.classId & 0xff,
-      startRecord & 0xff,
-      (startRecord >> 8) & 0xff,
-      recordCount === 256 ? 0x00 : recordCount & 0xff,
+      entry.tag.charCodeAt(0) & 0xff,
+      entry.tag.charCodeAt(1) & 0xff,
+      entry.tag.charCodeAt(2) & 0xff,
+      entry.classId & 0xff,
+      entry.startRecord & 0xff,
+      (entry.startRecord >> 8) & 0xff,
+      entry.recordCount & 0xff,
+      entry.nextRecord & 0xff,
+      (entry.nextRecord >> 8) & 0xff,
     );
   });
   const dataFiles = Object.keys(datBuckets)
@@ -4846,16 +4896,15 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrLabel("hideSprites");
   jsrLabel("clearKeys");
   jsrLabel("delayPrompt");
+  jsrLabel("loadFallbackPrompt");
   ldaAbs(vars.promptRecordCount);
   beq("coverReady");
   jsrLabel("setPromptFilename");
   jsrLabel("loadPromptFile");
   bcc("promptOpenOk");
-  jsrLabel("loadFallbackPrompt");
   jmpLabel("coverReady");
   label("promptOpenOk");
   jsrLabel("hideSprites");
-  jsrLabel("loadFallbackPrompt");
   label("coverReady");
   jsrLabel("showPrompt");
   jsrLabel("clearKeys");
@@ -5528,99 +5577,105 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(120, 'POKE 646,1');
   pushLine(130, 'PRINT "WAITING FOR COMMAND..."');
   pushLine(140, 'GET A$:IF A$="" THEN 140');
-  pushLine(150, 'IF A$="Q" THEN 900');
-  if (hasToc) pushLine(160, 'IF A$="T" THEN 400');
+  pushLine(150, 'IF A$="Q" THEN 1900');
+  if (hasToc) pushLine(160, 'IF A$="T" THEN 800');
   pushLine(170, 'GOTO 140');
   pushLine(200, 'IF HL=1 THEN RETURN');
   pushLine(210, 'HL=1:HC=0:G$="HOM":GOSUB 500');
   pushLine(220, 'IF LN=0 THEN RETURN');
-  pushLine(225, 'GOSUB 620');
-  pushLine(230, 'OPEN 3,8,3,DF$');
-  pushLine(232, 'RC=LN:IF RC<>0 THEN 236');
-  pushLine(234, 'RC=256');
-  pushLine(236, 'SK=TP*RS:IF SK<1 THEN 260');
-  pushLine(250, 'FOR I=1 TO SK:GET#3,A$:NEXT');
-  pushLine(260, 'RD=0:BY=RC*RS');
-  pushLine(270, 'IF RD>=BY OR HC>=24 THEN CLOSE 3:RETURN');
-  pushLine(280, 'GET#3,A$:IF ST<>0 THEN CLOSE 3:RETURN');
-  pushLine(285, 'IF A$="" THEN CB=0:GOTO 289');
-  pushLine(287, 'CB=ASC(A$)');
-  pushLine(289, 'RD=RD+1');
-  pushLine(290, 'HC=HC+1:NC(HC)=0:VC(HC)=CB');
-  pushLine(292, 'IF VC(HC)<16 THEN 296');
-  pushLine(294, 'VC(HC)=VC(HC)-16:NC(HC)=NC(HC)+1:GOTO 292');
-  pushLine(296, 'GET#3,A$:IF A$="" THEN NL=0:GOTO 300');
-  pushLine(298, 'NL=ASC(A$)');
-  pushLine(300, 'RD=RD+1:N$(HC)=""');
-  pushLine(310, 'FOR J=1 TO NL:GET#3,A$:N$(HC)=N$(HC)+A$:NEXT');
-  pushLine(320, 'RD=RD+NL');
-  pushLine(330, 'GET#3,A$:IF A$="" THEN VL=0:GOTO 334');
-  pushLine(332, 'VL=ASC(A$)');
-  pushLine(334, 'RD=RD+1:V$(HC)=""');
-  pushLine(340, 'FOR J=1 TO VL:GET#3,A$:V$(HC)=V$(HC)+A$:NEXT');
-  pushLine(350, 'RD=RD+VL');
-  pushLine(360, 'GOTO 270');
-  pushLine(400, 'GOSUB 700');
-  pushLine(410, 'IF TC=0 THEN PRINT:PRINT "NO TABLE OF CONTENTS.":GOSUB 1000:GOTO 30');
-  pushLine(420, 'PG=0');
-  pushLine(430, 'GOSUB 1200');
-  pushLine(440, 'GET A$:IF A$="" THEN 440');
-  pushLine(450, 'IF A$="H" THEN 30');
-  pushLine(460, 'IF A$="N" THEN IF (PG+1)*9<TC THEN PG=PG+1:GOTO 430');
-  pushLine(470, 'IF A$="P" THEN IF PG>0 THEN PG=PG-1:GOTO 430');
-  pushLine(480, 'GOTO 440');
-  pushLine(500, 'TP=0:LN=0');
-  pushLine(505, 'DT=0');
+  pushLine(230, 'IF HC>=24 THEN RETURN');
+  pushLine(240, 'GOSUB 620');
+  pushLine(250, 'OPEN 3,8,3,DF$');
+  pushLine(260, 'RC=LN:IF RC<>0 THEN 264');
+  pushLine(262, 'RC=256');
+  pushLine(264, 'SK=TP*RS:IF SK<1 THEN 280');
+  pushLine(270, 'FOR I=1 TO SK:GET#3,A$:NEXT');
+  pushLine(280, 'RD=0:BY=RC*RS');
+  pushLine(290, 'GET#3,A$:IF ST<>0 THEN CLOSE 3:RETURN');
+  pushLine(292, 'IF A$="" THEN CB=0:GOTO 296');
+  pushLine(294, 'CB=ASC(A$)');
+  pushLine(296, 'RD=RD+1');
+  pushLine(300, 'HC=HC+1:NC(HC)=0:VC(HC)=CB');
+  pushLine(302, 'IF VC(HC)<16 THEN 306');
+  pushLine(304, 'VC(HC)=VC(HC)-16:NC(HC)=NC(HC)+1:GOTO 302');
+  pushLine(306, 'GET#3,A$:IF A$="" THEN NL=0:GOTO 310');
+  pushLine(308, 'NL=ASC(A$)');
+  pushLine(310, 'RD=RD+1:N$(HC)=""');
+  pushLine(320, 'FOR J=1 TO NL:GET#3,A$:N$(HC)=N$(HC)+A$:NEXT');
+  pushLine(330, 'RD=RD+NL');
+  pushLine(340, 'GET#3,A$:IF A$="" THEN VL=0:GOTO 344');
+  pushLine(342, 'VL=ASC(A$)');
+  pushLine(344, 'RD=RD+1:V$(HC)=""');
+  pushLine(350, 'FOR J=1 TO VL:GET#3,A$:V$(HC)=V$(HC)+A$:NEXT');
+  pushLine(360, 'RD=RD+VL:CLOSE 3:I=HC:GOSUB 1100');
+  pushLine(370, 'IF NX=0 THEN RETURN');
+  pushLine(380, 'RI=NX:GOSUB 650');
+  pushLine(390, 'IF LN=0 THEN RETURN');
+  pushLine(395, 'GOTO 230');
+  pushLine(500, 'TP=0:LN=0:DT=0:NX=0:RI=1');
   pushLine(510, 'OPEN 2,8,2,"BOOK.IDX,S,R"');
-  pushLine(520, 'GET#2,A$:IF ST<>0 THEN CLOSE 2:RETURN');
-  pushLine(530, 'K$=A$');
-  pushLine(540, 'GET#2,A$:IF ST<>0 THEN CLOSE 2:RETURN');
-  pushLine(550, 'K$=K$+A$');
-  pushLine(560, 'GET#2,A$:IF ST<>0 THEN CLOSE 2:RETURN');
-  pushLine(570, 'K$=K$+A$');
-  pushLine(580, 'GET#2,A$:IF A$="" THEN D1=0:GOTO 584');
-  pushLine(582, 'D1=ASC(A$)');
-  pushLine(584, 'GET#2,A$:IF A$="" THEN P1=0:GOTO 588');
-  pushLine(586, 'P1=ASC(A$)');
-  pushLine(588, 'GET#2,A$:IF A$="" THEN 592');
-  pushLine(590, 'P1=P1+256*ASC(A$)');
-  pushLine(592, 'GET#2,A$:IF A$="" THEN L1=0:GOTO 596');
-  pushLine(594, 'L1=ASC(A$)');
-  pushLine(596, 'IF K$=G$ THEN DT=D1:TP=P1:LN=L1:CLOSE 2:RETURN');
-  pushLine(598, 'GOTO 520');
-  pushLine(620, 'RS=16:DF$="16.DAT"');
-  pushLine(622, 'IF DT=0 THEN RS=1:DF$="1.DAT":RETURN');
-  pushLine(624, 'IF DT=1 THEN RS=2:DF$="2.DAT":RETURN');
-  pushLine(626, 'IF DT=2 THEN RS=4:DF$="4.DAT":RETURN');
-  pushLine(628, 'IF DT=3 THEN RS=8:DF$="8.DAT":RETURN');
-  pushLine(630, 'IF DT=4 THEN RS=16:DF$="16.DAT":RETURN');
-  pushLine(632, 'IF DT=5 THEN RS=32:DF$="32.DAT":RETURN');
-  pushLine(634, 'IF DT=6 THEN RS=64:DF$="64.DAT":RETURN');
-  pushLine(636, 'IF DT=7 THEN RS=128:DF$="128.DAT":RETURN');
-  pushLine(638, 'IF DT=8 THEN RS=256:DF$="256.DAT":RETURN');
-  pushLine(640, 'IF DT=9 THEN RS=512:DF$="512.DAT":RETURN');
-  pushLine(642, 'IF DT=10 THEN RS=1024:DF$="1024.DAT"');
+  pushLine(520, 'GOSUB 680');
+  pushLine(522, 'IF K$="TAG" THEN CLOSE 2:RETURN');
+  pushLine(524, 'IF K$<>G$ THEN RI=RI+1:GOTO 520');
+  pushLine(526, 'CLOSE 2:IF NX=0 THEN TP=0:LN=0:DT=0:RETURN');
+  pushLine(528, 'RI=NX:GOSUB 650:RETURN');
+  pushLine(650, 'TP=0:LN=0:DT=0:NX=0');
+  pushLine(660, 'OPEN 2,8,2,"BOOK.IDX,S,R"');
+  pushLine(662, 'SK=(RI-1)*9:IF SK<1 THEN 670');
+  pushLine(664, 'FOR I=1 TO SK:GET#2,A$:NEXT');
+  pushLine(670, 'GOSUB 680:CLOSE 2:RETURN');
+  pushLine(680, 'GET#2,A$:IF ST<>0 THEN K$="TAG":DT=0:TP=0:LN=0:NX=0:RETURN');
+  pushLine(682, 'K$=A$');
+  pushLine(684, 'GET#2,A$:IF ST<>0 THEN K$="TAG":DT=0:TP=0:LN=0:NX=0:RETURN');
+  pushLine(686, 'K$=K$+A$');
+  pushLine(688, 'GET#2,A$:IF ST<>0 THEN K$="TAG":DT=0:TP=0:LN=0:NX=0:RETURN');
+  pushLine(690, 'K$=K$+A$');
+  pushLine(692, 'GET#2,A$:IF A$="" THEN D1=0:GOTO 696');
+  pushLine(694, 'D1=ASC(A$)');
+  pushLine(696, 'GET#2,A$:IF A$="" THEN P1=0:GOTO 700');
+  pushLine(698, 'P1=ASC(A$)');
+  pushLine(700, 'GET#2,A$:IF A$="" THEN 704');
+  pushLine(702, 'P1=P1+256*ASC(A$)');
+  pushLine(704, 'GET#2,A$:IF A$="" THEN L1=0:GOTO 708');
+  pushLine(706, 'L1=ASC(A$)');
+  pushLine(708, 'GET#2,A$:IF A$="" THEN N1=0:GOTO 712');
+  pushLine(710, 'N1=ASC(A$)');
+  pushLine(712, 'GET#2,A$:IF A$="" THEN 716');
+  pushLine(714, 'N1=N1+256*ASC(A$)');
+  pushLine(716, 'DT=D1:TP=P1:LN=L1:NX=N1:RETURN');
+  pushLine(620, 'RS=0:DF$=""');
+  pushLine(622, 'IF DT=1 THEN RS=1:DF$="1.DAT":RETURN');
+  pushLine(624, 'IF DT=2 THEN RS=2:DF$="2.DAT":RETURN');
+  pushLine(626, 'IF DT=3 THEN RS=4:DF$="4.DAT":RETURN');
+  pushLine(628, 'IF DT=4 THEN RS=8:DF$="8.DAT":RETURN');
+  pushLine(630, 'IF DT=5 THEN RS=16:DF$="16.DAT":RETURN');
+  pushLine(632, 'IF DT=6 THEN RS=32:DF$="32.DAT":RETURN');
+  pushLine(634, 'IF DT=7 THEN RS=64:DF$="64.DAT":RETURN');
+  pushLine(636, 'IF DT=8 THEN RS=128:DF$="128.DAT":RETURN');
+  pushLine(638, 'IF DT=9 THEN RS=256:DF$="256.DAT":RETURN');
+  pushLine(640, 'IF DT=10 THEN RS=512:DF$="512.DAT":RETURN');
+  pushLine(642, 'IF DT=11 THEN RS=1024:DF$="1024.DAT"');
   pushLine(644, 'RETURN');
   if (hasToc) {
-    pushLine(700, 'IF TL=1 THEN RETURN');
-    pushLine(710, 'TL=1:TC=0:G$="TOC":GOSUB 500');
-    pushLine(720, 'IF LN=0 THEN RETURN');
-    pushLine(725, 'GOSUB 620');
-    pushLine(730, 'OPEN 3,8,3,DF$');
-    pushLine(732, 'RC=LN:IF RC<>0 THEN 736');
-    pushLine(734, 'RC=256');
-    pushLine(736, 'SK=TP*RS:IF SK<1 THEN 760');
-    pushLine(750, 'FOR I=1 TO SK:GET#3,A$:NEXT');
-    pushLine(760, 'RD=0:BY=RC*RS');
-    pushLine(770, 'IF RD>=BY OR TC>=200 THEN CLOSE 3:RETURN');
-    pushLine(780, 'GET#3,A$:IF ST<>0 THEN CLOSE 3:RETURN');
-    pushLine(785, 'IF A$="" THEN LL=0:RD=RD+1:IF LL=0 THEN CLOSE 3:RETURN');
-    pushLine(790, 'LL=ASC(A$):RD=RD+1:IF LL=0 THEN CLOSE 3:RETURN');
-    pushLine(800, 'TC=TC+1:T$(TC)=""');
-    pushLine(810, 'FOR J=1 TO LL:GET#3,A$:T$(TC)=T$(TC)+A$:NEXT');
-    pushLine(820, 'RD=RD+LL');
-    pushLine(830, 'GET#3,A$:GET#3,A$:RD=RD+2');
-    pushLine(840, 'GOTO 770');
+    pushLine(800, 'IF TL=1 THEN RETURN');
+    pushLine(810, 'TL=1:TC=0:G$="TOC":GOSUB 500');
+    pushLine(820, 'IF LN=0 THEN RETURN');
+    pushLine(825, 'GOSUB 620');
+    pushLine(830, 'OPEN 3,8,3,DF$');
+    pushLine(832, 'RC=LN:IF RC<>0 THEN 836');
+    pushLine(834, 'RC=256');
+    pushLine(836, 'SK=TP*RS:IF SK<1 THEN 860');
+    pushLine(850, 'FOR I=1 TO SK:GET#3,A$:NEXT');
+    pushLine(860, 'RD=0:BY=RC*RS');
+    pushLine(870, 'IF RD>=BY OR TC>=200 THEN CLOSE 3:RETURN');
+    pushLine(880, 'GET#3,A$:IF ST<>0 THEN CLOSE 3:RETURN');
+    pushLine(885, 'IF A$="" THEN LL=0:RD=RD+1:IF LL=0 THEN CLOSE 3:RETURN');
+    pushLine(890, 'LL=ASC(A$):RD=RD+1:IF LL=0 THEN CLOSE 3:RETURN');
+    pushLine(900, 'TC=TC+1:T$(TC)=""');
+    pushLine(910, 'FOR J=1 TO LL:GET#3,A$:T$(TC)=T$(TC)+A$:NEXT');
+    pushLine(920, 'RD=RD+LL');
+    pushLine(930, 'GET#3,A$:GET#3,A$:RD=RD+2');
+    pushLine(940, 'GOTO 870');
     pushLine(1200, 'POKE 53280,4:POKE 53281,4:POKE 646,7:PRINT CHR$(147)');
     pushLine(1210, 'PRINT "TABLE OF CONTENTS"');
     pushLine(1220, 'PRINT');
@@ -5730,12 +5785,12 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
       pushLine(line, 'DATA ' + loaderData.slice(offset, offset + 16).join(','));
     }
   }
-  pushLine(900, 'POKE 53280,2:POKE 53281,2:POKE 646,7:PRINT');
-  pushLine(910, 'PRINT "QUIT TO BASIC (Y/N)?"');
-  pushLine(920, 'GET A$:IF A$="" THEN 920');
-  pushLine(930, 'IF A$="Y" THEN END');
-  pushLine(940, 'IF A$="N" THEN POKE 53280,6:POKE 53281,6:POKE 646,1:GOTO 20');
-  pushLine(950, 'GOTO 920');
+  pushLine(1900, 'POKE 53280,2:POKE 53281,2:POKE 646,7:PRINT');
+  pushLine(1910, 'PRINT "QUIT TO BASIC (Y/N)?"');
+  pushLine(1920, 'GET A$:IF A$="" THEN 1920');
+  pushLine(1930, 'IF A$="Y" THEN END');
+  pushLine(1940, 'IF A$="N" THEN POKE 53280,6:POKE 53281,6:POKE 646,1:GOTO 20');
+  pushLine(1950, 'GOTO 1920');
   const buffer = [];
   let address = basicStart;
   basicLines.sort(function (a, b) {
