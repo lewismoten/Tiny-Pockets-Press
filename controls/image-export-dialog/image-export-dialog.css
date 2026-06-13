@@ -225,6 +225,7 @@
 .image-export-compare-after {
   clip-path: inset(0 0 0 50%);
   z-index: 1;
+  image-rendering: pixelated;
 }
 .image-export-compare-after-empty {
   background: transparent;
