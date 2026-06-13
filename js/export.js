@@ -4764,6 +4764,11 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrLabel("hideSprites");
   jsrLabel("clearKeys");
   jsrLabel("delayPrompt");
+  bcc("showPromptPhase");
+  ldaImm(0x00);
+  staAbs(vars.status);
+  rts();
+  label("showPromptPhase");
   jsrLabel("setPromptFilename");
   jsrLabel("loadPromptFile");
   bcc("promptOpenOk");
@@ -5047,6 +5052,11 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   label("delayPrompt");
   ldyImm(180);
   label("delayFrame");
+  jsrLabel("scanKey");
+  bcc("delayContinue");
+  sec();
+  rts();
+  label("delayContinue");
   ldaImm(0xff);
   label("waitHigh");
   cmpAbs(0xd012);
@@ -5056,6 +5066,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   beq("waitLow");
   dey();
   bne("delayFrame");
+  clc();
   rts();
 
   label("showPrompt");
@@ -5287,7 +5298,12 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(8, 'GOSUB 3000');
     pushLine(10, 'F$="0:COVER.IMG,S,R":GOSUB 3300:GOSUB 3330:GOSUB 3400');
   }
-  pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:POKE 53265,S1:POKE 53270,S2:POKE 53269,SE:CV=0');
+  pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:POKE 53265,S1:POKE 53270,S2:POKE 53269,SE:POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147):CV=0');
+  pushLine(25, 'POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147)');
+  pushLine(26, 'POKE 646,7:PRINT "TINY POCKETS PRESS"');
+  pushLine(27, 'POKE 646,3:PRINT "BOOK FILE READER"');
+  pushLine(28, 'PRINT');
+  pushLine(29, 'POKE 646,1:PRINT "LOADING BOOK INFO..."');
   pushLine(30, 'GOSUB 200');
   pushLine(40, 'POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147)');
   pushLine(50, 'POKE 646,7:PRINT "TINY POCKETS PRESS"');
