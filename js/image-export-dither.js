@@ -2215,18 +2215,10 @@ export function init(TPP) {
       }
       let bestMask =
         representativeByKey.get(fit.originalKey) ||
-        charsetByKey.get(fit.originalKey) ||
         charsetByKey.get(fit.key) ||
-        charset[0] ||
-        fit.mask;
-      if (
-        !charsetByKey.has(fit.originalKey) &&
-        charset.length < 256
-      ) {
-        charset.push(fit.originalMask);
-        charsetByKey.set(fit.originalKey, fit.originalMask);
-        bestMask = fit.originalMask;
-      } else if (!charsetByKey.has(fit.originalKey) && charset.length) {
+        charsetByKey.get(fit.originalKey) ||
+        null;
+      if (!bestMask && charset.length) {
         let bestError = Infinity;
         for (let i = 0; i < charset.length; i += 1) {
           const candidateMask = charset[i];
@@ -2242,6 +2234,9 @@ export function init(TPP) {
             bestMask = candidateMask;
           }
         }
+      }
+      if (!bestMask) {
+        bestMask = fit.mask || fit.originalMask || charset[0] || solidGlyphMask();
       }
       paintMaskCell(
         data,
