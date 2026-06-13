@@ -4724,6 +4724,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     promptRecordCount: configBase + 52,
     skipLo: configBase + 53,
     skipHi: configBase + 54,
+    readLenLo: configBase + 55,
+    readLenHi: configBase + 56,
   };
   const promptFileName = "0:64.DAT,S,R";
   const coverFileName = "0:512.DAT,S,R";
@@ -4909,6 +4911,51 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrLabel("showPrompt");
   jsrLabel("clearKeys");
   jsrLabel("waitForKey");
+  ldaImm(0x00);
+  staAbs(vars.status);
+  rts();
+
+  label("readRecordsEntry");
+  ldaImm(0x02);
+  staAbs(vars.status);
+  ldaImm(0x00);
+  staAbs(vars.fileOpen);
+  ldaAbs(0x00fb);
+  staAbs(vars.restoreFb);
+  ldaAbs(0x00fc);
+  staAbs(vars.restoreFc);
+  ldaAbs(0x00fd);
+  staAbs(vars.restoreFd);
+  ldaAbs(0x00fe);
+  staAbs(vars.restoreFe);
+  jsrLabel("openFile");
+  bcc("readerOpenOk");
+  jsrLabel("cleanup");
+  rts();
+  label("readerOpenOk");
+  ldaAbs(vars.skipLo);
+  staAbs(vars.lenLo);
+  ldaAbs(vars.skipHi);
+  staAbs(vars.lenHi);
+  jsrLabel("discardSegment");
+  bcc("readerSkipOk");
+  jsrLabel("cleanup");
+  rts();
+  label("readerSkipOk");
+  ldaAbs(vars.dstLo);
+  staAbs(vars.ptrLo);
+  ldaAbs(vars.dstHi);
+  staAbs(vars.ptrHi);
+  ldaAbs(vars.readLenLo);
+  staAbs(vars.lenLo);
+  ldaAbs(vars.readLenHi);
+  staAbs(vars.lenHi);
+  jsrLabel("streamSegment");
+  bcc("readerDoneOk");
+  jsrLabel("cleanup");
+  rts();
+  label("readerDoneOk");
+  jsrLabel("cleanup");
   ldaImm(0x00);
   staAbs(vars.status);
   rts();
@@ -5390,12 +5437,16 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   });
   return {
     address: start,
+    readerAddress: labels.readRecordsEntry,
     configBase: configBase,
     filenameLengthAddress: vars.filenameLength,
     statusAddress: vars.status,
     coverRecordAddress: vars.coverRecordLo,
     promptRecordAddress: vars.promptRecordLo,
     promptRecordCountAddress: vars.promptRecordCount,
+    skipAddress: vars.skipLo,
+    readLengthAddress: vars.readLenLo,
+    destinationAddress: vars.dstLo,
     bytes: new Uint8Array(code),
   };
 };
@@ -5446,7 +5497,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   const config = options || {};
   const hasToc = Boolean(config.hasToc);
   const hasCover = Boolean(config.hasCover);
-  const loaderProgram = hasCover ? TPP.buildD64AssetLoaderProgramBytes() : null;
+  const loaderProgram = TPP.buildD64AssetLoaderProgramBytes();
   const basicString = function (value) {
     return String(value || "")
       .replace(/[\r\n]+/g, " ")
@@ -5552,9 +5603,9 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
       body: Array.isArray(body) ? body.slice() : encodeBasicBody(body),
     });
   };
-  pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24)');
+  pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24):RB=28672');
+  pushLine(8, 'GOSUB 3000');
   if (hasCover) {
-    pushLine(8, 'GOSUB 3000');
     pushLine(10, 'G$="COV":GOSUB 500:IF LN=0 THEN 20');
     pushLine(11, 'CR=TP:CD=DT:G$="ANK":GOSUB 500:AR=TP:AC=LN');
     pushLine(12, 'DT=CD:GOSUB 620:F$=DF$:GOSUB 3300:GOSUB 3330:GOSUB 3400');
@@ -5585,64 +5636,39 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(220, 'IF LN=0 THEN RETURN');
   pushLine(230, 'IF HC>=24 THEN RETURN');
   pushLine(240, 'GOSUB 620');
-  pushLine(250, 'OPEN 3,8,3,DF$');
-  pushLine(260, 'RC=LN:IF RC<>0 THEN 264');
-  pushLine(262, 'RC=256');
-  pushLine(264, 'SK=TP*RS:IF SK<1 THEN 280');
-  pushLine(270, 'FOR I=1 TO SK:GET#3,A$:NEXT');
-  pushLine(280, 'RD=0:BY=RC*RS');
-  pushLine(290, 'GET#3,A$:IF ST<>0 THEN CLOSE 3:RETURN');
-  pushLine(292, 'IF A$="" THEN CB=0:GOTO 296');
-  pushLine(294, 'CB=ASC(A$)');
-  pushLine(296, 'RD=RD+1');
-  pushLine(300, 'HC=HC+1:NC(HC)=0:VC(HC)=CB');
-  pushLine(302, 'IF VC(HC)<16 THEN 306');
-  pushLine(304, 'VC(HC)=VC(HC)-16:NC(HC)=NC(HC)+1:GOTO 302');
-  pushLine(306, 'GET#3,A$:IF A$="" THEN NL=0:GOTO 310');
-  pushLine(308, 'NL=ASC(A$)');
-  pushLine(310, 'RD=RD+1:N$(HC)=""');
-  pushLine(320, 'FOR J=1 TO NL:GET#3,A$:N$(HC)=N$(HC)+A$:NEXT');
-  pushLine(330, 'RD=RD+NL');
-  pushLine(340, 'GET#3,A$:IF A$="" THEN VL=0:GOTO 344');
-  pushLine(342, 'VL=ASC(A$)');
-  pushLine(344, 'RD=RD+1:V$(HC)=""');
-  pushLine(350, 'FOR J=1 TO VL:GET#3,A$:V$(HC)=V$(HC)+A$:NEXT');
-  pushLine(360, 'RD=RD+VL:CLOSE 3:I=HC:GOSUB 1100');
-  pushLine(370, 'IF NX=0 THEN RETURN');
-  pushLine(380, 'RI=NX:GOSUB 650');
-  pushLine(390, 'IF LN=0 THEN RETURN');
-  pushLine(395, 'GOTO 230');
+  pushLine(250, 'RC=LN:IF RC<>0 THEN 254');
+  pushLine(252, 'RC=256');
+  pushLine(254, 'F$=DF$:SK=TP*RS:RL=RC*RS:GOSUB 7200');
+  pushLine(256, 'IF RR<>0 THEN RETURN');
+  pushLine(260, 'CB=PEEK(RB)');
+  pushLine(270, 'HC=HC+1:NC(HC)=0:VC(HC)=CB');
+  pushLine(272, 'IF VC(HC)<16 THEN 276');
+  pushLine(274, 'VC(HC)=VC(HC)-16:NC(HC)=NC(HC)+1:GOTO 272');
+  pushLine(276, 'NL=PEEK(RB+1):N$(HC)=""');
+  pushLine(278, 'IF NL=0 THEN 286');
+  pushLine(280, 'FOR J=0 TO NL-1:N$(HC)=N$(HC)+CHR$(PEEK(RB+2+J)):NEXT');
+  pushLine(286, 'VL=PEEK(RB+2+NL):V$(HC)=""');
+  pushLine(288, 'IF VL=0 THEN 296');
+  pushLine(290, 'FOR J=0 TO VL-1:V$(HC)=V$(HC)+CHR$(PEEK(RB+3+NL+J)):NEXT');
+  pushLine(296, 'I=HC:GOSUB 1100');
+  pushLine(300, 'IF NX=0 THEN RETURN');
+  pushLine(310, 'RI=NX:GOSUB 650');
+  pushLine(320, 'IF LN=0 THEN RETURN');
+  pushLine(330, 'GOTO 230');
   pushLine(500, 'TP=0:LN=0:DT=0:NX=0:RI=1');
-  pushLine(510, 'OPEN 2,8,2,"BOOK.IDX,S,R"');
-  pushLine(520, 'GOSUB 680');
-  pushLine(522, 'IF K$="TAG" THEN CLOSE 2:RETURN');
-  pushLine(524, 'IF K$<>G$ THEN RI=RI+1:GOTO 520');
-  pushLine(526, 'CLOSE 2:IF NX=0 THEN TP=0:LN=0:DT=0:RETURN');
-  pushLine(528, 'RI=NX:GOSUB 650:RETURN');
+  pushLine(510, 'GOSUB 650');
+  pushLine(520, 'IF K$="TAG" THEN RETURN');
+  pushLine(524, 'IF K$<>G$ THEN RI=RI+1:GOSUB 650:GOTO 520');
+  pushLine(528, 'IF NX=0 THEN TP=0:LN=0:DT=0:RETURN');
+  pushLine(530, 'RI=NX:GOSUB 650:RETURN');
   pushLine(650, 'TP=0:LN=0:DT=0:NX=0');
-  pushLine(660, 'OPEN 2,8,2,"BOOK.IDX,S,R"');
-  pushLine(662, 'SK=(RI-1)*9:IF SK<1 THEN 670');
-  pushLine(664, 'FOR I=1 TO SK:GET#2,A$:NEXT');
-  pushLine(670, 'GOSUB 680:CLOSE 2:RETURN');
-  pushLine(680, 'GET#2,A$:IF ST<>0 THEN K$="TAG":DT=0:TP=0:LN=0:NX=0:RETURN');
-  pushLine(682, 'K$=A$');
-  pushLine(684, 'GET#2,A$:IF ST<>0 THEN K$="TAG":DT=0:TP=0:LN=0:NX=0:RETURN');
-  pushLine(686, 'K$=K$+A$');
-  pushLine(688, 'GET#2,A$:IF ST<>0 THEN K$="TAG":DT=0:TP=0:LN=0:NX=0:RETURN');
-  pushLine(690, 'K$=K$+A$');
-  pushLine(692, 'GET#2,A$:IF A$="" THEN D1=0:GOTO 696');
-  pushLine(694, 'D1=ASC(A$)');
-  pushLine(696, 'GET#2,A$:IF A$="" THEN P1=0:GOTO 700');
-  pushLine(698, 'P1=ASC(A$)');
-  pushLine(700, 'GET#2,A$:IF A$="" THEN 704');
-  pushLine(702, 'P1=P1+256*ASC(A$)');
-  pushLine(704, 'GET#2,A$:IF A$="" THEN L1=0:GOTO 708');
-  pushLine(706, 'L1=ASC(A$)');
-  pushLine(708, 'GET#2,A$:IF A$="" THEN N1=0:GOTO 712');
-  pushLine(710, 'N1=ASC(A$)');
-  pushLine(712, 'GET#2,A$:IF A$="" THEN 716');
-  pushLine(714, 'N1=N1+256*ASC(A$)');
-  pushLine(716, 'DT=D1:TP=P1:LN=L1:NX=N1:RETURN');
+  pushLine(652, 'F$="BOOK.IDX,S,R":SK=(RI-1)*9:RL=9:GOSUB 7200');
+  pushLine(654, 'IF RR<>0 THEN K$="TAG":RETURN');
+  pushLine(656, 'K$=CHR$(PEEK(RB))+CHR$(PEEK(RB+1))+CHR$(PEEK(RB+2))');
+  pushLine(658, 'DT=PEEK(RB+3)');
+  pushLine(660, 'TP=PEEK(RB+4)+256*PEEK(RB+5)');
+  pushLine(662, 'LN=PEEK(RB+6)');
+  pushLine(664, 'NX=PEEK(RB+7)+256*PEEK(RB+8):RETURN');
   pushLine(620, 'RS=0:DF$=""');
   pushLine(622, 'IF DT=1 THEN RS=1:DF$="1.DAT":RETURN');
   pushLine(624, 'IF DT=2 THEN RS=2:DF$="2.DAT":RETURN');
@@ -5715,7 +5741,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(1590, 'L$=MID$(L$,B+1)');
     pushLine(1600, 'GOTO 1530');
   }
-  if (hasCover && loaderProgram) {
+  if (loaderProgram) {
     pushLine(3000, 'IF ML=1 THEN RETURN');
     pushLine(3005, 'LT$="INSTALLING LOADER":GOSUB 3500');
     pushLine(3008, 'NI=0:BP=0:GOSUB 3730');
@@ -5733,6 +5759,12 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3314, 'POKE ' + String(loaderProgram.promptRecordAddress) + ',AR-256*INT(AR/256):POKE ' + String(loaderProgram.promptRecordAddress + 1) + ',INT(AR/256)');
     pushLine(3316, 'POKE ' + String(loaderProgram.promptRecordCountAddress) + ',AC');
     pushLine(3320, 'RETURN');
+    pushLine(7200, 'GOSUB 3300');
+    pushLine(7210, 'POKE ' + String(loaderProgram.skipAddress) + ',SK-256*INT(SK/256):POKE ' + String(loaderProgram.skipAddress + 1) + ',INT(SK/256)');
+    pushLine(7220, 'POKE ' + String(loaderProgram.readLengthAddress) + ',RL-256*INT(RL/256):POKE ' + String(loaderProgram.readLengthAddress + 1) + ',INT(RL/256)');
+    pushLine(7230, 'POKE ' + String(loaderProgram.destinationAddress) + ',0:POKE ' + String(loaderProgram.destinationAddress + 1) + ',112');
+    pushLine(7240, 'SYS ' + String(loaderProgram.readerAddress));
+    pushLine(7250, 'RR=PEEK(' + String(loaderProgram.statusAddress) + '):RETURN');
     pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$=":" THEN 3350');
     pushLine(3340, 'IF A$="." THEN 3360');
     pushLine(3342, 'LT$=LT$+A$:NEXT');
