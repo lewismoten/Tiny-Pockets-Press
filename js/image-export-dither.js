@@ -777,6 +777,65 @@ export function init(TPP) {
     }
     return bestBgIndex;
   };
+  const chooseGlobalBackgroundIndexAsync = async function (
+    data,
+    width,
+    height,
+    palette,
+    options,
+  ) {
+    const config = options || {};
+    const cellSize = 8;
+    const colorLimit = Math.max(
+      2,
+      Math.min(Number(config.colorLimit) || 6, palette.length),
+    );
+    const bgCandidates = Array.isArray(config.backgroundCandidates) &&
+      config.backgroundCandidates.length
+      ? config.backgroundCandidates
+      : palette.map(function (_swatch, index) {
+        return index;
+      });
+    let bestBgIndex = bgCandidates[0] || 0;
+    let bestError = Infinity;
+    let processedCells = 0;
+    for (let candidateIndex = 0; candidateIndex < bgCandidates.length; candidateIndex += 1) {
+      const bgIndex = bgCandidates[candidateIndex];
+      let totalError = 0;
+      for (let cellY = 0; cellY < height; cellY += cellSize) {
+        for (let cellX = 0; cellX < width; cellX += cellSize) {
+          const blockWidth = Math.min(cellSize, width - cellX);
+          const blockHeight = Math.min(cellSize, height - cellY);
+          const pixels = extractCellPixels(
+            data,
+            width,
+            cellX,
+            cellY,
+            blockWidth,
+            blockHeight,
+          );
+          const candidates = paletteCellCandidates(pixels, palette, colorLimit);
+          const fit = bestTwoColorCellFit(
+            pixels,
+            blockWidth,
+            blockHeight,
+            palette,
+            candidates,
+            { backgroundIndex: bgIndex },
+          );
+          totalError += fit.error;
+          processedCells += 1;
+          if (processedCells % 8 === 0) await yieldToUi();
+        }
+      }
+      if (totalError < bestError) {
+        bestError = totalError;
+        bestBgIndex = bgIndex;
+      }
+      await yieldToUi();
+    }
+    return bestBgIndex;
+  };
   const bestTwoColorCellFit = function (
     pixels,
     blockWidth,
@@ -997,6 +1056,112 @@ export function init(TPP) {
       }
     }
   };
+  const applyPalettePetsciiAsync = async function (
+    data,
+    width,
+    height,
+    palette,
+    glyphs,
+    glyphCacheId,
+  ) {
+    const cellSize = 8;
+    const colorLimit = Math.max(2, Math.min(6, palette.length));
+    const glyphCatalog =
+      Array.isArray(glyphs) && glyphs.length ? glyphs : petsciiGlyphs;
+    const paletteHash = hashPalette(palette);
+    const glyphHash =
+      fixedGlyphCatalogHashes[glyphCacheId] ||
+      hashGlyphCatalog(glyphCatalog);
+    const globalBackgroundIndex = chooseGlobalBackgroundIndex(
+      data,
+      width,
+      height,
+      palette,
+      { colorLimit: colorLimit },
+    );
+    let processedCells = 0;
+    for (let cellY = 0; cellY < height; cellY += cellSize) {
+      for (let cellX = 0; cellX < width; cellX += cellSize) {
+        const blockWidth = Math.min(cellSize, width - cellX);
+        const blockHeight = Math.min(cellSize, height - cellY);
+        const pixels = extractCellPixels(
+          data,
+          width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+        );
+        const cellCacheKey =
+          "glyph|" +
+          String(glyphCacheId || "custom") +
+          "|" +
+          glyphHash +
+          "|" +
+          String(globalBackgroundIndex) +
+          "|" +
+          cellPixelsCacheKey(pixels, blockWidth, blockHeight, paletteHash);
+        const cachedCell = getCachedC64Cell(cellCacheKey);
+        if (cachedCell) {
+          paintMaskCell(
+            data,
+            width,
+            cellX,
+            cellY,
+            blockWidth,
+            blockHeight,
+            cachedCell.mask,
+            cachedCell.bg,
+            cachedCell.fg,
+          );
+        } else {
+          const candidates = paletteCellCandidates(pixels, palette, colorLimit);
+          const fit = bestTwoColorCellFit(
+            pixels,
+            blockWidth,
+            blockHeight,
+            palette,
+            candidates,
+            { backgroundIndex: globalBackgroundIndex },
+          );
+          let bestGlyph = glyphCatalog[0];
+          let bestError = Infinity;
+          for (let glyphIndex = 0; glyphIndex < glyphCatalog.length; glyphIndex += 1) {
+            const glyph = glyphCatalog[glyphIndex];
+            const totalError = scoreMaskAgainstCell(
+              glyph,
+              blockWidth,
+              blockHeight,
+              fit.bgErrors,
+              fit.fgErrors,
+            );
+            if (totalError < bestError) {
+              bestError = totalError;
+              bestGlyph = glyph;
+            }
+          }
+          paintMaskCell(
+            data,
+            width,
+            cellX,
+            cellY,
+            blockWidth,
+            blockHeight,
+            bestGlyph,
+            fit.bg,
+            fit.fg,
+          );
+          setCachedC64Cell(cellCacheKey, {
+            mask: bestGlyph,
+            bg: fit.bg,
+            fg: fit.fg,
+          });
+        }
+        processedCells += 1;
+        if (processedCells % 8 === 0) await yieldToUi();
+      }
+    }
+  };
   const applyPaletteCustomCharset = function (
     data,
     width,
@@ -1134,7 +1299,7 @@ export function init(TPP) {
     const selectionBias = clampByte(
       config.selectionBias == null ? 128 : config.selectionBias,
     );
-    const globalBackgroundIndex = chooseGlobalBackgroundIndex(
+    const globalBackgroundIndex = await chooseGlobalBackgroundIndexAsync(
       data,
       width,
       height,
@@ -1695,6 +1860,28 @@ export function init(TPP) {
     const algorithm = String(config.algorithm || "threshold");
     if (algorithm === "c64-custom-charset") {
       await applyPaletteCustomCharsetAsync(data, width, height, palette, config);
+      return;
+    }
+    if (algorithm === "c64-petscii") {
+      await applyPalettePetsciiAsync(
+        data,
+        width,
+        height,
+        palette,
+        petsciiGlyphs,
+        "blocks",
+      );
+      return;
+    }
+    if (algorithm === "c64-petscii-full") {
+      await applyPalettePetsciiAsync(
+        data,
+        width,
+        height,
+        palette,
+        petsciiFullGlyphs,
+        "full",
+      );
       return;
     }
     TPP.applyImageExportPaletteDither(data, width, height, palette, config);
