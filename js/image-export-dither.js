@@ -340,10 +340,77 @@ export function init(TPP) {
       }
     }
   };
+  const applyC64ContrastAssist = function (data, width, height) {
+    if (!data || !width || !height) return;
+    let minR = 255;
+    let minG = 255;
+    let minB = 255;
+    let maxR = 0;
+    let maxG = 0;
+    let maxB = 0;
+    let minL = 255;
+    let maxL = 0;
+    let sumR = 0;
+    let sumG = 0;
+    let sumB = 0;
+    const pixels = Math.max(1, width * height);
+    for (let offset = 0; offset < data.length; offset += 4) {
+      const r = data[offset];
+      const g = data[offset + 1];
+      const b = data[offset + 2];
+      const l = r * 0.299 + g * 0.587 + b * 0.114;
+      minR = Math.min(minR, r);
+      minG = Math.min(minG, g);
+      minB = Math.min(minB, b);
+      maxR = Math.max(maxR, r);
+      maxG = Math.max(maxG, g);
+      maxB = Math.max(maxB, b);
+      minL = Math.min(minL, l);
+      maxL = Math.max(maxL, l);
+      sumR += r;
+      sumG += g;
+      sumB += b;
+    }
+    const avgR = sumR / pixels;
+    const avgG = sumG / pixels;
+    const avgB = sumB / pixels;
+    const rangeR = Math.max(1, maxR - minR);
+    const rangeG = Math.max(1, maxG - minG);
+    const rangeB = Math.max(1, maxB - minB);
+    const rangeL = Math.max(1, maxL - minL);
+    const weakContrast = Math.max(0, Math.min(1, (96 - rangeL) / 96));
+    const channelBoost = 0.2 + weakContrast * 0.55;
+    const lumaBoost = 0.15 + weakContrast * 0.6;
+    const saturationBoost = 1 + weakContrast * 0.75;
+    for (let offset = 0; offset < data.length; offset += 4) {
+      const r = data[offset];
+      const g = data[offset + 1];
+      const b = data[offset + 2];
+      const stretchedR = ((r - minR) * 255) / rangeR;
+      const stretchedG = ((g - minG) * 255) / rangeG;
+      const stretchedB = ((b - minB) * 255) / rangeB;
+      let nextR = r * (1 - channelBoost) + stretchedR * channelBoost;
+      let nextG = g * (1 - channelBoost) + stretchedG * channelBoost;
+      let nextB = b * (1 - channelBoost) + stretchedB * channelBoost;
+      const baseLuma = nextR * 0.299 + nextG * 0.587 + nextB * 0.114;
+      const stretchedLuma = ((baseLuma - minL) * 255) / rangeL;
+      const lumaDelta = (stretchedLuma - baseLuma) * lumaBoost;
+      nextR += lumaDelta;
+      nextG += lumaDelta;
+      nextB += lumaDelta;
+      nextR = avgR + (nextR - avgR) * saturationBoost;
+      nextG = avgG + (nextG - avgG) * saturationBoost;
+      nextB = avgB + (nextB - avgB) * saturationBoost;
+      data[offset] = clampColor(nextR);
+      data[offset + 1] = clampColor(nextG);
+      data[offset + 2] = clampColor(nextB);
+    }
+  };
   const applyC64BayerPrepass = function (data, width, height, palette) {
     if (!data || !width || !height || !Array.isArray(palette) || !palette.length) {
       return;
     }
+    applyC64ContrastAssist(data, width, height);
     for (let y = 0; y < height; y += 1) {
       for (let x = 0; x < width; x += 1) {
         const offset = (y * width + x) * 4;
