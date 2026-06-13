@@ -828,7 +828,33 @@ export function init(TPP) {
       coarse2Shape * 0.15
     );
   };
-  const clusterMergeSimilarity = function (
+  const maskMacroDistance = function (a, b, blockSize) {
+    const sourceA = a || new Uint8Array(64);
+    const sourceB = b || new Uint8Array(64);
+    const step = Math.max(1, Math.min(8, Number(blockSize) || 1));
+    let distance = 0;
+    for (let y0 = 0; y0 < 8; y0 += step) {
+      for (let x0 = 0; x0 < 8; x0 += step) {
+        let litA = 0;
+        let litB = 0;
+        let total = 0;
+        for (let y = y0; y < Math.min(8, y0 + step); y += 1) {
+          for (let x = x0; x < Math.min(8, x0 + step); x += 1) {
+            total += 1;
+            litA += sourceA[y * 8 + x] ? 1 : 0;
+            litB += sourceB[y * 8 + x] ? 1 : 0;
+          }
+        }
+        const bitA = litA >= total / 2 ? 1 : 0;
+        const bitB = litB >= total / 2 ? 1 : 0;
+        if (bitA !== bitB) {
+          distance += 1;
+        }
+      }
+    }
+    return distance;
+  };
+  const clusterMergeMetrics = function (
     source,
     target,
     originalMaskByKey,
@@ -840,6 +866,9 @@ export function init(TPP) {
     let totalScore = 0;
     let compared = 0;
     let worstScore = 0;
+    let worstPixelDiff = 0;
+    let worstMacro4 = 0;
+    let worstMacro2 = 0;
     for (let i = 0; i < memberKeys.length; i += 1) {
       const memberKey = memberKeys[i];
       const originalMask = originalMaskByKey.get(memberKey) || source.mask;
@@ -851,16 +880,44 @@ export function init(TPP) {
       const diffCount = maskHammingDistance(originalMask, target.mask);
       const shapeScore = maskDifferenceScore(originalMask, target.mask);
       const blockScore = maskBlockStructureScore(originalMask, target.mask);
+      const macro4 = maskMacroDistance(originalMask, target.mask, 2);
+      const macro2 = maskMacroDistance(originalMask, target.mask, 4);
       const similarityScore =
         diffCount * (1 - similarityBias) * 0.45 +
         shapeScore * similarityBias * 0.55 +
         blockScore * 0.6;
       totalScore += similarityScore;
       worstScore = Math.max(worstScore, similarityScore);
+      worstPixelDiff = Math.max(worstPixelDiff, diffCount);
+      worstMacro4 = Math.max(worstMacro4, macro4);
+      worstMacro2 = Math.max(worstMacro2, macro2);
       compared += 1;
     }
     if (!compared) return null;
-    return worstScore * 0.7 + (totalScore / compared) * 0.3;
+    return {
+      score: worstScore * 0.7 + (totalScore / compared) * 0.3,
+      worstPixelDiff: worstPixelDiff,
+      worstMacro4: worstMacro4,
+      worstMacro2: worstMacro2,
+    };
+  };
+  const mergeGuardForProgress = function (progress, relaxLevel) {
+    const stage = Math.max(0, Math.min(1, Number(progress) || 0));
+    const relax = Math.max(0, Math.min(2, Number(relaxLevel) || 0));
+    if (relax >= 2) return null;
+    if (stage >= 0.8) {
+      return relax === 0
+        ? { pixel: 6, macro4: 3, macro2: 0 }
+        : { pixel: 8, macro4: 5, macro2: 1 };
+    }
+    if (stage >= 0.6) {
+      return relax === 0
+        ? { pixel: 8, macro4: 5, macro2: 1 }
+        : { pixel: 10, macro4: 7, macro2: 2 };
+    }
+    return relax === 0
+      ? { pixel: 10, macro4: 7, macro2: 2 }
+      : { pixel: 14, macro4: 10, macro2: 3 };
   };
   const solidGlyphMask = function () {
     const mask = new Uint8Array(64);
@@ -945,46 +1002,62 @@ export function init(TPP) {
         litCount: maskLitCount(entry.mask),
       });
     });
+    const totalRemovals = Math.max(1, working.length - maxPatterns);
     while (working.length > maxPatterns) {
       let bestMerge = null;
-      for (let i = 0; i < working.length; i += 1) {
-        const source = working[i];
-        for (let j = 0; j < working.length; j += 1) {
-          if (i === j) continue;
-          const target = working[j];
-          if (
-            target.utility < source.utility &&
-            !(target.utility === source.utility && (target.count || 0) >= (source.count || 0))
-          ) {
-            continue;
-          }
-          const similarityScore = clusterMergeSimilarity(
-            source,
-            target,
-            originalMaskByKey,
-            similarityBias,
-          );
-          if (similarityScore == null) continue;
-          const removalWeight =
-            (1 - source.utility) * 6 +
-            (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
-            (source.averageError - minAverageError) / errorRange;
-          const detailWeight =
-            source.detailProtection * 4 -
-            target.detailProtection * 1.5;
-          const mergeScore =
-            similarityScore +
-            removalWeight -
-            detailWeight -
-            target.utility * 2 -
-            Math.min(2, ((target.count || 0) / maxCount) * 2);
-          if (!bestMerge || mergeScore < bestMerge.score) {
-            bestMerge = {
-              sourceIndex: i,
-              targetIndex: j,
-              score: mergeScore,
-              similarityScore: similarityScore,
-            };
+      const reductionProgress =
+        (totalRemovals - Math.max(0, working.length - maxPatterns)) / totalRemovals;
+      for (let relaxLevel = 0; relaxLevel < 3 && !bestMerge; relaxLevel += 1) {
+        const guard = mergeGuardForProgress(reductionProgress, relaxLevel);
+        for (let i = 0; i < working.length; i += 1) {
+          const source = working[i];
+          for (let j = 0; j < working.length; j += 1) {
+            if (i === j) continue;
+            const target = working[j];
+            if (
+              target.utility < source.utility &&
+              !(target.utility === source.utility && (target.count || 0) >= (source.count || 0))
+            ) {
+              continue;
+            }
+            const metrics = clusterMergeMetrics(
+              source,
+              target,
+              originalMaskByKey,
+              similarityBias,
+            );
+            if (metrics == null) continue;
+            if (
+              guard &&
+              (
+                metrics.worstPixelDiff > guard.pixel ||
+                metrics.worstMacro4 > guard.macro4 ||
+                metrics.worstMacro2 > guard.macro2
+              )
+            ) {
+              continue;
+            }
+            const removalWeight =
+              (1 - source.utility) * 6 +
+              (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
+              (source.averageError - minAverageError) / errorRange;
+            const detailWeight =
+              source.detailProtection * 4 -
+              target.detailProtection * 1.5;
+            const mergeScore =
+              metrics.score +
+              removalWeight -
+              detailWeight -
+              target.utility * 2 -
+              Math.min(2, ((target.count || 0) / maxCount) * 2);
+            if (!bestMerge || mergeScore < bestMerge.score) {
+              bestMerge = {
+                sourceIndex: i,
+                targetIndex: j,
+                score: mergeScore,
+                similarityScore: metrics.score,
+              };
+            }
           }
         }
       }
@@ -1088,48 +1161,63 @@ export function init(TPP) {
     let mergesCompleted = 0;
     while (working.length > maxPatterns) {
       let bestMerge = null;
-      for (let i = 0; i < working.length; i += 1) {
-        const source = working[i];
-        for (let j = 0; j < working.length; j += 1) {
-          if (i === j) continue;
-          const target = working[j];
-          if (
-            target.utility < source.utility &&
-            !(target.utility === source.utility && (target.count || 0) >= (source.count || 0))
-          ) {
-            continue;
+      const reductionProgress =
+        mergesNeeded ? mergesCompleted / mergesNeeded : 1;
+      for (let relaxLevel = 0; relaxLevel < 3 && !bestMerge; relaxLevel += 1) {
+        const guard = mergeGuardForProgress(reductionProgress, relaxLevel);
+        for (let i = 0; i < working.length; i += 1) {
+          const source = working[i];
+          for (let j = 0; j < working.length; j += 1) {
+            if (i === j) continue;
+            const target = working[j];
+            if (
+              target.utility < source.utility &&
+              !(target.utility === source.utility && (target.count || 0) >= (source.count || 0))
+            ) {
+              continue;
+            }
+            const metrics = clusterMergeMetrics(
+              source,
+              target,
+              originalMaskByKey,
+              similarityBias,
+            );
+            if (metrics == null) continue;
+            if (
+              guard &&
+              (
+                metrics.worstPixelDiff > guard.pixel ||
+                metrics.worstMacro4 > guard.macro4 ||
+                metrics.worstMacro2 > guard.macro2
+              )
+            ) {
+              continue;
+            }
+            const removalWeight =
+              (1 - source.utility) * 6 +
+              (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
+              (source.averageError - minAverageError) / errorRange;
+            const detailWeight =
+              source.detailProtection * 4 -
+              target.detailProtection * 1.5;
+            const mergeScore =
+              metrics.score +
+              removalWeight -
+              detailWeight -
+              target.utility * 2 -
+              Math.min(2, ((target.count || 0) / maxCount) * 2);
+            if (!bestMerge || mergeScore < bestMerge.score) {
+              bestMerge = {
+                sourceIndex: i,
+                targetIndex: j,
+                score: mergeScore,
+                similarityScore: metrics.score,
+              };
+            }
           }
-          const similarityScore = clusterMergeSimilarity(
-            source,
-            target,
-            originalMaskByKey,
-            similarityBias,
-          );
-          if (similarityScore == null) continue;
-          const removalWeight =
-            (1 - source.utility) * 6 +
-            (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
-            (source.averageError - minAverageError) / errorRange;
-          const detailWeight =
-            source.detailProtection * 4 -
-            target.detailProtection * 1.5;
-          const mergeScore =
-            similarityScore +
-            removalWeight -
-            detailWeight -
-            target.utility * 2 -
-            Math.min(2, ((target.count || 0) / maxCount) * 2);
-          if (!bestMerge || mergeScore < bestMerge.score) {
-            bestMerge = {
-              sourceIndex: i,
-              targetIndex: j,
-              score: mergeScore,
-              similarityScore: similarityScore,
-            };
+          if (i % 8 === 0) {
+            await maybeYield();
           }
-        }
-        if (i % 8 === 0) {
-          await maybeYield();
         }
       }
       if (!bestMerge) break;
