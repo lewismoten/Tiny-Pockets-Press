@@ -4169,6 +4169,38 @@ TPP.d64BuildBitmapPromptSprites = function () {
       if (touchesText) outlineMask[y * 96 + x] = 1;
     }
   }
+  let minX = 96;
+  let maxX = -1;
+  for (let y = 0; y < 21; y += 1) {
+    for (let x = 0; x < 96; x += 1) {
+      if (!outlineMask[y * 96 + x] && !textMask[y * 96 + x]) continue;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+    }
+  }
+  if (maxX >= minX) {
+    const visibleWidth = maxX - minX + 1;
+    const targetLeft = Math.floor((96 - visibleWidth) / 2);
+    const shiftX = targetLeft - minX;
+    if (shiftX !== 0) {
+      const shiftMask = function (mask) {
+        const shifted = new Uint8Array(mask.length);
+        for (let y = 0; y < 21; y += 1) {
+          for (let x = 0; x < 96; x += 1) {
+            if (!mask[y * 96 + x]) continue;
+            const nextX = x + shiftX;
+            if (nextX < 0 || nextX >= 96) continue;
+            shifted[y * 96 + nextX] = mask[y * 96 + x];
+          }
+        }
+        return shifted;
+      };
+      const shiftedOutline = shiftMask(outlineMask);
+      const shiftedText = shiftMask(textMask);
+      outlineMask.set(shiftedOutline);
+      textMask.set(shiftedText);
+    }
+  }
   const sprites = [];
   [outlineMask, textMask].forEach(function (mask) {
     for (let spriteIndex = 0; spriteIndex < 4; spriteIndex += 1) {
@@ -4665,37 +4697,37 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   rts();
 
   label("showPrompt");
-  ldaImm(112);
+  ldaImm(136);
   staAbs(0xd000);
-  ldaImm(182);
+  ldaImm(236);
   staAbs(0xd001);
-  ldaImm(136);
+  ldaImm(160);
   staAbs(0xd002);
-  ldaImm(182);
+  ldaImm(236);
   staAbs(0xd003);
-  ldaImm(160);
+  ldaImm(184);
   staAbs(0xd004);
-  ldaImm(182);
+  ldaImm(236);
   staAbs(0xd005);
-  ldaImm(184);
+  ldaImm(208);
   staAbs(0xd006);
-  ldaImm(182);
+  ldaImm(236);
   staAbs(0xd007);
-  ldaImm(112);
-  staAbs(0xd008);
-  ldaImm(182);
-  staAbs(0xd009);
   ldaImm(136);
-  staAbs(0xd00a);
-  ldaImm(182);
-  staAbs(0xd00b);
+  staAbs(0xd008);
+  ldaImm(236);
+  staAbs(0xd009);
   ldaImm(160);
-  staAbs(0xd00c);
-  ldaImm(182);
-  staAbs(0xd00d);
+  staAbs(0xd00a);
+  ldaImm(236);
+  staAbs(0xd00b);
   ldaImm(184);
+  staAbs(0xd00c);
+  ldaImm(236);
+  staAbs(0xd00d);
+  ldaImm(208);
   staAbs(0xd00e);
-  ldaImm(182);
+  ldaImm(236);
   staAbs(0xd00f);
   ldaImm(0x00);
   staAbs(0xd027);
