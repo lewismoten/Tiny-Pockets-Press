@@ -4846,11 +4846,6 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrLabel("hideSprites");
   jsrLabel("clearKeys");
   jsrLabel("delayPrompt");
-  bcc("showPromptPhase");
-  ldaImm(0x00);
-  staAbs(vars.status);
-  rts();
-  label("showPromptPhase");
   ldaAbs(vars.promptRecordCount);
   beq("coverReady");
   jsrLabel("setPromptFilename");
@@ -5256,11 +5251,6 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   label("delayPrompt");
   ldyImm(180);
   label("delayFrame");
-  jsrLabel("scanKey");
-  bcc("delayContinue");
-  sec();
-  rts();
-  label("delayContinue");
   ldaImm(0xff);
   label("waitHigh");
   cmpAbs(0xd012);
@@ -5270,7 +5260,6 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   beq("waitLow");
   dey();
   bne("delayFrame");
-  clc();
   rts();
 
   label("showPrompt");
