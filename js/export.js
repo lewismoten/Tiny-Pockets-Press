@@ -4143,6 +4143,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(669, 'CLOSE 2');
     pushLine(680, 'IF K$<>"TOC" THEN RETURN');
     pushLine(690, 'OPEN 3,8,3,"BOOK.DAT,S,R"');
+    pushLine(695, 'IF TP<1 THEN 710');
     pushLine(700, 'FOR I=1 TO TP:GET#3,A$:NEXT');
     pushLine(710, 'RD=0');
     pushLine(720, 'IF RD>=LN OR TC>=200 THEN CLOSE 3:RETURN');
@@ -4217,7 +4218,6 @@ TPP.exportFileIdDizText = function (book) {
 TPP.exportImagesD64 = async function (options) {
   const progressOp = TPP.beginProgressOperation("D64 export");
   try {
-    await TPP.ensureImageExportPaletteForOptionsLoaded(options);
     TPP.sync();
     const settings = TPP.settings();
     const pages = TPP.buildPages();
@@ -4225,88 +4225,41 @@ TPP.exportImagesD64 = async function (options) {
       alert("No pages available to export.");
       return;
     }
-    const exportOptions = TPP.imageExportOptions(options);
-    const mount = document.createElement("div");
-    mount.style.cssText =
-      "position:fixed;left:-9999px;top:0;pointer-events:none;";
-    document.body.appendChild(mount);
-    try {
-      const shell = TPP.createExportRenderShell(settings);
-      mount.appendChild(shell);
-      const tocFiles = TPP.exportD64TocIndexAndData(settings);
-      const d64Files = [
-        {
-          name: "BOOK.PRG",
-          type: 0x82,
-          data: TPP.exportD64BootProgramBytes(settings, pages.length, {
-            hasToc: tocFiles.hasToc,
-          }),
-        },
-        {
-          name: "BOOK.IDX",
-          type: 0x81,
-          data: tocFiles.indexBytes,
-        },
-        {
-          name: "BOOK.DAT",
-          type: 0x81,
-          data: tocFiles.dataBytes,
-        },
-      ];
-      for (let i = 0; i < pages.length; i += 1) {
-        TPP.throwIfProgressCancelled(progressOp);
-        TPP.showProgress(
-          5 + Math.round((i / pages.length) * 80),
-          "Rendering page " + (i + 1) + " of " + pages.length + "...",
-        );
-        const page = pages[i];
-        const canvas = await TPP.renderExportPageCanvas(shell, page, settings, 1);
-        const exportCanvas = TPP.fitCanvasToExportTarget(canvas, exportOptions);
-        const seqBytes = await TPP.imageExportSeqBytesForCanvas(exportCanvas, exportOptions);
-        if (!seqBytes || !seqBytes.length) {
-          alert("D64 export failed while generating page data.");
-          return;
-        }
-        d64Files.push({
-          name: TPP.exportD64PageFileName(i + 1),
-          type: 0x81,
-          data: seqBytes,
-        });
-        const sheet = TPP.buildImageExportCustomCharsetSheet(
-          exportCanvas,
-          TPP.imageExportNamedPalette(exportOptions.palette),
-          {
-            cellSize: 8,
-            cols: 16,
-            selectionBias: exportOptions.threshold,
-          },
-        );
-        const chrBytes = sheet && sheet.patterns
-          ? TPP.imageExportCharsetToChrBytes(sheet.patterns)
-          : null;
-        if (chrBytes) {
-          d64Files.push({
-            name: TPP.exportD64CharsetPageFileName(i + 1),
-            type: 0x81,
-            data: chrBytes,
-          });
-        }
-      }
-      d64Files.push({
+    TPP.showProgress(15, "Building Commodore 64 files...");
+    const tocFiles = TPP.exportD64TocIndexAndData(settings);
+    const d64Files = [
+      {
+        name: "BOOK.PRG",
+        type: 0x82,
+        data: TPP.exportD64BootProgramBytes(settings, pages.length, {
+          hasToc: tocFiles.hasToc,
+        }),
+      },
+      {
+        name: "BOOK.IDX",
+        type: 0x81,
+        data: tocFiles.indexBytes,
+      },
+      {
+        name: "BOOK.DAT",
+        type: 0x81,
+        data: tocFiles.dataBytes,
+      },
+      {
         name: "FILE_ID.DIZ",
         type: 0x81,
         data: new TextEncoder().encode(TPP.exportFileIdDizText(settings)),
-      });
-      const imageBytes = TPP.buildD64Image(d64Files, settings);
-      if (!imageBytes) {
-        alert("Failed to build D64 disk image.");
-        return;
-      }
-      const blob = new Blob([imageBytes], { type: "application/octet-stream" });
-      TPP.downloadBlob(TPP.exportD64FileName(settings), blob);
-    } finally {
-      mount.remove();
+      },
+    ];
+    TPP.throwIfProgressCancelled(progressOp);
+    TPP.showProgress(75, "Building D64 disk image...");
+    const imageBytes = TPP.buildD64Image(d64Files, settings);
+    if (!imageBytes) {
+      alert("Failed to build D64 disk image.");
+      return;
     }
+    const blob = new Blob([imageBytes], { type: "application/octet-stream" });
+    TPP.downloadBlob(TPP.exportD64FileName(settings), blob);
     TPP.finishProgressOperation(progressOp);
     TPP.showProgress(100, "Commodore 64 D64 export complete");
   } catch (error) {
