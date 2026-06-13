@@ -1083,6 +1083,8 @@ TPP.renderImageExportPreview = async function () {
     ctx.drawImage(canvas, 0, 0);
     return out;
   };
+  let pendingAfterProgress = null;
+  let afterProgressFrame = 0;
   const compareStageMarkup = function (beforeSrc, afterSrc, beforeSize, afterSize) {
     return (
       '<div class="image-export-compare" style="' +
@@ -1105,6 +1107,52 @@ TPP.renderImageExportPreview = async function () {
       "</span></div>" +
       "</div>"
     );
+  };
+  const renderAfterProgressPreview = function (progress) {
+    if (!progress || !progress.canvas || TPP.imageExportPreviewToken !== token) return;
+    const after = stage.querySelector(".image-export-compare-after");
+    if (!after || !after.classList.contains("image-export-compare-after-empty")) return;
+    let canvas = after.querySelector(".image-export-compare-after-progress");
+    if (!canvas) {
+      canvas = document.createElement("canvas");
+      canvas.className = "image-export-compare-after-progress";
+      after.replaceChildren(canvas);
+    }
+    if (
+      canvas.width !== progress.canvas.width ||
+      canvas.height !== progress.canvas.height
+    ) {
+      canvas.width = progress.canvas.width;
+      canvas.height = progress.canvas.height;
+    }
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(progress.canvas, 0, 0);
+    }
+    const afterLabel = stage.querySelector(
+      ".image-export-compare-label.after .image-export-compare-size",
+    );
+    if (afterLabel) {
+      const phase = String(progress.phase || "Rendering");
+      afterLabel.textContent = phase + " " + String(progress.percent || 0) + "%";
+    }
+  };
+  const scheduleAfterProgressPreview = function (progress) {
+    pendingAfterProgress = progress || null;
+    if (afterProgressFrame) return;
+    const schedule =
+      typeof window.requestAnimationFrame === "function"
+        ? window.requestAnimationFrame.bind(window)
+        : function (callback) {
+            return window.setTimeout(callback, 16);
+          };
+    afterProgressFrame = schedule(function () {
+      afterProgressFrame = 0;
+      const next = pendingAfterProgress;
+      pendingAfterProgress = null;
+      renderAfterProgressPreview(next);
+    });
   };
   const renderLiveBeforeStage = function (page, settings, exportOptions) {
     if (!page || typeof TPP.pageEl !== "function") return;
@@ -1320,7 +1368,15 @@ TPP.renderImageExportPreview = async function () {
       exportOptions.colorDepth,
       exportOptions.threshold,
       exportOptions.palette,
-      exportOptions,
+      Object.assign({}, exportOptions, {
+        onProgress:
+          exportOptions.colorDepth === "indexed" &&
+          String(exportOptions.dithering || "").startsWith("c64-")
+            ? function (progress) {
+                scheduleAfterProgressPreview(progress);
+              }
+            : null,
+      }),
     );
     if (
       customCharsetPreview &&

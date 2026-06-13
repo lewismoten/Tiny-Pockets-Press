@@ -126,6 +126,33 @@ export function init(TPP) {
       return true;
     };
   };
+  const reportProgress = function (config, info) {
+    if (!config || typeof config.onProgress !== "function") return;
+    const now =
+      typeof performance !== "undefined" && typeof performance.now === "function"
+        ? performance.now()
+        : Date.now();
+    const last = Number(config._lastProgressAt) || 0;
+    const total = Math.max(1, Number(info && info.total) || 1);
+    const completed = Math.max(
+      0,
+      Math.min(total, Number(info && info.completed) || 0),
+    );
+    if (
+      completed < total &&
+      now - last < Math.max(16, Number(config.progressIntervalMs) || 48)
+    ) {
+      return;
+    }
+    config._lastProgressAt = now;
+    config.onProgress(
+      Object.assign({}, info, {
+        completed: completed,
+        total: total,
+        percent: Math.max(0, Math.min(100, Math.round((completed / total) * 100))),
+      }),
+    );
+  };
   const applyOrderedMatrix = function (data, width, height, threshold, matrix) {
     const size = matrix.length || 1;
     const levels = size * size;
@@ -812,6 +839,10 @@ export function init(TPP) {
         return index;
       });
     const maybeYield = makeUiYieldController(config.yieldBudgetMs);
+    const totalCells =
+      bgCandidates.length *
+      Math.ceil(height / cellSize) *
+      Math.ceil(width / cellSize);
     let bestBgIndex = bgCandidates[0] || 0;
     let bestError = Infinity;
     let processedCells = 0;
@@ -841,6 +872,11 @@ export function init(TPP) {
           );
           totalError += fit.error;
           processedCells += 1;
+          reportProgress(config, {
+            phase: "Background",
+            completed: processedCells,
+            total: totalCells,
+          });
           if (processedCells % 4 === 0) await yieldToUi();
           await maybeYield();
         }
@@ -849,6 +885,11 @@ export function init(TPP) {
         bestError = totalError;
         bestBgIndex = bgIndex;
       }
+      reportProgress(config, {
+        phase: "Background",
+        completed: Math.min(totalCells, processedCells),
+        total: totalCells,
+      });
       await yieldToUi();
     }
     return bestBgIndex;
@@ -1081,6 +1122,7 @@ export function init(TPP) {
     palette,
     glyphs,
     glyphCacheId,
+    options,
   ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(6, palette.length));
@@ -1090,14 +1132,22 @@ export function init(TPP) {
     const glyphHash =
       fixedGlyphCatalogHashes[glyphCacheId] ||
       hashGlyphCatalog(glyphCatalog);
-    const maybeYield = makeUiYieldController();
+    const config = options || {};
+    const maybeYield = makeUiYieldController(config.yieldBudgetMs);
     const globalBackgroundIndex = await chooseGlobalBackgroundIndexAsync(
       data,
       width,
       height,
       palette,
-      { colorLimit: colorLimit },
+      {
+        colorLimit: colorLimit,
+        onProgress: config.onProgress,
+        progressIntervalMs: config.progressIntervalMs,
+        yieldBudgetMs: config.yieldBudgetMs,
+      },
     );
+    const totalCells = Math.ceil(height / cellSize) * Math.ceil(width / cellSize);
+    let processedCells = 0;
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
@@ -1176,6 +1226,11 @@ export function init(TPP) {
           });
         }
         processedCells += 1;
+        reportProgress(config, {
+          phase: "Glyphs",
+          completed: processedCells,
+          total: totalCells,
+        });
         if (processedCells % 4 === 0) await yieldToUi();
         await maybeYield();
       }
@@ -1324,8 +1379,14 @@ export function init(TPP) {
       width,
       height,
       palette,
-      { colorLimit: colorLimit },
+      {
+        colorLimit: colorLimit,
+        onProgress: config.onProgress,
+        progressIntervalMs: config.progressIntervalMs,
+        yieldBudgetMs: config.yieldBudgetMs,
+      },
     );
+    const totalCells = Math.ceil(height / cellSize) * Math.ceil(width / cellSize);
     const cellFits = [];
     const patternStats = new Map();
     let processedCells = 0;
@@ -1376,6 +1437,11 @@ export function init(TPP) {
           key: originalKey,
         });
         processedCells += 1;
+        reportProgress(config, {
+          phase: "Analyze",
+          completed: processedCells,
+          total: totalCells,
+        });
         if (processedCells % 4 === 0) await yieldToUi();
         await maybeYield();
       }
@@ -1432,6 +1498,11 @@ export function init(TPP) {
         fit.bg,
         fit.fg,
       );
+      reportProgress(config, {
+        phase: "Paint",
+        completed: index + 1,
+        total: cellFits.length,
+      });
       if ((index + 1) % 4 === 0) await yieldToUi();
       await maybeYield();
     }
@@ -1888,6 +1959,7 @@ export function init(TPP) {
         palette,
         petsciiGlyphs,
         "blocks",
+        config,
       );
       return;
     }
@@ -1899,6 +1971,7 @@ export function init(TPP) {
         palette,
         petsciiFullGlyphs,
         "full",
+        config,
       );
       return;
     }

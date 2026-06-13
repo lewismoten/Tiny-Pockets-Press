@@ -229,6 +229,12 @@
 .image-export-compare-after-empty {
   background: transparent;
 }
+.image-export-compare-after-progress {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
 .image-export-compare-divider {
   position: absolute;
   top: 0;

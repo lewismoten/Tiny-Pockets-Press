@@ -3203,6 +3203,12 @@ TPP.exportCanvasForDepth = async function (
   if (applyIndexedDither) {
     const ditherLib = await TPP.loadImageExportDither();
     if (ditherLib && typeof ditherLib.applyPaletteDitherAsync === "function") {
+      const progressCallback = typeof config.onProgress === "function"
+        ? function (info) {
+            ctx.putImageData(image, 0, 0);
+            config.onProgress(Object.assign({}, info, { canvas: out }));
+          }
+        : null;
       await ditherLib.applyPaletteDitherAsync(
         data,
         out.width,
@@ -3212,6 +3218,9 @@ TPP.exportCanvasForDepth = async function (
           algorithm: String(config.dithering || "threshold"),
           threshold: monoThreshold,
           selectionBias: monoThreshold,
+          onProgress: progressCallback,
+          progressIntervalMs: config.progressIntervalMs,
+          yieldBudgetMs: config.yieldBudgetMs,
         },
       );
       ctx.putImageData(image, 0, 0);
