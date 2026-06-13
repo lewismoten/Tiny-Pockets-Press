@@ -1186,6 +1186,22 @@ TPP.renderImageExportPreview = async function () {
     });
     TPP.bindImageExportPreviewDrag();
   };
+  const publishBeforePreviewAsset = function (beforeEntry) {
+    if (TPP.imageExportPreviewToken !== token) return;
+    TPP.setImageExportPreviewDownloads({
+      before: {
+        src: beforeEntry && beforeEntry.src ? beforeEntry.src : "",
+        blob: beforeEntry ? beforeEntry.blob || null : null,
+        name: beforeName,
+      },
+      after: null,
+    });
+    TPP.updateImageExportPreviewStageSizeLabels(
+      stage,
+      TPP.imageExportPreviewSizeLabel(beforeEntry),
+      "Rendering...",
+    );
+  };
   if (cachedBefore.previewSrc && cachedAfter.previewSrc) {
     TPP.cancelImageExportPreviewLoadingTimer();
     await renderPreviewStage(
@@ -1243,6 +1259,51 @@ TPP.renderImageExportPreview = async function () {
     const beforeCanvas = typeof TPP.fitCanvasToExportTarget === "function"
       ? TPP.fitCanvasToExportTarget(baseCanvas, exportOptions)
       : baseCanvas;
+    const beforeEntry = {
+      previewSrc:
+        cachedBefore.previewSrc || TPP.previewDataUrl(beforeCanvas, "png", 1),
+      blob: cachedBefore.blob || null,
+    };
+    TPP.setImageExportPreviewResultCache(beforeCacheKey, beforeEntry);
+    if (!cachedAfter.previewSrc) {
+      if (TPP.imageExportPreviewToken !== token) return;
+      await renderBeforeStage({
+        src: beforeEntry.previewSrc,
+        blob: beforeEntry.blob,
+      });
+      if (TPP.imageExportPreviewToken !== token) return;
+      await TPP.nextFrame();
+      TPP.setImageExportPreviewLoading(
+        stage,
+        true,
+        customCharsetPreview ? "Rendering custom charset..." : "Rendering preview...",
+      );
+      if (TPP.imageExportPreviewToken !== token) return;
+    }
+    if (beforeEntry.blob) {
+      publishBeforePreviewAsset({
+        src: beforeEntry.previewSrc,
+        blob: beforeEntry.blob,
+      });
+    } else {
+      window.setTimeout(async function () {
+        if (TPP.imageExportPreviewToken !== token) return;
+        const blob = await TPP.exportBlobForCanvas(beforeCanvas, {
+          format: "png",
+          quality: 100,
+        });
+        if (TPP.imageExportPreviewToken !== token) return;
+        beforeEntry.blob = blob;
+        TPP.setImageExportPreviewResultCache(beforeCacheKey, beforeEntry);
+        publishBeforePreviewAsset({
+          src: beforeEntry.previewSrc,
+          blob: beforeEntry.blob,
+        });
+      }, 0);
+    }
+    if (TPP.imageExportPreviewToken !== token) return;
+    await TPP.nextFrame();
+    if (TPP.imageExportPreviewToken !== token) return;
     const afterCanvas = await TPP.exportCanvasForDepth(
       beforeCanvas,
       exportOptions.colorDepth,
@@ -1260,27 +1321,6 @@ TPP.renderImageExportPreview = async function () {
         TPP.imageExportPreviewIndex,
       );
     }
-    const beforeEntry = {
-      previewSrc:
-        cachedBefore.previewSrc || TPP.previewDataUrl(beforeCanvas, "png", 1),
-      blob: cachedBefore.blob || null,
-    };
-    if (!cachedAfter.previewSrc) {
-      TPP.setImageExportPreviewResultCache(beforeCacheKey, beforeEntry);
-      if (TPP.imageExportPreviewToken !== token) return;
-      await renderBeforeStage({
-        src: beforeEntry.previewSrc,
-        blob: beforeEntry.blob,
-      });
-      if (TPP.imageExportPreviewToken !== token) return;
-      await TPP.nextFrame();
-      TPP.setImageExportPreviewLoading(
-        stage,
-        true,
-        customCharsetPreview ? "Rendering custom charset..." : "Rendering preview...",
-      );
-      if (TPP.imageExportPreviewToken !== token) return;
-    }
     const afterEntry = {
       previewSrc:
         cachedAfter.previewSrc ||
@@ -1291,7 +1331,6 @@ TPP.renderImageExportPreview = async function () {
         ),
       blob: cachedAfter.blob || null,
     };
-    TPP.setImageExportPreviewResultCache(beforeCacheKey, beforeEntry);
     TPP.setImageExportPreviewResultCache(afterCacheKey, afterEntry);
     if (TPP.imageExportPreviewToken !== token) return;
     TPP.cancelImageExportPreviewLoadingTimer();
@@ -1300,14 +1339,6 @@ TPP.renderImageExportPreview = async function () {
       { src: afterEntry.previewSrc, blob: afterEntry.blob },
     );
     window.setTimeout(async function () {
-      if (TPP.imageExportPreviewToken !== token) return;
-      if (!beforeEntry.blob) {
-        beforeEntry.blob = await TPP.exportBlobForCanvas(beforeCanvas, {
-          format: "png",
-          quality: 100,
-        });
-        TPP.setImageExportPreviewResultCache(beforeCacheKey, beforeEntry);
-      }
       if (TPP.imageExportPreviewToken !== token) return;
       if (!afterEntry.blob) {
         afterEntry.blob = await TPP.exportBlobForCanvas(afterCanvas, exportOptions);
