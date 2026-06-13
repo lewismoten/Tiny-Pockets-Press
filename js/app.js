@@ -894,8 +894,12 @@ TPP.applyImageExportPreviewSplit = function (split) {
   if (!compare) return;
   const normalized = Math.max(0, Math.min(100, Number(split) || 50));
   TPP.imageExportPreviewSplit = normalized;
+  const before = compare.querySelector(".image-export-compare-before");
   const after = compare.querySelector(".image-export-compare-after");
   const divider = compare.querySelector(".image-export-compare-divider");
+  if (before) {
+    before.style.clipPath = "inset(0 " + (100 - normalized) + "% 0 0)";
+  }
   if (after) after.style.clipPath = "inset(0 0 0 " + normalized + "%)";
   if (divider) divider.style.left = normalized + "%";
 };
@@ -1074,12 +1078,14 @@ TPP.renderImageExportPreview = async function () {
       '<div class="image-export-compare" style="' +
       compareStageStyle() +
       '">' +
-      '<img draggable="false" src="' +
+      '<img draggable="false" class="image-export-compare-before" src="' +
       TPP.esc(beforeSrc || "") +
       '" alt="Original preview">' +
-      '<img draggable="false" class="image-export-compare-after" src="' +
-      TPP.esc(afterSrc || beforeSrc || "") +
-      '" alt="Exported preview">' +
+      (afterSrc
+        ? '<img draggable="false" class="image-export-compare-after" src="' +
+          TPP.esc(afterSrc) +
+          '" alt="Exported preview">'
+        : '<div class="image-export-compare-after image-export-compare-after-empty" aria-hidden="true"></div>') +
       '<div class="image-export-compare-divider"></div>' +
       '<div class="image-export-compare-label before">Before<span class="image-export-compare-size">' +
       TPP.esc(beforeSize || "Preview") +
@@ -1096,9 +1102,9 @@ TPP.renderImageExportPreview = async function () {
     compare.className = "image-export-compare image-export-compare-live";
     compare.style.cssText = compareStageStyle();
     const beforePane = document.createElement("div");
-    beforePane.className = "image-export-compare-pane image-export-compare-pane-before";
+    beforePane.className = "image-export-compare-pane image-export-compare-before";
     const afterPane = document.createElement("div");
-    afterPane.className = "image-export-compare-pane image-export-compare-after";
+    afterPane.className = "image-export-compare-pane image-export-compare-after image-export-compare-after-empty";
     const divider = document.createElement("div");
     divider.className = "image-export-compare-divider";
     const beforeLabel = document.createElement("div");
@@ -1127,7 +1133,6 @@ TPP.renderImageExportPreview = async function () {
       return shell;
     };
     beforePane.appendChild(createLivePage());
-    afterPane.appendChild(createLivePage());
     compare.appendChild(beforePane);
     compare.appendChild(afterPane);
     compare.appendChild(divider);
@@ -1144,7 +1149,7 @@ TPP.renderImageExportPreview = async function () {
     }
     stage.innerHTML = compareStageMarkup(
       beforeSrc,
-      beforeSrc,
+      "",
       TPP.imageExportPreviewSizeLabel(beforeEntry),
       "Rendering...",
     );
