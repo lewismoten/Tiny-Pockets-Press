@@ -559,8 +559,8 @@ export function init(TPP) {
     return bytes;
   };
   TPP.buildImageExportSeqScreen = buildImageExportSeqScreen;
-  const paletteCellCandidates = function (pixels, palette, limit) {
-    const scored = palette.map(function (swatch, index) {
+  const paletteCellScores = function (pixels, palette) {
+    return palette.map(function (swatch, index) {
       let total = 0;
       for (let i = 0; i < pixels.length; i += 3) {
         const dr = pixels[i] - swatch[0];
@@ -569,10 +569,13 @@ export function init(TPP) {
         total += dr * dr + dg * dg + db * db;
       }
       return { index: index, total: total };
-    });
-    scored.sort(function (a, b) {
-      return a.total - b.total;
-    });
+    })
+      .sort(function (a, b) {
+        return a.total - b.total;
+      });
+  };
+  const paletteCellCandidates = function (pixels, palette, limit) {
+    const scored = paletteCellScores(pixels, palette);
     return scored
       .slice(0, Math.max(1, Math.min(Number(limit) || 1, scored.length)))
       .map(function (entry) {
@@ -772,52 +775,32 @@ export function init(TPP) {
   ) {
     const config = options || {};
     const cellSize = 8;
-    const colorLimit = Math.max(
-      2,
-      Math.min(Number(config.colorLimit) || 6, palette.length),
-    );
     const bgCandidates = Array.isArray(config.backgroundCandidates) &&
       config.backgroundCandidates.length
       ? config.backgroundCandidates
       : palette.map(function (_swatch, index) {
         return index;
       });
-    let bestBgIndex = bgCandidates[0] || 0;
-    let bestError = Infinity;
-    let processedCells = 0;
-    for (let candidateIndex = 0; candidateIndex < bgCandidates.length; candidateIndex += 1) {
-      const bgIndex = bgCandidates[candidateIndex];
-      let totalError = 0;
-      for (let cellY = 0; cellY < height; cellY += cellSize) {
-        for (let cellX = 0; cellX < width; cellX += cellSize) {
-          const blockWidth = Math.min(cellSize, width - cellX);
-          const blockHeight = Math.min(cellSize, height - cellY);
-          const pixels = extractCellPixels(
-            data,
-            width,
-            cellX,
-            cellY,
-            blockWidth,
-            blockHeight,
-          );
-          const candidates = paletteCellCandidates(pixels, palette, colorLimit);
-          const fit = bestTwoColorCellFit(
-            pixels,
-            blockWidth,
-            blockHeight,
-            palette,
-            candidates,
-            { backgroundIndex: bgIndex },
-          );
-          totalError += fit.error;
+    const totals = new Float64Array(palette.length);
+    for (let cellY = 0; cellY < height; cellY += cellSize) {
+      for (let cellX = 0; cellX < width; cellX += cellSize) {
+        const blockWidth = Math.min(cellSize, width - cellX);
+        const blockHeight = Math.min(cellSize, height - cellY);
+        const pixels = extractCellPixels(
+          data,
+          width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+        );
+        const scored = paletteCellScores(pixels, palette);
+        for (let i = 0; i < scored.length; i += 1) {
+          totals[scored[i].index] += scored[i].total;
         }
       }
-      if (totalError < bestError) {
-        bestError = totalError;
-        bestBgIndex = bgIndex;
-      }
     }
-    return bestBgIndex;
+    return strongestBackgroundIndex(totals, bgCandidates);
   };
   const chooseGlobalBackgroundIndexAsync = async function (
     data,
@@ -828,10 +811,6 @@ export function init(TPP) {
   ) {
     const config = options || {};
     const cellSize = 8;
-    const colorLimit = Math.max(
-      2,
-      Math.min(Number(config.colorLimit) || 6, palette.length),
-    );
     const bgCandidates = Array.isArray(config.backgroundCandidates) &&
       config.backgroundCandidates.length
       ? config.backgroundCandidates
@@ -839,68 +818,90 @@ export function init(TPP) {
         return index;
       });
     const maybeYield = makeUiYieldController(config.yieldBudgetMs);
-    const totalCells =
-      bgCandidates.length *
-      Math.ceil(height / cellSize) *
-      Math.ceil(width / cellSize);
-    let bestBgIndex = bgCandidates[0] || 0;
-    let bestError = Infinity;
+    const totalCells = Math.ceil(height / cellSize) * Math.ceil(width / cellSize);
+    const totals = new Float64Array(palette.length);
+    const strongCells = [];
+    let currentWinner = bgCandidates[0] || 0;
     let processedCells = 0;
-    for (let candidateIndex = 0; candidateIndex < bgCandidates.length; candidateIndex += 1) {
-      const bgIndex = bgCandidates[candidateIndex];
-      if (config.previewData && palette[bgIndex]) {
-        fillPreviewWithColor(config.previewData, palette[bgIndex]);
-      }
-      let totalError = 0;
-      for (let cellY = 0; cellY < height; cellY += cellSize) {
-        for (let cellX = 0; cellX < width; cellX += cellSize) {
-          const blockWidth = Math.min(cellSize, width - cellX);
-          const blockHeight = Math.min(cellSize, height - cellY);
-          const pixels = extractCellPixels(
-            data,
-            width,
-            cellX,
-            cellY,
-            blockWidth,
-            blockHeight,
-          );
-          const candidates = paletteCellCandidates(pixels, palette, colorLimit);
-          const fit = bestTwoColorCellFit(
-            pixels,
-            blockWidth,
-            blockHeight,
-            palette,
-            candidates,
-            { backgroundIndex: bgIndex },
-          );
-          totalError += fit.error;
-          processedCells += 1;
-          reportProgress(config, {
-            phase: "Background",
-            completed: processedCells,
-            total: totalCells,
-            cellX: cellX,
-            cellY: cellY,
-            cellWidth: blockWidth,
-            cellHeight: blockHeight,
-          });
-          if (processedCells % 4 === 0) await yieldToUi();
-          await maybeYield();
-        }
-      }
-      if (totalError < bestError) {
-        bestError = totalError;
-        bestBgIndex = bgIndex;
-      }
-      reportProgress(config, {
-        phase: "Background",
-        completed: Math.min(totalCells, processedCells),
-        total: totalCells,
-        backgroundIndex: bestBgIndex,
-      });
-      await yieldToUi();
+    if (config.previewData && palette[currentWinner]) {
+      fillPreviewWithColor(config.previewData, palette[currentWinner]);
     }
-    return bestBgIndex;
+    for (let cellY = 0; cellY < height; cellY += cellSize) {
+      for (let cellX = 0; cellX < width; cellX += cellSize) {
+        const blockWidth = Math.min(cellSize, width - cellX);
+        const blockHeight = Math.min(cellSize, height - cellY);
+        const pixels = extractCellPixels(
+          data,
+          width,
+          cellX,
+          cellY,
+          blockWidth,
+          blockHeight,
+        );
+        const scored = paletteCellScores(pixels, palette);
+        for (let i = 0; i < scored.length; i += 1) {
+          totals[scored[i].index] += scored[i].total;
+        }
+        const best = scored[0];
+        const second = scored[1];
+        const nextWinner = strongestBackgroundIndex(totals, bgCandidates);
+        const strongLean = second &&
+          second.total > 0 &&
+          best.total / second.total < 0.7;
+        if (strongLean) {
+          strongCells.push({
+            x: cellX,
+            y: cellY,
+            width: blockWidth,
+            height: blockHeight,
+            color: palette[best.index] || palette[nextWinner] || palette[0],
+          });
+        }
+        if (config.previewData) {
+          if (nextWinner !== currentWinner) {
+            currentWinner = nextWinner;
+            fillPreviewWithColor(config.previewData, palette[currentWinner] || palette[0]);
+            for (let i = 0; i < strongCells.length; i += 1) {
+              const cell = strongCells[i];
+              paintSolidCell(
+                config.previewData,
+                width,
+                cell.x,
+                cell.y,
+                cell.width,
+                cell.height,
+                cell.color,
+              );
+            }
+          } else if (strongLean) {
+            const cell = strongCells[strongCells.length - 1];
+            paintSolidCell(
+              config.previewData,
+              width,
+              cell.x,
+              cell.y,
+              cell.width,
+              cell.height,
+              cell.color,
+            );
+          }
+        }
+        processedCells += 1;
+        reportProgress(config, {
+          phase: "Background",
+          completed: processedCells,
+          total: totalCells,
+          backgroundIndex: currentWinner,
+          cellX: cellX,
+          cellY: cellY,
+          cellWidth: blockWidth,
+          cellHeight: blockHeight,
+        });
+        if (processedCells % 4 === 0) await yieldToUi();
+        await maybeYield();
+      }
+    }
+    return currentWinner;
   };
   const bestTwoColorCellFit = function (
     pixels,
@@ -1026,6 +1027,43 @@ export function init(TPP) {
       data[offset + 1] = color[1];
       data[offset + 2] = color[2];
     }
+  };
+  const paintSolidCell = function (
+    data,
+    width,
+    cellX,
+    cellY,
+    blockWidth,
+    blockHeight,
+    color,
+  ) {
+    if (!data || !color) return;
+    for (let y = 0; y < blockHeight; y += 1) {
+      for (let x = 0; x < blockWidth; x += 1) {
+        const offset = ((cellY + y) * width + (cellX + x)) * 4;
+        data[offset] = color[0];
+        data[offset + 1] = color[1];
+        data[offset + 2] = color[2];
+      }
+    }
+  };
+  const strongestBackgroundIndex = function (totals, candidates) {
+    const list = Array.isArray(candidates) && candidates.length
+      ? candidates
+      : totals.map(function (_value, index) {
+        return index;
+      });
+    let bestIndex = list[0] || 0;
+    let bestScore = Number.isFinite(totals[bestIndex]) ? totals[bestIndex] : Infinity;
+    for (let i = 1; i < list.length; i += 1) {
+      const index = list[i];
+      const score = Number.isFinite(totals[index]) ? totals[index] : Infinity;
+      if (score < bestScore) {
+        bestScore = score;
+        bestIndex = index;
+      }
+    }
+    return bestIndex;
   };
   const applyPalettePetscii = function (
     data,
