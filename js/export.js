@@ -4623,13 +4623,13 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(1792, 'B=ASC(A$)');
     pushLine(1796, 'POKE 12288+I,B');
     pushLine(1797, 'LD=LD+1:GOSUB 2100');
-    pushLine(1798, 'IF SK=1 THEN 1885');
+    pushLine(1798, 'IF SK=1 THEN 1830');
     pushLine(1799, 'NEXT');
     pushLine(1800, 'FOR I=0 TO 999:GET#3,A$:IF A$="" THEN B=0:GOTO 1806');
     pushLine(1802, 'B=ASC(A$)');
     pushLine(1806, 'POKE 2048+I,B');
     pushLine(1807, 'LD=LD+1:GOSUB 2100');
-    pushLine(1808, 'IF SK=1 THEN 1885');
+    pushLine(1808, 'IF SK=1 THEN 1830');
     pushLine(1809, 'NEXT');
     pushLine(1810, 'FOR I=0 TO 499:GET#3,A$:IF A$="" THEN B=0:GOTO 1816');
     pushLine(1812, 'B=ASC(A$)');
@@ -4639,10 +4639,10 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(1824, 'POKE 49152+I*2,HI');
     pushLine(1826, 'POKE 49152+I*2+1,LO');
     pushLine(1827, 'LD=LD+1:GOSUB 2100');
-    pushLine(1828, 'IF SK=1 THEN 1885');
+    pushLine(1828, 'IF SK=1 THEN 1830');
     pushLine(1829, 'NEXT');
-    pushLine(1885, 'CLOSE 3:RETURN');
     pushLine(1830, 'CLOSE 3');
+    pushLine(1832, 'IF SK=1 THEN RETURN');
     pushLine(1840, 'POKE 56576,(PEEK(56576) AND 252)+3');
     pushLine(1850, 'FOR I=0 TO 999:POKE 55296+I,PEEK(49152+I):NEXT');
     pushLine(1860, 'POKE 53280,BG:POKE 53281,BG');
