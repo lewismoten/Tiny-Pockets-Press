@@ -4609,9 +4609,9 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(1700, 'CV=0:G$="COV":GOSUB 500');
     pushLine(1710, 'IF LN=0 OR TP=65535 THEN RETURN');
     pushLine(1720, 'SB=PEEK(56576):SV=PEEK(53272)');
-    pushLine(1730, 'STP=LN/20');
-    pushLine(1732, 'IF STP<1 THEN STP=1');
-    pushLine(1740, 'LD=0:BP=0:NX=STP:SK=0:GOSUB 1900');
+    pushLine(1730, 'SP=LN/20');
+    pushLine(1732, 'IF SP<1 THEN SP=1');
+    pushLine(1740, 'LD=0:BP=0:NX=SP:SK=0:GOSUB 1900');
     pushLine(1750, 'OPEN 3,8,3,"BOOK.DAT,S,R"');
     pushLine(1760, 'IF TP<1 THEN 1780');
     pushLine(1770, 'FOR I=1 TO TP:GET#3,A$:NEXT');
@@ -4662,7 +4662,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(2110, 'SK=1:RETURN');
     pushLine(2120, 'IF LD<NX THEN RETURN');
     pushLine(2130, 'BP=BP+1:IF BP>20 THEN BP=20');
-    pushLine(2140, 'NX=NX+STP:GOSUB 1900:RETURN');
+    pushLine(2140, 'NX=NX+SP:GOSUB 1900:RETURN');
   }
   pushLine(900, 'POKE 53280,2:POKE 53281,2:POKE 646,7:PRINT');
   pushLine(910, 'PRINT "QUIT TO BASIC (Y/N)?"');
