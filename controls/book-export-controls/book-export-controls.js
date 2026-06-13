@@ -38,6 +38,20 @@ export async function init(TPP) {
         TPP.exportEpub();
         return true;
       }
+      const d64 = event.target.closest("#exportD64");
+      if (d64) {
+        event.preventDefault();
+        TPP.exportImagesD64({
+          dpi: 300,
+          targetWidth: 320,
+          targetHeight: 200,
+          format: "d64",
+          colorDepth: "indexed",
+          palette: "c64",
+          dithering: "c64-custom-charset",
+        });
+        return true;
+      }
       const images = event.target.closest("#exportImagesZip");
       if (images) {
         event.preventDefault();

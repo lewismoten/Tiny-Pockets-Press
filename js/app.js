@@ -326,7 +326,7 @@ TPP.initializeRuntimeUi = function () {
   if (TPP.renderColorPalettes) TPP.renderColorPalettes();
 };
 
-TPP.openImageExportDialog = async function () {
+TPP.openImageExportDialog = async function (options) {
   if (
     typeof TPP.ensureControlModule === "function" &&
     !document.getElementById("imageExportDialog")
@@ -378,6 +378,7 @@ TPP.openImageExportDialog = async function () {
   )
     return;
   const ui = TPP.imageExportUi();
+  const config = options || {};
   const presetValues = ["72", "96", "150", "200", "300", "600", "320x200"];
   const dpiPreset =
     ui.dpiPreset === "320x200" ||
@@ -404,6 +405,7 @@ TPP.openImageExportDialog = async function () {
     colorDepth.value === "indexed" && !["png", "gif"].includes(ui.format)
       ? "png"
       : ui.format || "png";
+  if (config.format) format.value = String(config.format);
   quality.value = Math.max(1, Math.min(100, Number(ui.quality) || 92));
   palette.value =
     ui.palette || (ui.colorDepth === "websafe" ? "websafe" : "websafe");

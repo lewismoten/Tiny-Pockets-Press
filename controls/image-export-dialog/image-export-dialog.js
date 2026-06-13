@@ -1265,12 +1265,7 @@ export async function init(TPP) {
         TPP.exportAnimatedGif(exportOptions);
       } else if (button.dataset.action === "export-mp4") {
         TPP.exportMp4(exportOptions);
-      } else if (button.dataset.action === "export-d64") {
-        TPP.exportImagesD64(exportOptions);
       } else {
-        if (format === "d64") {
-          exportOptions = Object.assign({}, exportOptions, { format: "png" });
-        }
         TPP.exportImagesZip(exportOptions);
       }
     }

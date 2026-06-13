@@ -71,6 +71,7 @@ TPP.bindTopLevelEventRouters = function () {
       target.closest("#exportInteriorPdf") ||
       target.closest("#exportReadablePdf") ||
       target.closest("#exportEpub") ||
+      target.closest("#exportD64") ||
       target.closest("#exportImagesZip") ||
       target.closest("#openCoverView") ||
       target.closest("#exportCoverPdf") ||
