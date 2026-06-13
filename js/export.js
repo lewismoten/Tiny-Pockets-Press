@@ -4236,6 +4236,22 @@ TPP.buildD64PromptSpriteProgramBytes = function () {
   program.set(spriteBytes, 2);
   return program;
 };
+TPP.d64DatClassInfo = function (classId) {
+  const catalog = {
+    0: { size: 1, name: "1.DAT" },
+    1: { size: 2, name: "2.DAT" },
+    2: { size: 4, name: "4.DAT" },
+    3: { size: 8, name: "8.DAT" },
+    4: { size: 16, name: "16.DAT" },
+    5: { size: 32, name: "32.DAT" },
+    6: { size: 64, name: "64.DAT" },
+    7: { size: 128, name: "128.DAT" },
+    8: { size: 256, name: "256.DAT" },
+    9: { size: 512, name: "512.DAT" },
+    10: { size: 1024, name: "1024.DAT" },
+  };
+  return catalog[classId] || null;
+};
 TPP.buildD64CoverRecordBytes = function (coverLayout) {
   if (!coverLayout || !coverLayout.bitmap || !coverLayout.screen) return null;
   const layout = TPP.d64BitmapCoverLayout();
@@ -4527,11 +4543,13 @@ TPP.exportD64IndexAndData = function (book, options) {
     pageCount: options && options.pageCount,
     hasToc: tocRecords.length > 0,
   });
+  const config = options || {};
   const sections = [];
   const pushSection = function (tag, bytes) {
     if (!bytes.length) return;
     sections.push({
       tag: String(tag || "").slice(0, 3).toUpperCase(),
+      classId: 4,
       bytes: bytes.slice(),
     });
   };
@@ -4560,25 +4578,68 @@ TPP.exportD64IndexAndData = function (book, options) {
     tocBytes.push(record.pointer & 0xff, (record.pointer >> 8) & 0xff);
   });
   pushSection("TOC", tocBytes);
+  if (config.coverBytes && config.coverBytes.length) {
+    sections.unshift({
+      tag: "COV",
+      classId: 9,
+      bytes: config.coverBytes.slice(),
+    });
+  }
+  if (config.promptBytes && config.promptBytes.length) {
+    sections.push({
+      tag: "ANK",
+      classId: 6,
+      bytes: config.promptBytes.slice(),
+    });
+  }
   const idxBytes = [];
-  const datBytes = [];
+  const datBuckets = {};
+  const ensureBucket = function (classId) {
+    if (!datBuckets[classId]) datBuckets[classId] = [];
+    return datBuckets[classId];
+  };
   sections.forEach(function (section) {
-    const pointer = datBytes.length;
-    datBytes.push.apply(datBytes, section.bytes);
+    const info = TPP.d64DatClassInfo(section.classId);
+    if (!info) return;
+    const bucket = ensureBucket(section.classId);
+    const recordSize = info.size;
+    const startRecord = Math.floor(bucket.length / recordSize);
+    const paddedLength = Math.ceil(section.bytes.length / recordSize) * recordSize;
+    const recordCount = paddedLength / recordSize;
+    if (recordCount < 1 || recordCount > 256) {
+      throw new Error("D64 section " + section.tag + " exceeds record capacity for " + info.name);
+    }
+    for (let i = 0; i < paddedLength; i += 1) {
+      bucket.push(i < section.bytes.length ? section.bytes[i] : 0x00);
+    }
     idxBytes.push(
       section.tag.charCodeAt(0) & 0xff,
       section.tag.charCodeAt(1) & 0xff,
       section.tag.charCodeAt(2) & 0xff,
-      pointer & 0xff,
-      (pointer >> 8) & 0xff,
-      section.bytes.length & 0xff,
-      (section.bytes.length >> 8) & 0xff,
+      section.classId & 0xff,
+      startRecord & 0xff,
+      (startRecord >> 8) & 0xff,
+      recordCount === 256 ? 0x00 : recordCount & 0xff,
     );
   });
+  const dataFiles = Object.keys(datBuckets)
+    .map(function (classIdText) {
+      const classId = Number(classIdText);
+      const info = TPP.d64DatClassInfo(classId);
+      return {
+        name: info.name,
+        classId: classId,
+        data: new Uint8Array(datBuckets[classId]),
+      };
+    })
+    .sort(function (a, b) {
+      return a.classId - b.classId;
+    });
   return {
     hasToc: tocRecords.length > 0,
+    hasCover: Boolean(config.coverBytes && config.coverBytes.length),
     indexBytes: new Uint8Array(idxBytes),
-    dataBytes: new Uint8Array(datBytes),
+    dataFiles: dataFiles,
     tocRecords: tocRecords,
     homeRecords: homeRecords,
   };
@@ -4605,8 +4666,16 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     dstHi: configBase + 45,
     restoreFd: configBase + 46,
     restoreFe: configBase + 47,
+    coverRecordLo: configBase + 48,
+    coverRecordHi: configBase + 49,
+    promptRecordLo: configBase + 50,
+    promptRecordHi: configBase + 51,
+    promptRecordCount: configBase + 52,
+    skipLo: configBase + 53,
+    skipHi: configBase + 54,
   };
-  const promptFileName = "0:ANYKEY.SPR,P,R";
+  const promptFileName = "0:64.DAT,S,R";
+  const coverFileName = "0:512.DAT,S,R";
   const KERNAL = {
     setnam: 0xffbd,
     setlfs: 0xffba,
@@ -4620,6 +4689,9 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     getin: 0xffe4,
   };
   const promptFileNameBytes = Array.from(promptFileName, function (char) {
+    return char.charCodeAt(0) & 0xff;
+  });
+  const coverFileNameBytes = Array.from(coverFileName, function (char) {
     return char.charCodeAt(0) & 0xff;
   });
   const code = [];
@@ -4679,11 +4751,17 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   ldaAbs(0x00fe);
   staAbs(vars.restoreFe);
   jsrLabel("clearKeys");
+  jsrLabel("setCoverFilename");
   jsrLabel("openFile");
   bcc("openOk");
   jsrLabel("cleanup");
   rts();
   label("openOk");
+  jsrLabel("skipCoverRecords");
+  bcc("coverSkipOk");
+  jsrLabel("cleanup");
+  rts();
+  label("coverSkipOk");
   ldaImm(coverLayout.screenAddress & 0xff);
   staAbs(vars.ptrLo);
   ldaImm((coverLayout.screenAddress >> 8) & 0xff);
@@ -4769,6 +4847,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(vars.status);
   rts();
   label("showPromptPhase");
+  ldaAbs(vars.promptRecordCount);
+  beq("coverReady");
   jsrLabel("setPromptFilename");
   jsrLabel("loadPromptFile");
   bcc("promptOpenOk");
@@ -4975,23 +5055,28 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   rts();
 
   label("loadPromptFile");
-  ldaAbs(vars.filenameLength);
-  ldxImm(vars.filename & 0xff);
-  ldyImm((vars.filename >> 8) & 0xff);
-  jsrAbs(KERNAL.setnam);
-  ldaImm(0x00);
-  ldxImm(0x08);
-  ldyImm(0x00);
-  jsrAbs(KERNAL.setlfs);
-  ldaImm(0x00);
-  ldxImm(coverLayout.spriteAddress & 0xff);
-  ldyImm((coverLayout.spriteAddress >> 8) & 0xff);
-  jsrAbs(KERNAL.load);
-  bcc("promptLoadOk");
-  staAbs(vars.status);
+  jsrLabel("setPromptFilename");
+  jsrLabel("openFile");
+  bcc("promptFileOpenOk");
   sec();
   rts();
-  label("promptLoadOk");
+  label("promptFileOpenOk");
+  jsrLabel("skipPromptRecords");
+  ldaImm(coverLayout.spriteAddress & 0xff);
+  staAbs(vars.ptrLo);
+  ldaImm((coverLayout.spriteAddress >> 8) & 0xff);
+  staAbs(vars.ptrHi);
+  ldaImm(0x00);
+  staAbs(vars.lenLo);
+  ldaAbs(vars.promptRecordCount);
+  staAbs(vars.lenHi);
+  jsrLabel("streamSegment");
+  bcc("promptReadOk");
+  jsrLabel("cleanup");
+  sec();
+  rts();
+  label("promptReadOk");
+  jsrLabel("cleanup");
   clc();
   rts();
 
@@ -5021,6 +5106,104 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     ldaImm(value);
     staAbs(vars.filename + index);
   });
+  rts();
+
+  label("setCoverFilename");
+  ldaImm(coverFileName.length);
+  staAbs(vars.filenameLength);
+  coverFileNameBytes.forEach(function (value, index) {
+    ldaImm(value);
+    staAbs(vars.filename + index);
+  });
+  rts();
+
+  label("skipCoverRecords");
+  ldaAbs(vars.coverRecordLo);
+  staAbs(vars.skipLo);
+  ldaAbs(vars.coverRecordHi);
+  staAbs(vars.skipHi);
+  label("skipCoverLoop");
+  ldaAbs(vars.skipLo);
+  oraImm(0x00);
+  bne("skipCoverRecord");
+  ldaAbs(vars.skipHi);
+  beq("skipCoverDone");
+  label("skipCoverRecord");
+  ldaImm(0x00);
+  staAbs(vars.lenLo);
+  ldaImm(0x02);
+  staAbs(vars.lenHi);
+  jsrLabel("discardSegment");
+  bcc("skipCoverStepOk");
+  sec();
+  rts();
+  label("skipCoverStepOk");
+  sec();
+  ldaAbs(vars.skipLo);
+  sbcImm(0x01);
+  staAbs(vars.skipLo);
+  ldaAbs(vars.skipHi);
+  sbcImm(0x00);
+  staAbs(vars.skipHi);
+  jmpLabel("skipCoverLoop");
+  label("skipCoverDone");
+  rts();
+
+  label("skipPromptRecords");
+  ldaAbs(vars.promptRecordLo);
+  staAbs(vars.skipLo);
+  ldaAbs(vars.promptRecordHi);
+  staAbs(vars.skipHi);
+  label("skipPromptLoop");
+  ldaAbs(vars.skipLo);
+  oraImm(0x00);
+  bne("skipPromptRecord");
+  ldaAbs(vars.skipHi);
+  beq("skipPromptDone");
+  label("skipPromptRecord");
+  ldaImm(0x40);
+  staAbs(vars.lenLo);
+  ldaImm(0x00);
+  staAbs(vars.lenHi);
+  jsrLabel("discardSegment");
+  bcc("skipPromptStepOk");
+  sec();
+  rts();
+  label("skipPromptStepOk");
+  sec();
+  ldaAbs(vars.skipLo);
+  sbcImm(0x01);
+  staAbs(vars.skipLo);
+  ldaAbs(vars.skipHi);
+  sbcImm(0x00);
+  staAbs(vars.skipHi);
+  jmpLabel("skipPromptLoop");
+  label("skipPromptDone");
+  rts();
+
+  label("discardSegment");
+  label("discardLoop");
+  ldaAbs(vars.lenLo);
+  oraImm(0x00);
+  bne("discardByte");
+  ldaAbs(vars.lenHi);
+  beq("discardDone");
+  label("discardByte");
+  jsrLabel("readByte");
+  bcc("discardHaveByte");
+  sec();
+  rts();
+  label("discardHaveByte");
+  sec();
+  ldaAbs(vars.lenLo);
+  sbcImm(0x01);
+  staAbs(vars.lenLo);
+  ldaAbs(vars.lenHi);
+  sbcImm(0x00);
+  staAbs(vars.lenHi);
+  jmpLabel("discardLoop");
+  label("discardDone");
+  clc();
   rts();
 
   label("hideSprites");
@@ -5137,6 +5320,9 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     configBase: configBase,
     filenameLengthAddress: vars.filenameLength,
     statusAddress: vars.status,
+    coverRecordAddress: vars.coverRecordLo,
+    promptRecordAddress: vars.promptRecordLo,
+    promptRecordCountAddress: vars.promptRecordCount,
     bytes: new Uint8Array(code),
   };
 };
@@ -5296,7 +5482,9 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24)');
   if (hasCover) {
     pushLine(8, 'GOSUB 3000');
-    pushLine(10, 'F$="0:COVER.IMG,S,R":GOSUB 3300:GOSUB 3330:GOSUB 3400');
+    pushLine(10, 'G$="COV":GOSUB 500:IF LN=0 THEN 20');
+    pushLine(11, 'CR=TP:CD=DT:G$="ANK":GOSUB 500:AR=TP:AC=LN');
+    pushLine(12, 'DT=CD:GOSUB 620:F$=DF$:GOSUB 3300:GOSUB 3330:GOSUB 3400');
   }
   pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:POKE 53265,S1:POKE 53270,S2:POKE 53269,SE:POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147):CV=0');
   pushLine(25, 'POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147)');
@@ -5322,11 +5510,14 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(200, 'IF HL=1 THEN RETURN');
   pushLine(210, 'HL=1:HC=0:G$="HOM":GOSUB 500');
   pushLine(220, 'IF LN=0 THEN RETURN');
-  pushLine(230, 'OPEN 3,8,3,"BOOK.DAT,S,R"');
-  pushLine(240, 'IF TP<1 THEN 260');
-  pushLine(250, 'FOR I=1 TO TP:GET#3,A$:NEXT');
-  pushLine(260, 'RD=0');
-  pushLine(270, 'IF RD>=LN OR HC>=24 THEN CLOSE 3:RETURN');
+  pushLine(225, 'GOSUB 620');
+  pushLine(230, 'OPEN 3,8,3,DF$');
+  pushLine(232, 'RC=LN:IF RC<>0 THEN 236');
+  pushLine(234, 'RC=256');
+  pushLine(236, 'SK=TP*RS:IF SK<1 THEN 260');
+  pushLine(250, 'FOR I=1 TO SK:GET#3,A$:NEXT');
+  pushLine(260, 'RD=0:BY=RC*RS');
+  pushLine(270, 'IF RD>=BY OR HC>=24 THEN CLOSE 3:RETURN');
   pushLine(280, 'GET#3,A$:IF ST<>0 THEN CLOSE 3:RETURN');
   pushLine(285, 'IF A$="" THEN CB=0:GOTO 289');
   pushLine(287, 'CB=ASC(A$)');
@@ -5355,6 +5546,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(470, 'IF A$="P" THEN IF PG>0 THEN PG=PG-1:GOTO 430');
   pushLine(480, 'GOTO 440');
   pushLine(500, 'TP=0:LN=0');
+  pushLine(505, 'DT=0');
   pushLine(510, 'OPEN 2,8,2,"BOOK.IDX,S,R"');
   pushLine(520, 'GET#2,A$:IF ST<>0 THEN CLOSE 2:RETURN');
   pushLine(530, 'K$=A$');
@@ -5362,25 +5554,41 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(550, 'K$=K$+A$');
   pushLine(560, 'GET#2,A$:IF ST<>0 THEN CLOSE 2:RETURN');
   pushLine(570, 'K$=K$+A$');
-  pushLine(580, 'GET#2,A$:IF A$="" THEN P1=0:GOTO 584');
-  pushLine(582, 'P1=ASC(A$)');
-  pushLine(584, 'GET#2,A$:IF A$="" THEN 588');
-  pushLine(586, 'P1=P1+256*ASC(A$)');
-  pushLine(588, 'GET#2,A$:IF A$="" THEN L1=0:GOTO 592');
-  pushLine(590, 'L1=ASC(A$)');
-  pushLine(592, 'GET#2,A$:IF A$="" THEN 596');
-  pushLine(594, 'L1=L1+256*ASC(A$)');
-  pushLine(596, 'IF K$=G$ THEN TP=P1:LN=L1:CLOSE 2:RETURN');
+  pushLine(580, 'GET#2,A$:IF A$="" THEN D1=0:GOTO 584');
+  pushLine(582, 'D1=ASC(A$)');
+  pushLine(584, 'GET#2,A$:IF A$="" THEN P1=0:GOTO 588');
+  pushLine(586, 'P1=ASC(A$)');
+  pushLine(588, 'GET#2,A$:IF A$="" THEN 592');
+  pushLine(590, 'P1=P1+256*ASC(A$)');
+  pushLine(592, 'GET#2,A$:IF A$="" THEN L1=0:GOTO 596');
+  pushLine(594, 'L1=ASC(A$)');
+  pushLine(596, 'IF K$=G$ THEN DT=D1:TP=P1:LN=L1:CLOSE 2:RETURN');
   pushLine(598, 'GOTO 520');
+  pushLine(620, 'RS=16:DF$="16.DAT"');
+  pushLine(622, 'IF DT=0 THEN RS=1:DF$="1.DAT":RETURN');
+  pushLine(624, 'IF DT=1 THEN RS=2:DF$="2.DAT":RETURN');
+  pushLine(626, 'IF DT=2 THEN RS=4:DF$="4.DAT":RETURN');
+  pushLine(628, 'IF DT=3 THEN RS=8:DF$="8.DAT":RETURN');
+  pushLine(630, 'IF DT=4 THEN RS=16:DF$="16.DAT":RETURN');
+  pushLine(632, 'IF DT=5 THEN RS=32:DF$="32.DAT":RETURN');
+  pushLine(634, 'IF DT=6 THEN RS=64:DF$="64.DAT":RETURN');
+  pushLine(636, 'IF DT=7 THEN RS=128:DF$="128.DAT":RETURN');
+  pushLine(638, 'IF DT=8 THEN RS=256:DF$="256.DAT":RETURN');
+  pushLine(640, 'IF DT=9 THEN RS=512:DF$="512.DAT":RETURN');
+  pushLine(642, 'IF DT=10 THEN RS=1024:DF$="1024.DAT"');
+  pushLine(644, 'RETURN');
   if (hasToc) {
     pushLine(700, 'IF TL=1 THEN RETURN');
     pushLine(710, 'TL=1:TC=0:G$="TOC":GOSUB 500');
     pushLine(720, 'IF LN=0 THEN RETURN');
-    pushLine(730, 'OPEN 3,8,3,"BOOK.DAT,S,R"');
-    pushLine(740, 'IF TP<1 THEN 760');
-    pushLine(750, 'FOR I=1 TO TP:GET#3,A$:NEXT');
-    pushLine(760, 'RD=0');
-    pushLine(770, 'IF RD>=LN OR TC>=200 THEN CLOSE 3:RETURN');
+    pushLine(725, 'GOSUB 620');
+    pushLine(730, 'OPEN 3,8,3,DF$');
+    pushLine(732, 'RC=LN:IF RC<>0 THEN 736');
+    pushLine(734, 'RC=256');
+    pushLine(736, 'SK=TP*RS:IF SK<1 THEN 760');
+    pushLine(750, 'FOR I=1 TO SK:GET#3,A$:NEXT');
+    pushLine(760, 'RD=0:BY=RC*RS');
+    pushLine(770, 'IF RD>=BY OR TC>=200 THEN CLOSE 3:RETURN');
     pushLine(780, 'GET#3,A$:IF ST<>0 THEN CLOSE 3:RETURN');
     pushLine(785, 'IF A$="" THEN LL=0:RD=RD+1:IF LL=0 THEN CLOSE 3:RETURN');
     pushLine(790, 'LL=ASC(A$):RD=RD+1:IF LL=0 THEN CLOSE 3:RETURN');
@@ -5442,6 +5650,9 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3290, 'IF LEN(F$)>32 THEN F$=LEFT$(F$,32)');
     pushLine(3300, 'POKE ' + String(loaderProgram.filenameLengthAddress) + ',LEN(F$)');
     pushLine(3310, 'FOR I=1 TO LEN(F$):POKE ' + String(loaderProgram.filenameLengthAddress + 1) + '+I-1,ASC(MID$(F$,I,1)):NEXT');
+    pushLine(3312, 'POKE ' + String(loaderProgram.coverRecordAddress) + ',CR-256*INT(CR/256):POKE ' + String(loaderProgram.coverRecordAddress + 1) + ',INT(CR/256)');
+    pushLine(3314, 'POKE ' + String(loaderProgram.promptRecordAddress) + ',AR-256*INT(AR/256):POKE ' + String(loaderProgram.promptRecordAddress + 1) + ',INT(AR/256)');
+    pushLine(3316, 'POKE ' + String(loaderProgram.promptRecordCountAddress) + ',AC');
     pushLine(3320, 'RETURN');
     pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$=":" THEN 3350');
     pushLine(3340, 'IF A$="." THEN 3360');
@@ -5543,22 +5754,23 @@ TPP.exportImagesD64 = async function (options) {
     }
     TPP.showProgress(15, "Building Commodore 64 files...");
     const coverRecord = await TPP.exportD64CoverData(settings, options);
+    const promptRecord = coverRecord && coverRecord.bytes && coverRecord.bytes.length
+      ? TPP.buildD64PromptSpriteRecordBytes()
+      : null;
     TPP.throwIfProgressCancelled(progressOp);
     TPP.showProgress(45, "Packing Commodore 64 data...");
     const bookFiles = TPP.exportD64IndexAndData(settings, {
       pageCount: pages.length,
+      coverBytes: coverRecord && coverRecord.bytes ? coverRecord.bytes : null,
+      promptBytes: promptRecord,
     });
-    const promptSpriteBytes =
-      coverRecord && coverRecord.bytes && coverRecord.bytes.length
-        ? TPP.buildD64PromptSpriteProgramBytes()
-        : null;
     const d64Files = [
       {
         name: "BOOK.PRG",
         type: 0x82,
         data: TPP.exportD64BootProgramBytes(settings, pages.length, {
           hasToc: bookFiles.hasToc,
-          hasCover: Boolean(coverRecord && coverRecord.bytes && coverRecord.bytes.length),
+          hasCover: Boolean(bookFiles.hasCover),
         }),
       },
       {
@@ -5566,25 +5778,13 @@ TPP.exportImagesD64 = async function (options) {
         type: 0x81,
         data: bookFiles.indexBytes,
       },
-      {
-        name: "BOOK.DAT",
-        type: 0x81,
-        data: bookFiles.dataBytes,
-      },
-      ...(coverRecord && coverRecord.bytes && coverRecord.bytes.length
-        ? [
-          {
-            name: "COVER.IMG",
-            type: 0x81,
-            data: coverRecord.bytes,
-          },
-          {
-            name: "ANYKEY.SPR",
-            type: 0x82,
-            data: promptSpriteBytes,
-          },
-        ]
-        : []),
+      ...bookFiles.dataFiles.map(function (file) {
+        return {
+          name: file.name,
+          type: 0x81,
+          data: file.data,
+        };
+      }),
       {
         name: "FILE_ID.DIZ",
         type: 0x81,
