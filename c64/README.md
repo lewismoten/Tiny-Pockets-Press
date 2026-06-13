@@ -1,6 +1,6 @@
 # C64 Export Notes
 
-This folder documents the current Commodore 64 export pipeline implemented in [js/export.js](/Users/lewismoten/dev/Tiny%20Pockets%20Press/js/export.js).
+This folder documents the current Commodore 64 export pipeline implemented in [js/export.js](../js/export.js).
 
 The current exporter builds one or more `.d64` disk images containing:
 
@@ -37,14 +37,14 @@ That separation is important because it allows the runtime portion to be redistr
 
 ## Docs In This Folder
 
-- [file-formats.md](/Users/lewismoten/dev/Tiny%20Pockets%20Press/c64/file-formats.md): disk files, index records, DAT classes, bitmap payload structure.
-- [book-reader.md](/Users/lewismoten/dev/Tiny%20Pockets%20Press/c64/book-reader.md): how the C64 reader currently boots and navigates.
-- [memory-map.md](/Users/lewismoten/dev/Tiny%20Pockets%20Press/c64/memory-map.md): addresses used by bitmap mode, sprites, buffers, and loader code.
-- [assembly-programs.md](/Users/lewismoten/dev/Tiny%20Pockets%20Press/c64/assembly-programs.md): ML components and what each one is responsible for.
+- [file-formats.md](file-formats.md): disk files, index records, DAT classes, bitmap payload structure.
+- [book-reader.md](book-reader.md): how the C64 reader currently boots and navigates.
+- [memory-map.md](memory-map.md): addresses used by bitmap mode, sprites, buffers, and loader code.
+- [assembly-programs.md](assembly-programs.md): ML components and what each one is responsible for.
 
 ## Internal Notes
 
-The [notes/](/Users/lewismoten/dev/Tiny%20Pockets%20Press/c64/notes/) folder is a working reference set for future implementation work. It includes:
+The [notes/](notes/) folder is a working reference set for future implementation work. It includes:
 
 - BASIC V2 reminders
 - 6502 instruction notes

@@ -2,6 +2,8 @@
 
 These are the KERNAL routines currently relevant to the reader/loader flow.
 
+For other standard KERNAL jump-table routines that are not currently used by this project, see [kernal-ext.md](kernal-ext.md).
+
 ## File IO Routines
 
 | Routine | Address | Use |
