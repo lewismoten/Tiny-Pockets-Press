@@ -128,12 +128,14 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+  pointer-events: none;
 }
 .image-export-live-preview-shell > .page {
   left: 50% !important;
   top: 50% !important;
   transform: translate(-50%, -50%);
   outline: 0;
+  pointer-events: none;
 }
 .image-export-preview-loading {
   position: absolute;
@@ -210,6 +212,7 @@
   inset: 0;
   overflow: hidden;
   z-index: 0;
+  pointer-events: none;
 }
 .image-export-compare-after {
   position: absolute;

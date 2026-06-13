@@ -1207,6 +1207,8 @@ TPP.renderImageExportPreview = async function () {
       src: cachedBefore.previewSrc,
       blob: cachedBefore.blob || null,
     });
+    if (TPP.imageExportPreviewToken !== token) return;
+    await TPP.nextFrame();
   }
   if (customCharsetPreview) {
     TPP.setImageExportPreviewLoading(stage, true, "Rendering custom charset...");
@@ -1265,6 +1267,8 @@ TPP.renderImageExportPreview = async function () {
         src: beforeEntry.previewSrc,
         blob: beforeEntry.blob,
       });
+      if (TPP.imageExportPreviewToken !== token) return;
+      await TPP.nextFrame();
       TPP.setImageExportPreviewLoading(
         stage,
         true,

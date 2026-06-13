@@ -3202,6 +3202,21 @@ TPP.exportCanvasForDepth = async function (
   }
   if (applyIndexedDither) {
     const ditherLib = await TPP.loadImageExportDither();
+    if (ditherLib && typeof ditherLib.applyPaletteDitherAsync === "function") {
+      await ditherLib.applyPaletteDitherAsync(
+        data,
+        out.width,
+        out.height,
+        indexedPalette,
+        {
+          algorithm: String(config.dithering || "threshold"),
+          threshold: monoThreshold,
+          selectionBias: monoThreshold,
+        },
+      );
+      ctx.putImageData(image, 0, 0);
+      return out;
+    }
     if (ditherLib && typeof ditherLib.applyPaletteDither === "function") {
       ditherLib.applyPaletteDither(data, out.width, out.height, indexedPalette, {
         algorithm: String(config.dithering || "threshold"),
