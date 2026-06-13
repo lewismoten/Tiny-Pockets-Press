@@ -344,12 +344,20 @@ export function init(TPP) {
     if (!data || !width || !height || !Array.isArray(palette) || !palette.length) {
       return;
     }
-    applyPaletteOrderedMatrix(data, width, height, palette, [
-      [0, 8, 2, 10],
-      [12, 4, 14, 6],
-      [3, 11, 1, 9],
-      [15, 7, 13, 5],
-    ], 64);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const offset = (y * width + x) * 4;
+        const swatch = nearestPaletteColor(
+          data[offset],
+          data[offset + 1],
+          data[offset + 2],
+          palette,
+        );
+        data[offset] = swatch[0];
+        data[offset + 1] = swatch[1];
+        data[offset + 2] = swatch[2];
+      }
+    }
   };
   const quadrantMask = function (bits) {
     const mask = new Uint8Array(64);
