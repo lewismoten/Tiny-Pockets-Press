@@ -1073,6 +1073,16 @@ TPP.renderImageExportPreview = async function () {
       "px)"
     );
   };
+  const cloneCanvas = function (canvas) {
+    if (!canvas) return null;
+    const out = document.createElement("canvas");
+    out.width = canvas.width;
+    out.height = canvas.height;
+    const ctx = out.getContext("2d");
+    if (!ctx) return canvas;
+    ctx.drawImage(canvas, 0, 0);
+    return out;
+  };
   const compareStageMarkup = function (beforeSrc, afterSrc, beforeSize, afterSize) {
     return (
       '<div class="image-export-compare" style="' +
@@ -1304,8 +1314,9 @@ TPP.renderImageExportPreview = async function () {
     if (TPP.imageExportPreviewToken !== token) return;
     await TPP.nextFrame();
     if (TPP.imageExportPreviewToken !== token) return;
+    const afterSourceCanvas = cloneCanvas(beforeCanvas) || beforeCanvas;
     const afterCanvas = await TPP.exportCanvasForDepth(
-      beforeCanvas,
+      afterSourceCanvas,
       exportOptions.colorDepth,
       exportOptions.threshold,
       exportOptions.palette,
