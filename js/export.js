@@ -4262,6 +4262,50 @@ TPP.buildD64PromptSpriteRecordBytes = function () {
   });
   return spriteBytes;
 };
+TPP.buildD64WordPromptSpriteRecordBytes = function (word, highlightLetter) {
+  const glyphs = TPP.d64BitmapPromptGlyphs();
+  const text = String(word || "").toUpperCase().slice(0, 4);
+  const focus = String(highlightLetter || "").toUpperCase().charAt(0);
+  const glyphWidth = 5;
+  const glyphHeight = 7;
+  const charSpacing = 1;
+  const totalWidth = text.length * glyphWidth + Math.max(0, text.length - 1) * charSpacing;
+  const offsetX = Math.max(0, Math.floor((24 - totalWidth) / 2));
+  const offsetY = 7;
+  const baseMask = new Uint8Array(24 * 21);
+  const accentMask = new Uint8Array(24 * 21);
+  let cursorX = offsetX;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text.charAt(index);
+    const glyph = glyphs[char] || glyphs[" "];
+    const targetMask = char === focus ? accentMask : baseMask;
+    for (let y = 0; y < glyphHeight; y += 1) {
+      for (let x = 0; x < glyphWidth; x += 1) {
+        if (!glyph[y * glyphWidth + x]) continue;
+        const px = cursorX + x;
+        const py = offsetY + y;
+        if (px < 0 || px >= 24 || py < 0 || py >= 21) continue;
+        targetMask[py * 24 + px] = 1;
+      }
+    }
+    cursorX += glyphWidth + charSpacing;
+  }
+  const buildSprite = function (mask) {
+    const sprite = new Uint8Array(64);
+    for (let row = 0; row < 21; row += 1) {
+      for (let x = 0; x < 24; x += 1) {
+        if (!mask[row * 24 + x]) continue;
+        const byteIndex = row * 3 + (x >> 3);
+        sprite[byteIndex] |= 0x80 >> (x & 7);
+      }
+    }
+    return sprite;
+  };
+  const bytes = new Uint8Array(128);
+  bytes.set(buildSprite(baseMask), 0);
+  bytes.set(buildSprite(accentMask), 64);
+  return bytes;
+};
 TPP.buildD64PromptSpriteProgramBytes = function () {
   const layout = TPP.d64BitmapCoverLayout();
   const spriteBytes = TPP.buildD64PromptSpriteRecordBytes();
@@ -4810,6 +4854,26 @@ TPP.exportD64DiskBundle = function (book, options) {
   const graphicPageCount = pageByteSets.filter(function (pageRecord) {
     return Boolean(pageRecord && pageRecord.bytes && pageRecord.bytes.length);
   }).length;
+  if (graphicPageCount > 0) {
+    sharedSections.push({
+      key: "BAK",
+      tag: "BAK",
+      classId: 8,
+      bytes: TPP.buildD64WordPromptSpriteRecordBytes("BACK", "B"),
+    });
+    sharedSections.push({
+      key: "ESC",
+      tag: "ESC",
+      classId: 8,
+      bytes: TPP.buildD64WordPromptSpriteRecordBytes("HOME", "H"),
+    });
+    sharedSections.push({
+      key: "NXT",
+      tag: "NXT",
+      classId: 8,
+      bytes: TPP.buildD64WordPromptSpriteRecordBytes("NEXT", "N"),
+    });
+  }
   const pageSections = pageByteSets.map(function (pageRecord, index) {
     const key = "PAG" + String(index + 1);
     const isCoverAlias =
@@ -5970,7 +6034,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
       body: Array.isArray(body) ? body.slice() : encodeBasicBody(body),
     });
   };
-  pushLine(5, 'CLR:DIM T$(200),N$(24),V$(24),NC(24),VC(24),PR(' + String(Math.max(1, pageCount)) + '),PL(' + String(Math.max(1, pageCount)) + '),PD(' + String(Math.max(1, pageCount)) + '):RB=28672');
+  pushLine(5, 'CLR:DIM T$(200),N$(24),V$(24),NC(24),VC(24),PR(' + String(Math.max(1, pageCount)) + '),PL(' + String(Math.max(1, pageCount)) + '),PD(' + String(Math.max(1, pageCount)) + '),KR(3),KL(3),KD(3):RB=28672');
   pushLine(8, 'GOSUB 3000');
   if (hasCover) {
     pushLine(10, 'G$="COV":GOSUB 500:IF LN=0 THEN 20');
@@ -6028,15 +6092,25 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   if (hasPages) {
     pushLine(2000, 'IF GL=1 THEN RETURN');
     pushLine(2010, 'GL=1:PC=0:G$="PAG":GOSUB 500');
-    pushLine(2020, 'IF LN=0 THEN RETURN');
+    pushLine(2020, 'IF LN=0 THEN 2080');
     pushLine(2030, 'PC=PC+1:PR(PC)=TP:PL(PC)=LN:PD(PC)=DT');
-    pushLine(2040, 'IF NX=0 OR PC>=' + String(Math.max(1, pageCount)) + ' THEN RETURN');
+    pushLine(2040, 'IF NX=0 OR PC>=' + String(Math.max(1, pageCount)) + ' THEN 2080');
     pushLine(2050, 'RI=NX:GOSUB 650');
-    pushLine(2060, 'IF LN=0 THEN RETURN');
+    pushLine(2060, 'IF LN=0 THEN 2080');
     pushLine(2070, 'GOTO 2030');
+    pushLine(2080, 'G$="BAK":GOSUB 500:KR(1)=TP:KL(1)=LN:KD(1)=DT');
+    pushLine(2082, 'G$="ESC":GOSUB 500:KR(2)=TP:KL(2)=LN:KD(2)=DT');
+    pushLine(2084, 'G$="NXT":GOSUB 500:KR(3)=TP:KL(3)=LN:KD(3)=DT');
+    pushLine(2086, 'RETURN');
     pushLine(2100, 'CR=PR(PI):DT=PD(PI):LN=PL(PI):GOSUB 620:F$=DF$:AR=0:AC=0:GOSUB 3450');
     pushLine(2110, 'IF LR<>0 THEN RETURN');
-    pushLine(2120, 'GET A$:IF A$="" THEN 2120');
+    pushLine(2112, 'NV=0:WT=0');
+    pushLine(2120, 'GET A$:IF A$="" THEN 2124');
+    pushLine(2122, 'IF NV=1 THEN GOSUB 2400:NV=0');
+    pushLine(2123, 'GOTO 2130');
+    pushLine(2124, 'WT=WT+1:IF WT<5000 THEN 2120');
+    pushLine(2126, 'IF NV=1 THEN 2120');
+    pushLine(2128, 'GOSUB 2300:NV=1:GOTO 2120');
     pushLine(2130, 'IF A$="H" OR A$="W" THEN RETURN');
     pushLine(2140, 'IF A$=" " OR A$="N" OR A$="D" THEN 2144');
     pushLine(2142, 'GOTO 2150');
@@ -6047,6 +6121,24 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(2154, 'IF PI<=1 THEN RETURN');
     pushLine(2156, 'PI=PI-1:GOTO 2100');
     pushLine(2160, 'GOTO 2120');
+    pushLine(2300, 'GOSUB 2320');
+    pushLine(2302, 'GOSUB 2340');
+    pushLine(2304, 'GOSUB 2360');
+    pushLine(2306, 'POKE 2040,144:POKE 2041,145:POKE 2042,146:POKE 2043,147:POKE 2044,148:POKE 2045,149');
+    pushLine(2308, 'POKE 53248,24:POKE 53249,236');
+    pushLine(2310, 'POKE 53250,24:POKE 53251,236');
+    pushLine(2312, 'POKE 53252,144:POKE 53253,236');
+    pushLine(2314, 'POKE 53254,144:POKE 53255,236');
+    pushLine(2316, 'POKE 53256,264:POKE 53257,236');
+    pushLine(2318, 'POKE 53258,264:POKE 53259,236');
+    pushLine(2319, 'POKE 53264,48');
+    pushLine(2320, 'DT=KD(1):TP=KR(1):LN=KL(1):GOSUB 620:SK=TP*RS:RL=128:DB=25600:GOSUB 7340');
+    pushLine(2322, 'POKE 53287,1:POKE 53288,7:RETURN');
+    pushLine(2340, 'DT=KD(2):TP=KR(2):LN=KL(2):GOSUB 620:SK=TP*RS:RL=128:DB=25728:GOSUB 7340');
+    pushLine(2342, 'POKE 53289,1:POKE 53290,3:RETURN');
+    pushLine(2360, 'DT=KD(3):TP=KR(3):LN=KL(3):GOSUB 620:SK=TP*RS:RL=128:DB=25856:GOSUB 7340');
+    pushLine(2362, 'POKE 53291,1:POKE 53292,5:POKE 53269,63:RETURN');
+    pushLine(2400, 'POKE 53269,0:POKE 53264,0:RETURN');
   }
   pushLine(500, 'TP=0:LN=0:DT=0:NX=0:RI=2');
   pushLine(510, 'GOSUB 650');
@@ -6172,6 +6264,12 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(7290, 'POKE ' + String(loaderProgram.destinationAddress) + ',0:POKE ' + String(loaderProgram.destinationAddress + 1) + ',112');
     pushLine(7300, 'SYS ' + String(loaderProgram.readerAddress));
     pushLine(7310, 'RR=PEEK(' + String(loaderProgram.statusAddress) + '):RETURN');
+    pushLine(7340, 'GOSUB 6800:GOSUB 3300');
+    pushLine(7350, 'POKE ' + String(loaderProgram.skipAddress) + ',SK-256*INT(SK/256):POKE ' + String(loaderProgram.skipAddress + 1) + ',INT(SK/256)');
+    pushLine(7360, 'POKE ' + String(loaderProgram.readLengthAddress) + ',RL-256*INT(RL/256):POKE ' + String(loaderProgram.readLengthAddress + 1) + ',INT(RL/256)');
+    pushLine(7370, 'POKE ' + String(loaderProgram.destinationAddress) + ',DB-256*INT(DB/256):POKE ' + String(loaderProgram.destinationAddress + 1) + ',INT(DB/256)');
+    pushLine(7380, 'SYS ' + String(loaderProgram.readerAddress));
+    pushLine(7390, 'RR=PEEK(' + String(loaderProgram.statusAddress) + '):RETURN');
     pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$=":" THEN 3350');
     pushLine(3340, 'IF A$="." THEN 3360');
     pushLine(3342, 'LT$=LT$+A$:NEXT');
