@@ -4316,6 +4316,9 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(950, 'GOTO 920');
   const buffer = [];
   let address = basicStart;
+  basicLines.sort(function (a, b) {
+    return a.number - b.number;
+  });
   basicLines.forEach(function (line) {
     const nextAddress = address + 4 + line.body.length + 1;
     buffer.push(nextAddress & 0xff, (nextAddress >> 8) & 0xff);
