@@ -582,6 +582,51 @@ export function init(TPP) {
         return entry.index;
       });
   };
+  const classifySolidPaletteCell = function (pixels, palette, options) {
+    if (!pixels || !pixels.length || !Array.isArray(palette) || !palette.length) {
+      return null;
+    }
+    const config = options || {};
+    const threshold = Math.max(
+      0.5,
+      Math.min(1, Number(config.solidCellThreshold) || 0.9375),
+    );
+    const counts = new Uint16Array(palette.length);
+    const totalPixels = Math.floor(pixels.length / 3);
+    if (!totalPixels) return null;
+    for (let i = 0; i < pixels.length; i += 3) {
+      let bestIndex = 0;
+      let bestError = Infinity;
+      for (let paletteIndex = 0; paletteIndex < palette.length; paletteIndex += 1) {
+        const swatch = palette[paletteIndex];
+        const dr = pixels[i] - swatch[0];
+        const dg = pixels[i + 1] - swatch[1];
+        const db = pixels[i + 2] - swatch[2];
+        const error = dr * dr + dg * dg + db * db;
+        if (error < bestError) {
+          bestError = error;
+          bestIndex = paletteIndex;
+        }
+      }
+      counts[bestIndex] += 1;
+    }
+    let dominantIndex = 0;
+    let dominantCount = counts[0] || 0;
+    for (let i = 1; i < counts.length; i += 1) {
+      if (counts[i] > dominantCount) {
+        dominantCount = counts[i];
+        dominantIndex = i;
+      }
+    }
+    const coverage = dominantCount / totalPixels;
+    if (coverage < threshold) return null;
+    return {
+      colorIndex: dominantIndex,
+      coverage: coverage,
+      totalPixels: totalPixels,
+      dominantCount: dominantCount,
+    };
+  };
   const petsciiMaskBit = function (mask, x, y, width, height) {
     const glyphX = Math.max(
       0,
@@ -611,6 +656,11 @@ export function init(TPP) {
       }
     }
     return distance;
+  };
+  const solidGlyphMask = function () {
+    const mask = new Uint8Array(64);
+    mask.fill(1);
+    return mask;
   };
   const simplifyMask = function (mask, cellSize) {
     const source = mask || new Uint8Array(64);
@@ -794,6 +844,9 @@ export function init(TPP) {
           blockWidth,
           blockHeight,
         );
+        if (classifySolidPaletteCell(pixels, palette, config)) {
+          continue;
+        }
         const scored = paletteCellScores(pixels, palette);
         for (let i = 0; i < scored.length; i += 1) {
           totals[scored[i].index] += scored[i].total;
@@ -838,28 +891,50 @@ export function init(TPP) {
           blockWidth,
           blockHeight,
         );
-        const scored = paletteCellScores(pixels, palette);
-        for (let i = 0; i < scored.length; i += 1) {
-          totals[scored[i].index] += scored[i].total;
-        }
-        const best = scored[0];
-        const second = scored[1];
-        const nextWinner = strongestBackgroundIndex(totals, bgCandidates);
-        const strongLean = second &&
-          second.total > 0 &&
-          best.total / second.total < 0.7;
-        if (strongLean) {
+        const specialCell = classifySolidPaletteCell(pixels, palette, config);
+        if (specialCell) {
           strongCells.push({
             x: cellX,
             y: cellY,
             width: blockWidth,
             height: blockHeight,
-            color: palette[best.index] || palette[nextWinner] || palette[0],
+            color: palette[specialCell.colorIndex] || palette[currentWinner] || palette[0],
           });
+          if (config.previewData) {
+            paintSolidCell(
+              config.previewData,
+              width,
+              cellX,
+              cellY,
+              blockWidth,
+              blockHeight,
+              palette[specialCell.colorIndex] || palette[currentWinner] || palette[0],
+            );
+          }
+          processedCells += 1;
+          reportProgress(config, {
+            phase: "Background",
+            completed: processedCells,
+            total: totalCells,
+            backgroundIndex: currentWinner,
+            cellX: cellX,
+            cellY: cellY,
+            cellWidth: blockWidth,
+            cellHeight: blockHeight,
+          });
+          if (processedCells % 4 === 0) await yieldToUi();
+          await maybeYield();
+          continue;
         }
+        const scored = paletteCellScores(pixels, palette);
+        for (let i = 0; i < scored.length; i += 1) {
+          totals[scored[i].index] += scored[i].total;
+        }
+        const nextWinner = strongestBackgroundIndex(totals, bgCandidates);
+        const winnerChanged = nextWinner !== currentWinner;
+        currentWinner = nextWinner;
         if (config.previewData) {
-          if (nextWinner !== currentWinner) {
-            currentWinner = nextWinner;
+          if (winnerChanged) {
             fillPreviewWithColor(config.previewData, palette[currentWinner] || palette[0]);
             for (let i = 0; i < strongCells.length; i += 1) {
               const cell = strongCells[i];
@@ -873,17 +948,6 @@ export function init(TPP) {
                 cell.color,
               );
             }
-          } else if (strongLean) {
-            const cell = strongCells[strongCells.length - 1];
-            paintSolidCell(
-              config.previewData,
-              width,
-              cell.x,
-              cell.y,
-              cell.width,
-              cell.height,
-              cell.color,
-            );
           }
         }
         processedCells += 1;
@@ -1310,15 +1374,21 @@ export function init(TPP) {
     const selectionBias = clampByte(
       config.selectionBias == null ? 128 : config.selectionBias,
     );
+    const backgroundColor = palette[0] || [0, 0, 0];
     const globalBackgroundIndex = chooseGlobalBackgroundIndex(
       data,
       width,
       height,
       palette,
-      { colorLimit: colorLimit },
+      {
+        colorLimit: colorLimit,
+        solidCellThreshold: config.solidCellThreshold,
+      },
     );
+    const finalBackground = palette[globalBackgroundIndex] || backgroundColor;
     const cellFits = [];
     const patternStats = new Map();
+    let hasSpecialSolidForeground = false;
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
@@ -1331,6 +1401,23 @@ export function init(TPP) {
           blockWidth,
           blockHeight,
         );
+        const specialCell = classifySolidPaletteCell(pixels, palette, config);
+        if (specialCell) {
+          const solidColor = palette[specialCell.colorIndex] || finalBackground;
+          const isForegroundSolid = specialCell.colorIndex !== globalBackgroundIndex;
+          hasSpecialSolidForeground = hasSpecialSolidForeground || isForegroundSolid;
+          cellFits.push({
+            x: cellX,
+            y: cellY,
+            width: blockWidth,
+            height: blockHeight,
+            bg: finalBackground,
+            fg: solidColor,
+            specialSolid: true,
+            solidColorIndex: specialCell.colorIndex,
+          });
+          continue;
+        }
         const candidates = paletteCellCandidates(pixels, palette, colorLimit);
         const fit = bestTwoColorCellFit(
           pixels,
@@ -1372,12 +1459,48 @@ export function init(TPP) {
       256,
       selectionBias,
     );
+    const solidKey = maskKey(solidGlyphMask());
+    if (hasSpecialSolidForeground) {
+      const deduped = charset.filter(function (mask) {
+        return maskKey(mask) !== solidKey;
+      });
+      deduped.unshift(solidGlyphMask());
+      charset.splice(0, charset.length, ...deduped.slice(0, 256));
+    } else if (!charset.length) {
+      charset.push(new Uint8Array(64));
+    }
     const charsetByKey = new Map(
       charset.map(function (mask) {
         return [maskKey(mask), mask];
       }),
     );
     cellFits.forEach(function (fit) {
+      if (fit.specialSolid) {
+        if (fit.solidColorIndex === globalBackgroundIndex) {
+          paintSolidCell(
+            data,
+            width,
+            fit.x,
+            fit.y,
+            fit.width,
+            fit.height,
+            fit.bg,
+          );
+        } else {
+          paintMaskCell(
+            data,
+            width,
+            fit.x,
+            fit.y,
+            fit.width,
+            fit.height,
+            charset[0] || solidGlyphMask(),
+            fit.bg,
+            fit.fg,
+          );
+        }
+        return;
+      }
       let bestMask =
         charsetByKey.get(fit.originalKey) ||
         charsetByKey.get(fit.key) ||
@@ -1436,6 +1559,7 @@ export function init(TPP) {
       config.selectionBias == null ? 128 : config.selectionBias,
     );
     const maybeYield = makeUiYieldController(config.yieldBudgetMs);
+    const backgroundColor = palette[0] || [0, 0, 0];
     const globalBackgroundIndex = await chooseGlobalBackgroundIndexAsync(
       data,
       width,
@@ -1447,12 +1571,15 @@ export function init(TPP) {
         onProgress: config.onProgress,
         progressIntervalMs: config.progressIntervalMs,
         yieldBudgetMs: config.yieldBudgetMs,
+        solidCellThreshold: config.solidCellThreshold,
       },
     );
     const totalCells = Math.ceil(height / cellSize) * Math.ceil(width / cellSize);
-    fillPreviewWithColor(data, palette[globalBackgroundIndex] || palette[0] || [0, 0, 0]);
+    const finalBackground = palette[globalBackgroundIndex] || backgroundColor;
+    fillPreviewWithColor(data, finalBackground);
     const cellFits = [];
     const patternStats = new Map();
+    let hasSpecialSolidForeground = false;
     let processedCells = 0;
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
@@ -1466,6 +1593,46 @@ export function init(TPP) {
           blockWidth,
           blockHeight,
         );
+        const specialCell = classifySolidPaletteCell(pixels, palette, config);
+        if (specialCell) {
+          const solidColor = palette[specialCell.colorIndex] || finalBackground;
+          const isForegroundSolid = specialCell.colorIndex !== globalBackgroundIndex;
+          hasSpecialSolidForeground = hasSpecialSolidForeground || isForegroundSolid;
+          cellFits.push({
+            x: cellX,
+            y: cellY,
+            width: blockWidth,
+            height: blockHeight,
+            bg: finalBackground,
+            fg: solidColor,
+            specialSolid: true,
+            solidColorIndex: specialCell.colorIndex,
+          });
+          if (isForegroundSolid) {
+            paintSolidCell(
+              data,
+              width,
+              cellX,
+              cellY,
+              blockWidth,
+              blockHeight,
+              solidColor,
+            );
+          }
+          processedCells += 1;
+          reportProgress(config, {
+            phase: "Analyze",
+            completed: processedCells,
+            total: totalCells,
+            cellX: cellX,
+            cellY: cellY,
+            cellWidth: blockWidth,
+            cellHeight: blockHeight,
+          });
+          if (processedCells % 4 === 0) await yieldToUi();
+          await maybeYield();
+          continue;
+        }
         const candidates = paletteCellCandidates(pixels, palette, colorLimit);
         const fit = bestTwoColorCellFit(
           pixels,
@@ -1530,6 +1697,16 @@ export function init(TPP) {
       256,
       selectionBias,
     );
+    const solidKey = maskKey(solidGlyphMask());
+    if (hasSpecialSolidForeground) {
+      const deduped = charset.filter(function (mask) {
+        return maskKey(mask) !== solidKey;
+      });
+      deduped.unshift(solidGlyphMask());
+      charset.splice(0, charset.length, ...deduped.slice(0, 256));
+    } else if (!charset.length) {
+      charset.push(new Uint8Array(64));
+    }
     const charsetByKey = new Map(
       charset.map(function (mask) {
         return [maskKey(mask), mask];
@@ -1537,6 +1714,43 @@ export function init(TPP) {
     );
     for (let index = 0; index < cellFits.length; index += 1) {
       const fit = cellFits[index];
+      if (fit.specialSolid) {
+        if (fit.solidColorIndex === globalBackgroundIndex) {
+          paintSolidCell(
+            data,
+            width,
+            fit.x,
+            fit.y,
+            fit.width,
+            fit.height,
+            fit.bg,
+          );
+        } else {
+          paintMaskCell(
+            data,
+            width,
+            fit.x,
+            fit.y,
+            fit.width,
+            fit.height,
+            charset[0] || solidGlyphMask(),
+            fit.bg,
+            fit.fg,
+          );
+        }
+        reportProgress(config, {
+          phase: "Paint",
+          completed: index + 1,
+          total: cellFits.length,
+          cellX: fit.x,
+          cellY: fit.y,
+          cellWidth: fit.width,
+          cellHeight: fit.height,
+        });
+        if ((index + 1) % 4 === 0) await yieldToUi();
+        await maybeYield();
+        continue;
+      }
       let bestMask =
         charsetByKey.get(fit.originalKey) ||
         charsetByKey.get(fit.key) ||
