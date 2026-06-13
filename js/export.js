@@ -4400,6 +4400,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     workLo: configBase + 50,
     workHi: configBase + 51,
     fileOpen: configBase + 52,
+    keyReady: configBase + 53,
   };
   const KERNAL = {
     setnam: 0xffbd,
@@ -4478,6 +4479,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   const tax = function () { emit(0xaa); };
   const tya = function () { emit(0x98); };
   const aslA = function () { emit(0x0a); };
+  const pha = function () { emit(0x48); };
+  const pla = function () { emit(0x68); };
   const staIndY = function (zp) { emit(0x91, zp); };
   const percentTableIndex = dataLabel(
     Array.from(
@@ -4502,33 +4505,65 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(vars.barCount);
   staAbs(vars.readLo);
   staAbs(vars.readHi);
+  staAbs(vars.keyReady);
   jsrLabel("openFile");
-  bcs("done");
+  bcc("fileOpenOk");
+  jmpLabel("done");
+  label("fileOpenOk");
   jsrLabel("readByte");
+  bcc("haveBackground");
+  jmpLabel("done");
+  label("haveBackground");
   staAbs(vars.background);
   jsrLabel("readByte");
+  bcc("haveSegmentCount");
+  jmpLabel("done");
+  label("haveSegmentCount");
   staAbs(vars.segmentCount);
   jsrLabel("readByte");
+  bcc("haveTotalLo");
+  jmpLabel("done");
+  label("haveTotalLo");
   staAbs(vars.totalLo);
   jsrLabel("readByte");
+  bcc("haveTotalHi");
+  jmpLabel("done");
+  label("haveTotalHi");
   staAbs(vars.totalHi);
   jsrLabel("computeStep");
   jsrLabel("drawProgress");
   label("segmentLoop");
   ldaAbs(vars.segmentCount);
-  beq("finish");
+  bne("haveSegment");
+  jmpLabel("finish");
+  label("haveSegment");
   jsrLabel("readByte");
+  bcc("skipSegmentFlags");
+  jmpLabel("done");
+  label("skipSegmentFlags");
   jsrLabel("readByte");
+  bcc("haveDestLo");
+  jmpLabel("done");
+  label("haveDestLo");
   staAbs(vars.destLo);
   jsrLabel("readByte");
+  bcc("haveDestHi");
+  jmpLabel("done");
+  label("haveDestHi");
   staAbs(vars.destHi);
   ldaAbs(vars.destLo);
   staAbs(0x00fb);
   ldaAbs(vars.destHi);
   staAbs(0x00fc);
   jsrLabel("readByte");
+  bcc("haveLenLo");
+  jmpLabel("done");
+  label("haveLenLo");
   staAbs(vars.lenLo);
   jsrLabel("readByte");
+  bcc("haveLenHi");
+  jmpLabel("done");
+  label("haveLenHi");
   staAbs(vars.lenHi);
   label("byteLoop");
   ldaAbs(vars.lenLo);
@@ -4542,9 +4577,13 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   ldaImm(0x10);
   staAbs(vars.keyCounter);
   jsrLabel("scanKey");
-  bcs("abort");
+  bcc("readAndStore");
+  jmpLabel("abort");
   label("readAndStore");
   jsrLabel("readByte");
+  bcc("haveDataByte");
+  jmpLabel("done");
+  label("haveDataByte");
   ldyImm(0x00);
   staIndY(0xfb);
   incAbs(0x00fb);
@@ -4623,15 +4662,21 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   bcs("openFail");
   ldaImm(0x01);
   staAbs(vars.fileOpen);
-  ldaImm(0x02);
+  ldxImm(0x02);
   jsrAbs(KERNAL.chkin);
   bcc("openDone");
+  ldaImm(0x03);
+  staAbs(vars.status);
+  sec();
+  rts();
   label("openFail");
   ldaImm(0x02);
   staAbs(vars.status);
   sec();
   rts();
   label("openDone");
+  ldaImm(0x00);
+  staAbs(0x0090);
   ldaImm(0x10);
   staAbs(vars.keyCounter);
   clc();
@@ -4649,15 +4694,34 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   rts();
 
   label("readByte");
+  ldaImm(0x00);
+  staAbs(0x0090);
   jsrAbs(KERNAL.chrin);
+  pha();
+  ldaAbs(0x0090);
+  beq("readByteOk");
+  staAbs(vars.status);
+  pla();
+  sec();
+  rts();
+  label("readByteOk");
+  pla();
+  clc();
   rts();
 
   label("scanKey");
   jsrAbs(KERNAL.scnkey);
   jsrAbs(KERNAL.getin);
+  beq("armKey");
+  ldaAbs(vars.keyReady);
   beq("noKey");
+  cmpImm(32);
+  bne("noKey");
   sec();
   rts();
+  label("armKey");
+  ldaImm(0x01);
+  staAbs(vars.keyReady);
   label("noKey");
   clc();
   rts();
@@ -4765,8 +4829,10 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     if (fixup.kind === "rel") {
       const target = labels[fixup.name];
       const from = start + fixup.index + 1;
-      let delta = target - from;
-      if (delta < 0) delta += 0x100;
+      const delta = target - from;
+      if (delta < -128 || delta > 127) {
+        throw new Error("Out-of-range branch to " + fixup.name + " (" + String(delta) + ")");
+      }
       code[fixup.index] = delta & 0xff;
       return;
     }
@@ -4781,6 +4847,13 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     configBase: configBase,
     filenameLengthAddress: vars.filenameLength,
     statusAddress: vars.status,
+    backgroundAddress: vars.background,
+    segmentCountAddress: vars.segmentCount,
+    totalLoAddress: vars.totalLo,
+    totalHiAddress: vars.totalHi,
+    readLoAddress: vars.readLo,
+    readHiAddress: vars.readHi,
+    barCountAddress: vars.barCount,
     bytes: new Uint8Array(code),
   };
 };
@@ -4940,7 +5013,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24)');
   if (hasCover) {
     pushLine(8, 'GOSUB 3000');
-    pushLine(10, 'F$="COVER.BIN":GOSUB 3300:GOSUB 3400');
+    pushLine(10, 'F$="0:COVER.BIN,S,R":GOSUB 3300:GOSUB 3400');
     pushLine(12, 'IF CV=0 THEN 20');
     pushLine(14, 'GET A$:IF A$="" THEN 14');
     pushLine(16, 'GOTO 20');
@@ -5072,19 +5145,31 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   }
   if (hasCover && loaderProgram) {
     pushLine(3000, 'IF ML=1 THEN RETURN');
+    pushLine(3005, 'LT$="INSTALLING LOADER":GOSUB 3500');
     pushLine(3010, 'RESTORE');
-    pushLine(3020, 'FOR I=0 TO ' + String(loaderProgram.bytes.length - 1) + ':READ B:POKE ' + String(loaderProgram.address) + '+I,B:NEXT');
-    pushLine(3030, 'ML=1:RETURN');
+    pushLine(3015, 'NI=0:BP=0:GOSUB 3730');
+    pushLine(3020, 'FOR I=0 TO ' + String(loaderProgram.bytes.length - 1));
+    pushLine(3022, 'READ B:POKE ' + String(loaderProgram.address) + '+I,B');
+    pushLine(3024, 'IF I<NI THEN 3028');
+    pushLine(3026, 'BP=INT(I*20/' + String(loaderProgram.bytes.length) + '):GOSUB 3730:NI=NI+32');
+    pushLine(3028, 'NEXT');
+    pushLine(3030, 'BP=20:GOSUB 3730:ML=1:RETURN');
     pushLine(3290, 'IF LEN(F$)>32 THEN F$=LEFT$(F$,32)');
     pushLine(3300, 'POKE ' + String(loaderProgram.filenameLengthAddress) + ',LEN(F$)');
     pushLine(3310, 'FOR I=1 TO LEN(F$):POKE ' + String(loaderProgram.filenameLengthAddress + 1) + '+I-1,ASC(MID$(F$,I,1)):NEXT');
     pushLine(3320, 'RETURN');
-    pushLine(3400, 'SB=PEEK(56576):SV=PEEK(53272):CV=0:GOSUB 3500');
+    pushLine(3400, 'SB=PEEK(56576):SV=PEEK(53272):CV=0:LT$="LOADING COVER":GOSUB 3500');
+    pushLine(3405, 'GET A$:IF A$<>"" THEN 3405');
     pushLine(3410, 'SYS ' + String(loaderProgram.address));
-    pushLine(3420, 'LR=PEEK(' + String(loaderProgram.statusAddress) + '):IF LR<>0 THEN RETURN');
+    pushLine(3420, 'LR=PEEK(' + String(loaderProgram.statusAddress) + '):IF LR=0 THEN 3430');
+    pushLine(3422, 'IF LR<>1 THEN 3424');
+    pushLine(3423, 'POKE 646,2:PRINT:PRINT "COVER SKIPPED":POKE 646,1:RETURN');
+    pushLine(3424, 'POKE 646,2:PRINT:PRINT "COVER LOAD FAILED";LR:POKE 646,1:RETURN');
+    pushLine(3426, 'SG=PEEK(' + String(loaderProgram.segmentCountAddress) + '):TT=PEEK(' + String(loaderProgram.totalLoAddress) + ')+256*PEEK(' + String(loaderProgram.totalHiAddress) + '):RR=PEEK(' + String(loaderProgram.readLoAddress) + ')+256*PEEK(' + String(loaderProgram.readHiAddress) + ')');
+    pushLine(3428, 'IF SG=0 OR RR=0 THEN POKE 646,2:PRINT:PRINT "COVER HEADER";SG;TT;RR:POKE 646,1:RETURN');
     pushLine(3430, 'CV=1:RETURN');
     pushLine(3500, 'POKE 53280,6:POKE 53281,6:POKE 646,7:PRINT CHR$(147)');
-    pushLine(3510, 'PRINT "LOADING COVER"');
+    pushLine(3510, 'PRINT LT$');
     pushLine(3520, 'PRINT');
     pushLine(3530, 'PRINT');
     pushLine(3540, 'PRINT');
@@ -5106,6 +5191,15 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3700, 'PRINT "               TO SKIP"');
     pushLine(3710, 'PRINT "             PRESS SPACE"');
     pushLine(3720, 'POKE 646,1:RETURN');
+    pushLine(3730, 'POKE 646,7');
+    pushLine(3740, 'PRINT CHR$(19);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);');
+    pushLine(3750, 'B$="["');
+    pushLine(3760, 'FOR K=1 TO 20:IF K<=BP THEN B$=B$+"*":GOTO 3780');
+    pushLine(3770, 'B$=B$+"."');
+    pushLine(3780, 'NEXT');
+    pushLine(3785, 'B$=B$+"]"');
+    pushLine(3790, 'PC=INT(BP*5):PRINT B$;" ";MID$(STR$(PC),2)+"%   "');
+    pushLine(3792, 'POKE 646,1:RETURN');
     const loaderData = Array.from(loaderProgram.bytes);
     for (let offset = 0, line = 3800; offset < loaderData.length; offset += 16, line += 10) {
       pushLine(line, 'DATA ' + loaderData.slice(offset, offset + 16).join(','));
