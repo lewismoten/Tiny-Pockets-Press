@@ -3929,6 +3929,14 @@ TPP.buildD64Image = function (files, book) {
 TPP.exportD64FileName = function (book) {
   return TPP.exportFileName(book, { extension: "d64", kind: "c64" });
 };
+TPP.exportD64DiskFileName = function (book, diskNumber, totalDisks) {
+  const base = TPP.exportFileName(book, {
+    extension: "d64",
+    kind: "c64-disk" + String(diskNumber),
+  });
+  const suffix = "-disk" + String(diskNumber).padStart(2, "0") + "-of-" + String(totalDisks).padStart(2, "0") + ".d64";
+  return base.replace(/\.d64$/i, suffix);
+};
 TPP.exportD64PageFileName = function (pageIndex) {
   return "PAGE" + String(Math.max(1, Number(pageIndex) || 1)).padStart(4, "0") + "DAT";
 };
@@ -4280,6 +4288,141 @@ TPP.d64DatClassInfo = function (classId) {
   };
   return catalog[classId] || null;
 };
+TPP.d64EncodeDiskClass = function (diskNumber, classId) {
+  const diskNibble = Math.max(1, Math.min(16, Number(diskNumber) || 1)) - 1;
+  const classNibble = Math.max(0, Math.min(15, Number(classId) || 0));
+  return ((diskNibble & 0x0f) << 4) | (classNibble & 0x0f);
+};
+TPP.packD64DataSections = function (sections) {
+  const datBuckets = {};
+  const ensureBucket = function (classId) {
+    if (!datBuckets[classId]) datBuckets[classId] = [];
+    return datBuckets[classId];
+  };
+  const sectionLocations = {};
+  const materialSections = Array.isArray(sections) ? sections : [];
+  materialSections.forEach(function (section) {
+    if (!section || !section.bytes || !section.bytes.length) return;
+    const info = TPP.d64DatClassInfo(section.classId);
+    if (!info || !info.size) return;
+    const bucket = ensureBucket(section.classId);
+    const recordSize = info.size;
+    const startRecord = Math.floor(bucket.length / recordSize);
+    const paddedLength = Math.ceil(section.bytes.length / recordSize) * recordSize;
+    const recordCount = paddedLength / recordSize;
+    if (recordCount < 1 || recordCount > 256) {
+      throw new Error("D64 section " + section.tag + " exceeds record capacity for " + info.name);
+    }
+    for (let i = 0; i < paddedLength; i += 1) {
+      bucket.push(i < section.bytes.length ? section.bytes[i] : 0x00);
+    }
+    sectionLocations[section.key] = {
+      key: section.key,
+      tag: section.tag,
+      classId: section.classId,
+      startRecord: startRecord,
+      recordCount: recordCount === 256 ? 0x00 : recordCount & 0xff,
+    };
+  });
+  const dataFiles = Object.keys(datBuckets)
+    .map(function (classIdText) {
+      const classId = Number(classIdText);
+      const info = TPP.d64DatClassInfo(classId);
+      return {
+        name: info.name,
+        classId: classId,
+        data: new Uint8Array(datBuckets[classId]),
+      };
+    })
+    .sort(function (a, b) {
+      return a.classId - b.classId;
+    });
+  return {
+    sectionLocations: sectionLocations,
+    dataFiles: dataFiles,
+  };
+};
+TPP.buildD64IndexBytesForDisk = function (diskNumber, totalDisks, sectionCatalog) {
+  const catalog = Array.isArray(sectionCatalog) ? sectionCatalog : [];
+  const tagOrder = [];
+  const firstByTag = {};
+  const lastByTag = {};
+  const actualEntries = [];
+  catalog.forEach(function (entry, index) {
+    const actual = {
+      tag: String(entry.tag || "").slice(0, 3).toUpperCase(),
+      diskClass: TPP.d64EncodeDiskClass(entry.diskNumber, entry.classId),
+      startRecord: entry.startRecord & 0xffff,
+      recordCount: entry.recordCount & 0xff,
+      nextRecord: 0,
+    };
+    if (!Object.prototype.hasOwnProperty.call(firstByTag, actual.tag)) {
+      tagOrder.push(actual.tag);
+      firstByTag[actual.tag] = index;
+    }
+    if (Object.prototype.hasOwnProperty.call(lastByTag, actual.tag)) {
+      actualEntries[lastByTag[actual.tag]].nextRecord = index + 1;
+    }
+    lastByTag[actual.tag] = index;
+    actualEntries.push(actual);
+  });
+  const headEntries = tagOrder.map(function (tag) {
+    return {
+      tag: tag,
+      diskClass: TPP.d64EncodeDiskClass(diskNumber, 0),
+      startRecord: 0,
+      recordCount: 0,
+      nextRecord: 0,
+    };
+  });
+  headEntries.push({
+    tag: "TAG",
+    diskClass: TPP.d64EncodeDiskClass(diskNumber, 0),
+    startRecord: 0,
+    recordCount: 0,
+    nextRecord: 0,
+  });
+  const actualBaseRecord = headEntries.length + 2;
+  actualEntries.forEach(function (entry) {
+    if (entry.nextRecord) entry.nextRecord = actualBaseRecord + entry.nextRecord - 1;
+  });
+  headEntries.forEach(function (entry) {
+    if (entry.tag === "TAG") return;
+    entry.nextRecord = actualBaseRecord + firstByTag[entry.tag];
+  });
+  const idxBytes = [];
+  const pushEntry = function (entry) {
+    idxBytes.push(
+      entry.tag.charCodeAt(0) & 0xff,
+      entry.tag.charCodeAt(1) & 0xff,
+      entry.tag.charCodeAt(2) & 0xff,
+      entry.diskClass & 0xff,
+      entry.startRecord & 0xff,
+      (entry.startRecord >> 8) & 0xff,
+      entry.recordCount & 0xff,
+      entry.nextRecord & 0xff,
+      (entry.nextRecord >> 8) & 0xff,
+    );
+  };
+  pushEntry({
+    tag: "DSK",
+    diskClass: TPP.d64EncodeDiskClass(diskNumber, 0),
+    startRecord: diskNumber,
+    recordCount: Math.max(1, Math.min(255, Number(totalDisks) || 1)),
+    nextRecord: 0,
+  });
+  headEntries.forEach(pushEntry);
+  actualEntries.forEach(pushEntry);
+  return new Uint8Array(idxBytes);
+};
+TPP.estimateD64IndexLength = function (entries) {
+  const uniqueTags = {};
+  (Array.isArray(entries) ? entries : []).forEach(function (entry) {
+    uniqueTags[String(entry.tag || "").slice(0, 3).toUpperCase()] = true;
+  });
+  const uniqueTagCount = Object.keys(uniqueTags).length;
+  return (1 + uniqueTagCount + 1 + (Array.isArray(entries) ? entries.length : 0)) * 9;
+};
 TPP.buildD64CoverRecordBytes = function (coverLayout) {
   if (!coverLayout || !coverLayout.bitmap || !coverLayout.screen) return null;
   const layout = TPP.d64BitmapCoverLayout();
@@ -4593,20 +4736,25 @@ TPP.exportD64HomeRecords = function (book, options) {
   pushRecord("CONTENTS", config.hasToc ? "AVAILABLE" : "NONE", 13, 1);
   return records;
 };
-TPP.exportD64IndexAndData = function (book, options) {
+TPP.exportD64DiskBundle = function (book, options) {
   const tocRecords = TPP.exportD64TocRecords(book);
   const homeRecords = TPP.exportD64HomeRecords(book, {
     pageCount: options && options.pageCount,
     hasToc: tocRecords.length > 0,
   });
   const config = options || {};
-  const sections = [];
-  let graphicPageCount = 0;
-  const pushSection = function (tag, bytes) {
-    if (!bytes.length) return;
-    sections.push({
+  const notifyProgress = function (phase, detail) {
+    if (typeof config.onProgress === "function") {
+      config.onProgress(phase, detail || {});
+    }
+  };
+  const sharedSections = [];
+  const pushSharedSection = function (key, tag, classId, bytes) {
+    if (!bytes || !bytes.length) return;
+    sharedSections.push({
+      key: key,
       tag: String(tag || "").slice(0, 3).toUpperCase(),
-      classId: 5,
+      classId: classId,
       bytes: bytes.slice(),
     });
   };
@@ -4618,7 +4766,7 @@ TPP.exportD64IndexAndData = function (book, options) {
     }
     return true;
   };
-  homeRecords.forEach(function (record) {
+  homeRecords.forEach(function (record, index) {
     const nameBytes = Array.from(String(record.name || ""), function (char) {
       return char.charCodeAt(0) & 0xff;
     });
@@ -4631,7 +4779,7 @@ TPP.exportD64IndexAndData = function (book, options) {
     homeBytes.push.apply(homeBytes, nameBytes);
     homeBytes.push(valueBytes.length & 0xff);
     homeBytes.push.apply(homeBytes, valueBytes);
-    pushSection("HOM", homeBytes);
+    pushSharedSection("HOM" + String(index + 1), "HOM", 5, homeBytes);
   });
   const tocBytes = [];
   tocRecords.forEach(function (record) {
@@ -4642,160 +4790,215 @@ TPP.exportD64IndexAndData = function (book, options) {
     tocBytes.push.apply(tocBytes, titleBytes);
     tocBytes.push(record.pointer & 0xff, (record.pointer >> 8) & 0xff);
   });
-  pushSection("TOC", tocBytes);
+  pushSharedSection("TOC", "TOC", 5, tocBytes);
   if (config.coverBytes && config.coverBytes.length) {
-    sections.unshift({
+    sharedSections.unshift({
       key: "COV",
       tag: "COV",
       classId: 10,
       bytes: config.coverBytes.slice(),
     });
   }
-  pageByteSets.forEach(function (pageRecord, index) {
-    if (!pageRecord || !pageRecord.bytes || !pageRecord.bytes.length) return;
-    graphicPageCount += 1;
-    const section = {
-      key: "PAG" + String(index + 1),
-      tag: "PAG",
-      classId: 10,
-      bytes: pageRecord.bytes.slice(),
-    };
-    if (
-      index === 0 &&
-      config.coverBytes &&
-      config.coverBytes.length &&
-      sameBytes(pageRecord.bytes, config.coverBytes)
-    ) {
-      section.aliasOf = "COV";
-      delete section.bytes;
-    }
-    sections.push(section);
-  });
   if (config.promptBytes && config.promptBytes.length) {
-    sections.push({
+    sharedSections.push({
       key: "ANK",
       tag: "ANK",
       classId: 7,
       bytes: config.promptBytes.slice(),
     });
   }
-  const idxBytes = [];
-  const datBuckets = {};
-  const ensureBucket = function (classId) {
-    if (!datBuckets[classId]) datBuckets[classId] = [];
-    return datBuckets[classId];
-  };
-  const actualEntries = [];
-  const entriesByKey = {};
-  sections.forEach(function (section) {
-    if (section.aliasOf) {
-      const aliased = entriesByKey[section.aliasOf];
-      if (!aliased) {
-        throw new Error("D64 section " + section.tag + " alias target " + section.aliasOf + " missing");
-      }
-      const aliasEntry = {
-        tag: section.tag,
-        classId: aliased.classId,
-        startRecord: aliased.startRecord,
-        recordCount: aliased.recordCount,
-        nextRecord: 0,
-      };
-      actualEntries.push(aliasEntry);
-      if (section.key) entriesByKey[section.key] = aliasEntry;
-      return;
-    }
-    const info = TPP.d64DatClassInfo(section.classId);
-    if (!info || !info.size) return;
-    const bucket = ensureBucket(section.classId);
-    const recordSize = info.size;
-    const startRecord = Math.floor(bucket.length / recordSize);
-    const paddedLength = Math.ceil(section.bytes.length / recordSize) * recordSize;
-    const recordCount = paddedLength / recordSize;
-    if (recordCount < 1 || recordCount > 256) {
-      throw new Error("D64 section " + section.tag + " exceeds record capacity for " + info.name);
-    }
-    for (let i = 0; i < paddedLength; i += 1) {
-      bucket.push(i < section.bytes.length ? section.bytes[i] : 0x00);
-    }
-    const entry = {
-      tag: section.tag,
-      classId: section.classId,
-      startRecord: startRecord,
-      recordCount: recordCount === 256 ? 0x00 : recordCount & 0xff,
-      nextRecord: 0,
-    };
-    actualEntries.push(entry);
-    if (section.key) entriesByKey[section.key] = entry;
-  });
-  const tagOrder = [];
-  const firstByTag = {};
-  const lastByTag = {};
-  actualEntries.forEach(function (entry, index) {
-    if (!Object.prototype.hasOwnProperty.call(firstByTag, entry.tag)) {
-      tagOrder.push(entry.tag);
-      firstByTag[entry.tag] = index;
-    }
-    if (Object.prototype.hasOwnProperty.call(lastByTag, entry.tag)) {
-      actualEntries[lastByTag[entry.tag]].nextRecord = index + 1;
-    }
-    lastByTag[entry.tag] = index;
-  });
-  const headEntries = tagOrder.map(function (tag) {
+  const graphicPageCount = pageByteSets.filter(function (pageRecord) {
+    return Boolean(pageRecord && pageRecord.bytes && pageRecord.bytes.length);
+  }).length;
+  const pageSections = pageByteSets.map(function (pageRecord, index) {
+    const key = "PAG" + String(index + 1);
+    const isCoverAlias =
+      index === 0 &&
+      config.coverBytes &&
+      config.coverBytes.length &&
+      pageRecord &&
+      pageRecord.bytes &&
+      sameBytes(pageRecord.bytes, config.coverBytes);
     return {
-      tag: tag,
-      classId: 0,
+      key: key,
+      tag: "PAG",
+      classId: 10,
+      bytes: pageRecord && pageRecord.bytes ? pageRecord.bytes.slice() : null,
+      pageIndex: index + 1,
+      coverAlias: isCoverAlias,
+    };
+  });
+  const placeholderCatalog = [];
+  sharedSections.forEach(function (section) {
+    placeholderCatalog.push({
+      tag: section.tag,
+      diskNumber: 1,
+      classId: section.classId,
       startRecord: 0,
       recordCount: 0,
-      nextRecord: 0,
+    });
+  });
+  pageSections.forEach(function (pageSection) {
+    placeholderCatalog.push({
+      tag: "PAG",
+      diskNumber: 1,
+      classId: pageSection.coverAlias ? 10 : pageSection.classId,
+      startRecord: 0,
+      recordCount: 0,
+    });
+  });
+  const indexLength = TPP.estimateD64IndexLength(placeholderCatalog);
+  const loaderFile = config.loaderFile;
+  const bookProgramBytes = config.bookProgramBytes;
+  const fileIdBytes = config.fileIdBytes;
+  const estimateDiskFiles = function (packed) {
+    return [
+      { name: "BOOK.PRG", data: bookProgramBytes },
+      { name: "BOOK.IDX", data: new Uint8Array(indexLength) },
+      { name: "LOADER.PRG", data: loaderFile.bytes },
+      ...packed.dataFiles,
+      { name: "FILE_ID.DIZ", data: fileIdBytes },
+    ];
+  };
+  const diskPageIndexes = [[]];
+  const pageOwners = new Array(pageSections.length).fill(1);
+  const buildPackedForDisk = function (pageIndexes) {
+    const material = sharedSections.slice();
+    (pageIndexes || []).forEach(function (pageSectionIndex) {
+      const pageSection = pageSections[pageSectionIndex];
+      if (!pageSection || pageSection.coverAlias || !pageSection.bytes || !pageSection.bytes.length) return;
+      material.push({
+        key: pageSection.key,
+        tag: pageSection.tag,
+        classId: pageSection.classId,
+        bytes: pageSection.bytes.slice(),
+      });
+    });
+    return TPP.packD64DataSections(material);
+  };
+  pageSections.forEach(function (pageSection, index) {
+    notifyProgress("assign-page", {
+      pageIndex: index + 1,
+      totalPages: pageSections.length,
+    });
+    if (!pageSection || pageSection.coverAlias || !pageSection.bytes || !pageSection.bytes.length) {
+      pageOwners[index] = 1;
+      return;
+    }
+    let currentDiskIndex = diskPageIndexes.length - 1;
+    diskPageIndexes[currentDiskIndex].push(index);
+    let packed = buildPackedForDisk(diskPageIndexes[currentDiskIndex]);
+    let usage = TPP.d64EstimateImageUsage(estimateDiskFiles(packed));
+    if (usage.totalFileSectors > usage.usableFileSectors && diskPageIndexes[currentDiskIndex].length > 1) {
+      diskPageIndexes[currentDiskIndex].pop();
+      currentDiskIndex += 1;
+      diskPageIndexes[currentDiskIndex] = [index];
+      packed = buildPackedForDisk(diskPageIndexes[currentDiskIndex]);
+      usage = TPP.d64EstimateImageUsage(estimateDiskFiles(packed));
+    }
+    if (usage.totalFileSectors > usage.usableFileSectors) {
+      throw new Error(
+        "Graphic page " + String(index + 1) + " cannot fit on a D64 disk with shared assets."
+      );
+    }
+    pageOwners[index] = currentDiskIndex + 1;
+  });
+  if (diskPageIndexes.length > 16) {
+    throw new Error("D64 export requires more than 16 disks.");
+  }
+  const diskPacks = diskPageIndexes.map(function (pageIndexes, diskIndex) {
+    notifyProgress("pack-disk", {
+      diskNumber: diskIndex + 1,
+      totalDisks: diskPageIndexes.length,
+      pageCount: pageIndexes.length,
+    });
+    return buildPackedForDisk(pageIndexes);
+  });
+  const disks = diskPacks.map(function (packed, diskIndex) {
+    const diskNumber = diskIndex + 1;
+    notifyProgress("index-disk", {
+      diskNumber: diskNumber,
+      totalDisks: diskPacks.length,
+    });
+    const sectionCatalog = [];
+    sharedSections.forEach(function (section) {
+      const location = packed.sectionLocations[section.key];
+      if (!location) return;
+      sectionCatalog.push({
+        tag: section.tag,
+        diskNumber: diskNumber,
+        classId: location.classId,
+        startRecord: location.startRecord,
+        recordCount: location.recordCount,
+      });
+    });
+    pageSections.forEach(function (pageSection, index) {
+      if (pageSection.coverAlias) {
+        const coverLocation = packed.sectionLocations.COV;
+        if (!coverLocation) return;
+        sectionCatalog.push({
+          tag: "PAG",
+          diskNumber: diskNumber,
+          classId: coverLocation.classId,
+          startRecord: coverLocation.startRecord,
+          recordCount: coverLocation.recordCount,
+        });
+        return;
+      }
+      const ownerDisk = pageOwners[index];
+      const ownerPack = diskPacks[ownerDisk - 1];
+      const ownerLocation = ownerPack.sectionLocations[pageSection.key];
+      if (!ownerLocation) return;
+      sectionCatalog.push({
+        tag: "PAG",
+        diskNumber: ownerDisk,
+        classId: ownerLocation.classId,
+        startRecord: ownerLocation.startRecord,
+        recordCount: ownerLocation.recordCount,
+      });
+    });
+    const indexBytes = TPP.buildD64IndexBytesForDisk(diskNumber, diskPacks.length, sectionCatalog);
+    const d64Files = [
+      {
+        name: "BOOK.PRG",
+        type: 0x82,
+        data: bookProgramBytes,
+      },
+      {
+        name: "BOOK.IDX",
+        type: 0x81,
+        data: indexBytes,
+      },
+      {
+        name: "LOADER.PRG",
+        type: 0x82,
+        data: loaderFile.bytes,
+      },
+      ...packed.dataFiles.map(function (file) {
+        return {
+          name: file.name,
+          type: 0x81,
+          data: file.data,
+        };
+      }),
+      {
+        name: "FILE_ID.DIZ",
+        type: 0x81,
+        data: fileIdBytes,
+      },
+    ];
+    return {
+      diskNumber: diskNumber,
+      files: d64Files,
+      usage: TPP.d64EstimateImageUsage(d64Files),
+      indexBytes: indexBytes,
     };
   });
-  headEntries.push({
-    tag: "TAG",
-    classId: 0,
-    startRecord: 0,
-    recordCount: 0,
-    nextRecord: 0,
-  });
-  const actualBaseRecord = headEntries.length + 1;
-  actualEntries.forEach(function (entry, index) {
-    if (entry.nextRecord) entry.nextRecord = actualBaseRecord + entry.nextRecord - 1;
-  });
-  headEntries.forEach(function (entry) {
-    if (entry.tag === "TAG") return;
-    entry.nextRecord = actualBaseRecord + firstByTag[entry.tag];
-  });
-  headEntries.concat(actualEntries).forEach(function (entry) {
-    idxBytes.push(
-      entry.tag.charCodeAt(0) & 0xff,
-      entry.tag.charCodeAt(1) & 0xff,
-      entry.tag.charCodeAt(2) & 0xff,
-      entry.classId & 0xff,
-      entry.startRecord & 0xff,
-      (entry.startRecord >> 8) & 0xff,
-      entry.recordCount & 0xff,
-      entry.nextRecord & 0xff,
-      (entry.nextRecord >> 8) & 0xff,
-    );
-  });
-  const dataFiles = Object.keys(datBuckets)
-    .map(function (classIdText) {
-      const classId = Number(classIdText);
-      const info = TPP.d64DatClassInfo(classId);
-      return {
-        name: info.name,
-        classId: classId,
-        data: new Uint8Array(datBuckets[classId]),
-      };
-    })
-    .sort(function (a, b) {
-      return a.classId - b.classId;
-    });
   return {
     hasToc: tocRecords.length > 0,
     hasCover: Boolean(config.coverBytes && config.coverBytes.length),
     hasPages: graphicPageCount > 0,
-    indexBytes: new Uint8Array(idxBytes),
-    dataFiles: dataFiles,
+    disks: disks,
     tocRecords: tocRecords,
     homeRecords: homeRecords,
   };
@@ -5780,7 +5983,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(27, 'POKE 646,3:PRINT "BOOK FILE READER"');
   pushLine(28, 'PRINT');
   pushLine(29, 'POKE 646,1:PRINT "LOADING BOOK INFO..."');
-  pushLine(30, 'GOSUB 200');
+  pushLine(30, 'GOSUB 6900:GOSUB 200');
   pushLine(40, 'POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147)');
   pushLine(50, 'POKE 646,7:PRINT "TINY POCKETS PRESS"');
   pushLine(60, 'PRINT');
@@ -5845,38 +6048,38 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(2156, 'PI=PI-1:GOTO 2100');
     pushLine(2160, 'GOTO 2120');
   }
-  pushLine(500, 'TP=0:LN=0:DT=0:NX=0:RI=1');
+  pushLine(500, 'TP=0:LN=0:DT=0:NX=0:RI=2');
   pushLine(510, 'GOSUB 650');
   pushLine(520, 'IF K$="TAG" THEN RETURN');
   pushLine(524, 'IF K$<>G$ THEN RI=RI+1:GOSUB 650:GOTO 520');
   pushLine(528, 'IF NX=0 THEN TP=0:LN=0:DT=0:RETURN');
   pushLine(530, 'RI=NX:GOSUB 650:RETURN');
   pushLine(650, 'TP=0:LN=0:DT=0:NX=0');
-  pushLine(652, 'F$="BOOK.IDX,S,R":SK=(RI-1)*9:RL=9:GOSUB 7200');
+  pushLine(652, 'F$="BOOK.IDX,S,R":SK=(RI-1)*9:RL=9:GOSUB 7260');
   pushLine(654, 'IF RR<>0 THEN K$="TAG":RETURN');
   pushLine(656, 'K$=CHR$(PEEK(RB))+CHR$(PEEK(RB+1))+CHR$(PEEK(RB+2))');
   pushLine(658, 'DT=PEEK(RB+3)');
   pushLine(660, 'TP=PEEK(RB+4)+256*PEEK(RB+5)');
   pushLine(662, 'LN=PEEK(RB+6)');
   pushLine(664, 'NX=PEEK(RB+7)+256*PEEK(RB+8):RETURN');
-  pushLine(620, 'RS=0:DF$=""');
-  pushLine(622, 'IF DT=1 THEN RS=1:DF$="1.DAT":RETURN');
-  pushLine(624, 'IF DT=2 THEN RS=2:DF$="2.DAT":RETURN');
-  pushLine(626, 'IF DT=3 THEN RS=4:DF$="4.DAT":RETURN');
-  pushLine(628, 'IF DT=4 THEN RS=8:DF$="8.DAT":RETURN');
-  pushLine(630, 'IF DT=5 THEN RS=16:DF$="16.DAT":RETURN');
-  pushLine(632, 'IF DT=6 THEN RS=32:DF$="32.DAT":RETURN');
-  pushLine(634, 'IF DT=7 THEN RS=64:DF$="64.DAT":RETURN');
-  pushLine(636, 'IF DT=8 THEN RS=128:DF$="128.DAT":RETURN');
-  pushLine(638, 'IF DT=9 THEN RS=256:DF$="256.DAT":RETURN');
-  pushLine(640, 'IF DT=10 THEN RS=512:DF$="512.DAT":RETURN');
-  pushLine(642, 'IF DT=11 THEN RS=1024:DF$="1024.DAT"');
+  pushLine(620, 'DD=INT(DT/16)+1:DC=DT-16*INT(DT/16):RS=0:DF$=""');
+  pushLine(622, 'IF DC=1 THEN RS=1:DF$="1.DAT":RETURN');
+  pushLine(624, 'IF DC=2 THEN RS=2:DF$="2.DAT":RETURN');
+  pushLine(626, 'IF DC=3 THEN RS=4:DF$="4.DAT":RETURN');
+  pushLine(628, 'IF DC=4 THEN RS=8:DF$="8.DAT":RETURN');
+  pushLine(630, 'IF DC=5 THEN RS=16:DF$="16.DAT":RETURN');
+  pushLine(632, 'IF DC=6 THEN RS=32:DF$="32.DAT":RETURN');
+  pushLine(634, 'IF DC=7 THEN RS=64:DF$="64.DAT":RETURN');
+  pushLine(636, 'IF DC=8 THEN RS=128:DF$="128.DAT":RETURN');
+  pushLine(638, 'IF DC=9 THEN RS=256:DF$="256.DAT":RETURN');
+  pushLine(640, 'IF DC=10 THEN RS=512:DF$="512.DAT":RETURN');
+  pushLine(642, 'IF DC=11 THEN RS=1024:DF$="1024.DAT"');
   pushLine(644, 'RETURN');
   if (hasToc) {
     pushLine(800, 'IF TL=1 THEN RETURN');
     pushLine(810, 'TL=1:TC=0:G$="TOC":GOSUB 500');
     pushLine(820, 'IF LN=0 THEN RETURN');
-    pushLine(825, 'GOSUB 620');
+    pushLine(825, 'GOSUB 620:GOSUB 6800');
     pushLine(830, 'OPEN 3,8,3,DF$');
     pushLine(832, 'RC=LN:IF RC<>0 THEN 836');
     pushLine(834, 'RC=256');
@@ -5952,12 +6155,23 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3314, 'POKE ' + String(loaderProgram.promptRecordAddress) + ',AR-256*INT(AR/256):POKE ' + String(loaderProgram.promptRecordAddress + 1) + ',INT(AR/256)');
     pushLine(3316, 'POKE ' + String(loaderProgram.promptRecordCountAddress) + ',AC');
     pushLine(3320, 'RETURN');
-    pushLine(7200, 'GOSUB 3300');
-    pushLine(7210, 'POKE ' + String(loaderProgram.skipAddress) + ',SK-256*INT(SK/256):POKE ' + String(loaderProgram.skipAddress + 1) + ',INT(SK/256)');
-    pushLine(7220, 'POKE ' + String(loaderProgram.readLengthAddress) + ',RL-256*INT(RL/256):POKE ' + String(loaderProgram.readLengthAddress + 1) + ',INT(RL/256)');
-    pushLine(7230, 'POKE ' + String(loaderProgram.destinationAddress) + ',0:POKE ' + String(loaderProgram.destinationAddress + 1) + ',112');
-    pushLine(7240, 'SYS ' + String(loaderProgram.readerAddress));
-    pushLine(7250, 'RR=PEEK(' + String(loaderProgram.statusAddress) + '):RETURN');
+    pushLine(6800, 'IF DD=0 OR DD=DI THEN RETURN');
+    pushLine(6810, 'POKE 53280,2:POKE 53281,2:POKE 646,7:PRINT CHR$(147)');
+    pushLine(6820, 'PRINT "INSERT BOOK DISK ";DD;" OF ";TD');
+    pushLine(6830, 'PRINT "AND PRESS ANY KEY"');
+    pushLine(6840, 'GET A$:IF A$="" THEN 6840');
+    pushLine(6850, 'GOSUB 6900:IF DI<>DD THEN 6810');
+    pushLine(6860, 'RETURN');
+    pushLine(6900, 'F$="BOOK.IDX,S,R":SK=0:RL=9:GOSUB 7260');
+    pushLine(6910, 'IF RR<>0 THEN RETURN');
+    pushLine(6920, 'DI=PEEK(RB+4)+256*PEEK(RB+5):TD=PEEK(RB+6):RETURN');
+    pushLine(7200, 'GOSUB 6800:GOSUB 7260:RETURN');
+    pushLine(7260, 'GOSUB 3300');
+    pushLine(7270, 'POKE ' + String(loaderProgram.skipAddress) + ',SK-256*INT(SK/256):POKE ' + String(loaderProgram.skipAddress + 1) + ',INT(SK/256)');
+    pushLine(7280, 'POKE ' + String(loaderProgram.readLengthAddress) + ',RL-256*INT(RL/256):POKE ' + String(loaderProgram.readLengthAddress + 1) + ',INT(RL/256)');
+    pushLine(7290, 'POKE ' + String(loaderProgram.destinationAddress) + ',0:POKE ' + String(loaderProgram.destinationAddress + 1) + ',112');
+    pushLine(7300, 'SYS ' + String(loaderProgram.readerAddress));
+    pushLine(7310, 'RR=PEEK(' + String(loaderProgram.statusAddress) + '):RETURN');
     pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$=":" THEN 3350');
     pushLine(3340, 'IF A$="." THEN 3360');
     pushLine(3342, 'LT$=LT$+A$:NEXT');
@@ -5971,7 +6185,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3422, 'IF LR=1 THEN POKE 56576,SB:POKE 53272,SV:POKE 53265,S1:POKE 53270,S2:POKE 53269,SE:RETURN');
     pushLine(3424, 'POKE 646,2:PRINT:PRINT "COVER LOAD FAILED";LR:POKE 646,1:RETURN');
     pushLine(3430, 'CV=1:RETURN');
-    pushLine(3450, 'SB=PEEK(56576):SV=PEEK(53272):S1=PEEK(53265):S2=PEEK(53270):SE=PEEK(53269):CV=0:GOSUB 3300');
+    pushLine(3450, 'SB=PEEK(56576):SV=PEEK(53272):S1=PEEK(53265):S2=PEEK(53270):SE=PEEK(53269):CV=0:GOSUB 6800:GOSUB 3300');
     pushLine(3452, 'POKE ' + String(loaderProgram.coverRecordAddress) + ',CR-256*INT(CR/256):POKE ' + String(loaderProgram.coverRecordAddress + 1) + ',INT(CR/256)');
     pushLine(3454, 'POKE ' + String(loaderProgram.promptRecordCountAddress) + ',0');
     pushLine(3456, 'POKE ' + String(loaderProgram.interactiveAddress) + ',0');
@@ -6082,75 +6296,106 @@ TPP.exportImagesD64 = async function (options) {
       ? TPP.buildD64PromptSpriteRecordBytes()
       : null;
     const loaderFile = TPP.buildD64AssetLoaderProgramFile();
+    const fileIdBytes = new TextEncoder().encode(TPP.exportFileIdDizText(settings));
+    const hasTocRecords = TPP.exportD64TocRecords(settings).length > 0;
+    const hasGraphicPages = pageRecords.some(function (record) {
+      return Boolean(record && record.bytes && record.bytes.length);
+    });
+    const bookProgramBytes = TPP.exportD64BootProgramBytes(settings, pages.length, {
+      hasToc: hasTocRecords,
+      hasCover: Boolean(coverRecord && coverRecord.bytes && coverRecord.bytes.length),
+      hasPages: hasGraphicPages,
+    });
     TPP.throwIfProgressCancelled(progressOp);
     TPP.showProgress(55, "Packing Commodore 64 data...");
-    const bookFiles = TPP.exportD64IndexAndData(settings, {
+    const bookFiles = TPP.exportD64DiskBundle(settings, {
       pageCount: pages.length,
       coverBytes: coverRecord && coverRecord.bytes ? coverRecord.bytes : null,
       pageBytes: pageRecords,
       promptBytes: promptRecord,
+      loaderFile: loaderFile,
+      bookProgramBytes: bookProgramBytes,
+      fileIdBytes: fileIdBytes,
+      onProgress: function (phase, detail) {
+        if (phase === "assign-page") {
+          TPP.showProgress(
+            55 + Math.round((detail.pageIndex / Math.max(1, detail.totalPages)) * 10),
+            "Packing Commodore 64 data: assigning page " +
+              detail.pageIndex +
+              " of " +
+              detail.totalPages +
+              "...",
+          );
+          return;
+        }
+        if (phase === "pack-disk") {
+          TPP.showProgress(
+            66 + Math.round((detail.diskNumber / Math.max(1, detail.totalDisks)) * 4),
+            "Packing disk " +
+              detail.diskNumber +
+              " of " +
+              detail.totalDisks +
+              " (" +
+              detail.pageCount +
+              " graphic pages)...",
+          );
+          return;
+        }
+        if (phase === "index-disk") {
+          TPP.showProgress(
+            70 + Math.round((detail.diskNumber / Math.max(1, detail.totalDisks)) * 5),
+            "Building index for disk " +
+              detail.diskNumber +
+              " of " +
+              detail.totalDisks +
+              "...",
+          );
+        }
+      },
     });
-    const d64Files = [
-      {
-        name: "BOOK.PRG",
-        type: 0x82,
-        data: TPP.exportD64BootProgramBytes(settings, pages.length, {
-          hasToc: bookFiles.hasToc,
-          hasCover: Boolean(bookFiles.hasCover),
-          hasPages: Boolean(bookFiles.hasPages),
-        }),
-      },
-      {
-        name: "BOOK.IDX",
-        type: 0x81,
-        data: bookFiles.indexBytes,
-      },
-      {
-        name: "LOADER.PRG",
-        type: 0x82,
-        data: loaderFile.bytes,
-      },
-      ...bookFiles.dataFiles.map(function (file) {
-        return {
-          name: file.name,
-          type: 0x81,
-          data: file.data,
-        };
-      }),
-      {
-        name: "FILE_ID.DIZ",
-        type: 0x81,
-        data: new TextEncoder().encode(TPP.exportFileIdDizText(settings)),
-      },
-    ];
-    TPP.throwIfProgressCancelled(progressOp);
-    const usage = TPP.d64EstimateImageUsage(d64Files);
-    TPP.showProgress(
-      80,
-      "Building D64 disk image... " +
-        usage.totalFileSectors +
-        "/" +
-        usage.usableFileSectors +
-        " sectors",
-    );
-    const imageBytes = TPP.buildD64Image(d64Files, settings);
-    if (!imageBytes) {
-      const failureUsage = TPP.d64EstimateImageUsage(d64Files);
-      alert(
-        failureUsage.totalFileSectors > failureUsage.usableFileSectors
-          ? "Failed to build D64 disk image. Disk capacity exceeded: " +
-              String(failureUsage.totalFileSectors) +
-              " sectors needed, but only " +
-              String(failureUsage.usableFileSectors) +
-              " are available for files."
-          : "Failed to build D64 disk image.",
+    const diskImages = [];
+    for (let diskIndex = 0; diskIndex < bookFiles.disks.length; diskIndex += 1) {
+      const disk = bookFiles.disks[diskIndex];
+      TPP.throwIfProgressCancelled(progressOp);
+      TPP.showProgress(
+        80 + Math.round((diskIndex / Math.max(1, bookFiles.disks.length)) * 15),
+        "Building D64 disk " + disk.diskNumber + " of " + bookFiles.disks.length + "... " +
+          disk.usage.totalFileSectors + "/" + disk.usage.usableFileSectors + " sectors",
       );
-      return;
+      const imageBytes = TPP.buildD64Image(disk.files, settings);
+      if (!imageBytes) {
+        alert("Failed to build D64 disk " + String(disk.diskNumber) + ".");
+        return;
+      }
+      diskImages.push({
+        diskNumber: disk.diskNumber,
+        bytes: imageBytes,
+      });
     }
-    const blob = new Blob([imageBytes], { type: "application/octet-stream" });
-    TPP.downloadBlob(TPP.exportD64FileName(settings), blob);
+    if (diskImages.length === 1) {
+      const blob = new Blob([diskImages[0].bytes], { type: "application/octet-stream" });
+      TPP.downloadBlob(TPP.exportD64FileName(settings), blob);
+    } else {
+      if (!window.JSZip) {
+        alert("ZIP export library failed to load for multi-disk D64 export.");
+        return;
+      }
+      const zip = new JSZip();
+      diskImages.forEach(function (diskImage) {
+        zip.file(
+          TPP.exportD64DiskFileName(settings, diskImage.diskNumber, diskImages.length),
+          diskImage.bytes,
+        );
+      });
+      TPP.showProgress(96, "Building multi-disk D64 archive...");
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      TPP.downloadBlob(
+        TPP.exportFileName(settings, { extension: "zip", kind: "c64-disks" }),
+        zipBlob,
+      );
+    }
     TPP.finishProgressOperation(progressOp);
-    TPP.showProgress(100, "Commodore 64 D64 export complete");
+    TPP.showProgress(100, "Commodore 64 D64 export complete (" + bookFiles.disks.length + " disk" + (bookFiles.disks.length === 1 ? "" : "s") + ")");
   } catch (error) {
     if (TPP.isProgressCancelledError(error)) {
       TPP.finishProgressOperation(progressOp, {
