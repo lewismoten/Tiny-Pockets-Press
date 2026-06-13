@@ -3986,19 +3986,26 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   };
   const config = options || {};
   const hasToc = Boolean(config.hasToc);
-  const bookInfoValue = function (key, fallback) {
+  const basicString = function (value) {
+    return String(value || "")
+      .replace(/[\r\n]+/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/"/g, "'");
+  };
+  const bookInfoValue = function (key, fallback, options) {
+    if (typeof TPP.bookInfoFieldValue === "function") {
+      const value = TPP.bookInfoFieldValue(book, key, options);
+      if (value) return basicString(value);
+    }
     if (typeof TPP.bookInfoValue === "function") {
       const value = TPP.bookInfoValue(book, key);
-      if (value) return String(value);
+      if (value) return basicString(value);
     }
-    if (book && book[key] != null && book[key] !== "") return String(book[key]);
+    if (book && book[key] != null && book[key] !== "") return basicString(book[key]);
     return fallback || "";
   };
   const normalizeLineText = function (value) {
-    return String(value || "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toUpperCase();
+    return basicString(value).trim().toUpperCase();
   };
   const wrapText = function (value, width) {
     const normalized = normalizeLineText(value);
@@ -4090,18 +4097,15 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     lines.forEach(function (line, index) {
       pushLine(
         lineNumber,
-        'PRINT CHR$(31);"' +
-          (index === 0 ? label : " ".repeat(label.length)) +
-          line +
-          '";CHR$(5)',
+        'PRINT "' + (index === 0 ? label : " ".repeat(label.length)) + line + '"',
       );
       lineNumber += 10;
     });
   };
   const subtitle = bookInfoValue("subtitle", "");
-  const seriesName = bookInfoValue("seriesName", "");
+  const seriesName = bookInfoValue("series", "");
   const publisher = bookInfoValue("publisher", "");
-  const pubDate = bookInfoValue("pubDate", "");
+  const pubDate = bookInfoValue("pubDate", "", { dateFormat: "year-month-day" });
   const pubYear = /^\d{4}/.test(pubDate) ? pubDate.slice(0, 4) : "";
   const titleLines = wrapText(
     bookInfoValue("title", "UNTITLED BOOK"),
@@ -4119,51 +4123,48 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     : 0;
   pushLine(5, 'DIM T$(200)');
   pushLine(10, 'POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147)');
-  pushLine(20, 'PRINT CHR$(158);"TINY POCKETS PRESS";CHR$(5)');
+  pushLine(20, 'POKE 646,7:PRINT "TINY POCKETS PRESS"');
   pushLine(30, 'PRINT');
+  pushLine(35, 'POKE 646,3');
   let lineNumber = 40;
   titleLines.forEach(function (line) {
-    pushLine(
-      lineNumber,
-      'PRINT CHR$(159);"' +
-        (lineNumber === 40 ? "TITLE: " : "       ") +
-        line +
-        '";CHR$(5)',
-    );
+    pushLine(lineNumber, 'PRINT "' + (lineNumber === 40 ? "TITLE: " : "       ") + line + '"');
     lineNumber += 10;
   });
   pushWrappedLabel("SUBTITLE: ", subtitle, 30);
+  pushLine(lineNumber, 'POKE 646,14');
+  lineNumber += 10;
   authorLines.forEach(function (line, index) {
-    pushLine(
-      lineNumber,
-      'PRINT CHR$(30);"' +
-        (index === 0 ? "AUTHOR: " : "        ") +
-        line +
-        '";CHR$(5)',
-    );
+    pushLine(lineNumber, 'PRINT "' + (index === 0 ? "AUTHOR: " : "        ") + line + '"');
     lineNumber += 10;
   });
+  pushLine(lineNumber, 'POKE 646,13');
+  lineNumber += 10;
   pushWrappedLabel("SERIES: ", seriesName, 32);
   pushWrappedLabel("PUBLISHER: ", publisher, 29);
   if (pubYear) {
-    pushLine(lineNumber, 'PRINT CHR$(31);"YEAR: ' + pubYear + '";CHR$(5)');
+    pushLine(lineNumber, 'PRINT "YEAR: ' + pubYear + '"');
     lineNumber += 10;
   }
-  pushLine(lineNumber, 'PRINT CHR$(31);"PAGES: ' + String(totalPages) + '";CHR$(5)');
+  pushLine(lineNumber, 'PRINT "PAGES: ' + String(totalPages) + '"');
   lineNumber += 10;
-  pushLine(lineNumber, 'PRINT CHR$(31);"CHAPTERS: ' + String(chapterCount) + '";CHR$(5)');
+  pushLine(lineNumber, 'PRINT "CHAPTERS: ' + String(chapterCount) + '"');
   lineNumber += 10;
-  pushLine(lineNumber, 'PRINT CHR$(31);"CONTENTS: ' + (hasToc ? "AVAILABLE" : "NONE") + '";CHR$(5)');
+  pushLine(lineNumber, 'PRINT "CONTENTS: ' + (hasToc ? "AVAILABLE" : "NONE") + '"');
   lineNumber += 10;
   pushLine(lineNumber, 'PRINT');
   lineNumber += 10;
+  pushLine(lineNumber, 'POKE 646,7');
+  lineNumber += 10;
   if (hasToc) {
-    pushLine(lineNumber, 'PRINT CHR$(156);"PRESS T FOR CONTENTS";CHR$(5)');
+    pushLine(lineNumber, 'PRINT "PRESS T FOR CONTENTS"');
     lineNumber += 10;
   }
-  pushLine(lineNumber, 'PRINT CHR$(156);"PRESS Q TO QUIT";CHR$(5)');
+  pushLine(lineNumber, 'PRINT "PRESS Q TO QUIT"');
   lineNumber += 10;
-  pushLine(lineNumber, 'PRINT CHR$(158);"WAITING FOR COMMAND...";CHR$(5)');
+  pushLine(lineNumber, 'POKE 646,1');
+  lineNumber += 10;
+  pushLine(lineNumber, 'PRINT "WAITING FOR COMMAND..."');
   lineNumber += 10;
   const pollLine = lineNumber;
   pushLine(lineNumber, 'GET A$:IF A$="" THEN ' + String(lineNumber));
@@ -4177,7 +4178,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(lineNumber, 'GOTO ' + String(pollLine));
   if (hasToc) {
     pushLine(300, 'GOSUB 600');
-    pushLine(310, 'IF TC=0 THEN PRINT:PRINT CHR$(156);"NO TABLE OF CONTENTS.";CHR$(5):GOSUB 1000:GOTO 10');
+    pushLine(310, 'IF TC=0 THEN PRINT:PRINT "NO TABLE OF CONTENTS.":GOSUB 1000:GOTO 10');
     pushLine(320, 'PG=0');
     pushLine(330, 'GOSUB 800');
     pushLine(340, 'GET A$:IF A$="" THEN 340');
@@ -4213,16 +4214,17 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(770, 'RD=RD+LL');
     pushLine(780, 'GET#3,A$:GET#3,A$:RD=RD+2');
     pushLine(790, 'GOTO 720');
-    pushLine(800, 'POKE 53280,4:POKE 53281,4:POKE 646,1:PRINT CHR$(147)');
-    pushLine(810, 'PRINT CHR$(158);"TABLE OF CONTENTS";CHR$(5)');
+    pushLine(800, 'POKE 53280,4:POKE 53281,4:POKE 646,7:PRINT CHR$(147)');
+    pushLine(810, 'PRINT "TABLE OF CONTENTS"');
     pushLine(820, 'PRINT');
+    pushLine(825, 'POKE 646,1');
     pushLine(830, 'S=PG*9+1:E=S+8:IF E>TC THEN E=TC');
     pushLine(840, 'FOR I=S TO E:GOSUB 1100:NEXT');
     pushLine(850, 'PRINT');
     pushLine(860, 'F$="H/HOME"');
     pushLine(865, 'IF PG>0 THEN F$="P/PREV "+F$');
     pushLine(867, 'IF E<TC THEN F$=F$+" N/NEXT"');
-    pushLine(870, 'PRINT CHR$(156);F$;CHR$(5)');
+    pushLine(870, 'POKE 646,7:PRINT F$:POKE 646,1');
     pushLine(875, 'RETURN');
     pushLine(1000, 'GET A$:IF A$="" THEN 1000');
     pushLine(1010, 'RETURN');
@@ -4248,8 +4250,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(1290, 'L$=MID$(L$,B+1)');
     pushLine(1300, 'GOTO 1230');
   }
-  pushLine(900, 'POKE 53280,2:POKE 53281,2:POKE 646,1:PRINT');
-  pushLine(910, 'PRINT CHR$(158);"QUIT TO BASIC (Y/N)?";CHR$(5)');
+  pushLine(900, 'POKE 53280,2:POKE 53281,2:POKE 646,7:PRINT');
+  pushLine(910, 'PRINT "QUIT TO BASIC (Y/N)?"');
   pushLine(920, 'GET A$:IF A$="" THEN 920');
   pushLine(930, 'IF A$="Y" THEN END');
   pushLine(940, 'IF A$="N" THEN POKE 53280,6:POKE 53281,6:POKE 646,1:GOTO 10');
