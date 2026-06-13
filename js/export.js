@@ -4222,31 +4222,27 @@ TPP.buildD64CoverRecordBytes = function (coverLayout) {
   if (!coverLayout || !coverLayout.bitmap || !coverLayout.screen) return null;
   const layout = TPP.d64BitmapCoverLayout();
   const spriteBlocks = TPP.d64BuildBitmapPromptSprites();
-  const spritePointerBase = (layout.spriteAddress - (layout.bitmapAddress & 0xc000)) / 64;
-  const loadAddress = layout.bitmapAddress;
-  const totalLength =
-    layout.spriteAddress +
-    spriteBlocks.length * 64 -
-    loadAddress;
-  const payload = new Uint8Array(totalLength);
-  payload.set(coverLayout.bitmap, layout.bitmapAddress - loadAddress);
-  payload.set(coverLayout.screen, layout.screenAddress - loadAddress);
+  const spritePointerBase = (layout.spriteAddress - (layout.bitmapAddress & 0xc000)) >> 6;
+  const screenBytes = new Uint8Array(1024);
+  screenBytes.set(coverLayout.screen, 0);
+  screenBytes[0x03f8] = spritePointerBase + 0;
+  screenBytes[0x03f9] = spritePointerBase + 1;
+  screenBytes[0x03fa] = spritePointerBase + 2;
+  screenBytes[0x03fb] = spritePointerBase + 3;
+  screenBytes[0x03fc] = spritePointerBase + 4;
+  screenBytes[0x03fd] = spritePointerBase + 5;
+  screenBytes[0x03fe] = spritePointerBase + 6;
+  screenBytes[0x03ff] = spritePointerBase + 7;
+  const spriteBytes = new Uint8Array(spriteBlocks.length * 64);
   spriteBlocks.forEach(function (sprite, index) {
-    payload.set(sprite, layout.spriteAddress - loadAddress + index * 64);
+    spriteBytes.set(sprite, index * 64);
   });
-  const screenOffset = layout.screenAddress - loadAddress;
-  payload[screenOffset + 0x03f8] = spritePointerBase + 0;
-  payload[screenOffset + 0x03f9] = spritePointerBase + 1;
-  payload[screenOffset + 0x03fa] = spritePointerBase + 2;
-  payload[screenOffset + 0x03fb] = spritePointerBase + 3;
-  payload[screenOffset + 0x03fc] = spritePointerBase + 4;
-  payload[screenOffset + 0x03fd] = spritePointerBase + 5;
-  payload[screenOffset + 0x03fe] = spritePointerBase + 6;
-  payload[screenOffset + 0x03ff] = spritePointerBase + 7;
-  const bytes = new Uint8Array(payload.length + 2);
-  bytes[0] = loadAddress & 0xff;
-  bytes[1] = (loadAddress >> 8) & 0xff;
-  bytes.set(payload, 2);
+  const bytes = new Uint8Array(2 + screenBytes.length + coverLayout.bitmap.length + spriteBytes.length);
+  bytes[0] = layout.screenAddress & 0xff;
+  bytes[1] = (layout.screenAddress >> 8) & 0xff;
+  bytes.set(screenBytes, 2);
+  bytes.set(coverLayout.bitmap, 2 + screenBytes.length);
+  bytes.set(spriteBytes, 2 + screenBytes.length + coverLayout.bitmap.length);
   return {
     backgroundIndex: 0,
     bytes: bytes,
@@ -4579,17 +4575,35 @@ TPP.exportD64IndexAndData = function (book, options) {
 };
 TPP.buildD64AssetLoaderProgramBytes = function () {
   const coverLayout = TPP.d64BitmapCoverLayout();
+  const coverPayloadBytes = TPP.buildD64CoverRecordBytes({
+    bitmap: new Uint8Array(8000),
+    screen: new Uint8Array(1000),
+  }).bytes.length - 2;
   const start = 0xc000;
-  const configBase = 0xc180;
+  const configBase = 0xc240;
   const vars = {
     status: configBase + 0,
     filenameLength: configBase + 1,
     filename: configBase + 2,
+    fileOpen: configBase + 34,
+    ptrLo: configBase + 35,
+    ptrHi: configBase + 36,
+    lenLo: configBase + 37,
+    lenHi: configBase + 38,
+    keyCounter: configBase + 39,
+    restoreFb: configBase + 40,
+    restoreFc: configBase + 41,
   };
   const KERNAL = {
     setnam: 0xffbd,
     setlfs: 0xffba,
-    load: 0xffd5,
+    open: 0xffc0,
+    close: 0xffc3,
+    chkin: 0xffc6,
+    clrchn: 0xffcc,
+    chrin: 0xffcf,
+    scnkey: 0xff9f,
+    getin: 0xffe4,
   };
   const code = [];
   const labels = {};
@@ -4613,26 +4627,51 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   const ldyImm = function (value) { emit(0xa0, value); };
   const ldaAbs = function (value) { emit(0xad, value & 0xff, (value >> 8) & 0xff); };
   const staAbs = function (value) { emit(0x8d, value & 0xff, (value >> 8) & 0xff); };
+  const incAbs = function (value) { emit(0xee, value & 0xff, (value >> 8) & 0xff); };
   const jsrAbs = function (value) { emit(0x20, value & 0xff, (value >> 8) & 0xff); };
   const jsrLabel = function (name) { emit(0x20); absoluteFixup(name); };
+  const jmpLabel = function (name) { emit(0x4c); absoluteFixup(name); };
   const bne = function (name) { emit(0xd0); relativeFixup(name); };
   const bcc = function (name) { emit(0x90); relativeFixup(name); };
   const beq = function (name) { emit(0xf0); relativeFixup(name); };
+  const bcs = function (name) { emit(0xb0); relativeFixup(name); };
   const andImm = function (value) { emit(0x29, value); };
   const oraImm = function (value) { emit(0x09, value); };
   const cmpAbs = function (value) { emit(0xcd, value & 0xff, (value >> 8) & 0xff); };
+  const sbcImm = function (value) { emit(0xe9, value); };
   const clc = function () { emit(0x18); };
   const sec = function () { emit(0x38); };
   const rts = function () { emit(0x60); };
   const dey = function () { emit(0x88); };
+  const pha = function () { emit(0x48); };
+  const pla = function () { emit(0x68); };
+  const staIndY = function (zp) { emit(0x91, zp); };
 
   label("start");
   ldaImm(0x02);
   staAbs(vars.status);
-  jsrLabel("loadFile");
-  bcc("loadOk");
+  ldaImm(0x00);
+  staAbs(vars.fileOpen);
+  ldaImm(0x20);
+  staAbs(vars.keyCounter);
+  ldaAbs(0x00fb);
+  staAbs(vars.restoreFb);
+  ldaAbs(0x00fc);
+  staAbs(vars.restoreFc);
+  jsrLabel("openFile");
+  bcc("fileOpenOk");
   rts();
-  label("loadOk");
+  label("fileOpenOk");
+  jsrLabel("readByte");
+  bcc("skipLoadLo");
+  jsrLabel("cleanup");
+  rts();
+  label("skipLoadLo");
+  jsrLabel("readByte");
+  bcc("prepareBitmap");
+  jsrLabel("cleanup");
+  rts();
+  label("prepareBitmap");
   ldaImm(0x00);
   staAbs(0xd015);
   staAbs(0xd010);
@@ -4655,31 +4694,165 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   ldaAbs(0xd011);
   oraImm(0x20);
   staAbs(0xd011);
+  ldaImm(coverLayout.screenAddress & 0xff);
+  staAbs(vars.ptrLo);
+  ldaImm((coverLayout.screenAddress >> 8) & 0xff);
+  staAbs(vars.ptrHi);
+  ldaImm(0x00);
+  staAbs(vars.lenLo);
+  ldaImm(0x04);
+  staAbs(vars.lenHi);
+  jsrLabel("streamSegment");
+  bcc("bitmapSegment");
+  jsrLabel("cleanup");
+  rts();
+  label("bitmapSegment");
+  ldaImm(coverLayout.bitmapAddress & 0xff);
+  staAbs(vars.ptrLo);
+  ldaImm((coverLayout.bitmapAddress >> 8) & 0xff);
+  staAbs(vars.ptrHi);
+  ldaImm(0x40);
+  staAbs(vars.lenLo);
+  ldaImm(0x1f);
+  staAbs(vars.lenHi);
+  jsrLabel("streamSegment");
+  bcc("spriteSegment");
+  jsrLabel("cleanup");
+  rts();
+  label("spriteSegment");
+  ldaImm(coverLayout.spriteAddress & 0xff);
+  staAbs(vars.ptrLo);
+  ldaImm((coverLayout.spriteAddress >> 8) & 0xff);
+  staAbs(vars.ptrHi);
+  ldaImm(0x00);
+  staAbs(vars.lenLo);
+  ldaImm(0x02);
+  staAbs(vars.lenHi);
+  jsrLabel("streamSegment");
+  bcc("loadOk");
+  jsrLabel("cleanup");
+  rts();
+  label("streamSegment");
+  ldaAbs(vars.lenLo);
+  oraImm(0x00);
+  bne("segmentRead");
+  ldaAbs(vars.lenHi);
+  beq("segmentDone");
+  ldaAbs(vars.keyCounter);
+  sec();
+  sbcImm(0x01);
+  staAbs(vars.keyCounter);
+  bne("segmentRead");
+  ldaImm(0x20);
+  staAbs(vars.keyCounter);
+  jsrLabel("scanKey");
+  bcc("segmentRead");
+  ldaImm(0x01);
+  staAbs(vars.status);
+  sec();
+  rts();
+  label("segmentRead");
+  jsrLabel("readByte");
+  bcc("haveDataByte");
+  sec();
+  rts();
+  label("haveDataByte");
+  ldyImm(0x00);
+  staIndY(0xfb);
+  incAbs(0x00fb);
+  bne("ptrOk");
+  incAbs(0x00fc);
+  label("ptrOk");
+  sec();
+  ldaAbs(vars.lenLo);
+  sbcImm(0x01);
+  staAbs(vars.lenLo);
+  ldaAbs(vars.lenHi);
+  sbcImm(0x00);
+  staAbs(vars.lenHi);
+  jmpLabel("streamSegment");
+  label("segmentDone");
+  clc();
+  rts();
+  label("loadOk");
+  jsrLabel("cleanup");
   jsrLabel("delayPrompt");
   jsrLabel("showPrompt");
   ldaImm(0x00);
   staAbs(vars.status);
   rts();
 
-  label("loadFile");
+  label("openFile");
   ldaAbs(vars.filenameLength);
   ldxImm(vars.filename & 0xff);
   ldyImm((vars.filename >> 8) & 0xff);
   jsrAbs(KERNAL.setnam);
-  ldaImm(0x01);
+  ldaImm(0x02);
   ldxImm(0x08);
-  ldyImm(0x01);
+  ldyImm(0x02);
   jsrAbs(KERNAL.setlfs);
-  ldaImm(0x00);
-  ldxImm(0x00);
-  ldyImm(0x00);
-  jsrAbs(KERNAL.load);
-  bcc("loadDone");
+  jsrAbs(KERNAL.open);
+  bcc("openOk");
   staAbs(vars.status);
   sec();
   rts();
-  label("loadDone");
+  label("openOk");
+  ldaImm(0x01);
+  staAbs(vars.fileOpen);
+  ldxImm(0x02);
+  jsrAbs(KERNAL.chkin);
+  bcc("chkinOk");
+  ldaImm(0x03);
+  staAbs(vars.status);
+  sec();
+  rts();
+  label("chkinOk");
+  ldaAbs(vars.ptrLo);
+  staAbs(0x00fb);
+  ldaAbs(vars.ptrHi);
+  staAbs(0x00fc);
   clc();
+  rts();
+
+  label("readByte");
+  ldaImm(0x00);
+  staAbs(0x0090);
+  jsrAbs(KERNAL.chrin);
+  pha();
+  ldaAbs(0x0090);
+  beq("readByteOk");
+  staAbs(vars.status);
+  pla();
+  sec();
+  rts();
+  label("readByteOk");
+  pla();
+  clc();
+  rts();
+
+  label("scanKey");
+  jsrAbs(KERNAL.scnkey);
+  jsrAbs(KERNAL.getin);
+  beq("noKey");
+  sec();
+  rts();
+  label("noKey");
+  clc();
+  rts();
+
+  label("cleanup");
+  jsrAbs(KERNAL.clrchn);
+  ldaAbs(vars.fileOpen);
+  beq("cleanupDone");
+  ldaImm(0x02);
+  jsrAbs(KERNAL.close);
+  ldaImm(0x00);
+  staAbs(vars.fileOpen);
+  label("cleanupDone");
+  ldaAbs(vars.restoreFb);
+  staAbs(0x00fb);
+  ldaAbs(vars.restoreFc);
+  staAbs(0x00fc);
   rts();
 
   label("delayPrompt");
@@ -4923,7 +5096,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24)');
   if (hasCover) {
     pushLine(8, 'GOSUB 3000');
-    pushLine(10, 'F$="COVER.IMG":GOSUB 3300:GOSUB 3330:GOSUB 3400');
+    pushLine(10, 'F$="0:COVER.IMG,P,R":GOSUB 3300:GOSUB 3330:GOSUB 3400');
     pushLine(12, 'IF CV=0 THEN 20');
     pushLine(14, 'GET A$:IF A$="" THEN 14');
     pushLine(16, 'GOTO 20');
@@ -5057,58 +5230,30 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3000, 'IF ML=1 THEN RETURN');
     pushLine(3005, 'LT$="INSTALLING LOADER":GOSUB 3500');
     pushLine(3010, 'RESTORE');
-    pushLine(3015, 'NI=0:BP=0:GOSUB 3730');
     pushLine(3020, 'FOR I=0 TO ' + String(loaderProgram.bytes.length - 1));
     pushLine(3022, 'READ B:POKE ' + String(loaderProgram.address) + '+I,B');
-    pushLine(3024, 'IF I<NI THEN 3028');
-    pushLine(3026, 'BP=INT(I*20/' + String(loaderProgram.bytes.length) + '):GOSUB 3730:NI=NI+32');
     pushLine(3028, 'NEXT');
-    pushLine(3030, 'BP=20:GOSUB 3730:ML=1:RETURN');
+    pushLine(3030, 'ML=1:RETURN');
     pushLine(3290, 'IF LEN(F$)>32 THEN F$=LEFT$(F$,32)');
     pushLine(3300, 'POKE ' + String(loaderProgram.filenameLengthAddress) + ',LEN(F$)');
     pushLine(3310, 'FOR I=1 TO LEN(F$):POKE ' + String(loaderProgram.filenameLengthAddress + 1) + '+I-1,ASC(MID$(F$,I,1)):NEXT');
     pushLine(3320, 'RETURN');
-    pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$="." THEN 3360');
-    pushLine(3340, 'LT$=LT$+A$:NEXT');
+    pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$=":" THEN 3350');
+    pushLine(3340, 'IF A$="." THEN 3360');
+    pushLine(3342, 'LT$=LT$+A$:NEXT');
+    pushLine(3350, 'LT$="LOADING ":NEXT');
     pushLine(3360, 'RETURN');
     pushLine(3400, 'SB=PEEK(56576):SV=PEEK(53272):S1=PEEK(53265):S2=PEEK(53270):SE=PEEK(53269):CV=0:GOSUB 3500');
     pushLine(3405, 'GET A$:IF A$<>"" THEN 3405');
     pushLine(3410, 'SYS ' + String(loaderProgram.address));
     pushLine(3420, 'LR=PEEK(' + String(loaderProgram.statusAddress) + '):IF LR=0 THEN 3430');
+    pushLine(3422, 'IF LR=1 THEN RETURN');
     pushLine(3424, 'POKE 646,2:PRINT:PRINT "COVER LOAD FAILED";LR:POKE 646,1:RETURN');
     pushLine(3430, 'CV=1:RETURN');
     pushLine(3500, 'POKE 53280,6:POKE 53281,6:POKE 646,7:PRINT CHR$(147)');
     pushLine(3510, 'PRINT LT$');
-    pushLine(3520, 'PRINT');
-    pushLine(3530, 'PRINT');
-    pushLine(3540, 'PRINT');
-    pushLine(3550, 'PRINT');
-    pushLine(3560, 'PRINT');
-    pushLine(3570, 'PRINT');
-    pushLine(3580, 'PRINT');
-    pushLine(3590, 'PRINT');
-    pushLine(3600, 'PRINT');
-    pushLine(3610, 'PRINT');
-    pushLine(3620, 'PRINT');
-    pushLine(3630, 'PRINT "         [....................]   0%"');
-    pushLine(3640, 'PRINT');
-    pushLine(3650, 'PRINT');
-    pushLine(3660, 'PRINT');
-    pushLine(3670, 'PRINT');
-    pushLine(3680, 'PRINT');
-    pushLine(3690, 'PRINT');
-    pushLine(3700, 'PRINT "             PLEASE WAIT"');
-    pushLine(3710, 'PRINT');
+    pushLine(3520, 'PRINT "PRESS ANY KEY TO SKIP"');
     pushLine(3720, 'POKE 646,1:RETURN');
-    pushLine(3730, 'POKE 646,7');
-    pushLine(3740, 'PRINT CHR$(19);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);');
-    pushLine(3750, 'B$="["');
-    pushLine(3760, 'FOR K=1 TO 20:IF K<=BP THEN B$=B$+"*":GOTO 3780');
-    pushLine(3770, 'B$=B$+"."');
-    pushLine(3780, 'NEXT');
-    pushLine(3785, 'B$=B$+"]"');
-    pushLine(3790, 'PC=INT(BP*5):PRINT B$;" ";MID$(STR$(PC),2)+"%   "');
-    pushLine(3792, 'POKE 646,1:RETURN');
     const loaderData = Array.from(loaderProgram.bytes);
     for (let offset = 0, line = 3800; offset < loaderData.length; offset += 16, line += 10) {
       pushLine(line, 'DATA ' + loaderData.slice(offset, offset + 16).join(','));
