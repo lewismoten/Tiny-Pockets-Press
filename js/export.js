@@ -3785,6 +3785,10 @@ TPP.d64CreateDirectoryEntry = function (filename, type, startTrack, startSector,
   entry[3] = startTrack;
   entry[4] = startSector;
   entry.set(TPP.d64EncodeFileName(filename, 16), 5);
+  // Keep the block count in both legacy slot positions so common viewers
+  // and emulators show the file size even if they parse raw directory slots differently.
+  entry[28] = sectorCount & 0xff;
+  entry[29] = (sectorCount >> 8) & 0xff;
   entry[30] = sectorCount & 0xff;
   entry[31] = (sectorCount >> 8) & 0xff;
   return entry;
@@ -3999,46 +4003,199 @@ TPP.d64CoverForcedGlyphPatterns = function () {
     ]),
   };
 };
-TPP.d64CoverLayout = function () {
+TPP.d64BitmapPromptGlyphs = function () {
+  const glyph = function (rows) {
+    const mask = new Uint8Array(64);
+    rows.forEach(function (row, y) {
+      String(row || "").slice(0, 8).split("").forEach(function (char, x) {
+        if (char !== " ") mask[y * 8 + x] = 1;
+      });
+    });
+    return mask;
+  };
   return {
-    vicBankRegister: 0x01,
-    screenAddress: 0xb800,
-    charsetAddress: 0xa000,
-    colorAddress: 0xd800,
-    d018: 0xe8,
+    " ": glyph([
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+    ]),
+    A: glyph([
+      "  XXXX  ",
+      " XX  XX ",
+      " XX  XX ",
+      " XXXXXX ",
+      " XX  XX ",
+      " XX  XX ",
+      " XX  XX ",
+      "        ",
+    ]),
+    E: glyph([
+      " XXXXXX ",
+      " XX     ",
+      " XX     ",
+      " XXXXX  ",
+      " XX     ",
+      " XX     ",
+      " XXXXXX ",
+      "        ",
+    ]),
+    K: glyph([
+      " XX  XX ",
+      " XX XX  ",
+      " XXXX   ",
+      " XXX    ",
+      " XXXX   ",
+      " XX XX  ",
+      " XX  XX ",
+      "        ",
+    ]),
+    N: glyph([
+      " XX  XX ",
+      " XXX XX ",
+      " XXXXXX ",
+      " XX XXX ",
+      " XX  XX ",
+      " XX  XX ",
+      " XX  XX ",
+      "        ",
+    ]),
+    P: glyph([
+      " XXXXX  ",
+      " XX  XX ",
+      " XX  XX ",
+      " XXXXX  ",
+      " XX     ",
+      " XX     ",
+      " XX     ",
+      "        ",
+    ]),
+    R: glyph([
+      " XXXXX  ",
+      " XX  XX ",
+      " XX  XX ",
+      " XXXXX  ",
+      " XX XX  ",
+      " XX  XX ",
+      " XX  XX ",
+      "        ",
+    ]),
+    S: glyph([
+      "  XXXX  ",
+      " XX  XX ",
+      " XX     ",
+      "  XXXX  ",
+      "     XX ",
+      " XX  XX ",
+      "  XXXX  ",
+      "        ",
+    ]),
+    Y: glyph([
+      " XX  XX ",
+      " XX  XX ",
+      "  XXXX  ",
+      "   XX   ",
+      "   XX   ",
+      "   XX   ",
+      "   XX   ",
+      "        ",
+    ]),
   };
 };
-TPP.buildD64CoverRecordBytes = function (coverLayout) {
-  if (!coverLayout || !coverLayout.charset || !coverLayout.screen || !coverLayout.fgColors) {
-    return null;
-  }
-  const charsetBytes = TPP.imageExportCharsetToChrBytes(coverLayout.charset);
-  if (!charsetBytes) return null;
-  const colorBytes = new Uint8Array(1000);
-  for (let i = 0; i < 1000; i += 1) colorBytes[i] = coverLayout.fgColors[i] & 0x0f;
-  const layout = TPP.d64CoverLayout();
-  const bytes = TPP.buildD64AssetBinBytes(
-    [
-      {
-        destination: layout.charsetAddress,
-        bytes: charsetBytes,
-      },
-      {
-        destination: layout.screenAddress,
-        bytes: coverLayout.screen,
-      },
-      {
-        destination: layout.colorAddress,
-        bytes: colorBytes,
-      },
-    ],
-    {
-      backgroundIndex: coverLayout.backgroundIndex & 0x0f,
-    },
-  );
-  if (!bytes) return null;
+TPP.d64BitmapCoverLayout = function () {
   return {
-    backgroundIndex: coverLayout.backgroundIndex & 0x0f,
+    vicBankRegister: 0x02,
+    bitmapAddress: 0x4000,
+    screenAddress: 0x6000,
+    spriteAddress: 0x6400,
+    d011: 0x3b,
+    d016: 0x08,
+    d018: 0x80,
+    borderColor: 0x00,
+    backgroundColor: 0x00,
+  };
+};
+TPP.d64NearestPaletteIndex = function (r, g, b, palette) {
+  let bestIndex = 0;
+  let bestDistance = Infinity;
+  for (let i = 0; i < palette.length; i += 1) {
+    const swatch = palette[i];
+    const dr = r - swatch[0];
+    const dg = g - swatch[1];
+    const db = b - swatch[2];
+    const distance = dr * dr + dg * dg + db * db;
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestIndex = i;
+    }
+  }
+  return bestIndex;
+};
+TPP.d64BuildBitmapPromptSprites = function () {
+  const glyphs = TPP.d64BitmapPromptGlyphs();
+  const groups = ["PRE", "SS ", "ANY", " KE", "Y"];
+  const sprites = [];
+  groups.forEach(function (group) {
+    const sprite = new Uint8Array(64);
+    for (let row = 0; row < 21; row += 1) {
+      if (row < 6 || row > 13) continue;
+      const glyphRow = row - 6;
+      for (let charIndex = 0; charIndex < 3; charIndex += 1) {
+        const glyph = glyphs[group.charAt(charIndex) || " "] || glyphs[" "];
+        for (let x = 0; x < 8; x += 1) {
+          if (!glyph[glyphRow * 8 + x]) continue;
+          const pixelIndex = charIndex * 8 + x;
+          const byteIndex = row * 3 + (pixelIndex >> 3);
+          sprite[byteIndex] |= 0x80 >> (pixelIndex & 7);
+        }
+      }
+    }
+    sprites.push(sprite);
+  });
+  const backdrop = new Uint8Array(64);
+  for (let row = 0; row < 21; row += 1) {
+    backdrop[row * 3] = 0xff;
+    backdrop[row * 3 + 1] = 0xff;
+    backdrop[row * 3 + 2] = 0xff;
+  }
+  sprites.push(backdrop);
+  return sprites;
+};
+TPP.buildD64CoverRecordBytes = function (coverLayout) {
+  if (!coverLayout || !coverLayout.bitmap || !coverLayout.screen) return null;
+  const layout = TPP.d64BitmapCoverLayout();
+  const spriteBlocks = TPP.d64BuildBitmapPromptSprites();
+  const spritePointerBase = (layout.spriteAddress - (layout.bitmapAddress & 0xc000)) / 64;
+  const loadAddress = layout.bitmapAddress;
+  const totalLength =
+    layout.spriteAddress +
+    spriteBlocks.length * 64 -
+    loadAddress;
+  const payload = new Uint8Array(totalLength);
+  payload.set(coverLayout.bitmap, layout.bitmapAddress - loadAddress);
+  payload.set(coverLayout.screen, layout.screenAddress - loadAddress);
+  spriteBlocks.forEach(function (sprite, index) {
+    payload.set(sprite, layout.spriteAddress - loadAddress + index * 64);
+  });
+  const screenOffset = layout.screenAddress - loadAddress;
+  payload[screenOffset + 0x03f8] = spritePointerBase + 0;
+  payload[screenOffset + 0x03f9] = spritePointerBase + 1;
+  payload[screenOffset + 0x03fa] = spritePointerBase + 2;
+  payload[screenOffset + 0x03fb] = spritePointerBase + 3;
+  payload[screenOffset + 0x03fc] = spritePointerBase + 4;
+  payload[screenOffset + 0x03fd] = spritePointerBase + 5;
+  payload[screenOffset + 0x03fe] = spritePointerBase + 5;
+  payload[screenOffset + 0x03ff] = spritePointerBase + 5;
+  const bytes = new Uint8Array(payload.length + 2);
+  bytes[0] = loadAddress & 0xff;
+  bytes[1] = (loadAddress >> 8) & 0xff;
+  bytes.set(payload, 2);
+  return {
+    backgroundIndex: 0,
     bytes: bytes,
   };
 };
@@ -4095,17 +4252,6 @@ TPP.exportD64CoverData = async function (settings, options) {
   if (!front) return null;
   const palette = TPP.imageExportNamedPalette("c64");
   if (!Array.isArray(palette) || !palette.length) return null;
-  const ditherLib = await TPP.loadImageExportDither();
-  const exportOptions = Object.assign(
-    {},
-    TPP.imageExportOptions(options),
-    {
-      format: "png",
-      colorDepth: "indexed",
-      palette: "c64",
-      dithering: "c64-custom-charset",
-    },
-  );
   const mount = document.createElement("div");
   mount.style.cssText = "position:fixed;left:-9999px;top:0;pointer-events:none;";
   document.body.appendChild(mount);
@@ -4128,12 +4274,115 @@ TPP.exportD64CoverData = async function (settings, options) {
     const rendered = await html2canvas(shell, TPP.html2canvasOptions({ scale: 1 }));
     const scaled = TPP.d64CoverScaleCanvas(rendered, 320, 200);
     if (!scaled) return null;
-    const buildCoverLayout = ditherLib && typeof ditherLib.buildC64CustomCharsetLayout === "function"
-      ? ditherLib.buildC64CustomCharsetLayout
-      : TPP.buildC64CustomCharsetLayout;
-    const coverLayout = typeof buildCoverLayout === "function"
-      ? buildCoverLayout(scaled, palette, exportOptions)
-      : null;
+    const ctx = scaled.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    const image = ctx.getImageData(0, 0, scaled.width, scaled.height);
+    const pixels = image.data;
+    const thresholdMap = [
+      [0, 8, 2, 10],
+      [12, 4, 14, 6],
+      [3, 11, 1, 9],
+      [15, 7, 13, 5],
+    ];
+    const indexed = new Uint8Array(scaled.width * scaled.height);
+    for (let y = 0; y < scaled.height; y += 1) {
+      for (let x = 0; x < scaled.width; x += 1) {
+        const offset = (y * scaled.width + x) * 4;
+        const bias = (((thresholdMap[y & 3][x & 3] + 0.5) / 16) - 0.5) * 48;
+        indexed[y * scaled.width + x] = TPP.d64NearestPaletteIndex(
+          Math.max(0, Math.min(255, pixels[offset] + bias)),
+          Math.max(0, Math.min(255, pixels[offset + 1] + bias)),
+          Math.max(0, Math.min(255, pixels[offset + 2] + bias)),
+          palette,
+        );
+      }
+    }
+    const paletteDistance = function (fromIndex, toIndex) {
+      const from = palette[fromIndex] || palette[0];
+      const to = palette[toIndex] || palette[0];
+      const dr = from[0] - to[0];
+      const dg = from[1] - to[1];
+      const db = from[2] - to[2];
+      return dr * dr + dg * dg + db * db;
+    };
+    const bitmap = new Uint8Array(8000);
+    const screen = new Uint8Array(1000);
+    for (let cellY = 0; cellY < 25; cellY += 1) {
+      for (let cellX = 0; cellX < 40; cellX += 1) {
+        const counts = new Uint16Array(16);
+        const cellIndexes = new Uint8Array(64);
+        let pixelCount = 0;
+        for (let row = 0; row < 8; row += 1) {
+          for (let col = 0; col < 8; col += 1) {
+            const index = indexed[(cellY * 8 + row) * 320 + (cellX * 8 + col)];
+            cellIndexes[pixelCount] = index;
+            counts[index] += 1;
+            pixelCount += 1;
+          }
+        }
+        const used = [];
+        for (let i = 0; i < 16; i += 1) {
+          if (counts[i]) used.push(i);
+        }
+        let bestLo = used[0] || 0;
+        let bestHi = used[0] || 0;
+        let bestBits = new Uint8Array(64);
+        let bestScore = Infinity;
+        if (used.length === 1) {
+          bestScore = 0;
+        } else {
+          for (let a = 0; a < used.length; a += 1) {
+            for (let b = a + 1; b < used.length; b += 1) {
+              const colorA = used[a];
+              const colorB = used[b];
+              let score = 0;
+              let countA = 0;
+              let countB = 0;
+              const bits = new Uint8Array(64);
+              for (let i = 0; i < 64; i += 1) {
+                const source = cellIndexes[i];
+                const distanceA = paletteDistance(source, colorA);
+                const distanceB = paletteDistance(source, colorB);
+                if (distanceB < distanceA) {
+                  score += distanceB;
+                  bits[i] = 1;
+                  countB += 1;
+                } else {
+                  score += distanceA;
+                  countA += 1;
+                }
+              }
+              let lo = colorA;
+              let hi = colorB;
+              if (countB > countA) {
+                lo = colorB;
+                hi = colorA;
+                for (let i = 0; i < 64; i += 1) bits[i] = bits[i] ? 0 : 1;
+              }
+              if (score < bestScore) {
+                bestScore = score;
+                bestLo = lo;
+                bestHi = hi;
+                bestBits = bits;
+              }
+            }
+          }
+        }
+        const cellIndex = cellY * 40 + cellX;
+        screen[cellIndex] = ((bestHi & 0x0f) << 4) | (bestLo & 0x0f);
+        for (let row = 0; row < 8; row += 1) {
+          let value = 0;
+          for (let col = 0; col < 8; col += 1) {
+            if (bestBits[row * 8 + col]) value |= 0x80 >> col;
+          }
+          bitmap[cellY * 320 + cellX * 8 + row] = value;
+        }
+      }
+    }
+    const coverLayout = {
+      bitmap: bitmap,
+      screen: screen,
+    };
     if (!coverLayout) return null;
     return TPP.buildD64CoverRecordBytes(coverLayout);
   } finally {
@@ -4276,55 +4525,22 @@ TPP.exportD64IndexAndData = function (book, options) {
   };
 };
 TPP.buildD64AssetLoaderProgramBytes = function () {
-  const coverLayout = TPP.d64CoverLayout();
+  const coverLayout = TPP.d64BitmapCoverLayout();
   const start = 0xc000;
-  const configBase = 0xc300;
+  const configBase = 0xc180;
   const vars = {
     status: configBase + 0,
     filenameLength: configBase + 1,
     filename: configBase + 2,
-    background: configBase + 34,
-    segmentCount: configBase + 35,
-    totalLo: configBase + 36,
-    totalHi: configBase + 37,
-    stepLo: configBase + 38,
-    stepHi: configBase + 39,
-    nextLo: configBase + 40,
-    nextHi: configBase + 41,
-    readLo: configBase + 42,
-    readHi: configBase + 43,
-    destLo: configBase + 44,
-    destHi: configBase + 45,
-    lenLo: configBase + 46,
-    lenHi: configBase + 47,
-    barCount: configBase + 48,
-    keyCounter: configBase + 49,
-    workLo: configBase + 50,
-    workHi: configBase + 51,
-    fileOpen: configBase + 52,
-    keyReady: configBase + 53,
-    restoreDd00: configBase + 54,
-    restoreD018: configBase + 55,
-    restoreZpFb: configBase + 56,
-    restoreZpFc: configBase + 57,
   };
   const KERNAL = {
     setnam: 0xffbd,
     setlfs: 0xffba,
-    open: 0xffc0,
-    close: 0xffc3,
-    chkin: 0xffc6,
-    clrchn: 0xffcc,
-    chrin: 0xffcf,
-    chrout: 0xffd2,
-    scnkey: 0xff9f,
-    getin: 0xffe4,
-    plot: 0xfff0,
+    load: 0xffd5,
   };
   const code = [];
   const labels = {};
   const fixups = [];
-  const dataBytes = [];
   const emit = function () {
     for (let i = 0; i < arguments.length; i += 1) code.push(arguments[i] & 0xff);
   };
@@ -4339,210 +4555,41 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     fixups.push({ kind: "rel", index: code.length, name: name });
     emit(0x00);
   };
-  const dataFixup = function (index) {
-    fixups.push({ kind: "abs-data", index: code.length, dataIndex: index });
-    emit(0x00, 0x00);
-  };
-  const dataLabel = function (bytes) {
-    const index = dataBytes.length;
-    dataBytes.push(Uint8Array.from(bytes));
-    return index;
-  };
   const ldaImm = function (value) { emit(0xa9, value); };
   const ldxImm = function (value) { emit(0xa2, value); };
   const ldyImm = function (value) { emit(0xa0, value); };
   const ldaAbs = function (value) { emit(0xad, value & 0xff, (value >> 8) & 0xff); };
   const staAbs = function (value) { emit(0x8d, value & 0xff, (value >> 8) & 0xff); };
-  const ldxAbs = function (value) { emit(0xae, value & 0xff, (value >> 8) & 0xff); };
-  const ldyAbs = function (value) { emit(0xac, value & 0xff, (value >> 8) & 0xff); };
-  const ldaAbsX = function (value) { emit(0xbd, value & 0xff, (value >> 8) & 0xff); };
-  const incAbs = function (value) { emit(0xee, value & 0xff, (value >> 8) & 0xff); };
-  const decAbs = function (value) { emit(0xce, value & 0xff, (value >> 8) & 0xff); };
   const jsrAbs = function (value) { emit(0x20, value & 0xff, (value >> 8) & 0xff); };
   const jsrLabel = function (name) { emit(0x20); absoluteFixup(name); };
-  const jmpLabel = function (name) { emit(0x4c); absoluteFixup(name); };
   const bne = function (name) { emit(0xd0); relativeFixup(name); };
-  const beq = function (name) { emit(0xf0); relativeFixup(name); };
   const bcc = function (name) { emit(0x90); relativeFixup(name); };
-  const bcs = function (name) { emit(0xb0); relativeFixup(name); };
-  const bpl = function (name) { emit(0x10); relativeFixup(name); };
-  const cmpImm = function (value) { emit(0xc9, value); };
-  const cpxImm = function (value) { emit(0xe0, value); };
-  const cpyImm = function (value) { emit(0xc0, value); };
-  const adcAbs = function (value) { emit(0x6d, value & 0xff, (value >> 8) & 0xff); };
-  const adcImm = function (value) { emit(0x69, value); };
-  const sbcImm = function (value) { emit(0xe9, value); };
+  const beq = function (name) { emit(0xf0); relativeFixup(name); };
   const andImm = function (value) { emit(0x29, value); };
   const oraImm = function (value) { emit(0x09, value); };
   const cmpAbs = function (value) { emit(0xcd, value & 0xff, (value >> 8) & 0xff); };
-  const sec = function () { emit(0x38); };
   const clc = function () { emit(0x18); };
+  const sec = function () { emit(0x38); };
   const rts = function () { emit(0x60); };
-  const iny = function () { emit(0xc8); };
-  const inx = function () { emit(0xe8); };
-  const dex = function () { emit(0xca); };
-  const tay = function () { emit(0xa8); };
-  const tax = function () { emit(0xaa); };
-  const tya = function () { emit(0x98); };
-  const aslA = function () { emit(0x0a); };
-  const pha = function () { emit(0x48); };
-  const pla = function () { emit(0x68); };
-  const staIndY = function (zp) { emit(0x91, zp); };
-  const percentTableIndex = dataLabel(
-    Array.from(
-      [
-        "  0%", "  5%", " 10%", " 15%", " 20%",
-        " 25%", " 30%", " 35%", " 40%", " 45%",
-        " 50%", " 55%", " 60%", " 65%", " 70%",
-        " 75%", " 80%", " 85%", " 90%", " 95%",
-        "100%",
-      ].join(""),
-      function (char) {
-        return char.charCodeAt(0) & 0xff;
-      },
-    ),
-  );
+  const dey = function () { emit(0x88); };
 
   label("start");
   ldaImm(0x02);
   staAbs(vars.status);
+  jsrLabel("loadFile");
+  bcc("loadOk");
+  rts();
+  label("loadOk");
   ldaImm(0x00);
-  staAbs(vars.fileOpen);
-  staAbs(vars.barCount);
-  staAbs(vars.readLo);
-  staAbs(vars.readHi);
-  staAbs(vars.keyReady);
-  ldaAbs(0x00fb);
-  staAbs(vars.restoreZpFb);
-  ldaAbs(0x00fc);
-  staAbs(vars.restoreZpFc);
-  jsrLabel("openFile");
-  bcc("fileOpenOk");
-  jmpLabel("done");
-  label("fileOpenOk");
-  jsrLabel("readByte");
-  bcc("haveBackground");
-  jmpLabel("done");
-  label("haveBackground");
-  staAbs(vars.background);
-  jsrLabel("readByte");
-  bcc("haveSegmentCount");
-  jmpLabel("done");
-  label("haveSegmentCount");
-  staAbs(vars.segmentCount);
-  jsrLabel("readByte");
-  bcc("haveTotalLo");
-  jmpLabel("done");
-  label("haveTotalLo");
-  staAbs(vars.totalLo);
-  jsrLabel("readByte");
-  bcc("haveTotalHi");
-  jmpLabel("done");
-  label("haveTotalHi");
-  staAbs(vars.totalHi);
-  jsrLabel("computeStep");
-  jsrLabel("drawProgress");
-  label("segmentLoop");
-  ldaAbs(vars.segmentCount);
-  bne("haveSegment");
-  jmpLabel("finish");
-  label("haveSegment");
-  jsrLabel("readByte");
-  bcc("skipSegmentFlags");
-  jmpLabel("done");
-  label("skipSegmentFlags");
-  jsrLabel("readByte");
-  bcc("haveDestLo");
-  jmpLabel("done");
-  label("haveDestLo");
-  staAbs(vars.destLo);
-  jsrLabel("readByte");
-  bcc("haveDestHi");
-  jmpLabel("done");
-  label("haveDestHi");
-  staAbs(vars.destHi);
-  ldaAbs(vars.destLo);
-  staAbs(0x00fb);
-  ldaAbs(vars.destHi);
-  staAbs(0x00fc);
-  jsrLabel("readByte");
-  bcc("haveLenLo");
-  jmpLabel("done");
-  label("haveLenLo");
-  staAbs(vars.lenLo);
-  jsrLabel("readByte");
-  bcc("haveLenHi");
-  jmpLabel("done");
-  label("haveLenHi");
-  staAbs(vars.lenHi);
-  label("byteLoop");
-  ldaAbs(vars.lenLo);
-  oraImm(0x00);
-  bne("loadByte");
-  ldaAbs(vars.lenHi);
-  beq("segmentDone");
-  label("loadByte");
-  decAbs(vars.keyCounter);
-  bne("readAndStore");
-  ldaImm(0x10);
-  staAbs(vars.keyCounter);
-  jsrLabel("scanKey");
-  bcc("readAndStore");
-  jmpLabel("abort");
-  label("readAndStore");
-  jsrLabel("readByte");
-  bcc("haveDataByte");
-  jmpLabel("done");
-  label("haveDataByte");
-  ldyImm(0x00);
-  staIndY(0xfb);
-  incAbs(0x00fb);
-  bne("destOk");
-  incAbs(0x00fc);
-  label("destOk");
-  sec();
-  ldaAbs(vars.lenLo);
-  sbcImm(0x01);
-  staAbs(vars.lenLo);
-  ldaAbs(vars.lenHi);
-  sbcImm(0x00);
-  staAbs(vars.lenHi);
-  incAbs(vars.readLo);
-  bne("progressCheck");
-  incAbs(vars.readHi);
-  label("progressCheck");
-  ldaAbs(vars.readHi);
-  cmpAbs(vars.nextHi);
-  bcc("byteLoop");
-  bne("advanceBar");
-  ldaAbs(vars.readLo);
-  cmpAbs(vars.nextLo);
-  bcc("byteLoop");
-  label("advanceBar");
-  ldaAbs(vars.barCount);
-  cmpImm(20);
-  bcs("byteLoop");
-  incAbs(vars.barCount);
-  clc();
-  ldaAbs(vars.nextLo);
-  adcAbs(vars.stepLo);
-  staAbs(vars.nextLo);
-  ldaAbs(vars.nextHi);
-  adcAbs(vars.stepHi);
-  staAbs(vars.nextHi);
-  jsrLabel("drawProgress");
-  jmpLabel("byteLoop");
-  label("segmentDone");
-  decAbs(vars.segmentCount);
-  jmpLabel("segmentLoop");
-  label("finish");
-  ldaImm(20);
-  staAbs(vars.barCount);
-  jsrLabel("drawProgress");
-  jsrLabel("cleanup");
-  ldaAbs(vars.background);
-  andImm(0x0f);
+  staAbs(0xd015);
+  staAbs(0xd010);
+  staAbs(0xd017);
+  staAbs(0xd01d);
+  staAbs(0xd01b);
+  staAbs(0xd01c);
+  ldaImm(coverLayout.borderColor);
   staAbs(0xd020);
+  ldaImm(coverLayout.backgroundColor);
   staAbs(0xd021);
   ldaAbs(0xdd00);
   andImm(0xfc);
@@ -4550,201 +4597,100 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(0xdd00);
   ldaImm(coverLayout.d018);
   staAbs(0xd018);
+  ldaImm(coverLayout.d016);
+  staAbs(0xd016);
+  ldaAbs(0xd011);
+  oraImm(0x20);
+  staAbs(0xd011);
+  jsrLabel("delayPrompt");
+  jsrLabel("showPrompt");
   ldaImm(0x00);
   staAbs(vars.status);
   rts();
-  label("abort");
-  ldaImm(0x01);
-  staAbs(vars.status);
-  label("done");
-  jsrLabel("cleanup");
-  rts();
 
-  label("openFile");
+  label("loadFile");
   ldaAbs(vars.filenameLength);
   ldxImm(vars.filename & 0xff);
   ldyImm((vars.filename >> 8) & 0xff);
   jsrAbs(KERNAL.setnam);
-  ldaImm(0x02);
+  ldaImm(0x01);
   ldxImm(0x08);
-  ldyImm(0x02);
+  ldyImm(0x00);
   jsrAbs(KERNAL.setlfs);
-  jsrAbs(KERNAL.open);
-  bcs("openFail");
-  ldaImm(0x01);
-  staAbs(vars.fileOpen);
-  ldxImm(0x02);
-  jsrAbs(KERNAL.chkin);
-  bcc("openDone");
-  ldaImm(0x03);
-  staAbs(vars.status);
-  sec();
-  rts();
-  label("openFail");
-  ldaImm(0x02);
-  staAbs(vars.status);
-  sec();
-  rts();
-  label("openDone");
   ldaImm(0x00);
-  staAbs(0x0090);
-  ldaImm(0x10);
-  staAbs(vars.keyCounter);
-  clc();
-  rts();
-
-  label("cleanup");
-  jsrAbs(KERNAL.clrchn);
-  ldaAbs(vars.fileOpen);
-  beq("cleanupDone");
-  ldaImm(0x02);
-  jsrAbs(KERNAL.close);
-  ldaImm(0x00);
-  staAbs(vars.fileOpen);
-  label("cleanupDone");
-  ldaAbs(vars.restoreZpFb);
-  staAbs(0x00fb);
-  ldaAbs(vars.restoreZpFc);
-  staAbs(0x00fc);
-  rts();
-
-  label("readByte");
-  ldaImm(0x00);
-  staAbs(0x0090);
-  jsrAbs(KERNAL.chrin);
-  pha();
-  ldaAbs(0x0090);
-  beq("readByteOk");
-  pha();
-  andImm(64);
-  bne("readByteEofOk");
-  pla();
-  staAbs(vars.status);
-  pla();
-  sec();
-  rts();
-  label("readByteEofOk");
-  pla();
-  label("readByteOk");
-  pla();
-  clc();
-  rts();
-
-  label("scanKey");
-  jsrAbs(KERNAL.scnkey);
-  jsrAbs(KERNAL.getin);
-  beq("armKey");
-  pha();
-  ldaAbs(vars.keyReady);
-  beq("discardKey");
-  pla();
-  cmpImm(32);
-  bne("noKey");
-  sec();
-  rts();
-  label("discardKey");
-  pla();
-  jmpLabel("noKey");
-  label("armKey");
-  ldaImm(0x01);
-  staAbs(vars.keyReady);
-  label("noKey");
-  clc();
-  rts();
-
-  label("computeStep");
-  ldaAbs(vars.totalLo);
-  staAbs(vars.workLo);
-  ldaAbs(vars.totalHi);
-  staAbs(vars.workHi);
-  ldaImm(0x00);
-  staAbs(vars.stepLo);
-  staAbs(vars.stepHi);
-  label("stepLoop");
-  ldaAbs(vars.workHi);
-  bne("stepSubtract");
-  ldaAbs(vars.workLo);
-  cmpImm(20);
-  bcc("stepDone");
-  label("stepSubtract");
-  sec();
-  ldaAbs(vars.workLo);
-  sbcImm(20);
-  staAbs(vars.workLo);
-  ldaAbs(vars.workHi);
-  sbcImm(0x00);
-  staAbs(vars.workHi);
-  incAbs(vars.stepLo);
-  bne("stepLoop");
-  incAbs(vars.stepHi);
-  jmpLabel("stepLoop");
-  label("stepDone");
-  ldaAbs(vars.stepLo);
-  oraImm(0x00);
-  bne("haveStep");
-  ldaAbs(vars.stepHi);
-  bne("haveStep");
-  ldaImm(0x01);
-  staAbs(vars.stepLo);
-  ldaImm(0x00);
-  staAbs(vars.stepHi);
-  label("haveStep");
-  ldaAbs(vars.stepLo);
-  staAbs(vars.nextLo);
-  ldaAbs(vars.stepHi);
-  staAbs(vars.nextHi);
-  rts();
-
-  label("drawProgress");
-  clc();
-  ldxImm(9);
-  ldyImm(12);
-  jsrAbs(KERNAL.plot);
-  ldaImm("[".charCodeAt(0));
-  jsrAbs(KERNAL.chrout);
+  ldxImm(0x00);
   ldyImm(0x00);
-  label("barLoop");
-  cpyImm(20);
-  beq("barDone");
-  tya();
-  cmpAbs(vars.barCount);
-  bcc("barFill");
-  ldaImm(".".charCodeAt(0));
-  jsrAbs(KERNAL.chrout);
-  jmpLabel("barNext");
-  label("barFill");
-  ldaImm("*".charCodeAt(0));
-  jsrAbs(KERNAL.chrout);
-  label("barNext");
-  iny();
-  jmpLabel("barLoop");
-  label("barDone");
-  ldaImm("]".charCodeAt(0));
-  jsrAbs(KERNAL.chrout);
-  ldaImm(" ".charCodeAt(0));
-  jsrAbs(KERNAL.chrout);
-  ldaAbs(vars.barCount);
-  aslA();
-  aslA();
-  tax();
-  ldyImm(0x00);
-  label("percentLoop");
-  emit(0xbd);
-  dataFixup(percentTableIndex);
-  jsrAbs(KERNAL.chrout);
-  inx();
-  iny();
-  cpyImm(4);
-  bne("percentLoop");
+  jsrAbs(KERNAL.load);
+  bcc("loadDone");
+  staAbs(vars.status);
+  sec();
+  rts();
+  label("loadDone");
+  clc();
   rts();
 
-  const dataBase = start + code.length;
-  let dataOffset = 0;
-  dataBytes.forEach(function (chunk) {
-    chunk._offset = dataOffset;
-    dataOffset += chunk.length;
-    emit.apply(null, Array.from(chunk));
-  });
+  label("delayPrompt");
+  ldyImm(90);
+  label("delayFrame");
+  ldaImm(0xff);
+  label("waitHigh");
+  cmpAbs(0xd012);
+  bne("waitHigh");
+  label("waitLow");
+  cmpAbs(0xd012);
+  beq("waitLow");
+  dey();
+  bne("delayFrame");
+  rts();
+
+  label("showPrompt");
+  ldaImm(100);
+  staAbs(0xd000);
+  ldaImm(177);
+  staAbs(0xd001);
+  ldaImm(124);
+  staAbs(0xd002);
+  ldaImm(177);
+  staAbs(0xd003);
+  ldaImm(148);
+  staAbs(0xd004);
+  ldaImm(177);
+  staAbs(0xd005);
+  ldaImm(172);
+  staAbs(0xd006);
+  ldaImm(177);
+  staAbs(0xd007);
+  ldaImm(196);
+  staAbs(0xd008);
+  ldaImm(177);
+  staAbs(0xd009);
+  ldaImm(88);
+  staAbs(0xd00a);
+  ldaImm(177);
+  staAbs(0xd00b);
+  ldaImm(136);
+  staAbs(0xd00c);
+  ldaImm(177);
+  staAbs(0xd00d);
+  ldaImm(184);
+  staAbs(0xd00e);
+  ldaImm(177);
+  staAbs(0xd00f);
+  ldaImm(0x01);
+  staAbs(0xd027);
+  staAbs(0xd028);
+  staAbs(0xd029);
+  staAbs(0xd02a);
+  staAbs(0xd02b);
+  ldaImm(0x00);
+  staAbs(0xd02c);
+  staAbs(0xd02d);
+  staAbs(0xd02e);
+  ldaImm(0xe0);
+  staAbs(0xd01d);
+  ldaImm(0xff);
+  staAbs(0xd015);
+  rts();
   fixups.forEach(function (fixup) {
     if (fixup.kind === "abs") {
       const target = labels[fixup.name];
@@ -4760,12 +4706,6 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
         throw new Error("Out-of-range branch to " + fixup.name + " (" + String(delta) + ")");
       }
       code[fixup.index] = delta & 0xff;
-      return;
-    }
-    if (fixup.kind === "abs-data") {
-      const absolute = dataBase + dataBytes[fixup.dataIndex]._offset;
-      code[fixup.index] = absolute & 0xff;
-      code[fixup.index + 1] = (absolute >> 8) & 0xff;
     }
   });
   return {
@@ -4773,15 +4713,6 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     configBase: configBase,
     filenameLengthAddress: vars.filenameLength,
     statusAddress: vars.status,
-    restoreDd00Address: vars.restoreDd00,
-    restoreD018Address: vars.restoreD018,
-    backgroundAddress: vars.background,
-    segmentCountAddress: vars.segmentCount,
-    totalLoAddress: vars.totalLo,
-    totalHiAddress: vars.totalHi,
-    readLoAddress: vars.readLo,
-    readHiAddress: vars.readHi,
-    barCountAddress: vars.barCount,
     bytes: new Uint8Array(code),
   };
 };
@@ -4941,12 +4872,12 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24)');
   if (hasCover) {
     pushLine(8, 'GOSUB 3000');
-    pushLine(10, 'F$="0:COVER.BIN,S,R":GOSUB 3300:GOSUB 3400');
+    pushLine(10, 'F$="0:COVER.IMG,P,R":GOSUB 3300:GOSUB 3330:GOSUB 3400');
     pushLine(12, 'IF CV=0 THEN 20');
-    pushLine(14, 'GET A$:IF A$<>" " THEN 14');
+    pushLine(14, 'GET A$:IF A$="" THEN 14');
     pushLine(16, 'GOTO 20');
   }
-  pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:CV=0');
+  pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:POKE 53265,S1:POKE 53270,S2:POKE 53269,SE:CV=0');
   pushLine(30, 'GOSUB 200');
   pushLine(40, 'POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147)');
   pushLine(50, 'POKE 646,7:PRINT "TINY POCKETS PRESS"');
@@ -5086,17 +5017,16 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3300, 'POKE ' + String(loaderProgram.filenameLengthAddress) + ',LEN(F$)');
     pushLine(3310, 'FOR I=1 TO LEN(F$):POKE ' + String(loaderProgram.filenameLengthAddress + 1) + '+I-1,ASC(MID$(F$,I,1)):NEXT');
     pushLine(3320, 'RETURN');
-    pushLine(3400, 'SB=PEEK(56576):SV=PEEK(53272):CV=0:LT$="LOADING COVER":GOSUB 3500');
-    pushLine(3402, 'POKE ' + String(loaderProgram.restoreDd00Address) + ',SB');
-    pushLine(3404, 'POKE ' + String(loaderProgram.restoreD018Address) + ',SV');
+    pushLine(3330, 'LT$="LOADING ":FOR J=1 TO LEN(F$):A$=MID$(F$,J,1):IF A$=":" THEN 3350');
+    pushLine(3340, 'IF A$="." THEN 3360');
+    pushLine(3342, 'LT$=LT$+A$:NEXT');
+    pushLine(3350, 'LT$="LOADING ":NEXT');
+    pushLine(3360, 'RETURN');
+    pushLine(3400, 'SB=PEEK(56576):SV=PEEK(53272):S1=PEEK(53265):S2=PEEK(53270):SE=PEEK(53269):CV=0:GOSUB 3500');
     pushLine(3405, 'GET A$:IF A$<>"" THEN 3405');
     pushLine(3410, 'SYS ' + String(loaderProgram.address));
     pushLine(3420, 'LR=PEEK(' + String(loaderProgram.statusAddress) + '):IF LR=0 THEN 3430');
-    pushLine(3422, 'IF LR<>1 THEN 3424');
-    pushLine(3423, 'POKE 646,2:PRINT:PRINT "COVER SKIPPED":POKE 646,1:RETURN');
     pushLine(3424, 'POKE 646,2:PRINT:PRINT "COVER LOAD FAILED";LR:POKE 646,1:RETURN');
-    pushLine(3426, 'SG=PEEK(' + String(loaderProgram.segmentCountAddress) + '):TT=PEEK(' + String(loaderProgram.totalLoAddress) + ')+256*PEEK(' + String(loaderProgram.totalHiAddress) + '):RR=PEEK(' + String(loaderProgram.readLoAddress) + ')+256*PEEK(' + String(loaderProgram.readHiAddress) + ')');
-    pushLine(3428, 'IF SG=0 OR RR=0 THEN POKE 646,2:PRINT:PRINT "COVER HEADER";SG;TT;RR:POKE 646,1:RETURN');
     pushLine(3430, 'CV=1:RETURN');
     pushLine(3500, 'POKE 53280,6:POKE 53281,6:POKE 646,7:PRINT CHR$(147)');
     pushLine(3510, 'PRINT LT$');
@@ -5118,8 +5048,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3670, 'PRINT');
     pushLine(3680, 'PRINT');
     pushLine(3690, 'PRINT');
-    pushLine(3700, 'PRINT "               TO SKIP"');
-    pushLine(3710, 'PRINT "             PRESS SPACE"');
+    pushLine(3700, 'PRINT "             PLEASE WAIT"');
+    pushLine(3710, 'PRINT');
     pushLine(3720, 'POKE 646,1:RETURN');
     pushLine(3730, 'POKE 646,7');
     pushLine(3740, 'PRINT CHR$(19);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(17);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);CHR$(29);');
@@ -5210,8 +5140,8 @@ TPP.exportImagesD64 = async function (options) {
       ...(coverRecord && coverRecord.bytes && coverRecord.bytes.length
         ? [
           {
-            name: "COVER.BIN",
-            type: 0x81,
+            name: "COVER.IMG",
+            type: 0x82,
             data: coverRecord.bytes,
           },
         ]
