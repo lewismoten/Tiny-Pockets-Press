@@ -1085,6 +1085,18 @@ TPP.renderImageExportPreview = async function () {
   };
   let pendingAfterProgress = null;
   let afterProgressFrame = 0;
+  const colorCss = function (color) {
+    if (!Array.isArray(color) || color.length < 3) return "rgb(0 0 0)";
+    return (
+      "rgb(" +
+      Math.max(0, Math.min(255, Number(color[0]) || 0)) +
+      " " +
+      Math.max(0, Math.min(255, Number(color[1]) || 0)) +
+      " " +
+      Math.max(0, Math.min(255, Number(color[2]) || 0)) +
+      ")"
+    );
+  };
   const compareStageMarkup = function (beforeSrc, afterSrc, beforeSize, afterSize) {
     return (
       '<div class="image-export-compare" style="' +
@@ -1110,13 +1122,20 @@ TPP.renderImageExportPreview = async function () {
   };
   const renderAfterProgressPreview = function (progress) {
     if (!progress || !progress.canvas || TPP.imageExportPreviewToken !== token) return;
+    const compare = stage.querySelector(".image-export-compare");
     const after = stage.querySelector(".image-export-compare-after");
-    if (!after || !after.classList.contains("image-export-compare-after-empty")) return;
+    if (!compare || !after || !after.classList.contains("image-export-compare-after-empty")) return;
+    let backgroundLayer = after.querySelector(".image-export-background-preview");
+    if (!backgroundLayer) {
+      backgroundLayer = document.createElement("div");
+      backgroundLayer.className = "image-export-background-preview";
+      after.appendChild(backgroundLayer);
+    }
     let canvas = after.querySelector(".image-export-compare-after-progress");
     if (!canvas) {
       canvas = document.createElement("canvas");
       canvas.className = "image-export-compare-after-progress";
-      after.replaceChildren(canvas);
+      after.appendChild(canvas);
     }
     if (
       canvas.width !== progress.canvas.width ||
@@ -1127,8 +1146,60 @@ TPP.renderImageExportPreview = async function () {
     }
     const ctx = canvas.getContext("2d");
     if (ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(progress.canvas, 0, 0);
+      if (progress.phase === "Background" && Array.isArray(progress.backgroundColor)) {
+        canvas.style.visibility = "hidden";
+        backgroundLayer.style.display = "block";
+        backgroundLayer.style.backgroundColor = colorCss(progress.backgroundColor);
+        const renderCell = function (cell) {
+          if (!cell || !Array.isArray(cell.color)) return;
+          const key =
+            String(Number(cell.x) || 0) + ":" + String(Number(cell.y) || 0);
+          let cellEl = backgroundLayer.querySelector(
+            '.image-export-background-cell[data-cell-key="' + key + '"]',
+          );
+          if (!cellEl) {
+            cellEl = document.createElement("div");
+            cellEl.className = "image-export-background-cell";
+            cellEl.setAttribute("data-cell-key", key);
+            backgroundLayer.appendChild(cellEl);
+          }
+          cellEl.style.left =
+            (((Number(cell.x) || 0) / progress.canvas.width) * 100).toFixed(4) + "%";
+          cellEl.style.top =
+            (((Number(cell.y) || 0) / progress.canvas.height) * 100).toFixed(4) + "%";
+          cellEl.style.width =
+            ((Math.max(1, Number(cell.width) || 0) / progress.canvas.width) * 100).toFixed(4) + "%";
+          cellEl.style.height =
+            ((Math.max(1, Number(cell.height) || 0) / progress.canvas.height) * 100).toFixed(4) + "%";
+          cellEl.style.backgroundColor = colorCss(cell.color);
+        };
+        if (Array.isArray(progress.evaluatedCells) && progress.evaluatedCells.length) {
+          backgroundLayer.replaceChildren();
+          for (let i = 0; i < progress.evaluatedCells.length; i += 1) {
+            renderCell(progress.evaluatedCells[i]);
+          }
+        } else if (
+          Array.isArray(progress.cellColor) &&
+          Number.isFinite(progress.cellX) &&
+          Number.isFinite(progress.cellY) &&
+          Number.isFinite(progress.cellWidth) &&
+          Number.isFinite(progress.cellHeight)
+        ) {
+          renderCell({
+            x: progress.cellX,
+            y: progress.cellY,
+            width: progress.cellWidth,
+            height: progress.cellHeight,
+            color: progress.cellColor,
+          });
+        }
+      } else {
+        backgroundLayer.style.display = "none";
+        backgroundLayer.replaceChildren();
+        canvas.style.visibility = "visible";
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(progress.canvas, 0, 0);
+      }
     }
     let frame = after.querySelector(".image-export-progress-cell");
     if (
@@ -1164,7 +1235,14 @@ TPP.renderImageExportPreview = async function () {
     }
   };
   const scheduleAfterProgressPreview = function (progress) {
-    pendingAfterProgress = progress || null;
+    pendingAfterProgress = progress
+      ? Object.assign({}, progress, {
+        canvas:
+          progress.canvas && progress.canvas.width && progress.canvas.height
+            ? cloneCanvas(progress.canvas)
+            : progress.canvas,
+      })
+      : null;
     if (afterProgressFrame) return;
     const schedule =
       typeof window.requestAnimationFrame === "function"

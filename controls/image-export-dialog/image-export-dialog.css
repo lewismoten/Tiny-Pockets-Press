@@ -229,18 +229,31 @@
 .image-export-compare-after-empty {
   background: transparent;
 }
+.image-export-background-preview {
+  position: absolute;
+  inset: 0;
+  display: none;
+  z-index: 2;
+}
+.image-export-background-cell {
+  position: absolute;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
 .image-export-compare-after-progress {
   display: block;
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 .image-export-progress-cell {
   position: absolute;
   border: 1px solid rgb(255 255 255 / 0.95);
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.55);
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 .image-export-compare-divider {
   position: absolute;
@@ -252,7 +265,7 @@
   box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35);
   transform: translateX(-50%);
   pointer-events: none;
-  z-index: 3;
+  z-index: 4;
 }
 .image-export-compare-label {
   position: absolute;
