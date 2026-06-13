@@ -4161,8 +4161,11 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(830, 'S=PG*9+1:E=S+8:IF E>TC THEN E=TC');
     pushLine(840, 'FOR I=S TO E:GOSUB 1100:NEXT');
     pushLine(850, 'PRINT');
-    pushLine(860, 'PRINT "P/PREV N/NEXT H/HOME"');
-    pushLine(870, 'RETURN');
+    pushLine(860, 'F$="H/HOME"');
+    pushLine(865, 'IF PG>0 THEN F$="P/PREV "+F$');
+    pushLine(867, 'IF E<TC THEN F$=F$+" N/NEXT"');
+    pushLine(870, 'PRINT F$');
+    pushLine(875, 'RETURN');
     pushLine(1000, 'GET A$:IF A$="" THEN 1000');
     pushLine(1010, 'RETURN');
     pushLine(1100, 'X=I-S+1:P$=MID$(STR$(X),2)+". ":L$=T$(I)');
