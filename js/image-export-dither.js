@@ -340,6 +340,17 @@ export function init(TPP) {
       }
     }
   };
+  const applyC64BayerPrepass = function (data, width, height, palette) {
+    if (!data || !width || !height || !Array.isArray(palette) || !palette.length) {
+      return;
+    }
+    applyPaletteOrderedMatrix(data, width, height, palette, [
+      [0, 8, 2, 10],
+      [12, 4, 14, 6],
+      [3, 11, 1, 9],
+      [15, 7, 13, 5],
+    ], 64);
+  };
   const quadrantMask = function (bits) {
     const mask = new Uint8Array(64);
     for (let y = 0; y < 8; y += 1) {
@@ -1221,6 +1232,7 @@ export function init(TPP) {
   ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(6, palette.length));
+    applyC64BayerPrepass(data, width, height, palette);
     const glyphCatalog =
       Array.isArray(glyphs) && glyphs.length ? glyphs : petsciiGlyphs;
     const paletteHash = hashPalette(palette);
@@ -1326,6 +1338,7 @@ export function init(TPP) {
   ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(6, palette.length));
+    applyC64BayerPrepass(data, width, height, palette);
     const originalData = new Uint8ClampedArray(data);
     const glyphCatalog =
       Array.isArray(glyphs) && glyphs.length ? glyphs : petsciiGlyphs;
@@ -1452,6 +1465,7 @@ export function init(TPP) {
   ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(4, palette.length));
+    applyC64BayerPrepass(data, width, height, palette);
     const config = options || {};
     const selectionBias = clampByte(
       config.selectionBias == null ? 128 : config.selectionBias,
@@ -1635,6 +1649,7 @@ export function init(TPP) {
   ) {
     const cellSize = 8;
     const colorLimit = Math.max(2, Math.min(4, palette.length));
+    applyC64BayerPrepass(data, width, height, palette);
     const originalData = new Uint8ClampedArray(data);
     const config = options || {};
     const selectionBias = clampByte(
