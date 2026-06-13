@@ -925,6 +925,156 @@ export function init(TPP) {
         return entry.mask;
       });
   };
+  const selectVariedCharsetPatternsAsync = async function (
+    stats,
+    limit,
+    bias,
+    options,
+  ) {
+    const entries = Array.isArray(stats) ? stats.slice() : [];
+    const maxPatterns = Math.max(1, Math.min(Number(limit) || 256, entries.length));
+    const config = options || {};
+    const maybeYield =
+      typeof config.maybeYield === "function"
+        ? config.maybeYield
+        : async function () {};
+    if (entries.length <= maxPatterns) {
+      const direct = entries
+        .sort(function (a, b) {
+          if (b.count !== a.count) return b.count - a.count;
+          return a.error - b.error;
+        });
+      return {
+        charset: direct.map(function (entry) {
+          return entry.mask;
+        }),
+        representativeByKey: new Map(
+          direct.map(function (entry) {
+            return [entry.key, entry.mask];
+          }),
+        ),
+      };
+    }
+    const normalizedBias = clampByte(bias == null ? 128 : bias) / 255;
+    const enriched = entries.map(function (entry) {
+      return {
+        key: entry.key,
+        mask: entry.mask,
+        count: entry.count,
+        error: entry.error,
+        averageError: entry.count ? entry.error / entry.count : entry.error,
+        members: [entry.key],
+      };
+    });
+    const maxCount = enriched.reduce(function (best, entry) {
+      return Math.max(best, entry.count || 0);
+    }, 1);
+    const minAverageError = enriched.reduce(function (best, entry) {
+      return Math.min(best, entry.averageError);
+    }, Infinity);
+    const maxAverageError = enriched.reduce(function (best, entry) {
+      return Math.max(best, entry.averageError);
+    }, 0);
+    const errorRange = Math.max(1e-6, maxAverageError - minAverageError);
+    const utilityScore = function (entry) {
+      const countScore = (entry.count || 0) / maxCount;
+      const errorScore =
+        1 - (entry.averageError - minAverageError) / errorRange;
+      return countScore * 0.85 + errorScore * 0.15;
+    };
+    const similarityBias = 0.35 + normalizedBias * 0.4;
+    const working = enriched.map(function (entry) {
+      return Object.assign({}, entry, {
+        utility: utilityScore(entry),
+      });
+    });
+    const mergesNeeded = Math.max(0, working.length - maxPatterns);
+    let mergesCompleted = 0;
+    while (working.length > maxPatterns) {
+      let bestMerge = null;
+      for (let i = 0; i < working.length; i += 1) {
+        const source = working[i];
+        for (let j = 0; j < working.length; j += 1) {
+          if (i === j) continue;
+          const target = working[j];
+          if (
+            target.utility < source.utility &&
+            !(target.utility === source.utility && (target.count || 0) >= (source.count || 0))
+          ) {
+            continue;
+          }
+          const diffCount = maskHammingDistance(source.mask, target.mask);
+          const shapeScore = maskDifferenceScore(source.mask, target.mask);
+          const similarityScore =
+            diffCount * (1 - similarityBias) + shapeScore * similarityBias;
+          const removalWeight =
+            (1 - source.utility) * 6 +
+            (1 - Math.min(1, (source.count || 0) / maxCount)) * 4 +
+            (source.averageError - minAverageError) / errorRange;
+          const mergeScore =
+            similarityScore +
+            removalWeight -
+            target.utility * 2 -
+            Math.min(2, ((target.count || 0) / maxCount) * 2);
+          if (!bestMerge || mergeScore < bestMerge.score) {
+            bestMerge = {
+              sourceIndex: i,
+              targetIndex: j,
+              score: mergeScore,
+              similarityScore: similarityScore,
+            };
+          }
+        }
+        if (i % 8 === 0) {
+          await maybeYield();
+        }
+      }
+      if (!bestMerge) break;
+      const source = working[bestMerge.sourceIndex];
+      const target = working[bestMerge.targetIndex];
+      const absorbedCount = source.count || 0;
+      const absorbedError =
+        (source.error || 0) + bestMerge.similarityScore * absorbedCount;
+      target.count = (target.count || 0) + absorbedCount;
+      target.error = (target.error || 0) + absorbedError;
+      target.averageError = target.count ? target.error / target.count : target.error;
+      target.members = target.members.concat(source.members || []);
+      target.utility = utilityScore(target);
+      if (typeof config.onMerge === "function") {
+        await config.onMerge({
+          source: source,
+          target: target,
+          completed: mergesCompleted + 1,
+          total: mergesNeeded,
+        });
+      }
+      working.splice(bestMerge.sourceIndex, 1);
+      mergesCompleted += 1;
+      await maybeYield();
+    }
+    const sorted = working
+      .slice()
+      .sort(function (a, b) {
+        if (b.count !== a.count) return b.count - a.count;
+        const utilityDiff = (b.utility || 0) - (a.utility || 0);
+        if (Math.abs(utilityDiff) > 1e-6) return utilityDiff;
+        return a.averageError - b.averageError;
+      })
+      .slice(0, maxPatterns);
+    const representativeByKey = new Map();
+    sorted.forEach(function (entry) {
+      (entry.members || [entry.key]).forEach(function (memberKey) {
+        representativeByKey.set(memberKey, entry.mask);
+      });
+      representativeByKey.set(entry.key, entry.mask);
+    });
+    return {
+      charset: sorted.map(function (entry) {
+        return entry.mask;
+      }),
+      representativeByKey: representativeByKey,
+    };
+  };
   const extractCellPixels = function (data, width, cellX, cellY, blockWidth, blockHeight) {
     const pixels = new Uint8Array(blockWidth * blockHeight * 3);
     for (let y = 0; y < blockHeight; y += 1) {
@@ -1760,6 +1910,7 @@ export function init(TPP) {
     fillPreviewWithColor(data, finalBackground);
     const cellFits = [];
     const patternStats = new Map();
+    const fitIndexesByKey = new Map();
     let hasSpecialSolidForeground = false;
     let processedCells = 0;
     for (let cellY = 0; cellY < height; cellY += cellSize) {
@@ -1848,6 +1999,10 @@ export function init(TPP) {
           mask: originalMask,
           key: originalKey,
         });
+        const fitIndex = cellFits.length - 1;
+        const keyFits = fitIndexesByKey.get(originalKey) || [];
+        keyFits.push(fitIndex);
+        fitIndexesByKey.set(originalKey, keyFits);
         paintMaskCell(
           data,
           width,
@@ -1873,11 +2028,55 @@ export function init(TPP) {
         await maybeYield();
       }
     }
-    const charset = selectVariedCharsetPatterns(
+    const selection = await selectVariedCharsetPatternsAsync(
       Array.from(patternStats.values()),
       256,
       selectionBias,
+      {
+        maybeYield: maybeYield,
+        onMerge: async function (merge) {
+          const memberKeys = merge && merge.source && Array.isArray(merge.source.members)
+            ? merge.source.members
+            : [merge.source && merge.source.key];
+          let highlightFit = null;
+          for (let memberIndex = 0; memberIndex < memberKeys.length; memberIndex += 1) {
+            const memberKey = memberKeys[memberIndex];
+            const indexes = fitIndexesByKey.get(memberKey) || [];
+            for (let i = 0; i < indexes.length; i += 1) {
+              const fit = cellFits[indexes[i]];
+              if (!fit || fit.specialSolid) continue;
+              fit.mask = merge.target.mask;
+              fit.key = merge.target.key;
+              paintMaskCell(
+                data,
+                width,
+                fit.x,
+                fit.y,
+                fit.width,
+                fit.height,
+                merge.target.mask,
+                fit.bg,
+                fit.fg,
+              );
+              if (!highlightFit) highlightFit = fit;
+            }
+            await maybeYield();
+          }
+          reportProgress(config, {
+            phase: "Reduce",
+            completed: merge.completed,
+            total: Math.max(1, merge.total || 1),
+            cellX: highlightFit ? highlightFit.x : null,
+            cellY: highlightFit ? highlightFit.y : null,
+            cellWidth: highlightFit ? highlightFit.width : null,
+            cellHeight: highlightFit ? highlightFit.height : null,
+          });
+          await maybeYield();
+        },
+      },
     );
+    const charset = selection.charset;
+    const representativeByKey = selection.representativeByKey || new Map();
     const solidKey = maskKey(solidGlyphMask());
     if (hasSpecialSolidForeground) {
       const deduped = charset.filter(function (mask) {
@@ -1933,6 +2132,7 @@ export function init(TPP) {
         continue;
       }
       let bestMask =
+        representativeByKey.get(fit.originalKey) ||
         charsetByKey.get(fit.originalKey) ||
         charsetByKey.get(fit.key) ||
         charset[0] ||
