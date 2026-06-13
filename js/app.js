@@ -936,6 +936,18 @@ TPP.bindImageExportPreviewDrag = function () {
   };
   TPP.applyImageExportPreviewSplit(TPP.imageExportPreviewSplit);
 };
+TPP.restoreImageExportPreviewSplit = function () {
+  const split = Math.max(
+    0,
+    Math.min(100, Number(TPP.imageExportPreviewSplit) || 50),
+  );
+  TPP.applyImageExportPreviewSplit(split);
+  if (typeof window.requestAnimationFrame === "function") {
+    window.requestAnimationFrame(function () {
+      TPP.applyImageExportPreviewSplit(split);
+    });
+  }
+};
 TPP.renderImageExportPreview = async function () {
   const dialog = document.getElementById("imageExportDialog");
   const stage = document.getElementById("imageExportPreviewStage");
@@ -1315,6 +1327,7 @@ TPP.renderImageExportPreview = async function () {
       "Rendering...",
     );
     TPP.bindImageExportPreviewDrag();
+    TPP.restoreImageExportPreviewSplit();
   };
   const renderPreviewStage = async function (beforeEntry, afterEntry) {
     const beforeSrc = beforeEntry && beforeEntry.src ? beforeEntry.src : "";
@@ -1346,6 +1359,7 @@ TPP.renderImageExportPreview = async function () {
       },
     });
     TPP.bindImageExportPreviewDrag();
+    TPP.restoreImageExportPreviewSplit();
   };
   const publishBeforePreviewAsset = function (beforeEntry) {
     if (TPP.imageExportPreviewToken !== token) return;
