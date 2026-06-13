@@ -3904,38 +3904,163 @@ TPP.exportD64PageFileName = function (pageIndex) {
 TPP.exportD64CharsetPageFileName = function (pageIndex) {
   return "PAGE" + String(Math.max(1, Number(pageIndex) || 1)).padStart(4, "0") + "CHR";
 };
-TPP.exportD64BootProgramBytes = function () {
-  const message = "BOOK PRG LOADER - PAGE FILES AVAILABLE";
+TPP.exportD64BootProgramBytes = function (book, pageCount) {
   const basicStart = 0x0801;
-  const codeStart = 0x0810;
-  const basicLineNumber = 10;
-  const basicText = [0x9e, 0x20, 0x32, 0x30, 0x36, 0x34];
+  const tokens = {
+    END: 0x80,
+    GOTO: 0x89,
+    IF: 0x8b,
+    PRINT: 0x99,
+    GET: 0xa1,
+    THEN: 0xa7,
+    CHR$: 0xc7,
+  };
+  const normalizeLineText = function (value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+  };
+  const wrapText = function (value, width) {
+    const normalized = normalizeLineText(value);
+    if (!normalized) return [];
+    const words = normalized.split(" ");
+    const lines = [];
+    let current = "";
+    for (let i = 0; i < words.length; i += 1) {
+      const next = current ? current + " " + words[i] : words[i];
+      if (next.length > width && current) {
+        lines.push(current);
+        current = words[i];
+      } else if (next.length > width) {
+        lines.push(next.slice(0, width));
+        current = next.slice(width).trim();
+      } else {
+        current = next;
+      }
+    }
+    if (current) lines.push(current);
+    return lines;
+  };
+  const stringBytes = function (value) {
+    return Array.from(String(value || ""), function (char) {
+      return char.charCodeAt(0) & 0xff;
+    });
+  };
+  const quotedString = function (value) {
+    return [0x22].concat(stringBytes(value), [0x22]);
+  };
+  const basicLines = [];
+  const pushLine = function (lineNumber, bodyBytes) {
+    basicLines.push({
+      number: lineNumber,
+      body: Array.isArray(bodyBytes) ? bodyBytes.slice() : [],
+    });
+  };
+  const titleLines = wrapText(
+    (book && book.title) || "UNTITLED BOOK",
+    34,
+  );
+  const authorLines = wrapText(
+    (book && (book.by || book.author)) || "UNKNOWN AUTHOR",
+    30,
+  );
+  const totalPages = Math.max(1, Number(pageCount) || 1);
+  pushLine(10, [
+    tokens.PRINT,
+    tokens.CHR$,
+    0x28,
+    0x31,
+    0x34,
+    0x37,
+    0x29,
+  ]);
+  pushLine(20, [tokens.PRINT].concat(quotedString("TINY POCKETS PRESS")));
+  pushLine(30, [tokens.PRINT]);
+  let lineNumber = 40;
+  titleLines.forEach(function (line) {
+    pushLine(
+      lineNumber,
+      [tokens.PRINT].concat(
+        quotedString((lineNumber === 40 ? "TITLE: " : "       ") + line),
+      ),
+    );
+    lineNumber += 10;
+  });
+  authorLines.forEach(function (line, index) {
+    pushLine(
+      lineNumber,
+      [tokens.PRINT].concat(
+        quotedString((index === 0 ? "AUTHOR: " : "        ") + line),
+      ),
+    );
+    lineNumber += 10;
+  });
+  pushLine(
+    lineNumber,
+    [tokens.PRINT].concat(quotedString("PAGES: " + String(totalPages))),
+  );
+  lineNumber += 10;
+  pushLine(lineNumber, [tokens.PRINT]);
+  lineNumber += 10;
+  pushLine(
+    lineNumber,
+    [tokens.PRINT].concat(quotedString("PRESS Q TO QUIT")),
+  );
+  lineNumber += 10;
+  pushLine(
+    lineNumber,
+    [tokens.GET, 0x20, 0x41, 0x24, 0x3a, tokens.IF, 0x20, 0x41, 0x24, 0xb2, 0x22, 0x22, tokens.THEN, 0x20]
+      .concat(stringBytes(String(lineNumber))),
+  );
+  lineNumber += 10;
+  pushLine(
+    lineNumber,
+    [tokens.IF, 0x20, 0x41, 0x24, 0xb2].concat(
+      quotedString("Q"),
+      [tokens.THEN, 0x20],
+      stringBytes("200"),
+    ),
+  );
+  lineNumber += 10;
+  pushLine(
+    lineNumber,
+    [tokens.GOTO, 0x20].concat(stringBytes(String(lineNumber - 10))),
+  );
+  pushLine(200, [tokens.PRINT]);
+  pushLine(210, [tokens.PRINT].concat(quotedString("QUIT TO BASIC (Y/N)?")));
+  pushLine(
+    220,
+    [tokens.GET, 0x20, 0x41, 0x24, 0x3a, tokens.IF, 0x20, 0x41, 0x24, 0xb2, 0x22, 0x22, tokens.THEN, 0x20]
+      .concat(stringBytes("220")),
+  );
+  pushLine(
+    230,
+    [tokens.IF, 0x20, 0x41, 0x24, 0xb2].concat(
+      quotedString("Y"),
+      [tokens.THEN, 0x20, tokens.END],
+    ),
+  );
+  pushLine(
+    240,
+    [tokens.IF, 0x20, 0x41, 0x24, 0xb2].concat(
+      quotedString("N"),
+      [tokens.THEN, 0x20],
+      stringBytes("10"),
+    ),
+  );
+  pushLine(250, [tokens.GOTO, 0x20].concat(stringBytes("220")));
   const buffer = [];
-  const nextLineAddress = basicStart + 4 + basicText.length + 1;
-  buffer.push(nextLineAddress & 0xff, (nextLineAddress >> 8) & 0xff);
-  buffer.push(basicLineNumber & 0xff, (basicLineNumber >> 8) & 0xff);
-  buffer.push(...basicText);
-  buffer.push(0x00);
-  buffer.push(0x00, 0x00);
-  while (basicStart + buffer.length < codeStart) {
+  let address = basicStart;
+  basicLines.forEach(function (line) {
+    const nextAddress = address + 4 + line.body.length + 1;
+    buffer.push(nextAddress & 0xff, (nextAddress >> 8) & 0xff);
+    buffer.push(line.number & 0xff, (line.number >> 8) & 0xff);
+    buffer.push.apply(buffer, line.body);
     buffer.push(0x00);
-  }
-  const code = [];
-  code.push(0xa2, 0x00);
-  code.push(0xbd, 0x00, 0x08);
-  code.push(0xf0, 0x07);
-  code.push(0x20, 0xd2, 0xff);
-  code.push(0xe8);
-  code.push(0x4c, 0x12, 0x08);
-  code.push(0x60);
-  const messageOffset = codeStart + code.length;
-  code[3] = messageOffset & 0xff;
-  code[4] = (messageOffset >> 8) & 0xff;
-  for (let i = 0; i < code.length; i += 1) buffer.push(code[i]);
-  for (let i = 0; i < message.length; i += 1) {
-    buffer.push(message.charCodeAt(i));
-  }
-  buffer.push(0x00);
+    address = nextAddress;
+  });
+  buffer.push(0x00, 0x00);
   const blob = new Uint8Array(buffer.length + 2);
   blob[0] = 0x01;
   blob[1] = 0x08;
@@ -3970,7 +4095,7 @@ TPP.exportImagesD64 = async function (options) {
         {
           name: "BOOK.PRG",
           type: 0x82,
-          data: TPP.exportD64BootProgramBytes(),
+          data: TPP.exportD64BootProgramBytes(settings, pages.length),
         },
       ];
       for (let i = 0; i < pages.length; i += 1) {
