@@ -3840,6 +3840,31 @@ TPP.d64WriteFile = function (image, data, allocation) {
     sectorCount: sectors,
   };
 };
+TPP.d64UsableFileSectorCapacity = function () {
+  let total = 0;
+  for (let track = 1; track <= 35; track += 1) {
+    if (track === 18) continue;
+    total += TPP.d64TrackSectorCount(track);
+  }
+  return total;
+};
+TPP.d64EstimateImageUsage = function (files) {
+  const items = Array.isArray(files) ? files : [];
+  const fileSectors = items.map(function (file) {
+    const size = file && file.data && typeof file.data.length === "number" ? file.data.length : 0;
+    return Math.max(1, Math.ceil(size / 254));
+  });
+  const totalFileSectors = fileSectors.reduce(function (sum, count) {
+    return sum + count;
+  }, 0);
+  const directorySectors = Math.max(1, Math.ceil(items.length / 8));
+  return {
+    totalFileSectors: totalFileSectors,
+    directorySectors: directorySectors,
+    usableFileSectors: TPP.d64UsableFileSectorCapacity(),
+    fileSectors: fileSectors,
+  };
+};
 TPP.d64FinalizeImage = function (image, allocation, dirSectors, diskName) {
   const freeMap = {};
   for (let track = 1; track <= 35; track += 1) {
@@ -3866,6 +3891,8 @@ TPP.d64FinalizeImage = function (image, allocation, dirSectors, diskName) {
   }
 };
 TPP.buildD64Image = function (files, book) {
+  const estimate = TPP.d64EstimateImageUsage(files);
+  if (estimate.totalFileSectors > estimate.usableFileSectors) return null;
   const image = new Uint8Array(174848);
   const allocation = {
     track: 1,
@@ -4320,12 +4347,9 @@ TPP.buildD64AssetBinBytes = function (segments, options) {
   });
   return bytes;
 };
-TPP.exportD64CoverData = async function (settings, options) {
-  const pages = TPP.buildPages();
-  const front = pages.find(function (page) {
-    return page && page.role === "front";
-  });
-  if (!front) return null;
+TPP.renderD64BitmapRecordForPage = async function (page, settings, options) {
+  if (!page || !settings) return null;
+  const config = options || {};
   const palette = TPP.imageExportNamedPalette("c64");
   if (!Array.isArray(palette) || !palette.length) return null;
   const mount = document.createElement("div");
@@ -4338,7 +4362,7 @@ TPP.exportD64CoverData = async function (settings, options) {
     shell.style.height = settings.page.h + "in";
     shell.style.background = "#fff";
     shell.appendChild(
-      TPP.pageEl(front, settings, 0, 0, false, false, {
+      TPP.pageEl(page, settings, 0, 0, false, false, {
         w: settings.page.w,
         h: settings.page.h,
       }),
@@ -4350,6 +4374,9 @@ TPP.exportD64CoverData = async function (settings, options) {
     const rendered = await html2canvas(shell, TPP.html2canvasOptions({ scale: 1 }));
     const scaled = TPP.d64CoverScaleCanvas(rendered, 320, 200);
     if (!scaled) return null;
+    if (typeof config.onPreviewCanvas === "function") {
+      config.onPreviewCanvas(scaled);
+    }
     const ctx = scaled.getContext("2d", { willReadFrequently: true });
     if (!ctx) return null;
     const image = ctx.getImageData(0, 0, scaled.width, scaled.height);
@@ -4465,6 +4492,34 @@ TPP.exportD64CoverData = async function (settings, options) {
     mount.remove();
   }
 };
+TPP.exportD64CoverData = async function (settings, options) {
+  const pages = TPP.buildPages();
+  const front = pages.find(function (page) {
+    return page && page.role === "front";
+  });
+  if (!front) return null;
+  return TPP.renderD64BitmapRecordForPage(front, settings, options);
+};
+TPP.exportD64PageGraphicData = async function (settings, options) {
+  const config = options || {};
+  const pages = TPP.buildPages();
+  const records = [];
+  for (let index = 0; index < pages.length; index += 1) {
+    const page = pages[index];
+    if (typeof config.onPageStart === "function") {
+      config.onPageStart(page, index, pages.length);
+    }
+    const record = await TPP.renderD64BitmapRecordForPage(page, settings, {
+      onPreviewCanvas: function (canvas) {
+        if (typeof config.onPagePreview === "function") {
+          config.onPagePreview(canvas, page, index, pages.length);
+        }
+      },
+    });
+    records.push(record);
+  }
+  return records;
+};
 TPP.exportD64TocRecords = function (book) {
   const settings = book || {};
   if (!settings || !settings.toc || settings.toc.enabled === false) return [];
@@ -4546,6 +4601,7 @@ TPP.exportD64IndexAndData = function (book, options) {
   });
   const config = options || {};
   const sections = [];
+  let graphicPageCount = 0;
   const pushSection = function (tag, bytes) {
     if (!bytes.length) return;
     sections.push({
@@ -4553,6 +4609,14 @@ TPP.exportD64IndexAndData = function (book, options) {
       classId: 5,
       bytes: bytes.slice(),
     });
+  };
+  const pageByteSets = Array.isArray(config.pageBytes) ? config.pageBytes : [];
+  const sameBytes = function (left, right) {
+    if (!left || !right || left.length !== right.length) return false;
+    for (let i = 0; i < left.length; i += 1) {
+      if (left[i] !== right[i]) return false;
+    }
+    return true;
   };
   homeRecords.forEach(function (record) {
     const nameBytes = Array.from(String(record.name || ""), function (char) {
@@ -4581,13 +4645,35 @@ TPP.exportD64IndexAndData = function (book, options) {
   pushSection("TOC", tocBytes);
   if (config.coverBytes && config.coverBytes.length) {
     sections.unshift({
+      key: "COV",
       tag: "COV",
       classId: 10,
       bytes: config.coverBytes.slice(),
     });
   }
+  pageByteSets.forEach(function (pageRecord, index) {
+    if (!pageRecord || !pageRecord.bytes || !pageRecord.bytes.length) return;
+    graphicPageCount += 1;
+    const section = {
+      key: "PAG" + String(index + 1),
+      tag: "PAG",
+      classId: 10,
+      bytes: pageRecord.bytes.slice(),
+    };
+    if (
+      index === 0 &&
+      config.coverBytes &&
+      config.coverBytes.length &&
+      sameBytes(pageRecord.bytes, config.coverBytes)
+    ) {
+      section.aliasOf = "COV";
+      delete section.bytes;
+    }
+    sections.push(section);
+  });
   if (config.promptBytes && config.promptBytes.length) {
     sections.push({
+      key: "ANK",
       tag: "ANK",
       classId: 7,
       bytes: config.promptBytes.slice(),
@@ -4600,7 +4686,24 @@ TPP.exportD64IndexAndData = function (book, options) {
     return datBuckets[classId];
   };
   const actualEntries = [];
+  const entriesByKey = {};
   sections.forEach(function (section) {
+    if (section.aliasOf) {
+      const aliased = entriesByKey[section.aliasOf];
+      if (!aliased) {
+        throw new Error("D64 section " + section.tag + " alias target " + section.aliasOf + " missing");
+      }
+      const aliasEntry = {
+        tag: section.tag,
+        classId: aliased.classId,
+        startRecord: aliased.startRecord,
+        recordCount: aliased.recordCount,
+        nextRecord: 0,
+      };
+      actualEntries.push(aliasEntry);
+      if (section.key) entriesByKey[section.key] = aliasEntry;
+      return;
+    }
     const info = TPP.d64DatClassInfo(section.classId);
     if (!info || !info.size) return;
     const bucket = ensureBucket(section.classId);
@@ -4614,13 +4717,15 @@ TPP.exportD64IndexAndData = function (book, options) {
     for (let i = 0; i < paddedLength; i += 1) {
       bucket.push(i < section.bytes.length ? section.bytes[i] : 0x00);
     }
-    actualEntries.push({
+    const entry = {
       tag: section.tag,
       classId: section.classId,
       startRecord: startRecord,
       recordCount: recordCount === 256 ? 0x00 : recordCount & 0xff,
       nextRecord: 0,
-    });
+    };
+    actualEntries.push(entry);
+    if (section.key) entriesByKey[section.key] = entry;
   });
   const tagOrder = [];
   const firstByTag = {};
@@ -4688,6 +4793,7 @@ TPP.exportD64IndexAndData = function (book, options) {
   return {
     hasToc: tocRecords.length > 0,
     hasCover: Boolean(config.coverBytes && config.coverBytes.length),
+    hasPages: graphicPageCount > 0,
     indexBytes: new Uint8Array(idxBytes),
     dataFiles: dataFiles,
     tocRecords: tocRecords,
@@ -4726,6 +4832,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     skipHi: configBase + 54,
     readLenLo: configBase + 55,
     readLenHi: configBase + 56,
+    interactive: configBase + 57,
   };
   const promptFileName = "0:64.DAT,S,R";
   const coverFileName = "0:512.DAT,S,R";
@@ -4897,6 +5004,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrLabel("cleanup");
   jsrLabel("hideSprites");
   jsrLabel("clearKeys");
+  ldaAbs(vars.interactive);
+  beq("imageReady");
   jsrLabel("delayPrompt");
   jsrLabel("loadFallbackPrompt");
   ldaAbs(vars.promptRecordCount);
@@ -4911,6 +5020,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrLabel("showPrompt");
   jsrLabel("clearKeys");
   jsrLabel("waitForKey");
+  label("imageReady");
   ldaImm(0x00);
   staAbs(vars.status);
   rts();
@@ -5447,6 +5557,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     skipAddress: vars.skipLo,
     readLengthAddress: vars.readLenLo,
     destinationAddress: vars.dstLo,
+    interactiveAddress: vars.interactive,
     bytes: new Uint8Array(code),
   };
 };
@@ -5548,6 +5659,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   const config = options || {};
   const hasToc = Boolean(config.hasToc);
   const hasCover = Boolean(config.hasCover);
+  const hasPages = Boolean(config.hasPages);
   const loaderProgram = TPP.buildD64AssetLoaderProgramBytes();
   const loaderBootstrap = TPP.buildD64LoaderBootstrapBytes();
   const basicString = function (value) {
@@ -5655,7 +5767,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
       body: Array.isArray(body) ? body.slice() : encodeBasicBody(body),
     });
   };
-  pushLine(5, 'CLR:DIM T$(200),N$(24),V$(24),NC(24),VC(24):RB=28672');
+  pushLine(5, 'CLR:DIM T$(200),N$(24),V$(24),NC(24),VC(24),PR(' + String(Math.max(1, pageCount)) + '),PL(' + String(Math.max(1, pageCount)) + '),PD(' + String(Math.max(1, pageCount)) + '):RB=28672');
   pushLine(8, 'GOSUB 3000');
   if (hasCover) {
     pushLine(10, 'G$="COV":GOSUB 500:IF LN=0 THEN 20');
@@ -5676,12 +5788,15 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(80, 'PRINT');
   pushLine(90, 'POKE 646,7');
   if (hasToc) pushLine(100, 'PRINT "PRESS T FOR CONTENTS"');
+  if (hasPages) pushLine(105, 'PRINT "PRESS G FOR GRAPHICS"');
   pushLine(110, 'PRINT "PRESS Q TO QUIT"');
   pushLine(120, 'POKE 646,1');
   pushLine(130, 'PRINT "WAITING FOR COMMAND..."');
   pushLine(140, 'GET A$:IF A$="" THEN 140');
   pushLine(150, 'IF A$="Q" THEN 1900');
-  if (hasToc) pushLine(160, 'IF A$="T" THEN 800');
+  if (hasToc) pushLine(160, 'IF A$="T" THEN GOSUB 800:PG=0:GOSUB 1700:GOTO 40');
+  if (hasPages) pushLine(165, 'IF A$="G" THEN GOSUB 2000');
+  if (hasPages) pushLine(166, 'IF A$="G" AND PC>0 THEN PI=1:GOSUB 2100:GOTO 20');
   pushLine(170, 'GOTO 140');
   pushLine(200, 'IF HL=1 THEN RETURN');
   pushLine(210, 'HL=1:HC=0:G$="HOM":GOSUB 500');
@@ -5707,6 +5822,29 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(310, 'RI=NX:GOSUB 650');
   pushLine(320, 'IF LN=0 THEN RETURN');
   pushLine(330, 'GOTO 230');
+  if (hasPages) {
+    pushLine(2000, 'IF GL=1 THEN RETURN');
+    pushLine(2010, 'GL=1:PC=0:G$="PAG":GOSUB 500');
+    pushLine(2020, 'IF LN=0 THEN RETURN');
+    pushLine(2030, 'PC=PC+1:PR(PC)=TP:PL(PC)=LN:PD(PC)=DT');
+    pushLine(2040, 'IF NX=0 OR PC>=' + String(Math.max(1, pageCount)) + ' THEN RETURN');
+    pushLine(2050, 'RI=NX:GOSUB 650');
+    pushLine(2060, 'IF LN=0 THEN RETURN');
+    pushLine(2070, 'GOTO 2030');
+    pushLine(2100, 'CR=PR(PI):DT=PD(PI):LN=PL(PI):GOSUB 620:F$=DF$:AR=0:AC=0:GOSUB 3450');
+    pushLine(2110, 'IF LR<>0 THEN RETURN');
+    pushLine(2120, 'GET A$:IF A$="" THEN 2120');
+    pushLine(2130, 'IF A$="H" OR A$="W" THEN RETURN');
+    pushLine(2140, 'IF A$=" " OR A$="N" OR A$="D" THEN 2144');
+    pushLine(2142, 'GOTO 2150');
+    pushLine(2144, 'IF PI>=PC THEN RETURN');
+    pushLine(2146, 'PI=PI+1:GOTO 2100');
+    pushLine(2150, 'IF A$=CHR$(20) OR A$="B" OR A$="P" OR A$="A" THEN 2154');
+    pushLine(2152, 'GOTO 2160');
+    pushLine(2154, 'IF PI<=1 THEN RETURN');
+    pushLine(2156, 'PI=PI-1:GOTO 2100');
+    pushLine(2160, 'GOTO 2120');
+  }
   pushLine(500, 'TP=0:LN=0:DT=0:NX=0:RI=1');
   pushLine(510, 'GOSUB 650');
   pushLine(520, 'IF K$="TAG" THEN RETURN');
@@ -5771,6 +5909,12 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   }
   pushLine(1100, 'POKE 646,NC(I):PRINT N$(I);": ";:POKE 646,VC(I):PRINT V$(I):POKE 646,1:RETURN');
   if (hasToc) {
+    pushLine(1700, 'GOSUB 1200');
+    pushLine(1710, 'GOSUB 1000');
+    pushLine(1720, 'IF A$="H" THEN RETURN');
+    pushLine(1730, 'IF A$="P" AND PG>0 THEN PG=PG-1:GOTO 1700');
+    pushLine(1740, 'IF A$="N" AND (PG+1)*9<TC THEN PG=PG+1:GOTO 1700');
+    pushLine(1750, 'GOTO 1710');
     pushLine(1400, 'X=I-S+1:P$=MID$(STR$(X),2)+". ":L$=T$(I)');
     pushLine(1410, 'LS=0');
     pushLine(1420, 'IF MID$(L$,LS+1,1)=" " THEN LS=LS+1:GOTO 1420');
@@ -5821,11 +5965,19 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(3360, 'RETURN');
     pushLine(3400, 'SB=PEEK(56576):SV=PEEK(53272):S1=PEEK(53265):S2=PEEK(53270):SE=PEEK(53269):CV=0:GOSUB 3500');
     pushLine(3405, 'GET A$:IF A$<>"" THEN 3405');
+    pushLine(3408, 'POKE ' + String(loaderProgram.interactiveAddress) + ',1');
     pushLine(3410, 'SYS ' + String(loaderProgram.address));
     pushLine(3420, 'LR=PEEK(' + String(loaderProgram.statusAddress) + '):IF LR=0 THEN 3430');
     pushLine(3422, 'IF LR=1 THEN POKE 56576,SB:POKE 53272,SV:POKE 53265,S1:POKE 53270,S2:POKE 53269,SE:RETURN');
     pushLine(3424, 'POKE 646,2:PRINT:PRINT "COVER LOAD FAILED";LR:POKE 646,1:RETURN');
     pushLine(3430, 'CV=1:RETURN');
+    pushLine(3450, 'SB=PEEK(56576):SV=PEEK(53272):S1=PEEK(53265):S2=PEEK(53270):SE=PEEK(53269):CV=0:GOSUB 3300');
+    pushLine(3452, 'POKE ' + String(loaderProgram.coverRecordAddress) + ',CR-256*INT(CR/256):POKE ' + String(loaderProgram.coverRecordAddress + 1) + ',INT(CR/256)');
+    pushLine(3454, 'POKE ' + String(loaderProgram.promptRecordCountAddress) + ',0');
+    pushLine(3456, 'POKE ' + String(loaderProgram.interactiveAddress) + ',0');
+    pushLine(3458, 'SYS ' + String(loaderProgram.address));
+    pushLine(3460, 'LR=PEEK(' + String(loaderProgram.statusAddress) + '):IF LR=0 THEN CV=1:RETURN');
+    pushLine(3462, 'POKE 56576,SB:POKE 53272,SV:POKE 53265,S1:POKE 53270,S2:POKE 53269,SE:RETURN');
     pushLine(3500, 'POKE 53280,6:POKE 53281,6:POKE 646,7:PRINT CHR$(147)');
     pushLine(3510, 'PRINT "        TINY POCKETS PRESS"');
     pushLine(3520, 'POKE 646,3:PRINT "          BOOK FILE READER"');
@@ -5901,17 +6053,41 @@ TPP.exportImagesD64 = async function (options) {
       alert("No pages available to export.");
       return;
     }
-    TPP.showProgress(15, "Building Commodore 64 files...");
-    const coverRecord = await TPP.exportD64CoverData(settings, options);
+    TPP.showProgress(5, "Rendering Commodore 64 cover...");
+    const coverRecord = await TPP.exportD64CoverData(settings, {
+      onPreviewCanvas: function (canvas) {
+        TPP.showProgress(15, "Rendering Commodore 64 cover preview...", {
+          previewCanvas: canvas,
+        });
+      },
+    });
+    TPP.throwIfProgressCancelled(progressOp);
+    TPP.showProgress(20, "Rendering Commodore 64 graphic pages...");
+    const pageRecords = await TPP.exportD64PageGraphicData(settings, {
+      onPageStart: function (_page, index, total) {
+        TPP.showProgress(
+          20 + Math.round((index / Math.max(1, total)) * 35),
+          "Rendering graphic page " + (index + 1) + " of " + total + "...",
+        );
+      },
+      onPagePreview: function (canvas, _page, index, total) {
+        TPP.showProgress(
+          20 + Math.round(((index + 0.5) / Math.max(1, total)) * 35),
+          "Rendered graphic page " + (index + 1) + " of " + total + "...",
+          { previewCanvas: canvas },
+        );
+      },
+    });
     const promptRecord = coverRecord && coverRecord.bytes && coverRecord.bytes.length
       ? TPP.buildD64PromptSpriteRecordBytes()
       : null;
     const loaderFile = TPP.buildD64AssetLoaderProgramFile();
     TPP.throwIfProgressCancelled(progressOp);
-    TPP.showProgress(45, "Packing Commodore 64 data...");
+    TPP.showProgress(55, "Packing Commodore 64 data...");
     const bookFiles = TPP.exportD64IndexAndData(settings, {
       pageCount: pages.length,
       coverBytes: coverRecord && coverRecord.bytes ? coverRecord.bytes : null,
+      pageBytes: pageRecords,
       promptBytes: promptRecord,
     });
     const d64Files = [
@@ -5921,6 +6097,7 @@ TPP.exportImagesD64 = async function (options) {
         data: TPP.exportD64BootProgramBytes(settings, pages.length, {
           hasToc: bookFiles.hasToc,
           hasCover: Boolean(bookFiles.hasCover),
+          hasPages: Boolean(bookFiles.hasPages),
         }),
       },
       {
@@ -5947,10 +6124,27 @@ TPP.exportImagesD64 = async function (options) {
       },
     ];
     TPP.throwIfProgressCancelled(progressOp);
-    TPP.showProgress(75, "Building D64 disk image...");
+    const usage = TPP.d64EstimateImageUsage(d64Files);
+    TPP.showProgress(
+      80,
+      "Building D64 disk image... " +
+        usage.totalFileSectors +
+        "/" +
+        usage.usableFileSectors +
+        " sectors",
+    );
     const imageBytes = TPP.buildD64Image(d64Files, settings);
     if (!imageBytes) {
-      alert("Failed to build D64 disk image.");
+      const failureUsage = TPP.d64EstimateImageUsage(d64Files);
+      alert(
+        failureUsage.totalFileSectors > failureUsage.usableFileSectors
+          ? "Failed to build D64 disk image. Disk capacity exceeded: " +
+              String(failureUsage.totalFileSectors) +
+              " sectors needed, but only " +
+              String(failureUsage.usableFileSectors) +
+              " are available for files."
+          : "Failed to build D64 disk image.",
+      );
       return;
     }
     const blob = new Blob([imageBytes], { type: "application/octet-stream" });
