@@ -4004,105 +4004,96 @@ TPP.d64CoverForcedGlyphPatterns = function () {
   };
 };
 TPP.d64BitmapPromptGlyphs = function () {
-  const glyph = function (rows) {
-    const mask = new Uint8Array(64);
+  const glyph = function (rows, width) {
+    const mask = new Uint8Array((width || 5) * 7);
     rows.forEach(function (row, y) {
-      String(row || "").slice(0, 8).split("").forEach(function (char, x) {
-        if (char !== " ") mask[y * 8 + x] = 1;
+      String(row || "").slice(0, width || 5).split("").forEach(function (char, x) {
+        if (char !== " ") mask[y * (width || 5) + x] = 1;
       });
     });
     return mask;
   };
   return {
     " ": glyph([
-      "        ",
-      "        ",
-      "        ",
-      "        ",
-      "        ",
-      "        ",
-      "        ",
-      "        ",
+      "     ",
+      "     ",
+      "     ",
+      "     ",
+      "     ",
+      "     ",
+      "     ",
     ]),
     A: glyph([
-      "  XXXX  ",
-      " XX  XX ",
-      " XX  XX ",
-      " XXXXXX ",
-      " XX  XX ",
-      " XX  XX ",
-      " XX  XX ",
-      "        ",
+      " XXX ",
+      "X   X",
+      "X   X",
+      "XXXXX",
+      "X   X",
+      "X   X",
+      "X   X",
     ]),
     E: glyph([
-      " XXXXXX ",
-      " XX     ",
-      " XX     ",
-      " XXXXX  ",
-      " XX     ",
-      " XX     ",
-      " XXXXXX ",
-      "        ",
+      "XXXXX",
+      "X    ",
+      "X    ",
+      "XXXX ",
+      "X    ",
+      "X    ",
+      "XXXXX",
     ]),
     K: glyph([
-      " XX  XX ",
-      " XX XX  ",
-      " XXXX   ",
-      " XXX    ",
-      " XXXX   ",
-      " XX XX  ",
-      " XX  XX ",
-      "        ",
+      "X   X",
+      "X  X ",
+      "X X  ",
+      "XX   ",
+      "X X  ",
+      "X  X ",
+      "X   X",
     ]),
     N: glyph([
-      " XX  XX ",
-      " XXX XX ",
-      " XXXXXX ",
-      " XX XXX ",
-      " XX  XX ",
-      " XX  XX ",
-      " XX  XX ",
-      "        ",
+      "X   X",
+      "XX  X",
+      "XX  X",
+      "X X X",
+      "X  XX",
+      "X  XX",
+      "X   X",
     ]),
     P: glyph([
-      " XXXXX  ",
-      " XX  XX ",
-      " XX  XX ",
-      " XXXXX  ",
-      " XX     ",
-      " XX     ",
-      " XX     ",
-      "        ",
+      "XXXX ",
+      "X   X",
+      "X   X",
+      "XXXX ",
+      "X    ",
+      "X    ",
+      "X    ",
     ]),
     R: glyph([
-      " XXXXX  ",
-      " XX  XX ",
-      " XX  XX ",
-      " XXXXX  ",
-      " XX XX  ",
-      " XX  XX ",
-      " XX  XX ",
-      "        ",
+      "XXXX ",
+      "X   X",
+      "X   X",
+      "XXXX ",
+      "X X  ",
+      "X  X ",
+      "X   X",
     ]),
     S: glyph([
-      "  XXXX  ",
-      " XX  XX ",
-      " XX     ",
-      "  XXXX  ",
-      "     XX ",
-      " XX  XX ",
-      "  XXXX  ",
-      "        ",
+      " XXXX",
+      "X    ",
+      "X    ",
+      " XXX ",
+      "    X",
+      "    X",
+      "XXXX ",
     ]),
     Y: glyph([
-      " XX  XX ",
-      " XX  XX ",
-      "  XXXX  ",
-      "   XX   ",
-      "   XX   ",
-      "   XX   ",
-      "   XX   ",
-      "        ",
+      "X   X",
+      "X   X",
+      " X X ",
+      "  X  ",
+      "  X  ",
+      "  X  ",
+      "  X  ",
     ]),
   };
 };
@@ -4137,32 +4128,62 @@ TPP.d64NearestPaletteIndex = function (r, g, b, palette) {
 };
 TPP.d64BuildBitmapPromptSprites = function () {
   const glyphs = TPP.d64BitmapPromptGlyphs();
-  const groups = ["PRE", "SS ", "ANY", " KE", "Y"];
-  const sprites = [];
-  groups.forEach(function (group) {
-    const sprite = new Uint8Array(64);
-    for (let row = 0; row < 21; row += 1) {
-      if (row < 6 || row > 13) continue;
-      const glyphRow = row - 6;
-      for (let charIndex = 0; charIndex < 3; charIndex += 1) {
-        const glyph = glyphs[group.charAt(charIndex) || " "] || glyphs[" "];
-        for (let x = 0; x < 8; x += 1) {
-          if (!glyph[glyphRow * 8 + x]) continue;
-          const pixelIndex = charIndex * 8 + x;
-          const byteIndex = row * 3 + (pixelIndex >> 3);
-          sprite[byteIndex] |= 0x80 >> (pixelIndex & 7);
+  const message = "PRESS ANY KEY";
+  const glyphWidth = 5;
+  const glyphHeight = 7;
+  const charSpacing = 1;
+  const topPadding = 7;
+  const totalWidth = message.length * glyphWidth + (message.length - 1) * charSpacing;
+  const textMask = new Uint8Array(96 * 21);
+  let cursorX = Math.floor((96 - totalWidth) / 2);
+  for (let index = 0; index < message.length; index += 1) {
+    const glyph = glyphs[message.charAt(index)] || glyphs[" "];
+    for (let y = 0; y < glyphHeight; y += 1) {
+      for (let x = 0; x < glyphWidth; x += 1) {
+        if (!glyph[y * glyphWidth + x]) continue;
+        const px = cursorX + x;
+        const py = topPadding + y;
+        if (px >= 0 && px < 96 && py >= 0 && py < 21) {
+          textMask[py * 96 + px] = 1;
         }
       }
     }
-    sprites.push(sprite);
-  });
-  const backdrop = new Uint8Array(64);
-  for (let row = 0; row < 21; row += 1) {
-    backdrop[row * 3] = 0xff;
-    backdrop[row * 3 + 1] = 0xff;
-    backdrop[row * 3 + 2] = 0xff;
+    cursorX += glyphWidth + charSpacing;
   }
-  sprites.push(backdrop);
+  const outlineMask = new Uint8Array(96 * 21);
+  for (let y = 0; y < 21; y += 1) {
+    for (let x = 0; x < 96; x += 1) {
+      if (textMask[y * 96 + x]) continue;
+      let touchesText = false;
+      for (let dy = -1; dy <= 1 && !touchesText; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || nx >= 96 || ny < 0 || ny >= 21) continue;
+          if (textMask[ny * 96 + nx]) {
+            touchesText = true;
+            break;
+          }
+        }
+      }
+      if (touchesText) outlineMask[y * 96 + x] = 1;
+    }
+  }
+  const sprites = [];
+  [outlineMask, textMask].forEach(function (mask) {
+    for (let spriteIndex = 0; spriteIndex < 4; spriteIndex += 1) {
+      const sprite = new Uint8Array(64);
+      const xStart = spriteIndex * 24;
+      for (let row = 0; row < 21; row += 1) {
+        for (let x = 0; x < 24; x += 1) {
+          if (!mask[row * 96 + xStart + x]) continue;
+          const byteIndex = row * 3 + (x >> 3);
+          sprite[byteIndex] |= 0x80 >> (x & 7);
+        }
+      }
+      sprites.push(sprite);
+    }
+  });
   return sprites;
 };
 TPP.buildD64CoverRecordBytes = function (coverLayout) {
@@ -4188,8 +4209,8 @@ TPP.buildD64CoverRecordBytes = function (coverLayout) {
   payload[screenOffset + 0x03fb] = spritePointerBase + 3;
   payload[screenOffset + 0x03fc] = spritePointerBase + 4;
   payload[screenOffset + 0x03fd] = spritePointerBase + 5;
-  payload[screenOffset + 0x03fe] = spritePointerBase + 5;
-  payload[screenOffset + 0x03ff] = spritePointerBase + 5;
+  payload[screenOffset + 0x03fe] = spritePointerBase + 6;
+  payload[screenOffset + 0x03ff] = spritePointerBase + 7;
   const bytes = new Uint8Array(payload.length + 2);
   bytes[0] = loadAddress & 0xff;
   bytes[1] = (loadAddress >> 8) & 0xff;
@@ -4644,50 +4665,48 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   rts();
 
   label("showPrompt");
-  ldaImm(100);
+  ldaImm(112);
   staAbs(0xd000);
-  ldaImm(177);
+  ldaImm(182);
   staAbs(0xd001);
-  ldaImm(124);
-  staAbs(0xd002);
-  ldaImm(177);
-  staAbs(0xd003);
-  ldaImm(148);
-  staAbs(0xd004);
-  ldaImm(177);
-  staAbs(0xd005);
-  ldaImm(172);
-  staAbs(0xd006);
-  ldaImm(177);
-  staAbs(0xd007);
-  ldaImm(196);
-  staAbs(0xd008);
-  ldaImm(177);
-  staAbs(0xd009);
-  ldaImm(88);
-  staAbs(0xd00a);
-  ldaImm(177);
-  staAbs(0xd00b);
   ldaImm(136);
+  staAbs(0xd002);
+  ldaImm(182);
+  staAbs(0xd003);
+  ldaImm(160);
+  staAbs(0xd004);
+  ldaImm(182);
+  staAbs(0xd005);
+  ldaImm(184);
+  staAbs(0xd006);
+  ldaImm(182);
+  staAbs(0xd007);
+  ldaImm(112);
+  staAbs(0xd008);
+  ldaImm(182);
+  staAbs(0xd009);
+  ldaImm(136);
+  staAbs(0xd00a);
+  ldaImm(182);
+  staAbs(0xd00b);
+  ldaImm(160);
   staAbs(0xd00c);
-  ldaImm(177);
+  ldaImm(182);
   staAbs(0xd00d);
   ldaImm(184);
   staAbs(0xd00e);
-  ldaImm(177);
+  ldaImm(182);
   staAbs(0xd00f);
-  ldaImm(0x01);
+  ldaImm(0x00);
   staAbs(0xd027);
   staAbs(0xd028);
   staAbs(0xd029);
   staAbs(0xd02a);
+  ldaImm(0x01);
   staAbs(0xd02b);
-  ldaImm(0x00);
   staAbs(0xd02c);
   staAbs(0xd02d);
   staAbs(0xd02e);
-  ldaImm(0xe0);
-  staAbs(0xd01d);
   ldaImm(0xff);
   staAbs(0xd015);
   rts();
