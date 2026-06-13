@@ -4633,9 +4633,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(1809, 'NEXT');
     pushLine(1810, 'FOR I=0 TO 499:GET#3,A$:IF A$="" THEN B=0:GOTO 1816');
     pushLine(1812, 'B=ASC(A$)');
-    pushLine(1816, 'HI=0:LO=B');
-    pushLine(1818, 'IF LO<16 THEN 1824');
-    pushLine(1820, 'LO=LO-16:HI=HI+1:GOTO 1818');
+    pushLine(1816, 'HI=INT(B/16)');
+    pushLine(1818, 'LO=B-HI*16');
     pushLine(1824, 'POKE 49152+I*2,HI');
     pushLine(1826, 'POKE 49152+I*2+1,LO');
     pushLine(1827, 'LD=LD+1:GOSUB 2100');
