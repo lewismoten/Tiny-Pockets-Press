@@ -3985,6 +3985,14 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   };
   const config = options || {};
   const hasToc = Boolean(config.hasToc);
+  const bookInfoValue = function (key, fallback) {
+    if (typeof TPP.bookInfoValue === "function") {
+      const value = TPP.bookInfoValue(book, key);
+      if (value) return String(value);
+    }
+    if (book && book[key] != null && book[key] !== "") return String(book[key]);
+    return fallback || "";
+  };
   const normalizeLineText = function (value) {
     return String(value || "")
       .replace(/\s+/g, " ")
@@ -4075,12 +4083,28 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
       body: Array.isArray(body) ? body.slice() : encodeBasicBody(body),
     });
   };
+  const pushWrappedLabel = function (label, value, width) {
+    const lines = wrapText(value, width);
+    if (!lines.length) return;
+    lines.forEach(function (line, index) {
+      pushLine(
+        lineNumber,
+        'PRINT "' + (index === 0 ? label : " ".repeat(label.length)) + line + '"',
+      );
+      lineNumber += 10;
+    });
+  };
+  const subtitle = bookInfoValue("subtitle", "");
+  const seriesName = bookInfoValue("seriesName", "");
+  const publisher = bookInfoValue("publisher", "");
+  const pubDate = bookInfoValue("pubDate", "");
+  const pubYear = /^\d{4}/.test(pubDate) ? pubDate.slice(0, 4) : "";
   const titleLines = wrapText(
-    (book && book.title) || "UNTITLED BOOK",
+    bookInfoValue("title", "UNTITLED BOOK"),
     34,
   );
   const authorLines = wrapText(
-    (book && (book.by || book.author)) || "UNKNOWN AUTHOR",
+    bookInfoValue("author", (book && (book.by || book.author)) || "UNKNOWN AUTHOR"),
     30,
   );
   const totalPages = Math.max(1, Number(pageCount) || 1);
@@ -4098,10 +4122,17 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(lineNumber, 'PRINT "' + (lineNumber === 40 ? "TITLE: " : "       ") + line + '"');
     lineNumber += 10;
   });
+  pushWrappedLabel("SUBTITLE: ", subtitle, 30);
   authorLines.forEach(function (line, index) {
     pushLine(lineNumber, 'PRINT "' + (index === 0 ? "AUTHOR: " : "        ") + line + '"');
     lineNumber += 10;
   });
+  pushWrappedLabel("SERIES: ", seriesName, 32);
+  pushWrappedLabel("PUBLISHER: ", publisher, 29);
+  if (pubYear) {
+    pushLine(lineNumber, 'PRINT "YEAR: ' + pubYear + '"');
+    lineNumber += 10;
+  }
   pushLine(lineNumber, 'PRINT "PAGES: ' + String(totalPages) + '"');
   lineNumber += 10;
   pushLine(lineNumber, 'PRINT "CHAPTERS: ' + String(chapterCount) + '"');
