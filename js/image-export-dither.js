@@ -103,14 +103,28 @@ export function init(TPP) {
   };
   const yieldToUi = function () {
     return new Promise(function (resolve) {
-      if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
-        window.requestAnimationFrame(function () {
-          resolve();
-        });
-        return;
-      }
       setTimeout(resolve, 0);
     });
+  };
+  const makeUiYieldController = function (budgetMs) {
+    const maxBudget = Math.max(1, Number(budgetMs) || 2);
+    let lastYieldAt =
+      typeof performance !== "undefined" && typeof performance.now === "function"
+        ? performance.now()
+        : Date.now();
+    return async function () {
+      const now =
+        typeof performance !== "undefined" && typeof performance.now === "function"
+          ? performance.now()
+          : Date.now();
+      if (now - lastYieldAt < maxBudget) return false;
+      await yieldToUi();
+      lastYieldAt =
+        typeof performance !== "undefined" && typeof performance.now === "function"
+          ? performance.now()
+          : Date.now();
+      return true;
+    };
   };
   const applyOrderedMatrix = function (data, width, height, threshold, matrix) {
     const size = matrix.length || 1;
@@ -743,6 +757,7 @@ export function init(TPP) {
       });
     let bestBgIndex = bgCandidates[0] || 0;
     let bestError = Infinity;
+    let processedCells = 0;
     for (let candidateIndex = 0; candidateIndex < bgCandidates.length; candidateIndex += 1) {
       const bgIndex = bgCandidates[candidateIndex];
       let totalError = 0;
@@ -796,6 +811,7 @@ export function init(TPP) {
       : palette.map(function (_swatch, index) {
         return index;
       });
+    const maybeYield = makeUiYieldController(config.yieldBudgetMs);
     let bestBgIndex = bgCandidates[0] || 0;
     let bestError = Infinity;
     let processedCells = 0;
@@ -825,7 +841,8 @@ export function init(TPP) {
           );
           totalError += fit.error;
           processedCells += 1;
-          if (processedCells % 8 === 0) await yieldToUi();
+          if (processedCells % 4 === 0) await yieldToUi();
+          await maybeYield();
         }
       }
       if (totalError < bestError) {
@@ -976,6 +993,7 @@ export function init(TPP) {
       palette,
       { colorLimit: colorLimit },
     );
+    let processedCells = 0;
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
@@ -1072,14 +1090,14 @@ export function init(TPP) {
     const glyphHash =
       fixedGlyphCatalogHashes[glyphCacheId] ||
       hashGlyphCatalog(glyphCatalog);
-    const globalBackgroundIndex = chooseGlobalBackgroundIndex(
+    const maybeYield = makeUiYieldController();
+    const globalBackgroundIndex = await chooseGlobalBackgroundIndexAsync(
       data,
       width,
       height,
       palette,
       { colorLimit: colorLimit },
     );
-    let processedCells = 0;
     for (let cellY = 0; cellY < height; cellY += cellSize) {
       for (let cellX = 0; cellX < width; cellX += cellSize) {
         const blockWidth = Math.min(cellSize, width - cellX);
@@ -1158,7 +1176,8 @@ export function init(TPP) {
           });
         }
         processedCells += 1;
-        if (processedCells % 8 === 0) await yieldToUi();
+        if (processedCells % 4 === 0) await yieldToUi();
+        await maybeYield();
       }
     }
   };
@@ -1299,6 +1318,7 @@ export function init(TPP) {
     const selectionBias = clampByte(
       config.selectionBias == null ? 128 : config.selectionBias,
     );
+    const maybeYield = makeUiYieldController(config.yieldBudgetMs);
     const globalBackgroundIndex = await chooseGlobalBackgroundIndexAsync(
       data,
       width,
@@ -1356,9 +1376,8 @@ export function init(TPP) {
           key: originalKey,
         });
         processedCells += 1;
-        if (processedCells % 8 === 0) {
-          await yieldToUi();
-        }
+        if (processedCells % 4 === 0) await yieldToUi();
+        await maybeYield();
       }
     }
     const charset = selectVariedCharsetPatterns(
@@ -1413,9 +1432,8 @@ export function init(TPP) {
         fit.bg,
         fit.fg,
       );
-      if ((index + 1) % 8 === 0) {
-        await yieldToUi();
-      }
+      if ((index + 1) % 4 === 0) await yieldToUi();
+      await maybeYield();
     }
     return charset;
   };
