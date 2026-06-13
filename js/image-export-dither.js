@@ -836,6 +836,95 @@ export function init(TPP) {
       coarse2Shape * 0.15
     );
   };
+  const maskEdgeEnergy = function (mask) {
+    const source = mask || [];
+    let borderLit = 0;
+    let transitions = 0;
+    for (let y = 0; y < 8; y += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        const index = y * 8 + x;
+        const bit = source[index] ? 1 : 0;
+        if (x === 0 || x === 7 || y === 0 || y === 7) {
+          borderLit += bit;
+        }
+        if (x < 7) {
+          transitions += bit !== (source[index + 1] ? 1 : 0) ? 1 : 0;
+        }
+        if (y < 7) {
+          transitions += bit !== (source[index + 8] ? 1 : 0) ? 1 : 0;
+        }
+      }
+    }
+    return borderLit / 28 + transitions / 112;
+  };
+  const partitionProtectedCharsetEntries = function (working, maxPatterns) {
+    const list = Array.isArray(working) ? working.slice() : [];
+    if (!list.length) {
+      return { protected: [], reducible: [], remainingSlots: maxPatterns };
+    }
+    const coarse4Counts = new Map();
+    const coarse2Counts = new Map();
+    list.forEach(function (entry) {
+      const sig4 = maskKey(simplifyMask(entry.mask, 2));
+      const sig2 = maskKey(simplifyMask(entry.mask, 4));
+      coarse4Counts.set(sig4, (coarse4Counts.get(sig4) || 0) + 1);
+      coarse2Counts.set(sig2, (coarse2Counts.get(sig2) || 0) + 1);
+    });
+    const reservedTarget = Math.max(
+      16,
+      Math.min(
+        Math.round(maxPatterns * 0.2),
+        Math.max(16, maxPatterns - 48),
+      ),
+    );
+    const reserveCount = Math.max(
+      0,
+      Math.min(reservedTarget, list.length, Math.max(0, maxPatterns - 32)),
+    );
+    const scored = list.map(function (entry) {
+      const sig4 = maskKey(simplifyMask(entry.mask, 2));
+      const sig2 = maskKey(simplifyMask(entry.mask, 4));
+      const rarity4 = 1 / Math.max(1, coarse4Counts.get(sig4) || 1);
+      const rarity2 = 1 / Math.max(1, coarse2Counts.get(sig2) || 1);
+      const protectionScore =
+        (entry.detailProtection || 0) * 3.2 +
+        maskEdgeEnergy(entry.mask) * 2.8 +
+        rarity4 * 2 +
+        rarity2 * 1.6 +
+        (1 - Math.min(1, entry.utility || 0)) * 0.5;
+      return Object.assign({}, entry, {
+        protectionScore: protectionScore,
+      });
+    });
+    scored.sort(function (a, b) {
+      if (b.protectionScore !== a.protectionScore) {
+        return b.protectionScore - a.protectionScore;
+      }
+      if ((b.count || 0) !== (a.count || 0)) {
+        return (b.count || 0) - (a.count || 0);
+      }
+      return (b.utility || 0) - (a.utility || 0);
+    });
+    const protectedKeys = new Set(
+      scored.slice(0, reserveCount).map(function (entry) {
+        return entry.key;
+      }),
+    );
+    const protectedEntries = [];
+    const reducibleEntries = [];
+    list.forEach(function (entry) {
+      if (protectedKeys.has(entry.key)) {
+        protectedEntries.push(entry);
+      } else {
+        reducibleEntries.push(entry);
+      }
+    });
+    return {
+      protected: protectedEntries,
+      reducible: reducibleEntries,
+      remainingSlots: Math.max(1, maxPatterns - protectedEntries.length),
+    };
+  };
   const maskMacroDistance = function (a, b, blockSize) {
     const sourceA = a || new Uint8Array(64);
     const sourceB = b || new Uint8Array(64);
@@ -1010,18 +1099,22 @@ export function init(TPP) {
         litCount: maskLitCount(entry.mask),
       });
     });
-    const totalRemovals = Math.max(1, working.length - maxPatterns);
-    while (working.length > maxPatterns) {
+    const partition = partitionProtectedCharsetEntries(working, maxPatterns);
+    const protectedEntries = partition.protected;
+    const reducibleWorking = partition.reducible.slice();
+    const remainingSlots = partition.remainingSlots;
+    const totalRemovals = Math.max(1, reducibleWorking.length - remainingSlots);
+    while (reducibleWorking.length > remainingSlots) {
       let bestMerge = null;
       const reductionProgress =
-        (totalRemovals - Math.max(0, working.length - maxPatterns)) / totalRemovals;
+        (totalRemovals - Math.max(0, reducibleWorking.length - remainingSlots)) / totalRemovals;
       for (let relaxLevel = 0; relaxLevel < 3 && !bestMerge; relaxLevel += 1) {
         const guard = mergeGuardForProgress(reductionProgress, relaxLevel);
-        for (let i = 0; i < working.length; i += 1) {
-          const source = working[i];
-          for (let j = 0; j < working.length; j += 1) {
+        for (let i = 0; i < reducibleWorking.length; i += 1) {
+          const source = reducibleWorking[i];
+          for (let j = 0; j < reducibleWorking.length; j += 1) {
             if (i === j) continue;
-            const target = working[j];
+            const target = reducibleWorking[j];
             if (
               target.utility < source.utility &&
               !(target.utility === source.utility && (target.count || 0) >= (source.count || 0))
@@ -1070,8 +1163,8 @@ export function init(TPP) {
         }
       }
       if (!bestMerge) break;
-      const source = working[bestMerge.sourceIndex];
-      const target = working[bestMerge.targetIndex];
+      const source = reducibleWorking[bestMerge.sourceIndex];
+      const target = reducibleWorking[bestMerge.targetIndex];
       const absorbedCount = source.count || 0;
       const absorbedError =
         (source.error || 0) + bestMerge.similarityScore * absorbedCount;
@@ -1080,9 +1173,10 @@ export function init(TPP) {
       target.averageError = target.count ? target.error / target.count : target.error;
       target.members = (target.members || []).concat(source.members || []);
       target.utility = utilityScore(target);
-      working.splice(bestMerge.sourceIndex, 1);
+      reducibleWorking.splice(bestMerge.sourceIndex, 1);
     }
-    return working
+    return protectedEntries
+      .concat(reducibleWorking)
       .slice()
       .sort(function (a, b) {
         if (b.count !== a.count) return b.count - a.count;
@@ -1165,19 +1259,23 @@ export function init(TPP) {
         litCount: maskLitCount(entry.mask),
       });
     });
-    const mergesNeeded = Math.max(0, working.length - maxPatterns);
+    const partition = partitionProtectedCharsetEntries(working, maxPatterns);
+    const protectedEntries = partition.protected;
+    const reducibleWorking = partition.reducible.slice();
+    const remainingSlots = partition.remainingSlots;
+    const mergesNeeded = Math.max(0, reducibleWorking.length - remainingSlots);
     let mergesCompleted = 0;
-    while (working.length > maxPatterns) {
+    while (reducibleWorking.length > remainingSlots) {
       let bestMerge = null;
       const reductionProgress =
         mergesNeeded ? mergesCompleted / mergesNeeded : 1;
       for (let relaxLevel = 0; relaxLevel < 3 && !bestMerge; relaxLevel += 1) {
         const guard = mergeGuardForProgress(reductionProgress, relaxLevel);
-        for (let i = 0; i < working.length; i += 1) {
-          const source = working[i];
-          for (let j = 0; j < working.length; j += 1) {
+        for (let i = 0; i < reducibleWorking.length; i += 1) {
+          const source = reducibleWorking[i];
+          for (let j = 0; j < reducibleWorking.length; j += 1) {
             if (i === j) continue;
-            const target = working[j];
+            const target = reducibleWorking[j];
             if (
               target.utility < source.utility &&
               !(target.utility === source.utility && (target.count || 0) >= (source.count || 0))
@@ -1229,8 +1327,8 @@ export function init(TPP) {
         }
       }
       if (!bestMerge) break;
-      const source = working[bestMerge.sourceIndex];
-      const target = working[bestMerge.targetIndex];
+      const source = reducibleWorking[bestMerge.sourceIndex];
+      const target = reducibleWorking[bestMerge.targetIndex];
       const absorbedCount = source.count || 0;
       const absorbedError =
         (source.error || 0) + bestMerge.similarityScore * absorbedCount;
@@ -1247,11 +1345,12 @@ export function init(TPP) {
           total: mergesNeeded,
         });
       }
-      working.splice(bestMerge.sourceIndex, 1);
+      reducibleWorking.splice(bestMerge.sourceIndex, 1);
       mergesCompleted += 1;
       await maybeYield();
     }
-    const sorted = working
+    const sorted = protectedEntries
+      .concat(reducibleWorking)
       .slice()
       .sort(function (a, b) {
         if (b.count !== a.count) return b.count - a.count;
