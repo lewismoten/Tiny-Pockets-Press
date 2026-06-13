@@ -3904,6 +3904,289 @@ TPP.exportD64PageFileName = function (pageIndex) {
 TPP.exportD64CharsetPageFileName = function (pageIndex) {
   return "PAGE" + String(Math.max(1, Number(pageIndex) || 1)).padStart(4, "0") + "CHR";
 };
+TPP.d64CoverScaleCanvas = function (canvas, width, height) {
+  if (!canvas || !canvas.width || !canvas.height) return null;
+  const out = document.createElement("canvas");
+  out.width = Math.max(1, Number(width) || 320);
+  out.height = Math.max(1, Number(height) || 200);
+  const ctx = out.getContext("2d");
+  if (!ctx) return null;
+  ctx.imageSmoothingEnabled = true;
+  ctx.clearRect(0, 0, out.width, out.height);
+  ctx.drawImage(canvas, 0, 0, out.width, out.height);
+  return out;
+};
+TPP.d64CoverForcedGlyphPatterns = function () {
+  const glyph = function (rows) {
+    const mask = new Uint8Array(64);
+    rows.forEach(function (row, y) {
+      String(row || "").slice(0, 8).split("").forEach(function (char, x) {
+        if (char !== " ") mask[y * 8 + x] = 1;
+      });
+    });
+    return mask;
+  };
+  return {
+    " ": glyph([
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+      "        ",
+    ]),
+    A: glyph([
+      "  XXXX  ",
+      " XX  XX ",
+      " XX  XX ",
+      " XXXXXX ",
+      " XX  XX ",
+      " XX  XX ",
+      " XX  XX ",
+      "        ",
+    ]),
+    C: glyph([
+      "  XXXX  ",
+      " XX  XX ",
+      " XX     ",
+      " XX     ",
+      " XX     ",
+      " XX  XX ",
+      "  XXXX  ",
+      "        ",
+    ]),
+    E: glyph([
+      " XXXXXX ",
+      " XX     ",
+      " XX     ",
+      " XXXXX  ",
+      " XX     ",
+      " XX     ",
+      " XXXXXX ",
+      "        ",
+    ]),
+    P: glyph([
+      " XXXXX  ",
+      " XX  XX ",
+      " XX  XX ",
+      " XXXXX  ",
+      " XX     ",
+      " XX     ",
+      " XX     ",
+      "        ",
+    ]),
+    R: glyph([
+      " XXXXX  ",
+      " XX  XX ",
+      " XX  XX ",
+      " XXXXX  ",
+      " XX XX  ",
+      " XX  XX ",
+      " XX  XX ",
+      "        ",
+    ]),
+    S: glyph([
+      "  XXXX  ",
+      " XX  XX ",
+      " XX     ",
+      "  XXXX  ",
+      "     XX ",
+      " XX  XX ",
+      "  XXXX  ",
+      "        ",
+    ]),
+  };
+};
+TPP.buildD64CoverRecordBytes = function (canvas, palette) {
+  if (!canvas || !canvas.width || !canvas.height) return null;
+  const paletteColors =
+    Array.isArray(palette) && palette.length ? palette : [[0, 0, 0]];
+  const width = canvas.width;
+  const height = canvas.height;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  const rgba = ctx.getImageData(0, 0, width, height).data;
+  const toPaletteIndex = function (r, g, b) {
+    let bestIndex = 0;
+    let bestError = Infinity;
+    for (let i = 0; i < paletteColors.length; i += 1) {
+      const swatch = paletteColors[i];
+      const dr = r - swatch[0];
+      const dg = g - swatch[1];
+      const db = b - swatch[2];
+      const error = dr * dr + dg * dg + db * db;
+      if (error < bestError) {
+        bestError = error;
+        bestIndex = i;
+      }
+    }
+    return bestIndex;
+  };
+  const pixelIndexes = new Uint8Array(width * height);
+  const totals = new Uint32Array(Math.max(16, paletteColors.length));
+  for (let i = 0, p = 0; i < rgba.length; i += 4, p += 1) {
+    const index = toPaletteIndex(rgba[i], rgba[i + 1], rgba[i + 2]);
+    pixelIndexes[p] = index;
+    totals[index] += 1;
+  }
+  let backgroundIndex = 0;
+  for (let i = 1; i < totals.length; i += 1) {
+    if (totals[i] > totals[backgroundIndex]) backgroundIndex = i;
+  }
+  const forcedGlyphs = TPP.d64CoverForcedGlyphPatterns();
+  const bannerText = "PRESS SPACE";
+  const bannerPatterns = [];
+  const glyphIndexByKey = new Map();
+  const glyphs = [];
+  const addGlyph = function (mask) {
+    const key = Array.from(mask).join("");
+    if (glyphIndexByKey.has(key)) return glyphIndexByKey.get(key);
+    const index = glyphs.length;
+    glyphs.push(mask);
+    glyphIndexByKey.set(key, index);
+    return index;
+  };
+  Object.keys(forcedGlyphs).sort().forEach(function (key) {
+    addGlyph(forcedGlyphs[key]);
+  });
+  const screen = new Uint8Array(1000);
+  const fgColors = new Uint8Array(1000);
+  const bannerRow = 24;
+  const bannerCol = Math.floor((40 - bannerText.length) / 2);
+  const backgroundLuma =
+    (paletteColors[backgroundIndex][0] * 299 +
+      paletteColors[backgroundIndex][1] * 587 +
+      paletteColors[backgroundIndex][2] * 114) /
+    1000;
+  const bannerColor = backgroundLuma < 128 ? 1 : 0;
+  for (let cellY = 0; cellY < 25; cellY += 1) {
+    for (let cellX = 0; cellX < 40; cellX += 1) {
+      const cellIndex = cellY * 40 + cellX;
+      let forcedChar = "";
+      if (
+        cellY === bannerRow &&
+        cellX >= bannerCol &&
+        cellX < bannerCol + bannerText.length
+      ) {
+        forcedChar = bannerText[cellX - bannerCol];
+      }
+      if (forcedChar) {
+        screen[cellIndex] = addGlyph(forcedGlyphs[forcedChar] || forcedGlyphs[" "]);
+        fgColors[cellIndex] = bannerColor;
+        continue;
+      }
+      const mask = new Uint8Array(64);
+      const counts = new Uint16Array(Math.max(16, paletteColors.length));
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          const pixelIndex = (cellY * 8 + py) * width + (cellX * 8 + px);
+          const colorIndex = pixelIndexes[pixelIndex];
+          counts[colorIndex] += 1;
+        }
+      }
+      let fgIndex = backgroundIndex;
+      let fgCount = 0;
+      for (let i = 0; i < counts.length; i += 1) {
+        if (i === backgroundIndex) continue;
+        if (counts[i] > fgCount) {
+          fgCount = counts[i];
+          fgIndex = i;
+        }
+      }
+      if (!fgCount) {
+        screen[cellIndex] = addGlyph(forcedGlyphs[" "]);
+        fgColors[cellIndex] = backgroundIndex;
+        continue;
+      }
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          const pixelIndex = (cellY * 8 + py) * width + (cellX * 8 + px);
+          const colorIndex = pixelIndexes[pixelIndex];
+          if (colorIndex !== backgroundIndex) mask[py * 8 + px] = 1;
+        }
+      }
+      screen[cellIndex] = addGlyph(mask);
+      fgColors[cellIndex] = fgIndex;
+    }
+  }
+  if (glyphs.length > 256) return null;
+  while (glyphs.length < 256) glyphs.push(new Uint8Array(64));
+  const charsetBytes = TPP.imageExportCharsetToChrBytes(glyphs);
+  if (!charsetBytes) return null;
+  const packedColors = new Uint8Array(500);
+  for (let i = 0; i < 500; i += 1) {
+    const left = fgColors[i * 2] & 0x0f;
+    const right = fgColors[i * 2 + 1] & 0x0f;
+    packedColors[i] = (left << 4) | right;
+  }
+  const bytes = new Uint8Array(1 + charsetBytes.length + screen.length + packedColors.length);
+  let offset = 0;
+  bytes[offset] = backgroundIndex & 0x0f;
+  offset += 1;
+  bytes.set(charsetBytes, offset);
+  offset += charsetBytes.length;
+  bytes.set(screen, offset);
+  offset += screen.length;
+  bytes.set(packedColors, offset);
+  return {
+    backgroundIndex: backgroundIndex & 0x0f,
+    bytes: bytes,
+  };
+};
+TPP.exportD64CoverData = async function (settings, options) {
+  const pages = TPP.buildPages();
+  const front = pages.find(function (page) {
+    return page && page.role === "front";
+  });
+  if (!front) return null;
+  const palette = TPP.imageExportNamedPalette("c64");
+  if (!Array.isArray(palette) || !palette.length) return null;
+  const exportOptions = Object.assign(
+    {},
+    TPP.imageExportOptions(options),
+    {
+      format: "png",
+      colorDepth: "indexed",
+      palette: "c64",
+      dithering: "c64-custom-charset",
+    },
+  );
+  const mount = document.createElement("div");
+  mount.style.cssText = "position:fixed;left:-9999px;top:0;pointer-events:none;";
+  document.body.appendChild(mount);
+  try {
+    const shell = document.createElement("div");
+    shell.style.position = "relative";
+    shell.style.width = settings.page.w + "in";
+    shell.style.height = settings.page.h + "in";
+    shell.style.background = "#fff";
+    shell.appendChild(
+      TPP.pageEl(front, settings, 0, 0, false, false, {
+        w: settings.page.w,
+        h: settings.page.h,
+      }),
+    );
+    mount.appendChild(shell);
+    TPP.renderQr(shell, settings);
+    await TPP.waitForImages(shell);
+    await new Promise(requestAnimationFrame);
+    const rendered = await html2canvas(shell, TPP.html2canvasOptions({ scale: 1 }));
+    const scaled = TPP.d64CoverScaleCanvas(rendered, 320, 200);
+    if (!scaled) return null;
+    const exportCanvas = await TPP.exportCanvasForDepth(
+      scaled,
+      exportOptions.colorDepth,
+      exportOptions.threshold,
+      exportOptions.palette,
+      exportOptions,
+    );
+    return TPP.buildD64CoverRecordBytes(exportCanvas, palette);
+  } finally {
+    mount.remove();
+  }
+};
 TPP.exportD64TocRecords = function (book) {
   const settings = book || {};
   if (!settings || !settings.toc || settings.toc.enabled === false) return [];
@@ -3979,6 +4262,7 @@ TPP.exportD64HomeRecords = function (book, options) {
 };
 TPP.exportD64IndexAndData = function (book, options) {
   const tocRecords = TPP.exportD64TocRecords(book);
+  const coverRecord = options && options.coverRecord ? options.coverRecord : null;
   const homeRecords = TPP.exportD64HomeRecords(book, {
     pageCount: options && options.pageCount,
     hasToc: tocRecords.length > 0,
@@ -4006,6 +4290,9 @@ TPP.exportD64IndexAndData = function (book, options) {
     homeBytes.push.apply(homeBytes, valueBytes);
   });
   pushSection("HOM", homeBytes);
+  if (coverRecord && coverRecord.bytes && coverRecord.bytes.length) {
+    pushSection("COV", Array.from(coverRecord.bytes));
+  }
   const tocBytes = [];
   tocRecords.forEach(function (record) {
     const titleBytes = Array.from(String(record.title || "").toUpperCase(), function (char) {
@@ -4033,6 +4320,7 @@ TPP.exportD64IndexAndData = function (book, options) {
   });
   return {
     hasToc: tocRecords.length > 0,
+    hasCover: Boolean(coverRecord && coverRecord.bytes && coverRecord.bytes.length),
     indexBytes: new Uint8Array(idxBytes),
     dataBytes: new Uint8Array(datBytes),
     tocRecords: tocRecords,
@@ -4063,6 +4351,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     AND: 0xaf,
     OR: 0xb0,
     CHR$: 0xc7,
+    PEEK: 0xc2,
     LEFT$: 0xc8,
     MID$: 0xca,
     LEN: 0xc3,
@@ -4078,6 +4367,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   };
   const config = options || {};
   const hasToc = Boolean(config.hasToc);
+  const hasCover = Boolean(config.hasCover);
   const basicString = function (value) {
     return String(value || "")
       .replace(/[\r\n]+/g, " ")
@@ -4184,21 +4474,28 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     });
   };
   pushLine(5, 'DIM T$(200),N$(24),V$(24),NC(24),VC(24)');
-  pushLine(10, 'GOSUB 200');
-  pushLine(20, 'POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147)');
-  pushLine(30, 'POKE 646,7:PRINT "TINY POCKETS PRESS"');
-  pushLine(40, 'PRINT');
-  pushLine(50, 'FOR I=1 TO HC:GOSUB 1100:NEXT');
+  if (hasCover) {
+    pushLine(10, 'GOSUB 1700');
+    pushLine(12, 'IF CV=0 THEN 20');
+    pushLine(14, 'GET A$:IF A$="" THEN 14');
+    pushLine(16, 'GOTO 20');
+  }
+  pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:CV=0');
+  pushLine(30, 'GOSUB 200');
+  pushLine(40, 'POKE 53280,6:POKE 53281,6:POKE 646,1:PRINT CHR$(147)');
+  pushLine(50, 'POKE 646,7:PRINT "TINY POCKETS PRESS"');
   pushLine(60, 'PRINT');
-  pushLine(70, 'POKE 646,7');
-  if (hasToc) pushLine(80, 'PRINT "PRESS T FOR CONTENTS"');
-  pushLine(90, 'PRINT "PRESS Q TO QUIT"');
-  pushLine(100, 'POKE 646,1');
-  pushLine(110, 'PRINT "WAITING FOR COMMAND..."');
-  pushLine(120, 'GET A$:IF A$="" THEN 120');
-  pushLine(130, 'IF A$="Q" THEN 900');
-  if (hasToc) pushLine(140, 'IF A$="T" THEN 400');
-  pushLine(150, 'GOTO 120');
+  pushLine(70, 'FOR I=1 TO HC:GOSUB 1100:NEXT');
+  pushLine(80, 'PRINT');
+  pushLine(90, 'POKE 646,7');
+  if (hasToc) pushLine(100, 'PRINT "PRESS T FOR CONTENTS"');
+  pushLine(110, 'PRINT "PRESS Q TO QUIT"');
+  pushLine(120, 'POKE 646,1');
+  pushLine(130, 'PRINT "WAITING FOR COMMAND..."');
+  pushLine(140, 'GET A$:IF A$="" THEN 140');
+  pushLine(150, 'IF A$="Q" THEN 900');
+  if (hasToc) pushLine(160, 'IF A$="T" THEN 400');
+  pushLine(170, 'GOTO 140');
   pushLine(200, 'IF HL=1 THEN RETURN');
   pushLine(210, 'HL=1:HC=0:G$="HOM":GOSUB 500');
   pushLine(220, 'IF LN=0 THEN RETURN');
@@ -4226,11 +4523,11 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(350, 'RD=RD+VL');
   pushLine(360, 'GOTO 270');
   pushLine(400, 'GOSUB 700');
-  pushLine(410, 'IF TC=0 THEN PRINT:PRINT "NO TABLE OF CONTENTS.":GOSUB 1000:GOTO 20');
+  pushLine(410, 'IF TC=0 THEN PRINT:PRINT "NO TABLE OF CONTENTS.":GOSUB 1000:GOTO 30');
   pushLine(420, 'PG=0');
   pushLine(430, 'GOSUB 1200');
   pushLine(440, 'GET A$:IF A$="" THEN 440');
-  pushLine(450, 'IF A$="H" THEN 20');
+  pushLine(450, 'IF A$="H" THEN 30');
   pushLine(460, 'IF A$="N" THEN IF (PG+1)*9<TC THEN PG=PG+1:GOTO 430');
   pushLine(470, 'IF A$="P" THEN IF PG>0 THEN PG=PG-1:GOTO 430');
   pushLine(480, 'GOTO 440');
@@ -4308,11 +4605,38 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(1590, 'L$=MID$(L$,B+1)');
     pushLine(1600, 'GOTO 1530');
   }
+  if (hasCover) {
+    pushLine(1700, 'CV=0:G$="COV":GOSUB 500');
+    pushLine(1710, 'IF LN=0 OR TP=65535 THEN RETURN');
+    pushLine(1720, 'SB=PEEK(56576):SV=PEEK(53272)');
+    pushLine(1730, 'OPEN 3,8,3,"BOOK.DAT,S,R"');
+    pushLine(1740, 'IF TP<1 THEN 1760');
+    pushLine(1750, 'FOR I=1 TO TP:GET#3,A$:NEXT');
+    pushLine(1760, 'GET#3,A$:IF A$="" THEN BG=0:GOTO 1764');
+    pushLine(1762, 'BG=ASC(A$)');
+    pushLine(1764, 'POKE 56576,(PEEK(56576) AND 252)+3');
+    pushLine(1766, 'POKE 53272,28');
+    pushLine(1768, 'POKE 53280,BG:POKE 53281,BG');
+    pushLine(1770, 'FOR I=0 TO 2047:GET#3,A$:IF A$="" THEN B=0:GOTO 1776');
+    pushLine(1772, 'B=ASC(A$)');
+    pushLine(1776, 'POKE 12288+I,B:NEXT');
+    pushLine(1780, 'FOR I=0 TO 999:GET#3,A$:IF A$="" THEN B=0:GOTO 1786');
+    pushLine(1782, 'B=ASC(A$)');
+    pushLine(1786, 'POKE 1024+I,B:NEXT');
+    pushLine(1790, 'FOR I=0 TO 499:GET#3,A$:IF A$="" THEN B=0:GOTO 1796');
+    pushLine(1792, 'B=ASC(A$)');
+    pushLine(1796, 'HI=0:LO=B');
+    pushLine(1798, 'IF LO<16 THEN 1804');
+    pushLine(1800, 'LO=LO-16:HI=HI+1:GOTO 1798');
+    pushLine(1804, 'POKE 55296+I*2,HI');
+    pushLine(1806, 'POKE 55296+I*2+1,LO:NEXT');
+    pushLine(1810, 'CLOSE 3:CV=1:RETURN');
+  }
   pushLine(900, 'POKE 53280,2:POKE 53281,2:POKE 646,7:PRINT');
   pushLine(910, 'PRINT "QUIT TO BASIC (Y/N)?"');
   pushLine(920, 'GET A$:IF A$="" THEN 920');
   pushLine(930, 'IF A$="Y" THEN END');
-  pushLine(940, 'IF A$="N" THEN POKE 53280,6:POKE 53281,6:POKE 646,1:GOTO 10');
+  pushLine(940, 'IF A$="N" THEN POKE 53280,6:POKE 53281,6:POKE 646,1:GOTO 20');
   pushLine(950, 'GOTO 920');
   const buffer = [];
   let address = basicStart;
@@ -4342,6 +4666,11 @@ TPP.exportFileIdDizText = function (book) {
 TPP.exportImagesD64 = async function (options) {
   const progressOp = TPP.beginProgressOperation("D64 export");
   try {
+    await TPP.ensureImageExportPaletteForOptionsLoaded(
+      Object.assign({}, options || {}, {
+        palette: "c64",
+      }),
+    );
     TPP.sync();
     const settings = TPP.settings();
     const pages = TPP.buildPages();
@@ -4350,8 +4679,12 @@ TPP.exportImagesD64 = async function (options) {
       return;
     }
     TPP.showProgress(15, "Building Commodore 64 files...");
+    const coverRecord = await TPP.exportD64CoverData(settings, options);
+    TPP.throwIfProgressCancelled(progressOp);
+    TPP.showProgress(45, "Packing Commodore 64 data...");
     const bookFiles = TPP.exportD64IndexAndData(settings, {
       pageCount: pages.length,
+      coverRecord: coverRecord,
     });
     const d64Files = [
       {
@@ -4359,6 +4692,7 @@ TPP.exportImagesD64 = async function (options) {
         type: 0x82,
         data: TPP.exportD64BootProgramBytes(settings, pages.length, {
           hasToc: bookFiles.hasToc,
+          hasCover: bookFiles.hasCover,
         }),
       },
       {
