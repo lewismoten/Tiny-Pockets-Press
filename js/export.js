@@ -4586,7 +4586,7 @@ TPP.exportD64IndexAndData = function (book, options) {
 TPP.buildD64AssetLoaderProgramBytes = function () {
   const coverLayout = TPP.d64BitmapCoverLayout();
   const start = 0xc000;
-  const configBase = 0xc300;
+  const configBase = 0xc500;
   const vars = {
     status: configBase + 0,
     filenameLength: configBase + 1,
@@ -4606,7 +4606,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     restoreFd: configBase + 46,
     restoreFe: configBase + 47,
   };
-  const promptFileName = "0:PROMPT.SPR,P,R";
+  const promptFileName = "0:ANYKEY.SPR,P,R";
   const KERNAL = {
     setnam: 0xffbd,
     setlfs: 0xffba,
@@ -4651,6 +4651,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   const jmpLabel = function (name) { emit(0x4c); absoluteFixup(name); };
   const bne = function (name) { emit(0xd0); relativeFixup(name); };
   const bcc = function (name) { emit(0x90); relativeFixup(name); };
+  const bcs = function (name) { emit(0xb0); relativeFixup(name); };
   const beq = function (name) { emit(0xf0); relativeFixup(name); };
   const andImm = function (value) { emit(0x29, value); };
   const oraImm = function (value) { emit(0x09, value); };
@@ -4696,13 +4697,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrLabel("cleanup");
   rts();
   label("screenOk");
-  ldaImm(0x00);
-  staAbs(0xd015);
-  staAbs(0xd010);
-  staAbs(0xd017);
-  staAbs(0xd01d);
-  staAbs(0xd01b);
-  staAbs(0xd01c);
+  jsrLabel("hideSprites");
   ldaImm(coverLayout.borderColor);
   staAbs(0xd020);
   ldaImm(coverLayout.backgroundColor);
@@ -4766,14 +4761,19 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   decAbs(vars.bandCount);
   bne("bandLoop");
   jsrLabel("cleanup");
+  jsrLabel("hideSprites");
+  jsrLabel("clearKeys");
+  jsrLabel("delayPrompt");
   jsrLabel("setPromptFilename");
   jsrLabel("loadPromptFile");
   bcc("promptOpenOk");
   jmpLabel("coverReady");
   label("promptOpenOk");
-  jsrLabel("delayPrompt");
+  jsrLabel("hideSprites");
   label("coverReady");
   jsrLabel("showPrompt");
+  jsrLabel("clearKeys");
+  jsrLabel("waitForKey");
   ldaImm(0x00);
   staAbs(vars.status);
   rts();
@@ -4951,6 +4951,16 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   clc();
   rts();
 
+  label("waitForKey");
+  label("waitForKeyRelease");
+  jsrLabel("scanKey");
+  bcs("waitForKeyRelease");
+  label("waitForKeyLoop");
+  jsrLabel("scanKey");
+  bcc("waitForKeyLoop");
+  jsrLabel("clearKeys");
+  rts();
+
   label("clearKeys");
   ldaImm(0x00);
   staAbs(0x00c6);
@@ -5008,8 +5018,34 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   });
   rts();
 
+  label("hideSprites");
+  ldaImm(0x00);
+  staAbs(0xd015);
+  staAbs(0xd010);
+  staAbs(0xd017);
+  staAbs(0xd01d);
+  staAbs(0xd01b);
+  staAbs(0xd01c);
+  staAbs(0xd000);
+  staAbs(0xd002);
+  staAbs(0xd004);
+  staAbs(0xd006);
+  staAbs(0xd008);
+  staAbs(0xd00a);
+  staAbs(0xd00c);
+  staAbs(0xd00e);
+  staAbs(0xd001);
+  staAbs(0xd003);
+  staAbs(0xd005);
+  staAbs(0xd007);
+  staAbs(0xd009);
+  staAbs(0xd00b);
+  staAbs(0xd00d);
+  staAbs(0xd00f);
+  rts();
+
   label("delayPrompt");
-  ldyImm(90);
+  ldyImm(180);
   label("delayFrame");
   ldaImm(0xff);
   label("waitHigh");
@@ -5250,9 +5286,6 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   if (hasCover) {
     pushLine(8, 'GOSUB 3000');
     pushLine(10, 'F$="0:COVER.IMG,S,R":GOSUB 3300:GOSUB 3330:GOSUB 3400');
-    pushLine(12, 'IF CV=0 THEN 20');
-    pushLine(14, 'GET A$:IF A$="" THEN 14');
-    pushLine(16, 'GOTO 20');
   }
   pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:POKE 53265,S1:POKE 53270,S2:POKE 53269,SE:CV=0');
   pushLine(30, 'GOSUB 200');
@@ -5530,7 +5563,7 @@ TPP.exportImagesD64 = async function (options) {
             data: coverRecord.bytes,
           },
           {
-            name: "PROMPT.SPR",
+            name: "ANYKEY.SPR",
             type: 0x82,
             data: promptSpriteBytes,
           },
