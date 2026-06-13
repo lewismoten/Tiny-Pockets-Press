@@ -812,6 +812,22 @@ export function init(TPP) {
     const distanceFromHalf = Math.abs(fill - 0.5) * 2;
     return distanceFromHalf;
   };
+  const maskBlockStructureScore = function (a, b) {
+    const coarse4A = simplifyMask(a, 2);
+    const coarse4B = simplifyMask(b, 2);
+    const coarse2A = simplifyMask(a, 4);
+    const coarse2B = simplifyMask(b, 4);
+    const coarse4Diff = maskHammingDistance(coarse4A, coarse4B);
+    const coarse2Diff = maskHammingDistance(coarse2A, coarse2B);
+    const coarse4Shape = maskDifferenceScore(coarse4A, coarse4B);
+    const coarse2Shape = maskDifferenceScore(coarse2A, coarse2B);
+    return (
+      coarse4Diff * 0.35 +
+      coarse4Shape * 0.35 +
+      coarse2Diff * 0.15 +
+      coarse2Shape * 0.15
+    );
+  };
   const clusterMergeSimilarity = function (
     source,
     target,
@@ -834,8 +850,11 @@ export function init(TPP) {
       }
       const diffCount = maskHammingDistance(originalMask, target.mask);
       const shapeScore = maskDifferenceScore(originalMask, target.mask);
+      const blockScore = maskBlockStructureScore(originalMask, target.mask);
       const similarityScore =
-        diffCount * (1 - similarityBias) + shapeScore * similarityBias;
+        diffCount * (1 - similarityBias) * 0.45 +
+        shapeScore * similarityBias * 0.55 +
+        blockScore * 0.6;
       totalScore += similarityScore;
       worstScore = Math.max(worstScore, similarityScore);
       compared += 1;
