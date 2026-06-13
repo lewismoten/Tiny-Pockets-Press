@@ -4084,6 +4084,11 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     30,
   );
   const totalPages = Math.max(1, Number(pageCount) || 1);
+  const chapterCount = Array.isArray(book && book.chapters)
+    ? book.chapters.filter(function (chapter) {
+      return Boolean(chapter);
+    }).length
+    : 0;
   pushLine(5, 'DIM T$(200)');
   pushLine(10, 'PRINT CHR$(147)');
   pushLine(20, 'PRINT "TINY POCKETS PRESS"');
@@ -4099,6 +4104,10 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   });
   pushLine(lineNumber, 'PRINT "PAGES: ' + String(totalPages) + '"');
   lineNumber += 10;
+  pushLine(lineNumber, 'PRINT "CHAPTERS: ' + String(chapterCount) + '"');
+  lineNumber += 10;
+  pushLine(lineNumber, 'PRINT "CONTENTS: ' + (hasToc ? "AVAILABLE" : "NONE") + '"');
+  lineNumber += 10;
   pushLine(lineNumber, 'PRINT');
   lineNumber += 10;
   if (hasToc) {
@@ -4106,6 +4115,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     lineNumber += 10;
   }
   pushLine(lineNumber, 'PRINT "PRESS Q TO QUIT"');
+  lineNumber += 10;
+  pushLine(lineNumber, 'PRINT "WAITING FOR COMMAND..."');
   lineNumber += 10;
   const pollLine = lineNumber;
   pushLine(lineNumber, 'GET A$:IF A$="" THEN ' + String(lineNumber));
