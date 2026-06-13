@@ -4305,6 +4305,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     keyReady: configBase + 53,
     restoreDd00: configBase + 54,
     restoreD018: configBase + 55,
+    restoreZpFb: configBase + 56,
+    restoreZpFc: configBase + 57,
   };
   const KERNAL = {
     setnam: 0xffbd,
@@ -4410,6 +4412,10 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   staAbs(vars.readLo);
   staAbs(vars.readHi);
   staAbs(vars.keyReady);
+  ldaAbs(0x00fb);
+  staAbs(vars.restoreZpFb);
+  ldaAbs(0x00fc);
+  staAbs(vars.restoreZpFc);
   jsrLabel("openFile");
   bcc("fileOpenOk");
   jmpLabel("done");
@@ -4533,6 +4539,7 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   ldaImm(20);
   staAbs(vars.barCount);
   jsrLabel("drawProgress");
+  jsrLabel("cleanup");
   ldaAbs(vars.background);
   andImm(0x0f);
   staAbs(0xd020);
@@ -4544,17 +4551,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   ldaImm(coverLayout.d018);
   staAbs(0xd018);
   ldaImm(0x00);
-  staAbs(vars.keyReady);
-  label("waitForDismiss");
-  jsrLabel("scanKey");
-  bcc("waitForDismiss");
-  ldaAbs(vars.restoreDd00);
-  staAbs(0xdd00);
-  ldaAbs(vars.restoreD018);
-  staAbs(0xd018);
-  ldaImm(0x00);
   staAbs(vars.status);
-  jmpLabel("done");
+  rts();
   label("abort");
   ldaImm(0x01);
   staAbs(vars.status);
@@ -4604,6 +4602,10 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   ldaImm(0x00);
   staAbs(vars.fileOpen);
   label("cleanupDone");
+  ldaAbs(vars.restoreZpFb);
+  staAbs(0x00fb);
+  ldaAbs(vars.restoreZpFc);
+  staAbs(0x00fc);
   rts();
 
   label("readByte");
@@ -4632,12 +4634,17 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
   jsrAbs(KERNAL.scnkey);
   jsrAbs(KERNAL.getin);
   beq("armKey");
+  pha();
   ldaAbs(vars.keyReady);
-  beq("noKey");
+  beq("discardKey");
+  pla();
   cmpImm(32);
   bne("noKey");
   sec();
   rts();
+  label("discardKey");
+  pla();
+  jmpLabel("noKey");
   label("armKey");
   ldaImm(0x01);
   staAbs(vars.keyReady);
@@ -4936,7 +4943,8 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(8, 'GOSUB 3000');
     pushLine(10, 'F$="0:COVER.BIN,S,R":GOSUB 3300:GOSUB 3400');
     pushLine(12, 'IF CV=0 THEN 20');
-    pushLine(14, 'GOTO 20');
+    pushLine(14, 'GET A$:IF A$<>" " THEN 14');
+    pushLine(16, 'GOTO 20');
   }
   pushLine(20, 'IF CV=1 THEN POKE 56576,SB:POKE 53272,SV:CV=0');
   pushLine(30, 'GOSUB 200');
