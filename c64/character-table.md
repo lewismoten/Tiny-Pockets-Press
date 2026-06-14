@@ -245,7 +245,7 @@ The table below uses a practical slot-label approach:
  | 89 | `$59` | GFX 89 / Y | `$02C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-59.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-59.PNG) | 
  | 90 | `$5A` | ♦ / Z | `$02D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5A.PNG) | 
  | 91 | `$5B` | GFX 91 / [ | `$02D8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5B.PNG) | 
- | 92 | `$5C` | GFX 92 / GBP | `$02E0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5C.PNG) | 
+ | 92 | `$5C` | GFX 92 | `$02E0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5C.PNG) | 
  | 93 | `$5D` | GFX 93 / ] | `$02E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5D.PNG) | 
  | 94 | `$5E` | GFX 94 / ^ | `$02F0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5E.PNG) | 
  | 95 | `$5F` | GFX 95 / LEFT | `$02F8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5F.PNG) | 
