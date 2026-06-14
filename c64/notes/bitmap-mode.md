@@ -25,6 +25,8 @@ Standard bitmap mode on the C64 gives:
 - lower nibble = second color
 - arranged left to right, top to bottom by 40x25 cell order
 
+For a concrete byte/nibble/color example, see [../colors.md](../colors.md).
+
 So this is not:
 
 - cell 0 foreground in one nibble, cell 1 background in the next nibble
@@ -43,12 +45,7 @@ Important distinction:
 - color RAM is one 4-bit value per cell at `$d800-$dbff`
 - standard bitmap mode color pairs come from screen RAM bytes, not from packing neighboring color RAM entries together
 
-If you linearize color RAM, the order is:
-
-- left to right
-- then top to bottom
-
-with one cell color entry per address.
+For the fuller color-RAM and palette explanation, see [../colors.md](../colors.md).
 
 ## Addressing In This Project
 

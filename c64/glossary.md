@@ -99,7 +99,7 @@ MSB            LSB
 | Term | Meaning |
 | --- | --- |
 | `screen RAM` | the 1000-byte page the VIC uses for text cells or cell metadata |
-| `color RAM` | the special 4-bit-per-cell color memory at `$d800-$dbff` |
+| `color RAM` | the special 4-bit-per-cell color memory at `$d800-$dbff`; see [colors.md](colors.md) |
 | `bitmap mode` | graphics mode where pixel patterns are stored in bitmap memory |
 | `sprite` | a hardware-movable graphic object drawn by the VIC-II |
 | `character ROM` | ROM containing built-in character glyph bitmaps |
