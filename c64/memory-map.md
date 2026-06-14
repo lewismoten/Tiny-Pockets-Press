@@ -275,6 +275,24 @@ For standard bitmap mode, the per-cell foreground/background-style pair is taken
 
 That screen RAM byte is arranged left to right, top to bottom by cell, one byte per 8x8 cell.
 
+Example:
+
+```text
+[00100111]
+```
+
+Split into nibbles:
+
+- upper nibble = `0010` = decimal `2` = red
+- lower nibble = `0111` = decimal `7` = yellow
+
+So that one screen RAM byte means that this one 8x8 bitmap cell uses:
+
+- color `2` (`red`)
+- color `7` (`yellow`)
+
+The bitmap bits for that cell then decide which of those two colors each pixel gets.
+
 So for standard bitmap mode:
 
 - bitmap RAM gives the 1-bit pixel pattern
