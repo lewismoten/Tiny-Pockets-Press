@@ -41,6 +41,7 @@ That separation is important because it allows the runtime portion to be redistr
 - [d64-format.md](d64-format.md): general 1541 D64 structure, BAM, directory layout, sector chains, and block counts.
 - [book-reader.md](book-reader.md): how the C64 reader currently boots and navigates.
 - [memory-map.md](memory-map.md): addresses used by bitmap mode, sprites, buffers, and loader code.
+- [memory-techniques.md](memory-techniques.md): practical strategies for where and how C64 programs use memory, from safe starter areas to advanced reclaiming.
 - [assembly-programs.md](assembly-programs.md): ML components and what each one is responsible for.
 
 ## Internal Notes
