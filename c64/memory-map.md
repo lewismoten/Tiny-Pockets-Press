@@ -194,6 +194,28 @@ Important practical behavior:
 - color RAM holds one 4-bit color value per screen cell
 - color RAM is not just “normal RAM in the D-page”
 
+When talking about nibbles, it helps to picture a byte like this:
+
+```text
+[FFFFBBBB]
+```
+
+- `FFFF` = upper nibble = bits `7-4`
+- `BBBB` = lower nibble = bits `3-0`
+
+If a byte were:
+
+```text
+10100011
+```
+
+then:
+
+- upper nibble = `1010` = decimal `10`
+- lower nibble = `0011` = decimal `3`
+
+For C64 color RAM, only one 4-bit color value is meaningful per screen cell entry, so the important part is the 4-bit color index itself.
+
 If you linearize color RAM as a 40x25 screen, the order is:
 
 - left to right across a row
@@ -213,6 +235,31 @@ Instead:
 
 - one address = one cell color entry
 - only the low nibble is meaningful for the cell color value
+
+## C64 Color Values
+
+The standard 16-color C64 palette uses a 4-bit color index:
+
+| Bits | Decimal | Hex | Name | HTML hex |
+| --- | --- | --- | --- | --- |
+| `0000` | `0` | `$0` | black | `#000000` |
+| `0001` | `1` | `$1` | white | `#ffffff` |
+| `0010` | `2` | `$2` | red | `#813338` |
+| `0011` | `3` | `$3` | cyan | `#75cec8` |
+| `0100` | `4` | `$4` | purple | `#8e3c97` |
+| `0101` | `5` | `$5` | green | `#56ac4d` |
+| `0110` | `6` | `$6` | blue | `#2e2c9b` |
+| `0111` | `7` | `$7` | yellow | `#edf171` |
+| `1000` | `8` | `$8` | orange | `#8e5029` |
+| `1001` | `9` | `$9` | brown | `#553800` |
+| `1010` | `10` | `$a` | light red | `#c46c71` |
+| `1011` | `11` | `$b` | dark gray | `#4a4a4a` |
+| `1100` | `12` | `$c` | medium gray | `#7b7b7b` |
+| `1101` | `13` | `$d` | light green | `#a9ff9f` |
+| `1110` | `14` | `$e` | light blue | `#706deb` |
+| `1111` | `15` | `$f` | light gray | `#b2b2b2` |
+
+These HTML hex values match the project palette in [data/palettes/c64.json](../data/palettes/c64.json).
 
 ## Where FG/BG Pairs Actually Live
 
