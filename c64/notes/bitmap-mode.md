@@ -23,10 +23,32 @@ Standard bitmap mode on the C64 gives:
 - one byte per 8x8 cell
 - upper nibble = one color
 - lower nibble = second color
+- arranged left to right, top to bottom by 40x25 cell order
+
+So this is not:
+
+- cell 0 foreground in one nibble, cell 1 background in the next nibble
+
+Instead, it is:
+
+- one full byte per cell
+- each byte contains that cell’s two color nibbles
 
 ### Color RAM
 
 In multicolor and other display setups color RAM matters differently, but the current bitmap export path is organized around standard bitmap screen bytes plus global background.
+
+Important distinction:
+
+- color RAM is one 4-bit value per cell at `$d800-$dbff`
+- standard bitmap mode color pairs come from screen RAM bytes, not from packing neighboring color RAM entries together
+
+If you linearize color RAM, the order is:
+
+- left to right
+- then top to bottom
+
+with one cell color entry per address.
 
 ## Addressing In This Project
 

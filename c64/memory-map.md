@@ -191,8 +191,50 @@ Color RAM is not ordinary 8-bit main RAM.
 Important practical behavior:
 
 - screen RAM holds character or bitmap cell bytes
-- color RAM holds color nybbles for those screen cells
+- color RAM holds one 4-bit color value per screen cell
 - color RAM is not just “normal RAM in the D-page”
+
+If you linearize color RAM as a 40x25 screen, the order is:
+
+- left to right across a row
+- then top to bottom across rows
+
+So:
+
+- `$d800` = row 0, column 0
+- `$d801` = row 0, column 1
+- ...
+- `$d827` = row 0, column 39
+- `$d828` = row 1, column 0
+
+Color RAM itself is not stored as `FG,BG,FG,BG` nibble pairs for neighboring cells.
+
+Instead:
+
+- one address = one cell color entry
+- only the low nibble is meaningful for the cell color value
+
+## Where FG/BG Pairs Actually Live
+
+This is the part that is easy to mix up:
+
+- color RAM is one 4-bit color per cell
+- screen RAM bytes may contain two color nibbles in some display modes
+
+For standard bitmap mode, the per-cell foreground/background-style pair is taken from the screen RAM byte for that cell:
+
+- high nibble = one cell color
+- low nibble = the other cell color
+
+That screen RAM byte is arranged left to right, top to bottom by cell, one byte per 8x8 cell.
+
+So for standard bitmap mode:
+
+- bitmap RAM gives the 1-bit pixel pattern
+- screen RAM gives the two per-cell colors as a nibble pair
+- `$d021` gives the global background register used by the mode setup
+
+Color RAM is not where those two per-cell bitmap nibbles live in this mode.
 
 ## “Dead Zones”, Mirrors, And Unusual Areas
 
@@ -345,3 +387,15 @@ Each 8x8 character cell corresponds to:
 - 1 byte in screen RAM
 
 The high nibble and low nibble in screen RAM select the two per-cell colors used with the cell bitmap bits.
+
+If you flatten screen RAM by cell order, it is:
+
+- left to right across 40 cells
+- then top to bottom across 25 rows
+
+So the byte at screen offset `n` corresponds to cell `n`, and that one byte contains:
+
+- upper nibble = first cell color
+- lower nibble = second cell color
+
+That is different from color RAM, where one address represents one cell color entry rather than a packed two-cell or FG/BG stream.
