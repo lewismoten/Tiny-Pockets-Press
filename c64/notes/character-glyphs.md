@@ -26,7 +26,8 @@ That means text can come from three different systems:
 
 ## Useful Reminders
 
-- uppercase/graphics mode and lowercase/uppercase mode change visible glyphs
+- unshifted mode shows the uppercase/graphics set
+- shifted mode shows the upper/lowercase set and is also called business mode
 - `PRINT` writes PETSCII, which the ROM converts to screen codes
 - directly writing to screen RAM uses screen codes, not raw PETSCII expectations
 - reverse-video and control codes can appear as unexpected symbols if mixed into text data

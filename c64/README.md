@@ -40,7 +40,7 @@ That separation is important because it allows the runtime portion to be redistr
 - [file-formats.md](file-formats.md): disk files, index records, DAT classes, bitmap payload structure.
 - [d64-format.md](d64-format.md): general 1541 D64 structure, BAM, directory layout, sector chains, and block counts.
 - [book-reader.md](book-reader.md): how the C64 reader currently boots and navigates.
-- [character-table.md](character-table.md): character-slot layout, glyph memory format, charset replacement, and a 0-255 slot table.
+- [character-table.md](character-table.md): character-slot layout, glyph memory format, shifted vs. unshifted ROM sets, charset replacement, and a 0-255 slot table.
 - [colors.md](colors.md): C64 color values, nibbles, color RAM, and bitmap screen-RAM color pairs.
 - [glossary.md](glossary.md): acronyms, chip names, file terms, and common C64 terminology used in these docs.
 - [memory-map.md](memory-map.md): addresses used by bitmap mode, sprites, buffers, and loader code.

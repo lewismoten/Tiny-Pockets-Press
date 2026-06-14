@@ -106,6 +106,9 @@ MSB            LSB
 | `glyph` | the pixel shape of a character or symbol; see [character-table.md](character-table.md) |
 | `screen code` | the code stored in screen RAM to select a displayed character; see [character-table.md](character-table.md) |
 | `PETSCII` | Commodore’s character encoding, similar in concept to ASCII but different in values and behavior; see [character-table.md](character-table.md) |
+| `unshifted mode` | the C64 character-display mode that shows uppercase letters plus graphics symbols; see [character-table.md](character-table.md) |
+| `shifted mode` | the C64 character-display mode that shows upper/lowercase letters; also called business mode; see [character-table.md](character-table.md) |
+| `business mode` | another name for the shifted upper/lowercase character-display mode |
 | `nibble` | 4 bits, or half of a byte |
 | `upper nibble` | the high 4 bits of a byte, bits `7-4` |
 | `lower nibble` | the low 4 bits of a byte, bits `3-0` |
