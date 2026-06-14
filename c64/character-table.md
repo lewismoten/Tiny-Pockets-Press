@@ -149,36 +149,37 @@ The table below uses a practical slot-label approach:
 - common text-range characters are named directly
 - graphics-heavy ranges are labeled like `GFX 64`
 - reverse-video slots are labeled `REV ...`
+- when shifted/business mode shows a different visible character, the label is written as `unshifted / shifted`
 
 | Dec | Hex | Printable / Label | Offset | Unshifted | Shifted / Business |
 | --- | --- | --- | --- | --- | --- |
  | 0 | `$00` | @ | `$0000` | ![UG](assets/charset-unshifted/glyphs/PETSCII-00.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-00.PNG) | 
- | 1 | `$01` | A | `$0008` | ![UG](assets/charset-unshifted/glyphs/PETSCII-01.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-01.PNG) | 
- | 2 | `$02` | B | `$0010` | ![UG](assets/charset-unshifted/glyphs/PETSCII-02.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-02.PNG) | 
- | 3 | `$03` | C | `$0018` | ![UG](assets/charset-unshifted/glyphs/PETSCII-03.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-03.PNG) | 
- | 4 | `$04` | D | `$0020` | ![UG](assets/charset-unshifted/glyphs/PETSCII-04.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-04.PNG) | 
- | 5 | `$05` | E | `$0028` | ![UG](assets/charset-unshifted/glyphs/PETSCII-05.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-05.PNG) | 
- | 6 | `$06` | F | `$0030` | ![UG](assets/charset-unshifted/glyphs/PETSCII-06.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-06.PNG) | 
- | 7 | `$07` | G | `$0038` | ![UG](assets/charset-unshifted/glyphs/PETSCII-07.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-07.PNG) | 
- | 8 | `$08` | H | `$0040` | ![UG](assets/charset-unshifted/glyphs/PETSCII-08.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-08.PNG) | 
- | 9 | `$09` | I | `$0048` | ![UG](assets/charset-unshifted/glyphs/PETSCII-09.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-09.PNG) | 
- | 10 | `$0A` | J | `$0050` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0A.PNG) | 
- | 11 | `$0B` | K | `$0058` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0B.PNG) | 
- | 12 | `$0C` | L | `$0060` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0C.PNG) | 
- | 13 | `$0D` | M | `$0068` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0D.PNG) | 
- | 14 | `$0E` | N | `$0070` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0E.PNG) | 
- | 15 | `$0F` | O | `$0078` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0F.PNG) | 
- | 16 | `$10` | P | `$0080` | ![UG](assets/charset-unshifted/glyphs/PETSCII-10.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-10.PNG) | 
- | 17 | `$11` | Q | `$0088` | ![UG](assets/charset-unshifted/glyphs/PETSCII-11.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-11.PNG) | 
- | 18 | `$12` | R | `$0090` | ![UG](assets/charset-unshifted/glyphs/PETSCII-12.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-12.PNG) | 
- | 19 | `$13` | S | `$0098` | ![UG](assets/charset-unshifted/glyphs/PETSCII-13.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-13.PNG) | 
- | 20 | `$14` | T | `$00A0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-14.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-14.PNG) | 
- | 21 | `$15` | U | `$00A8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-15.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-15.PNG) | 
- | 22 | `$16` | V | `$00B0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-16.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-16.PNG) | 
- | 23 | `$17` | W | `$00B8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-17.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-17.PNG) | 
- | 24 | `$18` | X | `$00C0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-18.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-18.PNG) | 
- | 25 | `$19` | Y | `$00C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-19.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-19.PNG) | 
- | 26 | `$1A` | Z | `$00D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-1A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-1A.PNG) | 
+ | 1 | `$01` | A / a | `$0008` | ![UG](assets/charset-unshifted/glyphs/PETSCII-01.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-01.PNG) | 
+ | 2 | `$02` | B / b | `$0010` | ![UG](assets/charset-unshifted/glyphs/PETSCII-02.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-02.PNG) | 
+ | 3 | `$03` | C / c | `$0018` | ![UG](assets/charset-unshifted/glyphs/PETSCII-03.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-03.PNG) | 
+ | 4 | `$04` | D / d | `$0020` | ![UG](assets/charset-unshifted/glyphs/PETSCII-04.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-04.PNG) | 
+ | 5 | `$05` | E / e | `$0028` | ![UG](assets/charset-unshifted/glyphs/PETSCII-05.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-05.PNG) | 
+ | 6 | `$06` | F / f | `$0030` | ![UG](assets/charset-unshifted/glyphs/PETSCII-06.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-06.PNG) | 
+ | 7 | `$07` | G / g | `$0038` | ![UG](assets/charset-unshifted/glyphs/PETSCII-07.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-07.PNG) | 
+ | 8 | `$08` | H / h | `$0040` | ![UG](assets/charset-unshifted/glyphs/PETSCII-08.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-08.PNG) | 
+ | 9 | `$09` | I / i | `$0048` | ![UG](assets/charset-unshifted/glyphs/PETSCII-09.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-09.PNG) | 
+ | 10 | `$0A` | J / j | `$0050` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0A.PNG) | 
+ | 11 | `$0B` | K / k | `$0058` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0B.PNG) | 
+ | 12 | `$0C` | L / l | `$0060` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0C.PNG) | 
+ | 13 | `$0D` | M / m | `$0068` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0D.PNG) | 
+ | 14 | `$0E` | N / n | `$0070` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0E.PNG) | 
+ | 15 | `$0F` | O / o | `$0078` | ![UG](assets/charset-unshifted/glyphs/PETSCII-0F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-0F.PNG) | 
+ | 16 | `$10` | P / p | `$0080` | ![UG](assets/charset-unshifted/glyphs/PETSCII-10.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-10.PNG) | 
+ | 17 | `$11` | Q / q | `$0088` | ![UG](assets/charset-unshifted/glyphs/PETSCII-11.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-11.PNG) | 
+ | 18 | `$12` | R / r | `$0090` | ![UG](assets/charset-unshifted/glyphs/PETSCII-12.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-12.PNG) | 
+ | 19 | `$13` | S / s | `$0098` | ![UG](assets/charset-unshifted/glyphs/PETSCII-13.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-13.PNG) | 
+ | 20 | `$14` | T / t | `$00A0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-14.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-14.PNG) | 
+ | 21 | `$15` | U / u | `$00A8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-15.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-15.PNG) | 
+ | 22 | `$16` | V / v | `$00B0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-16.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-16.PNG) | 
+ | 23 | `$17` | W / w | `$00B8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-17.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-17.PNG) | 
+ | 24 | `$18` | X / x | `$00C0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-18.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-18.PNG) | 
+ | 25 | `$19` | Y / y | `$00C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-19.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-19.PNG) | 
+ | 26 | `$1A` | Z / z | `$00D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-1A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-1A.PNG) | 
  | 27 | `$1B` | [ | `$00D8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-1B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-1B.PNG) | 
  | 28 | `$1C` | GBP | `$00E0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-1C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-1C.PNG) | 
  | 29 | `$1D` | ] | `$00E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-1D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-1D.PNG) | 
@@ -216,38 +217,38 @@ The table below uses a practical slot-label approach:
  | 61 | `$3D` | = | `$01E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-3D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-3D.PNG) | 
  | 62 | `$3E` | > | `$01F0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-3E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-3E.PNG) | 
  | 63 | `$3F` | ? | `$01F8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-3F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-3F.PNG) | 
- | 64 | `$40` | GFX 64 | `$0200` | ![UG](assets/charset-unshifted/glyphs/PETSCII-40.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-40.PNG) | 
- | 65 | `$41` | GFX 65 | `$0208` | ![UG](assets/charset-unshifted/glyphs/PETSCII-41.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-41.PNG) | 
- | 66 | `$42` | GFX 66 | `$0210` | ![UG](assets/charset-unshifted/glyphs/PETSCII-42.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-42.PNG) | 
- | 67 | `$43` | GFX 67 | `$0218` | ![UG](assets/charset-unshifted/glyphs/PETSCII-43.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-43.PNG) | 
- | 68 | `$44` | GFX 68 | `$0220` | ![UG](assets/charset-unshifted/glyphs/PETSCII-44.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-44.PNG) | 
- | 69 | `$45` | GFX 69 | `$0228` | ![UG](assets/charset-unshifted/glyphs/PETSCII-45.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-45.PNG) | 
- | 70 | `$46` | GFX 70 | `$0230` | ![UG](assets/charset-unshifted/glyphs/PETSCII-46.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-46.PNG) | 
- | 71 | `$47` | GFX 71 | `$0238` | ![UG](assets/charset-unshifted/glyphs/PETSCII-47.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-47.PNG) | 
- | 72 | `$48` | GFX 72 | `$0240` | ![UG](assets/charset-unshifted/glyphs/PETSCII-48.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-48.PNG) | 
- | 73 | `$49` | GFX 73 | `$0248` | ![UG](assets/charset-unshifted/glyphs/PETSCII-49.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-49.PNG) | 
- | 74 | `$4A` | GFX 74 | `$0250` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4A.PNG) | 
- | 75 | `$4B` | GFX 75 | `$0258` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4B.PNG) | 
- | 76 | `$4C` | GFX 76 | `$0260` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4C.PNG) | 
- | 77 | `$4D` | GFX 77 | `$0268` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4D.PNG) | 
- | 78 | `$4E` | GFX 78 | `$0270` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4E.PNG) | 
- | 79 | `$4F` | GFX 79 | `$0278` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4F.PNG) | 
- | 80 | `$50` | GFX 80 | `$0280` | ![UG](assets/charset-unshifted/glyphs/PETSCII-50.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-50.PNG) | 
- | 81 | `$51` | GFX 81 | `$0288` | ![UG](assets/charset-unshifted/glyphs/PETSCII-51.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-51.PNG) | 
- | 82 | `$52` | GFX 82 | `$0290` | ![UG](assets/charset-unshifted/glyphs/PETSCII-52.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-52.PNG) | 
- | 83 | `$53` | GFX 83 | `$0298` | ![UG](assets/charset-unshifted/glyphs/PETSCII-53.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-53.PNG) | 
- | 84 | `$54` | GFX 84 | `$02A0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-54.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-54.PNG) | 
- | 85 | `$55` | GFX 85 | `$02A8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-55.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-55.PNG) | 
- | 86 | `$56` | GFX 86 | `$02B0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-56.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-56.PNG) | 
- | 87 | `$57` | GFX 87 | `$02B8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-57.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-57.PNG) | 
- | 88 | `$58` | GFX 88 | `$02C0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-58.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-58.PNG) | 
- | 89 | `$59` | GFX 89 | `$02C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-59.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-59.PNG) | 
- | 90 | `$5A` | GFX 90 | `$02D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5A.PNG) | 
- | 91 | `$5B` | GFX 91 | `$02D8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5B.PNG) | 
- | 92 | `$5C` | GFX 92 | `$02E0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5C.PNG) | 
- | 93 | `$5D` | GFX 93 | `$02E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5D.PNG) | 
- | 94 | `$5E` | GFX 94 | `$02F0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5E.PNG) | 
- | 95 | `$5F` | GFX 95 | `$02F8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5F.PNG) | 
+ | 64 | `$40` | GFX 64 / @ | `$0200` | ![UG](assets/charset-unshifted/glyphs/PETSCII-40.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-40.PNG) | 
+ | 65 | `$41` | GFX 65 / A | `$0208` | ![UG](assets/charset-unshifted/glyphs/PETSCII-41.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-41.PNG) | 
+ | 66 | `$42` | GFX 66 / B | `$0210` | ![UG](assets/charset-unshifted/glyphs/PETSCII-42.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-42.PNG) | 
+ | 67 | `$43` | GFX 67 / C | `$0218` | ![UG](assets/charset-unshifted/glyphs/PETSCII-43.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-43.PNG) | 
+ | 68 | `$44` | GFX 68 / D | `$0220` | ![UG](assets/charset-unshifted/glyphs/PETSCII-44.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-44.PNG) | 
+ | 69 | `$45` | GFX 69 / E | `$0228` | ![UG](assets/charset-unshifted/glyphs/PETSCII-45.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-45.PNG) | 
+ | 70 | `$46` | GFX 70 / F | `$0230` | ![UG](assets/charset-unshifted/glyphs/PETSCII-46.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-46.PNG) | 
+ | 71 | `$47` | GFX 71 / G | `$0238` | ![UG](assets/charset-unshifted/glyphs/PETSCII-47.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-47.PNG) | 
+ | 72 | `$48` | GFX 72 / H | `$0240` | ![UG](assets/charset-unshifted/glyphs/PETSCII-48.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-48.PNG) | 
+ | 73 | `$49` | GFX 73 / I | `$0248` | ![UG](assets/charset-unshifted/glyphs/PETSCII-49.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-49.PNG) | 
+ | 74 | `$4A` | GFX 74 / J | `$0250` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4A.PNG) | 
+ | 75 | `$4B` | GFX 75 / K | `$0258` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4B.PNG) | 
+ | 76 | `$4C` | GFX 76 / L | `$0260` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4C.PNG) | 
+ | 77 | `$4D` | GFX 77 / M | `$0268` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4D.PNG) | 
+ | 78 | `$4E` | GFX 78 / N | `$0270` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4E.PNG) | 
+ | 79 | `$4F` | GFX 79 / O | `$0278` | ![UG](assets/charset-unshifted/glyphs/PETSCII-4F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-4F.PNG) | 
+ | 80 | `$50` | GFX 80 / P | `$0280` | ![UG](assets/charset-unshifted/glyphs/PETSCII-50.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-50.PNG) | 
+ | 81 | `$51` | GFX 81 / Q | `$0288` | ![UG](assets/charset-unshifted/glyphs/PETSCII-51.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-51.PNG) | 
+ | 82 | `$52` | GFX 82 / R | `$0290` | ![UG](assets/charset-unshifted/glyphs/PETSCII-52.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-52.PNG) | 
+ | 83 | `$53` | GFX 83 / S | `$0298` | ![UG](assets/charset-unshifted/glyphs/PETSCII-53.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-53.PNG) | 
+ | 84 | `$54` | GFX 84 / T | `$02A0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-54.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-54.PNG) | 
+ | 85 | `$55` | GFX 85 / U | `$02A8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-55.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-55.PNG) | 
+ | 86 | `$56` | GFX 86 / V | `$02B0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-56.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-56.PNG) | 
+ | 87 | `$57` | GFX 87 / W | `$02B8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-57.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-57.PNG) | 
+ | 88 | `$58` | GFX 88 / X | `$02C0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-58.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-58.PNG) | 
+ | 89 | `$59` | GFX 89 / Y | `$02C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-59.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-59.PNG) | 
+ | 90 | `$5A` | GFX 90 / Z | `$02D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5A.PNG) | 
+ | 91 | `$5B` | GFX 91 / [ | `$02D8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5B.PNG) | 
+ | 92 | `$5C` | GFX 92 / GBP | `$02E0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5C.PNG) | 
+ | 93 | `$5D` | GFX 93 / ] | `$02E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5D.PNG) | 
+ | 94 | `$5E` | GFX 94 / ^ | `$02F0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5E.PNG) | 
+ | 95 | `$5F` | GFX 95 / LEFT | `$02F8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-5F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-5F.PNG) | 
  | 96 | `$60` | GFX 96 | `$0300` | ![UG](assets/charset-unshifted/glyphs/PETSCII-60.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-60.PNG) | 
  | 97 | `$61` | GFX 97 | `$0308` | ![UG](assets/charset-unshifted/glyphs/PETSCII-61.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-61.PNG) | 
  | 98 | `$62` | GFX 98 | `$0310` | ![UG](assets/charset-unshifted/glyphs/PETSCII-62.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-62.PNG) | 
@@ -281,32 +282,32 @@ The table below uses a practical slot-label approach:
  | 126 | `$7E` | GFX 126 | `$03F0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-7E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-7E.PNG) | 
  | 127 | `$7F` | GFX 127 | `$03F8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-7F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-7F.PNG) | 
  | 128 | `$80` | REV @ | `$0400` | ![UG](assets/charset-unshifted/glyphs/PETSCII-80.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-80.PNG) | 
- | 129 | `$81` | REV A | `$0408` | ![UG](assets/charset-unshifted/glyphs/PETSCII-81.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-81.PNG) | 
- | 130 | `$82` | REV B | `$0410` | ![UG](assets/charset-unshifted/glyphs/PETSCII-82.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-82.PNG) | 
- | 131 | `$83` | REV C | `$0418` | ![UG](assets/charset-unshifted/glyphs/PETSCII-83.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-83.PNG) | 
- | 132 | `$84` | REV D | `$0420` | ![UG](assets/charset-unshifted/glyphs/PETSCII-84.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-84.PNG) | 
- | 133 | `$85` | REV E | `$0428` | ![UG](assets/charset-unshifted/glyphs/PETSCII-85.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-85.PNG) | 
- | 134 | `$86` | REV F | `$0430` | ![UG](assets/charset-unshifted/glyphs/PETSCII-86.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-86.PNG) | 
- | 135 | `$87` | REV G | `$0438` | ![UG](assets/charset-unshifted/glyphs/PETSCII-87.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-87.PNG) | 
- | 136 | `$88` | REV H | `$0440` | ![UG](assets/charset-unshifted/glyphs/PETSCII-88.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-88.PNG) | 
- | 137 | `$89` | REV I | `$0448` | ![UG](assets/charset-unshifted/glyphs/PETSCII-89.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-89.PNG) | 
- | 138 | `$8A` | REV J | `$0450` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8A.PNG) | 
- | 139 | `$8B` | REV K | `$0458` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8B.PNG) | 
- | 140 | `$8C` | REV L | `$0460` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8C.PNG) | 
- | 141 | `$8D` | REV M | `$0468` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8D.PNG) | 
- | 142 | `$8E` | REV N | `$0470` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8E.PNG) | 
- | 143 | `$8F` | REV O | `$0478` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8F.PNG) | 
- | 144 | `$90` | REV P | `$0480` | ![UG](assets/charset-unshifted/glyphs/PETSCII-90.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-90.PNG) | 
- | 145 | `$91` | REV Q | `$0488` | ![UG](assets/charset-unshifted/glyphs/PETSCII-91.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-91.PNG) | 
- | 146 | `$92` | REV R | `$0490` | ![UG](assets/charset-unshifted/glyphs/PETSCII-92.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-92.PNG) | 
- | 147 | `$93` | REV S | `$0498` | ![UG](assets/charset-unshifted/glyphs/PETSCII-93.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-93.PNG) | 
- | 148 | `$94` | REV T | `$04A0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-94.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-94.PNG) | 
- | 149 | `$95` | REV U | `$04A8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-95.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-95.PNG) | 
- | 150 | `$96` | REV V | `$04B0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-96.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-96.PNG) | 
- | 151 | `$97` | REV W | `$04B8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-97.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-97.PNG) | 
- | 152 | `$98` | REV X | `$04C0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-98.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-98.PNG) | 
- | 153 | `$99` | REV Y | `$04C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-99.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-99.PNG) | 
- | 154 | `$9A` | REV Z | `$04D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-9A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-9A.PNG) | 
+ | 129 | `$81` | REV A / REV a | `$0408` | ![UG](assets/charset-unshifted/glyphs/PETSCII-81.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-81.PNG) | 
+ | 130 | `$82` | REV B / REV b | `$0410` | ![UG](assets/charset-unshifted/glyphs/PETSCII-82.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-82.PNG) | 
+ | 131 | `$83` | REV C / REV c | `$0418` | ![UG](assets/charset-unshifted/glyphs/PETSCII-83.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-83.PNG) | 
+ | 132 | `$84` | REV D / REV d | `$0420` | ![UG](assets/charset-unshifted/glyphs/PETSCII-84.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-84.PNG) | 
+ | 133 | `$85` | REV E / REV e | `$0428` | ![UG](assets/charset-unshifted/glyphs/PETSCII-85.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-85.PNG) | 
+ | 134 | `$86` | REV F / REV f | `$0430` | ![UG](assets/charset-unshifted/glyphs/PETSCII-86.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-86.PNG) | 
+ | 135 | `$87` | REV G / REV g | `$0438` | ![UG](assets/charset-unshifted/glyphs/PETSCII-87.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-87.PNG) | 
+ | 136 | `$88` | REV H / REV h | `$0440` | ![UG](assets/charset-unshifted/glyphs/PETSCII-88.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-88.PNG) | 
+ | 137 | `$89` | REV I / REV i | `$0448` | ![UG](assets/charset-unshifted/glyphs/PETSCII-89.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-89.PNG) | 
+ | 138 | `$8A` | REV J / REV j | `$0450` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8A.PNG) | 
+ | 139 | `$8B` | REV K / REV k | `$0458` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8B.PNG) | 
+ | 140 | `$8C` | REV L / REV l | `$0460` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8C.PNG) | 
+ | 141 | `$8D` | REV M / REV m | `$0468` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8D.PNG) | 
+ | 142 | `$8E` | REV N / REV n | `$0470` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8E.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8E.PNG) | 
+ | 143 | `$8F` | REV O / REV o | `$0478` | ![UG](assets/charset-unshifted/glyphs/PETSCII-8F.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-8F.PNG) | 
+ | 144 | `$90` | REV P / REV p | `$0480` | ![UG](assets/charset-unshifted/glyphs/PETSCII-90.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-90.PNG) | 
+ | 145 | `$91` | REV Q / REV q | `$0488` | ![UG](assets/charset-unshifted/glyphs/PETSCII-91.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-91.PNG) | 
+ | 146 | `$92` | REV R / REV r | `$0490` | ![UG](assets/charset-unshifted/glyphs/PETSCII-92.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-92.PNG) | 
+ | 147 | `$93` | REV S / REV s | `$0498` | ![UG](assets/charset-unshifted/glyphs/PETSCII-93.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-93.PNG) | 
+ | 148 | `$94` | REV T / REV t | `$04A0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-94.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-94.PNG) | 
+ | 149 | `$95` | REV U / REV u | `$04A8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-95.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-95.PNG) | 
+ | 150 | `$96` | REV V / REV v | `$04B0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-96.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-96.PNG) | 
+ | 151 | `$97` | REV W / REV w | `$04B8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-97.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-97.PNG) | 
+ | 152 | `$98` | REV X / REV x | `$04C0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-98.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-98.PNG) | 
+ | 153 | `$99` | REV Y / REV y | `$04C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-99.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-99.PNG) | 
+ | 154 | `$9A` | REV Z / REV z | `$04D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-9A.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-9A.PNG) | 
  | 155 | `$9B` | REV [ | `$04D8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-9B.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-9B.PNG) | 
  | 156 | `$9C` | REV GBP | `$04E0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-9C.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-9C.PNG) | 
  | 157 | `$9D` | REV ] | `$04E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-9D.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-9D.PNG) | 
@@ -344,38 +345,38 @@ The table below uses a practical slot-label approach:
  | 189 | `$BD` | REV = | `$05E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-BD.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-BD.PNG) | 
  | 190 | `$BE` | REV > | `$05F0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-BE.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-BE.PNG) | 
  | 191 | `$BF` | REV ? | `$05F8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-BF.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-BF.PNG) | 
- | 192 | `$C0` | REV GFX 64 | `$0600` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C0.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C0.PNG) | 
- | 193 | `$C1` | REV GFX 65 | `$0608` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C1.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C1.PNG) | 
- | 194 | `$C2` | REV GFX 66 | `$0610` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C2.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C2.PNG) | 
- | 195 | `$C3` | REV GFX 67 | `$0618` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C3.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C3.PNG) | 
- | 196 | `$C4` | REV GFX 68 | `$0620` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C4.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C4.PNG) | 
- | 197 | `$C5` | REV GFX 69 | `$0628` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C5.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C5.PNG) | 
- | 198 | `$C6` | REV GFX 70 | `$0630` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C6.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C6.PNG) | 
- | 199 | `$C7` | REV GFX 71 | `$0638` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C7.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C7.PNG) | 
- | 200 | `$C8` | REV GFX 72 | `$0640` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C8.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C8.PNG) | 
- | 201 | `$C9` | REV GFX 73 | `$0648` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C9.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C9.PNG) | 
- | 202 | `$CA` | REV GFX 74 | `$0650` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CA.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CA.PNG) | 
- | 203 | `$CB` | REV GFX 75 | `$0658` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CB.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CB.PNG) | 
- | 204 | `$CC` | REV GFX 76 | `$0660` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CC.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CC.PNG) | 
- | 205 | `$CD` | REV GFX 77 | `$0668` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CD.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CD.PNG) | 
- | 206 | `$CE` | REV GFX 78 | `$0670` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CE.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CE.PNG) | 
- | 207 | `$CF` | REV GFX 79 | `$0678` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CF.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CF.PNG) | 
- | 208 | `$D0` | REV GFX 80 | `$0680` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D0.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D0.PNG) | 
- | 209 | `$D1` | REV GFX 81 | `$0688` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D1.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D1.PNG) | 
- | 210 | `$D2` | REV GFX 82 | `$0690` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D2.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D2.PNG) | 
- | 211 | `$D3` | REV GFX 83 | `$0698` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D3.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D3.PNG) | 
- | 212 | `$D4` | REV GFX 84 | `$06A0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D4.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D4.PNG) | 
- | 213 | `$D5` | REV GFX 85 | `$06A8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D5.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D5.PNG) | 
- | 214 | `$D6` | REV GFX 86 | `$06B0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D6.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D6.PNG) | 
- | 215 | `$D7` | REV GFX 87 | `$06B8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D7.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D7.PNG) | 
- | 216 | `$D8` | REV GFX 88 | `$06C0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D8.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D8.PNG) | 
- | 217 | `$D9` | REV GFX 89 | `$06C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D9.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D9.PNG) | 
- | 218 | `$DA` | REV GFX 90 | `$06D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DA.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DA.PNG) | 
- | 219 | `$DB` | REV GFX 91 | `$06D8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DB.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DB.PNG) | 
- | 220 | `$DC` | REV GFX 92 | `$06E0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DC.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DC.PNG) | 
- | 221 | `$DD` | REV GFX 93 | `$06E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DD.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DD.PNG) | 
- | 222 | `$DE` | REV GFX 94 | `$06F0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DE.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DE.PNG) | 
- | 223 | `$DF` | REV GFX 95 | `$06F8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DF.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DF.PNG) | 
+ | 192 | `$C0` | REV GFX 64 / REV @ | `$0600` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C0.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C0.PNG) | 
+ | 193 | `$C1` | REV GFX 65 / REV A | `$0608` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C1.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C1.PNG) | 
+ | 194 | `$C2` | REV GFX 66 / REV B | `$0610` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C2.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C2.PNG) | 
+ | 195 | `$C3` | REV GFX 67 / REV C | `$0618` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C3.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C3.PNG) | 
+ | 196 | `$C4` | REV GFX 68 / REV D | `$0620` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C4.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C4.PNG) | 
+ | 197 | `$C5` | REV GFX 69 / REV E | `$0628` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C5.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C5.PNG) | 
+ | 198 | `$C6` | REV GFX 70 / REV F | `$0630` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C6.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C6.PNG) | 
+ | 199 | `$C7` | REV GFX 71 / REV G | `$0638` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C7.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C7.PNG) | 
+ | 200 | `$C8` | REV GFX 72 / REV H | `$0640` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C8.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C8.PNG) | 
+ | 201 | `$C9` | REV GFX 73 / REV I | `$0648` | ![UG](assets/charset-unshifted/glyphs/PETSCII-C9.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-C9.PNG) | 
+ | 202 | `$CA` | REV GFX 74 / REV J | `$0650` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CA.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CA.PNG) | 
+ | 203 | `$CB` | REV GFX 75 / REV K | `$0658` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CB.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CB.PNG) | 
+ | 204 | `$CC` | REV GFX 76 / REV L | `$0660` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CC.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CC.PNG) | 
+ | 205 | `$CD` | REV GFX 77 / REV M | `$0668` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CD.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CD.PNG) | 
+ | 206 | `$CE` | REV GFX 78 / REV N | `$0670` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CE.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CE.PNG) | 
+ | 207 | `$CF` | REV GFX 79 / REV O | `$0678` | ![UG](assets/charset-unshifted/glyphs/PETSCII-CF.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-CF.PNG) | 
+ | 208 | `$D0` | REV GFX 80 / REV P | `$0680` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D0.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D0.PNG) | 
+ | 209 | `$D1` | REV GFX 81 / REV Q | `$0688` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D1.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D1.PNG) | 
+ | 210 | `$D2` | REV GFX 82 / REV R | `$0690` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D2.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D2.PNG) | 
+ | 211 | `$D3` | REV GFX 83 / REV S | `$0698` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D3.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D3.PNG) | 
+ | 212 | `$D4` | REV GFX 84 / REV T | `$06A0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D4.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D4.PNG) | 
+ | 213 | `$D5` | REV GFX 85 / REV U | `$06A8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D5.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D5.PNG) | 
+ | 214 | `$D6` | REV GFX 86 / REV V | `$06B0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D6.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D6.PNG) | 
+ | 215 | `$D7` | REV GFX 87 / REV W | `$06B8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D7.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D7.PNG) | 
+ | 216 | `$D8` | REV GFX 88 / REV X | `$06C0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D8.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D8.PNG) | 
+ | 217 | `$D9` | REV GFX 89 / REV Y | `$06C8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-D9.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-D9.PNG) | 
+ | 218 | `$DA` | REV GFX 90 / REV Z | `$06D0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DA.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DA.PNG) | 
+ | 219 | `$DB` | REV GFX 91 / REV [ | `$06D8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DB.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DB.PNG) | 
+ | 220 | `$DC` | REV GFX 92 / REV GBP | `$06E0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DC.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DC.PNG) | 
+ | 221 | `$DD` | REV GFX 93 / REV ] | `$06E8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DD.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DD.PNG) | 
+ | 222 | `$DE` | REV GFX 94 / REV ^ | `$06F0` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DE.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DE.PNG) | 
+ | 223 | `$DF` | REV GFX 95 / REV LEFT | `$06F8` | ![UG](assets/charset-unshifted/glyphs/PETSCII-DF.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-DF.PNG) | 
  | 224 | `$E0` | REV GFX 96 | `$0700` | ![UG](assets/charset-unshifted/glyphs/PETSCII-E0.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-E0.PNG) | 
  | 225 | `$E1` | REV GFX 97 | `$0708` | ![UG](assets/charset-unshifted/glyphs/PETSCII-E1.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-E1.PNG) | 
  | 226 | `$E2` | REV GFX 98 | `$0710` | ![UG](assets/charset-unshifted/glyphs/PETSCII-E2.PNG) | ![LU](assets/charset-shifted-business/glyphs/PETSCII-E2.PNG) | 
