@@ -203,6 +203,17 @@ When talking about nibbles, it helps to picture a byte like this:
 - `FFFF` = upper nibble = bits `7-4`
 - `BBBB` = lower nibble = bits `3-0`
 
+Another way to visualize the same byte is:
+
+```text
+76543210
+^      ^
+MSB    LSB
+```
+
+- `MSB` = most significant bit = bit `7`
+- `LSB` = least significant bit = bit `0`
+
 If a byte were:
 
 ```text
