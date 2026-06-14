@@ -8,6 +8,8 @@
 
 These are related, but not identical.
 
+For the memory layout of a 256-slot character set, replacement strategy, and a slot/address table, see [../character-table.md](../character-table.md).
+
 ## Why This Matters Here
 
 This project uses:

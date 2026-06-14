@@ -102,10 +102,10 @@ MSB            LSB
 | `color RAM` | the special 4-bit-per-cell color memory at `$d800-$dbff`; see [colors.md](colors.md) |
 | `bitmap mode` | graphics mode where pixel patterns are stored in bitmap memory |
 | `sprite` | a hardware-movable graphic object drawn by the VIC-II |
-| `character ROM` | ROM containing built-in character glyph bitmaps |
-| `glyph` | the pixel shape of a character or symbol |
-| `screen code` | the code stored in screen RAM to select a displayed character |
-| `PETSCII` | Commodore’s character encoding, similar in concept to ASCII but different in values and behavior |
+| `character ROM` | ROM containing built-in character glyph bitmaps; see [character-table.md](character-table.md) |
+| `glyph` | the pixel shape of a character or symbol; see [character-table.md](character-table.md) |
+| `screen code` | the code stored in screen RAM to select a displayed character; see [character-table.md](character-table.md) |
+| `PETSCII` | Commodore’s character encoding, similar in concept to ASCII but different in values and behavior; see [character-table.md](character-table.md) |
 | `nibble` | 4 bits, or half of a byte |
 | `upper nibble` | the high 4 bits of a byte, bits `7-4` |
 | `lower nibble` | the low 4 bits of a byte, bits `3-0` |
