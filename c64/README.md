@@ -43,14 +43,15 @@ That separation is important because it allows the runtime portion to be redistr
 - [character-table.md](character-table.md): character-slot layout, glyph memory format, shifted vs. unshifted ROM sets, charset replacement, and a 0-255 slot table.
 - [colors.md](colors.md): C64 color values, nibbles, color RAM, and bitmap screen-RAM color pairs.
 - [glossary.md](glossary.md): acronyms, chip names, file terms, and common C64 terminology used in these docs.
-- [memory-map.md](memory-map.md): addresses used by bitmap mode, sprites, buffers, and loader code.
-- [memory-techniques.md](memory-techniques.md): practical strategies for where and how C64 programs use memory, from safe starter areas to advanced reclaiming.
+- [memory-map.md](memory-map.md): landing page for the split address-space, I/O/banking, and project layout memory docs.
+- [memory-techniques.md](memory-techniques.md): landing page for split safe-area, advanced, and ML-only memory strategy docs.
 - [assembly-programs.md](assembly-programs.md): ML components and what each one is responsible for.
 
 ## Internal Notes
 
 The [notes/](notes/) folder is a working reference set for future implementation work. It includes:
 
+- [README.md](notes/README.md): notes index for CPU, BASIC, KERNAL, bitmap, banking, and auxiliary references
 - [basic-v2.md](notes/basic-v2.md): BASIC V2 landing page with links to overview, memory, programming, and token references
 - banking and overlay behavior
 - 6502 instruction notes
