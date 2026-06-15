@@ -7,8 +7,8 @@ behavior, and day-to-day programming notes are easier to browse and link to.
 
 - [basic-v2-overview.md](basic-v2-overview.md): what BASIC V2 is good at, program layout, and how it fits into this project
 - [basic-v2-memory.md](basic-v2-memory.md): BASIC pointers, memory areas, system variables, and important `PEEK`/`POKE` addresses
-- [basic-v2-programming.md](basic-v2-programming.md): variables, arrays, strings, file I/O, flow control, and practical generated-BASIC guidance
-- [basic-v2-tokens.md](basic-v2-tokens.md): keyword token notes, extra tokens not yet used, and the full BASIC V2 token table
+- [basic-v2-programming.md](basic-v2-programming.md): landing page for split programming notes covering data types, flow, I/O, and errors
+- [basic-v2-tokens.md](basic-v2-tokens.md): landing page for split token notes and full token appendix
 
 ## Recommended Reading Order
 

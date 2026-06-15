@@ -12,6 +12,8 @@ larger documentation set.
 - [6502-instructions-extra.md](6502-instructions-extra.md): additional 6502 instructions not currently used in the loader
 - [6502-reference.md](6502-reference.md): flags, addressing modes, and loader coding patterns
 - [basic-v2.md](basic-v2.md): BASIC V2 landing page
+- [basic-v2-programming.md](basic-v2-programming.md): BASIC programming landing page
+- [basic-v2-tokens.md](basic-v2-tokens.md): BASIC token landing page
 - [bitmap-mode.md](bitmap-mode.md): bitmap-specific notes
 - [banking.md](banking.md): banking behavior and overlay notes
 - [kernal.md](kernal.md): KERNAL routines used directly
