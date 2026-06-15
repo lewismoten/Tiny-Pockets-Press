@@ -1,56 +1,24 @@
-# Commodore 64 BASIC V2 Notes
+# Commodore 64 BASIC V2
 
-## General Constraints
+This section now splits BASIC V2 into smaller reference pages so token tables, memory
+behavior, and day-to-day programming notes are easier to browse and link to.
 
-- no local variables
-- arrays must be dimensioned before use
-- line-number oriented flow
-- string handling is expensive
-- loops over lots of bytes are slow
+## BASIC V2 Pages
 
-## Common Error Messages We Have Hit
+- [basic-v2-overview.md](basic-v2-overview.md): what BASIC V2 is good at, program layout, and how it fits into this project
+- [basic-v2-memory.md](basic-v2-memory.md): BASIC pointers, memory areas, system variables, and important `PEEK`/`POKE` addresses
+- [basic-v2-programming.md](basic-v2-programming.md): variables, arrays, strings, file I/O, flow control, and practical generated-BASIC guidance
+- [basic-v2-tokens.md](basic-v2-tokens.md): keyword token notes, extra tokens not yet used, and the full BASIC V2 token table
 
-| Error | Typical Cause |
-| --- | --- |
-| `?SYNTAX ERROR` | malformed generated line |
-| `?ILLEGAL QUANTITY ERROR` | invalid argument to math/string/array ops |
-| `?UNDEF'D STATEMENT ERROR` | `GOTO`/`GOSUB` target missing |
-| `RETURN WITHOUT GOSUB` | `RETURN` reached without active `GOSUB` |
-| `?BAD SUBSCRIPT ERROR` | array index outside declared bounds |
-| `?OUT OF DATA ERROR` | `READ` exceeded generated `DATA` statements |
-| `?REDIM'D ARRAY ERROR` | attempted to re-`DIM` an existing array |
+## Recommended Reading Order
 
-## String/Character Helpers
+1. [basic-v2-overview.md](basic-v2-overview.md)
+2. [basic-v2-memory.md](basic-v2-memory.md)
+3. [basic-v2-programming.md](basic-v2-programming.md)
+4. [basic-v2-tokens.md](basic-v2-tokens.md)
 
-- `CHR$(n)`: make a one-character string from byte `n`
-- `ASC(s$)`: get code of first char
-- `MID$`, `LEFT$`, `RIGHT$`: substring helpers
-- `LEN(s$)`: length
-- `VAL(s$)`: parse numeric string
+## Related Notes
 
-## PEEK/POKE
-
-- `PEEK(addr)`: read byte from memory
-- `POKE addr,value`: write byte to memory
-
-These are heavily used for:
-
-- reading loader status bytes
-- setting loader configuration fields
-- controlling VIC-II registers
-- reading buffers filled by machine language
-
-## Calling Machine Language
-
-- `SYS address`
-
-The BASIC program configures loader state with `POKE`, then `SYS` calls into ML.
-
-## Practical Guidance For Generated BASIC
-
-- keep line construction simple
-- prefer short variable names
-- be careful with quote escaping
-- always verify every `GOSUB` has a matching reachable `RETURN`
-- reserve arrays once and reuse them
-- avoid deeply nested logic when a small helper subroutine will do
+- [6502.md](6502.md): machine-language reference used beside BASIC
+- [kernal.md](kernal.md): ROM entry points often called from ML launched by BASIC
+- [memory-map.md](../memory-map.md): broader C64 address space beyond BASIC’s view

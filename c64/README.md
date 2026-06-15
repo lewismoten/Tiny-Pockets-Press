@@ -51,7 +51,7 @@ That separation is important because it allows the runtime portion to be redistr
 
 The [notes/](notes/) folder is a working reference set for future implementation work. It includes:
 
-- BASIC V2 reminders
+- [basic-v2.md](notes/basic-v2.md): BASIC V2 landing page with links to overview, memory, programming, and token references
 - banking and overlay behavior
 - 6502 instruction notes
 - KERNAL entry points used by the loader
