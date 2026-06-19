@@ -1,5 +1,7 @@
 # BASIC V2 Overview
 
+Parent pages: [BASIC V2](basic-v2.md), [Notes Index](README.md), [C64 README](../README.md)
+
 This page introduces Commodore 64 BASIC V2 at a high level and explains why this
 project still uses it even though most performance-sensitive work moves into machine
 language.
@@ -60,3 +62,9 @@ Example:
 - [basic-v2-memory.md](basic-v2-memory.md)
 - [basic-v2-programming.md](basic-v2-programming.md)
 - [basic-v2-tokens.md](basic-v2-tokens.md)
+
+## Related Notes
+
+- [basic-v2.md](basic-v2.md)
+- [basic-v2-memory.md](basic-v2-memory.md)
+- [6502.md](6502.md)

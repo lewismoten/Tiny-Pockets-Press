@@ -13,3 +13,9 @@ to scan.
 - [techniques-safe-areas.md](techniques-safe-areas.md): beginner-safe and commonly used RAM regions
 - [techniques-advanced.md](techniques-advanced.md): banking, overlays, dual-use memory, and advanced workflows
 - [techniques-ml-only.md](techniques-ml-only.md): reclaiming BASIC-owned RAM and ML-first memory strategy
+
+## Related Docs
+
+- [../memory-map.md](../memory-map.md)
+- [../memory-techniques.md](../memory-techniques.md)
+- [../notes/banking.md](../notes/banking.md)

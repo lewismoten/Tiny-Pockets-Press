@@ -1,5 +1,7 @@
 # Commodore 64 BASIC V2
 
+Parent pages: [Notes Index](README.md), [C64 README](../README.md)
+
 This section now splits BASIC V2 into smaller reference pages so token tables, memory
 behavior, and day-to-day programming notes are easier to browse and link to.
 

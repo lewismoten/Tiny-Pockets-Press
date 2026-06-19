@@ -1,5 +1,7 @@
 # C64 Programs And Machine Language Pieces
 
+Parent: [C64 README](README.md)
+
 ## `BOOK.PRG`
 
 `BOOK.PRG` is the BASIC-facing entry point on disk.
@@ -113,3 +115,11 @@ In that model, the book-specific layer is the data:
 - generic supporting asset files referenced by the index
 
 That makes the runtime a reusable viewer/reader, while the book itself is just a packaged data set.
+
+## Related Docs
+
+- [ASM/README.md](ASM/README.md)
+- [book-reader.md](book-reader.md)
+- [file-formats.md](file-formats.md)
+- [notes/6502.md](notes/6502.md)
+- [notes/kernal.md](notes/kernal.md)

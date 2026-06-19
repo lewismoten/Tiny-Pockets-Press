@@ -98,3 +98,9 @@ Each 8x8 character cell corresponds to:
 
 The high nibble and low nibble in screen RAM select the two per-cell colors used with
 the cell bitmap bits.
+
+## Related Pages
+
+- [README.md](README.md)
+- [../memory-map.md](../memory-map.md)
+- [../notes/bitmap-mode.md](../notes/bitmap-mode.md)

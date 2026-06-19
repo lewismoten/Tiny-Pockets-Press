@@ -76,3 +76,9 @@ PHA
 ; work
 PLA
 ```
+
+## Related Pages
+
+- [6502.md](6502.md)
+- [6502-instructions-used.md](6502-instructions-used.md)
+- [6502-instructions-extra.md](6502-instructions-extra.md)

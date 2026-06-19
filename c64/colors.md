@@ -2,6 +2,8 @@
 
 This file explains how color values are represented in the C64-related docs for this project.
 
+Parent: [C64 README](README.md)
+
 It covers:
 
 - bits, nibbles, and bytes
@@ -147,6 +149,7 @@ So the full picture is:
 
 ## Related Docs
 
+- [README.md](README.md)
 - [memory-map.md](memory-map.md)
 - [notes/bitmap-mode.md](notes/bitmap-mode.md)
 - [glossary.md](glossary.md)

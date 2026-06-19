@@ -94,3 +94,9 @@ This appendix lists the standard Commodore 64 BASIC V2 token bytes in token orde
   still stored as regular character bytes rather than keyword tokens
 - after a `REM` token, the rest of the line is treated as literal text rather than
   parsed as more tokens
+
+## Related Notes
+
+- [basic-v2-tokens.md](basic-v2-tokens.md)
+- [basic-v2-tokens-used.md](basic-v2-tokens-used.md)
+- [basic-v2-programming.md](basic-v2-programming.md)

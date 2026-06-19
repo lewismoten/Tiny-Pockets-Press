@@ -2,6 +2,8 @@
 
 This file describes how the generated reader is intended to work on the C64.
 
+Parent: [C64 README](README.md)
+
 ## Guiding Behavior
 
 The reader is intended to feel active while work is happening, not stalled. That means:
@@ -114,3 +116,9 @@ The machine-language loader is meant to handle the byte-heavy work:
 BASIC remains responsible for menu flow, tag lookup, disk prompts, and higher-level reader state.
 
 Longer term, more of the expensive or timing-sensitive logic should move into ML as long as the book-specific content still lives outside the engine in index and data files.
+
+## Related Docs
+
+- [assembly-programs.md](assembly-programs.md)
+- [file-formats.md](file-formats.md)
+- [d64-format.md](d64-format.md)

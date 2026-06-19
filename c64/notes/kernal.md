@@ -2,6 +2,8 @@
 
 These are the KERNAL routines currently relevant to the reader/loader flow.
 
+Parent pages: [Notes Index](README.md), [C64 README](../README.md)
+
 For other standard KERNAL jump-table routines that are not currently used by this project, see [kernal-ext.md](kernal-ext.md).
 
 ## File IO Routines
@@ -68,3 +70,9 @@ The current ML code relies on KERNAL because it is much simpler than writing a f
 - screen updates
 
 If speed becomes the dominant issue later, this is the main area to revisit.
+
+## Related Notes
+
+- [kernal-ext.md](kernal-ext.md)
+- [6502.md](6502.md)
+- [../assembly-programs.md](../assembly-programs.md)

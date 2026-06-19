@@ -2,6 +2,10 @@
 
 This folder documents the current Commodore 64 export pipeline implemented in [js/export.js](../js/export.js).
 
+Parent: [Project README](../README.md)
+
+This page is the primary entry point for the C64 documentation set.
+
 The current exporter builds one or more `.d64` disk images containing:
 
 - `BOOK.PRG`: BASIC bootstrap and UI logic.
@@ -37,12 +41,18 @@ That separation is important because it allows the runtime portion to be redistr
 
 ## Docs In This Folder
 
+- [ASM/README.md](ASM/README.md): source-style mirrors of the generated assembly modules and their role in the exporter
 - [file-formats.md](file-formats.md): disk files, index records, DAT classes, bitmap payload structure.
 - [d64-format.md](d64-format.md): landing page for split D64 geometry, BAM, and directory-chain docs.
+- [d64-geometry.md](d64-geometry.md): D64 track geometry, sector sizes, BAM, and Track 18 responsibilities.
+- [d64-directory-and-files.md](d64-directory-and-files.md): directory entries, PRG layout, sector chains, and displayed block counts.
 - [book-reader.md](book-reader.md): how the C64 reader currently boots and navigates.
 - [character-table.md](character-table.md): landing page for split charset layout and full slot-table docs.
+- [character-table-layout.md](character-table-layout.md): character-slot memory layout, ROM sets, and charset replacement workflow.
+- [character-table-slots.md](character-table-slots.md): full `0-255` character-slot appendix with unshifted and shifted previews.
 - [colors.md](colors.md): C64 color values, nibbles, color RAM, and bitmap screen-RAM color pairs.
 - [glossary.md](glossary.md): acronyms, chip names, file terms, and common C64 terminology used in these docs.
+- [memory/README.md](memory/README.md): index for the split memory docs folder.
 - [memory-map.md](memory-map.md): landing page for the split address-space, I/O/banking, and project layout memory docs.
 - [memory-techniques.md](memory-techniques.md): landing page for split safe-area, advanced, and ML-only memory strategy docs.
 - [assembly-programs.md](assembly-programs.md): ML components and what each one is responsible for.
@@ -63,3 +73,9 @@ The [notes/](notes/) folder is a working reference set for future implementation
 ## Scope
 
 These notes describe the current exporter and reader as they exist in the codebase today. Some sections also call out intended behavior where the implementation is still in progress.
+
+## Related Sections
+
+- [notes/README.md](notes/README.md)
+- [memory/README.md](memory/README.md)
+- [ASM/README.md](ASM/README.md)

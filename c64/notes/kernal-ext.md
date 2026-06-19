@@ -2,6 +2,8 @@
 
 This file lists standard C64 KERNAL jump-table routines that are not currently used by the Tiny Pockets Press loader/reader, but may be useful later.
 
+Parent pages: [Notes Index](README.md), [kernal.md](kernal.md), [C64 README](../README.md)
+
 The routines already in active use are documented in [kernal.md](kernal.md). This companion file is the broader reference.
 
 ## Scope
@@ -142,3 +144,9 @@ are the main practical KERNAL layer to know, and they are already documented in 
 - `VECTOR`
 
 These are more “system state” routines than “do one file task” routines. They are powerful, but easy to misuse in the middle of a custom reader flow.
+
+## Related Notes
+
+- [kernal.md](kernal.md)
+- [6502.md](6502.md)
+- [../book-reader.md](../book-reader.md)

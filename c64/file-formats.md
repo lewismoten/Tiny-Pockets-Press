@@ -1,5 +1,7 @@
 # C64 File Formats
 
+Parent: [C64 README](README.md)
+
 ## Disk Contents
 
 Each generated disk can contain some or all of the following:
@@ -137,3 +139,10 @@ For standard bitmap mode:
 - one global background color comes from `$d021`
 
 The exporter dither pass reduces source art to this layout before packaging.
+
+## Related Docs
+
+- [README.md](README.md)
+- [d64-format.md](d64-format.md)
+- [book-reader.md](book-reader.md)
+- [assembly-programs.md](assembly-programs.md)

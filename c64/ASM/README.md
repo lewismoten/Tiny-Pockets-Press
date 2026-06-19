@@ -1,5 +1,7 @@
 # Generated Assembly Mirrors
 
+Parent pages: [C64 README](../README.md), [Assembly Programs](../assembly-programs.md)
+
 This folder holds source-style assembly mirrors of the machine-language programs that are currently generated in JavaScript during C64 D64 export.
 
 These files are not yet the authoritative build source. The authoritative logic still lives in [js/export.js](../../js/export.js), where bytes are emitted directly.
@@ -22,3 +24,9 @@ The purpose of this folder is to make that generated machine-language logic easi
 - Labels and comments were added to make the intent easier to follow than raw emitted bytes.
 - Some generated data blobs, such as fallback prompt sprite bytes, are noted symbolically rather than fully expanded here.
 - If the JS emitter changes, these files should be updated to match.
+
+## Related Docs
+
+- [../assembly-programs.md](../assembly-programs.md)
+- [../notes/6502.md](../notes/6502.md)
+- [../notes/kernal.md](../notes/kernal.md)

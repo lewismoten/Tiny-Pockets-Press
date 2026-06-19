@@ -1,5 +1,7 @@
 # BASIC V2 Memory And System Variables
 
+Parent pages: [BASIC V2](basic-v2.md), [Notes Index](README.md), [C64 README](../README.md)
+
 This page focuses on the RAM structures and system variables that matter when BASIC
 shares memory with generated data or machine-language routines.
 
@@ -105,3 +107,9 @@ POKE 55296,7
 ```
 
 That writes screen code `1` at the top-left cell and colors it yellow.
+
+## Related Notes
+
+- [basic-v2.md](basic-v2.md)
+- [basic-v2-programming.md](basic-v2-programming.md)
+- [../memory-map.md](../memory-map.md)

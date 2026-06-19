@@ -1,5 +1,7 @@
 # D64 And Data Packing Notes
 
+Parent pages: [Notes Index](README.md), [D64 Format](../d64-format.md), [C64 README](../README.md)
+
 ## 1541 Capacity Reminder
 
 A standard `.d64` image has limited usable space. Not all sectors are available for file payload because some are consumed by:
@@ -49,3 +51,9 @@ If performance becomes a bigger problem, possible next steps are:
 - larger grouped asset files with smarter block maps
 - custom sector tables rather than KERNAL byte-by-byte streaming
 - more aggressive duplication or compression tradeoff analysis
+
+## Related Notes
+
+- [../d64-format.md](../d64-format.md)
+- [../file-formats.md](../file-formats.md)
+- [kernal.md](kernal.md)

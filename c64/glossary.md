@@ -2,6 +2,8 @@
 
 This page explains the most common C64 terms, acronyms, and shorthand used throughout these docs.
 
+Parent: [C64 README](README.md)
+
 It is meant to be a quick “what does that mean?” reference while reading the rest of the C64 documentation.
 
 ## Core Machine Terms
@@ -223,3 +225,10 @@ When reading C64 material, these categories help:
 - if it sounds like a file suffix or disk structure, it is often a DOS or D64 term like `PRG`, `SEQ`, `BAM`, or `sector`
 - if it sounds like a short all-caps routine name, it is often a KERNAL routine like `SETNAM`, `CHRIN`, or `LOAD`
 - if it sounds like a three-letter project tag, it is probably one of the Tiny Pockets Press `IDX` tags like `HOM`, `TOC`, or `PAG`
+
+## Related Docs
+
+- [README.md](README.md)
+- [colors.md](colors.md)
+- [character-table.md](character-table.md)
+- [notes/kernal.md](notes/kernal.md)

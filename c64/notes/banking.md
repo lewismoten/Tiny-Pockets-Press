@@ -2,6 +2,8 @@
 
 This note explains the C64’s banked/overlay behavior in a little more detail than the main [memory-map.md](../memory-map.md).
 
+Parent pages: [Notes Index](README.md), [Memory Docs](../memory/README.md), [C64 README](../README.md)
+
 ## Why Banking Exists
 
 The CPU can only address 64 KB at once, but the machine contains:
@@ -86,3 +88,9 @@ When people say an address range is weird or dead, they often mean one of these:
 - the range is covered by ROM or I/O unless explicitly banked out
 
 So on the C64, “memory map” is really “address-space behavior map”.
+
+## Related Notes
+
+- [../memory-map.md](../memory-map.md)
+- [../memory/io-and-banking.md](../memory/io-and-banking.md)
+- [basic-v2-memory.md](basic-v2-memory.md)

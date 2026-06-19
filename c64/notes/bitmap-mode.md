@@ -1,5 +1,7 @@
 # C64 Standard Bitmap Mode Notes
 
+Parent pages: [Notes Index](README.md), [C64 README](../README.md)
+
 ## Mode Summary
 
 Standard bitmap mode on the C64 gives:
@@ -81,3 +83,9 @@ If screen RAM has been loaded but the bitmap body has not:
 - you can see striped, blocky, or noisy transitional frames
 
 This is expected unless the loader deliberately masks the screen or stages updates differently.
+
+## Related Notes
+
+- [../colors.md](../colors.md)
+- [../memory/project-layout.md](../memory/project-layout.md)
+- [../book-reader.md](../book-reader.md)

@@ -1,5 +1,7 @@
 # Screen Codes, PETSCII, And Glyph Notes
 
+Parent pages: [Notes Index](README.md), [Character Table](../character-table.md), [C64 README](../README.md)
+
 ## Terminology Reminder
 
 - PETSCII: Commodore character encoding used for typed and stored text.
@@ -38,3 +40,9 @@ That means text can come from three different systems:
 - terminate raw text payloads with `0x00` when designing simple custom formats
 - keep sprite text assets separate from image payloads when they need reuse
 - prefer generated bitmap/sprite glyph data over relying on ROM text when exact placement matters
+
+## Related Notes
+
+- [../character-table.md](../character-table.md)
+- [../character-table-layout.md](../character-table-layout.md)
+- [basic-v2.md](basic-v2.md)
