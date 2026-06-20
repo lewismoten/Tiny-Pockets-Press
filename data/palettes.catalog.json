@@ -1,125 +1,183 @@
 {
-  "schemaVersion": 1,
-  "palettes": [
+  "schemaVersion": 2,
+  "plugins": [
     {
       "id": "websafe",
       "name": "Web-Safe",
-      "file": "data/palettes/websafe.json"
+      "url": "data/palettes/websafe/plugin.js",
+      "format": "javascript",
+      "colorCount": 216,
+      "description": "The classic web-safe browser palette from the 1990s, built from a 6x6x6 RGB cube for early displays with limited color fidelity."
     },
     {
       "id": "colors4",
       "name": "4 Colors",
-      "file": "data/palettes/colors4.json"
+      "url": "data/palettes/colors4/plugin.js",
+      "format": "javascript",
+      "colorCount": 4
     },
     {
       "id": "colors8",
       "name": "8 Colors",
-      "file": "data/palettes/colors8.json"
+      "url": "data/palettes/colors8/plugin.js",
+      "format": "javascript",
+      "colorCount": 8
     },
     {
       "id": "colors16",
       "name": "16 Colors",
-      "file": "data/palettes/colors16.json"
+      "url": "data/palettes/colors16/plugin.js",
+      "format": "javascript",
+      "colorCount": 12
     },
     {
       "id": "colors32",
       "name": "32 Colors",
-      "file": "data/palettes/colors32.json"
+      "url": "data/palettes/colors32/plugin.js",
+      "format": "javascript",
+      "colorCount": 27
     },
     {
       "id": "colors64",
       "name": "64 Colors",
-      "file": "data/palettes/colors64.json"
+      "url": "data/palettes/colors64/plugin.js",
+      "format": "javascript",
+      "colorCount": 64
     },
     {
       "id": "colors128",
       "name": "128 Colors",
-      "file": "data/palettes/colors128.json"
+      "url": "data/palettes/colors128/plugin.js",
+      "format": "javascript",
+      "colorCount": 125
     },
     {
       "id": "colors256",
       "name": "256 Colors",
-      "file": "data/palettes/colors256.json"
+      "url": "data/palettes/colors256/plugin.js",
+      "format": "javascript",
+      "colorCount": 252
     },
     {
       "id": "gray4",
       "name": "4 Grayscale",
-      "file": "data/palettes/gray4.json"
+      "url": "data/palettes/gray4/plugin.js",
+      "format": "javascript",
+      "colorCount": 4
     },
     {
       "id": "gray8",
       "name": "8 Grayscale",
-      "file": "data/palettes/gray8.json"
+      "url": "data/palettes/gray8/plugin.js",
+      "format": "javascript",
+      "colorCount": 8
     },
     {
       "id": "gray16",
       "name": "16 Grayscale",
-      "file": "data/palettes/gray16.json"
+      "url": "data/palettes/gray16/plugin.js",
+      "format": "javascript",
+      "colorCount": 16
     },
     {
       "id": "gray32",
       "name": "32 Grayscale",
-      "file": "data/palettes/gray32.json"
+      "url": "data/palettes/gray32/plugin.js",
+      "format": "javascript",
+      "colorCount": 32
     },
     {
       "id": "gray64",
       "name": "64 Grayscale",
-      "file": "data/palettes/gray64.json"
+      "url": "data/palettes/gray64/plugin.js",
+      "format": "javascript",
+      "colorCount": 64
     },
     {
       "id": "gray128",
       "name": "128 Grayscale",
-      "file": "data/palettes/gray128.json"
+      "url": "data/palettes/gray128/plugin.js",
+      "format": "javascript",
+      "colorCount": 128
     },
     {
       "id": "gray256",
       "name": "256 Grayscale",
-      "file": "data/palettes/gray256.json"
+      "url": "data/palettes/gray256/plugin.js",
+      "format": "javascript",
+      "colorCount": 256
     },
     {
       "id": "windows16",
       "name": "Windows 16",
-      "file": "data/palettes/windows16.json"
+      "url": "data/palettes/windows16/plugin.js",
+      "format": "javascript",
+      "colorCount": 16,
+      "description": "The standard 16-color Windows system palette used by legacy VGA-era software and desktop themes."
     },
     {
       "id": "ansi16",
       "name": "ANSI 16",
-      "file": "data/palettes/ansi16.json"
+      "url": "data/palettes/ansi16/plugin.js",
+      "format": "javascript",
+      "colorCount": 16,
+      "description": "The traditional 16-color ANSI terminal palette, combining 8 base colors with their bright counterparts."
     },
     {
       "id": "xterm256",
       "name": "Extended ANSI / Xterm",
-      "file": "data/palettes/xterm256.json"
+      "url": "data/palettes/xterm256/plugin.js",
+      "format": "javascript",
+      "colorCount": 256,
+      "description": "The 256-color xterm palette: ANSI 16, a 6x6x6 color cube, and a grayscale ramp used by many terminal emulators."
     },
     {
       "id": "ega16",
       "name": "EGA",
-      "file": "data/palettes/ega16.json"
+      "url": "data/palettes/ega16/plugin.js",
+      "format": "javascript",
+      "colorCount": 16,
+      "description": "IBM Enhanced Graphics Adapter 16-color palette, common in late DOS software before VGA became dominant."
     },
     {
       "id": "c64",
       "name": "Commodore 64",
-      "file": "data/palettes/c64.json"
+      "url": "data/palettes/c64/plugin.js",
+      "format": "javascript",
+      "colorCount": 16,
+      "description": "The standard 16-color Commodore 64 palette derived from the VIC-II graphics chip and widely used in C64 artwork and games."
     },
     {
       "id": "atari400base",
       "name": "Atari 400",
-      "file": "data/palettes/atari400base.json"
+      "url": "data/palettes/atari400base/plugin.js",
+      "format": "javascript",
+      "colorCount": 128,
+      "description": "A representative Atari 400/800-era palette based on the machine's CTIA/GTIA color-luminance combinations without artifact color simulation."
     },
     {
       "id": "atari400",
       "name": "Atari 400 Artifacting",
-      "file": "data/palettes/atari400.json"
+      "url": "data/palettes/atari400/plugin.js",
+      "format": "javascript",
+      "colorCount": 256,
+      "description": "An expanded Atari 400/800-inspired palette that includes artifact-style color behavior associated with composite display output."
     },
     {
       "id": "cga0",
       "name": "CGA 0",
-      "file": "data/palettes/cga0.json"
+      "url": "data/palettes/cga0/plugin.js",
+      "format": "javascript",
+      "colorCount": 4,
+      "description": "IBM CGA palette 0, the cyan-magenta-white set commonly seen in early composite and RGBI PC graphics."
     },
     {
       "id": "cga1",
       "name": "CGA 1",
-      "file": "data/palettes/cga1.json"
+      "url": "data/palettes/cga1/plugin.js",
+      "format": "javascript",
+      "colorCount": 4,
+      "description": "IBM CGA palette 1, the green-red-brown set used by many early DOS games and applications."
     }
   ]
 }

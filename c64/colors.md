@@ -68,7 +68,7 @@ The standard 16-color C64 palette uses a 4-bit color index:
 | `1110` | `14` | `$e` | light blue | `#706deb` |
 | `1111` | `15` | `$f` | light gray | `#b2b2b2` |
 
-These HTML hex values match the project palette in [../data/palettes/c64.json](../data/palettes/c64.json).
+These HTML hex values match the project palette plugin in [../data/palettes/c64/plugin.js](../data/palettes/c64/plugin.js).
 
 ## Color RAM
 
