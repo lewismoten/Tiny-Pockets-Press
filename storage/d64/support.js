@@ -105,6 +105,39 @@
     return chars.join("").trimEnd();
   };
 
+  d64.normalizeDiskId = function (diskId) {
+    return d64.decodeName(d64.encodeFileName(String(diskId || "TP"), 2)) || "TP";
+  };
+
+  d64.normalizeDosType = function (dosType) {
+    const value = String(dosType || d64.dosTypes.dos2a).trim().toUpperCase();
+    return value || d64.dosTypes.dos2a;
+  };
+
+  d64.normalizeDosVersion = function (dosVersion) {
+    if (typeof dosVersion === "number" && Number.isFinite(dosVersion)) {
+      return Math.max(0, Math.min(255, Math.round(dosVersion)));
+    }
+    const key = String(dosVersion || "").trim().toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(d64.dosVersions, key)) {
+      return d64.dosVersions[key];
+    }
+    return d64.dosVersions.dos2_6;
+  };
+
+  d64.normalizeDiskInfo = function (options) {
+    const config = options || {};
+    return {
+      diskName:
+        String(
+          config.diskName || config.name || config.title || config.baseName || DEFAULT_IMAGE_NAME,
+        ).trim() || DEFAULT_IMAGE_NAME,
+      diskId: d64.normalizeDiskId(config.diskId),
+      dosType: d64.normalizeDosType(config.dosType),
+      dosVersion: d64.normalizeDosVersion(config.dosVersion),
+    };
+  };
+
   d64.normalizeFileType = function (type) {
     if (typeof type === "number" && Number.isFinite(type)) {
       return Math.max(0, Math.min(255, Math.round(type)));
@@ -387,11 +420,25 @@
     };
   };
 
+  d64.readFiles = function (image, options) {
+    return d64.readDirectoryEntries(image, options).map(function (entry) {
+      const file = d64.readFile(image, entry, options);
+      return {
+        name: entry.name,
+        type: entry.fileType,
+        recordLength: entry.recordLength || undefined,
+        data: file ? file.payload.slice() : new Uint8Array(0),
+        entry: entry,
+      };
+    });
+  };
+
   d64.inspectImage = function (image, options) {
     return {
       header: d64.readHeader(image),
       bam: d64.readBam(image),
       entries: d64.readDirectoryEntries(image, options),
+      files: d64.readFiles(image, options),
     };
   };
 
@@ -461,11 +508,14 @@
     };
   };
 
-  d64.createBamSector = function (freeMap, diskName) {
+  d64.createBamSector = function (freeMap, options) {
+    const diskInfo = d64.normalizeDiskInfo(
+      typeof options === "string" ? { diskName: options } : options,
+    );
     const sector = new Uint8Array(256);
-    sector[0] = 18;
-    sector[1] = 1;
-    sector[2] = 0x41;
+    sector[0] = DIRECTORY_TRACK;
+    sector[1] = DIRECTORY_START_SECTOR;
+    sector[2] = diskInfo.dosVersion;
     sector[3] = 0x00;
     for (let track = 1; track <= 35; track += 1) {
       const trackOffset = 0x04 + (track - 1) * 4;
@@ -485,15 +535,13 @@
       sector[trackOffset + 2] = bitmask[1];
       sector[trackOffset + 3] = bitmask[2];
     }
-    const nameBytes = d64.encodeFileName(diskName || DEFAULT_IMAGE_NAME, 16);
+    const nameBytes = d64.encodeFileName(diskInfo.diskName, 16);
     sector.set(nameBytes, 0x90);
     sector[0xa0] = 0xa0;
     sector[0xa1] = 0xa0;
-    sector[0xa2] = 0x54;
-    sector[0xa3] = 0x50;
+    sector.set(d64.encodeFileName(diskInfo.diskId, 2), 0xa2);
     sector[0xa4] = 0xa0;
-    sector[0xa5] = 0x32;
-    sector[0xa6] = 0x41;
+    sector.set(d64.encodeFileName(diskInfo.dosType, 2), 0xa5);
     sector[0xa7] = 0xa0;
     sector[0xa8] = 0xa0;
     return sector;
@@ -720,6 +768,7 @@
     if (estimate.totalFileSectors > estimate.usableFileSectors) return null;
     const image = new Uint8Array(STANDARD_IMAGE_SIZE);
     const config = options || {};
+    const diskInfo = d64.normalizeDiskInfo(config);
     const allocation = {
       track: 1,
       sector: 0,
@@ -767,9 +816,91 @@
       image,
       allocation,
       dirSectors,
-      config.diskName || config.name || config.title || DEFAULT_IMAGE_NAME,
+      diskInfo,
     );
     return image;
+  };
+
+  d64.rebuildImage = function (image, files, options) {
+    const header = d64.readHeader(image);
+    const config = Object.assign(
+      {
+        diskName: header.diskName || DEFAULT_IMAGE_NAME,
+        diskId: header.diskId || "TP",
+        dosType: header.dosType || d64.dosTypes.dos2a,
+        dosVersion: header.dosVersionByte || d64.dosVersions.dos2_6,
+      },
+      options || {},
+    );
+    return d64.buildImage(files, config);
+  };
+
+  d64.setDiskInfo = function (image, updates, options) {
+    return d64.rebuildImage(image, d64.readFiles(image, options), updates);
+  };
+
+  d64.setDiskName = function (image, diskName, options) {
+    return d64.setDiskInfo(
+      image,
+      Object.assign({}, options || {}, { diskName: diskName }),
+      options,
+    );
+  };
+
+  d64.updateFile = function (image, entryOrName, updates, options) {
+    const files = d64.readFiles(image, options);
+    const targetName =
+      typeof entryOrName === "string"
+        ? String(entryOrName).trim().toUpperCase()
+        : String((entryOrName && entryOrName.name) || "").trim().toUpperCase();
+    const index = files.findIndex(function (file) {
+      return String(file.name || "").trim().toUpperCase() === targetName;
+    });
+    if (index < 0) {
+      throw new Error("File not found: " + String(entryOrName || ""));
+    }
+    const patch = updates || {};
+    files[index] = {
+      name: Object.prototype.hasOwnProperty.call(patch, "name")
+        ? String(patch.name || "").trim()
+        : files[index].name,
+      type: Object.prototype.hasOwnProperty.call(patch, "type")
+        ? patch.type
+        : files[index].type,
+      recordLength: Object.prototype.hasOwnProperty.call(patch, "recordLength")
+        ? patch.recordLength
+        : files[index].recordLength,
+      data: Object.prototype.hasOwnProperty.call(patch, "data")
+        ? (patch.data instanceof Uint8Array ? patch.data : new Uint8Array(patch.data || []))
+        : files[index].data,
+    };
+    return d64.rebuildImage(image, files, options);
+  };
+
+  d64.renameFile = function (image, entryOrName, newName, options) {
+    return d64.updateFile(
+      image,
+      entryOrName,
+      {
+        name: newName,
+      },
+      options,
+    );
+  };
+
+  d64.deleteFile = function (image, entryOrName, options) {
+    const files = d64.readFiles(image, options);
+    const targetName =
+      typeof entryOrName === "string"
+        ? String(entryOrName).trim().toUpperCase()
+        : String((entryOrName && entryOrName.name) || "").trim().toUpperCase();
+    const filtered = files.filter(function (file) {
+      return String(file.name || "").trim().toUpperCase() !== targetName;
+    });
+    if (filtered.length === files.length) {
+      throw new Error("File not found: " + String(entryOrName || ""));
+    }
+    return d64.rebuildImage(image, filtered, options);
   };
 
   d64.fileName = function (options) {

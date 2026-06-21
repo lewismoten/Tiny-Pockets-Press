@@ -34,6 +34,7 @@ This is useful for:
 - listing files and decoding file metadata
 - reading file payloads directly from the image
 - reading `REL` side sectors and decoded records
+- rebuilding images after editing files or disk metadata
 - comparing two images to notice a disk swap
 
 The support layer exposes header-related enums:
@@ -93,6 +94,20 @@ The optional `options` argument is only used for generic disk naming. A minimal 
 ```ts
 type D64ImageOptions = {
   diskName?: string;
+  title?: string;
+  name?: string;
+  baseName?: string;
+};
+```
+
+Supported disk-info fields used when building or rebuilding images:
+
+```ts
+type D64DiskInfo = {
+  diskName?: string;
+  diskId?: string;
+  dosType?: string;
+  dosVersion?: number | keyof typeof window.TPP.d64.dosVersions;
   title?: string;
   name?: string;
   baseName?: string;
@@ -283,6 +298,54 @@ Parameters:
 Returns:
 
 - `string`
+
+### `normalizeDiskId(diskId)`
+
+Normalizes a 2-character disk id field.
+
+Parameters:
+
+- `diskId: string`
+
+Returns:
+
+- `string`
+
+### `normalizeDosType(dosType)`
+
+Normalizes a DOS type marker such as `2A`.
+
+Parameters:
+
+- `dosType: string`
+
+Returns:
+
+- `string`
+
+### `normalizeDosVersion(dosVersion)`
+
+Normalizes a DOS version byte.
+
+Parameters:
+
+- `dosVersion: number | string`
+
+Returns:
+
+- `number`
+
+### `normalizeDiskInfo(options)`
+
+Normalizes disk-level metadata used by image builders and mutation helpers.
+
+Parameters:
+
+- `options: D64DiskInfo`
+
+Returns:
+
+- `{ diskName, diskId, dosType, dosVersion }`
 
 ### `normalizeFileType(type)`
 
@@ -485,6 +548,19 @@ Returns:
 
 - `null | { entry, fileType, payload, blocks, sideSectors? }`
 
+### `readFiles(image, options)`
+
+Reads all directory-listed files into a rebuild-friendly structure.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Array<{ name, type, recordLength?, data, entry }>`
+
 ### `readRelativeRecords(image, entryOrName, options)`
 
 Reads and slices a `REL` file into fixed-length records.
@@ -511,6 +587,96 @@ Parameters:
 Returns:
 
 - `{ header, bam, entries }`
+
+### `rebuildImage(image, files, options)`
+
+Rebuilds a standard D64 image from an existing image plus a replacement file list.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `files: D64File[]`
+- `options?: D64DiskInfo`
+
+Returns:
+
+- `Uint8Array | null`
+
+Notes:
+
+- Existing disk metadata is preserved by default unless overridden.
+
+### `setDiskInfo(image, updates, options)`
+
+Rebuilds an image with updated disk-level metadata.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `updates: D64DiskInfo`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `setDiskName(image, diskName, options)`
+
+Convenience helper for renaming the disk.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `diskName: string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `updateFile(image, entryOrName, updates, options)`
+
+Rebuilds an image with one file updated.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `updates: Partial<D64File>`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `renameFile(image, entryOrName, newName, options)`
+
+Rebuilds an image with one file renamed.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `newName: string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `deleteFile(image, entryOrName, options)`
+
+Rebuilds an image with one file removed.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
 
 ### `diskSignature(image)`
 

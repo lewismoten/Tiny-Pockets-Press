@@ -251,7 +251,15 @@ function validateNonRelativeFileStillWorks() {
       type: "seq",
       data: new Uint8Array([1, 2, 3, 4, 5]),
     },
-  ]);
+    {
+      name: "README",
+      type: "seq",
+      data: new Uint8Array([9, 8, 7]),
+    },
+  ], {
+    diskName: "ORIGINAL",
+    diskId: "ID",
+  });
   assert(image instanceof Uint8Array, "SEQ image did not build");
   const entry = readDirectoryEntry(image, d64, 0);
   assert(entry[2] === d64.fileTypes.seq, "Directory type is not SEQ");
@@ -266,6 +274,42 @@ function validateNonRelativeFileStillWorks() {
     Buffer.from(seqFile.payload).equals(Buffer.from(new Uint8Array([1, 2, 3, 4, 5]))),
     "SEQ payload mismatch",
   );
+
+  const renamedImage = d64.renameFile(image, "HELLO", "WELCOME");
+  const renamedEntry = d64.findDirectoryEntryByName(renamedImage, "WELCOME");
+  assert(renamedEntry && renamedEntry.name === "WELCOME", "Rename failed");
+  assert(!d64.findDirectoryEntryByName(renamedImage, "HELLO"), "Old file name still present");
+
+  const updatedImage = d64.updateFile(
+    renamedImage,
+    "WELCOME",
+    {
+      data: new Uint8Array([6, 5, 4, 3]),
+    },
+  );
+  const updatedFile = d64.readFile(updatedImage, "WELCOME");
+  assert(updatedFile, "Updated file missing");
+  assert(
+    Buffer.from(updatedFile.payload).equals(Buffer.from(new Uint8Array([6, 5, 4, 3]))),
+    "Updated payload mismatch",
+  );
+
+  const diskRenamedImage = d64.setDiskName(updatedImage, "UPDATED");
+  const updatedHeader = d64.readHeader(diskRenamedImage);
+  assert(updatedHeader.diskName === "UPDATED", "Disk rename failed");
+  assert(updatedHeader.diskId === "ID", "Disk id should be preserved");
+
+  const diskInfoImage = d64.setDiskInfo(diskRenamedImage, {
+    diskId: "XY",
+    dosType: "2A",
+    dosVersion: d64.dosVersions.dos2_6,
+  });
+  const diskInfoHeader = d64.readHeader(diskInfoImage);
+  assert(diskInfoHeader.diskId === "XY", "Disk id update failed");
+
+  const deletedImage = d64.deleteFile(diskInfoImage, "README");
+  assert(!d64.findDirectoryEntryByName(deletedImage, "README"), "Delete failed");
+  assert(d64.findDirectoryEntryByName(deletedImage, "WELCOME"), "Remaining file missing after delete");
 
   const secondImage = d64.buildImage([
     {
