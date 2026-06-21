@@ -3066,7 +3066,29 @@ TPP.imageExportPaletteIds = function () {
     return TPP.imageExportPaletteIdsCached.slice();
   return TPP.imageExportPaletteIdsDefault.slice();
 };
-TPP.normalizeImageExportPaletteLibraryEntry = function (entry) {
+TPP.imageExportPaletteLibraryIsRemote = function () {
+  const libraryUrl = String(TPP.IMAGE_EXPORT_PALETTE_LIBRARY || "").trim();
+  if (!libraryUrl) return false;
+  try {
+    const resolved = new URL(
+      libraryUrl,
+      document.baseURI || window.location.href,
+    );
+    return resolved.origin !== window.location.origin;
+  } catch {
+    return /^https?:\/\//i.test(libraryUrl);
+  }
+};
+TPP.resolveImageExportPaletteLibraryUrl = function (value, baseUrl) {
+  const source = String(value || "").trim();
+  if (!source) return "";
+  try {
+    return new URL(source, baseUrl || document.baseURI || window.location.href).href;
+  } catch {
+    return source;
+  }
+};
+TPP.normalizeImageExportPaletteLibraryEntry = function (entry, baseUrl) {
   if (
     !entry ||
     typeof entry.id !== "string" ||
@@ -3075,8 +3097,14 @@ TPP.normalizeImageExportPaletteLibraryEntry = function (entry) {
     return null;
   const id = entry.id.trim();
   if (!id) return null;
-  const sourceUrl = typeof entry.url === "string" ? entry.url : "";
-  const file = typeof entry.file === "string" ? entry.file : "";
+  const sourceUrl = TPP.resolveImageExportPaletteLibraryUrl(
+    typeof entry.url === "string" ? entry.url : "",
+    baseUrl,
+  );
+  const file = TPP.resolveImageExportPaletteLibraryUrl(
+    typeof entry.file === "string" ? entry.file : "",
+    baseUrl,
+  );
   return {
     id: id,
     name: typeof entry.name === "string" ? entry.name : id,
@@ -3088,11 +3116,11 @@ TPP.normalizeImageExportPaletteLibraryEntry = function (entry) {
       typeof entry.description === "string" ? entry.description.trim() : "",
   };
 };
-TPP.applyImageExportPaletteLibraryEntries = function (entries) {
+TPP.applyImageExportPaletteLibraryEntries = function (entries, baseUrl) {
   const catalogMap = {};
   const ids = [];
   (Array.isArray(entries) ? entries : []).forEach(function (entry) {
-    const normalized = TPP.normalizeImageExportPaletteLibraryEntry(entry);
+    const normalized = TPP.normalizeImageExportPaletteLibraryEntry(entry, baseUrl);
     if (!normalized) return;
     catalogMap[normalized.id] = normalized;
     ids.push(normalized.id);
@@ -3116,11 +3144,20 @@ TPP.registerPaletteLibrary = TPP.registerPaletteLibrary || function (library) {
       : Array.isArray(payload.plugins)
         ? payload.plugins
         : [];
+  const baseUrl = String(
+    payload.baseUrl ||
+      (typeof document !== "undefined" &&
+      document.currentScript &&
+      document.currentScript.src
+        ? document.currentScript.src
+        : TPP.imageExportPaletteLibraryCurrentUrl || ""),
+  ).trim();
   TPP.imageExportPaletteLibraryLoaded = true;
-  return TPP.applyImageExportPaletteLibraryEntries(entries);
+  return TPP.applyImageExportPaletteLibraryEntries(entries, baseUrl);
 };
 TPP.loadImageExportPaletteCatalog = async function () {
-  const response = await fetch(TPP.imageExportAssetUrl(TPP.IMAGE_EXPORT_PALETTE_CATALOG), {
+  const catalogUrl = TPP.imageExportAssetUrl(TPP.IMAGE_EXPORT_PALETTE_CATALOG);
+  const response = await fetch(catalogUrl, {
     cache: "no-cache",
   });
   if (!response.ok)
@@ -3132,10 +3169,11 @@ TPP.loadImageExportPaletteCatalog = async function () {
     !Array.isArray(payload.plugins)
   )
     throw new Error("Palette catalog schema mismatch");
-  return TPP.applyImageExportPaletteLibraryEntries(payload.plugins);
+  return TPP.applyImageExportPaletteLibraryEntries(payload.plugins, catalogUrl);
 };
 TPP.loadImageExportPaletteLibrary = function () {
   const url = TPP.imageExportAssetUrl(TPP.IMAGE_EXPORT_PALETTE_LIBRARY);
+  TPP.imageExportPaletteLibraryCurrentUrl = url;
   return new Promise(function (resolve, reject) {
     const script = document.createElement("script");
     script.src = url;
@@ -3204,9 +3242,17 @@ TPP.ensureImageExportPaletteCatalogLoaded = async function () {
     TPP.imageExportPaletteCatalogLoadPromise =
       TPP.loadImageExportPaletteLibrary()
         .catch(function () {
+          if (TPP.imageExportPaletteLibraryIsRemote()) {
+            throw new Error(
+              "Remote palette library unavailable; skipping localhost catalog fallback.",
+            );
+          }
           return TPP.loadImageExportPaletteCatalog();
         })
-        .catch(function (_error) {
+        .catch(function (error) {
+          if (typeof console !== "undefined" && typeof console.error === "function") {
+            console.error("Palette catalog initialization failed.", error);
+          }
           TPP.imageExportPaletteById = {
             websafe: TPP.fallbackWebsafePalette(),
           };
