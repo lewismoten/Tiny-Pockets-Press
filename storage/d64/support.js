@@ -169,6 +169,16 @@
     );
   };
 
+  d64.normalizeUnusedTailData = function (unusedTailData, expectedLength) {
+    const length = Math.max(0, Math.floor(Number(expectedLength) || 0));
+    const source = unusedTailData instanceof Uint8Array
+      ? unusedTailData
+      : new Uint8Array(unusedTailData || []);
+    const result = new Uint8Array(length);
+    result.set(source.subarray(0, length));
+    return result;
+  };
+
   d64.readHeader = function (image) {
     const sector = d64.readSector(image, DIRECTORY_TRACK, BAM_SECTOR);
     const offsets = d64.headerOffsets;
@@ -305,6 +315,7 @@
   d64.readFileChain = function (image, startTrack, startSector) {
     const blocks = [];
     const payload = [];
+    let unusedTailData = new Uint8Array(0);
     const visited = {};
     let track = Math.max(0, Math.floor(Number(startTrack) || 0));
     let sector = Math.max(0, Math.floor(Number(startSector) || 0));
@@ -320,8 +331,12 @@
       const usedBytes = nextTrack === 0
         ? Math.max(0, Math.min(254, nextSector - 1))
         : 254;
+      const unusedBytes = nextTrack === 0 ? Math.max(0, 254 - usedBytes) : 0;
       for (let index = 0; index < usedBytes; index += 1) {
         payload.push(block[2 + index]);
+      }
+      if (!nextTrack && unusedBytes) {
+        unusedTailData = block.slice(2 + usedBytes, 2 + usedBytes + unusedBytes);
       }
       blocks.push({
         track: track,
@@ -329,6 +344,7 @@
         nextTrack: nextTrack,
         nextSector: nextSector,
         usedBytes: usedBytes,
+        unusedBytes: unusedBytes,
       });
       if (!nextTrack) break;
       track = nextTrack;
@@ -337,6 +353,11 @@
     return {
       blocks: blocks,
       payload: new Uint8Array(payload),
+      unusedTailData: unusedTailData,
+      unusedTailLength: unusedTailData.length,
+      hasUnusedTailData: unusedTailData.some(function (value) {
+        return value !== 0;
+      }),
     };
   };
 
@@ -403,6 +424,9 @@
       fileType: entry.fileType,
       payload: chain.payload,
       blocks: chain.blocks,
+      unusedTailData: chain.unusedTailData,
+      unusedTailLength: chain.unusedTailLength,
+      hasUnusedTailData: chain.hasUnusedTailData,
     };
     if (entry.fileType === "rel" && entry.sideSectorTrack) {
       result.sideSectors = d64.readRelativeSideSectors(
@@ -430,6 +454,9 @@
       sideSectors: file.sideSectors || [],
       payload: file.payload,
       blocks: file.blocks,
+      unusedTailData: file.unusedTailData,
+      unusedTailLength: file.unusedTailLength,
+      hasUnusedTailData: file.hasUnusedTailData,
     };
   };
 
@@ -443,6 +470,7 @@
         locked: entry.locked,
         recordLength: entry.recordLength || undefined,
         data: file ? file.payload.slice() : new Uint8Array(0),
+        unusedTailData: file ? file.unusedTailData.slice() : new Uint8Array(0),
         entry: entry,
       };
     });
@@ -487,6 +515,7 @@
       : new Uint8Array(entry.data || []);
     if (type !== d64.fileTypes.rel) {
       const dataSectors = Math.max(1, Math.ceil(bytes.length / 254));
+      const unusedTailLength = Math.max(0, dataSectors * 254 - bytes.length);
       return {
         type: type,
         bytes: bytes,
@@ -497,6 +526,7 @@
         locked: Boolean(entry.locked),
         recordLength: 0,
         recordCount: 0,
+        unusedTailData: d64.normalizeUnusedTailData(entry.unusedTailData, unusedTailLength),
       };
     }
     const recordLength = d64.normalizeRecordLength(entry.recordLength);
@@ -514,6 +544,7 @@
         "REL file exceeds side-sector capacity: " + String(entry.name || ""),
       );
     }
+    const unusedTailLength = Math.max(0, dataSectors * 254 - paddedBytes.length);
     return {
       type: type,
       bytes: paddedBytes,
@@ -524,6 +555,7 @@
       locked: Boolean(entry.locked),
       recordLength: recordLength,
       recordCount: recordCount,
+      unusedTailData: d64.normalizeUnusedTailData(entry.unusedTailData, unusedTailLength),
     };
   };
 
@@ -640,11 +672,15 @@
     return result;
   };
 
-  d64.writeFile = function (image, data, allocation) {
+  d64.writeFile = function (image, data, allocation, unusedTailData) {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data || []);
     const sectors = Math.max(1, Math.ceil(bytes.length / 254));
     const blocks = d64.allocateSectors(sectors, allocation);
     if (blocks.length < sectors) return null;
+    const normalizedUnusedTailData = d64.normalizeUnusedTailData(
+      unusedTailData,
+      Math.max(0, sectors * 254 - bytes.length),
+    );
     for (let i = 0; i < sectors; i += 1) {
       const block = blocks[i];
       const nextBlock = blocks[i + 1];
@@ -656,11 +692,15 @@
       sector[0] = nextBlock ? nextBlock.track : 0;
       sector[1] = nextBlock ? nextBlock.sector : Math.max(1, chunk.length + 1);
       sector.set(chunk, 2);
+      if (!nextBlock && normalizedUnusedTailData.length) {
+        sector.set(normalizedUnusedTailData, 2 + chunk.length);
+      }
     }
     return {
       startTrack: blocks[0].track,
       startSector: blocks[0].sector,
       sectorCount: sectors,
+      unusedTailData: normalizedUnusedTailData,
     };
   };
 
@@ -693,7 +733,7 @@
     return sector;
   };
 
-  d64.writeRelativeFile = function (image, data, allocation, recordLength) {
+  d64.writeRelativeFile = function (image, data, allocation, recordLength, unusedTailData) {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data || []);
     const dataSectors = Math.max(1, Math.ceil(bytes.length / 254));
     const sideSectorCount = Math.max(
@@ -701,6 +741,10 @@
       Math.ceil(dataSectors / REL_DATA_SECTORS_PER_SIDE_SECTOR),
     );
     if (sideSectorCount > REL_MAX_SIDE_SECTORS) return null;
+    const normalizedUnusedTailData = d64.normalizeUnusedTailData(
+      unusedTailData,
+      Math.max(0, dataSectors * 254 - bytes.length),
+    );
     const dataBlocks = d64.allocateSectors(dataSectors, allocation);
     if (dataBlocks.length < dataSectors) return null;
     const sideBlocks = d64.allocateSectors(sideSectorCount, allocation);
@@ -716,6 +760,9 @@
       sector[0] = nextBlock ? nextBlock.track : 0;
       sector[1] = nextBlock ? nextBlock.sector : Math.max(1, chunk.length + 1);
       sector.set(chunk, 2);
+      if (!nextBlock && normalizedUnusedTailData.length) {
+        sector.set(normalizedUnusedTailData, 2 + chunk.length);
+      }
     }
     sideBlocks.forEach(function (block, index) {
       const offset = d64.trackOffset(block.track, block.sector);
@@ -731,6 +778,7 @@
       sideSectorTrack: sideBlocks[0].track,
       sideSectorSector: sideBlocks[0].sector,
       recordLength: d64.normalizeRecordLength(recordLength),
+      unusedTailData: normalizedUnusedTailData,
     };
   };
 
@@ -808,8 +856,9 @@
               layout.bytes,
               allocation,
               layout.recordLength,
+              layout.unusedTailData,
             )
-          : d64.writeFile(image, layout.bytes, allocation);
+          : d64.writeFile(image, layout.bytes, allocation, layout.unusedTailData);
       if (!fileRecord) return null;
       directoryEntries.push(
         d64.createDirectoryEntry(
@@ -903,8 +952,47 @@
       data: Object.prototype.hasOwnProperty.call(patch, "data")
         ? (patch.data instanceof Uint8Array ? patch.data : new Uint8Array(patch.data || []))
         : files[index].data,
+      unusedTailData: Object.prototype.hasOwnProperty.call(patch, "unusedTailData")
+        ? (patch.unusedTailData instanceof Uint8Array
+          ? patch.unusedTailData
+          : new Uint8Array(patch.unusedTailData || []))
+        : files[index].unusedTailData,
     };
     return d64.rebuildImage(image, files, options);
+  };
+
+  d64.readUnusedTailData = function (image, entryOrName, options) {
+    const file = d64.readFile(image, entryOrName, options);
+    return file ? file.unusedTailData.slice() : null;
+  };
+
+  d64.hasUnusedTailData = function (image, entryOrName, options) {
+    const file = d64.readFile(image, entryOrName, options);
+    return Boolean(file && file.hasUnusedTailData);
+  };
+
+  d64.updateUnusedTailData = function (image, entryOrName, unusedTailData, options) {
+    return d64.updateFile(
+      image,
+      entryOrName,
+      {
+        unusedTailData: unusedTailData,
+      },
+      options,
+    );
+  };
+
+  d64.clearUnusedTailData = function (image, entryOrName, options) {
+    const file = d64.readFile(image, entryOrName, options);
+    if (!file) {
+      throw new Error("File not found: " + String(entryOrName || ""));
+    }
+    return d64.updateUnusedTailData(
+      image,
+      entryOrName,
+      new Uint8Array(file.unusedTailLength),
+      options,
+    );
   };
 
   d64.renameFile = function (image, entryOrName, newName, options) {

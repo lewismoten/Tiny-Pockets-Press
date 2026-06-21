@@ -126,6 +126,11 @@ function sameBlock(left, right) {
   return left && right && left.track === right.track && left.sector === right.sector;
 }
 
+function expectedUnusedTailLength(payloadLength) {
+  const sectors = Math.max(1, Math.ceil(payloadLength / 254));
+  return sectors * 254 - payloadLength;
+}
+
 function validateRelativeFileCrossesSectorBoundary() {
   const d64 = loadD64Support();
   const relRecordLength = 9;
@@ -228,6 +233,12 @@ function validateRelativeFileCrossesSectorBoundary() {
     Buffer.from(relFile.payload).equals(Buffer.from(relBytes)),
     "REL file payload via readFile mismatch",
   );
+  assert(
+    relFile.unusedTailLength === expectedUnusedTailLength(relBytes.length),
+    "REL unused tail length mismatch",
+  );
+  assert(relFile.unusedTailData.length === relFile.unusedTailLength, "REL unused tail data size mismatch");
+  assert(relFile.hasUnusedTailData === false, "REL unused tail should be clear by default");
 
   const relRecords = d64.readRelativeRecords(image, "BOOK.IDX");
   assert(relRecords, "REL record read failed");
@@ -235,6 +246,7 @@ function validateRelativeFileCrossesSectorBoundary() {
   assert(relRecords.recordCount === relRecordCount, "REL record count mismatch");
   assert(relRecords.records.length === relRecordCount, "REL records array mismatch");
   assert(relRecords.sideSectors.length === sideSectors.length, "REL side-sector read mismatch");
+  assert(relRecords.unusedTailLength === relFile.unusedTailLength, "REL record tail length mismatch");
 
   const inspect = d64.inspectImage(image);
   assert(inspect.header.diskName === "RELTEST", "Inspect header mismatch");
@@ -280,6 +292,13 @@ function validateNonRelativeFileStillWorks() {
     Buffer.from(seqFile.payload).equals(Buffer.from(new Uint8Array([1, 2, 3, 4, 5]))),
     "SEQ payload mismatch",
   );
+  assert(seqFile.unusedTailLength === 249, "SEQ unused tail length mismatch");
+  assert(seqFile.unusedTailData.length === 249, "SEQ unused tail data size mismatch");
+  assert(seqFile.hasUnusedTailData === false, "SEQ unused tail should be clear by default");
+
+  const files = d64.readFiles(image);
+  assert(files.length === 2, "Expected two files");
+  assert(files[0].unusedTailData.length === 249, "readFiles tail preservation mismatch");
 
   const renamedImage = d64.renameFile(image, "HELLO", "WELCOME");
   const renamedEntry = d64.findDirectoryEntryByName(renamedImage, "WELCOME");
@@ -339,6 +358,91 @@ function validateNonRelativeFileStillWorks() {
   assert(d64.hasDiskChanged(image, secondImage), "Different disks should have different signatures");
 }
 
+function validateUnusedTailHelpers() {
+  const d64 = loadD64Support();
+  const relBytes = new Uint8Array(9 * 40);
+  for (let index = 0; index < relBytes.length; index += 1) {
+    relBytes[index] = (index * 3) & 0xff;
+  }
+  const seqTail = new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd]);
+  const relTail = new Uint8Array([0x11, 0x22, 0x33, 0x44, 0x55]);
+  const image = d64.buildImage([
+    {
+      name: "SEQFILE",
+      type: "seq",
+      data: new Uint8Array([1, 2, 3, 4, 5]),
+      unusedTailData: seqTail,
+    },
+    {
+      name: "RELFILE",
+      type: "rel",
+      recordLength: 9,
+      data: relBytes,
+      unusedTailData: relTail,
+    },
+  ]);
+  assert(image instanceof Uint8Array, "Tail test image did not build");
+
+  const seqFile = d64.readFile(image, "SEQFILE");
+  assert(seqFile, "SEQ tail file missing");
+  assert(seqFile.hasUnusedTailData === true, "SEQ tail should be detected");
+  assert(
+    Buffer.from(seqFile.unusedTailData.subarray(0, seqTail.length)).equals(Buffer.from(seqTail)),
+    "SEQ tail prefix mismatch",
+  );
+  assert(
+    Buffer.from(d64.readUnusedTailData(image, "SEQFILE").subarray(0, seqTail.length)).equals(
+      Buffer.from(seqTail),
+    ),
+    "SEQ readUnusedTailData mismatch",
+  );
+  assert(d64.hasUnusedTailData(image, "SEQFILE") === true, "SEQ hasUnusedTailData mismatch");
+
+  const relFile = d64.readFile(image, "RELFILE");
+  assert(relFile, "REL tail file missing");
+  assert(relFile.hasUnusedTailData === true, "REL tail should be detected");
+  assert(
+    Buffer.from(relFile.unusedTailData.subarray(0, relTail.length)).equals(Buffer.from(relTail)),
+    "REL tail prefix mismatch",
+  );
+
+  const updatedImage = d64.updateUnusedTailData(
+    image,
+    "SEQFILE",
+    new Uint8Array([0xfe, 0xed, 0xfa, 0xce]),
+  );
+  const updatedSeq = d64.readFile(updatedImage, "SEQFILE");
+  assert(updatedSeq, "Updated SEQ tail file missing");
+  assert(updatedSeq.hasUnusedTailData === true, "Updated SEQ tail should be detected");
+  assert(
+    Buffer.from(updatedSeq.unusedTailData.subarray(0, 4)).equals(
+      Buffer.from(new Uint8Array([0xfe, 0xed, 0xfa, 0xce])),
+    ),
+    "Updated SEQ tail mismatch",
+  );
+
+  const clearedImage = d64.clearUnusedTailData(updatedImage, "SEQFILE");
+  const clearedSeq = d64.readFile(clearedImage, "SEQFILE");
+  assert(clearedSeq, "Cleared SEQ tail file missing");
+  assert(clearedSeq.hasUnusedTailData === false, "Cleared SEQ tail should be empty");
+  assert(
+    clearedSeq.unusedTailData.every(function (value) {
+      return value === 0;
+    }),
+    "Cleared SEQ tail bytes should be zero",
+  );
+
+  const rebuiltImage = d64.setDiskName(image, "TAILTEST");
+  const rebuiltRel = d64.readFile(rebuiltImage, "RELFILE");
+  assert(rebuiltRel, "Rebuilt REL tail file missing");
+  assert(rebuiltRel.hasUnusedTailData === true, "REL tail should survive rebuild");
+  assert(
+    Buffer.from(rebuiltRel.unusedTailData.subarray(0, relTail.length)).equals(Buffer.from(relTail)),
+    "REL tail should survive rebuild",
+  );
+}
+
 validateRelativeFileCrossesSectorBoundary();
 validateNonRelativeFileStillWorks();
+validateUnusedTailHelpers();
 console.log("D64 REL validation passed.");

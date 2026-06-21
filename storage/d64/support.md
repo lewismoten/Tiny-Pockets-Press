@@ -59,6 +59,7 @@ type D64File = {
   closed?: boolean;
   locked?: boolean;
   recordLength?: number;
+  unusedTailData?: Uint8Array | ArrayBuffer | number[];
   data: Uint8Array | ArrayBuffer | number[];
 };
 ```
@@ -101,6 +102,23 @@ type D64ImageOptions = {
   baseName?: string;
 };
 ```
+
+## Final-Sector Tail Data
+
+Commodore file chains only use as many bytes as the final sector header indicates. Any remaining bytes in that last 254-byte data area are technically unused tail space.
+
+This support layer now exposes that tail explicitly:
+
+- `readFileChain()` reports how many unused bytes the final sector has.
+- `readFile()` and `readFiles()` return `unusedTailData`.
+- `buildImage()`, `rebuildImage()`, and `updateFile()` preserve `unusedTailData`.
+- `updateUnusedTailData()` and `clearUnusedTailData()` let you modify it directly.
+
+When writing:
+
+- `unusedTailData` is truncated or zero-padded to fit the final sector tail exactly.
+- For `REL` files, the tail begins after the padded record payload, not inside the logical records themselves.
+- If omitted, the tail defaults to zero bytes.
 
 Supported disk-info fields used when building or rebuilding images:
 
@@ -537,7 +555,7 @@ Parameters:
 
 Returns:
 
-- `{ blocks, payload }`
+- `{ blocks, payload, unusedTailData, unusedTailLength, hasUnusedTailData }`
 
 ### `readRelativeSideSectors(image, sideSectorTrack, sideSectorSector)`
 
@@ -565,7 +583,7 @@ Parameters:
 
 Returns:
 
-- `null | { entry, fileType, payload, blocks, sideSectors? }`
+- `null | { entry, fileType, payload, blocks, unusedTailData, unusedTailLength, hasUnusedTailData, sideSectors? }`
 
 ### `readFiles(image, options)`
 
@@ -578,7 +596,7 @@ Parameters:
 
 Returns:
 
-- `Array<{ name, type, closed, locked, recordLength?, data, entry }>`
+- `Array<{ name, type, closed, locked, recordLength?, data, unusedTailData, entry }>`
 
 ### `readRelativeRecords(image, entryOrName, options)`
 
@@ -592,7 +610,35 @@ Parameters:
 
 Returns:
 
-- `null | { entry, recordLength, recordCount, records, sideSectors, payload, blocks }`
+- `null | { entry, recordLength, recordCount, records, sideSectors, payload, blocks, unusedTailData, unusedTailLength, hasUnusedTailData }`
+
+### `readUnusedTailData(image, entryOrName, options)`
+
+Reads just the unused data bytes from the final sector of one file.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `hasUnusedTailData(image, entryOrName, options)`
+
+Checks whether any byte in the unused tail area is non-zero.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `boolean`
 
 ### `inspectImage(image, options)`
 
@@ -670,7 +716,36 @@ Returns:
 
 Notes:
 
-- Can be used to change `locked` and `closed` as well as name, type, record length, and data.
+- Can be used to change `locked` and `closed` as well as name, type, record length, data, and `unusedTailData`.
+
+### `updateUnusedTailData(image, entryOrName, unusedTailData, options)`
+
+Rebuilds an image with one file's final-sector tail bytes replaced.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `unusedTailData: Uint8Array | ArrayBuffer | number[]`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `clearUnusedTailData(image, entryOrName, options)`
+
+Rebuilds an image with one file's final-sector tail zeroed out.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
 
 ### `renameFile(image, entryOrName, newName, options)`
 
@@ -848,7 +923,7 @@ Notes:
 - The `allocation` object is mutated.
 - Allocation proceeds forward from the current `track` and `sector`.
 
-### `writeFile(image, data, allocation)`
+### `writeFile(image, data, allocation, unusedTailData)`
 
 Writes one file into a D64 image using Commodore sector chaining.
 
@@ -857,14 +932,16 @@ Parameters:
 - `image: Uint8Array`
 - `data: Uint8Array | ArrayBuffer | number[]`
 - `allocation: { track: number, sector: number, map: Record<number, boolean[]> }`
+- `unusedTailData?: Uint8Array | ArrayBuffer | number[]`
 
 Returns:
 
-- `null | { startTrack: number, startSector: number, sectorCount: number }`
+- `null | { startTrack: number, startSector: number, sectorCount: number, unusedTailData: Uint8Array }`
 
 Notes:
 
 - File payload bytes are stored in 254-byte chunks because the first two bytes of each sector are used for the next-track/next-sector link.
+- Any remaining bytes in the final sector can be supplied through `unusedTailData`.
 
 ### `createRelativeSideSector(sideBlocks, dataBlocks, sideSectorIndex, recordLength)`
 
@@ -881,7 +958,7 @@ Returns:
 
 - `Uint8Array`
 
-### `writeRelativeFile(image, data, allocation, recordLength)`
+### `writeRelativeFile(image, data, allocation, recordLength, unusedTailData)`
 
 Writes one `REL` file into a D64 image, including side sectors.
 
@@ -891,10 +968,11 @@ Parameters:
 - `data: Uint8Array | ArrayBuffer | number[]`
 - `allocation: { track: number, sector: number, map: Record<number, boolean[]> }`
 - `recordLength: number`
+- `unusedTailData?: Uint8Array | ArrayBuffer | number[]`
 
 Returns:
 
-- `null | { startTrack, startSector, sectorCount, sideSectorTrack, sideSectorSector, recordLength }`
+- `null | { startTrack, startSector, sectorCount, sideSectorTrack, sideSectorSector, recordLength, unusedTailData }`
 
 ### `usableFileSectorCapacity()`
 
