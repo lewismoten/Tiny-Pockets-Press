@@ -4975,6 +4975,31 @@ TPP.d64DatClassInfo = function (classId) {
   };
   return catalog[classId] || null;
 };
+TPP.d64PreferredStorageForClass = function (classId) {
+  const info = TPP.d64DatClassInfo(classId);
+  if (!info || !info.size || !info.name) {
+    return {
+      type: "seq",
+      recordLength: 0,
+    };
+  }
+  if (info.size <= 254) {
+    return {
+      type: "rel",
+      recordLength: info.size,
+    };
+  }
+  return {
+    type: "seq",
+    recordLength: 0,
+  };
+};
+TPP.d64IndexStorage = function () {
+  return {
+    type: "rel",
+    recordLength: 9,
+  };
+};
 TPP.d64EncodeDiskClass = function (diskNumber, classId) {
   const diskNibble = Math.max(1, Math.min(16, Number(diskNumber) || 1)) - 1;
   const classNibble = Math.max(0, Math.min(15, Number(classId) || 0));
@@ -5015,10 +5040,13 @@ TPP.packD64DataSections = function (sections) {
     .map(function (classIdText) {
       const classId = Number(classIdText);
       const info = TPP.d64DatClassInfo(classId);
+      const storage = TPP.d64PreferredStorageForClass(classId);
       return {
         name: info.name,
         classId: classId,
         data: new Uint8Array(datBuckets[classId]),
+        type: storage.type,
+        recordLength: storage.recordLength,
       };
     })
     .sort(function (a, b) {
@@ -5559,9 +5587,15 @@ TPP.exportD64DiskBundle = function (book, options) {
   const bookProgramBytes = config.bookProgramBytes;
   const fileIdBytes = config.fileIdBytes;
   const estimateDiskFiles = function (packed) {
+    const indexStorage = TPP.d64IndexStorage();
     return [
       { name: "BOOK.PRG", data: bookProgramBytes },
-      { name: "BOOK.IDX", data: new Uint8Array(indexLength) },
+      {
+        name: "BOOK.IDX",
+        type: indexStorage.type,
+        recordLength: indexStorage.recordLength,
+        data: new Uint8Array(indexLength),
+      },
       { name: "LOADER.PRG", data: loaderFile.bytes },
       ...packed.dataFiles,
       { name: "FILE_ID.DIZ", data: fileIdBytes },
@@ -5665,6 +5699,7 @@ TPP.exportD64DiskBundle = function (book, options) {
       });
     });
     const indexBytes = TPP.buildD64IndexBytesForDisk(diskNumber, diskPacks.length, sectionCatalog);
+    const indexStorage = TPP.d64IndexStorage();
     const d64Files = [
       {
         name: "BOOK.PRG",
@@ -5673,7 +5708,8 @@ TPP.exportD64DiskBundle = function (book, options) {
       },
       {
         name: "BOOK.IDX",
-        type: 0x81,
+        type: indexStorage.type,
+        recordLength: indexStorage.recordLength,
         data: indexBytes,
       },
       {
@@ -5684,7 +5720,8 @@ TPP.exportD64DiskBundle = function (book, options) {
       ...packed.dataFiles.map(function (file) {
         return {
           name: file.name,
-          type: 0x81,
+          type: file.type || 0x81,
+          recordLength: file.recordLength || undefined,
           data: file.data,
         };
       }),
@@ -5744,8 +5781,8 @@ TPP.buildD64AssetLoaderProgramBytes = function () {
     readLenHi: configBase + 56,
     interactive: configBase + 57,
   };
-  const promptFileName = "0:64.DAT,S,R";
-  const coverFileName = "0:512.DAT,S,R";
+  const promptFileName = "0:64.DAT";
+  const coverFileName = "0:512.DAT";
   const KERNAL = {
     setnam: 0xffbd,
     setlfs: 0xffba,
@@ -6791,7 +6828,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
   pushLine(528, 'IF NX=0 THEN TP=0:LN=0:DT=0:RETURN');
   pushLine(530, 'RI=NX:GOSUB 650:RETURN');
   pushLine(650, 'TP=0:LN=0:DT=0:NX=0');
-  pushLine(652, 'F$="BOOK.IDX,S,R":SK=(RI-1)*9:RL=9:GOSUB 7260');
+  pushLine(652, 'F$="BOOK.IDX":SK=(RI-1)*9:RL=9:GOSUB 7260');
   pushLine(654, 'IF RR<>0 THEN K$="TAG":RETURN');
   pushLine(656, 'K$=CHR$(PEEK(RB))+CHR$(PEEK(RB+1))+CHR$(PEEK(RB+2))');
   pushLine(658, 'DT=PEEK(RB+3)');
@@ -6898,7 +6935,7 @@ TPP.exportD64BootProgramBytes = function (book, pageCount, options) {
     pushLine(6840, 'GET A$:IF A$="" THEN 6840');
     pushLine(6850, 'GOSUB 6900:IF DI<>DD THEN 6810');
     pushLine(6860, 'RETURN');
-    pushLine(6900, 'F$="BOOK.IDX,S,R":SK=0:RL=9:GOSUB 7260');
+    pushLine(6900, 'F$="BOOK.IDX":SK=0:RL=9:GOSUB 7260');
     pushLine(6910, 'IF RR<>0 THEN RETURN');
     pushLine(6920, 'DI=PEEK(RB+4)+256*PEEK(RB+5):TD=PEEK(RB+6):RETURN');
     pushLine(7200, 'GOSUB 6800:GOSUB 7260:RETURN');

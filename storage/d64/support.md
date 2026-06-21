@@ -164,7 +164,7 @@ Example:
 }
 ```
 
-Tiny Pockets Press itself still exports its book-reader files as `SEQ` today because the current BASIC and machine-language readers still assume sequential access. The low-level D64 support API can generate `REL` files now, but the higher-level TPP reader path has not been switched over yet.
+Tiny Pockets Press has started switching its book-reader disk files over to `REL` where the record size already fits naturally. `BOOK.IDX` now exports as `REL` with 9-byte records, and `.DAT` buckets up to `128.DAT` can also export as `REL`. Larger fixed buckets such as `256.DAT`, `512.DAT`, and `1024.DAT` still stay `SEQ` for now because this support layer currently caps `REL` record lengths at `254` bytes.
 
 Before that conversion happens, this repo now includes a local validator:
 

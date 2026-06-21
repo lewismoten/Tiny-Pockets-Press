@@ -12,7 +12,7 @@ These are the BASIC-side tools for device access.
 ### `OPEN`
 
 ```basic
-OPEN 1,8,2,"BOOK.IDX,S,R"
+OPEN 1,8,2,"BOOK.IDX"
 ```
 
 Common parts:

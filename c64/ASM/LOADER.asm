@@ -85,10 +85,10 @@ DEFAULT_BORDER       = $00
 DEFAULT_BG           = $00
 
 PROMPT_FILE_NAME:
-        .text "0:64.DAT,S,R"
+        .text "0:64.DAT"
 
 COVER_FILE_NAME:
-        .text "0:512.DAT,S,R"
+        .text "0:512.DAT"
 
 ; ---------------------------------------------------------------------------
 ; Cover-loader entry

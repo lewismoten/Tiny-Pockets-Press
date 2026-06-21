@@ -8,14 +8,20 @@ Each generated disk can contain some or all of the following:
 
 - `BOOK.PRG`: BASIC launcher and higher-level reader logic.
 - `LOADER.PRG`: machine-language loader installed into RAM and called from BASIC.
-- `BOOK.IDX`: compact index file describing where tagged content lives.
+- `BOOK.IDX`: compact relative file describing where tagged content lives.
 - `1.DAT`, `2.DAT`, `4.DAT`, `8.DAT`, `16.DAT`, `32.DAT`, `64.DAT`, `128.DAT`, `256.DAT`, `512.DAT`, `1024.DAT`: payload files grouped by fixed record size.
 
 Shared records such as `HOM`, `TOC`, `COV`, and prompt sprite records may be duplicated across disks so the reader can still show core UI without immediately forcing a swap.
 
+Current storage choice:
+
+- `BOOK.IDX` is exported as a `REL` file with 9-byte records.
+- `.DAT` files whose fixed record size is `254` bytes or smaller currently export as `REL`.
+- `256.DAT`, `512.DAT`, and `1024.DAT` still export as `SEQ` for now.
+
 ## BOOK.IDX Record Layout
 
-`BOOK.IDX` currently uses fixed 9-byte records:
+`BOOK.IDX` uses fixed 9-byte relative records:
 
 1. `tag[3]`
 2. `diskClass[1]`
