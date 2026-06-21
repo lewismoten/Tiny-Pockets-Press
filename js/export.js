@@ -2549,28 +2549,6 @@ TPP.fitCanvasToExportTarget = function (canvas, options) {
   ctx.drawImage(canvas, 0, 0, out.width, out.height);
   return out;
 };
-TPP.imageExportDitherIds = function () {
-  return [
-    "threshold",
-    "none",
-    "bayer2",
-    "bayer4",
-    "bayer8",
-    "floyd-steinberg",
-    "jarvis-judice-ninke",
-    "stucki",
-    "burkes",
-    "sierra",
-    "atkinson",
-    "halftone",
-    "blue-noise",
-    "random",
-    "pattern",
-    "c64-petscii",
-    "c64-petscii-full",
-    "c64-custom-charset",
-  ];
-};
 TPP.imageExportCharsetToChrBytes = function (patterns) {
   if (!Array.isArray(patterns)) return null;
   const buffer = new Uint8Array(2048);
@@ -3379,16 +3357,317 @@ TPP.canvasRgba = function (canvas) {
   readCtx.drawImage(canvas, 0, 0);
   return readCtx.getImageData(0, 0, canvas.width, canvas.height).data;
 };
+TPP.IMAGE_EXPORT_DITHER_LIBRARY = "data/dithers/library.js";
+TPP.IMAGE_EXPORT_DITHER_CORE_MODULE = "/js/image-export-dither.js";
+TPP.imageExportDitherById = TPP.imageExportDitherById || {};
+TPP.imageExportDitherCatalogById = TPP.imageExportDitherCatalogById || {};
+TPP.imageExportDitherIdsCached = TPP.imageExportDitherIdsCached || [];
+TPP.imageExportDitherLoadPromises = TPP.imageExportDitherLoadPromises || {};
+TPP.imageExportDitherModulePromises =
+  TPP.imageExportDitherModulePromises || {};
+TPP.imageExportDitherLibraryLoadPromise = null;
+TPP.imageExportDitherLibraryLoaded =
+  TPP.imageExportDitherLibraryLoaded || false;
+TPP.imageExportDitherIdsDefault = [
+  "threshold",
+  "bayer2",
+  "bayer4",
+  "bayer8",
+  "floyd-steinberg",
+  "jarvis-judice-ninke",
+  "stucki",
+  "burkes",
+  "sierra",
+  "atkinson",
+  "halftone",
+  "blue-noise",
+  "random",
+  "pattern",
+  "c64-petscii",
+  "c64-petscii-full",
+  "c64-custom-charset",
+];
 TPP.imageExportDitherLib = null;
 TPP.imageExportDitherPromise = null;
-TPP.loadImageExportDither = function () {
-  if (TPP.imageExportDitherLib) return Promise.resolve(TPP.imageExportDitherLib);
-  if (!TPP.imageExportDitherPromise) {
-    TPP.imageExportDitherPromise = import("/js/image-export-dither.js")
+TPP.resolveImageExportDitherLibraryUrl = function (value, baseUrl) {
+  const source = String(value || "").trim();
+  if (!source) return "";
+  try {
+    return new URL(
+      source,
+      baseUrl || document.baseURI || window.location.href,
+    ).href;
+  } catch {
+    return source;
+  }
+};
+TPP.normalizeImageExportDitherLibraryEntry = function (entry, baseUrl) {
+  if (
+    !entry ||
+    typeof entry.id !== "string" ||
+    (typeof entry.url !== "string" && typeof entry.module !== "string")
+  ) {
+    return null;
+  }
+  const id = entry.id.trim();
+  if (!id) return null;
+  const sourceUrl = TPP.resolveImageExportDitherLibraryUrl(
+    typeof entry.url === "string" ? entry.url : "",
+    baseUrl,
+  );
+  const moduleUrl = TPP.resolveImageExportDitherLibraryUrl(
+    typeof entry.module === "string" ? entry.module : "",
+    baseUrl,
+  );
+  return {
+    id: id,
+    name: typeof entry.name === "string" ? entry.name : id,
+    url: sourceUrl,
+    module: moduleUrl,
+    kind: typeof entry.kind === "string" ? entry.kind : "",
+    description:
+      typeof entry.description === "string" ? entry.description.trim() : "",
+  };
+};
+TPP.applyImageExportDitherLibraryEntries = function (entries, baseUrl) {
+  const catalogMap = {};
+  const ids = [];
+  (Array.isArray(entries) ? entries : []).forEach(function (entry) {
+    const normalized = TPP.normalizeImageExportDitherLibraryEntry(
+      entry,
+      baseUrl,
+    );
+    if (!normalized) return;
+    catalogMap[normalized.id] = normalized;
+    ids.push(normalized.id);
+  });
+  const uniqueIds = Array.from(new Set(ids));
+  TPP.imageExportDitherCatalogById = catalogMap;
+  TPP.imageExportDitherIdsCached = uniqueIds.length
+    ? uniqueIds
+    : TPP.imageExportDitherIdsDefault.slice();
+  return catalogMap;
+};
+TPP.registerDitherLibrary = TPP.registerDitherLibrary || function (library) {
+  const payload = library || {};
+  const entries = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload.dithers)
+      ? payload.dithers
+      : Array.isArray(payload.plugins)
+        ? payload.plugins
+        : [];
+  const baseUrl = String(
+    payload.baseUrl ||
+      (typeof document !== "undefined" &&
+      document.currentScript &&
+      document.currentScript.src
+        ? document.currentScript.src
+        : TPP.imageExportDitherLibraryCurrentUrl || ""),
+  ).trim();
+  TPP.imageExportDitherLibraryLoaded = true;
+  return TPP.applyImageExportDitherLibraryEntries(entries, baseUrl);
+};
+TPP.registerDither = TPP.registerDither || function (dither) {
+  const entry = dither || {};
+  const id = String(entry.id || "").trim();
+  if (!id) throw new Error("Dither plugin is missing an id");
+  const record = {
+    id: id,
+    name: String(entry.name || id).trim() || id,
+    kind: String(entry.kind || "").trim(),
+    description: String(entry.description || "").trim(),
+    applyMono:
+      typeof entry.applyMono === "function" ? entry.applyMono : null,
+    applyPalette:
+      typeof entry.applyPalette === "function" ? entry.applyPalette : null,
+    applyPaletteAsync:
+      typeof entry.applyPaletteAsync === "function"
+        ? entry.applyPaletteAsync
+        : null,
+  };
+  TPP.imageExportDitherById[id] = record;
+  const current = TPP.imageExportDitherCatalogById[id] || {};
+  TPP.imageExportDitherCatalogById[id] = {
+    id: id,
+    name: record.name,
+    url: current.url || "",
+    module: current.module || "",
+    kind: record.kind || current.kind || "",
+    description: record.description || current.description || "",
+  };
+  if (!TPP.imageExportDitherIdsCached.includes(id)) {
+    TPP.imageExportDitherIdsCached.push(id);
+  }
+  return record;
+};
+TPP.imageExportDitherIds = function () {
+  if (TPP.imageExportDitherIdsCached.length)
+    return TPP.imageExportDitherIdsCached.slice();
+  return TPP.imageExportDitherIdsDefault.slice();
+};
+TPP.imageExportDitherDisplayName = function (ditherId) {
+  const id = String(ditherId || "").trim() || "threshold";
+  const meta = TPP.imageExportDitherCatalogById[id];
+  return meta && meta.name ? meta.name : id;
+};
+TPP.imageExportDitherMetadata = function (ditherId) {
+  const id = String(ditherId || "").trim() || "threshold";
+  const record = TPP.imageExportDitherById[id];
+  const meta = TPP.imageExportDitherCatalogById[id];
+  const source = record || meta;
+  if (!source) return null;
+  return {
+    id: id,
+    name: source.name || id,
+    kind: source.kind || "",
+    description: source.description || "",
+    module: meta && meta.module ? meta.module : "",
+    url: meta && meta.url ? meta.url : "",
+  };
+};
+TPP.loadImageExportDitherLibrary = function () {
+  const url = TPP.imageExportAssetUrl(TPP.IMAGE_EXPORT_DITHER_LIBRARY);
+  TPP.imageExportDitherLibraryCurrentUrl = url;
+  return new Promise(function (resolve, reject) {
+    const script = document.createElement("script");
+    script.src = url;
+    script.async = true;
+    script.dataset.tppDitherLibrary = "true";
+    script.onload = function () {
+      if (TPP.imageExportDitherLibraryLoaded) {
+        resolve(TPP.imageExportDitherCatalogById);
+        return;
+      }
+      reject(new Error("Dither library script did not register."));
+    };
+    script.onerror = function () {
+      reject(new Error("Dither library script load failed."));
+    };
+    document.head.appendChild(script);
+  });
+};
+TPP.ensureImageExportDitherCatalogLoaded = async function () {
+  if (TPP.imageExportDitherIdsCached.length) return;
+  if (!TPP.imageExportDitherLibraryLoadPromise) {
+    TPP.imageExportDitherLibraryLoadPromise =
+      TPP.loadImageExportDitherLibrary()
+        .catch(function (error) {
+          if (typeof console !== "undefined" && typeof console.error === "function") {
+            console.error("Dither library initialization failed.", error);
+          }
+          TPP.imageExportDitherIdsCached =
+            TPP.imageExportDitherIdsDefault.slice();
+        })
+        .finally(function () {
+          TPP.imageExportDitherLibraryLoadPromise = null;
+        });
+  }
+  await TPP.imageExportDitherLibraryLoadPromise;
+};
+TPP.preloadImageExportDithers = async function () {
+  await TPP.ensureImageExportDitherCatalogLoaded();
+};
+TPP.loadImageExportDitherModule = function (moduleUrl) {
+  const url = TPP.imageExportAssetUrl(moduleUrl);
+  if (!url) return Promise.resolve({});
+  if (!TPP.imageExportDitherModulePromises[url]) {
+    TPP.imageExportDitherModulePromises[url] = import(url)
       .then(function (module) {
         const api =
           module && typeof module.init === "function" ? module.init(TPP) : module;
-        TPP.imageExportDitherLib = api || {};
+        return api || {};
+      })
+      .catch(function (error) {
+        delete TPP.imageExportDitherModulePromises[url];
+        throw error;
+      });
+  }
+  return TPP.imageExportDitherModulePromises[url];
+};
+TPP.ensureImageExportDitherLoaded = async function (id) {
+  const ditherId = String(id || "threshold").trim() || "threshold";
+  if (TPP.imageExportDitherById[ditherId]) return;
+  await TPP.ensureImageExportDitherCatalogLoaded();
+  const meta = TPP.imageExportDitherCatalogById[ditherId];
+  if (!meta) return;
+  if (!TPP.imageExportDitherLoadPromises[ditherId]) {
+    TPP.imageExportDitherLoadPromises[ditherId] = (async function () {
+      if (meta.module) {
+        await TPP.loadImageExportDitherModule(meta.module);
+      } else if (meta.url) {
+        await new Promise(function (resolve, reject) {
+          const script = document.createElement("script");
+          script.src = TPP.imageExportAssetUrl(meta.url);
+          script.async = true;
+          script.dataset.tppDitherPlugin = ditherId;
+          script.onload = function () {
+            if (TPP.imageExportDitherById[ditherId]) {
+              resolve();
+              return;
+            }
+            reject(new Error("Dither plugin did not register: " + ditherId));
+          };
+          script.onerror = function () {
+            reject(new Error("Dither plugin load failed: " + ditherId));
+          };
+          document.head.appendChild(script);
+        });
+      }
+    })()
+      .catch(function (error) {
+        if (typeof console !== "undefined" && typeof console.warn === "function") {
+          console.warn("Dither load failed:", ditherId, error);
+        }
+      })
+      .finally(function () {
+        delete TPP.imageExportDitherLoadPromises[ditherId];
+      });
+  }
+  await TPP.imageExportDitherLoadPromises[ditherId];
+};
+TPP.applyImageExportRegisteredMonoDither = function (
+  data,
+  width,
+  height,
+  options,
+) {
+  const config = options || {};
+  const algorithm = String(config.algorithm || "threshold");
+  const record = TPP.imageExportDitherById[algorithm];
+  if (!record || typeof record.applyMono !== "function") return false;
+  record.applyMono(data, width, height, config);
+  return true;
+};
+TPP.applyImageExportRegisteredPaletteDitherAsync = async function (
+  data,
+  width,
+  height,
+  palette,
+  options,
+) {
+  const config = options || {};
+  const algorithm = String(config.algorithm || "threshold");
+  const record = TPP.imageExportDitherById[algorithm];
+  if (!record) return false;
+  if (typeof record.applyPaletteAsync === "function") {
+    await record.applyPaletteAsync(data, width, height, palette, config);
+    return true;
+  }
+  if (typeof record.applyPalette === "function") {
+    record.applyPalette(data, width, height, palette, config);
+    return true;
+  }
+  return false;
+};
+TPP.loadImageExportDither = function () {
+  if (TPP.imageExportDitherLib) return Promise.resolve(TPP.imageExportDitherLib);
+  if (!TPP.imageExportDitherPromise) {
+    TPP.imageExportDitherPromise = TPP.loadImageExportDitherModule(
+      TPP.IMAGE_EXPORT_DITHER_CORE_MODULE,
+    )
+      .then(function (module) {
+        TPP.imageExportDitherLib = module || {};
         return TPP.imageExportDitherLib;
       })
       .catch(function (error) {
@@ -3491,26 +3770,27 @@ TPP.exportCanvasForDepth = async function (
     Array.isArray(indexedPalette) &&
     indexedPalette.length > 0;
   if (applyMonoDither) {
-    const ditherLib = await TPP.loadImageExportDither();
-    if (ditherLib && typeof ditherLib.applyMonoDither === "function") {
-      ditherLib.applyMonoDither(data, out.width, out.height, {
+    await TPP.ensureImageExportDitherLoaded(config.dithering || "threshold");
+    if (
+      TPP.applyImageExportRegisteredMonoDither(data, out.width, out.height, {
         algorithm: String(config.dithering || "threshold"),
         threshold: monoThreshold,
-      });
+      })
+    ) {
       ctx.putImageData(image, 0, 0);
       return out;
     }
   }
   if (applyIndexedDither) {
-    const ditherLib = await TPP.loadImageExportDither();
-    if (ditherLib && typeof ditherLib.applyPaletteDitherAsync === "function") {
-      const progressCallback = typeof config.onProgress === "function"
-        ? function (info) {
-            ctx.putImageData(image, 0, 0);
-            config.onProgress(Object.assign({}, info, { canvas: out }));
-          }
-        : null;
-      await ditherLib.applyPaletteDitherAsync(
+    await TPP.ensureImageExportDitherLoaded(config.dithering || "threshold");
+    const progressCallback = typeof config.onProgress === "function"
+      ? function (info) {
+          ctx.putImageData(image, 0, 0);
+          config.onProgress(Object.assign({}, info, { canvas: out }));
+        }
+      : null;
+    if (
+      await TPP.applyImageExportRegisteredPaletteDitherAsync(
         data,
         out.width,
         out.height,
@@ -3523,16 +3803,8 @@ TPP.exportCanvasForDepth = async function (
           progressIntervalMs: config.progressIntervalMs,
           yieldBudgetMs: config.yieldBudgetMs,
         },
-      );
-      ctx.putImageData(image, 0, 0);
-      return out;
-    }
-    if (ditherLib && typeof ditherLib.applyPaletteDither === "function") {
-      ditherLib.applyPaletteDither(data, out.width, out.height, indexedPalette, {
-        algorithm: String(config.dithering || "threshold"),
-        threshold: monoThreshold,
-        selectionBias: monoThreshold,
-      });
+      )
+    ) {
       ctx.putImageData(image, 0, 0);
       return out;
     }

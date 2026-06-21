@@ -178,6 +178,26 @@ export async function init(TPP) {
   ) {
     return {};
   }
+  const populateDitherOptions = async function () {
+    if (typeof TPP.preloadImageExportDithers === "function") {
+      await TPP.preloadImageExportDithers();
+    }
+    if (typeof TPP.imageExportDitherIds !== "function") return;
+    const previous = imageExportDither.value || "threshold";
+    const ids = TPP.imageExportDitherIds();
+    if (!ids || !ids.length) return;
+    imageExportDither.replaceChildren();
+    ids.forEach(function (id) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent =
+        typeof TPP.imageExportDitherDisplayName === "function"
+          ? TPP.imageExportDitherDisplayName(id)
+          : id;
+      imageExportDither.appendChild(option);
+    });
+    imageExportDither.value = ids.includes(previous) ? previous : "threshold";
+  };
   const presetValues = ["72", "96", "150", "200", "300", "600", "320x200"];
   const presetTargetPixels = function (value) {
     return String(value || "") === "320x200"
@@ -1299,6 +1319,7 @@ export async function init(TPP) {
     if (closeButton && imageExportCharsetDialog.open)
       imageExportCharsetDialog.close();
   });
+  await populateDitherOptions();
   syncPlaybackUi();
   updateSeqControls();
   TPP.updateImageExportSeqControls = updateSeqControls;

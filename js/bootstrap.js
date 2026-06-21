@@ -174,6 +174,9 @@ TPP.bootstrapApp = async function () {
   TPP.populate();
   await TPP.load();
   await TPP.loadStaleKeyLookup();
+  if (typeof TPP.preloadImageExportDithers === "function") {
+    await TPP.preloadImageExportDithers();
+  }
   if (typeof TPP.preloadImageExportPalettes === "function") {
     await TPP.preloadImageExportPalettes();
   }

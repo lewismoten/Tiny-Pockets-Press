@@ -3194,6 +3194,54 @@ export function init(TPP) {
     }
     TPP.applyImageExportPaletteDither(data, width, height, palette, config);
   };
+  const ditherMetadata = {
+    threshold: { name: "Threshold", kind: "both" },
+    bayer2: { name: "Bayer 2x2", kind: "both" },
+    bayer4: { name: "Bayer 4x4", kind: "both" },
+    bayer8: { name: "Bayer 8x8", kind: "both" },
+    "floyd-steinberg": { name: "Floyd-Steinberg", kind: "both" },
+    "jarvis-judice-ninke": {
+      name: "Jarvis Judice & Ninke",
+      kind: "both",
+    },
+    stucki: { name: "Stucki", kind: "both" },
+    burkes: { name: "Burkes", kind: "both" },
+    sierra: { name: "Sierra", kind: "both" },
+    atkinson: { name: "Atkinson", kind: "both" },
+    halftone: { name: "Halftone", kind: "both" },
+    "blue-noise": { name: "Blue-noise", kind: "both" },
+    random: { name: "Random", kind: "both" },
+    pattern: { name: "Pattern", kind: "both" },
+    "c64-petscii": { name: "C64 PETSCII Blocks", kind: "palette" },
+    "c64-petscii-full": { name: "C64 PETSCII Full Charset", kind: "palette" },
+    "c64-custom-charset": { name: "C64 Custom Charset", kind: "palette" },
+  };
+  if (typeof TPP.registerDither === "function") {
+    Object.keys(ditherMetadata).forEach(function (id) {
+      const meta = ditherMetadata[id];
+      TPP.registerDither({
+        id: id,
+        name: meta.name,
+        kind: meta.kind,
+        applyMono: ditherers[id] || null,
+        applyPalette: paletteDitherers[id] || null,
+        applyPaletteAsync:
+          id === "c64-custom-charset" ||
+          id === "c64-petscii" ||
+          id === "c64-petscii-full"
+            ? async function (data, width, height, palette, options) {
+                await TPP.applyImageExportPaletteDitherAsync(
+                  data,
+                  width,
+                  height,
+                  palette,
+                  Object.assign({}, options || {}, { algorithm: id }),
+                );
+              }
+            : null,
+      });
+    });
+  }
 
   return {
     applyMonoDither: TPP.applyImageExportMonoDither,
