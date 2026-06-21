@@ -4224,7 +4224,175 @@ TPP.previewBlobSize = function (canvas, format, quality) {
     return blob ? blob.size : 0;
   });
 };
-TPP.exportImagesZip = async function (options) {
+TPP.IMAGE_EXPORT_STORAGE_LIBRARY = "storage/library.js";
+TPP.imageExportStorageById = TPP.imageExportStorageById || {};
+TPP.imageExportStorageCatalogById = TPP.imageExportStorageCatalogById || {};
+TPP.imageExportStorageIdsCached = TPP.imageExportStorageIdsCached || [];
+TPP.imageExportStorageLoadPromises = TPP.imageExportStorageLoadPromises || {};
+TPP.imageExportStorageLibraryLoadPromise = null;
+TPP.imageExportStorageLibraryRegistrationCount =
+  TPP.imageExportStorageLibraryRegistrationCount || 0;
+TPP.resolveImageExportStorageLibraryUrl = function (value, baseUrl) {
+  const source = String(value || "").trim();
+  if (!source) return "";
+  try {
+    return new URL(
+      source,
+      baseUrl || document.baseURI || window.location.href,
+    ).href;
+  } catch {
+    return source;
+  }
+};
+TPP.normalizeImageExportStorageLibraryEntry = function (entry, baseUrl) {
+  if (!entry || typeof entry.id !== "string" || typeof entry.url !== "string") {
+    return null;
+  }
+  const id = entry.id.trim();
+  if (!id) return null;
+  return {
+    id: id,
+    name: typeof entry.name === "string" ? entry.name : id,
+    url: TPP.resolveImageExportStorageLibraryUrl(entry.url, baseUrl),
+    description:
+      typeof entry.description === "string" ? entry.description.trim() : "",
+  };
+};
+TPP.applyImageExportStorageLibraryEntries = function (entries, baseUrl) {
+  const catalogMap = Object.assign({}, TPP.imageExportStorageCatalogById || {});
+  const ids = TPP.imageExportStorageIdsCached.length
+    ? TPP.imageExportStorageIdsCached.slice()
+    : [];
+  (Array.isArray(entries) ? entries : []).forEach(function (entry) {
+    const normalized = TPP.normalizeImageExportStorageLibraryEntry(
+      entry,
+      baseUrl,
+    );
+    if (!normalized) return;
+    catalogMap[normalized.id] = normalized;
+    ids.push(normalized.id);
+  });
+  TPP.imageExportStorageCatalogById = catalogMap;
+  TPP.imageExportStorageIdsCached = Array.from(new Set(ids));
+  return catalogMap;
+};
+TPP.registerStorageLibrary = TPP.registerStorageLibrary || function (library) {
+  const payload = library || {};
+  const entries = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload.media)
+      ? payload.media
+      : Array.isArray(payload.storage)
+        ? payload.storage
+        : Array.isArray(payload.plugins)
+          ? payload.plugins
+          : [];
+  const baseUrl = String(
+    payload.baseUrl ||
+      (typeof document !== "undefined" &&
+      document.currentScript &&
+      document.currentScript.src
+        ? document.currentScript.src
+        : TPP.imageExportStorageLibraryCurrentUrl || ""),
+  ).trim();
+  TPP.imageExportStorageLibraryRegistrationCount += 1;
+  return TPP.applyImageExportStorageLibraryEntries(entries, baseUrl);
+};
+TPP.registerStorage = TPP.registerStorage || function (storage) {
+  const entry = storage || {};
+  const id = String(entry.id || "").trim();
+  if (!id) throw new Error("Storage medium is missing an id");
+  const record = {
+    id: id,
+    name: String(entry.name || id).trim() || id,
+    description: String(entry.description || "").trim(),
+    export:
+      typeof entry.export === "function" ? entry.export : null,
+  };
+  TPP.imageExportStorageById[id] = record;
+  const current = TPP.imageExportStorageCatalogById[id] || {};
+  TPP.imageExportStorageCatalogById[id] = {
+    id: id,
+    name: record.name,
+    url: current.url || "",
+    description: record.description || current.description || "",
+  };
+  if (!TPP.imageExportStorageIdsCached.includes(id)) {
+    TPP.imageExportStorageIdsCached.push(id);
+  }
+  return record;
+};
+TPP.loadImageExportStorageLibrary = function () {
+  const url = TPP.imageExportAssetUrl(TPP.IMAGE_EXPORT_STORAGE_LIBRARY);
+  TPP.imageExportStorageLibraryCurrentUrl = url;
+  return new Promise(function (resolve, reject) {
+    const registrationsBefore = TPP.imageExportStorageLibraryRegistrationCount;
+    const script = document.createElement("script");
+    script.src = url;
+    script.async = true;
+    script.dataset.tppStorageLibrary = "true";
+    script.onload = function () {
+      if (TPP.imageExportStorageLibraryRegistrationCount > registrationsBefore) {
+        resolve(TPP.imageExportStorageCatalogById);
+        return;
+      }
+      reject(new Error("Storage library script did not register."));
+    };
+    script.onerror = function () {
+      reject(new Error("Storage library script load failed."));
+    };
+    document.head.appendChild(script);
+  });
+};
+TPP.ensureImageExportStorageCatalogLoaded = async function () {
+  if (TPP.imageExportStorageIdsCached.length) return;
+  if (!TPP.imageExportStorageLibraryLoadPromise) {
+    TPP.imageExportStorageLibraryLoadPromise =
+      TPP.loadImageExportStorageLibrary()
+        .catch(function (error) {
+          if (typeof console !== "undefined" && typeof console.error === "function") {
+            console.error("Storage library initialization failed.", error);
+          }
+        })
+        .finally(function () {
+          TPP.imageExportStorageLibraryLoadPromise = null;
+        });
+  }
+  await TPP.imageExportStorageLibraryLoadPromise;
+};
+TPP.ensureImageExportStorageLoaded = async function (id) {
+  const storageId = String(id || "").trim();
+  if (!storageId) return null;
+  if (TPP.imageExportStorageById[storageId]) {
+    return TPP.imageExportStorageById[storageId];
+  }
+  await TPP.ensureImageExportStorageCatalogLoaded();
+  const meta = TPP.imageExportStorageCatalogById[storageId];
+  if (!meta || !meta.url) return null;
+  if (!TPP.imageExportStorageLoadPromises[storageId]) {
+    TPP.imageExportStorageLoadPromises[storageId] = new Promise(function (resolve, reject) {
+      const script = document.createElement("script");
+      script.src = TPP.imageExportAssetUrl(meta.url);
+      script.async = true;
+      script.dataset.tppStoragePlugin = storageId;
+      script.onload = function () {
+        if (TPP.imageExportStorageById[storageId]) {
+          resolve(TPP.imageExportStorageById[storageId]);
+          return;
+        }
+        reject(new Error("Storage plugin did not register: " + storageId));
+      };
+      script.onerror = function () {
+        reject(new Error("Storage plugin load failed: " + storageId));
+      };
+      document.head.appendChild(script);
+    }).finally(function () {
+      delete TPP.imageExportStorageLoadPromises[storageId];
+    });
+  }
+  return TPP.imageExportStorageLoadPromises[storageId];
+};
+TPP.exportImagesZipCore = async function (options) {
   const progressOp = TPP.beginProgressOperation("Page images ZIP export");
   try {
   await TPP.ensureImageExportPaletteForOptionsLoaded(options);
@@ -7074,7 +7242,7 @@ TPP.exportFileIdDizText = function (book) {
   const author = book && book.by ? String(book.by) : "Unknown author";
   return (title + " by " + author + "\r\n" + "D64 package generated by Tiny Pockets Press\r\n").toUpperCase();
 };
-TPP.exportImagesD64 = async function (options) {
+TPP.exportImagesD64Core = async function (options) {
   const progressOp = TPP.beginProgressOperation("D64 export");
   try {
     await TPP.ensureImageExportPaletteForOptionsLoaded(
@@ -7229,6 +7397,19 @@ TPP.exportImagesD64 = async function (options) {
     TPP.finishProgressOperation(progressOp);
     throw error;
   }
+};
+TPP.exportViaStorage = async function (storageId, options) {
+  const medium = await TPP.ensureImageExportStorageLoaded(storageId);
+  if (!medium || typeof medium.export !== "function") {
+    throw new Error("Storage medium is unavailable: " + String(storageId || ""));
+  }
+  return medium.export(options || {});
+};
+TPP.exportImagesZip = async function (options) {
+  return TPP.exportViaStorage("zip", options);
+};
+TPP.exportImagesD64 = async function (options) {
+  return TPP.exportViaStorage("d64", options);
 };
 TPP.exportAnimatedGif = async function (options) {
   const progressOp = TPP.beginProgressOperation("Animated GIF export");
