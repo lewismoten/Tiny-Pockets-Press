@@ -4,7 +4,9 @@ Each palette can now be loaded from a public URL.
 
 The project is moving toward JavaScript-only palette plugins. Each palette should be a `.js` file that registers itself at runtime.
 
-Palette discovery can also be registered through [library.js](./library.js), which calls `TPP.registerPaletteLibrary(...)` with the list of available palettes and their retrieval URLs. The app uses that library as a lazy-load registry before fetching an individual palette script.
+Palette discovery is loaded by default from `https://git.lewismoten.com/tiny-pockets-press/palette-lib/raw/branch/main/library.js`, which calls `TPP.registerPaletteLibrary(...)` with the list of available palettes and their retrieval URLs. The app uses that library as a lazy-load registry before fetching an individual palette script.
+
+The local [library.js](./library.js) file remains as a compatible fallback/development copy of that registry shape.
 
 The catalog in [../palettes.catalog.json](../palettes.catalog.json) accepts entries like:
 

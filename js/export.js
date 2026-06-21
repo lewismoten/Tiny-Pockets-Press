@@ -2783,7 +2783,8 @@ TPP.exportImagesSeq = async function (options) {
 TPP.IMAGE_EXPORT_PALETTE_SCHEMA_VERSION = 2;
 TPP.IMAGE_EXPORT_PALETTE_PLUGIN_SCHEMA_VERSION = 1;
 TPP.IMAGE_EXPORT_PALETTE_CATALOG = "data/palettes.catalog.json";
-TPP.IMAGE_EXPORT_PALETTE_LIBRARY = "data/palettes/library.js";
+TPP.IMAGE_EXPORT_PALETTE_LIBRARY =
+  "https://git.lewismoten.com/tiny-pockets-press/palette-lib/raw/branch/main/library.js";
 TPP.imageExportPaletteById = TPP.imageExportPaletteById || {};
 TPP.imageExportPaletteIdsCached = TPP.imageExportPaletteIdsCached || [];
 TPP.imageExportPaletteCatalogById = TPP.imageExportPaletteCatalogById || {};
