@@ -77,6 +77,27 @@ export async function init(TPP) {
   const imageExportThresholdValue = document.getElementById(
     "imageExportDialogThresholdValue",
   );
+  const imageExportPreDitherWrap = document.getElementById(
+    "imageExportDialogPreDitherWrap",
+  );
+  const imageExportPreDitherEnabled = document.getElementById(
+    "imageExportDialogPreDitherEnabled",
+  );
+  const imageExportPreDitherSelectWrap = document.getElementById(
+    "imageExportDialogPreDitherSelectWrap",
+  );
+  const imageExportPreDither = document.getElementById(
+    "imageExportDialogPreDither",
+  );
+  const imageExportPreDitherThresholdWrap = document.getElementById(
+    "imageExportDialogPreDitherThresholdWrap",
+  );
+  const imageExportPreDitherThreshold = document.getElementById(
+    "imageExportDialogPreDitherThreshold",
+  );
+  const imageExportPreDitherThresholdValue = document.getElementById(
+    "imageExportDialogPreDitherThresholdValue",
+  );
   const imageExportCharsetPreview = document.getElementById(
     "imageExportCharsetPreview",
   );
@@ -158,6 +179,13 @@ export async function init(TPP) {
     !imageExportDitherWrap ||
     !imageExportDither ||
     !imageExportThresholdValue ||
+    !imageExportPreDitherWrap ||
+    !imageExportPreDitherEnabled ||
+    !imageExportPreDitherSelectWrap ||
+    !imageExportPreDither ||
+    !imageExportPreDitherThresholdWrap ||
+    !imageExportPreDitherThreshold ||
+    !imageExportPreDitherThresholdValue ||
     !imageExportCharsetPreview ||
     !imageExportCharsetPreviewIcon ||
     !imageExportCharsetDialog ||
@@ -197,6 +225,33 @@ export async function init(TPP) {
       imageExportDither.appendChild(option);
     });
     imageExportDither.value = ids.includes(previous) ? previous : "threshold";
+  };
+  const populatePreDitherOptions = async function () {
+    if (typeof TPP.preloadImageExportDithers === "function") {
+      await TPP.preloadImageExportDithers();
+    }
+    if (typeof TPP.imageExportDitherIds !== "function") return;
+    const previous = imageExportPreDither.value || "threshold";
+    const ids = TPP.imageExportDitherIds().filter(function (id) {
+      if (String(id).startsWith("c64-")) return false;
+      const meta =
+        typeof TPP.imageExportDitherMetadata === "function"
+          ? TPP.imageExportDitherMetadata(id)
+          : null;
+      return !meta || !meta.kind || meta.kind === "both";
+    });
+    if (!ids.includes("threshold")) ids.unshift("threshold");
+    imageExportPreDither.replaceChildren();
+    ids.forEach(function (id) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent =
+        typeof TPP.imageExportDitherDisplayName === "function"
+          ? TPP.imageExportDitherDisplayName(id)
+          : id;
+      imageExportPreDither.appendChild(option);
+    });
+    imageExportPreDither.value = ids.includes(previous) ? previous : "threshold";
   };
   const presetValues = ["72", "96", "150", "200", "300", "600", "320x200"];
   const presetTargetPixels = function (value) {
@@ -238,6 +293,9 @@ export async function init(TPP) {
           colorDepth: imageExportColorDepth.value || "color24",
           palette: imageExportPalette.value || "websafe",
           threshold: clampThreshold(imageExportThreshold.value),
+          preDitherEnabled: Boolean(imageExportPreDitherEnabled.checked),
+          preDither: imageExportPreDither.value || "threshold",
+          preDitherThreshold: clampThreshold(imageExportPreDitherThreshold.value),
           dithering: imageExportDither.value || "threshold",
           frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
         },
@@ -619,8 +677,20 @@ export async function init(TPP) {
         varietyPercent + "% variety / " + accuracyPercent + "% accuracy";
     } else {
       imageExportThresholdLabel.textContent = "1-bit Threshold / Bias";
-      imageExportThresholdValue.textContent = String(thresholdValue);
+    imageExportThresholdValue.textContent = String(thresholdValue);
     }
+    const preDitherThresholdValue = clampThreshold(imageExportPreDitherThreshold.value);
+    imageExportPreDither.disabled = !imageExportPreDitherEnabled.checked;
+    imageExportPreDitherSelectWrap.classList.toggle(
+      "is-disabled",
+      imageExportPreDither.disabled,
+    );
+    imageExportPreDitherThreshold.disabled = !imageExportPreDitherEnabled.checked;
+    imageExportPreDitherThresholdWrap.classList.toggle(
+      "is-disabled",
+      imageExportPreDitherThreshold.disabled,
+    );
+    imageExportPreDitherThresholdValue.textContent = String(preDitherThresholdValue);
     syncPalettePreview();
   };
   const ensureSelectedPalette = async function () {
@@ -737,6 +807,9 @@ export async function init(TPP) {
       colorDepth: imageExportColorDepth.value || "color24",
       palette: imageExportPalette.value || "websafe",
       threshold: clampThreshold(imageExportThreshold.value),
+      preDitherEnabled: Boolean(imageExportPreDitherEnabled.checked),
+      preDither: imageExportPreDither.value || "threshold",
+      preDitherThreshold: clampThreshold(imageExportPreDitherThreshold.value),
       dithering: imageExportDither.value || "threshold",
     });
   };
@@ -765,6 +838,9 @@ export async function init(TPP) {
       palette: options.palette || "websafe",
       dithering: options.dithering || "threshold",
       threshold: Number(options.threshold) || 0,
+      preDitherEnabled: Boolean(options.preDitherEnabled),
+      preDither: options.preDither || "threshold",
+      preDitherThreshold: Number(options.preDitherThreshold) || 0,
       dpi: Number(options.dpi) || 0,
       targetWidth: Number(options.targetWidth) || 0,
       targetHeight: Number(options.targetHeight) || 0,
@@ -846,10 +922,15 @@ export async function init(TPP) {
       settings,
       scale,
     );
+    const fittedCanvas = typeof TPP.fitCanvasToExportTarget === "function"
+      ? TPP.fitCanvasToExportTarget(pageCanvas, exportOptions)
+      : pageCanvas;
+    const sourceCanvas =
+      typeof TPP.exportCanvasWithPreDither === "function"
+        ? await TPP.exportCanvasWithPreDither(fittedCanvas, exportOptions)
+        : fittedCanvas;
     return buildCharsetPreviewFromCanvas(
-      typeof TPP.fitCanvasToExportTarget === "function"
-        ? TPP.fitCanvasToExportTarget(pageCanvas, exportOptions)
-        : pageCanvas,
+      sourceCanvas,
       exportOptions,
       pageIndex,
       checkerboard,
@@ -907,10 +988,15 @@ export async function init(TPP) {
             ? TPP.imageExportPreviewRenderCache.canvas
             : null;
         if (baseCanvas) {
+          const fittedCanvas = typeof TPP.fitCanvasToExportTarget === "function"
+            ? TPP.fitCanvasToExportTarget(baseCanvas, exportOptions)
+            : baseCanvas;
+          const sourceCanvas =
+            typeof TPP.exportCanvasWithPreDither === "function"
+              ? await TPP.exportCanvasWithPreDither(fittedCanvas, exportOptions)
+              : fittedCanvas;
           sheet = buildCharsetPreviewFromCanvas(
-            typeof TPP.fitCanvasToExportTarget === "function"
-              ? TPP.fitCanvasToExportTarget(baseCanvas, exportOptions)
-              : baseCanvas,
+            sourceCanvas,
             exportOptions,
             pageIndex,
             false,
@@ -1064,6 +1150,33 @@ export async function init(TPP) {
     schedulePreview();
   });
   imageExportThreshold.addEventListener("input", function () {
+    syncFormatUi();
+    saveImageExportUi();
+    updateSeqControls();
+    if (typeof TPP.clearImageExportPreviewResultCache === "function") {
+      TPP.clearImageExportPreviewResultCache();
+    }
+    schedulePreview();
+  });
+  imageExportPreDitherEnabled.addEventListener("change", function () {
+    syncFormatUi();
+    saveImageExportUi();
+    updateSeqControls();
+    if (typeof TPP.clearImageExportPreviewResultCache === "function") {
+      TPP.clearImageExportPreviewResultCache();
+    }
+    schedulePreview();
+  });
+  imageExportPreDither.addEventListener("change", function () {
+    syncFormatUi();
+    saveImageExportUi();
+    updateSeqControls();
+    if (typeof TPP.clearImageExportPreviewResultCache === "function") {
+      TPP.clearImageExportPreviewResultCache();
+    }
+    schedulePreview();
+  });
+  imageExportPreDitherThreshold.addEventListener("input", function () {
     syncFormatUi();
     saveImageExportUi();
     updateSeqControls();
@@ -1251,6 +1364,12 @@ export async function init(TPP) {
         0,
         Math.min(255, Number(imageExportThreshold.value) || 128),
       );
+      const preDitherEnabled = Boolean(imageExportPreDitherEnabled.checked);
+      const preDither = imageExportPreDither.value || "threshold";
+      const preDitherThreshold = Math.max(
+        0,
+        Math.min(255, Number(imageExportPreDitherThreshold.value) || 128),
+      );
       const dithering = imageExportDither.value || "threshold";
       imageExportDpi.value = dpi;
       imageExportPreset.value = targetPixels
@@ -1271,6 +1390,9 @@ export async function init(TPP) {
         colorDepth: colorDepth,
         palette: palette,
         threshold: threshold,
+        preDitherEnabled: preDitherEnabled,
+        preDither: preDither,
+        preDitherThreshold: preDitherThreshold,
         dithering: dithering,
         frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
       });
@@ -1285,6 +1407,9 @@ export async function init(TPP) {
         colorDepth: colorDepth,
         palette: palette,
         threshold: threshold,
+        preDitherEnabled: preDitherEnabled,
+        preDither: preDither,
+        preDitherThreshold: preDitherThreshold,
         dithering: dithering,
         frameDelay: TPP.imageExportFrameDelayMs(imageExportFrameDelay.value),
       };
@@ -1327,6 +1452,7 @@ export async function init(TPP) {
       imageExportCharsetDialog.close();
   });
   await populateDitherOptions();
+  await populatePreDitherOptions();
   syncPlaybackUi();
   updateSeqControls();
   TPP.updateImageExportSeqControls = updateSeqControls;

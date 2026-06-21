@@ -150,6 +150,49 @@
           />
           <span id="imageExportDialogThresholdValue">128</span>
         </label>
+        <div id="imageExportDialogPreDitherWrap" class="image-export-pre-dither">
+          <label>
+            <input
+              id="imageExportDialogPreDitherEnabled"
+              type="checkbox"
+            />
+            Pre-dither before dithering
+          </label>
+          <label id="imageExportDialogPreDitherSelectWrap"
+            >Pre-dither Algorithm
+            <select id="imageExportDialogPreDither">
+              <option value="threshold">Threshold</option>
+              <option value="bayer2">Bayer 2x2</option>
+              <option value="bayer4">Bayer 4x4</option>
+              <option value="bayer8">Bayer 8x8</option>
+              <option value="floyd-steinberg">Floyd-Steinberg</option>
+              <option value="jarvis-judice-ninke">Jarvis Judice &amp; Ninke</option>
+              <option value="stucki">Stucki</option>
+              <option value="burkes">Burkes</option>
+              <option value="sierra">Sierra</option>
+              <option value="atkinson">Atkinson</option>
+              <option value="halftone">Halftone</option>
+              <option value="blue-noise">Blue-noise</option>
+              <option value="random">Random</option>
+              <option value="pattern">Pattern</option>
+            </select>
+          </label>
+          <label id="imageExportDialogPreDitherThresholdWrap"
+            >Pre-dither Threshold
+            <input
+              id="imageExportDialogPreDitherThreshold"
+              type="range"
+              min="0"
+              max="255"
+              step="1"
+              value="128"
+            />
+            <span id="imageExportDialogPreDitherThresholdValue">128</span>
+          </label>
+          <div class="image-export-estimate">
+            Useful before the main dither, especially for C64 exports.
+          </div>
+        </div>
         <div id="imageExportDialogEstimate" class="image-export-estimate"></div>
       </div>
       <div class="image-export-dialog-preview">

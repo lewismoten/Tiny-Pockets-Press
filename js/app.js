@@ -350,6 +350,16 @@ TPP.openImageExportDialog = async function (options) {
   const threshold = document.getElementById("imageExportDialogThreshold");
   const dither = document.getElementById("imageExportDialogDither");
   const ditherWrap = document.getElementById("imageExportDialogDitherWrap");
+  const preDitherEnabled = document.getElementById(
+    "imageExportDialogPreDitherEnabled",
+  );
+  const preDither = document.getElementById("imageExportDialogPreDither");
+  const preDitherThreshold = document.getElementById(
+    "imageExportDialogPreDitherThreshold",
+  );
+  const preDitherThresholdValue = document.getElementById(
+    "imageExportDialogPreDitherThresholdValue",
+  );
   const thresholdWrap = document.getElementById(
     "imageExportDialogThresholdWrap",
   );
@@ -371,6 +381,10 @@ TPP.openImageExportDialog = async function (options) {
     !frameDelay ||
     !threshold ||
     !dither ||
+    !preDitherEnabled ||
+    !preDither ||
+    !preDitherThreshold ||
+    !preDitherThresholdValue ||
     !ditherWrap ||
     !thresholdWrap ||
     !thresholdValue ||
@@ -412,8 +426,13 @@ TPP.openImageExportDialog = async function (options) {
   frameDelay.value = TPP.imageExportFrameDelaySeconds(ui.frameDelay || 300);
   threshold.value = TPP.imageExportClampThreshold(ui.threshold);
   dither.value = ui.dithering === "none" ? "threshold" : ui.dithering || "threshold";
+  preDitherEnabled.checked = Boolean(ui.preDitherEnabled);
+  preDither.value =
+    ui.preDither === "none" ? "threshold" : ui.preDither || "threshold";
+  preDitherThreshold.value = TPP.imageExportClampThreshold(ui.preDitherThreshold);
   qualityValue.textContent = quality.value + "%";
   thresholdValue.textContent = threshold.value;
+  preDitherThresholdValue.textContent = preDitherThreshold.value;
   preset.value = dpiPreset;
   customWrap.hidden = preset.value !== "custom";
   if (TPP.preloadImageExportPalettes) {
@@ -488,6 +507,9 @@ TPP.imageExportUi = function () {
       quality: 92,
       colorDepth: "color24",
       threshold: 128,
+      preDitherEnabled: false,
+      preDither: "threshold",
+      preDitherThreshold: 128,
       frameDelay: 300,
       palette: "websafe",
       dithering: "threshold",
@@ -508,6 +530,9 @@ TPP.writeImageExportUi = function (patch) {
       quality: 92,
       colorDepth: "color24",
       threshold: 128,
+      preDitherEnabled: false,
+      preDither: "threshold",
+      preDitherThreshold: 128,
       frameDelay: 300,
       palette: "websafe",
       dithering: "threshold",
@@ -701,6 +726,9 @@ TPP.imageExportPreviewAfterCacheKey = function (
       colorDepth: String(options.colorDepth || "color24"),
       palette: String(options.palette || "websafe"),
       threshold: TPP.imageExportClampThreshold(options.threshold),
+      preDitherEnabled: Boolean(options.preDitherEnabled),
+      preDither: String(options.preDither || "threshold"),
+      preDitherThreshold: TPP.imageExportClampThreshold(options.preDitherThreshold),
       dithering: String(options.dithering || "threshold"),
       quality: Number(options.quality) || 92,
     })

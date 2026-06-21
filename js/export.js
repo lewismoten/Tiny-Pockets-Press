@@ -2441,6 +2441,7 @@ TPP.exportEpub = async function () {
 TPP.imageExportOptions = function (options) {
   const source = options || {};
   const rawThreshold = Number(source.threshold);
+  const rawPreDitherThreshold = Number(source.preDitherThreshold);
   const requestedFormat = ["png", "gif", "jpeg", "webp", "seq", "d64"].includes(
     source.format,
   )
@@ -2464,8 +2465,14 @@ TPP.imageExportOptions = function (options) {
   const rawDithering = String(source.dithering || "").trim().toLowerCase();
   const normalizedDithering =
     rawDithering === "none" ? "threshold" : rawDithering;
+  const rawPreDither = String(source.preDither || "").trim().toLowerCase();
+  const normalizedPreDither =
+    rawPreDither === "none" ? "threshold" : rawPreDither;
   let dithering = TPP.imageExportDitherIds().includes(normalizedDithering)
     ? normalizedDithering
+    : "threshold";
+  const preDither = TPP.imageExportDitherIds().includes(normalizedPreDither)
+    ? normalizedPreDither
     : "threshold";
   if (
     requestedFormat === "seq" &&
@@ -2495,6 +2502,12 @@ TPP.imageExportOptions = function (options) {
     threshold: Math.max(
       0,
       Math.min(255, Number.isFinite(rawThreshold) ? rawThreshold : 128),
+    ),
+    preDitherEnabled: Boolean(source.preDitherEnabled),
+    preDither: preDither,
+    preDitherThreshold: Math.max(
+      0,
+      Math.min(255, Number.isFinite(rawPreDitherThreshold) ? rawPreDitherThreshold : 128),
     ),
     dithering: dithering,
     frameDelay: Math.max(
@@ -3691,6 +3704,46 @@ TPP.applyImageExportRegisteredPaletteDitherAsync = async function (
   }
   return false;
 };
+TPP.applyImageExportPreDither = async function (data, width, height, options) {
+  const config = options || {};
+  if (!config.preDitherEnabled) return false;
+  const algorithm = String(config.preDither || "threshold");
+  const preThreshold = Math.max(
+    0,
+    Math.min(255, Number(config.preDitherThreshold) || 128),
+  );
+  if (["threshold", "none"].includes(algorithm)) {
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = Math.round(
+        data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114,
+      );
+      const bit = gray >= preThreshold ? 255 : 0;
+      data[i] = bit;
+      data[i + 1] = bit;
+      data[i + 2] = bit;
+    }
+    return true;
+  }
+  await TPP.ensureImageExportDitherLoaded(algorithm);
+  return TPP.applyImageExportRegisteredMonoDither(data, width, height, {
+    algorithm: algorithm,
+    threshold: preThreshold,
+  });
+};
+TPP.exportCanvasWithPreDither = async function (canvas, options) {
+  if (!canvas) return canvas;
+  const config = options || {};
+  if (!config.preDitherEnabled) return canvas;
+  const out = document.createElement("canvas");
+  out.width = canvas.width;
+  out.height = canvas.height;
+  const ctx = out.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(canvas, 0, 0);
+  const image = ctx.getImageData(0, 0, out.width, out.height);
+  await TPP.applyImageExportPreDither(image.data, out.width, out.height, config);
+  ctx.putImageData(image, 0, 0);
+  return out;
+};
 TPP.loadImageExportDither = function () {
   if (TPP.imageExportDitherLib) return Promise.resolve(TPP.imageExportDitherLib);
   if (!TPP.imageExportDitherPromise) {
@@ -3800,6 +3853,9 @@ TPP.exportCanvasForDepth = async function (
     !["threshold", "none"].includes(String(config.dithering || "threshold")) &&
     Array.isArray(indexedPalette) &&
     indexedPalette.length > 0;
+  if (config.preDitherEnabled) {
+    await TPP.applyImageExportPreDither(data, out.width, out.height, config);
+  }
   if (applyMonoDither) {
     await TPP.ensureImageExportDitherLoaded(config.dithering || "threshold");
     if (
