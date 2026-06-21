@@ -30,6 +30,11 @@
     dos2a: "2A",
   });
 
+  d64.directoryEntryFlags = Object.freeze({
+    closed: 0x80,
+    locked: 0x40,
+  });
+
   d64.headerOffsets = Object.freeze({
     nextDirectoryTrack: 0x00,
     nextDirectorySector: 0x01,
@@ -143,6 +148,61 @@
     };
   };
 
+  d64.decodeDirectoryEntryType = function (typeByte) {
+    const value = Math.max(0, Math.min(255, Number(typeByte) || 0));
+    const code = value & 0x07;
+    const typeName =
+      {
+        0: "del",
+        1: "seq",
+        2: "prg",
+        3: "usr",
+        4: "rel",
+      }[code] || "unknown";
+    return {
+      raw: value,
+      code: code,
+      fileType: typeName,
+      closed: Boolean(value & d64.directoryEntryFlags.closed),
+      locked: Boolean(value & d64.directoryEntryFlags.locked),
+    };
+  };
+
+  d64.readBam = function (image) {
+    const sector = d64.readSector(image, DIRECTORY_TRACK, BAM_SECTOR);
+    const tracks = [];
+    for (let track = 1; track <= 35; track += 1) {
+      const offset = d64.headerOffsets.bamStart + (track - 1) * 4;
+      const sectorCount = d64.trackSectorCount(track);
+      const freeCount = sector[offset];
+      const sectorFree = [];
+      for (let sectorIndex = 0; sectorIndex < sectorCount; sectorIndex += 1) {
+        const byteIndex = 1 + (sectorIndex >> 3);
+        const bitIndex = sectorIndex & 7;
+        sectorFree.push(Boolean(sector[offset + byteIndex] & (1 << bitIndex)));
+      }
+      tracks.push({
+        track: track,
+        freeCount: freeCount,
+        sectorFree: sectorFree,
+      });
+    }
+    return {
+      track: DIRECTORY_TRACK,
+      sector: BAM_SECTOR,
+      tracks: tracks,
+    };
+  };
+
+  d64.readFreeMap = function (image) {
+    const bam = d64.readBam(image);
+    const map = {};
+    bam.tracks.forEach(function (trackInfo) {
+      map[trackInfo.track] = trackInfo.sectorFree.slice();
+    });
+    return map;
+  };
+
   d64.readDirectoryEntry = function (image, entryIndex) {
     const index = Math.max(0, Math.floor(Number(entryIndex) || 0));
     const sectorIndex = Math.floor(index / 8);
@@ -151,16 +211,16 @@
     const offset = slotIndex * 32;
     const entry = sector.subarray(offset, offset + 32);
     const typeByte = entry[2];
-    const fileTypeName =
-      Object.keys(d64.fileTypes).find(function (key) {
-        return d64.fileTypes[key] === (typeByte & 0x87);
-      }) || "unknown";
+    const typeInfo = d64.decodeDirectoryEntryType(typeByte);
     return {
       index: index,
       sector: DIRECTORY_START_SECTOR + sectorIndex,
       slot: slotIndex,
       typeByte: typeByte,
-      fileType: fileTypeName,
+      fileType: typeInfo.fileType,
+      typeCode: typeInfo.code,
+      closed: typeInfo.closed,
+      locked: typeInfo.locked,
       startTrack: entry[3],
       startSector: entry[4],
       name: d64.decodeName(entry.subarray(5, 21)),
@@ -182,6 +242,157 @@
       entries.push(entry);
     }
     return entries;
+  };
+
+  d64.findDirectoryEntryByName = function (image, name, options) {
+    const target = String(name || "").trim().toUpperCase();
+    if (!target) return null;
+    const entries = d64.readDirectoryEntries(image, options);
+    for (let index = 0; index < entries.length; index += 1) {
+      if (String(entries[index].name || "").trim().toUpperCase() === target) {
+        return entries[index];
+      }
+    }
+    return null;
+  };
+
+  d64.readFileChain = function (image, startTrack, startSector) {
+    const blocks = [];
+    const payload = [];
+    const visited = {};
+    let track = Math.max(0, Math.floor(Number(startTrack) || 0));
+    let sector = Math.max(0, Math.floor(Number(startSector) || 0));
+    while (track) {
+      const key = String(track) + ":" + String(sector);
+      if (visited[key]) {
+        throw new Error("File chain loops at " + key);
+      }
+      visited[key] = true;
+      const block = d64.readSector(image, track, sector);
+      const nextTrack = block[0];
+      const nextSector = block[1];
+      const usedBytes = nextTrack === 0
+        ? Math.max(0, Math.min(254, nextSector - 1))
+        : 254;
+      for (let index = 0; index < usedBytes; index += 1) {
+        payload.push(block[2 + index]);
+      }
+      blocks.push({
+        track: track,
+        sector: sector,
+        nextTrack: nextTrack,
+        nextSector: nextSector,
+        usedBytes: usedBytes,
+      });
+      if (!nextTrack) break;
+      track = nextTrack;
+      sector = nextSector;
+    }
+    return {
+      blocks: blocks,
+      payload: new Uint8Array(payload),
+    };
+  };
+
+  d64.readRelativeSideSectors = function (image, sideSectorTrack, sideSectorSector) {
+    const sectors = [];
+    const visited = {};
+    let track = Math.max(0, Math.floor(Number(sideSectorTrack) || 0));
+    let sector = Math.max(0, Math.floor(Number(sideSectorSector) || 0));
+    while (track) {
+      const key = String(track) + ":" + String(sector);
+      if (visited[key]) {
+        throw new Error("Side-sector chain loops at " + key);
+      }
+      visited[key] = true;
+      const block = d64.readSector(image, track, sector);
+      const allSideSectors = [];
+      const dataSectors = [];
+      for (let index = 0; index < REL_MAX_SIDE_SECTORS; index += 1) {
+        const pointerTrack = block[4 + index * 2];
+        const pointerSector = block[5 + index * 2];
+        if (!pointerTrack) break;
+        allSideSectors.push({
+          track: pointerTrack,
+          sector: pointerSector,
+        });
+      }
+      for (let offset = 16; offset < 256; offset += 2) {
+        const pointerTrack = block[offset];
+        const pointerSector = block[offset + 1];
+        if (!pointerTrack) break;
+        dataSectors.push({
+          track: pointerTrack,
+          sector: pointerSector,
+        });
+      }
+      sectors.push({
+        track: track,
+        sector: sector,
+        nextTrack: block[0],
+        nextSector: block[1],
+        sideSectorIndex: block[2],
+        recordLength: block[3],
+        allSideSectors: allSideSectors,
+        dataSectors: dataSectors,
+        raw: new Uint8Array(block),
+      });
+      if (!block[0]) break;
+      track = block[0];
+      sector = block[1];
+    }
+    return sectors;
+  };
+
+  d64.readFile = function (image, entryOrName, options) {
+    const config = options || {};
+    const entry =
+      typeof entryOrName === "string"
+        ? d64.findDirectoryEntryByName(image, entryOrName, config)
+        : entryOrName || null;
+    if (!entry) return null;
+    const chain = d64.readFileChain(image, entry.startTrack, entry.startSector);
+    const result = {
+      entry: entry,
+      fileType: entry.fileType,
+      payload: chain.payload,
+      blocks: chain.blocks,
+    };
+    if (entry.fileType === "rel" && entry.sideSectorTrack) {
+      result.sideSectors = d64.readRelativeSideSectors(
+        image,
+        entry.sideSectorTrack,
+        entry.sideSectorSector,
+      );
+    }
+    return result;
+  };
+
+  d64.readRelativeRecords = function (image, entryOrName, options) {
+    const file = d64.readFile(image, entryOrName, options);
+    if (!file || file.fileType !== "rel") return null;
+    const recordLength = Math.max(1, Number(file.entry.recordLength) || 1);
+    const records = [];
+    for (let offset = 0; offset < file.payload.length; offset += recordLength) {
+      records.push(file.payload.slice(offset, offset + recordLength));
+    }
+    return {
+      entry: file.entry,
+      recordLength: recordLength,
+      recordCount: records.length,
+      records: records,
+      sideSectors: file.sideSectors || [],
+      payload: file.payload,
+      blocks: file.blocks,
+    };
+  };
+
+  d64.inspectImage = function (image, options) {
+    return {
+      header: d64.readHeader(image),
+      bam: d64.readBam(image),
+      entries: d64.readDirectoryEntries(image, options),
+    };
   };
 
   d64.diskSignature = function (image) {

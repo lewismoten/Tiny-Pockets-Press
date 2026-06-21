@@ -157,6 +157,10 @@ function validateRelativeFileCrossesSectorBoundary() {
   assert(header.dosVersionByte === d64.dosVersions.dos2_6, "Header DOS version mismatch");
   assert(header.dosType === d64.dosTypes.dos2a, "Header DOS type mismatch");
   assert(header.diskName === "RELTEST", "Header disk name mismatch");
+  const bam = d64.readBam(image);
+  assert(Array.isArray(bam.tracks) && bam.tracks.length === 35, "BAM track count mismatch");
+  const freeMap = d64.readFreeMap(image);
+  assert(Array.isArray(freeMap[1]), "Free map missing track 1");
 
   const entry = readDirectoryEntry(image, d64, 0);
   assert(entry[2] === d64.fileTypes.rel, "Directory type is not REL");
@@ -212,6 +216,29 @@ function validateRelativeFileCrossesSectorBoundary() {
   const entries = d64.readDirectoryEntries(image);
   assert(entries.length === 1, "Expected one directory entry");
   assert(entries[0].name === "BOOK.IDX", "Directory entry name mismatch");
+  assert(entries[0].fileType === "rel", "Parsed file type mismatch");
+  assert(entries[0].closed === true, "Expected REL directory entry to be closed");
+
+  const foundEntry = d64.findDirectoryEntryByName(image, "book.idx");
+  assert(foundEntry && foundEntry.name === "BOOK.IDX", "Directory lookup failed");
+
+  const relFile = d64.readFile(image, "BOOK.IDX");
+  assert(relFile && relFile.fileType === "rel", "REL file read failed");
+  assert(
+    Buffer.from(relFile.payload).equals(Buffer.from(relBytes)),
+    "REL file payload via readFile mismatch",
+  );
+
+  const relRecords = d64.readRelativeRecords(image, "BOOK.IDX");
+  assert(relRecords, "REL record read failed");
+  assert(relRecords.recordLength === relRecordLength, "REL record length read mismatch");
+  assert(relRecords.recordCount === relRecordCount, "REL record count mismatch");
+  assert(relRecords.records.length === relRecordCount, "REL records array mismatch");
+  assert(relRecords.sideSectors.length === sideSectors.length, "REL side-sector read mismatch");
+
+  const inspect = d64.inspectImage(image);
+  assert(inspect.header.diskName === "RELTEST", "Inspect header mismatch");
+  assert(inspect.entries.length === 1, "Inspect entries mismatch");
 
   assert(d64.hasDiskChanged(image, image) === false, "Disk should not differ from itself");
 }
@@ -231,6 +258,14 @@ function validateNonRelativeFileStillWorks() {
   assert(entry[21] === 0, "SEQ side-sector track should be zero");
   assert(entry[22] === 0, "SEQ side-sector sector should be zero");
   assert(entry[23] === 0, "SEQ record length should be zero");
+
+  const seqFile = d64.readFile(image, "HELLO");
+  assert(seqFile && seqFile.fileType === "seq", "SEQ file read failed");
+  assert(seqFile.blocks.length === 1, "Expected one SEQ data block");
+  assert(
+    Buffer.from(seqFile.payload).equals(Buffer.from(new Uint8Array([1, 2, 3, 4, 5]))),
+    "SEQ payload mismatch",
+  );
 
   const secondImage = d64.buildImage([
     {

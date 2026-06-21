@@ -30,6 +30,10 @@ This is useful for:
 
 - inspecting generated images
 - reading disk names, ids, and DOS markers
+- reading the BAM and free-space map
+- listing files and decoding file metadata
+- reading file payloads directly from the image
+- reading `REL` side sectors and decoded records
 - comparing two images to notice a disk swap
 
 The support layer exposes header-related enums:
@@ -194,6 +198,11 @@ type D64DosVersions = {
 type D64DosTypes = {
   dos2a: string;
 };
+
+type D64DirectoryEntryFlags = {
+  closed: number;
+  locked: number;
+};
 ```
 
 ## Public Methods
@@ -353,6 +362,47 @@ Notes:
 - `dosVersionName` is resolved from `dosVersions` when recognized.
 - This helper is intended for the standard 35-track D64 layout.
 
+### `decodeDirectoryEntryType(typeByte)`
+
+Decodes a raw directory entry type byte into a friendlier structure.
+
+Parameters:
+
+- `typeByte: number`
+
+Returns:
+
+- `{ raw, code, fileType, closed, locked }`
+
+### `readBam(image)`
+
+Reads the BAM information from the standard header sector.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+
+Returns:
+
+- `{ track, sector, tracks }`
+
+Notes:
+
+- `tracks` is an array of per-track free-space data.
+- Each item includes `track`, `freeCount`, and `sectorFree`.
+
+### `readFreeMap(image)`
+
+Builds a simpler per-track free-space map from the BAM.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+
+Returns:
+
+- `Record<number, boolean[]>`
+
 ### `readDirectoryEntry(image, entryIndex)`
 
 Reads one parsed directory entry by flat entry index.
@@ -378,6 +428,89 @@ Parameters:
 Returns:
 
 - `Array<object>`
+
+### `findDirectoryEntryByName(image, name, options)`
+
+Finds the first directory entry whose decoded name matches the provided name case-insensitively.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `name: string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `object | null`
+
+### `readFileChain(image, startTrack, startSector)`
+
+Reads a normal Commodore file chain starting from the given track and sector.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `startTrack: number`
+- `startSector: number`
+
+Returns:
+
+- `{ blocks, payload }`
+
+### `readRelativeSideSectors(image, sideSectorTrack, sideSectorSector)`
+
+Reads a `REL` side-sector chain.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `sideSectorTrack: number`
+- `sideSectorSector: number`
+
+Returns:
+
+- `Array<{ track, sector, nextTrack, nextSector, sideSectorIndex, recordLength, allSideSectors, dataSectors, raw }>`
+
+### `readFile(image, entryOrName, options)`
+
+Reads a file from the image either by parsed directory entry or by filename.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `null | { entry, fileType, payload, blocks, sideSectors? }`
+
+### `readRelativeRecords(image, entryOrName, options)`
+
+Reads and slices a `REL` file into fixed-length records.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `null | { entry, recordLength, recordCount, records, sideSectors, payload, blocks }`
+
+### `inspectImage(image, options)`
+
+Builds a higher-level inspection object for a whole image.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `{ header, bam, entries }`
 
 ### `diskSignature(image)`
 
