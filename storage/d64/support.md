@@ -10,6 +10,8 @@ window.TPP.d64
 
 The goal of this API is to make the disk-image building primitives reusable outside of Tiny Pockets Press. A different host can use these methods directly to estimate capacity, allocate sectors, build directory entries, and assemble `.d64` images.
 
+This is not a full implementation of every D64 variant. It intentionally targets the common emulator-friendly format: standard 35-track images without appended error information.
+
 ## Namespace
 
 The public namespace is:
@@ -346,23 +348,25 @@ Returns:
 Notes:
 
 - Output uses the pattern `name-diskNN-of-NN.d64`.
-- `totalDisks: number`
-
-Returns:
-
-- `string`
 
 ## Limitations
 
 Current limitations of this support layer:
 
+- It is not a full implementation of every D64 variant.
 - It targets standard 35-track D64 images only.
-- Output image size is fixed at `174848` bytes.
+- Output image size is fixed at `174848` bytes, which matches the common no-error-info 35-track format.
+- It does not write appended per-sector error information.
+- It does not support 40-track or 42-track extended D64 variants.
 - Track `18` is reserved for the BAM and directory.
 - Directory capacity is limited by the available sectors on track `18`.
 - Each directory sector holds `8` directory entries.
 - Filenames are stored in a `16`-byte field.
 - Filename normalization is intentionally simple and not a full PETSCII conversion layer.
+- File type support is simplified to a normalized directory type byte.
+- `REL` files are not implemented with Commodore relative-file side sectors or record management.
+- File-type state bits such as custom locked/open combinations are not modeled separately from the normalized type byte.
+- Disk header customization is minimal and not exposed as a richer API for disk ID or DOS type variations.
 - This layer does not validate Commodore semantics beyond the structural image layout.
 - There is no visual disk-map API yet.
 - There is no sector fragmentation strategy beyond forward allocation.
@@ -372,6 +376,8 @@ Current limitations of this support layer:
 Important practical constraints:
 
 - Maximum tracks: `35`
+- Standard image size: `174848` bytes
+- Error-info bytes appended: `0`
 - Maximum sectors per file payload sector: `254` bytes of data
 - Directory sectors available on track `18`: `18`
 - Approximate maximum directory entries: `18 * 8 = 144`
