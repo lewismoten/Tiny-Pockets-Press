@@ -3384,6 +3384,7 @@ TPP.imageExportDitherIdsDefault = [
   "blue-noise",
   "random",
   "pattern",
+  "c64-bitmap",
   "c64-petscii",
   "c64-charset-unshifted",
   "c64-charset-shifted-business",

@@ -518,7 +518,7 @@ export async function init(TPP) {
     const c64Format = seqFormat || d64Format;
     const indexedOnlyDitherOptions = Array.from(
       imageExportDither.querySelectorAll(
-        'option[value="c64-petscii"], option[value="c64-charset-unshifted"], option[value="c64-charset-shifted-business"], option[value="c64-custom-charset"]',
+        'option[value="c64-bitmap"], option[value="c64-petscii"], option[value="c64-charset-unshifted"], option[value="c64-charset-shifted-business"], option[value="c64-custom-charset"]',
       ),
     );
     Array.from(imageExportFormat.options).forEach(function (option) {
@@ -578,6 +578,7 @@ export async function init(TPP) {
       if (
         !indexed &&
         [
+          "c64-bitmap",
           "c64-petscii",
           "c64-charset-unshifted",
           "c64-charset-shifted-business",

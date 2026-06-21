@@ -2077,6 +2077,67 @@ const paintSolidCell = function (
     }
   }
 };
+const applyPaletteBitmapAsync = async function (
+  data,
+  width,
+  height,
+  palette,
+  options,
+) {
+  const cellSize = 8;
+  const colorLimit = Math.max(2, Math.min(6, palette.length));
+  applyC64BayerPrepass(data, width, height, palette);
+  const originalData = new Uint8ClampedArray(data);
+  const config = options || {};
+  const maybeYield = makeUiYieldController(config.yieldBudgetMs);
+  const totalCells = Math.ceil(height / cellSize) * Math.ceil(width / cellSize);
+  let processedCells = 0;
+  for (let cellY = 0; cellY < height; cellY += cellSize) {
+    for (let cellX = 0; cellX < width; cellX += cellSize) {
+      const blockWidth = Math.min(cellSize, width - cellX);
+      const blockHeight = Math.min(cellSize, height - cellY);
+      const pixels = extractCellPixels(
+        originalData,
+        width,
+        cellX,
+        cellY,
+        blockWidth,
+        blockHeight,
+      );
+      const candidates = paletteCellCandidates(pixels, palette, colorLimit);
+      const fit = bestTwoColorCellFit(
+        pixels,
+        blockWidth,
+        blockHeight,
+        palette,
+        candidates,
+      );
+      paintMaskCell(
+        data,
+        width,
+        cellX,
+        cellY,
+        blockWidth,
+        blockHeight,
+        fit.mask,
+        fit.bg,
+        fit.fg,
+      );
+      processedCells += 1;
+      reportProgress(config, {
+        phase: "Bitmap",
+        completed: processedCells,
+        total: totalCells,
+        cellX: cellX,
+        cellY: cellY,
+        cellWidth: blockWidth,
+        cellHeight: blockHeight,
+      });
+      if (processedCells % 4 === 0) await yieldToUi();
+      await maybeYield();
+    }
+  }
+};
 const strongestBackgroundIndex = function (totals, candidates) {
   const list = Array.isArray(candidates) && candidates.length
     ? candidates
@@ -3071,6 +3132,7 @@ TPP.buildC64CustomCharsetLayout = function (canvas, palette, options) {
 };
 
   C64.dither = {
+    applyPaletteBitmapAsync: applyPaletteBitmapAsync,
     applyPalettePetsciiAsync: applyPalettePetsciiAsync,
     applyPaletteCustomCharsetAsync: applyPaletteCustomCharsetAsync,
     buildImageExportCustomCharsetSheet: TPP.buildImageExportCustomCharsetSheet,
