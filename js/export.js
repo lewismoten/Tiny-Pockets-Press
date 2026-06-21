@@ -3334,12 +3334,6 @@ TPP.ensureImageExportPaletteForOptionsLoaded = async function (options) {
 };
 TPP.preloadImageExportPalettes = async function () {
   await TPP.ensureImageExportPaletteCatalogLoaded();
-  const paletteIds = TPP.imageExportPaletteIds();
-  await Promise.all(
-    paletteIds.map(function (paletteId) {
-      return TPP.ensureImageExportPaletteLoaded(paletteId);
-    }),
-  );
 };
 TPP.imageExportNamedPalette = function (name) {
   const id = String(name || "websafe");
