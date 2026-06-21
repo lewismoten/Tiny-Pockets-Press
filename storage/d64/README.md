@@ -10,6 +10,8 @@ The entry point is [plugin.js](./plugin.js).
 
 The storage-medium support helpers live in [support.js](./support.js).
 
+The support API reference lives in [support.md](./support.md).
+
 When loaded, it calls:
 
 ```js
@@ -45,6 +47,14 @@ The storage plug-in itself also lazy-loads its own D64 support module, which is 
 - directory entry generation
 - file sector allocation
 - final `.d64` byte-image assembly
+
+When that support script loads, it exposes:
+
+```js
+window.TPP.d64
+```
+
+That namespace is intended to be usable directly by other repos, not just by Tiny Pockets Press.
 
 ## What This Plug-in Relies On
 

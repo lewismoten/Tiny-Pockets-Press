@@ -5595,13 +5595,13 @@ TPP.exportD64DiskBundle = function (book, options) {
     let currentDiskIndex = diskPageIndexes.length - 1;
     diskPageIndexes[currentDiskIndex].push(index);
     let packed = buildPackedForDisk(diskPageIndexes[currentDiskIndex]);
-    let usage = TPP.d64EstimateImageUsage(estimateDiskFiles(packed));
+    let usage = TPP.d64.estimateImageUsage(estimateDiskFiles(packed));
     if (usage.totalFileSectors > usage.usableFileSectors && diskPageIndexes[currentDiskIndex].length > 1) {
       diskPageIndexes[currentDiskIndex].pop();
       currentDiskIndex += 1;
       diskPageIndexes[currentDiskIndex] = [index];
       packed = buildPackedForDisk(diskPageIndexes[currentDiskIndex]);
-      usage = TPP.d64EstimateImageUsage(estimateDiskFiles(packed));
+      usage = TPP.d64.estimateImageUsage(estimateDiskFiles(packed));
     }
     if (usage.totalFileSectors > usage.usableFileSectors) {
       throw new Error(
@@ -5697,7 +5697,7 @@ TPP.exportD64DiskBundle = function (book, options) {
     return {
       diskNumber: diskNumber,
       files: d64Files,
-      usage: TPP.d64EstimateImageUsage(d64Files),
+      usage: TPP.d64.estimateImageUsage(d64Files),
       indexBytes: indexBytes,
     };
   });
@@ -7104,7 +7104,9 @@ TPP.exportImagesD64Core = async function (options) {
         "Building D64 disk " + disk.diskNumber + " of " + bookFiles.disks.length + "... " +
           disk.usage.totalFileSectors + "/" + disk.usage.usableFileSectors + " sectors",
       );
-      const imageBytes = TPP.buildD64Image(disk.files, settings);
+      const imageBytes = TPP.d64.buildImage(disk.files, {
+        title: settings && settings.title,
+      });
       if (!imageBytes) {
         alert("Failed to build D64 disk " + String(disk.diskNumber) + ".");
         return;
@@ -7116,7 +7118,12 @@ TPP.exportImagesD64Core = async function (options) {
     }
     if (diskImages.length === 1) {
       const blob = new Blob([diskImages[0].bytes], { type: "application/octet-stream" });
-      TPP.downloadBlob(TPP.exportD64FileName(settings), blob);
+      TPP.downloadBlob(
+        TPP.d64.fileName({
+          title: settings && settings.title,
+        }),
+        blob,
+      );
     } else {
       if (!window.JSZip) {
         alert("ZIP export library failed to load for multi-disk D64 export.");
@@ -7125,7 +7132,13 @@ TPP.exportImagesD64Core = async function (options) {
       const zip = new JSZip();
       diskImages.forEach(function (diskImage) {
         zip.file(
-          TPP.exportD64DiskFileName(settings, diskImage.diskNumber, diskImages.length),
+          TPP.d64.diskFileName(
+            {
+              title: settings && settings.title,
+            },
+            diskImage.diskNumber,
+            diskImages.length,
+          ),
           diskImage.bytes,
         );
       });

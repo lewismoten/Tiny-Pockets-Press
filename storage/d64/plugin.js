@@ -16,10 +16,11 @@
   const ensureSupport = function () {
     if (
       window.TPP &&
-      typeof window.TPP.buildD64Image === "function" &&
-      typeof window.TPP.d64EstimateImageUsage === "function" &&
-      typeof window.TPP.exportD64FileName === "function" &&
-      typeof window.TPP.exportD64DiskFileName === "function"
+      window.TPP.d64 &&
+      typeof window.TPP.d64.buildImage === "function" &&
+      typeof window.TPP.d64.estimateImageUsage === "function" &&
+      typeof window.TPP.d64.fileName === "function" &&
+      typeof window.TPP.d64.diskFileName === "function"
     ) {
       return Promise.resolve();
     }
@@ -37,10 +38,11 @@
       script.onload = function () {
         if (
           window.TPP &&
-          typeof window.TPP.buildD64Image === "function" &&
-          typeof window.TPP.d64EstimateImageUsage === "function" &&
-          typeof window.TPP.exportD64FileName === "function" &&
-          typeof window.TPP.exportD64DiskFileName === "function"
+          window.TPP.d64 &&
+          typeof window.TPP.d64.buildImage === "function" &&
+          typeof window.TPP.d64.estimateImageUsage === "function" &&
+          typeof window.TPP.d64.fileName === "function" &&
+          typeof window.TPP.d64.diskFileName === "function"
         ) {
           resolve();
           return;
