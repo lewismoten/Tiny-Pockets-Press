@@ -545,6 +545,79 @@ Returns:
 
 - `Record<number, boolean[]>`
 
+### `analyzeBamLikeSector(sectorBytes, options)`
+
+Scores one 256-byte sector for whether it structurally resembles a BAM/header block.
+
+Parameters:
+
+- `sectorBytes: Uint8Array | ArrayBuffer | number[]`
+- `options?: { requireScore?: number }`
+
+Returns:
+
+- `null | { confidence, looksLikeBam, validTrackEntries, invalidTrackEntries, nonZeroTrackEntries, hasRecognizedDosVersion, dosVersionByte, nextDirectoryTrack, nextDirectorySector, diskName, diskId, dosType, directoryPointerLooksValid }`
+
+Notes:
+
+- This is heuristic only.
+- It is useful for inspection and candidate detection, not authoritative DOS-variant identification.
+
+### `scanForUnexpectedBamSectors(image, options)`
+
+Scans the image for BAM-like sectors outside the normal primary header/BAM location at `18/0`.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `options?: { minConfidence?: number, validateContents?: boolean, maxEntries?: number }`
+
+Returns:
+
+- `Array<{ track, sector, confidence, evidence, reason, validation? }>`
+
+Notes:
+
+- This is intended to surface possible extended BAM records or alternate DOS metadata blocks.
+- The result is sorted by descending confidence.
+- The default threshold is intentionally conservative to reduce false positives.
+- By default it also performs a second-pass validation against the directory pointer and referenced file chains.
+
+### `readDirectoryEntriesFrom(image, startTrack, startSector, options)`
+
+Reads a directory chain starting from an arbitrary track/sector pointer.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `startTrack: number`
+- `startSector: number`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `{ entries, sectors }`
+
+### `validateUnexpectedBamSector(image, bamTrack, bamSector, options)`
+
+Validates whether a BAM-like sector can actually reach a readable directory and usable file chains.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `bamTrack: number`
+- `bamSector: number`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `null | { bamTrack, bamSector, directoryReachable, directoryError, directoryEntryCount, directorySectorCount, validFileChains, invalidFileChains, fileResults, bamAgreement, referencedSectorCount, referencedSectors, looksConsistent }`
+
+Notes:
+
+- This is still heuristic validation.
+- It proves much more than the structural scan alone, but it still does not identify a specific DOS family.
+
 ### `readDirectoryEntry(image, entryIndex)`
 
 Reads one parsed directory entry by flat entry index.
@@ -766,7 +839,7 @@ Parameters:
 
 Returns:
 
-- `{ header, bam, errorInfo, entries, files }`
+- `{ header, bam, errorInfo, unexpectedBamSectors, entries, files }`
 
 ### `rebuildImage(image, files, options)`
 

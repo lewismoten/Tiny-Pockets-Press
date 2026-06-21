@@ -551,8 +551,75 @@ function validateExtendedTracksAndErrorInfo() {
   );
 }
 
+function validateUnexpectedBamScan() {
+  const d64 = loadD64Support();
+  const image = d64.buildImage(
+    [
+      {
+        name: "HELLO",
+        type: "seq",
+        data: new Uint8Array([1, 2, 3, 4]),
+      },
+    ],
+    {
+      trackCount: 40,
+      diskName: "SCANME",
+    },
+  );
+  assert(image instanceof Uint8Array, "BAM scan image did not build");
+
+  const primaryFreeMap = d64.readFreeMap(image);
+  const extraBam = d64.createBamSector(primaryFreeMap, {
+    diskName: "EXTRA",
+    diskId: "XB",
+    dosType: "2A",
+    dosVersion: d64.dosVersions.dos2_6,
+  });
+  image.set(extraBam, d64.trackOffset(40, 0));
+
+  const candidates = d64.scanForUnexpectedBamSectors(image);
+  assert(Array.isArray(candidates), "Unexpected BAM scan should return an array");
+  assert(candidates.length >= 1, "Unexpected BAM scan should find at least one candidate");
+  const extendedCandidate = candidates.find(function (candidate) {
+    return candidate.track === 40 && candidate.sector === 0;
+  });
+  assert(extendedCandidate, "Unexpected BAM scan should find the injected 40/0 sector");
+  assert(
+    extendedCandidate.evidence && extendedCandidate.evidence.looksLikeBam === true,
+    "Unexpected BAM candidate should include BAM-like evidence",
+  );
+  assert(
+    extendedCandidate.evidence.diskName === "EXTRA",
+    "Unexpected BAM candidate should decode the injected disk name",
+  );
+  assert(extendedCandidate.validation, "Unexpected BAM candidate should include validation");
+  assert(
+    extendedCandidate.validation.directoryReachable === true,
+    "Unexpected BAM validation should reach a directory",
+  );
+  assert(
+    extendedCandidate.validation.directoryEntryCount >= 1,
+    "Unexpected BAM validation should find directory entries",
+  );
+  assert(
+    extendedCandidate.validation.validFileChains >= 1,
+    "Unexpected BAM validation should find valid file chains",
+  );
+  assert(
+    extendedCandidate.validation.invalidFileChains === 0,
+    "Unexpected BAM validation should not find invalid file chains",
+  );
+
+  const inspect = d64.inspectImage(image);
+  assert(
+    Array.isArray(inspect.unexpectedBamSectors) && inspect.unexpectedBamSectors.length >= 1,
+    "inspectImage should expose unexpected BAM sectors",
+  );
+}
+
 validateRelativeFileCrossesSectorBoundary();
 validateNonRelativeFileStillWorks();
 validateUnusedTailHelpers();
 validateExtendedTracksAndErrorInfo();
+validateUnexpectedBamScan();
 console.log("D64 REL validation passed.");
