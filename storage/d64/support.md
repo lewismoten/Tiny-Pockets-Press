@@ -124,6 +124,20 @@ Example:
 
 Tiny Pockets Press itself still exports its book-reader files as `SEQ` today because the current BASIC and machine-language readers still assume sequential access. The low-level D64 support API can generate `REL` files now, but the higher-level TPP reader path has not been switched over yet.
 
+Before that conversion happens, this repo now includes a local validator:
+
+```bash
+npm run check:d64-rel
+```
+
+That validation currently checks:
+
+- a generated `REL` file writes a `REL` directory entry
+- the directory entry stores side-sector track/sector and record length
+- side-sector pointers match the actual data-sector chain
+- a known test case includes at least one record that crosses a sector boundary
+- normal `SEQ` files still behave as expected
+
 ## File Type Enum
 
 The support layer exposes a readable enum:
