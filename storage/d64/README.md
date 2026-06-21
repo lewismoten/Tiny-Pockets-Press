@@ -8,6 +8,8 @@ It is designed to be hosted independently as static JavaScript. It does not depe
 
 The entry point is [plugin.js](./plugin.js).
 
+The storage-medium support helpers live in [support.js](./support.js).
+
 When loaded, it calls:
 
 ```js
@@ -34,7 +36,15 @@ The host application must provide:
 - `window.TPP.registerStorage(storage)`
 - `window.TPP.exportImagesD64Core(options)`
 
-In practice, the host's D64 core is also responsible for Commodore 64 rendering, disk layout, disk-image generation, optional multi-disk ZIP bundling, and download behavior.
+In practice, the host's D64 core is responsible for Commodore 64 rendering, asset preparation, optional multi-disk ZIP bundling, and download behavior.
+
+The storage plug-in itself also lazy-loads its own D64 support module, which is responsible for low-level disk image concerns such as:
+
+- track and sector sizing
+- BAM generation
+- directory entry generation
+- file sector allocation
+- final `.d64` byte-image assembly
 
 ## What This Plug-in Relies On
 
@@ -42,11 +52,9 @@ This plug-in is intentionally thin. It does not:
 
 - convert source content into C64 screen data
 - choose palette or dithering rules
-- assign files to D64 disks
-- build D64 filesystem sectors
 - trigger its own download logic
 
-It only registers the storage medium and forwards `options` to the host:
+It registers the storage medium, lazy-loads `support.js` when needed, and then forwards `options` to the host:
 
 ```js
 await storage.export(options);
