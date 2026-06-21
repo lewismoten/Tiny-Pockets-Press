@@ -2,9 +2,13 @@
   const TPP = window.TPP = window.TPP || {};
   const d64 = TPP.d64 = TPP.d64 || {};
   const DEFAULT_IMAGE_NAME = "disk";
+  const STANDARD_IMAGE_SIZE = 174848;
   const REL_MAX_RECORD_LENGTH = 254;
   const REL_DATA_SECTORS_PER_SIDE_SECTOR = 120;
   const REL_MAX_SIDE_SECTORS = 6;
+  const DIRECTORY_TRACK = 18;
+  const BAM_SECTOR = 0;
+  const DIRECTORY_START_SECTOR = 1;
 
   d64.fileTypes = Object.freeze({
     del: 0x80,
@@ -12,6 +16,31 @@
     prg: 0x82,
     usr: 0x83,
     rel: 0x84,
+  });
+
+  d64.diskFormats = Object.freeze({
+    d64_35_track: "d64_35_track",
+  });
+
+  d64.dosVersions = Object.freeze({
+    dos2_6: 0x41,
+  });
+
+  d64.dosTypes = Object.freeze({
+    dos2a: "2A",
+  });
+
+  d64.headerOffsets = Object.freeze({
+    nextDirectoryTrack: 0x00,
+    nextDirectorySector: 0x01,
+    dosVersion: 0x02,
+    bamStart: 0x04,
+    diskNameStart: 0x90,
+    diskNameLength: 0x10,
+    diskIdStart: 0xa2,
+    diskIdLength: 0x02,
+    dosTypeStart: 0xa5,
+    dosTypeLength: 0x02,
   });
 
   d64.trackSectorCount = function (track) {
@@ -28,6 +57,12 @@
       offset += 256 * d64.trackSectorCount(t);
     }
     return offset + 256 * sector;
+  };
+
+  d64.readSector = function (image, track, sector) {
+    const bytes = image instanceof Uint8Array ? image : new Uint8Array(image || []);
+    const offset = d64.trackOffset(track, sector);
+    return bytes.subarray(offset, offset + 256);
   };
 
   d64.encodeFileName = function (name, maxLength) {
@@ -50,6 +85,21 @@
     return result;
   };
 
+  d64.decodeName = function (bytes) {
+    const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || []);
+    const chars = [];
+    for (let index = 0; index < data.length; index += 1) {
+      const value = data[index];
+      if (value === 0x00) break;
+      if (value === 0xa0) {
+        chars.push(" ");
+        continue;
+      }
+      chars.push(String.fromCharCode(value & 0xff));
+    }
+    return chars.join("").trimEnd();
+  };
+
   d64.normalizeFileType = function (type) {
     if (typeof type === "number" && Number.isFinite(type)) {
       return Math.max(0, Math.min(255, Math.round(type)));
@@ -66,6 +116,90 @@
       1,
       Math.min(REL_MAX_RECORD_LENGTH, Math.round(Number(length) || 0) || 1),
     );
+  };
+
+  d64.readHeader = function (image) {
+    const sector = d64.readSector(image, DIRECTORY_TRACK, BAM_SECTOR);
+    const offsets = d64.headerOffsets;
+    return {
+      format: d64.diskFormats.d64_35_track,
+      imageSize: image && typeof image.length === "number" ? image.length : STANDARD_IMAGE_SIZE,
+      track: DIRECTORY_TRACK,
+      sector: BAM_SECTOR,
+      nextDirectoryTrack: sector[offsets.nextDirectoryTrack],
+      nextDirectorySector: sector[offsets.nextDirectorySector],
+      dosVersionByte: sector[offsets.dosVersion],
+      dosVersionName:
+        sector[offsets.dosVersion] === d64.dosVersions.dos2_6 ? "dos2_6" : "unknown",
+      diskName: d64.decodeName(
+        sector.subarray(offsets.diskNameStart, offsets.diskNameStart + offsets.diskNameLength),
+      ),
+      diskId: d64.decodeName(
+        sector.subarray(offsets.diskIdStart, offsets.diskIdStart + offsets.diskIdLength),
+      ),
+      dosType: d64.decodeName(
+        sector.subarray(offsets.dosTypeStart, offsets.dosTypeStart + offsets.dosTypeLength),
+      ),
+    };
+  };
+
+  d64.readDirectoryEntry = function (image, entryIndex) {
+    const index = Math.max(0, Math.floor(Number(entryIndex) || 0));
+    const sectorIndex = Math.floor(index / 8);
+    const slotIndex = index % 8;
+    const sector = d64.readSector(image, DIRECTORY_TRACK, DIRECTORY_START_SECTOR + sectorIndex);
+    const offset = slotIndex * 32;
+    const entry = sector.subarray(offset, offset + 32);
+    const typeByte = entry[2];
+    const fileTypeName =
+      Object.keys(d64.fileTypes).find(function (key) {
+        return d64.fileTypes[key] === (typeByte & 0x87);
+      }) || "unknown";
+    return {
+      index: index,
+      sector: DIRECTORY_START_SECTOR + sectorIndex,
+      slot: slotIndex,
+      typeByte: typeByte,
+      fileType: fileTypeName,
+      startTrack: entry[3],
+      startSector: entry[4],
+      name: d64.decodeName(entry.subarray(5, 21)),
+      sideSectorTrack: entry[21],
+      sideSectorSector: entry[22],
+      recordLength: entry[23],
+      blockCount: entry[28] | (entry[29] << 8),
+      raw: new Uint8Array(entry),
+    };
+  };
+
+  d64.readDirectoryEntries = function (image, options) {
+    const config = options || {};
+    const maxEntries = Math.max(1, Math.floor(Number(config.maxEntries) || 144));
+    const entries = [];
+    for (let index = 0; index < maxEntries; index += 1) {
+      const entry = d64.readDirectoryEntry(image, index);
+      if (!entry.typeByte) break;
+      entries.push(entry);
+    }
+    return entries;
+  };
+
+  d64.diskSignature = function (image) {
+    const header = d64.readHeader(image);
+    return JSON.stringify({
+      format: header.format,
+      imageSize: header.imageSize,
+      nextDirectoryTrack: header.nextDirectoryTrack,
+      nextDirectorySector: header.nextDirectorySector,
+      dosVersionByte: header.dosVersionByte,
+      diskName: header.diskName,
+      diskId: header.diskId,
+      dosType: header.dosType,
+    });
+  };
+
+  d64.hasDiskChanged = function (leftImage, rightImage) {
+    return d64.diskSignature(leftImage) !== d64.diskSignature(rightImage);
   };
 
   d64.isRelativeFileType = function (type) {
@@ -373,7 +507,7 @@
   d64.buildImage = function (files, options) {
     const estimate = d64.estimateImageUsage(files);
     if (estimate.totalFileSectors > estimate.usableFileSectors) return null;
-    const image = new Uint8Array(174848);
+    const image = new Uint8Array(STANDARD_IMAGE_SIZE);
     const config = options || {};
     const allocation = {
       track: 1,

@@ -22,6 +22,27 @@ window.TPP.d64
 
 All support methods described below live under that object.
 
+## Header And Disk Inspection
+
+The support layer can also read the standard D64 BAM/header sector and directory layout.
+
+This is useful for:
+
+- inspecting generated images
+- reading disk names, ids, and DOS markers
+- comparing two images to notice a disk swap
+
+The support layer exposes header-related enums:
+
+```js
+window.TPP.d64.diskFormats
+window.TPP.d64.dosVersions
+window.TPP.d64.dosTypes
+window.TPP.d64.headerOffsets
+```
+
+These currently target the common 35-track no-error-info D64 layout.
+
 ## Data Shape
 
 The higher-level `buildImage(files, options)` helper expects file records like this:
@@ -137,6 +158,7 @@ That validation currently checks:
 - side-sector pointers match the actual data-sector chain
 - a known test case includes at least one record that crosses a sector boundary
 - normal `SEQ` files still behave as expected
+- standard header parsing and disk-signature change detection behave as expected
 
 ## File Type Enum
 
@@ -155,6 +177,22 @@ type D64FileTypes = {
   prg: number;
   usr: number;
   rel: number;
+};
+```
+
+The support layer also exposes readable header enums:
+
+```ts
+type D64DiskFormats = {
+  d64_35_track: string;
+};
+
+type D64DosVersions = {
+  dos2_6: number;
+};
+
+type D64DosTypes = {
+  dos2a: string;
 };
 ```
 
@@ -190,6 +228,20 @@ Returns:
 
 - `number`
 
+### `readSector(image, track, sector)`
+
+Reads one 256-byte sector from a D64 image.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `track: number`
+- `sector: number`
+
+Returns:
+
+- `Uint8Array`
+
 ### `encodeFileName(name, maxLength)`
 
 Encodes a filename into the padded PETSCII-like directory format used by this implementation.
@@ -210,6 +262,18 @@ Notes:
 - Letters `A-Z`, digits `0-9`, spaces, and `.` are handled intentionally.
 - Spaces become `0xA0`.
 - Other characters are passed through as byte values from the JavaScript string.
+
+### `decodeName(bytes)`
+
+Decodes a padded filename or header field into a trimmed string.
+
+Parameters:
+
+- `bytes: Uint8Array | ArrayBuffer | number[]`
+
+Returns:
+
+- `string`
 
 ### `normalizeFileType(type)`
 
@@ -271,6 +335,74 @@ Notes:
 
 - `REL` files are padded to full records before sector allocation.
 - Non-`REL` files keep `recordLength` and `recordCount` at `0`.
+
+### `readHeader(image)`
+
+Reads the BAM/header sector at track `18`, sector `0`.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+
+Returns:
+
+- `{ format, imageSize, track, sector, nextDirectoryTrack, nextDirectorySector, dosVersionByte, dosVersionName, diskName, diskId, dosType }`
+
+Notes:
+
+- `dosVersionName` is resolved from `dosVersions` when recognized.
+- This helper is intended for the standard 35-track D64 layout.
+
+### `readDirectoryEntry(image, entryIndex)`
+
+Reads one parsed directory entry by flat entry index.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryIndex: number`
+
+Returns:
+
+- `{ index, sector, slot, typeByte, fileType, startTrack, startSector, name, sideSectorTrack, sideSectorSector, recordLength, blockCount, raw }`
+
+### `readDirectoryEntries(image, options)`
+
+Reads parsed directory entries until the first empty directory slot or the configured maximum.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Array<object>`
+
+### `diskSignature(image)`
+
+Builds a compact metadata signature for disk-change detection.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+
+Returns:
+
+- `string`
+
+### `hasDiskChanged(leftImage, rightImage)`
+
+Compares two images using `diskSignature(image)`.
+
+Parameters:
+
+- `leftImage: Uint8Array | ArrayBuffer | number[]`
+- `rightImage: Uint8Array | ArrayBuffer | number[]`
+
+Returns:
+
+- `boolean`
 
 ### `createBamSector(freeMap, diskName)`
 

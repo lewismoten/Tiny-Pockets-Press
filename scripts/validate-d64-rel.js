@@ -149,6 +149,15 @@ function validateRelativeFileCrossesSectorBoundary() {
   );
   assert(image instanceof Uint8Array, "REL image did not build");
 
+  const header = d64.readHeader(image);
+  assert(header.track === 18, "Header track mismatch");
+  assert(header.sector === 0, "Header sector mismatch");
+  assert(header.nextDirectoryTrack === 18, "Header next directory track mismatch");
+  assert(header.nextDirectorySector === 1, "Header next directory sector mismatch");
+  assert(header.dosVersionByte === d64.dosVersions.dos2_6, "Header DOS version mismatch");
+  assert(header.dosType === d64.dosTypes.dos2a, "Header DOS type mismatch");
+  assert(header.diskName === "RELTEST", "Header disk name mismatch");
+
   const entry = readDirectoryEntry(image, d64, 0);
   assert(entry[2] === d64.fileTypes.rel, "Directory type is not REL");
   assert(entry[23] === relRecordLength, "Directory record length mismatch");
@@ -199,6 +208,12 @@ function validateRelativeFileCrossesSectorBoundary() {
     crossingRecordStart < 254 && crossingRecordStart + relRecordLength > 254,
     "Expected a record boundary to cross a sector",
   );
+
+  const entries = d64.readDirectoryEntries(image);
+  assert(entries.length === 1, "Expected one directory entry");
+  assert(entries[0].name === "BOOK.IDX", "Directory entry name mismatch");
+
+  assert(d64.hasDiskChanged(image, image) === false, "Disk should not differ from itself");
 }
 
 function validateNonRelativeFileStillWorks() {
@@ -216,6 +231,17 @@ function validateNonRelativeFileStillWorks() {
   assert(entry[21] === 0, "SEQ side-sector track should be zero");
   assert(entry[22] === 0, "SEQ side-sector sector should be zero");
   assert(entry[23] === 0, "SEQ record length should be zero");
+
+  const secondImage = d64.buildImage([
+    {
+      name: "WORLD",
+      type: "seq",
+      data: new Uint8Array([1, 2, 3]),
+    },
+  ], {
+    diskName: "OTHER",
+  });
+  assert(d64.hasDiskChanged(image, secondImage), "Different disks should have different signatures");
 }
 
 validateRelativeFileCrossesSectorBoundary();
