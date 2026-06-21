@@ -4,6 +4,8 @@ Each palette can now be loaded from a public URL.
 
 The project is moving toward JavaScript-only palette plugins. Each palette should be a `.js` file that registers itself at runtime.
 
+Palette discovery can also be registered through [library.js](./library.js), which calls `TPP.registerPaletteLibrary(...)` with the list of available palettes and their retrieval URLs. The app uses that library as a lazy-load registry before fetching an individual palette script.
+
 The catalog in [../palettes.catalog.json](../palettes.catalog.json) accepts entries like:
 
 ```json
@@ -62,6 +64,7 @@ JavaScript plugins should call the global palette API:
 Runtime API:
 
 - `TPP.registerPalette(plugin)` registers a palette plugin.
+- `TPP.registerPaletteLibrary({ palettes })` registers the available palette library for lazy loading.
 - `TPP.imageExportPalettePluginApi.get(id)` returns `id`, `name`, `description`, `colorCount`, `sourceUrl`, `colors`, `hexColors`, `colorNames`, and `colorNumbers`.
 - `TPP.imageExportPalettePluginApi.list()` returns all loaded palette plugin records.
 - `TPP.imageExportPaletteMetadata(id)` returns the same metadata for a single palette when available.
