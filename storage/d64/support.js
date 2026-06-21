@@ -149,6 +149,19 @@
     return d64.fileTypes.seq;
   };
 
+  d64.encodeDirectoryEntryType = function (type, options) {
+    const config = options || {};
+    const baseCode = d64.normalizeFileType(type) & 0x07;
+    let typeByte = baseCode;
+    if (config.closed !== false) {
+      typeByte |= d64.directoryEntryFlags.closed;
+    }
+    if (Boolean(config.locked)) {
+      typeByte |= d64.directoryEntryFlags.locked;
+    }
+    return typeByte & 0xff;
+  };
+
   d64.normalizeRecordLength = function (length) {
     return Math.max(
       1,
@@ -426,6 +439,8 @@
       return {
         name: entry.name,
         type: entry.fileType,
+        closed: entry.closed,
+        locked: entry.locked,
         recordLength: entry.recordLength || undefined,
         data: file ? file.payload.slice() : new Uint8Array(0),
         entry: entry,
@@ -478,6 +493,8 @@
         dataSectors: dataSectors,
         sideSectorCount: 0,
         totalSectors: dataSectors,
+        closed: entry.closed !== false,
+        locked: Boolean(entry.locked),
         recordLength: 0,
         recordCount: 0,
       };
@@ -503,6 +520,8 @@
       dataSectors: dataSectors,
       sideSectorCount: sideSectorCount,
       totalSectors: dataSectors + sideSectorCount,
+      closed: entry.closed !== false,
+      locked: Boolean(entry.locked),
       recordLength: recordLength,
       recordCount: recordCount,
     };
@@ -575,7 +594,10 @@
   ) {
     const config = options || {};
     const entry = new Uint8Array(32).fill(0);
-    entry[2] = d64.normalizeFileType(type);
+    entry[2] = d64.encodeDirectoryEntryType(type, {
+      closed: config.closed,
+      locked: config.locked,
+    });
     entry[3] = startTrack;
     entry[4] = startSector;
     entry.set(d64.encodeFileName(filename, 16), 5);
@@ -797,6 +819,8 @@
           fileRecord.startSector,
           fileRecord.sectorCount,
           {
+            closed: layout.closed,
+            locked: layout.locked,
             sideSectorTrack: fileRecord.sideSectorTrack,
             sideSectorSector: fileRecord.sideSectorSector,
             recordLength: fileRecord.recordLength,
@@ -867,6 +891,12 @@
       type: Object.prototype.hasOwnProperty.call(patch, "type")
         ? patch.type
         : files[index].type,
+      closed: Object.prototype.hasOwnProperty.call(patch, "closed")
+        ? Boolean(patch.closed)
+        : files[index].closed,
+      locked: Object.prototype.hasOwnProperty.call(patch, "locked")
+        ? Boolean(patch.locked)
+        : files[index].locked,
       recordLength: Object.prototype.hasOwnProperty.call(patch, "recordLength")
         ? patch.recordLength
         : files[index].recordLength,
@@ -883,6 +913,50 @@
       entryOrName,
       {
         name: newName,
+      },
+      options,
+    );
+  };
+
+  d64.lockFile = function (image, entryOrName, options) {
+    return d64.updateFile(
+      image,
+      entryOrName,
+      {
+        locked: true,
+      },
+      options,
+    );
+  };
+
+  d64.unlockFile = function (image, entryOrName, options) {
+    return d64.updateFile(
+      image,
+      entryOrName,
+      {
+        locked: false,
+      },
+      options,
+    );
+  };
+
+  d64.closeFile = function (image, entryOrName, options) {
+    return d64.updateFile(
+      image,
+      entryOrName,
+      {
+        closed: true,
+      },
+      options,
+    );
+  };
+
+  d64.openFile = function (image, entryOrName, options) {
+    return d64.updateFile(
+      image,
+      entryOrName,
+      {
+        closed: false,
       },
       options,
     );

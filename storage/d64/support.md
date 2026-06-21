@@ -56,6 +56,8 @@ The higher-level `buildImage(files, options)` helper expects file records like t
 type D64File = {
   name: string;
   type: number | keyof typeof window.TPP.d64.fileTypes;
+  closed?: boolean;
+  locked?: boolean;
   recordLength?: number;
   data: Uint8Array | ArrayBuffer | number[];
 };
@@ -363,6 +365,19 @@ Notes:
 
 - Unknown values currently fall back to `SEQ`.
 
+### `encodeDirectoryEntryType(type, options)`
+
+Encodes a directory-entry type byte from a file type plus status flags.
+
+Parameters:
+
+- `type: number | "del" | "seq" | "prg" | "usr" | "rel"`
+- `options?: { closed?: boolean, locked?: boolean }`
+
+Returns:
+
+- `number`
+
 ### `normalizeRecordLength(length)`
 
 Normalizes a relative-file record length into the supported range.
@@ -479,6 +494,10 @@ Returns:
 
 - `{ index, sector, slot, typeByte, fileType, startTrack, startSector, name, sideSectorTrack, sideSectorSector, recordLength, blockCount, raw }`
 
+Notes:
+
+- Includes `closed` and `locked` flags decoded from the type byte.
+
 ### `readDirectoryEntries(image, options)`
 
 Reads parsed directory entries until the first empty directory slot or the configured maximum.
@@ -559,7 +578,7 @@ Parameters:
 
 Returns:
 
-- `Array<{ name, type, recordLength?, data, entry }>`
+- `Array<{ name, type, closed, locked, recordLength?, data, entry }>`
 
 ### `readRelativeRecords(image, entryOrName, options)`
 
@@ -649,6 +668,10 @@ Returns:
 
 - `Uint8Array | null`
 
+Notes:
+
+- Can be used to change `locked` and `closed` as well as name, type, record length, and data.
+
 ### `renameFile(image, entryOrName, newName, options)`
 
 Rebuilds an image with one file renamed.
@@ -658,6 +681,62 @@ Parameters:
 - `image: Uint8Array | ArrayBuffer | number[]`
 - `entryOrName: object | string`
 - `newName: string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `lockFile(image, entryOrName, options)`
+
+Rebuilds an image with one file marked locked.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `unlockFile(image, entryOrName, options)`
+
+Rebuilds an image with one file marked unlocked.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `closeFile(image, entryOrName, options)`
+
+Rebuilds an image with one file marked closed.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
+- `options?: { maxEntries?: number }`
+
+Returns:
+
+- `Uint8Array | null`
+
+### `openFile(image, entryOrName, options)`
+
+Rebuilds an image with one file marked open.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `entryOrName: object | string`
 - `options?: { maxEntries?: number }`
 
 Returns:

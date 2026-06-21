@@ -249,6 +249,8 @@ function validateNonRelativeFileStillWorks() {
     {
       name: "HELLO",
       type: "seq",
+      closed: false,
+      locked: true,
       data: new Uint8Array([1, 2, 3, 4, 5]),
     },
     {
@@ -262,10 +264,14 @@ function validateNonRelativeFileStillWorks() {
   });
   assert(image instanceof Uint8Array, "SEQ image did not build");
   const entry = readDirectoryEntry(image, d64, 0);
-  assert(entry[2] === d64.fileTypes.seq, "Directory type is not SEQ");
+  const typeInfo = d64.decodeDirectoryEntryType(entry[2]);
+  assert(typeInfo.fileType === "seq", "Directory type is not SEQ");
   assert(entry[21] === 0, "SEQ side-sector track should be zero");
   assert(entry[22] === 0, "SEQ side-sector sector should be zero");
   assert(entry[23] === 0, "SEQ record length should be zero");
+  const parsedEntry = d64.readDirectoryEntries(image)[0];
+  assert(parsedEntry.closed === false, "Expected file to be open");
+  assert(parsedEntry.locked === true, "Expected file to be locked");
 
   const seqFile = d64.readFile(image, "HELLO");
   assert(seqFile && seqFile.fileType === "seq", "SEQ file read failed");
@@ -279,6 +285,8 @@ function validateNonRelativeFileStillWorks() {
   const renamedEntry = d64.findDirectoryEntryByName(renamedImage, "WELCOME");
   assert(renamedEntry && renamedEntry.name === "WELCOME", "Rename failed");
   assert(!d64.findDirectoryEntryByName(renamedImage, "HELLO"), "Old file name still present");
+  assert(renamedEntry.closed === false, "Rename should preserve open state");
+  assert(renamedEntry.locked === true, "Rename should preserve locked state");
 
   const updatedImage = d64.updateFile(
     renamedImage,
@@ -294,7 +302,15 @@ function validateNonRelativeFileStillWorks() {
     "Updated payload mismatch",
   );
 
-  const diskRenamedImage = d64.setDiskName(updatedImage, "UPDATED");
+  const unlockedImage = d64.unlockFile(updatedImage, "WELCOME");
+  const unlockedEntry = d64.findDirectoryEntryByName(unlockedImage, "WELCOME");
+  assert(unlockedEntry && unlockedEntry.locked === false, "Unlock failed");
+
+  const closedImage = d64.closeFile(unlockedImage, "WELCOME");
+  const closedEntry = d64.findDirectoryEntryByName(closedImage, "WELCOME");
+  assert(closedEntry && closedEntry.closed === true, "Close failed");
+
+  const diskRenamedImage = d64.setDiskName(closedImage, "UPDATED");
   const updatedHeader = d64.readHeader(diskRenamedImage);
   assert(updatedHeader.diskName === "UPDATED", "Disk rename failed");
   assert(updatedHeader.diskId === "ID", "Disk id should be preserved");
