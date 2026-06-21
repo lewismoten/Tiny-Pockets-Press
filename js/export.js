@@ -3356,7 +3356,7 @@ TPP.canvasRgba = function (canvas) {
   return readCtx.getImageData(0, 0, canvas.width, canvas.height).data;
 };
 TPP.IMAGE_EXPORT_DITHER_LIBRARIES = [
-  "data/dithers/library.js",
+  "data/dithers/basic/library.js",
   "data/dithers/c64/library.js",
 ];
 TPP.IMAGE_EXPORT_DITHER_CORE_MODULE = "/js/image-export-dither.js";
@@ -3555,7 +3555,7 @@ TPP.loadImageExportDitherLibraries = async function () {
   const libraries = Array.isArray(TPP.IMAGE_EXPORT_DITHER_LIBRARIES) &&
     TPP.IMAGE_EXPORT_DITHER_LIBRARIES.length
     ? TPP.IMAGE_EXPORT_DITHER_LIBRARIES
-    : ["data/dithers/library.js"];
+    : ["data/dithers/basic/library.js"];
   TPP.imageExportDitherCatalogById = {};
   TPP.imageExportDitherIdsCached = [];
   let loadedCount = 0;
