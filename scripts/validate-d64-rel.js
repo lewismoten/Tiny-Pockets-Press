@@ -131,6 +131,17 @@ function expectedUnusedTailLength(payloadLength) {
   return sectors * 254 - payloadLength;
 }
 
+function sectorCountForTrackCount(trackCount) {
+  let total = 0;
+  for (let track = 1; track <= trackCount; track += 1) {
+    if (track <= 17) total += 21;
+    else if (track <= 24) total += 19;
+    else if (track <= 30) total += 18;
+    else total += 17;
+  }
+  return total;
+}
+
 function validateRelativeFileCrossesSectorBoundary() {
   const d64 = loadD64Support();
   const relRecordLength = 9;
@@ -442,7 +453,106 @@ function validateUnusedTailHelpers() {
   );
 }
 
+function validateExtendedTracksAndErrorInfo() {
+  const d64 = loadD64Support();
+
+  assert(
+    d64.imageSizeForGeometry(35, false) === 174848,
+    "35-track image size mismatch",
+  );
+  assert(
+    d64.imageSizeForGeometry(35, true) === 175531,
+    "35-track error-info image size mismatch",
+  );
+  assert(
+    d64.imageSizeForGeometry(40, false) === 196608,
+    "40-track image size mismatch",
+  );
+  assert(
+    d64.imageSizeForGeometry(40, true) === 197376,
+    "40-track error-info image size mismatch",
+  );
+  assert(
+    d64.imageSizeForGeometry(42, false) === 205312,
+    "42-track image size mismatch",
+  );
+  assert(
+    d64.imageSizeForGeometry(42, true) === 206114,
+    "42-track error-info image size mismatch",
+  );
+
+  const hugePayload = new Uint8Array(d64.usableFileSectorCapacity({ trackCount: 35 }) * 254 + 1);
+  for (let index = 0; index < hugePayload.length; index += 1) {
+    hugePayload[index] = index & 0xff;
+  }
+  const errorInfo = new Uint8Array(sectorCountForTrackCount(40)).fill(d64.errorCodes.ok);
+  const image = d64.buildImage(
+    [
+      {
+        name: "BIGFILE",
+        type: "seq",
+        data: hugePayload,
+      },
+    ],
+    {
+      trackCount: 40,
+      hasErrorInfo: true,
+      diskName: "EXTENDED",
+      errorInfo: errorInfo,
+    },
+  );
+  assert(image instanceof Uint8Array, "Extended-track image did not build");
+
+  const header = d64.readHeader(image);
+  assert(header.trackCount === 40, "Extended-track header track count mismatch");
+  assert(header.hasErrorInfo === true, "Extended-track header error-info flag mismatch");
+  assert(header.format === d64.diskFormats.d64_40_track_error_info, "Extended-track format mismatch");
+  assert(header.imageSize === 197376, "Extended-track image size header mismatch");
+  assert(header.errorInfoSize === sectorCountForTrackCount(40), "Extended-track error-info size mismatch");
+
+  const bigFile = d64.readFile(image, "BIGFILE");
+  assert(bigFile, "Extended-track file missing");
+  assert(
+    Buffer.from(bigFile.payload).equals(Buffer.from(hugePayload)),
+    "Extended-track payload mismatch",
+  );
+  assert(
+    bigFile.blocks.some(function (block) {
+      return block.track > 35;
+    }),
+    "Extended-track allocation never reached tracks beyond 35",
+  );
+
+  const storedErrorInfo = d64.readErrorInfo(image);
+  assert(storedErrorInfo.hasErrorInfo === true, "readErrorInfo should detect appended error bytes");
+  assert(storedErrorInfo.bytes.length === sectorCountForTrackCount(40), "readErrorInfo length mismatch");
+  assert(
+    d64.readSectorError(image, 1, 0) === d64.errorCodes.ok,
+    "Default sector error code mismatch",
+  );
+
+  const errorUpdatedImage = d64.rebuildImage(image, d64.readFiles(image), {
+    trackCount: 42,
+    hasErrorInfo: true,
+  });
+  assert(errorUpdatedImage instanceof Uint8Array, "42-track rebuild failed");
+  const rebuiltHeader = d64.readHeader(errorUpdatedImage);
+  assert(rebuiltHeader.trackCount === 42, "42-track rebuild header mismatch");
+  assert(rebuiltHeader.format === d64.diskFormats.d64_42_track_error_info, "42-track rebuild format mismatch");
+
+  d64.writeSectorError(errorUpdatedImage, 36, 0, 0x09);
+  assert(d64.readSectorError(errorUpdatedImage, 36, 0) === 0x09, "Sector error update failed");
+  d64.clearErrorInfo(errorUpdatedImage);
+  assert(
+    d64.readErrorInfo(errorUpdatedImage).bytes.every(function (value) {
+      return value === d64.errorCodes.ok;
+    }),
+    "Error info clear should reset all bytes to ok",
+  );
+}
+
 validateRelativeFileCrossesSectorBoundary();
 validateNonRelativeFileStillWorks();
 validateUnusedTailHelpers();
+validateExtendedTracksAndErrorInfo();
 console.log("D64 REL validation passed.");

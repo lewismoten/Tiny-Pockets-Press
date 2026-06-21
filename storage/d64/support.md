@@ -10,7 +10,7 @@ window.TPP.d64
 
 The goal of this API is to make the disk-image building primitives reusable outside of Tiny Pockets Press. A different host can use these methods directly to estimate capacity, allocate sectors, build directory entries, and assemble `.d64` images.
 
-This is not a full implementation of every D64 variant. It intentionally targets the common emulator-friendly format: standard 35-track images without appended error information.
+This is not a full implementation of every D64 variant. It currently supports the common 35-track layout plus 40-track and 42-track extended images, with or without appended per-sector error information.
 
 ## Namespace
 
@@ -46,7 +46,7 @@ window.TPP.d64.dosTypes
 window.TPP.d64.headerOffsets
 ```
 
-These currently target the common 35-track no-error-info D64 layout.
+These currently cover the supported 35-track, 40-track, and 42-track image variants.
 
 ## Data Shape
 
@@ -96,6 +96,10 @@ The optional `options` argument is only used for generic disk naming. A minimal 
 
 ```ts
 type D64ImageOptions = {
+  format?: keyof typeof window.TPP.d64.diskFormats;
+  trackCount?: 35 | 40 | 42;
+  hasErrorInfo?: boolean;
+  errorInfo?: Uint8Array | ArrayBuffer | number[];
   diskName?: string;
   title?: string;
   name?: string;
@@ -124,6 +128,10 @@ Supported disk-info fields used when building or rebuilding images:
 
 ```ts
 type D64DiskInfo = {
+  format?: keyof typeof window.TPP.d64.diskFormats;
+  trackCount?: 35 | 40 | 42;
+  hasErrorInfo?: boolean;
+  errorInfo?: Uint8Array | ArrayBuffer | number[];
   diskName?: string;
   diskId?: string;
   dosType?: string;
@@ -133,6 +141,42 @@ type D64DiskInfo = {
   baseName?: string;
 };
 ```
+
+## Geometry And Error Information
+
+The support layer now understands these image geometries:
+
+- `35` tracks without error info
+- `35` tracks with appended per-sector error info
+- `40` tracks without error info
+- `40` tracks with appended per-sector error info
+- `42` tracks without error info
+- `42` tracks with appended per-sector error info
+
+Supported format enum values:
+
+```js
+window.TPP.d64.diskFormats.d64_35_track
+window.TPP.d64.diskFormats.d64_35_track_error_info
+window.TPP.d64.diskFormats.d64_40_track
+window.TPP.d64.diskFormats.d64_40_track_error_info
+window.TPP.d64.diskFormats.d64_42_track
+window.TPP.d64.diskFormats.d64_42_track_error_info
+```
+
+When error info is present, one extra byte is appended for every sector in track/sector order.
+
+The support layer exposes:
+
+```js
+window.TPP.d64.errorCodes
+```
+
+Right now it only defines:
+
+- `ok: 0x01`
+
+This keeps the API ready for raw sector-error tables without overcommitting to a larger symbolic error catalog yet.
 
 ## File Names
 
@@ -451,12 +495,12 @@ Parameters:
 
 Returns:
 
-- `{ format, imageSize, track, sector, nextDirectoryTrack, nextDirectorySector, dosVersionByte, dosVersionName, diskName, diskId, dosType }`
+- `{ format, imageSize, dataSize, trackCount, sectorCount, hasErrorInfo, errorInfoOffset, errorInfoSize, track, sector, nextDirectoryTrack, nextDirectorySector, dosVersionByte, dosVersionName, diskName, diskId, dosType }`
 
 Notes:
 
 - `dosVersionName` is resolved from `dosVersions` when recognized.
-- This helper is intended for the standard 35-track D64 layout.
+- `trackCount` and `hasErrorInfo` are inferred from the image size.
 
 ### `decodeDirectoryEntryType(typeByte)`
 
@@ -486,6 +530,8 @@ Notes:
 
 - `tracks` is an array of per-track free-space data.
 - Each item includes `track`, `freeCount`, and `sectorFree`.
+- BAM bytes only exist for tracks `1-35`.
+- Tracks above `35` are returned with `isExtendedTrack: true` and `sectorFree` entries of `null`.
 
 ### `readFreeMap(image)`
 
@@ -612,6 +658,75 @@ Returns:
 
 - `null | { entry, recordLength, recordCount, records, sideSectors, payload, blocks, unusedTailData, unusedTailLength, hasUnusedTailData }`
 
+### `readErrorInfo(image)`
+
+Reads the appended per-sector error table when the image format includes one.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+
+Returns:
+
+- `{ format, trackCount, sectorCount, hasErrorInfo, errorInfoOffset, bytes }`
+
+### `readSectorError(image, track, sector)`
+
+Reads one sector's appended error byte.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `track: number`
+- `sector: number`
+
+Returns:
+
+- `number | null`
+
+### `writeErrorInfo(image, errorInfo, options)`
+
+Writes a whole appended error table into an image.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `errorInfo: Uint8Array | ArrayBuffer | number[] | null`
+- `options?: D64ImageOptions`
+
+Returns:
+
+- `Uint8Array`
+
+### `writeSectorError(image, track, sector, errorCode, options)`
+
+Writes one sector's appended error byte.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `track: number`
+- `sector: number`
+- `errorCode: number`
+- `options?: D64ImageOptions`
+
+Returns:
+
+- `Uint8Array`
+
+### `clearErrorInfo(image, options)`
+
+Resets all appended error bytes to `window.TPP.d64.errorCodes.ok`.
+
+Parameters:
+
+- `image: Uint8Array | ArrayBuffer | number[]`
+- `options?: D64ImageOptions`
+
+Returns:
+
+- `Uint8Array`
+
 ### `readUnusedTailData(image, entryOrName, options)`
 
 Reads just the unused data bytes from the final sector of one file.
@@ -651,7 +766,7 @@ Parameters:
 
 Returns:
 
-- `{ header, bam, entries }`
+- `{ header, bam, errorInfo, entries, files }`
 
 ### `rebuildImage(image, files, options)`
 
@@ -974,31 +1089,32 @@ Returns:
 
 - `null | { startTrack, startSector, sectorCount, sideSectorTrack, sideSectorSector, recordLength, unusedTailData }`
 
-### `usableFileSectorCapacity()`
+### `usableFileSectorCapacity(options)`
 
-Returns the number of data sectors available for files on a standard 35-track image, excluding track `18`.
+Returns the number of data sectors available for files for the selected geometry, excluding track `18`.
 
 Parameters:
 
-- none
+- `options?: D64ImageOptions`
 
 Returns:
 
 - `number`
 
-### `estimateImageUsage(files)`
+### `estimateImageUsage(files, options)`
 
 Estimates how many sectors a file set will consume.
 
 Parameters:
 
 - `files: D64File[]`
+- `options?: D64ImageOptions`
 
 Returns:
 
 - `{ totalFileSectors, directorySectors, usableFileSectors, fileSectors }`
 
-### `finalizeImage(image, allocation, dirSectors, diskName)`
+### `finalizeImage(image, allocation, dirSectors, diskName, options)`
 
 Writes the BAM and directory sectors into an image after data sectors have already been written.
 
@@ -1008,6 +1124,7 @@ Parameters:
 - `allocation: { map: Record<number, boolean[]>, directorySectors: Uint8Array[] }`
 - `dirSectors: number`
 - `diskName?: string`
+- `options?: D64DiskInfo`
 
 Returns:
 
@@ -1031,6 +1148,8 @@ Notes:
 - Returns `null` if the image cannot fit the requested content.
 - Uses `diskName`, `name`, `title`, or `baseName` as the disk name when available.
 - `REL` files are written with side sectors when `type` resolves to `rel`.
+- `trackCount` and `hasErrorInfo` control the output geometry.
+- If `errorInfo` is provided for an error-info image, it is written after the sector data area.
 
 ### `fileName(options)`
 
@@ -1067,13 +1186,13 @@ Notes:
 Current limitations of this support layer:
 
 - It is not a full implementation of every D64 variant.
-- It targets standard 35-track D64 images only.
-- Output image size is fixed at `174848` bytes, which matches the common no-error-info 35-track format.
-- It does not write appended per-sector error information.
-- It does not support 40-track or 42-track extended D64 variants.
+- It currently supports `35`, `40`, and `42` track images only.
+- It supports appended per-sector error information, but only as a raw one-byte-per-sector table.
 - Track `18` is reserved for the BAM and directory.
 - Directory capacity is limited by the available sectors on track `18`.
 - Each directory sector holds `8` directory entries.
+- The BAM/header physically stores allocation data only for tracks `1-35`.
+- Tracks above `35` can be used for file storage, but they are not represented in the on-disk BAM bytes.
 - Filenames are stored in a `16`-byte field.
 - Filename normalization is intentionally simple and not a full PETSCII conversion layer.
 - File type support is simplified to a normalized directory type byte.
@@ -1089,9 +1208,14 @@ Current limitations of this support layer:
 
 Important practical constraints:
 
-- Maximum tracks: `35`
-- Standard image size: `174848` bytes
-- Error-info bytes appended: `0`
+- Supported track counts: `35`, `40`, `42`
+- Standard `35`-track image size: `174848` bytes
+- `35`-track image size with error info: `175531` bytes
+- `40`-track image size: `196608` bytes
+- `40`-track image size with error info: `197376` bytes
+- `42`-track image size: `205312` bytes
+- `42`-track image size with error info: `206114` bytes
+- Error-info bytes appended: `1` byte per sector when enabled
 - Maximum sectors per file payload sector: `254` bytes of data
 - Directory sectors available on track `18`: `18`
 - Approximate maximum directory entries: `18 * 8 = 144`

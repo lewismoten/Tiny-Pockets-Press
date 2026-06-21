@@ -2,7 +2,10 @@
   const TPP = window.TPP = window.TPP || {};
   const d64 = TPP.d64 = TPP.d64 || {};
   const DEFAULT_IMAGE_NAME = "disk";
-  const STANDARD_IMAGE_SIZE = 174848;
+  const DEFAULT_TRACK_COUNT = 35;
+  const DEFAULT_HAS_ERROR_INFO = false;
+  const MAX_TRACK_COUNT = 42;
+  const SECTOR_SIZE = 256;
   const REL_MAX_RECORD_LENGTH = 254;
   const REL_DATA_SECTORS_PER_SIDE_SECTOR = 120;
   const REL_MAX_SIDE_SECTORS = 6;
@@ -20,6 +23,15 @@
 
   d64.diskFormats = Object.freeze({
     d64_35_track: "d64_35_track",
+    d64_35_track_error_info: "d64_35_track_error_info",
+    d64_40_track: "d64_40_track",
+    d64_40_track_error_info: "d64_40_track_error_info",
+    d64_42_track: "d64_42_track",
+    d64_42_track_error_info: "d64_42_track_error_info",
+  });
+
+  d64.errorCodes = Object.freeze({
+    ok: 0x01,
   });
 
   d64.dosVersions = Object.freeze({
@@ -52,16 +64,151 @@
     if (track >= 1 && track <= 17) return 21;
     if (track >= 18 && track <= 24) return 19;
     if (track >= 25 && track <= 30) return 18;
-    if (track >= 31 && track <= 35) return 17;
+    if (track >= 31 && track <= 42) return 17;
     return 0;
+  };
+
+  d64.normalizeTrackCount = function (trackCount) {
+    const value = Math.round(Number(trackCount) || 0);
+    if (value >= 42) return 42;
+    if (value >= 40) return 40;
+    return DEFAULT_TRACK_COUNT;
+  };
+
+  d64.totalSectorCount = function (trackCount) {
+    const maxTrack = d64.normalizeTrackCount(trackCount);
+    let total = 0;
+    for (let track = 1; track <= maxTrack; track += 1) {
+      total += d64.trackSectorCount(track);
+    }
+    return total;
+  };
+
+  d64.dataSizeForTrackCount = function (trackCount) {
+    return d64.totalSectorCount(trackCount) * SECTOR_SIZE;
+  };
+
+  d64.errorInfoSizeForTrackCount = function (trackCount) {
+    return d64.totalSectorCount(trackCount);
+  };
+
+  d64.imageSizeForGeometry = function (trackCount, hasErrorInfo) {
+    const normalizedTrackCount = d64.normalizeTrackCount(trackCount);
+    return (
+      d64.dataSizeForTrackCount(normalizedTrackCount) +
+      (hasErrorInfo ? d64.errorInfoSizeForTrackCount(normalizedTrackCount) : 0)
+    );
+  };
+
+  d64.formatForGeometry = function (trackCount, hasErrorInfo) {
+    const normalizedTrackCount = d64.normalizeTrackCount(trackCount);
+    if (normalizedTrackCount === 42) {
+      return hasErrorInfo
+        ? d64.diskFormats.d64_42_track_error_info
+        : d64.diskFormats.d64_42_track;
+    }
+    if (normalizedTrackCount === 40) {
+      return hasErrorInfo
+        ? d64.diskFormats.d64_40_track_error_info
+        : d64.diskFormats.d64_40_track;
+    }
+    return hasErrorInfo
+      ? d64.diskFormats.d64_35_track_error_info
+      : d64.diskFormats.d64_35_track;
+  };
+
+  d64.describeGeometry = function (source) {
+    let trackCount = DEFAULT_TRACK_COUNT;
+    let hasErrorInfo = DEFAULT_HAS_ERROR_INFO;
+    if (typeof source === "string") {
+      const format = String(source || "").trim();
+      if (format === d64.diskFormats.d64_42_track || format === d64.diskFormats.d64_42_track_error_info) {
+        trackCount = 42;
+      } else if (
+        format === d64.diskFormats.d64_40_track ||
+        format === d64.diskFormats.d64_40_track_error_info
+      ) {
+        trackCount = 40;
+      } else {
+        trackCount = 35;
+      }
+      hasErrorInfo = /error_info$/.test(format);
+    } else if (
+      source instanceof Uint8Array ||
+      source instanceof ArrayBuffer ||
+      Array.isArray(source) ||
+      (source && typeof source.length === "number" && typeof source !== "function")
+    ) {
+      const length =
+        source instanceof ArrayBuffer
+          ? source.byteLength
+          : Math.max(0, Math.floor(Number(source.length) || 0));
+      const knownFormats = [
+        { trackCount: 35, hasErrorInfo: false },
+        { trackCount: 35, hasErrorInfo: true },
+        { trackCount: 40, hasErrorInfo: false },
+        { trackCount: 40, hasErrorInfo: true },
+        { trackCount: 42, hasErrorInfo: false },
+        { trackCount: 42, hasErrorInfo: true },
+      ];
+      const known = knownFormats.find(function (candidate) {
+        return d64.imageSizeForGeometry(candidate.trackCount, candidate.hasErrorInfo) === length;
+      });
+      if (known) {
+        trackCount = known.trackCount;
+        hasErrorInfo = known.hasErrorInfo;
+      }
+    } else if (source && typeof source === "object") {
+      if (Object.prototype.hasOwnProperty.call(source, "format")) {
+        const fromFormat = d64.describeGeometry(String(source.format || ""));
+        trackCount = fromFormat.trackCount;
+        hasErrorInfo = fromFormat.hasErrorInfo;
+      }
+      if (Object.prototype.hasOwnProperty.call(source, "trackCount")) {
+        trackCount = d64.normalizeTrackCount(source.trackCount);
+      }
+      if (Object.prototype.hasOwnProperty.call(source, "hasErrorInfo")) {
+        hasErrorInfo = Boolean(source.hasErrorInfo);
+      } else if (Object.prototype.hasOwnProperty.call(source, "errorInfo")) {
+        hasErrorInfo = true;
+      }
+    }
+    const normalizedTrackCount = d64.normalizeTrackCount(trackCount);
+    return {
+      format: d64.formatForGeometry(normalizedTrackCount, hasErrorInfo),
+      trackCount: normalizedTrackCount,
+      hasErrorInfo: hasErrorInfo,
+      sectorCount: d64.totalSectorCount(normalizedTrackCount),
+      dataSize: d64.dataSizeForTrackCount(normalizedTrackCount),
+      errorInfoSize: hasErrorInfo ? d64.errorInfoSizeForTrackCount(normalizedTrackCount) : 0,
+      imageSize: d64.imageSizeForGeometry(normalizedTrackCount, hasErrorInfo),
+      errorInfoOffset: d64.dataSizeForTrackCount(normalizedTrackCount),
+    };
+  };
+
+  d64.detectFormat = function (imageOrLength) {
+    return d64.describeGeometry(imageOrLength).format;
   };
 
   d64.trackOffset = function (track, sector) {
     let offset = 0;
     for (let t = 1; t < track; t += 1) {
-      offset += 256 * d64.trackSectorCount(t);
+      offset += SECTOR_SIZE * d64.trackSectorCount(t);
     }
-    return offset + 256 * sector;
+    return offset + SECTOR_SIZE * sector;
+  };
+
+  d64.sectorIndex = function (track, sector, source) {
+    const geometry = d64.describeGeometry(source);
+    const normalizedTrack = Math.max(1, Math.floor(Number(track) || 0));
+    const normalizedSector = Math.max(0, Math.floor(Number(sector) || 0));
+    if (normalizedTrack > geometry.trackCount) return -1;
+    if (normalizedSector >= d64.trackSectorCount(normalizedTrack)) return -1;
+    let index = 0;
+    for (let currentTrack = 1; currentTrack < normalizedTrack; currentTrack += 1) {
+      index += d64.trackSectorCount(currentTrack);
+    }
+    return index + normalizedSector;
   };
 
   d64.readSector = function (image, track, sector) {
@@ -127,6 +274,7 @@
 
   d64.normalizeDiskInfo = function (options) {
     const config = options || {};
+    const geometry = d64.describeGeometry(config);
     return {
       diskName:
         String(
@@ -135,6 +283,15 @@
       diskId: d64.normalizeDiskId(config.diskId),
       dosType: d64.normalizeDosType(config.dosType),
       dosVersion: d64.normalizeDosVersion(config.dosVersion),
+      format: geometry.format,
+      trackCount: geometry.trackCount,
+      hasErrorInfo: geometry.hasErrorInfo,
+      errorInfo:
+        config.errorInfo instanceof Uint8Array
+          ? config.errorInfo
+          : config.errorInfo
+            ? new Uint8Array(config.errorInfo)
+            : undefined,
     };
   };
 
@@ -180,11 +337,18 @@
   };
 
   d64.readHeader = function (image) {
+    const geometry = d64.describeGeometry(image);
     const sector = d64.readSector(image, DIRECTORY_TRACK, BAM_SECTOR);
     const offsets = d64.headerOffsets;
     return {
-      format: d64.diskFormats.d64_35_track,
-      imageSize: image && typeof image.length === "number" ? image.length : STANDARD_IMAGE_SIZE,
+      format: geometry.format,
+      imageSize: geometry.imageSize,
+      dataSize: geometry.dataSize,
+      trackCount: geometry.trackCount,
+      sectorCount: geometry.sectorCount,
+      hasErrorInfo: geometry.hasErrorInfo,
+      errorInfoOffset: geometry.errorInfoOffset,
+      errorInfoSize: geometry.errorInfoSize,
       track: DIRECTORY_TRACK,
       sector: BAM_SECTOR,
       nextDirectoryTrack: sector[offsets.nextDirectoryTrack],
@@ -225,25 +389,38 @@
   };
 
   d64.readBam = function (image) {
+    const geometry = d64.describeGeometry(image);
     const sector = d64.readSector(image, DIRECTORY_TRACK, BAM_SECTOR);
     const tracks = [];
-    for (let track = 1; track <= 35; track += 1) {
-      const offset = d64.headerOffsets.bamStart + (track - 1) * 4;
+    for (let track = 1; track <= geometry.trackCount; track += 1) {
       const sectorCount = d64.trackSectorCount(track);
-      const freeCount = sector[offset];
       const sectorFree = [];
-      for (let sectorIndex = 0; sectorIndex < sectorCount; sectorIndex += 1) {
-        const byteIndex = 1 + (sectorIndex >> 3);
-        const bitIndex = sectorIndex & 7;
-        sectorFree.push(Boolean(sector[offset + byteIndex] & (1 << bitIndex)));
+      let freeCount = null;
+      let bamOffset = null;
+      if (track <= 35) {
+        bamOffset = d64.headerOffsets.bamStart + (track - 1) * 4;
+        freeCount = sector[bamOffset];
+        for (let sectorIndex = 0; sectorIndex < sectorCount; sectorIndex += 1) {
+          const byteIndex = 1 + (sectorIndex >> 3);
+          const bitIndex = sectorIndex & 7;
+          sectorFree.push(Boolean(sector[bamOffset + byteIndex] & (1 << bitIndex)));
+        }
+      } else {
+        for (let sectorIndex = 0; sectorIndex < sectorCount; sectorIndex += 1) {
+          sectorFree.push(null);
+        }
       }
       tracks.push({
         track: track,
         freeCount: freeCount,
         sectorFree: sectorFree,
+        bamOffset: bamOffset,
+        isExtendedTrack: track > 35,
       });
     }
     return {
+      format: geometry.format,
+      trackCount: geometry.trackCount,
       track: DIRECTORY_TRACK,
       sector: BAM_SECTOR,
       tracks: tracks,
@@ -257,6 +434,70 @@
       map[trackInfo.track] = trackInfo.sectorFree.slice();
     });
     return map;
+  };
+
+  d64.normalizeErrorInfo = function (errorInfo, source) {
+    const geometry = d64.describeGeometry(source);
+    const result = new Uint8Array(geometry.sectorCount).fill(d64.errorCodes.ok);
+    const data =
+      errorInfo instanceof Uint8Array
+        ? errorInfo
+        : errorInfo
+          ? new Uint8Array(errorInfo)
+          : null;
+    if (data) {
+      result.set(data.subarray(0, geometry.sectorCount));
+    }
+    return result;
+  };
+
+  d64.readErrorInfo = function (image) {
+    const bytes = image instanceof Uint8Array ? image : new Uint8Array(image || []);
+    const geometry = d64.describeGeometry(bytes);
+    return {
+      format: geometry.format,
+      trackCount: geometry.trackCount,
+      sectorCount: geometry.sectorCount,
+      hasErrorInfo: geometry.hasErrorInfo,
+      errorInfoOffset: geometry.errorInfoOffset,
+      bytes: geometry.hasErrorInfo
+        ? bytes.slice(geometry.errorInfoOffset, geometry.errorInfoOffset + geometry.errorInfoSize)
+        : new Uint8Array(0),
+    };
+  };
+
+  d64.readSectorError = function (image, track, sector) {
+    const geometry = d64.describeGeometry(image);
+    if (!geometry.hasErrorInfo) return null;
+    const index = d64.sectorIndex(track, sector, geometry);
+    if (index < 0) return null;
+    const bytes = image instanceof Uint8Array ? image : new Uint8Array(image || []);
+    return bytes[geometry.errorInfoOffset + index];
+  };
+
+  d64.writeErrorInfo = function (image, errorInfo, options) {
+    const bytes = image instanceof Uint8Array ? image : new Uint8Array(image || []);
+    const geometry = d64.describeGeometry(options || bytes);
+    if (!geometry.hasErrorInfo) return bytes;
+    bytes.set(d64.normalizeErrorInfo(errorInfo, geometry), geometry.errorInfoOffset);
+    return bytes;
+  };
+
+  d64.writeSectorError = function (image, track, sector, errorCode, options) {
+    const bytes = image instanceof Uint8Array ? image : new Uint8Array(image || []);
+    const geometry = d64.describeGeometry(options || bytes);
+    if (!geometry.hasErrorInfo) return bytes;
+    const index = d64.sectorIndex(track, sector, geometry);
+    if (index < 0) return bytes;
+    bytes[geometry.errorInfoOffset + index] = Math.max(
+      0,
+      Math.min(255, Math.round(Number(errorCode) || 0)),
+    );
+    return bytes;
+  };
+
+  d64.clearErrorInfo = function (image, options) {
+    return d64.writeErrorInfo(image, null, options);
   };
 
   d64.readDirectoryEntry = function (image, entryIndex) {
@@ -480,6 +721,7 @@
     return {
       header: d64.readHeader(image),
       bam: d64.readBam(image),
+      errorInfo: d64.readErrorInfo(image),
       entries: d64.readDirectoryEntries(image, options),
       files: d64.readFiles(image, options),
     };
@@ -487,15 +729,19 @@
 
   d64.diskSignature = function (image) {
     const header = d64.readHeader(image);
+    const errorInfo = d64.readErrorInfo(image);
     return JSON.stringify({
       format: header.format,
       imageSize: header.imageSize,
+      trackCount: header.trackCount,
+      hasErrorInfo: header.hasErrorInfo,
       nextDirectoryTrack: header.nextDirectoryTrack,
       nextDirectorySector: header.nextDirectorySector,
       dosVersionByte: header.dosVersionByte,
       diskName: header.diskName,
       diskId: header.diskId,
       dosType: header.dosType,
+      errorInfo: Array.from(errorInfo.bytes),
     });
   };
 
@@ -568,7 +814,7 @@
     sector[1] = DIRECTORY_START_SECTOR;
     sector[2] = diskInfo.dosVersion;
     sector[3] = 0x00;
-    for (let track = 1; track <= 35; track += 1) {
+    for (let track = 1; track <= DEFAULT_TRACK_COUNT; track += 1) {
       const trackOffset = 0x04 + (track - 1) * 4;
       const sectorCount = d64.trackSectorCount(track);
       let freeCount = 0;
@@ -645,7 +891,8 @@
 
   d64.allocateSectors = function (count, allocation) {
     const result = [];
-    for (let track = allocation.track; track <= 35 && result.length < count; track += 1) {
+    const trackLimit = d64.normalizeTrackCount(allocation.trackCount || DEFAULT_TRACK_COUNT);
+    for (let track = allocation.track; track <= trackLimit && result.length < count; track += 1) {
       if (track === 18) continue;
       const sectorCount = d64.trackSectorCount(track);
       allocation.map[track] = allocation.map[track] || new Array(sectorCount).fill(true);
@@ -783,15 +1030,17 @@
   };
 
   d64.usableFileSectorCapacity = function () {
+    const geometry = d64.describeGeometry(arguments[0]);
     let total = 0;
-    for (let track = 1; track <= 35; track += 1) {
+    for (let track = 1; track <= geometry.trackCount; track += 1) {
       if (track === 18) continue;
       total += d64.trackSectorCount(track);
     }
     return total;
   };
 
-  d64.estimateImageUsage = function (files) {
+  d64.estimateImageUsage = function (files, options) {
+    const geometry = d64.describeGeometry(options);
     const items = Array.isArray(files) ? files : [];
     const fileSectors = items.map(function (file) {
       return d64.prepareFileLayout(file).totalSectors;
@@ -803,14 +1052,15 @@
     return {
       totalFileSectors: totalFileSectors,
       directorySectors: directorySectors,
-      usableFileSectors: d64.usableFileSectorCapacity(),
+      usableFileSectors: d64.usableFileSectorCapacity(geometry),
       fileSectors: fileSectors,
     };
   };
 
-  d64.finalizeImage = function (image, allocation, dirSectors, diskName) {
+  d64.finalizeImage = function (image, allocation, dirSectors, diskName, options) {
+    const geometry = d64.describeGeometry(options || image);
     const freeMap = {};
-    for (let track = 1; track <= 35; track += 1) {
+    for (let track = 1; track <= geometry.trackCount; track += 1) {
       const sectorCount = d64.trackSectorCount(track);
       freeMap[track] = new Array(sectorCount).fill(true);
     }
@@ -834,14 +1084,16 @@
   };
 
   d64.buildImage = function (files, options) {
-    const estimate = d64.estimateImageUsage(files);
-    if (estimate.totalFileSectors > estimate.usableFileSectors) return null;
-    const image = new Uint8Array(STANDARD_IMAGE_SIZE);
     const config = options || {};
+    const geometry = d64.describeGeometry(config);
+    const estimate = d64.estimateImageUsage(files, geometry);
+    if (estimate.totalFileSectors > estimate.usableFileSectors) return null;
+    const image = new Uint8Array(geometry.imageSize);
     const diskInfo = d64.normalizeDiskInfo(config);
     const allocation = {
       track: 1,
       sector: 0,
+      trackCount: geometry.trackCount,
       map: {},
       directorySectors: [],
     };
@@ -890,18 +1142,27 @@
       allocation,
       dirSectors,
       diskInfo,
+      geometry,
     );
+    if (geometry.hasErrorInfo) {
+      d64.writeErrorInfo(image, diskInfo.errorInfo, geometry);
+    }
     return image;
   };
 
   d64.rebuildImage = function (image, files, options) {
     const header = d64.readHeader(image);
+    const errorInfo = d64.readErrorInfo(image);
     const config = Object.assign(
       {
         diskName: header.diskName || DEFAULT_IMAGE_NAME,
         diskId: header.diskId || "TP",
         dosType: header.dosType || d64.dosTypes.dos2a,
         dosVersion: header.dosVersionByte || d64.dosVersions.dos2_6,
+        format: header.format,
+        trackCount: header.trackCount || DEFAULT_TRACK_COUNT,
+        hasErrorInfo: header.hasErrorInfo === true,
+        errorInfo: errorInfo.bytes,
       },
       options || {},
     );
