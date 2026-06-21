@@ -557,7 +557,7 @@ export function init(TPP) {
       petsciiFullGlyphChars[i].charCodeAt(0) || 0x20;
   }
   const selectSeqGlyphCatalog = function (dithering) {
-    if (dithering === "c64-petscii-full" || dithering === "c64-custom-charset") {
+    if (dithering === "c64-custom-charset") {
       return {
         glyphs: petsciiFullGlyphs,
         codes: petsciiFullGlyphCodes,
@@ -2958,16 +2958,6 @@ export function init(TPP) {
         "blocks",
       );
     },
-    "c64-petscii-full": function (data, width, height, palette) {
-      applyPalettePetscii(
-        data,
-        width,
-        height,
-        palette,
-        petsciiFullGlyphs,
-        "full",
-      );
-    },
     "c64-custom-charset": function (data, width, height, palette, options) {
       applyPaletteCustomCharset(data, width, height, palette, options);
     },
@@ -3180,18 +3170,6 @@ export function init(TPP) {
       );
       return;
     }
-    if (algorithm === "c64-petscii-full") {
-      await applyPalettePetsciiAsync(
-        data,
-        width,
-        height,
-        palette,
-        petsciiFullGlyphs,
-        "full",
-        config,
-      );
-      return;
-    }
     TPP.applyImageExportPaletteDither(data, width, height, palette, config);
   };
   const ditherMetadata = {
@@ -3212,8 +3190,7 @@ export function init(TPP) {
     "blue-noise": { name: "Blue-noise", kind: "both" },
     random: { name: "Random", kind: "both" },
     pattern: { name: "Pattern", kind: "both" },
-    "c64-petscii": { name: "C64 PETSCII Blocks", kind: "palette" },
-    "c64-petscii-full": { name: "C64 PETSCII Full Charset", kind: "palette" },
+    "c64-petscii": { name: "C64 Blocks", kind: "palette" },
     "c64-custom-charset": { name: "C64 Custom Charset", kind: "palette" },
   };
   if (typeof TPP.registerDither === "function") {
@@ -3226,9 +3203,7 @@ export function init(TPP) {
         applyMono: ditherers[id] || null,
         applyPalette: paletteDitherers[id] || null,
         applyPaletteAsync:
-          id === "c64-custom-charset" ||
-          id === "c64-petscii" ||
-          id === "c64-petscii-full"
+          id === "c64-custom-charset" || id === "c64-petscii"
             ? async function (data, width, height, palette, options) {
                 await TPP.applyImageExportPaletteDitherAsync(
                   data,

@@ -518,7 +518,7 @@ export async function init(TPP) {
     const c64Format = seqFormat || d64Format;
     const indexedOnlyDitherOptions = Array.from(
       imageExportDither.querySelectorAll(
-        'option[value="c64-petscii"], option[value="c64-petscii-full"], option[value="c64-custom-charset"]',
+        'option[value="c64-petscii"], option[value="c64-charset-unshifted"], option[value="c64-charset-shifted-business"], option[value="c64-custom-charset"]',
       ),
     );
     Array.from(imageExportFormat.options).forEach(function (option) {
@@ -560,14 +560,12 @@ export async function init(TPP) {
       Array.from(imageExportDither.options).forEach(function (option) {
         option.disabled = ![
           "c64-petscii",
-          "c64-petscii-full",
           "c64-custom-charset",
         ].includes(option.value);
       });
       if (
         ![
           "c64-petscii",
-          "c64-petscii-full",
           "c64-custom-charset",
         ].includes(imageExportDither.value)
       ) {
@@ -579,7 +577,12 @@ export async function init(TPP) {
       });
       if (
         !indexed &&
-        ["c64-petscii", "c64-petscii-full", "c64-custom-charset"].includes(
+        [
+          "c64-petscii",
+          "c64-charset-unshifted",
+          "c64-charset-shifted-business",
+          "c64-custom-charset",
+        ].includes(
           imageExportDither.value,
         )
       ) {
@@ -806,6 +809,9 @@ export async function init(TPP) {
   };
   const buildCharsetPreview = async function () {
     if (!customCharsetMode()) return null;
+    if (typeof TPP.ensureImageExportDitherLoaded === "function") {
+      await TPP.ensureImageExportDitherLoaded("c64-custom-charset");
+    }
     if (
       typeof TPP.buildImageExportCustomCharsetSheet !== "function" ||
       typeof TPP.renderImageExportPreviewCanvas !== "function"

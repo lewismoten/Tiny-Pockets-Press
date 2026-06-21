@@ -2471,7 +2471,6 @@ TPP.imageExportOptions = function (options) {
     requestedFormat === "seq" &&
     ![
       "c64-petscii",
-      "c64-petscii-full",
       "c64-custom-charset",
     ].includes(dithering)
   ) {
@@ -2580,7 +2579,6 @@ TPP.imageExportSeqOptionsEnabled = function (options) {
     ["mono1", "indexed"].includes(config.colorDepth) &&
     [
       "c64-petscii",
-      "c64-petscii-full",
       "c64-custom-charset",
     ].includes(config.dithering)
   );
@@ -3384,7 +3382,8 @@ TPP.imageExportDitherIdsDefault = [
   "random",
   "pattern",
   "c64-petscii",
-  "c64-petscii-full",
+  "c64-charset-unshifted",
+  "c64-charset-shifted-business",
   "c64-custom-charset",
 ];
 TPP.imageExportDitherLib = null;
