@@ -2811,6 +2811,8 @@ TPP.imageExportPaletteIdsDefault = [
   "gray64",
   "gray128",
   "gray256",
+  "green2",
+  "amber2",
   "windows16",
   "ansi16",
   "xterm256",

@@ -108,6 +108,22 @@
       "colorCount": 256
     },
     {
+      "id": "green2",
+      "name": "Green Phosphor",
+      "url": "data/palettes/green2/plugin.js",
+      "format": "javascript",
+      "colorCount": 2,
+      "description": "A simple 2-color green-phosphor monitor palette inspired by monochrome CRT displays used on early terminals and PCs."
+    },
+    {
+      "id": "amber2",
+      "name": "Amber Phosphor",
+      "url": "data/palettes/amber2/plugin.js",
+      "format": "javascript",
+      "colorCount": 2,
+      "description": "A simple 2-color amber-phosphor monitor palette inspired by monochrome CRT displays used on early terminals and word processors."
+    },
+    {
       "id": "windows16",
       "name": "Windows 16",
       "url": "data/palettes/windows16/plugin.js",

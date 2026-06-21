@@ -34,6 +34,22 @@
       { id: "gray128", name: "128 Grayscale", url: "data/palettes/gray128/plugin.js", colorCount: 128 },
       { id: "gray256", name: "256 Grayscale", url: "data/palettes/gray256/plugin.js", colorCount: 256 },
       {
+        id: "green2",
+        name: "Green Phosphor",
+        url: "data/palettes/green2/plugin.js",
+        colorCount: 2,
+        description:
+          "A simple 2-color green-phosphor monitor palette inspired by monochrome CRT displays used on early terminals and PCs.",
+      },
+      {
+        id: "amber2",
+        name: "Amber Phosphor",
+        url: "data/palettes/amber2/plugin.js",
+        colorCount: 2,
+        description:
+          "A simple 2-color amber-phosphor monitor palette inspired by monochrome CRT displays used on early terminals and word processors.",
+      },
+      {
         id: "windows16",
         name: "Windows 16",
         url: "data/palettes/windows16/plugin.js",
