@@ -2,6 +2,9 @@
   const TPP = window.TPP = window.TPP || {};
   const d64 = TPP.d64 = TPP.d64 || {};
   const DEFAULT_IMAGE_NAME = "disk";
+  const REL_MAX_RECORD_LENGTH = 254;
+  const REL_DATA_SECTORS_PER_SIDE_SECTOR = 120;
+  const REL_MAX_SIDE_SECTORS = 6;
 
   d64.fileTypes = Object.freeze({
     del: 0x80,
@@ -56,6 +59,61 @@
       return d64.fileTypes[key];
     }
     return d64.fileTypes.seq;
+  };
+
+  d64.normalizeRecordLength = function (length) {
+    return Math.max(
+      1,
+      Math.min(REL_MAX_RECORD_LENGTH, Math.round(Number(length) || 0) || 1),
+    );
+  };
+
+  d64.isRelativeFileType = function (type) {
+    return d64.normalizeFileType(type) === d64.fileTypes.rel;
+  };
+
+  d64.prepareFileLayout = function (file) {
+    const entry = file || {};
+    const type = d64.normalizeFileType(entry.type);
+    const bytes = entry.data instanceof Uint8Array
+      ? entry.data
+      : new Uint8Array(entry.data || []);
+    if (type !== d64.fileTypes.rel) {
+      const dataSectors = Math.max(1, Math.ceil(bytes.length / 254));
+      return {
+        type: type,
+        bytes: bytes,
+        dataSectors: dataSectors,
+        sideSectorCount: 0,
+        totalSectors: dataSectors,
+        recordLength: 0,
+        recordCount: 0,
+      };
+    }
+    const recordLength = d64.normalizeRecordLength(entry.recordLength);
+    const recordCount = Math.max(1, Math.ceil(bytes.length / recordLength));
+    const paddedLength = recordCount * recordLength;
+    const paddedBytes = new Uint8Array(paddedLength);
+    paddedBytes.set(bytes.subarray(0, Math.min(bytes.length, paddedLength)));
+    const dataSectors = Math.max(1, Math.ceil(paddedBytes.length / 254));
+    const sideSectorCount = Math.max(
+      1,
+      Math.ceil(dataSectors / REL_DATA_SECTORS_PER_SIDE_SECTOR),
+    );
+    if (sideSectorCount > REL_MAX_SIDE_SECTORS) {
+      throw new Error(
+        "REL file exceeds side-sector capacity: " + String(entry.name || ""),
+      );
+    }
+    return {
+      type: type,
+      bytes: paddedBytes,
+      dataSectors: dataSectors,
+      sideSectorCount: sideSectorCount,
+      totalSectors: dataSectors + sideSectorCount,
+      recordLength: recordLength,
+      recordCount: recordCount,
+    };
   };
 
   d64.createBamSector = function (freeMap, diskName) {
@@ -120,12 +178,17 @@
     startTrack,
     startSector,
     sectorCount,
+    options,
   ) {
+    const config = options || {};
     const entry = new Uint8Array(32).fill(0);
     entry[2] = d64.normalizeFileType(type);
     entry[3] = startTrack;
     entry[4] = startSector;
     entry.set(d64.encodeFileName(filename, 16), 5);
+    entry[21] = Math.max(0, Math.min(255, Number(config.sideSectorTrack) || 0));
+    entry[22] = Math.max(0, Math.min(255, Number(config.sideSectorSector) || 0));
+    entry[23] = Math.max(0, Math.min(255, Number(config.recordLength) || 0));
     entry[28] = sectorCount & 0xff;
     entry[29] = (sectorCount >> 8) & 0xff;
     entry[30] = sectorCount & 0xff;
@@ -186,6 +249,76 @@
     };
   };
 
+  d64.createRelativeSideSector = function (
+    sideBlocks,
+    dataBlocks,
+    sideSectorIndex,
+    recordLength,
+  ) {
+    const sector = new Uint8Array(256);
+    const nextBlock = sideBlocks[sideSectorIndex + 1];
+    const currentDataBlocks = dataBlocks.slice(
+      sideSectorIndex * REL_DATA_SECTORS_PER_SIDE_SECTOR,
+      (sideSectorIndex + 1) * REL_DATA_SECTORS_PER_SIDE_SECTOR,
+    );
+    sector[0] = nextBlock ? nextBlock.track : 0;
+    sector[1] = nextBlock ? nextBlock.sector : 0;
+    sector[2] = sideSectorIndex & 0xff;
+    sector[3] = d64.normalizeRecordLength(recordLength);
+    for (let index = 0; index < REL_MAX_SIDE_SECTORS; index += 1) {
+      const block = sideBlocks[index];
+      sector[4 + index * 2] = block ? block.track : 0;
+      sector[5 + index * 2] = block ? block.sector : 0;
+    }
+    currentDataBlocks.forEach(function (block, index) {
+      const offset = 16 + index * 2;
+      sector[offset] = block.track;
+      sector[offset + 1] = block.sector;
+    });
+    return sector;
+  };
+
+  d64.writeRelativeFile = function (image, data, allocation, recordLength) {
+    const bytes = data instanceof Uint8Array ? data : new Uint8Array(data || []);
+    const dataSectors = Math.max(1, Math.ceil(bytes.length / 254));
+    const sideSectorCount = Math.max(
+      1,
+      Math.ceil(dataSectors / REL_DATA_SECTORS_PER_SIDE_SECTOR),
+    );
+    if (sideSectorCount > REL_MAX_SIDE_SECTORS) return null;
+    const dataBlocks = d64.allocateSectors(dataSectors, allocation);
+    if (dataBlocks.length < dataSectors) return null;
+    const sideBlocks = d64.allocateSectors(sideSectorCount, allocation);
+    if (sideBlocks.length < sideSectorCount) return null;
+    for (let i = 0; i < dataSectors; i += 1) {
+      const block = dataBlocks[i];
+      const nextBlock = dataBlocks[i + 1];
+      const offset = d64.trackOffset(block.track, block.sector);
+      const sector = image.subarray(offset, offset + 256);
+      const sliceStart = i * 254;
+      const sliceEnd = sliceStart + 254;
+      const chunk = bytes.subarray(sliceStart, sliceEnd);
+      sector[0] = nextBlock ? nextBlock.track : 0;
+      sector[1] = nextBlock ? nextBlock.sector : Math.max(1, chunk.length + 1);
+      sector.set(chunk, 2);
+    }
+    sideBlocks.forEach(function (block, index) {
+      const offset = d64.trackOffset(block.track, block.sector);
+      image.set(
+        d64.createRelativeSideSector(sideBlocks, dataBlocks, index, recordLength),
+        offset,
+      );
+    });
+    return {
+      startTrack: dataBlocks[0].track,
+      startSector: dataBlocks[0].sector,
+      sectorCount: dataSectors + sideSectorCount,
+      sideSectorTrack: sideBlocks[0].track,
+      sideSectorSector: sideBlocks[0].sector,
+      recordLength: d64.normalizeRecordLength(recordLength),
+    };
+  };
+
   d64.usableFileSectorCapacity = function () {
     let total = 0;
     for (let track = 1; track <= 35; track += 1) {
@@ -198,10 +331,7 @@
   d64.estimateImageUsage = function (files) {
     const items = Array.isArray(files) ? files : [];
     const fileSectors = items.map(function (file) {
-      const size = file && file.data && typeof file.data.length === "number"
-        ? file.data.length
-        : 0;
-      return Math.max(1, Math.ceil(size / 254));
+      return d64.prepareFileLayout(file).totalSectors;
     });
     const totalFileSectors = fileSectors.reduce(function (sum, count) {
       return sum + count;
@@ -254,15 +384,29 @@
     const directoryEntries = [];
     for (let i = 0; i < files.length; i += 1) {
       const file = files[i];
-      const fileRecord = d64.writeFile(image, file.data, allocation);
+      const layout = d64.prepareFileLayout(file);
+      const fileRecord =
+        layout.type === d64.fileTypes.rel
+          ? d64.writeRelativeFile(
+              image,
+              layout.bytes,
+              allocation,
+              layout.recordLength,
+            )
+          : d64.writeFile(image, layout.bytes, allocation);
       if (!fileRecord) return null;
       directoryEntries.push(
         d64.createDirectoryEntry(
           file.name,
-          file.type,
+          layout.type,
           fileRecord.startTrack,
           fileRecord.startSector,
           fileRecord.sectorCount,
+          {
+            sideSectorTrack: fileRecord.sideSectorTrack,
+            sideSectorSector: fileRecord.sideSectorSector,
+            recordLength: fileRecord.recordLength,
+          },
         ),
       );
     }

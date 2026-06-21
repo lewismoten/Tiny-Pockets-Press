@@ -30,6 +30,7 @@ The higher-level `buildImage(files, options)` helper expects file records like t
 type D64File = {
   name: string;
   type: number | keyof typeof window.TPP.d64.fileTypes;
+  recordLength?: number;
   data: Uint8Array | ArrayBuffer | number[];
 };
 ```
@@ -88,6 +89,40 @@ For example, these are both reasonable:
 README
 SPRITES.BIN
 ```
+
+## Relative Files
+
+The support layer can now build true `REL` files when a file record uses:
+
+```js
+type: "rel"
+```
+
+or:
+
+```js
+type: window.TPP.d64.fileTypes.rel
+```
+
+For `REL` files:
+
+- `recordLength` should be provided.
+- `recordLength` is normalized into the range `1-254`.
+- data is padded to a whole number of records.
+- the support layer allocates side sectors and writes relative-file metadata into the directory entry.
+
+Example:
+
+```js
+{
+  name: "BOOK.IDX",
+  type: "rel",
+  recordLength: 9,
+  data: indexBytes,
+}
+```
+
+Tiny Pockets Press itself still exports its book-reader files as `SEQ` today because the current BASIC and machine-language readers still assume sequential access. The low-level D64 support API can generate `REL` files now, but the higher-level TPP reader path has not been switched over yet.
 
 ## File Type Enum
 
@@ -178,6 +213,51 @@ Notes:
 
 - Unknown values currently fall back to `SEQ`.
 
+### `normalizeRecordLength(length)`
+
+Normalizes a relative-file record length into the supported range.
+
+Parameters:
+
+- `length: number`
+
+Returns:
+
+- `number`
+
+Notes:
+
+- Range is `1-254`.
+
+### `isRelativeFileType(type)`
+
+Checks whether a normalized file type is `REL`.
+
+Parameters:
+
+- `type: number | "del" | "seq" | "prg" | "usr" | "rel"`
+
+Returns:
+
+- `boolean`
+
+### `prepareFileLayout(file)`
+
+Normalizes file metadata before image writing.
+
+Parameters:
+
+- `file: D64File`
+
+Returns:
+
+- `{ type, bytes, dataSectors, sideSectorCount, totalSectors, recordLength, recordCount }`
+
+Notes:
+
+- `REL` files are padded to full records before sector allocation.
+- Non-`REL` files keep `recordLength` and `recordCount` at `0`.
+
 ### `createBamSector(freeMap, diskName)`
 
 Builds the BAM sector for track `18`, sector `0`.
@@ -262,6 +342,36 @@ Notes:
 
 - File payload bytes are stored in 254-byte chunks because the first two bytes of each sector are used for the next-track/next-sector link.
 
+### `createRelativeSideSector(sideBlocks, dataBlocks, sideSectorIndex, recordLength)`
+
+Builds one side sector for a relative file.
+
+Parameters:
+
+- `sideBlocks: Array<{ track: number, sector: number }>`
+- `dataBlocks: Array<{ track: number, sector: number }>`
+- `sideSectorIndex: number`
+- `recordLength: number`
+
+Returns:
+
+- `Uint8Array`
+
+### `writeRelativeFile(image, data, allocation, recordLength)`
+
+Writes one `REL` file into a D64 image, including side sectors.
+
+Parameters:
+
+- `image: Uint8Array`
+- `data: Uint8Array | ArrayBuffer | number[]`
+- `allocation: { track: number, sector: number, map: Record<number, boolean[]> }`
+- `recordLength: number`
+
+Returns:
+
+- `null | { startTrack, startSector, sectorCount, sideSectorTrack, sideSectorSector, recordLength }`
+
 ### `usableFileSectorCapacity()`
 
 Returns the number of data sectors available for files on a standard 35-track image, excluding track `18`.
@@ -318,6 +428,7 @@ Notes:
 
 - Returns `null` if the image cannot fit the requested content.
 - Uses `diskName`, `name`, `title`, or `baseName` as the disk name when available.
+- `REL` files are written with side sectors when `type` resolves to `rel`.
 
 ### `fileName(options)`
 
@@ -364,7 +475,8 @@ Current limitations of this support layer:
 - Filenames are stored in a `16`-byte field.
 - Filename normalization is intentionally simple and not a full PETSCII conversion layer.
 - File type support is simplified to a normalized directory type byte.
-- `REL` files are not implemented with Commodore relative-file side sectors or record management.
+- `REL` support is limited to fixed-length records with record lengths up to `254` bytes.
+- `REL` support currently assumes up to `6` side sectors per file.
 - File-type state bits such as custom locked/open combinations are not modeled separately from the normalized type byte.
 - Disk header customization is minimal and not exposed as a richer API for disk ID or DOS type variations.
 - This layer does not validate Commodore semantics beyond the structural image layout.
@@ -381,6 +493,8 @@ Important practical constraints:
 - Maximum sectors per file payload sector: `254` bytes of data
 - Directory sectors available on track `18`: `18`
 - Approximate maximum directory entries: `18 * 8 = 144`
+- Maximum `REL` record length: `254` bytes
+- Maximum supported side sectors per `REL` file: `6`
 
 In practice, the file-count limit is often lower because data sectors usually run out before directory entries do.
 
@@ -394,9 +508,10 @@ const files = [
     data: new Uint8Array([0x01, 0x08, 0x0b, 0x08]),
   },
   {
-    name: "README",
-    type: 0x81,
-    data: new TextEncoder().encode("TPP D64 SUPPORT"),
+    name: "BOOK.IDX",
+    type: "rel",
+    recordLength: 9,
+    data: new Uint8Array([0x44, 0x53, 0x4b, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00]),
   },
 ];
 
