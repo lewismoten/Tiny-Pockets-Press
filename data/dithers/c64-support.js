@@ -1,6 +1,11 @@
 (function () {
   const TPP = window.TPP;
-  if (!TPP || TPP.imageExportC64DitherSupport) return;
+  const C64 = window.C64 = window.C64 || {};
+  if (!TPP) return;
+  if (C64.dither) {
+    TPP.imageExportC64DitherSupport = C64.dither;
+    return;
+  }
   TPP.imageExportC64CellCache = TPP.imageExportC64CellCache || new Map();
   TPP.IMAGE_EXPORT_C64_CELL_CACHE_LIMIT =
     TPP.IMAGE_EXPORT_C64_CELL_CACHE_LIMIT || 4096;
@@ -3065,7 +3070,7 @@ TPP.buildC64CustomCharsetLayout = function (canvas, palette, options) {
   };
 };
 
-  TPP.imageExportC64DitherSupport = {
+  C64.dither = {
     applyPalettePetsciiAsync: applyPalettePetsciiAsync,
     applyPaletteCustomCharsetAsync: applyPaletteCustomCharsetAsync,
     buildImageExportCustomCharsetSheet: TPP.buildImageExportCustomCharsetSheet,
@@ -3075,4 +3080,5 @@ TPP.buildC64CustomCharsetLayout = function (canvas, palette, options) {
     c64CharsetUnshiftedGlyphs: c64CharsetUnshiftedGlyphs,
     c64CharsetShiftedBusinessGlyphs: c64CharsetShiftedBusinessGlyphs,
   };
+  TPP.imageExportC64DitherSupport = C64.dither;
 })();

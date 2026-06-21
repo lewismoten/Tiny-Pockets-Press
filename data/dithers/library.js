@@ -29,11 +29,7 @@
       { id: "halftone", name: "Halftone", url: "halftone/plugin.js", kind: "both" },
       { id: "blue-noise", name: "Blue-noise", url: "blue-noise/plugin.js", kind: "both" },
       { id: "random", name: "Random", url: "random/plugin.js", kind: "both" },
-      { id: "pattern", name: "Pattern", url: "pattern/plugin.js", kind: "both" },
-      { id: "c64-petscii", name: "C64 Blocks", url: "c64-petscii/plugin.js", kind: "palette" },
-      { id: "c64-charset-unshifted", name: "C64 Default Charset", url: "c64-charset-unshifted/plugin.js", kind: "palette" },
-      { id: "c64-charset-shifted-business", name: "C64 Shifted Business Charset", url: "c64-charset-shifted-business/plugin.js", kind: "palette" },
-      { id: "c64-custom-charset", name: "C64 Custom Charset", url: "c64-custom-charset/plugin.js", kind: "palette" }
+      { id: "pattern", name: "Pattern", url: "pattern/plugin.js", kind: "both" }
     ],
   });
 })();

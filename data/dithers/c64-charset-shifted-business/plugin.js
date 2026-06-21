@@ -18,24 +18,24 @@
       ? new URL("../c64-support.js", document.currentScript.src).toString()
       : "";
   const loadSupport = function () {
-    if (!window.TPP) {
-      return Promise.reject(new Error("TPP not found."));
+    if (!window.C64) {
+      window.C64 = {};
     }
-    if (window.TPP.imageExportC64DitherSupport) {
-      return Promise.resolve(window.TPP.imageExportC64DitherSupport);
+    if (window.C64.dither) {
+      return Promise.resolve(window.C64.dither);
     }
     if (!supportUrl) {
       return Promise.reject(new Error("C64 dither support URL not found."));
     }
-    if (!window.TPP.imageExportC64DitherSupportPromise) {
-      window.TPP.imageExportC64DitherSupportPromise = new Promise(function (resolve, reject) {
+    if (!window.C64.ditherPromise) {
+      window.C64.ditherPromise = new Promise(function (resolve, reject) {
         const script = document.createElement("script");
         script.src = supportUrl;
         script.async = true;
         script.dataset.tppC64DitherSupport = "true";
         script.onload = function () {
-          if (window.TPP && window.TPP.imageExportC64DitherSupport) {
-            resolve(window.TPP.imageExportC64DitherSupport);
+          if (window.C64 && window.C64.dither) {
+            resolve(window.C64.dither);
             return;
           }
           reject(new Error("C64 dither support did not initialize."));
@@ -45,11 +45,11 @@
         };
         document.head.appendChild(script);
       }).catch(function (err) {
-        window.TPP.imageExportC64DitherSupportPromise = null;
+        window.C64.ditherPromise = null;
         throw err;
       });
     }
-    return window.TPP.imageExportC64DitherSupportPromise;
+    return window.C64.ditherPromise;
   };
   try {
     registerDither({

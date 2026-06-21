@@ -3355,7 +3355,10 @@ TPP.canvasRgba = function (canvas) {
   readCtx.drawImage(canvas, 0, 0);
   return readCtx.getImageData(0, 0, canvas.width, canvas.height).data;
 };
-TPP.IMAGE_EXPORT_DITHER_LIBRARY = "data/dithers/library.js";
+TPP.IMAGE_EXPORT_DITHER_LIBRARIES = [
+  "data/dithers/library.js",
+  "data/dithers/c64/library.js",
+];
 TPP.IMAGE_EXPORT_DITHER_CORE_MODULE = "/js/image-export-dither.js";
 TPP.imageExportDitherById = TPP.imageExportDitherById || {};
 TPP.imageExportDitherCatalogById = TPP.imageExportDitherCatalogById || {};
@@ -3364,8 +3367,8 @@ TPP.imageExportDitherLoadPromises = TPP.imageExportDitherLoadPromises || {};
 TPP.imageExportDitherModulePromises =
   TPP.imageExportDitherModulePromises || {};
 TPP.imageExportDitherLibraryLoadPromise = null;
-TPP.imageExportDitherLibraryLoaded =
-  TPP.imageExportDitherLibraryLoaded || false;
+TPP.imageExportDitherLibraryRegistrationCount =
+  TPP.imageExportDitherLibraryRegistrationCount || 0;
 TPP.imageExportDitherIdsDefault = [
   "threshold",
   "bayer2",
@@ -3429,8 +3432,10 @@ TPP.normalizeImageExportDitherLibraryEntry = function (entry, baseUrl) {
   };
 };
 TPP.applyImageExportDitherLibraryEntries = function (entries, baseUrl) {
-  const catalogMap = {};
-  const ids = [];
+  const catalogMap = Object.assign({}, TPP.imageExportDitherCatalogById || {});
+  const ids = TPP.imageExportDitherIdsCached.length
+    ? TPP.imageExportDitherIdsCached.slice()
+    : [];
   (Array.isArray(entries) ? entries : []).forEach(function (entry) {
     const normalized = TPP.normalizeImageExportDitherLibraryEntry(
       entry,
@@ -3442,9 +3447,8 @@ TPP.applyImageExportDitherLibraryEntries = function (entries, baseUrl) {
   });
   const uniqueIds = Array.from(new Set(ids));
   TPP.imageExportDitherCatalogById = catalogMap;
-  TPP.imageExportDitherIdsCached = uniqueIds.length
-    ? uniqueIds
-    : TPP.imageExportDitherIdsDefault.slice();
+  TPP.imageExportDitherIdsCached =
+    uniqueIds.length ? uniqueIds : TPP.imageExportDitherIdsDefault.slice();
   return catalogMap;
 };
 TPP.registerDitherLibrary = TPP.registerDitherLibrary || function (library) {
@@ -3464,7 +3468,7 @@ TPP.registerDitherLibrary = TPP.registerDitherLibrary || function (library) {
         ? document.currentScript.src
         : TPP.imageExportDitherLibraryCurrentUrl || ""),
   ).trim();
-  TPP.imageExportDitherLibraryLoaded = true;
+  TPP.imageExportDitherLibraryRegistrationCount += 1;
   return TPP.applyImageExportDitherLibraryEntries(entries, baseUrl);
 };
 TPP.registerDither = TPP.registerDither || function (dither) {
@@ -3525,16 +3529,17 @@ TPP.imageExportDitherMetadata = function (ditherId) {
     url: meta && meta.url ? meta.url : "",
   };
 };
-TPP.loadImageExportDitherLibrary = function () {
-  const url = TPP.imageExportAssetUrl(TPP.IMAGE_EXPORT_DITHER_LIBRARY);
+TPP.loadImageExportDitherLibrary = function (libraryUrl) {
+  const url = TPP.imageExportAssetUrl(libraryUrl);
   TPP.imageExportDitherLibraryCurrentUrl = url;
   return new Promise(function (resolve, reject) {
+    const registrationsBefore = TPP.imageExportDitherLibraryRegistrationCount;
     const script = document.createElement("script");
     script.src = url;
     script.async = true;
     script.dataset.tppDitherLibrary = "true";
     script.onload = function () {
-      if (TPP.imageExportDitherLibraryLoaded) {
+      if (TPP.imageExportDitherLibraryRegistrationCount > registrationsBefore) {
         resolve(TPP.imageExportDitherCatalogById);
         return;
       }
@@ -3546,11 +3551,34 @@ TPP.loadImageExportDitherLibrary = function () {
     document.head.appendChild(script);
   });
 };
+TPP.loadImageExportDitherLibraries = async function () {
+  const libraries = Array.isArray(TPP.IMAGE_EXPORT_DITHER_LIBRARIES) &&
+    TPP.IMAGE_EXPORT_DITHER_LIBRARIES.length
+    ? TPP.IMAGE_EXPORT_DITHER_LIBRARIES
+    : ["data/dithers/library.js"];
+  TPP.imageExportDitherCatalogById = {};
+  TPP.imageExportDitherIdsCached = [];
+  let loadedCount = 0;
+  for (let i = 0; i < libraries.length; i += 1) {
+    try {
+      await TPP.loadImageExportDitherLibrary(libraries[i]);
+      loadedCount += 1;
+    } catch (error) {
+      if (typeof console !== "undefined" && typeof console.warn === "function") {
+        console.warn("Dither library load failed:", libraries[i], error);
+      }
+    }
+  }
+  if (!loadedCount) {
+    throw new Error("No dither libraries could be loaded.");
+  }
+  return TPP.imageExportDitherCatalogById;
+};
 TPP.ensureImageExportDitherCatalogLoaded = async function () {
   if (TPP.imageExportDitherIdsCached.length) return;
   if (!TPP.imageExportDitherLibraryLoadPromise) {
     TPP.imageExportDitherLibraryLoadPromise =
-      TPP.loadImageExportDitherLibrary()
+      TPP.loadImageExportDitherLibraries()
         .catch(function (error) {
           if (typeof console !== "undefined" && typeof console.error === "function") {
             console.error("Dither library initialization failed.", error);
