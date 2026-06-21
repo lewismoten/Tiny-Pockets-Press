@@ -3357,7 +3357,7 @@ TPP.canvasRgba = function (canvas) {
 };
 TPP.IMAGE_EXPORT_DITHER_LIBRARIES = [
   "https://git.lewismoten.com/tiny-pockets-press/dither-lib/raw/branch/main/library.js",
-  "data/dithers/c64/library.js",
+  "https://git.lewismoten.com/tiny-pockets-press/dither-c64-lib/raw/branch/main/library.js",
 ];
 TPP.IMAGE_EXPORT_DITHER_CORE_MODULE = "/js/image-export-dither.js";
 TPP.imageExportDitherById = TPP.imageExportDitherById || {};
@@ -3558,6 +3558,7 @@ TPP.loadImageExportDitherLibraries = async function () {
     ? TPP.IMAGE_EXPORT_DITHER_LIBRARIES
     : [
         "https://git.lewismoten.com/tiny-pockets-press/dither-lib/raw/branch/main/library.js",
+        "https://git.lewismoten.com/tiny-pockets-press/dither-c64-lib/raw/branch/main/library.js",
       ];
   TPP.imageExportDitherCatalogById = {};
   TPP.imageExportDitherIdsCached = [];
