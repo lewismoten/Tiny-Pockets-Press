@@ -1,5 +1,7 @@
 # Tiny Pockets Press v6.1
 
+![Tiny Pockets Press](./assets/social-preview.jpg)
+
 This is a syntax-corrected build of v6.
 
 ## Run locally
@@ -29,3 +31,5 @@ By default the app will be available at `http://127.0.0.1:3000`.
   - `app.js`
 - Keeps the uploaded sample book in `data/sample-book.json`.
 - Maintains separate interior and cover print/PDF views.
+
+![Tiny Pockets Press](./assets/logo-256.png)
