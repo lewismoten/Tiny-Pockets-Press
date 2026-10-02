@@ -369,6 +369,151 @@ function validateNonRelativeFileStillWorks() {
   assert(d64.hasDiskChanged(image, secondImage), "Different disks should have different signatures");
 }
 
+function validateUpdatesUsingStaleEntryIdentity() {
+  const d64 = loadD64Support();
+  const image = d64.buildImage([
+    {
+      name: "BOOK.IDX",
+      type: "rel",
+      recordLength: 9,
+      data: new Uint8Array(9 * 40).fill(0x41),
+    },
+    {
+      name: "NOTES",
+      type: "seq",
+      data: new Uint8Array([1, 2, 3]),
+    },
+  ], {
+    diskName: "STALEID",
+  });
+  assert(image instanceof Uint8Array, "Stale-entry test image did not build");
+
+  const originalRelEntry = d64.findDirectoryEntryByName(image, "BOOK.IDX");
+  const originalSeqEntry = d64.findDirectoryEntryByName(image, "NOTES");
+  assert(originalRelEntry, "Original REL entry missing");
+  assert(originalSeqEntry, "Original SEQ entry missing");
+
+  const renamedRelImage = d64.renameFile(image, originalRelEntry, "BOOK2.IDX");
+  const renamedRelEntry = d64.findDirectoryEntryByName(renamedRelImage, "BOOK2.IDX");
+  assert(renamedRelEntry, "Renamed REL entry missing");
+  assert(
+    renamedRelEntry.recordLength === 9,
+    "REL rename should preserve record length when using stale entry identity",
+  );
+
+  const relDataUpdatedImage = d64.updateFile(
+    renamedRelImage,
+    originalRelEntry,
+    {
+      data: new Uint8Array(9 * 20).fill(0x42),
+    },
+  );
+  const updatedRel = d64.readRelativeRecords(relDataUpdatedImage, "BOOK2.IDX");
+  assert(updatedRel, "Updated REL file missing after stale-entry update");
+  assert(updatedRel.recordCount === 20, "REL stale-entry update should replace payload");
+
+  const relDeletedImage = d64.deleteFile(relDataUpdatedImage, originalRelEntry);
+  assert(
+    !d64.findDirectoryEntryByName(relDeletedImage, "BOOK2.IDX"),
+    "REL stale-entry delete should remove renamed file",
+  );
+
+  const renamedSeqImage = d64.renameFile(image, originalSeqEntry, "README");
+  const renamedSeqEntry = d64.findDirectoryEntryByName(renamedSeqImage, "README");
+  assert(renamedSeqEntry, "Renamed SEQ entry missing");
+
+  const updatedSeqImage = d64.updateFile(
+    renamedSeqImage,
+    originalSeqEntry,
+    {
+      data: new Uint8Array([9, 8, 7, 6]),
+    },
+  );
+  const updatedSeq = d64.readFile(updatedSeqImage, "README");
+  assert(updatedSeq, "Updated SEQ file missing after stale-entry update");
+  assert(
+    Buffer.from(updatedSeq.payload).equals(Buffer.from(new Uint8Array([9, 8, 7, 6]))),
+    "SEQ stale-entry update should replace payload",
+  );
+}
+
+function validateRelativeRecordsInputShapes() {
+  const d64 = loadD64Support();
+  const records = [
+    new Uint8Array([1, 2, 3]),
+    [4, 5, 6],
+    "ABC",
+  ];
+  const image = d64.buildImage([
+    {
+      name: "RECFILE",
+      type: "rel",
+      recordLength: 3,
+      records: records,
+    },
+  ], {
+    diskName: "RECSHAPE",
+  });
+  assert(image instanceof Uint8Array, "REL records-shape image did not build");
+
+  const rel = d64.readRelativeRecords(image, "RECFILE");
+  assert(rel, "REL records-shape file missing");
+  assert(rel.recordLength === 3, "REL records-shape record length mismatch");
+  assert(rel.recordCount === 3, "REL records-shape record count mismatch");
+  assert(
+    Buffer.from(rel.payload).equals(Buffer.from(new Uint8Array([
+      1, 2, 3,
+      4, 5, 6,
+      65, 66, 67,
+    ]))),
+    "REL records-shape payload mismatch",
+  );
+}
+
+function validateRelativeRecordLimits() {
+  const d64 = loadD64Support();
+
+  assert(d64.maxRelativeDataSectors() === 720, "REL max data sectors mismatch");
+  assert(d64.maxRelativePayloadBytes() === 182880, "REL max payload bytes mismatch");
+  assert(d64.maxRelativeRecordCount(1) === 182880, "REL max record count for length 1 mismatch");
+  assert(d64.maxRelativeRecordCount(9) === Math.floor(182880 / 9), "REL max record count for length 9 mismatch");
+  assert(d64.maxRelativeRecordCount(254) === 720, "REL max record count for length 254 mismatch");
+
+  const maxRecordLength = 254;
+  const maxRecordCount = d64.maxRelativeRecordCount(maxRecordLength);
+  const maxPayload = new Uint8Array(maxRecordLength * maxRecordCount);
+  const maxImage = d64.buildImage([
+    {
+      name: "MAXREL",
+      type: "rel",
+      recordLength: maxRecordLength,
+      data: maxPayload,
+    },
+  ], {
+    trackCount: 40,
+    diskName: "MAXREL",
+  });
+  assert(maxImage instanceof Uint8Array, "REL max-capacity image did not build");
+
+  let threw = false;
+  try {
+    d64.buildImage([
+      {
+        name: "TOOBIG",
+        type: "rel",
+        recordLength: maxRecordLength,
+        data: new Uint8Array(maxRecordLength * (maxRecordCount + 1)),
+      },
+    ], {
+      trackCount: 40,
+      diskName: "TOOBIG",
+    });
+  } catch (error) {
+    threw = /record capacity/i.test(String(error && error.message ? error.message : error));
+  }
+  assert(threw, "REL over-capacity image should throw a record-capacity error");
+}
+
 function validateUnusedTailHelpers() {
   const d64 = loadD64Support();
   const relBytes = new Uint8Array(9 * 40);
@@ -549,6 +694,56 @@ function validateExtendedTracksAndErrorInfo() {
     }),
     "Error info clear should reset all bytes to ok",
   );
+
+  const relImage = d64.buildImage(
+    [
+      {
+        name: "RELBIG",
+        type: "rel",
+        recordLength: 254,
+        data: hugePayload,
+      },
+    ],
+    {
+      trackCount: 40,
+      diskName: "REL40",
+    },
+  );
+  assert(relImage instanceof Uint8Array, "Extended-track REL image did not build");
+  const relBam = d64.readBam(relImage);
+  assert(relBam.tracks.length === 40, "Extended-track REL BAM track count mismatch");
+  const extendedTrack = relBam.tracks.find(function (track) {
+    return track.track > 35;
+  });
+  assert(
+    relBam.tracks
+      .filter(function (track) {
+        return track.track > 35;
+      })
+      .every(function (track) {
+        return (
+          track.isInferred === true &&
+          Array.isArray(track.sectorFree) &&
+          track.bitmaskBytes instanceof Uint8Array &&
+          track.sectorFree.every(function (value) {
+            return typeof value === "boolean";
+          })
+        );
+      }),
+    "Extended-track REL BAM should expose inferred bitmask data",
+  );
+  assert(
+    relBam.tracks
+      .filter(function (track) {
+        return track.track > 35;
+      })
+      .some(function (track) {
+        return track.sectorFree.some(function (value) {
+          return value === false;
+        });
+      }),
+    "Extended-track REL BAM should show at least one used sector beyond track 35",
+  );
 }
 
 function validateUnexpectedBamScan() {
@@ -592,7 +787,29 @@ function validateUnexpectedBamScan() {
     extendedCandidate.evidence.diskName === "EXTRA",
     "Unexpected BAM candidate should decode the injected disk name",
   );
+  assert(
+    Array.isArray(extendedCandidate.evidence.trackEntries) &&
+      extendedCandidate.evidence.trackEntries.length === 35,
+    "Unexpected BAM candidate should expose parsed BAM track entries",
+  );
+  assert(
+    extendedCandidate.evidence.trackEntries[0].bitmaskBytes instanceof Uint8Array,
+    "Unexpected BAM candidate should expose BAM bitmask bytes",
+  );
+  assert(
+    Array.isArray(extendedCandidate.evidence.trackEntries[0].sectorFree) &&
+      extendedCandidate.evidence.trackEntries[0].sectorFree.length === 21,
+    "Unexpected BAM candidate should expose per-sector free bits",
+  );
   assert(extendedCandidate.validation, "Unexpected BAM candidate should include validation");
+  assert(
+    Array.isArray(extendedCandidate.trackEntries) && extendedCandidate.trackEntries.length >= 35,
+    "Unexpected BAM candidate should expose resolved track entries",
+  );
+  assert(
+    extendedCandidate.trackEntries[0].bitmaskBytes instanceof Uint8Array,
+    "Unexpected BAM candidate should expose resolved bitmask bytes",
+  );
   assert(
     extendedCandidate.validation.directoryReachable === true,
     "Unexpected BAM validation should reach a directory",
@@ -609,6 +826,10 @@ function validateUnexpectedBamScan() {
     extendedCandidate.validation.invalidFileChains === 0,
     "Unexpected BAM validation should not find invalid file chains",
   );
+  assert(
+    extendedCandidate.validation.trackEntries[0].isResolved === true,
+    "Unexpected BAM validation should expose resolved track entries",
+  );
 
   const inspect = d64.inspectImage(image);
   assert(
@@ -619,6 +840,9 @@ function validateUnexpectedBamScan() {
 
 validateRelativeFileCrossesSectorBoundary();
 validateNonRelativeFileStillWorks();
+validateUpdatesUsingStaleEntryIdentity();
+validateRelativeRecordsInputShapes();
+validateRelativeRecordLimits();
 validateUnusedTailHelpers();
 validateExtendedTracksAndErrorInfo();
 validateUnexpectedBamScan();

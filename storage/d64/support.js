@@ -9,6 +9,8 @@
   const REL_MAX_RECORD_LENGTH = 254;
   const REL_DATA_SECTORS_PER_SIDE_SECTOR = 120;
   const REL_MAX_SIDE_SECTORS = 6;
+  const REL_MAX_DATA_SECTORS = REL_DATA_SECTORS_PER_SIDE_SECTOR * REL_MAX_SIDE_SECTORS;
+  const REL_MAX_PAYLOAD_BYTES = REL_MAX_DATA_SECTORS * 254;
   const DIRECTORY_TRACK = 18;
   const BAM_SECTOR = 0;
   const DIRECTORY_START_SECTOR = 1;
@@ -326,6 +328,19 @@
     );
   };
 
+  d64.maxRelativeDataSectors = function () {
+    return REL_MAX_DATA_SECTORS;
+  };
+
+  d64.maxRelativePayloadBytes = function () {
+    return REL_MAX_PAYLOAD_BYTES;
+  };
+
+  d64.maxRelativeRecordCount = function (recordLength) {
+    const normalizedRecordLength = d64.normalizeRecordLength(recordLength);
+    return Math.max(1, Math.floor(REL_MAX_PAYLOAD_BYTES / normalizedRecordLength));
+  };
+
   d64.normalizeUnusedTailData = function (unusedTailData, expectedLength) {
     const length = Math.max(0, Math.floor(Number(expectedLength) || 0));
     const source = unusedTailData instanceof Uint8Array
@@ -334,6 +349,54 @@
     const result = new Uint8Array(length);
     result.set(source.subarray(0, length));
     return result;
+  };
+
+  d64.normalizeByteArray = function (value) {
+    if (value instanceof Uint8Array) return value;
+    if (typeof ArrayBuffer !== "undefined" && value instanceof ArrayBuffer) {
+      return new Uint8Array(value);
+    }
+    if (
+      typeof ArrayBuffer !== "undefined" &&
+      ArrayBuffer.isView &&
+      ArrayBuffer.isView(value)
+    ) {
+      return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+    }
+    if (Array.isArray(value)) {
+      return new Uint8Array(value);
+    }
+    if (typeof value === "string") {
+      const result = new Uint8Array(value.length);
+      for (let index = 0; index < value.length; index += 1) {
+        result[index] = value.charCodeAt(index) & 0xff;
+      }
+      return result;
+    }
+    return new Uint8Array(0);
+  };
+
+  d64.normalizeFileData = function (file, recordLength) {
+    const entry = file || {};
+    if (Object.prototype.hasOwnProperty.call(entry, "data")) {
+      return d64.normalizeByteArray(entry.data);
+    }
+    if (Object.prototype.hasOwnProperty.call(entry, "payload")) {
+      return d64.normalizeByteArray(entry.payload);
+    }
+    if (Array.isArray(entry.records)) {
+      const normalizedRecordLength = d64.normalizeRecordLength(recordLength || entry.recordLength);
+      const result = new Uint8Array(entry.records.length * normalizedRecordLength);
+      for (let index = 0; index < entry.records.length; index += 1) {
+        const recordBytes = d64.normalizeByteArray(entry.records[index]);
+        result.set(
+          recordBytes.subarray(0, normalizedRecordLength),
+          index * normalizedRecordLength,
+        );
+      }
+      return result;
+    }
+    return new Uint8Array(0);
   };
 
   d64.readHeader = function (image) {
@@ -392,30 +455,51 @@
     const geometry = d64.describeGeometry(image);
     const sector = d64.readSector(image, DIRECTORY_TRACK, BAM_SECTOR);
     const tracks = [];
+    let inferredUsedSectors = null;
     for (let track = 1; track <= geometry.trackCount; track += 1) {
       const sectorCount = d64.trackSectorCount(track);
       const sectorFree = [];
       let freeCount = null;
       let bamOffset = null;
+      let bitmaskBytes = null;
       if (track <= 35) {
         bamOffset = d64.headerOffsets.bamStart + (track - 1) * 4;
         freeCount = sector[bamOffset];
+        bitmaskBytes = new Uint8Array([
+          sector[bamOffset + 1],
+          sector[bamOffset + 2],
+          sector[bamOffset + 3],
+        ]);
         for (let sectorIndex = 0; sectorIndex < sectorCount; sectorIndex += 1) {
-          const byteIndex = 1 + (sectorIndex >> 3);
+          const byteIndex = sectorIndex >> 3;
           const bitIndex = sectorIndex & 7;
-          sectorFree.push(Boolean(sector[bamOffset + byteIndex] & (1 << bitIndex)));
+          sectorFree.push(Boolean(bitmaskBytes[byteIndex] & (1 << bitIndex)));
         }
       } else {
+        if (!inferredUsedSectors && typeof d64.collectReferencedSectors === "function") {
+          inferredUsedSectors = d64.collectReferencedSectors(image);
+        }
+        freeCount = 0;
+        bitmaskBytes = new Uint8Array(3);
         for (let sectorIndex = 0; sectorIndex < sectorCount; sectorIndex += 1) {
-          sectorFree.push(null);
+          const key = String(track) + ":" + String(sectorIndex);
+          const isUsed = Boolean(inferredUsedSectors && inferredUsedSectors[key]);
+          const isFree = !isUsed;
+          sectorFree.push(isFree);
+          if (isFree) {
+            freeCount += 1;
+            bitmaskBytes[sectorIndex >> 3] |= 1 << (sectorIndex & 7);
+          }
         }
       }
       tracks.push({
         track: track,
         freeCount: freeCount,
         sectorFree: sectorFree,
+        bitmaskBytes: bitmaskBytes,
         bamOffset: bamOffset,
         isExtendedTrack: track > 35,
+        isInferred: track > 35,
       });
     }
     return {
@@ -443,6 +527,7 @@
     let validTrackEntries = 0;
     let invalidTrackEntries = 0;
     let nonZeroTrackEntries = 0;
+    const trackEntries = [];
     for (let track = 1; track <= DEFAULT_TRACK_COUNT; track += 1) {
       const bamOffset = d64.headerOffsets.bamStart + (track - 1) * 4;
       const sectorCount = d64.trackSectorCount(track);
@@ -450,6 +535,7 @@
       const bit0 = bytes[bamOffset + 1];
       const bit1 = bytes[bamOffset + 2];
       const bit2 = bytes[bamOffset + 3];
+      const sectorFree = [];
       if (freeCount || bit0 || bit1 || bit2) {
         nonZeroTrackEntries += 1;
       }
@@ -464,13 +550,27 @@
           if (isFree) impossibleBits = true;
           continue;
         }
+        sectorFree.push(isFree);
         if (isFree) computedFreeCount += 1;
       }
-      if (!impossibleBits && freeCount <= sectorCount && Math.abs(freeCount - computedFreeCount) <= 1) {
+      const looksValid =
+        !impossibleBits && freeCount <= sectorCount && Math.abs(freeCount - computedFreeCount) <= 1;
+      if (looksValid) {
         validTrackEntries += 1;
       } else {
         invalidTrackEntries += 1;
       }
+      trackEntries.push({
+        track: track,
+        bamOffset: bamOffset,
+        freeCount: freeCount,
+        computedFreeCount: computedFreeCount,
+        sectorCount: sectorCount,
+        bitmaskBytes: new Uint8Array([bit0, bit1, bit2]),
+        sectorFree: sectorFree,
+        impossibleBits: impossibleBits,
+        looksValid: looksValid,
+      });
     }
     const dosVersionByte = bytes[d64.headerOffsets.dosVersion];
     const nextDirectoryTrack = bytes[d64.headerOffsets.nextDirectoryTrack];
@@ -527,6 +627,7 @@
       diskId: diskId,
       dosType: dosType,
       directoryPointerLooksValid: directoryPointerLooksValid,
+      trackEntries: trackEntries,
     };
   };
 
@@ -560,6 +661,9 @@
         };
         if (validateContents) {
           candidate.validation = d64.validateUnexpectedBamSector(bytes, track, sector, config);
+          if (candidate.validation && Array.isArray(candidate.validation.trackEntries)) {
+            candidate.trackEntries = candidate.validation.trackEntries;
+          }
         }
         candidates.push(candidate);
       }
@@ -751,6 +855,74 @@
     return null;
   };
 
+  d64.resolveFileIndex = function (files, entryOrName) {
+    const items = Array.isArray(files) ? files : [];
+    if (typeof entryOrName === "string") {
+      const target = String(entryOrName).trim().toUpperCase();
+      return items.findIndex(function (file) {
+        return String(file.name || "").trim().toUpperCase() === target;
+      });
+    }
+    const entry = entryOrName || null;
+    if (!entry) return -1;
+
+    const indexValue = Number(entry.index);
+    if (Number.isInteger(indexValue) && indexValue >= 0) {
+      const byIndex = items.findIndex(function (file) {
+        return file && file.entry && file.entry.index === indexValue;
+      });
+      if (byIndex >= 0) return byIndex;
+    }
+
+    const trackValue = Number(entry.track);
+    const sectorValue = Number(entry.sector);
+    const slotValue = Number(entry.slot);
+    if (
+      Number.isInteger(trackValue) &&
+      Number.isInteger(sectorValue) &&
+      Number.isInteger(slotValue) &&
+      trackValue > 0 &&
+      sectorValue >= 0 &&
+      slotValue >= 0
+    ) {
+      const byDirectoryLocation = items.findIndex(function (file) {
+        return (
+          file &&
+          file.entry &&
+          file.entry.track === trackValue &&
+          file.entry.sector === sectorValue &&
+          file.entry.slot === slotValue
+        );
+      });
+      if (byDirectoryLocation >= 0) return byDirectoryLocation;
+    }
+
+    const startTrackValue = Number(entry.startTrack);
+    const startSectorValue = Number(entry.startSector);
+    if (
+      Number.isInteger(startTrackValue) &&
+      Number.isInteger(startSectorValue) &&
+      startTrackValue > 0 &&
+      startSectorValue >= 0
+    ) {
+      const byStartBlock = items.findIndex(function (file) {
+        return (
+          file &&
+          file.entry &&
+          file.entry.startTrack === startTrackValue &&
+          file.entry.startSector === startSectorValue
+        );
+      });
+      if (byStartBlock >= 0) return byStartBlock;
+    }
+
+    const targetName = String(entry.name || "").trim().toUpperCase();
+    if (!targetName) return -1;
+    return items.findIndex(function (file) {
+      return String(file.name || "").trim().toUpperCase() === targetName;
+    });
+  };
+
   d64.readFileChain = function (image, startTrack, startSector) {
     const blocks = [];
     const payload = [];
@@ -798,6 +970,52 @@
         return value !== 0;
       }),
     };
+  };
+
+  d64.collectReferencedSectors = function (image, options) {
+    const bytes = image instanceof Uint8Array ? image : new Uint8Array(image || []);
+    const referenced = {};
+    const mark = function (track, sector, kind) {
+      if (!track && track !== 0) return;
+      const key = String(track) + ":" + String(sector);
+      referenced[key] = {
+        track: track,
+        sector: sector,
+        kind: kind,
+      };
+    };
+    mark(DIRECTORY_TRACK, BAM_SECTOR, "bam");
+    let directory = null;
+    try {
+      directory = d64.readDirectoryEntriesFrom(bytes, DIRECTORY_TRACK, DIRECTORY_START_SECTOR, options);
+      directory.sectors.forEach(function (sectorInfo) {
+        mark(sectorInfo.track, sectorInfo.sector, "directory");
+      });
+    } catch (_error) {
+      directory = null;
+    }
+    const entries = directory ? directory.entries : d64.readDirectoryEntries(bytes, options);
+    entries.forEach(function (entry) {
+      try {
+        const chain = d64.readFileChain(bytes, entry.startTrack, entry.startSector);
+        chain.blocks.forEach(function (block) {
+          mark(block.track, block.sector, "file");
+        });
+      } catch (_error) {}
+      if (entry.fileType === "rel" && entry.sideSectorTrack) {
+        try {
+          const sideSectors = d64.readRelativeSideSectors(
+            bytes,
+            entry.sideSectorTrack,
+            entry.sideSectorSector,
+          );
+          sideSectors.forEach(function (sideSector) {
+            mark(sideSector.track, sideSector.sector, "rel-side");
+          });
+        } catch (_error) {}
+      }
+    });
+    return referenced;
   };
 
   d64.validateUnexpectedBamSector = function (image, bamTrack, bamSector, options) {
@@ -883,25 +1101,73 @@
       mismatchedUsedAsFree: 0,
       mismatchedUsedAsUnknown: 0,
     };
+    const trackEntries = [];
     for (let track = 1; track <= Math.min(DEFAULT_TRACK_COUNT, geometry.trackCount); track += 1) {
       const bamOffset = d64.headerOffsets.bamStart + (track - 1) * 4;
       const sectorCount = d64.trackSectorCount(track);
       const bit0 = sectorBytes[bamOffset + 1];
       const bit1 = sectorBytes[bamOffset + 2];
       const bit2 = sectorBytes[bamOffset + 3];
+      const rawSectorFree = [];
+      const resolvedSectorFree = [];
+      let resolvedFreeCount = 0;
+      const resolvedBitmaskBytes = new Uint8Array(3);
       bamAgreement.checkedTracks += 1;
       for (let sector = 0; sector < sectorCount; sector += 1) {
         const key = String(track) + ":" + String(sector);
-        if (!referencedSectors[key]) continue;
         const byteIndex = sector >> 3;
         const bitIndex = sector & 7;
         const bitByte = [bit0, bit1, bit2][byteIndex];
-        const isFree = Boolean(bitByte & (1 << bitIndex));
+        const rawIsFree = Boolean(bitByte & (1 << bitIndex));
+        rawSectorFree.push(rawIsFree);
+        const resolvedIsFree = !referencedSectors[key];
+        resolvedSectorFree.push(resolvedIsFree);
+        if (resolvedIsFree) {
+          resolvedFreeCount += 1;
+          resolvedBitmaskBytes[byteIndex] |= 1 << bitIndex;
+        }
+        if (!referencedSectors[key]) continue;
         bamAgreement.checkedSectors += 1;
-        if (isFree) {
+        if (rawIsFree) {
           bamAgreement.mismatchedUsedAsFree += 1;
         }
       }
+      trackEntries.push({
+        track: track,
+        sectorCount: sectorCount,
+        freeCount: resolvedFreeCount,
+        sectorFree: resolvedSectorFree,
+        rawFreeCount: sectorBytes[bamOffset],
+        rawSectorFree: rawSectorFree,
+        bitmaskBytes: resolvedBitmaskBytes,
+        rawBitmaskBytes: new Uint8Array([bit0, bit1, bit2]),
+        isResolved: true,
+      });
+    }
+    for (let track = DEFAULT_TRACK_COUNT + 1; track <= geometry.trackCount; track += 1) {
+      const sectorCount = d64.trackSectorCount(track);
+      const sectorFree = [];
+      let freeCount = 0;
+      const bitmaskBytes = new Uint8Array(3);
+      for (let sector = 0; sector < sectorCount; sector += 1) {
+        const isFree = !referencedSectors[String(track) + ":" + String(sector)];
+        sectorFree.push(isFree);
+        if (isFree) {
+          freeCount += 1;
+          bitmaskBytes[sector >> 3] |= 1 << (sector & 7);
+        }
+      }
+      trackEntries.push({
+        track: track,
+        sectorCount: sectorCount,
+        freeCount: freeCount,
+        sectorFree: sectorFree,
+        rawFreeCount: null,
+        rawSectorFree: null,
+        bitmaskBytes: bitmaskBytes,
+        rawBitmaskBytes: null,
+        isResolved: true,
+      });
     }
     return {
       bamTrack: bamTrack,
@@ -916,6 +1182,7 @@
       invalidFileChains: invalidFileChains,
       fileResults: fileResults,
       bamAgreement: bamAgreement,
+      trackEntries: trackEntries,
       referencedSectorCount: Object.keys(referencedSectors).length,
       referencedSectors: Object.keys(referencedSectors).map(function (key) {
         return referencedSectors[key];
@@ -1082,9 +1349,10 @@
   d64.prepareFileLayout = function (file) {
     const entry = file || {};
     const type = d64.normalizeFileType(entry.type);
-    const bytes = entry.data instanceof Uint8Array
-      ? entry.data
-      : new Uint8Array(entry.data || []);
+    const recordLength = type === d64.fileTypes.rel
+      ? d64.normalizeRecordLength(entry.recordLength)
+      : 0;
+    const bytes = d64.normalizeFileData(entry, recordLength);
     if (type !== d64.fileTypes.rel) {
       const dataSectors = Math.max(1, Math.ceil(bytes.length / 254));
       const unusedTailLength = Math.max(0, dataSectors * 254 - bytes.length);
@@ -1101,12 +1369,28 @@
         unusedTailData: d64.normalizeUnusedTailData(entry.unusedTailData, unusedTailLength),
       };
     }
-    const recordLength = d64.normalizeRecordLength(entry.recordLength);
     const recordCount = Math.max(1, Math.ceil(bytes.length / recordLength));
+    const maxRecordCount = d64.maxRelativeRecordCount(recordLength);
+    if (recordCount > maxRecordCount) {
+      throw new Error(
+        "REL file exceeds record capacity: " +
+        String(entry.name || "") +
+        " (" +
+        String(recordCount) +
+        " > " +
+        String(maxRecordCount) +
+        " records)",
+      );
+    }
     const paddedLength = recordCount * recordLength;
     const paddedBytes = new Uint8Array(paddedLength);
     paddedBytes.set(bytes.subarray(0, Math.min(bytes.length, paddedLength)));
     const dataSectors = Math.max(1, Math.ceil(paddedBytes.length / 254));
+    if (dataSectors > REL_MAX_DATA_SECTORS) {
+      throw new Error(
+        "REL file exceeds data-sector capacity: " + String(entry.name || ""),
+      );
+    }
     const sideSectorCount = Math.max(
       1,
       Math.ceil(dataSectors / REL_DATA_SECTORS_PER_SIDE_SECTOR),
@@ -1309,6 +1593,7 @@
   d64.writeRelativeFile = function (image, data, allocation, recordLength, unusedTailData) {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data || []);
     const dataSectors = Math.max(1, Math.ceil(bytes.length / 254));
+    if (dataSectors > REL_MAX_DATA_SECTORS) return null;
     const sideSectorCount = Math.max(
       1,
       Math.ceil(dataSectors / REL_DATA_SECTORS_PER_SIDE_SECTOR),
@@ -1509,13 +1794,7 @@
 
   d64.updateFile = function (image, entryOrName, updates, options) {
     const files = d64.readFiles(image, options);
-    const targetName =
-      typeof entryOrName === "string"
-        ? String(entryOrName).trim().toUpperCase()
-        : String((entryOrName && entryOrName.name) || "").trim().toUpperCase();
-    const index = files.findIndex(function (file) {
-      return String(file.name || "").trim().toUpperCase() === targetName;
-    });
+    const index = d64.resolveFileIndex(files, entryOrName);
     if (index < 0) {
       throw new Error("File not found: " + String(entryOrName || ""));
     }
@@ -1639,12 +1918,12 @@
 
   d64.deleteFile = function (image, entryOrName, options) {
     const files = d64.readFiles(image, options);
-    const targetName =
-      typeof entryOrName === "string"
-        ? String(entryOrName).trim().toUpperCase()
-        : String((entryOrName && entryOrName.name) || "").trim().toUpperCase();
-    const filtered = files.filter(function (file) {
-      return String(file.name || "").trim().toUpperCase() !== targetName;
+    const index = d64.resolveFileIndex(files, entryOrName);
+    if (index < 0) {
+      throw new Error("File not found: " + String(entryOrName || ""));
+    }
+    const filtered = files.filter(function (_file, fileIndex) {
+      return fileIndex !== index;
     });
     if (filtered.length === files.length) {
       throw new Error("File not found: " + String(entryOrName || ""));

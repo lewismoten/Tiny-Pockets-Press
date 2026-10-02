@@ -483,7 +483,36 @@ Returns:
 Notes:
 
 - `REL` files are padded to full records before sector allocation.
+- `REL` files are rejected early when `recordCount` exceeds the supported capacity for the chosen `recordLength`.
 - Non-`REL` files keep `recordLength` and `recordCount` at `0`.
+
+### `maxRelativeDataSectors()`
+
+Returns the maximum number of data sectors supported by the REL writer.
+
+Returns:
+
+- `number`
+
+### `maxRelativePayloadBytes()`
+
+Returns the maximum raw payload size supported by the REL writer.
+
+Returns:
+
+- `number`
+
+### `maxRelativeRecordCount(recordLength)`
+
+Returns the maximum number of fixed-length REL records supported for a given record size.
+
+Parameters:
+
+- `recordLength: number`
+
+Returns:
+
+- `number`
 
 ### `readHeader(image)`
 
@@ -531,7 +560,8 @@ Notes:
 - `tracks` is an array of per-track free-space data.
 - Each item includes `track`, `freeCount`, and `sectorFree`.
 - BAM bytes only exist for tracks `1-35`.
-- Tracks above `35` are returned with `isExtendedTrack: true` and `sectorFree` entries of `null`.
+- Tracks above `35` are returned with `isExtendedTrack: true`.
+- For tracks above `35`, `sectorFree` and `freeCount` are inferred from reachable directory and file chains.
 
 ### `readFreeMap(image)`
 
@@ -556,12 +586,13 @@ Parameters:
 
 Returns:
 
-- `null | { confidence, looksLikeBam, validTrackEntries, invalidTrackEntries, nonZeroTrackEntries, hasRecognizedDosVersion, dosVersionByte, nextDirectoryTrack, nextDirectorySector, diskName, diskId, dosType, directoryPointerLooksValid }`
+- `null | { confidence, looksLikeBam, validTrackEntries, invalidTrackEntries, nonZeroTrackEntries, hasRecognizedDosVersion, dosVersionByte, nextDirectoryTrack, nextDirectorySector, diskName, diskId, dosType, directoryPointerLooksValid, trackEntries }`
 
 Notes:
 
 - This is heuristic only.
 - It is useful for inspection and candidate detection, not authoritative DOS-variant identification.
+- `trackEntries` includes parsed `freeCount`, `computedFreeCount`, raw `bitmaskBytes`, and boolean `sectorFree` bits for tracks `1-35`.
 
 ### `scanForUnexpectedBamSectors(image, options)`
 
@@ -574,7 +605,7 @@ Parameters:
 
 Returns:
 
-- `Array<{ track, sector, confidence, evidence, reason, validation? }>`
+- `Array<{ track, sector, confidence, evidence, reason, validation?, trackEntries? }>`
 
 Notes:
 
@@ -582,6 +613,7 @@ Notes:
 - The result is sorted by descending confidence.
 - The default threshold is intentionally conservative to reduce false positives.
 - By default it also performs a second-pass validation against the directory pointer and referenced file chains.
+- When validation runs, `trackEntries` exposes a resolved live sector map suitable for rendering, even if the raw BAM-like sector bytes are stale or incomplete.
 
 ### `readDirectoryEntriesFrom(image, startTrack, startSector, options)`
 
@@ -611,12 +643,13 @@ Parameters:
 
 Returns:
 
-- `null | { bamTrack, bamSector, directoryReachable, directoryError, directoryEntryCount, directorySectorCount, validFileChains, invalidFileChains, fileResults, bamAgreement, referencedSectorCount, referencedSectors, looksConsistent }`
+- `null | { bamTrack, bamSector, directoryReachable, directoryError, directoryEntryCount, directorySectorCount, validFileChains, invalidFileChains, fileResults, bamAgreement, trackEntries, referencedSectorCount, referencedSectors, looksConsistent }`
 
 Notes:
 
 - This is still heuristic validation.
 - It proves much more than the structural scan alone, but it still does not identify a specific DOS family.
+- `trackEntries` represents resolved sector usage from the validated directory and file chains.
 
 ### `readDirectoryEntry(image, entryIndex)`
 
@@ -1294,6 +1327,9 @@ Important practical constraints:
 - Approximate maximum directory entries: `18 * 8 = 144`
 - Maximum `REL` record length: `254` bytes
 - Maximum supported side sectors per `REL` file: `6`
+- Maximum supported REL data sectors: `720`
+- Maximum supported REL payload bytes: `182880`
+- Maximum supported REL record count: `floor(182880 / recordLength)`
 
 In practice, the file-count limit is often lower because data sectors usually run out before directory entries do.
 
